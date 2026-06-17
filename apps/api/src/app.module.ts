@@ -4,7 +4,10 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { CommentsModule } from './comments/comments.module';
 import { DevlogsModule } from './devlogs/devlogs.module';
+import { ReactionsModule } from './reactions/reactions.module';
+import { ReportsModule } from './reports/reports.module';
 import { FeedModule } from './feed/feed.module';
 import { FollowsModule } from './follows/follows.module';
 import { GamesModule } from './games/games.module';
@@ -27,7 +30,10 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     StudiosModule,
     GamesModule,
+    CommentsModule,
     DevlogsModule,
+    ReactionsModule,
+    ReportsModule,
     RoadmapItemsModule,
     FollowsModule,
     FeedModule,
