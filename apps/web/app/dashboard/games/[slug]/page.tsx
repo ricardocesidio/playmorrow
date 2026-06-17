@@ -3,7 +3,7 @@
 import { useState, type FormEvent, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, ExternalLink, Gamepad2, Milestone, FileText } from 'lucide-react';
+import { ArrowLeft, Save, ExternalLink, Gamepad2, Milestone, FileText, ScrollText } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
@@ -242,6 +242,11 @@ export default function EditGamePage() {
         <Button asChild variant="outline" size="sm">
           <Link href={'/dashboard/roadmap?game=' + slug}>
             <Milestone className="size-3" /> Manage roadmap
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href={'/dashboard/games/' + slug + '/press-kit'}>
+            <ScrollText className="size-3" /> Manage press kit
           </Link>
         </Button>
       </div>

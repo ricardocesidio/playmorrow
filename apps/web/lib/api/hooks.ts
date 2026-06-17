@@ -155,6 +155,26 @@ export function useGamePressKit(gameSlug: string) {
   });
 }
 
+export function useUpsertPressKit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      gameSlug: string;
+      headline: string;
+      factSheet?: Record<string, unknown>;
+      contactEmail?: string;
+      downloadUrl?: string;
+      token: string;
+    }) => {
+      const { gameSlug, token, ...body } = data;
+      return api.put<PressKit>(`/games/${gameSlug}/press-kit`, body, token);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['gamePressKit'] });
+    },
+  });
+}
+
 // ── My Studios ──────────────────────────────────────────────────────────
 
 export function useMyStudios(token?: string) {
