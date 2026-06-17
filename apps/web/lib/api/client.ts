@@ -197,6 +197,13 @@ export interface Comment {
   updatedAt: string;
 }
 
+export interface ReactionStatus {
+  targetType: 'DEVLOG' | 'COMMENT';
+  targetId: string;
+  counts: { LIKE: number; LOVE: number; HYPE: number; INSIGHTFUL: number };
+  viewerReactions: string[];
+}
+
 export interface StudioWithMembers extends Studio {
   members: {
     id: string;
