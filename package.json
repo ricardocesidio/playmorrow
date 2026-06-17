@@ -1,0 +1,31 @@
+{
+  "name": "playmorrow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Discover tomorrow's indie games today. The social discovery layer for indie games.",
+  "packageManager": "pnpm@11.1.3",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=11"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "db:generate": "pnpm --filter @playmorrow/database db:generate",
+    "db:migrate": "pnpm --filter @playmorrow/database db:migrate",
+    "db:push": "pnpm --filter @playmorrow/database db:push",
+    "db:studio": "pnpm --filter @playmorrow/database db:studio",
+    "db:seed": "pnpm --filter @playmorrow/database db:seed",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "turbo": "^2.3.3",
+    "typescript": "^5.6.3"
+  }
+}

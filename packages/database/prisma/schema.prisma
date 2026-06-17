@@ -1,0 +1,433 @@
+// Playmorrow database schema
+// Docs: https://pris.ly/d/prisma-schema
+//
+// V1 tables: users, studios, studio_members, games, game_media, devlogs,
+// roadmap_items, press_kits, follows, comments, reactions, tags, game_tags,
+// platform_links, moderation_reports.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Enums
+// ──────────────────────────────────────────────────────────────────────────
+
+/// Global account role. Studio-scoped roles live on StudioMember.
+enum UserRole {
+  PLAYER
+  PUBLISHER
+  MODERATOR
+  ADMIN
+}
+
+/// A member's role within a single studio.
+enum StudioRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum GameStatus {
+  CONCEPT
+  IN_DEVELOPMENT
+  ALPHA
+  BETA
+  EARLY_ACCESS
+  RELEASED
+  CANCELLED
+  ON_HOLD
+}
+
+enum MediaType {
+  SCREENSHOT
+  TRAILER
+  VIDEO
+  LOGO
+  BANNER
+  IMAGE
+}
+
+enum RoadmapStatus {
+  PLANNED
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  HYPE
+  INSIGHTFUL
+}
+
+enum FollowTargetType {
+  STUDIO
+  GAME
+}
+
+enum ReportTargetType {
+  GAME
+  STUDIO
+  DEVLOG
+  COMMENT
+  USER
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+enum PlatformKind {
+  STEAM
+  ITCH
+  EPIC
+  GOG
+  PLAYSTATION
+  XBOX
+  NINTENDO
+  WEB
+  ANDROID
+  IOS
+  DEMO
+  DISCORD
+  WEBSITE
+  OTHER
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Identity
+// ──────────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  displayName  String
+  /// Null for OAuth-only accounts.
+  passwordHash String?
+  role         UserRole @default(PLAYER)
+  avatarUrl    String?
+  bio          String?
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  studioMemberships StudioMember[]
+  devlogs           Devlog[]
+  comments          Comment[]
+  reactions         Reaction[]
+  follows           Follow[]
+  reportsFiled      ModerationReport[] @relation("ReportReporter")
+  reportsResolved   ModerationReport[] @relation("ReportResolver")
+
+  @@index([role])
+  @@map("users")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Studios
+// ──────────────────────────────────────────────────────────────────────────
+
+model Studio {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  tagline     String?
+  description String?
+  logoUrl     String?
+  bannerUrl   String?
+  websiteUrl  String?
+  location    String?
+  foundedYear Int?
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members   StudioMember[]
+  games     Game[]
+  followers Follow[]
+
+  @@map("studios")
+}
+
+model StudioMember {
+  id        String     @id @default(cuid())
+  studioId  String
+  userId    String
+  role      StudioRole @default(MEMBER)
+  /// Free-text role label shown on the studio page, e.g. "Lead Artist".
+  title     String?
+  createdAt DateTime   @default(now())
+
+  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([studioId, userId])
+  @@index([userId])
+  @@map("studio_members")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Games & media
+// ──────────────────────────────────────────────────────────────────────────
+
+model Game {
+  id                  String     @id @default(cuid())
+  slug                String     @unique
+  studioId            String
+  title               String
+  tagline             String?
+  description         String?
+  status              GameStatus @default(IN_DEVELOPMENT)
+  releaseDate         DateTime?
+  /// Human-friendly release window when no firm date, e.g. "Q3 2026".
+  expectedReleaseText String?
+  priceCents          Int?
+  currency            String?    @default("USD")
+  isFree              Boolean    @default(false)
+  coverUrl            String?
+  bannerUrl           String?
+  isPublished         Boolean    @default(false)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  studio        Studio         @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  media         GameMedia[]
+  devlogs       Devlog[]
+  roadmapItems  RoadmapItem[]
+  pressKit      PressKit?
+  platformLinks PlatformLink[]
+  tags          GameTag[]
+  followers     Follow[]
+
+  @@index([studioId])
+  @@index([status])
+  @@index([isPublished])
+  @@map("games")
+}
+
+model GameMedia {
+  id           String    @id @default(cuid())
+  gameId       String
+  type         MediaType
+  url          String
+  thumbnailUrl String?
+  caption      String?
+  position     Int       @default(0)
+  createdAt    DateTime  @default(now())
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId])
+  @@map("game_media")
+}
+
+model PlatformLink {
+  id        String       @id @default(cuid())
+  gameId    String
+  kind      PlatformKind
+  url       String
+  label     String?
+  position  Int          @default(0)
+  createdAt DateTime     @default(now())
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId])
+  @@map("platform_links")
+}
+
+model PressKit {
+  id              String   @id @default(cuid())
+  gameId          String   @unique
+  headline        String?
+  /// Structured fact-sheet (developer, based-in, release date, platforms, ...).
+  factSheet       Json?
+  contactEmail    String?
+  downloadUrl     String?
+  isAutoGenerated Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@map("press_kits")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Progress: devlogs & roadmap
+// ──────────────────────────────────────────────────────────────────────────
+
+model Devlog {
+  id          String    @id @default(cuid())
+  gameId      String
+  authorId    String
+  title       String
+  slug        String
+  body        String
+  coverUrl    String?
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  game      Game       @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  reactions Reaction[]
+
+  @@unique([gameId, slug])
+  @@index([authorId])
+  @@index([publishedAt])
+  @@map("devlogs")
+}
+
+model RoadmapItem {
+  id          String        @id @default(cuid())
+  gameId      String
+  title       String
+  description String?
+  status      RoadmapStatus @default(PLANNED)
+  targetDate  DateTime?
+  position    Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId])
+  @@map("roadmap_items")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Community: follows, comments, reactions
+// ──────────────────────────────────────────────────────────────────────────
+
+model Follow {
+  id         String           @id @default(cuid())
+  userId     String
+  targetType FollowTargetType
+  /// Exactly one of studioId / gameId is set, matching targetType.
+  studioId   String?
+  gameId     String?
+  createdAt  DateTime         @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studio Studio? @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  game   Game?   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  // Postgres treats NULLs as distinct, so each pair enforces one follow per
+  // target without blocking follows of the other kind.
+  @@unique([userId, studioId])
+  @@unique([userId, gameId])
+  @@index([studioId])
+  @@index([gameId])
+  @@map("follows")
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  devlogId  String
+  authorId  String
+  body      String
+  /// Self-relation for threaded replies.
+  parentId  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  devlog    Devlog     @relation(fields: [devlogId], references: [id], onDelete: Cascade)
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent    Comment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[]  @relation("CommentReplies")
+  reactions Reaction[]
+
+  @@index([devlogId])
+  @@index([authorId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model Reaction {
+  id        String       @id @default(cuid())
+  userId    String
+  type      ReactionType @default(LIKE)
+  devlogId  String?
+  commentId String?
+  createdAt DateTime     @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  devlog  Devlog?  @relation(fields: [devlogId], references: [id], onDelete: Cascade)
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, devlogId, type])
+  @@unique([userId, commentId, type])
+  @@index([devlogId])
+  @@index([commentId])
+  @@map("reactions")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Tagging
+// ──────────────────────────────────────────────────────────────────────────
+
+model Tag {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  name      String
+  /// Grouping for the tag, e.g. "genre" | "feature" | "mood" | "platform".
+  kind      String?
+  createdAt DateTime  @default(now())
+
+  games GameTag[]
+
+  @@map("tags")
+}
+
+model GameTag {
+  gameId String
+  tagId  String
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, tagId])
+  @@index([tagId])
+  @@map("game_tags")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Moderation
+// ──────────────────────────────────────────────────────────────────────────
+
+model ModerationReport {
+  id           String           @id @default(cuid())
+  reporterId   String
+  targetType   ReportTargetType
+  /// ID of the reported entity (polymorphic; resolved in app logic).
+  targetId     String
+  reason       String
+  details      String?
+  status       ReportStatus     @default(OPEN)
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  reporter   User  @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  resolvedBy User? @relation("ReportResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([targetType, targetId])
+  @@map("moderation_reports")
+}

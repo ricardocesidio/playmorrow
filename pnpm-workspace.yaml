@@ -1,0 +1,14 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+onlyBuiltDependencies:
+  - "@prisma/client"
+  - "@prisma/engines"
+  - "@swc/core"
+  - esbuild
+  - prisma
+  - sharp
+ignoredBuiltDependencies:
+  - "@scarf/scarf"
+allowBuilds:
+  '@scarf/scarf': true
