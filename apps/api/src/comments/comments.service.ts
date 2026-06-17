@@ -1,11 +1,15 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateCommentDto } from './dto/create-comment.dto';
 import type { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Injectable()
 export class CommentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async create(userId: string, devlogId: string, dto: CreateCommentDto) {
     const devlog = await this.prisma.devlog.findUnique({
@@ -18,6 +22,8 @@ export class CommentsService {
     if (!devlog.isPublished) {
       throw new NotFoundException('Devlog not found');
     }
+
+    let parentAuthorId: string | null = null;
 
     if (dto.parentId) {
       const parent = await this.prisma.comment.findUnique({
@@ -32,6 +38,7 @@ export class CommentsService {
       if (parent.deletedAt) {
         throw new NotFoundException('Cannot reply to a deleted comment');
       }
+      parentAuthorId = parent.authorId;
     }
 
     const comment = await this.prisma.comment.create({
@@ -45,6 +52,46 @@ export class CommentsService {
         author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
       },
     });
+
+    // ── Notifications ──────────────────────────────────────────────────
+    const actor = comment.author;
+    const inputs: Array<{
+      recipientId: string;
+      actorId: string;
+      type: string;
+      title: string;
+      targetType: string;
+      targetId: string;
+    }> = [];
+
+    if (dto.parentId && parentAuthorId && parentAuthorId !== userId) {
+      // Reply to a comment — notify parent author
+      inputs.push({
+        recipientId: parentAuthorId,
+        actorId: userId,
+        type: 'NEW_REPLY',
+        title: `${actor.displayName} replied to your comment`,
+        targetType: 'COMMENT',
+        targetId: comment.id,
+      });
+    } else if (!dto.parentId) {
+      // New comment on devlog — notify studio admin/mods
+      const adminIds = await this.notificationsService.resolveStudioAdminIds(devlog.game.id, userId);
+      for (const id of adminIds) {
+        inputs.push({
+          recipientId: id,
+          actorId: userId,
+          type: 'NEW_COMMENT',
+          title: `${actor.displayName} commented on ${devlog.title}`,
+          targetType: 'DEVLOG',
+          targetId: devlog.id,
+        });
+      }
+    }
+
+    if (inputs.length > 0) {
+      await this.notificationsService.createManyDeduped(inputs);
+    }
 
     return this.toResponse(comment);
   }

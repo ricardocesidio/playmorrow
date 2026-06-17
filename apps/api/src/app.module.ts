@@ -13,6 +13,7 @@ import { FollowsModule } from './follows/follows.module';
 import { GamesModule } from './games/games.module';
 import { PressKitsModule } from './press-kits/press-kits.module';
 import { HealthModule } from './health/health.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RoadmapItemsModule } from './roadmap-items/roadmap-items.module';
 import { StudiosModule } from './studios/studios.module';
@@ -26,6 +27,7 @@ import { UsersModule } from './users/users.module';
     }),
     PrismaModule,
     HealthModule,
+    NotificationsModule,
     UsersModule,
     AuthModule,
     StudiosModule,

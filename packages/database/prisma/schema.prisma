@@ -129,6 +129,8 @@ model User {
   follows           Follow[]
   reportsFiled      ModerationReport[] @relation("ReportReporter")
   reportsResolved   ModerationReport[] @relation("ReportResolver")
+  notificationsReceived Notification[] @relation("NotificationRecipient")
+  notificationsActed    Notification[] @relation("NotificationActor")
 
   @@index([role])
   @@map("users")
@@ -430,4 +432,42 @@ model ModerationReport {
   @@index([status])
   @@index([targetType, targetId])
   @@map("moderation_reports")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Notifications
+// ──────────────────────────────────────────────────────────────────────────
+
+enum NotificationType {
+  NEW_FOLLOWER
+  NEW_COMMENT
+  NEW_REPLY
+  NEW_REACTION
+}
+
+enum NotificationTargetType {
+  STUDIO
+  GAME
+  DEVLOG
+  COMMENT
+}
+
+model Notification {
+  id          String               @id @default(cuid())
+  recipientId String
+  actorId     String?
+  type        NotificationType
+  title       String
+  body        String?
+  targetType  NotificationTargetType?
+  targetId    String?
+  readAt      DateTime?
+  createdAt   DateTime             @default(now())
+
+  recipient User  @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  actor     User? @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([recipientId, readAt, createdAt])
+  @@index([targetType, targetId])
+  @@map("notifications")
 }

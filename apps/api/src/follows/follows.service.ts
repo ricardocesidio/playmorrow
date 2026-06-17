@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class FollowsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async followStudio(userId: string, slug: string) {
     const studio = await this.prisma.studio.findUnique({ where: { slug: slug.toLowerCase() } });
@@ -19,6 +23,23 @@ export class FollowsService {
     });
 
     const followerCount = await this.prisma.follow.count({ where: { studioId: studio.id } });
+
+    // Notify studio OWNER/ADMIN members
+    const adminIds = await this.notificationsService.resolveStudioAdminIdsForStudio(studio.id, userId);
+    const actor = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (adminIds.length > 0 && actor) {
+      await this.notificationsService.createManyDeduped(
+        adminIds.map((recipientId) => ({
+          recipientId,
+          actorId: userId,
+          type: 'NEW_FOLLOWER',
+          title: `${actor.displayName} followed your studio`,
+          targetType: 'STUDIO',
+          targetId: studio.id,
+        })),
+      );
+    }
+
     return { targetType: 'STUDIO', targetId: studio.id, isFollowing: true, followerCount };
   }
 
@@ -49,6 +70,23 @@ export class FollowsService {
     });
 
     const followerCount = await this.prisma.follow.count({ where: { gameId: game.id } });
+
+    // Notify game studio OWNER/ADMIN members
+    const adminIds = await this.notificationsService.resolveStudioAdminIds(game.id, userId);
+    const actor = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (adminIds.length > 0 && actor) {
+      await this.notificationsService.createManyDeduped(
+        adminIds.map((recipientId) => ({
+          recipientId,
+          actorId: userId,
+          type: 'NEW_FOLLOWER',
+          title: `${actor.displayName} is following ${game.title}`,
+          targetType: 'GAME',
+          targetId: game.id,
+        })),
+      );
+    }
+
     return { targetType: 'GAME', targetId: game.id, isFollowing: true, followerCount };
   }
 

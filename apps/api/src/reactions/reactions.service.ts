@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ReactionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   // ── DEVOOG REACTIONS ─────────────────────────────────────────────────
 
@@ -21,6 +25,22 @@ export class ReactionsService {
       update: {},
       create: { userId, devlogId, type: type as never },
     });
+
+    // Notify studio OWNER/ADMIN members (exclude actor)
+    const adminIds = await this.notificationsService.resolveStudioAdminIds(devlog.gameId, userId);
+    const actor = await this.prisma.user.findUnique({ where: { id: userId }, select: { displayName: true } });
+    if (adminIds.length > 0 && actor) {
+      await this.notificationsService.createManyDeduped(
+        adminIds.map((recipientId) => ({
+          recipientId,
+          actorId: userId,
+          type: 'NEW_REACTION',
+          title: `${actor.displayName} reacted to ${devlog.title}`,
+          targetType: 'DEVLOG',
+          targetId: devlogId,
+        })),
+      );
+    }
 
     return this.getDevlogReactions(devlogId, userId);
   }
@@ -72,6 +92,21 @@ export class ReactionsService {
       update: {},
       create: { userId, commentId, type: type as never },
     });
+
+    // Notify comment author (exclude actor)
+    if (comment.authorId !== userId) {
+      const actor = await this.prisma.user.findUnique({ where: { id: userId }, select: { displayName: true } });
+      if (actor) {
+        await this.notificationsService.createManyDeduped([{
+          recipientId: comment.authorId,
+          actorId: userId,
+          type: 'NEW_REACTION',
+          title: `${actor.displayName} reacted to your comment`,
+          targetType: 'COMMENT',
+          targetId: commentId,
+        }]);
+      }
+    }
 
     return this.getCommentReactions(commentId, userId);
   }

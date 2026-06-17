@@ -87,3 +87,11 @@ export const PLATFORM_KINDS = [
   'WEBSITE',
   'OTHER',
 ] as const;
+
+/** In-app notification type. */
+export type NotificationType = 'NEW_FOLLOWER' | 'NEW_COMMENT' | 'NEW_REPLY' | 'NEW_REACTION';
+export const NOTIFICATION_TYPES = ['NEW_FOLLOWER', 'NEW_COMMENT', 'NEW_REPLY', 'NEW_REACTION'] as const;
+
+/** Polymorphic target of a notification. */
+export type NotificationTargetType = 'STUDIO' | 'GAME' | 'DEVLOG' | 'COMMENT';
+export const NOTIFICATION_TARGET_TYPES = ['STUDIO', 'GAME', 'DEVLOG', 'COMMENT'] as const;
