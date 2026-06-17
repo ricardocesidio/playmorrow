@@ -175,6 +175,72 @@ export function useUpsertPressKit() {
   });
 }
 
+// ── Notifications ───────────────────────────────────────────────────────
+
+export interface NotificationItem {
+  id: string;
+  type: string;
+  title: string;
+  body: string | null;
+  targetType: string | null;
+  targetId: string | null;
+  readAt: string | null;
+  createdAt: string;
+  actor: { id: string; username: string; displayName: string; avatarUrl: string | null } | null;
+}
+
+export interface PaginatedNotifications {
+  items: NotificationItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export function useNotifications(status: string, page: number, pageSize: number, token?: string) {
+  return useQuery({
+    queryKey: ['notifications', status, page, pageSize],
+    queryFn: () =>
+      api.get<PaginatedNotifications>(
+        `/me/notifications?status=${status}&page=${page}&pageSize=${pageSize}`,
+        token,
+      ),
+    enabled: !!token,
+  });
+}
+
+export function useUnreadNotificationCount(token?: string) {
+  return useQuery({
+    queryKey: ['unreadNotificationCount'],
+    queryFn: () => api.get<{ unreadCount: number }>('/me/notifications/unread-count', token),
+    enabled: !!token,
+    refetchInterval: 60_000, // poll every 60s
+  });
+}
+
+export function useMarkNotificationRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { id: string; token: string }) =>
+      api.patch(`/notifications/${data.id}/read`, undefined, data.token),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['unreadNotificationCount'] });
+    },
+  });
+}
+
+export function useMarkAllNotificationsRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (token: string) =>
+      api.patch('/me/notifications/read-all', undefined, token),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['unreadNotificationCount'] });
+    },
+  });
+}
+
 // ── My Studios ──────────────────────────────────────────────────────────
 
 export function useMyStudios(token?: string) {

@@ -19,7 +19,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
-import { useMyStudios, useMyGames, useMyDevlogs } from '@/lib/api/hooks';
+import { useMyStudios, useMyGames, useMyDevlogs, useUnreadNotificationCount } from '@/lib/api/hooks';
 import { Footer } from '@/components/footer';
 
 function MyDevlogsList({ token }: { token: string | null }) {
@@ -150,6 +150,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, token, isLoading, isAuthenticated, logout } = useAuth();
   const { data: studios, isLoading: studiosLoading } = useMyStudios(token ?? undefined);
+  const { data: unreadData } = useUnreadNotificationCount(token ?? undefined);
+  const unreadCount = unreadData?.unreadCount ?? 0;
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -326,14 +328,21 @@ export default function DashboardPage() {
         {/* Other placeholder cards */}
         <div className="grid gap-4 sm:grid-cols-2">
           <Link
-            href="#"
-            className="group rounded-xl border border-border bg-card/30 p-6 transition-colors hover:border-primary/40"
+            href="/dashboard/notifications"
+            className="group relative rounded-xl border border-border bg-card/30 p-6 transition-colors hover:border-primary/40"
           >
             <span className="mb-4 grid size-10 place-items-center rounded-lg bg-primary/10 text-primary">
               <Bell className="size-5" />
             </span>
             <h3 className="font-medium group-hover:text-primary transition-colors">Notifications</h3>
-            <p className="mt-1 text-sm text-muted-foreground">View your latest notifications.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {unreadCount > 0 ? `${unreadCount} unread` : 'View your notifications'}
+            </p>
+            {unreadCount > 0 && (
+              <span className="absolute right-4 top-4 flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
           </Link>
 
           <Link
