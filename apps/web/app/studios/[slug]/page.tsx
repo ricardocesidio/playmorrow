@@ -2,12 +2,13 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Globe, Users, Calendar } from 'lucide-react';
+import { ArrowLeft, MapPin, Globe, Calendar } from 'lucide-react';
 
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
 import { GameCard } from '@/components/game-card';
 import { useStudio, useStudioMembers, useStudioGames } from '@/lib/api/hooks';
+import { FollowButton } from '@/components/follow-button';
 
 export default function StudioDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -86,9 +87,7 @@ export default function StudioDetailPage() {
                   <Calendar className="size-3.5" /> Founded {studio.foundedYear}
                 </span>
               )}
-              <span className="inline-flex items-center gap-1">
-                <Users className="size-3.5" /> {studio.followersCount} followers
-              </span>
+              <FollowButton targetType="studio" slug={slug} />
               {studio.websiteUrl && (
                 <a
                   href={studio.websiteUrl}

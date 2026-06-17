@@ -338,6 +338,91 @@ export function useMarkAllNotificationsRead() {
   });
 }
 
+// ── Follows ─────────────────────────────────────────────────────────────
+
+export interface FollowStatus {
+  targetType: string;
+  targetId: string;
+  isFollowing: boolean;
+  followerCount: number;
+}
+
+export function useStudioFollowStatus(slug: string, token?: string) {
+  return useQuery({
+    queryKey: ['studioFollow', slug],
+    queryFn: () => api.get<FollowStatus>(`/studios/${slug}/follow-status`, token),
+    enabled: !!slug,
+  });
+}
+
+export function useGameFollowStatus(slug: string, token?: string) {
+  return useQuery({
+    queryKey: ['gameFollow', slug],
+    queryFn: () => api.get<FollowStatus>(`/games/${slug}/follow-status`, token),
+    enabled: !!slug,
+  });
+}
+
+export function useFollowStudio() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; token: string }) =>
+      api.post<FollowStatus>(`/studios/${data.slug}/follow`, undefined, data.token),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['studioFollow'] });
+      qc.invalidateQueries({ queryKey: ['myFollows'] });
+    },
+  });
+}
+
+export function useUnfollowStudio() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; token: string }) =>
+      api.delete<FollowStatus>(`/studios/${data.slug}/follow`, data.token),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['studioFollow'] });
+      qc.invalidateQueries({ queryKey: ['myFollows'] });
+    },
+  });
+}
+
+export function useFollowGame() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; token: string }) =>
+      api.post<FollowStatus>(`/games/${data.slug}/follow`, undefined, data.token),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['gameFollow'] });
+      qc.invalidateQueries({ queryKey: ['myFollows'] });
+    },
+  });
+}
+
+export function useUnfollowGame() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; token: string }) =>
+      api.delete<FollowStatus>(`/games/${data.slug}/follow`, data.token),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['gameFollow'] });
+      qc.invalidateQueries({ queryKey: ['myFollows'] });
+    },
+  });
+}
+
+export function useMyFollows(token?: string) {
+  return useQuery({
+    queryKey: ['myFollows'],
+    queryFn: () =>
+      api.get<{ studios: { id: string; name: string; slug: string; logoUrl: string | null }[]; games: { id: string; title: string; slug: string; coverUrl: string | null; studio: { id: string; name: string; slug: string } }[] }>(
+        '/me/follows',
+        token,
+      ),
+    enabled: !!token,
+  });
+}
+
 // ── My Studios ──────────────────────────────────────────────────────────
 
 export function useMyStudios(token?: string) {
