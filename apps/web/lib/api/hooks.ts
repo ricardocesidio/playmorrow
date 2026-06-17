@@ -59,10 +59,13 @@ export function useStudioGames(studioSlug: string) {
 
 // ── Devlogs ─────────────────────────────────────────────────────────────
 
-export function useGameDevlogs(gameSlug: string) {
+export function useGameDevlogs(gameSlug: string, token?: string, includeDrafts?: boolean) {
+  const params = new URLSearchParams();
+  if (includeDrafts) params.set('includeDrafts', 'true');
+  const qs = params.toString() ? `?${params}` : '';
   return useQuery({
-    queryKey: ['gameDevlogs', gameSlug],
-    queryFn: () => api.get<Paginated<Devlog>>(`/games/${gameSlug}/devlogs`),
+    queryKey: ['gameDevlogs', gameSlug, includeDrafts],
+    queryFn: () => api.get<Paginated<Devlog>>(`/games/${gameSlug}/devlogs${qs}`, token),
     enabled: !!gameSlug,
   });
 }
@@ -137,6 +140,66 @@ export function useUpdateStudio() {
       qc.invalidateQueries({ queryKey: ['myStudios'] });
       qc.invalidateQueries({ queryKey: ['studio'] });
       qc.invalidateQueries({ queryKey: ['studios'] });
+    },
+  });
+}
+
+// ── My Devlogs ──────────────────────────────────────────────────────────
+
+export function useMyDevlogs(token?: string) {
+  return useQuery({
+    queryKey: ['myDevlogs', token],
+    queryFn: async () => {
+      const studios = await api.get<Studio[]>('/studios/me', token);
+      const results = await Promise.all(
+        studios.map((s) => api.get<Paginated<Game>>(`/studios/${s.slug}/games`, token)),
+      );
+      const games = results.flatMap((r) => r.items);
+      const devlogResults = await Promise.all(
+        games.map((g) =>
+          api.get<Paginated<Devlog>>(`/games/${g.slug}/devlogs?includeDrafts=true`, token),
+        ),
+      );
+      return devlogResults.flatMap((r) => r.items);
+    },
+    enabled: !!token,
+  });
+}
+
+export function useCreateDevlog() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      gameSlug: string;
+      title: string;
+      slug: string;
+      body: string;
+      coverUrl?: string;
+      isPublished?: boolean;
+      publishedAt?: string;
+      token: string;
+    }) => {
+      const { gameSlug, token, ...body } = data;
+      return api.post<Devlog>(`/games/${gameSlug}/devlogs`, body, token);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['myDevlogs'] });
+      qc.invalidateQueries({ queryKey: ['gameDevlogs'] });
+      qc.invalidateQueries({ queryKey: ['devlogs'] });
+    },
+  });
+}
+
+export function useUpdateDevlog() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { id: string; body: Record<string, unknown>; token: string }) => {
+      return api.patch<Devlog>(`/devlogs/${data.id}`, data.body, data.token);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['myDevlogs'] });
+      qc.invalidateQueries({ queryKey: ['gameDevlogs'] });
+      qc.invalidateQueries({ queryKey: ['devlog'] });
     },
   });
 }

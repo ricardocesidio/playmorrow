@@ -14,12 +14,74 @@ import {
   ExternalLink,
   Settings,
   Gamepad,
+  FileText,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
-import { useMyStudios, useMyGames } from '@/lib/api/hooks';
+import { useMyStudios, useMyGames, useMyDevlogs } from '@/lib/api/hooks';
 import { Footer } from '@/components/footer';
+
+function MyDevlogsList({ token }: { token: string | null }) {
+  const { data: devlogs, isLoading } = useMyDevlogs(token ?? undefined);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="h-20 animate-pulse rounded-xl bg-muted" />
+        ))}
+      </div>
+    );
+  }
+
+  if (devlogs && devlogs.length > 0) {
+    return (
+      <div className="space-y-3">
+        {devlogs.slice(0, 5).map((d) => (
+          <div key={d.id} className="flex items-center justify-between rounded-xl border border-border bg-card/30 p-4 transition-colors hover:border-primary/30">
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="grid size-12 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+                <FileText className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <Link href={`/devlogs/${d.id}`} className="font-medium hover:text-primary transition-colors">
+                  {d.title}
+                </Link>
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span className={`rounded px-1.5 py-0.5 ${d.isPublished ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                    {d.isPublished ? 'Published' : 'Draft'}
+                  </span>
+                  <span>{d.game?.title}</span>
+                  <span>·</span>
+                  <span>{d.publishedAt ? new Date(d.publishedAt).toLocaleDateString() : new Date(d.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button asChild variant="ghost" size="sm">
+                <Link href={`/devlogs/${d.id}`}><ExternalLink className="size-3" /></Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm">
+                <Link href={`/dashboard/devlogs/${d.id}`}><Settings className="size-3" /></Link>
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-border bg-card/20 py-10 text-center">
+      <FileText className="mx-auto mb-3 size-8 text-muted-foreground/40" />
+      <p className="text-muted-foreground">No devlogs yet.</p>
+      <Button asChild className="mt-4" size="sm">
+        <Link href="/dashboard/devlogs/new">Write your first devlog</Link>
+      </Button>
+    </div>
+  );
+}
 
 function MyGamesList({ token }: { token: string | null }) {
   const { data: games, isLoading } = useMyGames(token ?? undefined);
@@ -248,6 +310,17 @@ export default function DashboardPage() {
           </div>
 
           <MyGamesList token={token} />
+        </section>
+
+        {/* My Devlogs */}
+        <section className="mb-10">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-lg font-semibold">
+              <FileText className="size-5 text-primary" />
+              Recent Devlogs
+            </h2>
+          </div>
+          <MyDevlogsList token={token} />
         </section>
 
         {/* Other placeholder cards */}
