@@ -10,6 +10,17 @@ export function usePublicFeed(page = 1, pageSize = 10) {
   });
 }
 
+export function usePersonalFeed(type: string, page: number, pageSize: number, token?: string) {
+  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  if (type !== 'all') params.set('type', type);
+  return useQuery({
+    queryKey: ['personalFeed', type, page, pageSize],
+    queryFn: () => api.get<Paginated<FeedItem>>(`/me/feed?${params}`, token),
+    enabled: !!token,
+    placeholderData: (prev) => prev,
+  });
+}
+
 // ── Games ───────────────────────────────────────────────────────────────
 
 export function useGames(page = 1, pageSize = 20, search?: string) {
