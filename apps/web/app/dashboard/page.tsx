@@ -403,7 +403,7 @@ export default function DashboardPage() {
           </Link>
 
           <Link
-            href="#"
+            href="/dashboard/feed"
             className="group rounded-xl border border-border bg-card/30 p-6 transition-colors hover:border-primary/40"
           >
             <span className="mb-4 grid size-10 place-items-center rounded-lg bg-primary/10 text-primary">
