@@ -3,7 +3,7 @@
 import { useState, type FormEvent, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, ExternalLink, Gamepad2 } from 'lucide-react';
+import { ArrowLeft, Save, ExternalLink, Gamepad2, Milestone, FileText } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
@@ -231,6 +231,20 @@ export default function EditGamePage() {
           <Button asChild variant="outline"><Link href="/dashboard">Cancel</Link></Button>
         </div>
       </form>
+
+      {/* Quick links */}
+      <div className="mt-10 flex flex-wrap gap-3">
+        <Button asChild variant="outline" size="sm">
+          <Link href={'/dashboard/devlogs/new?game=' + slug}>
+            <FileText className="size-3" /> New devlog
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href={'/dashboard/roadmap?game=' + slug}>
+            <Milestone className="size-3" /> Manage roadmap
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 }
