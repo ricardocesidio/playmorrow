@@ -13,12 +13,76 @@ import {
   LogOut,
   ExternalLink,
   Settings,
+  Gamepad,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
-import { useMyStudios } from '@/lib/api/hooks';
+import { useMyStudios, useMyGames } from '@/lib/api/hooks';
 import { Footer } from '@/components/footer';
+
+function MyGamesList({ token }: { token: string | null }) {
+  const { data: games, isLoading } = useMyGames(token ?? undefined);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="h-20 animate-pulse rounded-xl bg-muted" />
+        ))}
+      </div>
+    );
+  }
+
+  if (games && games.length > 0) {
+    return (
+      <div className="space-y-3">
+        {games.map((g) => (
+          <div key={g.id} className="flex items-center justify-between rounded-xl border border-border bg-card/30 p-4 transition-colors hover:border-primary/30">
+            <div className="flex items-center gap-4 min-w-0">
+              {g.coverUrl ? (
+                <img src={g.coverUrl} alt="" className="size-12 shrink-0 rounded-lg object-cover" />
+              ) : (
+                <div className="grid size-12 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+                  <Gamepad className="size-5" />
+                </div>
+              )}
+              <div className="min-w-0">
+                <Link href={`/games/${g.slug}`} className="font-medium hover:text-primary transition-colors">
+                  {g.title}
+                </Link>
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span className="rounded bg-primary/10 px-1.5 py-0.5 text-primary">{g.status}</span>
+                  <span>{g.studio?.name}</span>
+                  <span>·</span>
+                  <span>{g.followersCount} followers</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button asChild variant="ghost" size="sm">
+                <Link href={`/games/${g.slug}`}><ExternalLink className="size-3" /></Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm">
+                <Link href={`/dashboard/games/${g.slug}`}><Settings className="size-3" /></Link>
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-border bg-card/20 py-10 text-center">
+      <Gamepad2 className="mx-auto mb-3 size-8 text-muted-foreground/40" />
+      <p className="text-muted-foreground">No games yet. Create one under a studio.</p>
+      <Button asChild className="mt-4" size="sm">
+        <Link href="/dashboard/games/new">Create your first game</Link>
+      </Button>
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -167,6 +231,23 @@ export default function DashboardPage() {
               </Button>
             </div>
           )}
+        </section>
+
+        {/* My Games */}
+        <section className="mb-10">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-lg font-semibold">
+              <Gamepad className="size-5 text-primary" />
+              My Games
+            </h2>
+            <Button asChild size="sm">
+              <Link href="/dashboard/games/new">
+                <PlusCircle className="size-4" /> Create game
+              </Link>
+            </Button>
+          </div>
+
+          <MyGamesList token={token} />
         </section>
 
         {/* Other placeholder cards */}
