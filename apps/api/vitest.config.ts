@@ -9,5 +9,20 @@ export default defineConfig({
     include: ['src/**/*.spec.ts'],
     root: './',
   },
-  plugins: [swc.vite()],
+  plugins: [
+    swc.vite({
+      jsc: {
+        target: 'es2022',
+        parser: {
+          syntax: 'typescript',
+          decorators: true,
+          dynamicImport: true,
+        },
+        transform: {
+          decoratorMetadata: true,
+          legacyDecorator: true,
+        },
+      },
+    }),
+  ],
 });
