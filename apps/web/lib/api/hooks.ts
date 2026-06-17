@@ -96,6 +96,55 @@ export function useGameRoadmap(gameSlug: string) {
   });
 }
 
+export function useCreateRoadmapItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      gameSlug: string;
+      title: string;
+      description?: string;
+      status?: string;
+      targetDate?: string;
+      position?: number;
+      token: string;
+    }) => {
+      const { gameSlug, token, ...body } = data;
+      return api.post<RoadmapItem>(`/games/${gameSlug}/roadmap`, body, token);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['gameRoadmap'] });
+    },
+  });
+}
+
+export function useUpdateRoadmapItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { id: string; body: Record<string, unknown>; token: string }) => {
+      return api.patch<RoadmapItem>(`/roadmap-items/${data.id}`, data.body, data.token);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['gameRoadmap'] });
+    },
+  });
+}
+
+export function useReorderRoadmapItems() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { gameSlug: string; items: { id: string; position: number }[]; token: string }) => {
+      return api.patch<{ reordered: number }>(
+        `/games/${data.gameSlug}/roadmap/reorder`,
+        { items: data.items },
+        data.token,
+      );
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['gameRoadmap'] });
+    },
+  });
+}
+
 // ── Press Kit ───────────────────────────────────────────────────────────
 
 export function useGamePressKit(gameSlug: string) {
