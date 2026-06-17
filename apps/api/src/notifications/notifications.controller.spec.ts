@@ -38,7 +38,6 @@ describe('NotificationsController (e2e)', () => {
   let followerToken: string;
   let ownerToken: string;
   let commentAuthorToken: string;
-  let commentAuthorId: string;
   let devlogId: string;
   let commentId: string;
 
@@ -78,7 +77,6 @@ describe('NotificationsController (e2e)', () => {
       .post('/api/auth/register')
       .send({ email: COMMENT_AUTHOR_EMAIL, username: COMMENT_AUTHOR_USERNAME, displayName: 'Comment Author', password: PASSWORD });
     commentAuthorToken = caRes.body.accessToken;
-    commentAuthorId = caRes.body.user.id;
 
     // Create studio as owner
     await request(httpServer)

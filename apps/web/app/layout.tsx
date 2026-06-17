@@ -22,7 +22,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen antialiased">
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="relative flex min-h-screen flex-col overflow-hidden">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_50%_-10%,oklch(0.62_0.214_286_/_0.25),transparent_70%)]"
+            />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
+            />
+            {children}
+          </div>
+        </Providers>
       </body>
     </html>
   );

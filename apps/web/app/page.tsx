@@ -1,108 +1,26 @@
-import {
-  Compass,
-  GitBranch,
-  ShieldCheck,
-  Users,
-  Sparkles,
-  ArrowRight,
-  Gamepad2,
-} from 'lucide-react';
+'use client';
+
+import Link from 'next/link';
+import { ArrowRight, Gamepad2, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-
-const pillars = [
-  {
-    icon: Compass,
-    title: 'Discovery',
-    body: 'Help people find indie games early — long before launch day.',
-  },
-  {
-    icon: GitBranch,
-    title: 'Progress',
-    body: 'Watch games evolve through devlogs, roadmaps, demos, and updates.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Trust',
-    body: 'Structured profiles, press kits, and transparent project status.',
-  },
-  {
-    icon: Users,
-    title: 'Community',
-    body: 'Follow, comment, react, ask questions, become an early supporter.',
-  },
-  {
-    icon: Sparkles,
-    title: 'Curation',
-    body: 'Highlight quality projects — not just endless uploads.',
-  },
-];
-
-const audiences = [
-  {
-    label: 'For studios',
-    promise: 'Give your game a beautiful public home before launch.',
-  },
-  {
-    label: 'For players',
-    promise: 'Follow promising indie games from the moment they start becoming real.',
-  },
-  {
-    label: 'For press & publishers',
-    promise: 'Find serious indie projects with organized media, roadmaps, and studio info.',
-  },
-];
+import { Nav } from '@/components/nav';
+import { Footer } from '@/components/footer';
+import { GameCard } from '@/components/game-card';
+import { FeedItemCard } from '@/components/feed-item';
+import { usePublicFeed, useGames } from '@/lib/api/hooks';
 
 export default function HomePage() {
+  const { data: feedData, isLoading: feedLoading } = usePublicFeed(1, 4);
+  const { data: gamesData, isLoading: gamesLoading } = useGames(1, 4);
+
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden">
-      {/* Ambient gradient backdrop */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_50%_-10%,oklch(0.62_0.214_286_/_0.25),transparent_70%)]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
-      />
+    <>
+      <Nav />
 
-      {/* Nav */}
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
-        <a href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <span className="grid size-8 place-items-center rounded-lg bg-primary/15 text-primary">
-            <Gamepad2 className="size-5" />
-          </span>
-          <span className="text-lg">Playmorrow</span>
-        </a>
-        <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-          <a className="transition-colors hover:text-foreground" href="/explore">
-            Explore
-          </a>
-          <a className="transition-colors hover:text-foreground" href="/studios">
-            Studios
-          </a>
-          <a className="transition-colors hover:text-foreground" href="/devlogs">
-            Devlogs
-          </a>
-        </nav>
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
-            <a href="/login">Sign in</a>
-          </Button>
-          <Button asChild size="sm">
-            <a href="/studios/new">Create studio</a>
-          </Button>
-        </div>
-      </header>
-
-      {/* Hero */}
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6">
+        {/* Hero */}
         <section className="flex flex-col items-center py-20 text-center sm:py-28">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/50 px-3 py-1 text-xs text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-primary" />
-            The social discovery layer for indie games
-          </div>
-
           <h1 className="max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-6xl">
             Discover{' '}
             <span className="bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent">
@@ -118,62 +36,77 @@ export default function HomePage() {
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
-              <a href="/explore">
+              <Link href="/games">
                 Explore games
                 <ArrowRight className="size-4" />
-              </a>
+              </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <a href="/studios/new">Create studio profile</a>
+              <Link href="/studios/new">Create studio profile</Link>
             </Button>
           </div>
-
-          <p className="mt-10 max-w-xl text-sm text-muted-foreground/80">
-            Steam is where people buy. itch.io is where people upload. Discord is where communities
-            talk. <span className="text-foreground">Playmorrow is where studios build in public.</span>
-          </p>
         </section>
 
-        {/* Brand pillars */}
-        <section className="grid gap-4 pb-20 sm:grid-cols-2 lg:grid-cols-5">
-          {pillars.map(({ icon: Icon, title, body }) => (
-            <div
-              key={title}
-              className="group rounded-xl border border-border bg-card/40 p-5 transition-colors hover:border-primary/40 hover:bg-card/70"
-            >
-              <span className="mb-4 grid size-10 place-items-center rounded-lg bg-primary/10 text-primary transition-transform group-hover:scale-105">
-                <Icon className="size-5" />
-              </span>
-              <h3 className="font-medium">{title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{body}</p>
+        {/* Latest games */}
+        <section className="pb-12">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Latest games</h2>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/games">
+                View all <ArrowRight className="size-3" />
+              </Link>
+            </Button>
+          </div>
+          {gamesLoading ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="aspect-[3/2] animate-pulse rounded-xl bg-muted" />
+              ))}
             </div>
-          ))}
+          ) : gamesData?.items.length ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {gamesData.items.slice(0, 4).map((game) => (
+                <GameCard key={game.id} game={game} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card/30 py-12">
+              <Sparkles className="size-8 text-muted-foreground/40" />
+              <p className="text-muted-foreground">No games yet. Be the first!</p>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/studios/new">Create a studio</Link>
+              </Button>
+            </div>
+          )}
         </section>
 
-        {/* Audience promises */}
-        <section className="grid gap-4 pb-24 md:grid-cols-3">
-          {audiences.map(({ label, promise }) => (
-            <div key={label} className="rounded-xl border border-border bg-card/30 p-6">
-              <div className="text-xs font-medium uppercase tracking-wider text-primary">
-                {label}
-              </div>
-              <p className="mt-3 text-pretty text-base">{promise}</p>
+        {/* Recent activity */}
+        <section className="pb-20">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Recent activity</h2>
+          </div>
+          {feedLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-24 animate-pulse rounded-xl bg-muted" />
+              ))}
             </div>
-          ))}
+          ) : feedData?.items.length ? (
+            <div className="space-y-3">
+              {feedData.items.map((item) => (
+                <FeedItemCard key={`${item.type}-${item.id}`} item={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card/30 py-12">
+              <Gamepad2 className="size-8 text-muted-foreground/40" />
+              <p className="text-muted-foreground">No activity yet.</p>
+            </div>
+          )}
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
-          <div className="flex items-center gap-2">
-            <Gamepad2 className="size-4 text-primary" />
-            <span>Playmorrow</span>
-            <span className="text-muted-foreground/50">· v0.1</span>
-          </div>
-          <p>Discover tomorrow&apos;s indie games today.</p>
-        </div>
-      </footer>
-    </div>
+      <Footer />
+    </>
   );
 }
