@@ -15,12 +15,60 @@ import {
   Settings,
   Gamepad,
   FileText,
+  Users,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
-import { useMyStudios, useMyGames, useMyDevlogs, useUnreadNotificationCount } from '@/lib/api/hooks';
+import { useMyStudios, useMyGames, useMyDevlogs, useUnreadNotificationCount, useMyFollows } from '@/lib/api/hooks';
 import { Footer } from '@/components/footer';
+
+function MyFollowsList({ token }: { token: string | null }) {
+  const { data: follows, isLoading } = useMyFollows(token ?? undefined);
+
+  if (isLoading) {
+    return <div className="h-16 animate-pulse rounded-xl bg-muted" />;
+  }
+
+  const items = [
+    ...(follows?.studios ?? []).map((s) => ({ type: 'studio' as const, slug: s.slug, name: s.name, img: s.logoUrl })),
+    ...(follows?.games ?? []).map((g) => ({ type: 'game' as const, slug: g.slug, name: g.title, img: g.coverUrl })),
+  ];
+
+  if (items.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-card/20 py-8 text-center">
+        <p className="text-sm text-muted-foreground">Not following anything yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.slice(0, 8).map((item) => (
+        <Link
+          key={`${item.type}-${item.slug}`}
+          href={item.type === 'studio' ? `/studios/${item.slug}` : `/games/${item.slug}`}
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card/30 px-3 py-1.5 text-sm transition-colors hover:border-primary/40"
+        >
+          {item.img ? (
+            <img src={item.img} alt="" className="size-5 rounded object-cover" />
+          ) : (
+            <div className="grid size-5 place-items-center rounded bg-primary/10 text-[9px] text-primary">
+              {item.type === 'studio' ? 'S' : 'G'}
+            </div>
+          )}
+          <span className="max-w-[140px] truncate">{item.name}</span>
+        </Link>
+      ))}
+      {items.length > 8 && (
+        <span className="inline-flex items-center text-sm text-muted-foreground">
+          +{items.length - 8} more
+        </span>
+      )}
+    </div>
+  );
+}
 
 function MyDevlogsList({ token }: { token: string | null }) {
   const { data: devlogs, isLoading } = useMyDevlogs(token ?? undefined);
@@ -323,6 +371,15 @@ export default function DashboardPage() {
             </h2>
           </div>
           <MyDevlogsList token={token} />
+        </section>
+
+        {/* Following */}
+        <section className="mb-10">
+          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+            <Users className="size-5 text-primary" />
+            Following
+          </h2>
+          <MyFollowsList token={token} />
         </section>
 
         {/* Other placeholder cards */}

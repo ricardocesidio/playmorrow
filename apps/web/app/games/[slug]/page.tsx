@@ -2,12 +2,13 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Users, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
 
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
 import { Tag } from '@/components/tag';
 import { useGame, useGameDevlogs, useGameRoadmap, useGamePressKit } from '@/lib/api/hooks';
+import { FollowButton } from '@/components/follow-button';
 
 export default function GameDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -86,8 +87,7 @@ export default function GameDetailPage() {
               )}
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <Users className="size-4" />
-              <span>{game.followersCount} followers</span>
+              <FollowButton targetType="game" slug={slug} />
               <span className="rounded bg-primary/10 px-2 py-0.5 text-primary">{game.status}</span>
             </div>
           </div>
