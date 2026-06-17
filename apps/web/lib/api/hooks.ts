@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type StudioWithMembers } from './client';
+import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type StudioWithMembers } from './client';
 
 // ── Feed ────────────────────────────────────────────────────────────────
 
@@ -78,11 +78,108 @@ export function useDevlog(id: string) {
   });
 }
 
-export function useDevlogComments(devlogId: string) {
+export function useDevlogComments(devlogId: string, token?: string) {
   return useQuery({
     queryKey: ['devlogComments', devlogId],
-    queryFn: () => api.get<Comment[]>(`/devlogs/${devlogId}/comments`),
+    queryFn: () => api.get<Comment[]>(`/devlogs/${devlogId}/comments`, token),
     enabled: !!devlogId,
+  });
+}
+
+// ── Reactions ───────────────────────────────────────────────────────────
+
+export function useDevlogReactions(devlogId: string, token?: string) {
+  return useQuery({
+    queryKey: ['devlogReactions', devlogId],
+    queryFn: () => api.get<ReactionStatus>(`/devlogs/${devlogId}/reactions`, token),
+    enabled: !!devlogId,
+  });
+}
+
+export function useReactToDevlog() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { devlogId: string; type: string; token: string }) =>
+      api.post<ReactionStatus>(`/devlogs/${data.devlogId}/reactions`, { type: data.type }, data.token),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['devlogReactions', vars.devlogId] });
+    },
+  });
+}
+
+export function useRemoveDevlogReaction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { devlogId: string; type: string; token: string }) =>
+      api.delete<ReactionStatus>(`/devlogs/${data.devlogId}/reactions?type=${data.type}`, data.token),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['devlogReactions', vars.devlogId] });
+    },
+  });
+}
+
+export function useCreateComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { devlogId: string; body: string; parentId?: string; token: string }) => {
+      const { devlogId, token, ...body } = data;
+      return api.post<Comment>(`/devlogs/${devlogId}/comments`, body, token);
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['devlogComments', vars.devlogId] });
+    },
+  });
+}
+
+export function useUpdateComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { commentId: string; body: string; token: string }) =>
+      api.patch<Comment>(`/comments/${data.commentId}`, { body: data.body }, data.token),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['devlogComments'] });
+    },
+  });
+}
+
+export function useDeleteComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { commentId: string; token: string }) =>
+      api.delete(`/comments/${data.commentId}`, data.token),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['devlogComments'] });
+    },
+  });
+}
+
+export function useCommentReactions(commentId: string, token?: string) {
+  return useQuery({
+    queryKey: ['commentReactions', commentId],
+    queryFn: () => api.get<ReactionStatus>(`/comments/${commentId}/reactions`, token),
+    enabled: !!commentId,
+  });
+}
+
+export function useReactToComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { commentId: string; type: string; token: string }) =>
+      api.post<ReactionStatus>(`/comments/${data.commentId}/reactions`, { type: data.type }, data.token),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['commentReactions', vars.commentId] });
+    },
+  });
+}
+
+export function useRemoveCommentReaction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { commentId: string; type: string; token: string }) =>
+      api.delete<ReactionStatus>(`/comments/${data.commentId}/reactions?type=${data.type}`, data.token),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['commentReactions', vars.commentId] });
+    },
   });
 }
 
