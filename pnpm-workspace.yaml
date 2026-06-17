@@ -12,3 +12,4 @@ ignoredBuiltDependencies:
   - "@scarf/scarf"
 allowBuilds:
   '@scarf/scarf': true
+  argon2: true
