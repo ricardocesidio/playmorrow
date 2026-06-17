@@ -140,3 +140,68 @@ export function useUpdateStudio() {
     },
   });
 }
+
+// ── My Games ────────────────────────────────────────────────────────────
+
+export function useMyGames(token?: string) {
+  return useQuery({
+    queryKey: ['myGames', token],
+    queryFn: async () => {
+      const studios = await api.get<Studio[]>('/studios/me', token);
+      const results = await Promise.all(
+        studios.map((s) => api.get<Paginated<Game>>(`/studios/${s.slug}/games`, token)),
+      );
+      return results.flatMap((r, i) =>
+        r.items.map((g) => ({ ...g, studio: studios[i] })),
+      );
+    },
+    enabled: !!token,
+  });
+}
+
+export function useCreateGame() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      studioSlug: string;
+      title: string;
+      slug: string;
+      tagline?: string;
+      description?: string;
+      status?: string;
+      releaseDate?: string;
+      expectedReleaseText?: string;
+      priceCents?: number;
+      currency?: string;
+      isFree?: boolean;
+      coverUrl?: string;
+      bannerUrl?: string;
+      platformLinks?: { platform: string; url: string; label?: string }[];
+      media?: { type: string; url: string; caption?: string; sortOrder?: number }[];
+      tags?: string[];
+      token: string;
+    }) => {
+      const { studioSlug, token, ...body } = data;
+      return api.post<Game>(`/studios/${studioSlug}/games`, body, token);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['myGames'] });
+      qc.invalidateQueries({ queryKey: ['games'] });
+      qc.invalidateQueries({ queryKey: ['studioGames'] });
+    },
+  });
+}
+
+export function useUpdateGame() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; body: Record<string, unknown>; token: string }) => {
+      return api.patch<Game>(`/games/${data.slug}`, data.body, data.token);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['myGames'] });
+      qc.invalidateQueries({ queryKey: ['games'] });
+      qc.invalidateQueries({ queryKey: ['game'] });
+    },
+  });
+}
