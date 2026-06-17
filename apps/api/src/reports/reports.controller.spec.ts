@@ -8,6 +8,7 @@ import { AuthModule } from '../auth/auth.module';
 import { CommentsModule } from '../comments/comments.module';
 import { DevlogsModule } from '../devlogs/devlogs.module';
 import { GamesModule } from '../games/games.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudiosModule } from '../studios/studios.module';
@@ -52,6 +53,7 @@ describe('ReportsController (e2e)', () => {
           DevlogsModule,
           CommentsModule,
           ReportsModule,
+          NotificationsModule,
         ],
       }),
     );

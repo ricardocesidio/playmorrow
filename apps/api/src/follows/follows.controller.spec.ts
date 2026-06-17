@@ -6,6 +6,7 @@ import request from 'supertest';
 
 import { AuthModule } from '../auth/auth.module';
 import { GamesModule } from '../games/games.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudiosModule } from '../studios/studios.module';
@@ -42,6 +43,7 @@ describe('FollowsController (e2e)', () => {
         StudiosModule,
         GamesModule,
         FollowsModule,
+        NotificationsModule,
       ],
     }).compile();
 

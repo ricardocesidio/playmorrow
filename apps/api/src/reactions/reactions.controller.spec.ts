@@ -8,6 +8,7 @@ import { AuthModule } from '../auth/auth.module';
 import { CommentsModule } from '../comments/comments.module';
 import { DevlogsModule } from '../devlogs/devlogs.module';
 import { GamesModule } from '../games/games.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { ReactionsModule } from './reactions.module';
@@ -49,13 +50,12 @@ describe('ReactionsController (e2e)', () => {
           DevlogsModule,
           CommentsModule,
           ReactionsModule,
+          NotificationsModule,
         ],
       }),
     );
     httpServer = result.httpServer;
     prisma = result.app.get(PrismaService);
-
-
 
     const userRes = await request(httpServer)
       .post('/api/auth/register')

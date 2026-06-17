@@ -8,6 +8,7 @@ import { AuthModule } from '../auth/auth.module';
 import { DevlogsModule } from '../devlogs/devlogs.module';
 import { FollowsModule } from '../follows/follows.module';
 import { GamesModule } from '../games/games.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { RoadmapItemsModule } from '../roadmap-items/roadmap-items.module';
@@ -46,9 +47,9 @@ describe('FeedController (e2e)', () => {
         RoadmapItemsModule,
         FeedModule,
         FollowsModule,
+        NotificationsModule,
       ],
     }).compile();
-
     const nestApp = app.createNestApplication();
     nestApp.setGlobalPrefix('api', { exclude: ['health'] });
     await nestApp.init();
