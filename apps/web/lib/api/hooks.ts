@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type StudioWithMembers } from './client';
 
 // ── Feed ────────────────────────────────────────────────────────────────
@@ -100,5 +100,43 @@ export function useGamePressKit(gameSlug: string) {
     queryKey: ['gamePressKit', gameSlug],
     queryFn: () => api.get<PressKit>(`/games/${gameSlug}/press-kit`),
     enabled: !!gameSlug,
+  });
+}
+
+// ── My Studios ──────────────────────────────────────────────────────────
+
+export function useMyStudios(token?: string) {
+  return useQuery({
+    queryKey: ['myStudios'],
+    queryFn: () => api.get<Studio[]>('/studios/me', token),
+    enabled: !!token,
+  });
+}
+
+export function useCreateStudio() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { name: string; slug: string; tagline?: string; description?: string; location?: string; websiteUrl?: string; logoUrl?: string; bannerUrl?: string; token: string }) => {
+      const { token, ...body } = data;
+      return api.post<Studio>('/studios', body, token);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['myStudios'] });
+      qc.invalidateQueries({ queryKey: ['studios'] });
+    },
+  });
+}
+
+export function useUpdateStudio() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; body: Record<string, unknown>; token: string }) => {
+      return api.patch<Studio>(`/studios/${data.slug}`, data.body, data.token);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['myStudios'] });
+      qc.invalidateQueries({ queryKey: ['studio'] });
+      qc.invalidateQueries({ queryKey: ['studios'] });
+    },
   });
 }
