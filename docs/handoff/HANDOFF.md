@@ -19,6 +19,7 @@
 | 2026-06-18 | 0 | #10, #11, #17, #30 done; #31 partial | `cf21a50` | Quick wins. See each issue's Status line for detail. |
 | 2026-06-18 | 1 | #12 done | `e48e341` | Feed E2E flake fixed (auth-setup hydration race + locator/retry bugs). Desktop suite 31/31; feed `--repeat-each=3` 18/18. |
 | 2026-06-18 | 1 | #13 done | `c3e5e6d` | Mobile project run + triaged. Same auth-setup race fixed in `auth`/`social-actions`/`responsive` via `addInitScript`. Desktop & mobile `--repeat-each=2` → 62/62 each. |
+| 2026-06-18 | 1 | #14 done | `13bec33` | GitHub Actions CI green: quality + backend(postgres:16) + e2e(desktop+mobile). [First green run](https://github.com/ricardocesidio/playmorrow/actions/runs/27785284477). Backend suite verified against real Postgres. CI uses Node 22 (pnpm 11.1.3 needs ≥22.13). |
 
 **Phase 0 verification:** `pnpm --filter @playmorrow/web lint` → 0 warnings; `prisma validate`
 clean (config + env load); turbo "no output files" warning gone on full `pnpm test`.
