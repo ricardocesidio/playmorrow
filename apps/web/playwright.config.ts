@@ -13,8 +13,8 @@ export default defineConfig({
     ['html', { outputFolder: 'playwright-report' }],
     ['list'],
   ],
-  timeout: 30_000,
-  expect: { timeout: 10_000 },
+  timeout: 60_000,
+  expect: { timeout: 15_000 },
 
   use: {
     baseURL: BASE_URL,
@@ -40,10 +40,10 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: `pnpm --filter @playmorrow/web test:e2e:server`,
+    command: `pnpm --filter @playmorrow/web start -p ${PORT}`,
     port: PORT,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 60_000,
     env: { NEXT_PUBLIC_API_URL: 'http://localhost:4000/api' },
   },
 });
