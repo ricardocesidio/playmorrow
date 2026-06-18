@@ -9,7 +9,23 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 12. ⭐ 6 Playwright E2E tests fail (desktop) — feed spec
 
-- **Type:** Bug · **Severity:** High (blocks CI) · **Effort:** M · **Status:** OPEN
+- **Type:** Bug · **Severity:** High (blocks CI) · **Effort:** M · **Status:** DONE (`e48e341`).
+  The assumed "route-ordering" cause and the stale `makeItem` artifact were both red herrings,
+  exactly as warned below. Confirmed via live browser/trace evidence; all in the **test layer**,
+  no production changes. **Three distinct causes** (current count was 5 failing + 1 passing, not 6):
+  1. **Auth-setup hydration race (the flake):** `setupAuth` set `localStorage` *after*
+     `goto('/')`, so the token landed mid-hydration; `/auth/me` fired on the interim page and was
+     **aborted** by the next navigation (`net::ERR_ABORTED`), AuthProvider's `.catch()` treated
+     that as logout, and the feed page redirected to `/login` (~11% of runs under load).
+     **Fix:** `page.addInitScript()` seeds the token before any document loads.
+  2. **Ambiguous locators (tests 1,2,3,6):** `getByText('Devlog Item 0')` also matched the
+     summary `<p>` ("Summary for devlog item 0.") → strict-mode violation. **Fix:**
+     `getByRole('heading', { name: … })`.
+  3. **React Query auto-retry (test 5):** mock returned 500 once then 200; RQ's default
+     `retry: 3` auto-recovered before the error UI rendered. **Fix:** fail every attempt, assert
+     the error, then re-route to 200 and click "Try again".
+  Verified: feed spec `--repeat-each=3` → **18/18**; full desktop suite → **31/31**;
+  `build` + `lint` + `typecheck` green. (Mobile project still pending — see #13.)
 - **Files:** `apps/web/e2e/personalized-feed.spec.ts`,
   `apps/web/e2e/fixtures/mocks.ts`, `apps/web/app/dashboard/feed/page.tsx`,
   `apps/web/lib/api/hooks.ts` (`usePersonalFeed`), `apps/web/lib/api/auth-context.tsx`
