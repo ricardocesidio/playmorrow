@@ -21,9 +21,6 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "clean": "rm -rf dist .turbo"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@prisma/client": "^6.2.1"
   },

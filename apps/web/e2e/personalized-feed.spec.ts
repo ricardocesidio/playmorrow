@@ -1,10 +1,10 @@
-import { test, expect } from '@playwright/test';
-import { API, MOCK_USER, MOCK_TOKEN } from './fixtures/mocks';
+import { test, expect, type Page } from '@playwright/test';
+import { MOCK_USER, MOCK_TOKEN } from './fixtures/mocks';
 
 const API_ORIGIN = 'http://localhost:4000';
 
 test.describe('Personalized feed', () => {
-  async function setupAuth(page: import('@playwright/test').Page) {
+  async function setupAuth(page: Page) {
     await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60_000 });
     await page.evaluate((token) => localStorage.setItem('playmorrow_token', token), MOCK_TOKEN);
   }
@@ -27,7 +27,7 @@ test.describe('Personalized feed', () => {
     };
   }
 
-  async function setupCommonMocks(page: import('@playwright/test').Page) {
+  async function setupCommonMocks(page: Page) {
     await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/me', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_USER) });
     });
