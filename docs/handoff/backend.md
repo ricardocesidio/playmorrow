@@ -1,0 +1,147 @@
+# Backend issues (1–11)
+
+Catalogue for `apps/api` (NestJS) and `packages/database` (Prisma). See
+[`HANDOFF.md`](./HANDOFF.md) for repo orientation and execution order.
+
+Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) / M (1–2d) / L (≥3d or design).
+
+---
+
+## 1. ValidationPipe not enforced in E2E (whitelist disabled in tests)
+
+- **Type:** Bug · **Severity:** High · **Effort:** M · **Status:** OPEN
+- **Files:** `apps/api/src/main.ts`, `apps/api/src/test/create-test-app.ts`,
+  `apps/api/vitest.config.ts`
+- **Analysis:** Production (`main.ts`) runs `ValidationPipe({ whitelist: true,
+  forbidNonWhitelisted: true, transform: true })`. The shared test harness
+  (`create-test-app.ts`) sets `whitelist: false / forbidNonWhitelisted: false`, with a long
+  comment blaming SWC for not emitting class-validator metadata. **But** `vitest.config.ts`
+  already enables `transform.decoratorMetadata: true` and `legacyDecorator: true` — so the
+  claimed limitation may be stale or misconfigured. Net effect: tests do not exercise the
+  same validation behavior as prod (e.g. extra/unknown body props are not rejected), and the
+  original list reports an invalid reaction type returning **500 instead of 400** in tests.
+- **Suggested fix:** (1) Reproduce the failure: flip `whitelist`/`forbidNonWhitelisted` back
+  to `true` in `create-test-app.ts` and run `pnpm --filter @playmorrow/api test`. (2) If DTOs
+  come back empty, the metadata is genuinely missing — confirm `reflect-metadata` is imported
+  in the test setup and that `@IsString()` etc. carry `@Type()` where needed; consider
+  switching the Vitest transform to `@swc/core` with explicit
+  `jsc.parser.decorators + transform.decoratorMetadata` (already present) or fall back to a
+  `tsc`-based test build for the affected suites. (3) Add an integration test asserting a
+  bogus `type`/unknown prop → **400**. Update the harness comment to reflect reality.
+- **Cross-refs:** #31 (same root, documented as a DX gap).
+
+## 2. No refresh tokens
+
+- **Type:** Feature · **Severity:** Medium · **Effort:** L · `NEEDS DESIGN` · **Status:** OPEN
+- **Files:** `apps/api/src/auth/*` (`auth.service.ts`, `auth.controller.ts`,
+  `strategies/jwt.strategy.ts`), `apps/web/lib/api/auth-context.tsx`
+- **Analysis:** Single JWT, 7-day expiry, no refresh flow. Expiry = forced logout. `User`
+  has no token/session table.
+- **Suggested approach:** Short-lived access token (~15m) + rotating refresh token. Decide
+  storage (httpOnly cookie vs. DB-backed refresh-token table with rotation + revocation).
+  Add `POST /auth/refresh`, `POST /auth/logout`. Frontend: silent refresh on 401, update
+  `auth-context`. **Design note required** (cookie vs. localStorage has CORS/security
+  implications — current setup is `Authorization: Bearer` from localStorage).
+
+## 3. No rate limiting
+
+- **Type:** Limitation · **Severity:** High · **Effort:** S–M · **Status:** OPEN
+- **Files:** `apps/api/src/app.module.ts`, auth/comments/reactions controllers
+- **Analysis:** No throttling anywhere. Auth endpoints (brute-force), comments/reactions
+  (spam) are exposed.
+- **Suggested fix:** Add `@nestjs/throttler`. Global `ThrottlerModule` default (e.g.
+  60 req/min) + `ThrottlerGuard`; tighter `@Throttle()` overrides on `POST /auth/login`,
+  `/auth/register`, comment create, reaction create. Add an integration test hitting the
+  limit → **429**. (Consider Redis storage later for multi-instance; in-memory is fine for v1.)
+
+## 4. No email verification — DEFERRED
+
+- **Type:** Feature · **Severity:** Medium · **Effort:** L · **Status:** DEFERRED (product owner)
+- **Files:** `apps/api/src/auth/*`, `User.isVerified` (already in schema)
+- **Analysis:** Users are active immediately; `User.isVerified` exists but is unused for
+  gating. Deferred because it requires an email transport (no provider chosen).
+- **If revived:** needs the email-transport decision first (Resend / SMTP / dev-stub), a
+  verification-token store, `POST /auth/verify-email` + resend endpoint, and a gate on
+  sensitive actions. Pair with #5.
+
+## 5. No password reset — DEFERRED
+
+- **Type:** Feature · **Severity:** Medium · **Effort:** M–L · **Status:** DEFERRED (product owner)
+- **Files:** `apps/api/src/auth/*`
+- **Analysis:** No `POST /auth/forgot-password` or `POST /auth/reset-password`. Deferred with
+  #4 (same email-transport dependency).
+- **If revived:** reset-token store with expiry + single-use, the two endpoints, argon2 rehash
+  on reset, rate-limit the request endpoint (ties to #3).
+
+## 6. No OAuth
+
+- **Type:** Feature · **Severity:** Low–Medium · **Effort:** L · `NEEDS DESIGN` · **Status:** OPEN
+- **Files:** `apps/api/src/auth/*`, `User.passwordHash` is already nullable ("Null for
+  OAuth-only accounts")
+- **Analysis:** Email/password only. Schema already anticipates OAuth (nullable
+  `passwordHash`).
+- **Suggested approach:** `passport` strategies for chosen provider(s) (Google / GitHub /
+  Discord — **provider list undecided**), account-linking rules (match by verified email),
+  callback routes, and frontend buttons. **Design note required** (which providers; link vs.
+  separate accounts).
+
+## 7. Report `reason` is a free string, not an enum
+
+- **Type:** Bug · **Severity:** Medium · **Effort:** S · **Status:** OPEN
+- **Files:** `packages/database/prisma/schema.prisma` (`ModerationReport.reason`),
+  `apps/api/src/reports/dto/create-report.dto.ts` (`VALID_REPORT_REASONS`),
+  `apps/api/src/reports/reports.service.ts`
+- **Analysis:** DTO already validates `reason` against `VALID_REPORT_REASONS` via `@IsIn`, but
+  the DB column is `String`, so anything written outside the API (or if validation regresses)
+  is accepted. The constant and the DB are not a single source of truth.
+- **Suggested fix:** Add a Prisma `enum ReportReason { SPAM HARASSMENT HATE SEXUAL_CONTENT
+  VIOLENCE COPYRIGHT MISLEADING OTHER }`, change `ModerationReport.reason` to it, migrate
+  (`pnpm db:migrate`), and have the DTO reference the enum. Keep `VALID_REPORT_REASONS` in
+  sync or derive it from the generated enum. Backfill/migrate existing rows.
+
+## 8. No `resolutionNote` on reports
+
+- **Type:** Limitation · **Severity:** Low · **Effort:** S · **Status:** OPEN
+- **Files:** `packages/database/prisma/schema.prisma` (`ModerationReport`),
+  `apps/api/src/reports/dto/update-report.dto.ts`, `reports.service.ts`
+- **Analysis:** `ModerationReport` has `status`, `resolvedById`, `resolvedAt`, timestamps —
+  but no field for *why* a report was resolved/dismissed.
+- **Suggested fix:** Add `resolutionNote String?` to the model + migration. Accept it on the
+  resolve/update endpoint (extend `UpdateReportDto`), persist it, and return it in
+  `findAll`/detail responses. Add a test.
+
+## 9. Devlog/comment reactions lack `useQuery` dedup (N+1) — backend half
+
+- **Type:** Bug · **Severity:** Medium · **Effort:** M · **Status:** OPEN
+- **Files:** `apps/api/src/reactions/reactions.controller.ts`,
+  `apps/api/src/reactions/reactions.service.ts` (frontend half: #24)
+- **Analysis:** Reaction counts are only available per-entity via
+  `GET /api/comments/:id/reactions` and `GET /api/devlogs/:id/reactions`. A devlog thread with
+  N comments => N requests (the frontend fans these out — see #24).
+- **Suggested fix:** Add a **batch endpoint**, e.g.
+  `GET /api/devlogs/:devlogId/comments/reactions` (or accept `?commentIds=` / return reactions
+  embedded in the comments list) that returns counts + viewer reactions for all comments in
+  one query (`groupBy` on `commentId`). Coordinate the response shape with #24 so the
+  frontend can key a single `useQuery` per devlog.
+
+## 10. Prisma v7 deprecation: seed config in `package.json`
+
+- **Type:** DX · **Severity:** Low · **Effort:** S · **Status:** OPEN
+- **Files:** `packages/database/package.json` (`"prisma": { "seed": ... }`),
+  new `packages/database/prisma.config.ts`
+- **Analysis:** `package.json#prisma.seed` is deprecated; Prisma 7 wants `prisma.config.ts`.
+  Currently `"prisma": { "seed": "tsx prisma/seed.ts" }`.
+- **Suggested fix:** Create `packages/database/prisma.config.ts` exporting the config
+  (`migrations`/`seed`) per Prisma's current docs, remove the `prisma` key from
+  `package.json`, verify `pnpm db:seed` still works.
+
+## 11. Turbo: "no output files found for task @playmorrow/api#test"
+
+- **Type:** DX · **Severity:** Low · **Effort:** S · **Status:** OPEN
+- **Files:** `turbo.json`
+- **Analysis:** `tasks.test.outputs` is `["coverage/**"]`, but the api test run produces no
+  `coverage/` dir (no coverage configured), so Turbo warns about missing outputs.
+- **Suggested fix:** Either enable coverage for the api Vitest run (so `coverage/**` exists) or
+  give the `test` task per-package outputs / an empty `outputs: []` where appropriate. Simplest:
+  add `coverage.enabled` to `apps/api/vitest.config.ts`, or remove the stale `outputs` if
+  coverage isn't wanted. Re-run `pnpm test` and confirm the warning is gone.

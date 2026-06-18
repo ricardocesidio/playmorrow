@@ -1,0 +1,132 @@
+# Playmorrow — Engineering Handoff
+
+> **Start here.** This is the entry point for the next agent/developer. It catalogues the
+> 34 known issues, explains how to run the repo, and lays out a recommended execution
+> order. Each issue has root-cause analysis, affected files, a suggested fix, and an
+> effort estimate. Work top-to-bottom through the phases unless told otherwise.
+
+- **Generated:** 2026-06-18
+- **Repo:** https://github.com/ricardocesidio/playmorrow (`main`)
+- **Source list:** 34 issues — 11 backend, 18 frontend, 5 dev-ex.
+- **Decisions captured so far:** email-based features (#4 verification, #5 password reset)
+  are **deferred** by product owner. Other feature infra (uploads storage, realtime
+  transport, OAuth providers) is **undecided** — those issues are flagged `NEEDS DESIGN`.
+
+## Issue catalogue (by area)
+
+- [`backend.md`](./backend.md) — issues **1–11**
+- [`frontend.md`](./frontend.md) — issues **12–29**
+- [`devx.md`](./devx.md) — issues **30–34**
+
+Each issue is tagged: **Type** (Bug / Limitation / Feature / DX), **Severity**, **Effort**
+(S ≤ half day · M ≈ 1–2 days · L ≥ 3 days or needs design), and **Status** (`OPEN`).
+
+---
+
+## ⚠️ Important correction before you start
+
+The original list names the **6 failing feed E2E tests (#12)** as the "single most impactful
+fix" and guesses the cause is a *"Playwright route-ordering issue with predicate functions."*
+
+That diagnosis is **not supported by the evidence on disk.** The failure artifact at
+`apps/web/test-results/personalized-feed-Personal-1497d--filter-shows-mixed-content-desktop/error-context.md`
+shows the real error:
+
+```
+TypeError: makeItem is not a function or its return value is not iterable
+```
+
+That is a JavaScript error **inside the test's own mock handler**, not a route-matching
+problem — and it may be a **stale artifact** (the current `personalized-feed.spec.ts` does
+not obviously contain that bug). **Do not implement the assumed "route ordering" fix.**
+Reproduce first (see #12) and fix the actual root cause.
+
+---
+
+## Recommended execution path
+
+Phases are ordered to unblock a green, CI-gated test suite first, then correctness, then
+polish, then features. Within a phase, items are independent unless noted.
+
+| Phase | Theme | Issues | Why this order |
+|-------|-------|--------|----------------|
+| **0** | Quick wins / clear the noise | #11, #10, #17, #30, #31 | Trivial, remove warnings/friction before real work. |
+| **1** | Green E2E + CI (critical path) | #12 → #1 → #15/#16 → #13 → #29 → #14 | A trustworthy, automated test gate. #12 first (reproduce!). |
+| **2** | Backend correctness & security | #3, #7, #8 | Cheap, high-value hardening + schema integrity. |
+| **3** | Performance | #9 / #24 | One batch endpoint kills the comment-reaction N+1. |
+| **4** | UX polish | #22, #23, #27, #26 | Small, user-visible fixes. |
+| **5** | Features (`NEEDS DESIGN`) | #2, #6, #18, #19, #20, #21, #25, #28, #32, #33, #34, (#4, #5 deferred) | Each needs its own design pass before coding. |
+
+**Concrete first step:** open [`frontend.md`](./frontend.md) → issue **#12**, follow the
+"Reproduce" steps, and capture the *live* failure before touching code.
+
+---
+
+## Repo orientation
+
+Monorepo: **pnpm 11 + Turborepo**.
+
+```
+apps/web         Next.js 15 + React 19 + Tailwind v4 + TanStack Query   (frontend)
+apps/api         NestJS 11 + Swagger + Passport-JWT + class-validator    (backend)
+packages/database Prisma 6 + Postgres (schema, migrations, seed)
+packages/types   shared TS types
+packages/config  shared tsconfig / eslint
+```
+
+### Commands
+
+```bash
+pnpm install                 # bootstrap
+pnpm build                   # turbo build (db:generate runs first)
+pnpm typecheck               # tsc --noEmit across packages
+pnpm lint                    # eslint across packages
+pnpm test                    # backend Vitest only — 207 passing (see #29: does NOT run E2E)
+pnpm --filter @playmorrow/api test     # backend unit/integration (SWC + Vitest)
+pnpm test:e2e                # Playwright — requires a production build first (see below)
+pnpm db:generate|migrate|push|studio|seed
+```
+
+### Running E2E (current, fragile — see #15/#16)
+
+```bash
+pnpm --filter @playmorrow/web build      # next build (3–5 min) — REQUIRED before e2e
+pnpm test:e2e                            # playwright starts `next start -p 3099`
+```
+
+- Playwright config: `apps/web/playwright.config.ts`. Two projects: `desktop`, `mobile`
+  (mobile is configured but **never run** — #13). Base URL `http://localhost:3099`.
+- E2E mocks intercept the API at origin **`http://localhost:4000`** (see
+  `apps/web/e2e/fixtures/mocks.ts`). The web app's API base is
+  `process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'`
+  (`apps/web/lib/api/client.ts`). Note `NEXT_PUBLIC_*` is **inlined at build time**, so the
+  `webServer.env` override in the Playwright config does not change an already-built bundle.
+
+### Environment / infra facts
+
+- **Docker is not installed on the dev machine.** Local Postgres options: hosted Neon /
+  Supabase, or install Docker for `docker-compose.yml`. CI must use a Postgres **service
+  container** (#14).
+- `apps/api/.env` is gitignored; copy from `.env.example` (#30).
+- No `.github/` workflows yet (#14). No `docs/` other than this handoff.
+
+### Conventions to follow
+
+- Backend: NestJS module-per-domain. DTOs use `class-validator` decorators; controllers
+  thin, services hold logic. Mirror production bootstrap via
+  `apps/api/src/test/create-test-app.ts` in integration tests.
+- Frontend: TanStack Query hooks live in `apps/web/lib/api/hooks.ts`; the typed fetch
+  wrapper is `apps/web/lib/api/client.ts`; auth state is `apps/web/lib/api/auth-context.tsx`.
+- Prisma is the single source of truth for the data model
+  (`packages/database/prisma/schema.prisma`). Schema changes require a migration.
+
+---
+
+## How to use this handoff
+
+1. Read this file end-to-end.
+2. Go to the area file for your issue, read the full entry (don't act on the title alone).
+3. For `NEEDS DESIGN` items, write a short design note before coding (the email-features
+   precedent: features can be deferred — confirm scope with the product owner).
+4. Update the issue's **Status** line as you progress (`OPEN` → `IN PROGRESS` → `DONE (commit)`).
+5. Keep the test suite green; don't open the next phase until the current one is CI-green.
