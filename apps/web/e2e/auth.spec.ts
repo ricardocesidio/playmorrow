@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { API, MOCK_USER, MOCK_TOKEN } from './fixtures/mocks';
+import { MOCK_USER, MOCK_TOKEN } from './fixtures/mocks';
 
 const API_ORIGIN = 'http://localhost:4000';
 

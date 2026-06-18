@@ -53,11 +53,17 @@ Tooling: **pnpm** workspaces + **Turborepo**.
 # 1. Install dependencies
 pnpm install
 
-# 2. Configure environment
-cp .env.example .env
-cp apps/web/.env.example apps/web/.env.local
-cp apps/api/.env.example apps/api/.env
-#   -> set DATABASE_URL (Docker default works out of the box)
+# 2. Configure environment — copies every .env.example (skips files you already have)
+pnpm setup:env
+#   Then edit the generated files and set at least:
+#     - DATABASE_URL   (root .env, apps/api/.env, packages/database/.env)
+#                       Docker default works out of the box; otherwise a Neon/Supabase URL.
+#     - JWT_SECRET     (apps/api/.env) — required; the API refuses to boot without it.
+#   (equivalent manual copies:)
+#     cp .env.example .env
+#     cp apps/web/.env.example apps/web/.env.local
+#     cp apps/api/.env.example apps/api/.env
+#     cp packages/database/.env.example packages/database/.env
 
 # 3. Start Postgres (if using Docker)
 docker compose up -d
@@ -81,6 +87,7 @@ pnpm dev
 
 | Command             | Description                                   |
 | ------------------- | --------------------------------------------- |
+| `pnpm setup:env`    | Copy all `.env.example` → `.env` (non-destructive) |
 | `pnpm dev`          | Run all apps in watch mode (Turborepo)        |
 | `pnpm build`        | Build all apps/packages                       |
 | `pnpm lint`         | Lint everything                               |

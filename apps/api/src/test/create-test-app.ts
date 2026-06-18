@@ -22,6 +22,14 @@ import { type TestingModule, type TestingModuleBuilder } from '@nestjs/testing';
  *
  * If a future SWC version supports full decorator metadata, flip whitelist
  * back on and fix any test DTOs that lack decorators.
+ *
+ * TODO(handoff #1): The "SWC can't emit metadata" claim above may be stale —
+ * `vitest.config.ts` already sets `transform.decoratorMetadata: true` and
+ * `legacyDecorator: true`. Re-verify by flipping whitelist/forbidNonWhitelisted
+ * back to `true` and running the suite; if DTOs come back populated, delete this
+ * divergence and add a regression test asserting unknown body props → 400.
+ * Tracked as issue #1 / #31 in docs/handoff. Do NOT let prod (whitelist: true)
+ * and tests (whitelist: false) drift silently without this loud note.
  */
 export async function createTestApp(
   moduleBuilder: TestingModuleBuilder,
@@ -35,7 +43,7 @@ export async function createTestApp(
 
   nestApp.useGlobalPipes(
     new ValidationPipe({
-      whitelist: false,          // see note above — SWC limitation
+      whitelist: false,          // DIVERGES from prod (true) — see note above, TODO(handoff #1)
       forbidNonWhitelisted: false,
       transform: true,
       transformOptions: { enableImplicitConversion: true },
