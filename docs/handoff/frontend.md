@@ -57,7 +57,15 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 13. Mobile Playwright project never executed
 
-- **Type:** Bug/Gap · **Severity:** Medium · **Effort:** S–M · **Status:** OPEN
+- **Type:** Bug/Gap · **Severity:** Medium · **Effort:** S–M · **Status:** DONE (`c3e5e6d`).
+  First mobile run = **30/31**; the one failure (`auth.spec.ts` "Authenticated feed renders")
+  was the **same auth-setup hydration race as #12** (a11y snapshot showed the `/login` page),
+  just more likely under mobile emulation. A follow-up desktop run also flaked on
+  `social-actions` "follow and unfollow" — same race. **Fix:** seed the token via
+  `page.addInitScript()` before any load, in the three remaining specs that used the racy
+  `goto('/')`+`evaluate(setItem)` pattern (`auth`, `social-actions`, `responsive`). No
+  mobile-specific layout changes were needed. **Verified:** desktop `--repeat-each=2` 62/62,
+  mobile `--repeat-each=2` 62/62, lint + typecheck green. Mobile is now wired for CI (#14).
 - **Files:** `apps/web/playwright.config.ts` (the `mobile` / Pixel 7 project)
 - **Analysis:** `mobile` project is configured but never run, so its pass/fail rate is unknown.
 - **Suggested fix:** After #12 is green, run `pnpm test:e2e --project=mobile`, triage failures
