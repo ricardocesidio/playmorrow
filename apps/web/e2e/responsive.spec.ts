@@ -65,9 +65,13 @@ test.describe('Responsive layout', () => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [], total: 0, page: 1, pageSize: 20, hasMore: false }) });
     });
 
-    // Set up auth
-    await page.goto('/');
-    await page.evaluate((token) => localStorage.setItem('playmorrow_token', token), MOCK_TOKEN);
+    // Seed the auth token BEFORE any document loads, so the protected dashboard
+    // routes actually render (not redirect to /login). Setting localStorage after
+    // goto('/') races hydration — /auth/me can be aborted and AuthProvider logs out.
+    // (Same root cause/fix as personalized-feed.spec.ts.)
+    await page.addInitScript((token) => {
+      window.localStorage.setItem('playmorrow_token', token);
+    }, MOCK_TOKEN);
 
     for (const path of ['/dashboard', '/dashboard/feed', '/dashboard/notifications']) {
       await page.setViewportSize({ width: 1440, height: 900 });
