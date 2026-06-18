@@ -74,7 +74,20 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 14. No CI integration
 
-- **Type:** DX/Infra · **Severity:** High · **Effort:** M · **Status:** OPEN
+- **Type:** DX/Infra · **Severity:** High · **Effort:** M · **Status:** DONE (`13bec33`).
+  `.github/workflows/ci.yml` runs three jobs on push (any branch) + PR to `main`: **quality**
+  (lint + typecheck), **backend** (Vitest against a `postgres:16` service container after
+  `prisma migrate deploy`), and **e2e** (build web + Playwright **desktop + mobile**, report
+  artifact on failure). **First fully-green run:**
+  https://github.com/ricardocesidio/playmorrow/actions/runs/27785284477 — all three jobs ✅,
+  including the backend suite against real Postgres (this is the first verification of issue
+  #14's "backend passes Postgres" gate). Three setup bugs were fixed live: (1) `pnpm/action-setup`
+  rejects a `version:` input alongside the `packageManager` field — removed it; (2) **Node 20 →
+  22** because pnpm 11.1.3 requires Node ≥ 22.13 (`node:sqlite`); (3) `pnpm install
+  --frozen-lockfile` failed `ERR_PNPM_IGNORED_BUILDS` on a clean install — allowlisted
+  `@prisma/client`/`@prisma/engines`/`prisma`/`@swc/core`/`esbuild`/`sharp` in
+  `pnpm-workspace.yaml` `allowBuilds`. Branch protection on `main` (require these checks) is a
+  repo-admin GitHub setting, not set here. Spec/plan: `docs/superpowers/{specs,plans}/`.
 - **Files:** new `.github/workflows/ci.yml`
 - **Analysis:** No CI exists; Playwright is manual. Repo is on GitHub → use GitHub Actions.
   Docker isn't on the dev machine, but Actions runners provide Postgres **service containers**.

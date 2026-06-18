@@ -29,7 +29,8 @@ concurrency:                 # cancel superseded runs for the same ref
 
 - `runs-on: ubuntu-latest`
 - `pnpm/action-setup@v4` with `version: 11` (matches `packageManager: pnpm@11.1.3`)
-- `actions/setup-node@v4` with `node-version: 20` and `cache: pnpm`
+- `actions/setup-node@v4` with `node-version: 22` and `cache: pnpm`
+  (Node 22, not 20 — pnpm 11.1.3 requires Node ≥ 22.13; corrected during implementation)
 - `pnpm install --frozen-lockfile`
 
 ## Jobs (run in parallel)
