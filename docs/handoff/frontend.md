@@ -86,7 +86,11 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 17. 6 ESLint warnings in E2E files
 
-- **Type:** DX · **Severity:** Low · **Effort:** S · **Status:** OPEN
+- **Type:** DX · **Severity:** Low · **Effort:** S · **Status:** DONE (`cf21a50`) — removed the
+  unused `API` import from `auth`/`personalized-feed`/`responsive`/`social-actions` specs and
+  replaced the two inline `import('@playwright/test').Page` annotations in
+  `personalized-feed.spec.ts` with a top-level `type Page` import. `pnpm --filter
+  @playmorrow/web lint` → 0 warnings.
 - **Files:** spec files under `apps/web/e2e/` (unused `API` import in several;
   `import(...)` type annotations in `personalized-feed.spec.ts`, e.g.
   `import('@playwright/test').Page`)
