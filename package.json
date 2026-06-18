@@ -21,6 +21,7 @@
     "db:push": "pnpm --filter @playmorrow/database db:push",
     "db:studio": "pnpm --filter @playmorrow/database db:studio",
     "db:seed": "pnpm --filter @playmorrow/database db:seed",
+    "test:e2e": "pnpm --filter @playmorrow/web test:e2e",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
