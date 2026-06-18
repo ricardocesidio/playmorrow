@@ -29,19 +29,18 @@ Tooling: **pnpm** workspaces + **Turborepo**.
 
 | Layer       | Choice                                                        |
 | ----------- | ------------------------------------------------------------- |
-| Frontend    | Next.js + React + TypeScript                                  |
+| Frontend    | Next.js 15 + React 19 + TypeScript                           |
 | Styling     | Tailwind CSS v4 + shadcn/ui                                   |
-| Data (FE)   | TanStack Query, React Hook Form + Zod _(added per feature)_   |
-| Backend     | NestJS + TypeScript                                           |
-| ORM / DB    | Prisma + PostgreSQL                                           |
-| Auth        | JWT/session (roles: player, studio member/admin, mod, pub)    |
+| Data (FE)   | TanStack Query v5                                              |
+| Backend     | NestJS 11 + TypeScript                                        |
+| ORM / DB    | Prisma 6 + PostgreSQL                                         |
+| Auth        | JWT (argon2 password hashing)                                 |
 | API docs    | OpenAPI (Swagger) at `/docs`                                  |
-| Testing     | Vitest (unit), Playwright (E2E)                               |
-| Later       | Meilisearch/Typesense (search), Redis + BullMQ (jobs)         |
+| Testing     | Vitest (unit, 207+ tests), Playwright (E2E, 31 tests)         |
 
 ## Prerequisites
 
-- Node `>=20` (you have v24)
+- Node `>=20`
 - pnpm `>=11`
 - A Postgres database — either:
   - **Docker** (recommended for local): `docker compose up -d` (see `docker-compose.yml`)
@@ -53,26 +52,21 @@ Tooling: **pnpm** workspaces + **Turborepo**.
 # 1. Install dependencies
 pnpm install
 
-# 2. Configure environment — copies every .env.example (skips files you already have)
+# 2. Configure environment (skips existing files)
 pnpm setup:env
-#   Then edit the generated files and set at least:
-#     - DATABASE_URL   (root .env, apps/api/.env, packages/database/.env)
-#                       Docker default works out of the box; otherwise a Neon/Supabase URL.
-#     - JWT_SECRET     (apps/api/.env) — required; the API refuses to boot without it.
-#   (equivalent manual copies:)
-#     cp .env.example .env
-#     cp apps/web/.env.example apps/web/.env.local
-#     cp apps/api/.env.example apps/api/.env
-#     cp packages/database/.env.example packages/database/.env
+#   Edit the generated files and set at least:
+#     - DATABASE_URL   (in .env and packages/database/.env)
+#                       Docker default works out of the box.
+#     - JWT_SECRET     (apps/api/.env) — required; API refuses to boot without it.
 
 # 3. Start Postgres (if using Docker)
 docker compose up -d
 
-# 4. Generate Prisma client + run the first migration
+# 4. Generate Prisma client + run migration
 pnpm db:generate
-pnpm db:migrate        # creates tables from packages/database/prisma/schema.prisma
+pnpm db:migrate
 
-# 5. Run everything in dev (Turborepo runs web + api together)
+# 5. Start development (Turborepo runs web + api together)
 pnpm dev
 ```
 
@@ -85,27 +79,92 @@ pnpm dev
 
 ## Common scripts (root)
 
-| Command             | Description                                   |
-| ------------------- | --------------------------------------------- |
-| `pnpm setup:env`    | Copy all `.env.example` → `.env` (non-destructive) |
-| `pnpm dev`          | Run all apps in watch mode (Turborepo)        |
-| `pnpm build`        | Build all apps/packages                       |
-| `pnpm lint`         | Lint everything                               |
-| `pnpm typecheck`    | Type-check everything                         |
-| `pnpm test`         | Run unit tests                                |
-| `pnpm format`       | Prettier write                                |
-| `pnpm db:migrate`   | Create/apply a Prisma migration               |
-| `pnpm db:studio`    | Open Prisma Studio                            |
+| Command             | Description                                            |
+| ------------------- | ------------------------------------------------------ |
+| `pnpm setup:env`    | Copy `.env.example` → `.env` for all packages          |
+| `pnpm dev`          | Run all apps in watch mode (Turborepo)                 |
+| `pnpm build`        | Build all apps/packages                                |
+| `pnpm lint`         | Lint everything                                        |
+| `pnpm typecheck`    | Type-check everything                                  |
+| `pnpm test`         | Backend unit tests (Vitest)                            |
+| `pnpm test:e2e`     | Frontend E2E tests (Playwright, desktop + mobile)      |
+| `pnpm format`       | Prettier write                                         |
+| `pnpm db:migrate`   | Create/apply a Prisma migration                        |
+| `pnpm db:seed`      | Seed demo data (studio + game + devlog)                |
+| `pnpm db:studio`    | Open Prisma Studio                                     |
 
-## Data model (V1)
+## Frontend E2E tests
+
+```bash
+# Install browsers (first time only)
+pnpm exec playwright install chromium
+
+# Run all projects (desktop + mobile)
+pnpm --filter @playmorrow/web test:e2e
+
+# Desktop only
+pnpm --filter @playmorrow/web test:e2e --project=desktop
+
+# With browser UI
+pnpm --filter @playmorrow/web test:e2e:headed
+```
+
+Tests use **mocked API** — no database or backend required.
+
+## Features
+
+### Public
+
+| Page | Route |
+| ---- | ----- |
+| Home (feed preview + latest games) | `/` |
+| Explore games (search, pagination) | `/games` |
+| Game detail (devlogs, roadmap, media, press kit) | `/games/[slug]` |
+| Studio detail (members, games, followers) | `/studios/[slug]` |
+| Devlog detail (body, comments, reactions) | `/devlogs/[id]` |
+| Public feed | `/feed/public` |
+
+### Authenticated
+
+| Page | Route |
+| ---- | ----- |
+| Login / Register | `/login` · `/register` |
+| Dashboard | `/dashboard` |
+| Create / Edit studio | `/studios/new` · `/dashboard/studios/[slug]` |
+| Create / Edit game | `/dashboard/games/new` · `/dashboard/games/[slug]` |
+| Write / Edit devlog | `/dashboard/devlogs/new` · `/dashboard/devlogs/[id]` |
+| Manage roadmap | `/dashboard/roadmap` |
+| Manage press kit | `/dashboard/games/[slug]/press-kit` |
+| Personalized feed | `/dashboard/feed` |
+| Notifications | `/dashboard/notifications` |
+
+### Follow, comment, react
+
+- Follow/unfollow studios and games
+- Comment on devlogs (including threaded replies)
+- Edit/delete own comments
+- React to devlogs and comments (LIKE, LOVE, HYPE, INSIGHTFUL)
+
+## Data model
 
 `users` · `studios` · `studio_members` · `games` · `game_media` · `devlogs` ·
 `roadmap_items` · `press_kits` · `follows` · `comments` · `reactions` · `tags` ·
-`game_tags` · `platform_links` · `moderation_reports`
+`game_tags` · `platform_links` · `moderation_reports` · `notifications`
 
 See [`packages/database/prisma/schema.prisma`](packages/database/prisma/schema.prisma).
 
+## Known issues
+
+All 34 known issues are catalogued in [`docs/handoff/`](docs/handoff/):
+
+- [`HANDOFF.md`](docs/handoff/HANDOFF.md) — master index + progress log
+- [`backend.md`](docs/handoff/backend.md) — #1–#11
+- [`frontend.md`](docs/handoff/frontend.md) — #12–#29
+- [`devx.md`](docs/handoff/devx.md) — #30–#34
+
 ## Status
 
-🚧 **v0.1 — foundation scaffold.** Monorepo, schema, and app skeletons are in place.
-Feature work (auth, studio/game pages, devlogs, explore, moderation) comes next.
+🚧 **v0.3 — public beta.** All core CRUD + community features are implemented:
+auth, studios, games, devlogs, roadmap, press kits, follows, comments, reactions,
+notifications, personalized feed, and E2E test suite. Remaining work focuses on
+hardening, CI, and optional features (search, realtime, uploads).
