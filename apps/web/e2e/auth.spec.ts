@@ -89,9 +89,14 @@ test.describe('Authentication', () => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unreadCount: 0 }) });
     });
 
-    // Set auth and navigate
-    await page.goto('/');
-    await page.evaluate((token) => localStorage.setItem('playmorrow_token', token), MOCK_TOKEN);
+    // Seed the auth token BEFORE any document loads. Setting localStorage *after*
+    // goto('/') races React hydration: /auth/me can fire on the interim page and be
+    // aborted by the next navigation, which AuthProvider's .catch() treats as a logout,
+    // redirecting the protected feed to /login. This race is more likely under mobile
+    // emulation. (Same root cause/fix as personalized-feed.spec.ts.)
+    await page.addInitScript((token) => {
+      window.localStorage.setItem('playmorrow_token', token);
+    }, MOCK_TOKEN);
     await page.goto('/dashboard/feed');
 
     await expect(page.getByRole('heading', { name: 'Your Feed' })).toBeVisible({ timeout: 15_000 });

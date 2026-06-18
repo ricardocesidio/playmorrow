@@ -112,8 +112,13 @@ test.describe('Follow interactions', () => {
       }
     });
 
-    await page.goto('/');
-    await page.evaluate((token) => localStorage.setItem('playmorrow_token', token), MOCK_TOKEN);
+    // Seed the auth token BEFORE any document loads. Setting localStorage *after*
+    // goto('/') races React hydration: /auth/me can be aborted on navigation, AuthProvider
+    // logs out, and clicking Follow then triggers the guest → /login redirect.
+    // (Same root cause/fix as personalized-feed.spec.ts.)
+    await page.addInitScript((token) => {
+      window.localStorage.setItem('playmorrow_token', token);
+    }, MOCK_TOKEN);
     await page.goto('/studios/test-studio');
 
     // Follow
