@@ -12,6 +12,22 @@
   are **deferred** by product owner. Other feature infra (uploads storage, realtime
   transport, OAuth providers) is **undecided** — those issues are flagged `NEEDS DESIGN`.
 
+## Progress log
+
+| Date | Phase | Issues | Commit | Notes |
+|------|-------|--------|--------|-------|
+| 2026-06-18 | 0 | #10, #11, #17, #30 done; #31 partial | `cf21a50` | Quick wins. See each issue's Status line for detail. |
+
+**Phase 0 verification:** `pnpm --filter @playmorrow/web lint` → 0 warnings; `prisma validate`
+clean (config + env load); turbo "no output files" warning gone on full `pnpm test`.
+
+> ⚠️ **Baseline reality check (2026-06-18):** despite the "207 passing" note below, a full
+> `pnpm test` on the dev machine reported **5 failed · 29 passed · 188 skipped (222)**, with
+> 11 of 14 backend test files failing — consistent with **no local Postgres** (integration
+> tests can't run). This is pre-existing and unrelated to the Phase 0 edits, but it means
+> there is **no green local backend baseline** yet. Resolve before Phase 1 #14 (CI) and to
+> fully trust Phase 2 backend work. E2E (#12) is API-mocked and does not need a DB.
+
 ## Issue catalogue (by area)
 
 - [`backend.md`](./backend.md) — issues **1–11**

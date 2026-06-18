@@ -9,7 +9,12 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 30. Environment file gap (`.env` is gitignored)
 
-- **Type:** DX · **Severity:** Medium · **Effort:** S · **Status:** OPEN
+- **Type:** DX · **Severity:** Medium · **Effort:** S · **Status:** DONE (`cf21a50`) — added a
+  non-destructive `pnpm setup:env` (`cp -n` for all four `.env.example` files) and documented
+  the required vars (`DATABASE_URL`, `JWT_SECRET`) in the README "Getting started" + scripts
+  table. Verified all `.env.example` files already list every var the apps read (`PORT`,
+  `WEB_ORIGIN`, `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `NEXT_PUBLIC_API_URL`).
+  (Runtime zod validation left as a future option — the API already `getOrThrow`s `JWT_SECRET`.)
 - **Files:** `apps/api/.env` (gitignored), `.env.example`, `packages/database/.env.example`,
   `README.md`
 - **Analysis:** New devs must manually copy `.env.example` → `.env` and fill values; nothing
@@ -22,7 +27,10 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 31. Test harness whitelist disabled (mirrors prod gap)
 
-- **Type:** DX · **Severity:** Medium · **Effort:** — (resolved alongside #1) · **Status:** OPEN
+- **Type:** DX · **Severity:** Medium · **Effort:** — (resolved alongside #1) · **Status:**
+  PARTIAL (`cf21a50`) — added a loud `TODO(handoff #1)` note in `create-test-app.ts` (doc
+  comment + inline on `whitelist: false`) so the prod/test divergence isn't silently forgotten.
+  The actual re-enable/investigation remains tracked under **#1** (Phase 2).
 - **Files:** `apps/api/src/test/create-test-app.ts`
 - **Analysis:** `create-test-app.ts` uses `whitelist: false` while prod uses `whitelist: true`.
   Documented as an SWC limitation but easy to forget, and it means tests don't match prod

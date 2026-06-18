@@ -126,7 +126,11 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 10. Prisma v7 deprecation: seed config in `package.json`
 
-- **Type:** DX · **Severity:** Low · **Effort:** S · **Status:** OPEN
+- **Type:** DX · **Severity:** Low · **Effort:** S · **Status:** DONE (`cf21a50`) — added
+  `packages/database/prisma.config.ts` (`migrations.seed`), removed the `prisma` key from
+  `package.json`. A config file disables Prisma's auto `.env` loading, so it's restored via
+  Node's `process.loadEnvFile()`. Verified: `prisma validate` loads the config, finds
+  `DATABASE_URL`, no deprecation warning. (Live seeding needs a DB — not available locally.)
 - **Files:** `packages/database/package.json` (`"prisma": { "seed": ... }`),
   new `packages/database/prisma.config.ts`
 - **Analysis:** `package.json#prisma.seed` is deprecated; Prisma 7 wants `prisma.config.ts`.
@@ -137,7 +141,9 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 11. Turbo: "no output files found for task @playmorrow/api#test"
 
-- **Type:** DX · **Severity:** Low · **Effort:** S · **Status:** OPEN
+- **Type:** DX · **Severity:** Low · **Effort:** S · **Status:** DONE (`cf21a50`) — set the
+  `test` task `outputs: []` in `turbo.json` (no coverage is produced). Confirmed the
+  "no output files found" warning is gone on a full `pnpm test` run.
 - **Files:** `turbo.json`
 - **Analysis:** `tasks.test.outputs` is `["coverage/**"]`, but the api test run produces no
   `coverage/` dir (no coverage configured), so Turbo warns about missing outputs.
