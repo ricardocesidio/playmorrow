@@ -1,12 +1,18 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page, type Route } from '@playwright/test';
 import { MOCK_USER, MOCK_TOKEN } from './fixtures/mocks';
 
 const API_ORIGIN = 'http://localhost:4000';
 
 test.describe('Personalized feed', () => {
   async function setupAuth(page: Page) {
-    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60_000 });
-    await page.evaluate((token) => localStorage.setItem('playmorrow_token', token), MOCK_TOKEN);
+    // Seed the auth token BEFORE any document loads so AuthProvider hydrates
+    // already-authenticated. Setting localStorage *after* a goto() races with
+    // React hydration: /auth/me can fire on the interim page and then be aborted
+    // by the next navigation, which AuthProvider's .catch() treats as a logout —
+    // intermittently redirecting the protected feed page to /login.
+    await page.addInitScript((token) => {
+      window.localStorage.setItem('playmorrow_token', token);
+    }, MOCK_TOKEN);
   }
 
   function feedResponse(items: unknown[], total: number, page: number, pageSize: number, hasMore: boolean) {
@@ -66,8 +72,11 @@ test.describe('Personalized feed', () => {
       });
     });
     await page.goto('/dashboard/feed');
-    await expect(page.getByText('Devlog Item 0')).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText('Roadmap Item 0')).toBeVisible();
+    // Target the card title heading specifically: getByText() matches the
+    // summary paragraph too ("Summary for devlog item 0.") via case-insensitive
+    // substring, which trips strict mode.
+    await expect(page.getByRole('heading', { name: 'Devlog Item 0' })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: 'Roadmap Item 0' })).toBeVisible();
   });
 
   test('Devlogs filter sends type=devlogs', async ({ page }) => {
@@ -82,7 +91,7 @@ test.describe('Personalized feed', () => {
     await page.goto('/dashboard/feed');
     await page.getByRole('button', { name: 'Devlogs', exact: true }).click();
     expect(new URL(capturedUrl).searchParams.get('type')).toBe('devlogs');
-    await expect(page.getByText('Devlog Item 0')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Devlog Item 0' })).toBeVisible();
   });
 
   test('Roadmap filter sends type=roadmap', async ({ page }) => {
@@ -94,7 +103,7 @@ test.describe('Personalized feed', () => {
     });
     await page.goto('/dashboard/feed');
     await page.getByRole('button', { name: 'Roadmap', exact: true }).click();
-    await expect(page.getByText('Roadmap Item 0')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Roadmap Item 0' })).toBeVisible();
   });
 
   test('Empty state for no follows', async ({ page }) => {
@@ -109,22 +118,25 @@ test.describe('Personalized feed', () => {
   });
 
   test('API failure shows retry button', async ({ page }) => {
-    let callCount = 0;
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/me/feed', async (route) => {
-      callCount++;
-      if (callCount === 1) {
-        await route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'Error' }) });
-      } else {
-        await route.fulfill({
-          status: 200, contentType: 'application/json',
-          body: JSON.stringify(feedResponse([makeItem('devlog', 0)], 1, 1, 10, false)),
-        });
-      }
-    });
+    // Fail EVERY attempt — not just the first. React Query retries failed
+    // queries (default retry: 3) before surfacing an error, so a mock that
+    // succeeds on the 2nd call would auto-recover and the error state would
+    // never render. Keep failing until the user manually retries.
+    const failFeed = (route: Route) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'Error' }) });
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/me/feed', failFeed);
     await page.goto('/dashboard/feed');
     await expect(page.getByText('Could not load your feed')).toBeVisible({ timeout: 15_000 });
+
+    // Endpoint recovers; the manual "Try again" refetch should now succeed.
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/me/feed', async (route) => {
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify(feedResponse([makeItem('devlog', 0)], 1, 1, 10, false)),
+      });
+    });
     await page.getByText('Try again').click();
-    await expect(page.getByText('Devlog Item 0')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Devlog Item 0' })).toBeVisible();
   });
 
   test('Pagination: next page requests page=2', async ({ page }) => {
@@ -144,7 +156,7 @@ test.describe('Personalized feed', () => {
     });
     await page.goto('/dashboard/feed');
     // Wait for page 1 to load
-    await expect(page.getByText('Devlog Item 0')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: 'Devlog Item 0' })).toBeVisible({ timeout: 15_000 });
     // Click Next
     await page.getByRole('button', { name: 'Next' }).click();
     // Verify page=2 was requested
