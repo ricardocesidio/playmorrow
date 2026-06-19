@@ -9,6 +9,10 @@ const BASE_URL = `http://localhost:${PORT}`;
 // which is what ships. Behaviour can differ slightly between the two modes.
 const DEV_MODE = process.env.PLAYWRIGHT_DEV === '1';
 
+// Snapshot tests (#28) are excluded from the default run — they need to be
+// invoked explicitly with `--update-snapshots` to create/update baselines.
+const SNAPSHOTS_ENABLED = process.env.UPDATE_SNAPSHOTS === '1';
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
@@ -20,14 +24,30 @@ export default defineConfig({
     ['list'],
   ],
   timeout: 60_000,
-  expect: { timeout: 15_000 },
+  expect: {
+    timeout: 15_000,
+    toHaveScreenshot: {
+      maxDiffPixels: 100,
+      threshold: 0.2,
+    },
+  },
+
+  // Snapshot tests only when UPDATE_SNAPSHOTS=1 (#28)
+  testIgnore: SNAPSHOTS_ENABLED ? undefined : ['**/snapshots.spec.ts'],
 
   use: {
     baseURL: BASE_URL,
     trace: 'retain-on-failure',
-    screenshot: 'only-on-failure',
+    screenshot: SNAPSHOTS_ENABLED ? 'on' : 'only-on-failure',
     video: 'retain-on-failure',
+    // Hide platform-specific text rendering differences
+    locale: 'en-US',
+    timezoneId: 'UTC',
   },
+
+  // Platform-independent snapshot paths — strip the OS suffix so the same
+  // baseline works on both Darwin and Linux CI runners.
+  snapshotPathTemplate: './e2e/__snapshots__/{testFileName}-snapshots/{arg}-{projectName}{ext}',
 
   projects: [
     {

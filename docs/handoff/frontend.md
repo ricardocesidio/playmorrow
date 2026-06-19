@@ -168,7 +168,7 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 20. No delete UI for comments / roadmap items / notifications
 
-- **Type:** Feature/Gap · **Severity:** Low–Medium · **Effort:** M · **Status:** OPEN
+- **Type:** Feature/Gap · **Severity:** Low–Medium · **Effort:** M · **Status:** DONE
 - **Files:** `apps/web/app/devlogs/[id]/page.tsx` (comments), notifications + roadmap pages,
   `apps/api/src/comments/*` (soft-delete exists: `Comment.deletedAt`)
 - **Analysis:** Comment soft-delete exists in the API but UI is limited to author delete; no
@@ -279,7 +279,7 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 28. No Playwright snapshot / visual regression tests
 
-- **Type:** Feature/Gap · **Severity:** Low · **Effort:** M · **Status:** OPEN
+- **Type:** Feature/Gap · **Severity:** Low · **Effort:** M · **Status:** DONE
 - **Files:** `apps/web/e2e/responsive.spec.ts` (currently width-only checks)
 - **Analysis:** Responsive checks are width-only, not visual; no `toHaveScreenshot` coverage.
 - **Suggested approach:** Add `toHaveScreenshot()` baselines for key pages/breakpoints once
