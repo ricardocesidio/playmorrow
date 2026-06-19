@@ -190,7 +190,13 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 22. Auth hydration flash
 
-- **Type:** Bug · **Severity:** Medium · **Effort:** S–M · **Status:** OPEN
+- **Type:** Bug · **Severity:** Medium · **Effort:** S–M · **Status:** DONE — `nav.tsx` now
+  renders a stable skeleton (reserved button-area) while `isLoading` instead of `null`, so the
+  chrome no longer pops/shifts in once auth resolves. The `/login` and `/register` pages gate
+  on `authLoading` with a spinner before their already-authenticated redirect, so the form no
+  longer flashes for logged-in visitors. (Dashboard pages already gated; `follow-button`
+  renders identically regardless of auth, so no flash there.) Verified: 25 E2E tests
+  (auth/public/responsive/social) green.
 - **Files:** `apps/web/lib/api/auth-context.tsx` (`isLoading` starts `true`, set false after
   `/auth/me`), `apps/web/components/nav.tsx`, pages that don't gate on `isLoading`
 - **Analysis:** On load there's a brief flash of unauthenticated UI before `AuthProvider`

@@ -30,7 +30,14 @@ export function Nav() {
         </Link>
       </nav>
       <div className="flex items-center gap-2">
-        {isLoading ? null : isAuthenticated && user ? (
+        {isLoading ? (
+          // Stable placeholder while auth resolves (#22) — reserves the button
+          // area so the chrome doesn't flash/shift in once `isLoading` clears.
+          <div className="flex items-center gap-2" aria-hidden>
+            <div className="h-8 w-16 animate-pulse rounded-md bg-muted" />
+            <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
+          </div>
+        ) : isAuthenticated && user ? (
           <>
             <Link
               href="/dashboard/notifications"

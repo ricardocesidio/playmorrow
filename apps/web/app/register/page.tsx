@@ -20,7 +20,17 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  if (isAuthenticated && !authLoading) {
+  // Wait for auth to resolve before deciding what to show, so an already
+  // logged-in visitor doesn't see the form flash before the redirect (#22).
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
     router.replace('/dashboard');
     return null;
   }

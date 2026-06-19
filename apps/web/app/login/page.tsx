@@ -18,8 +18,18 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Wait for auth to resolve before deciding what to show, so an already
+  // logged-in visitor doesn't see the form flash before the redirect (#22).
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
   // If already logged in, redirect
-  if (isAuthenticated && !authLoading) {
+  if (isAuthenticated) {
     router.replace('/dashboard');
     return null;
   }
