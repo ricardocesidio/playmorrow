@@ -132,7 +132,12 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 9. Devlog/comment reactions lack `useQuery` dedup (N+1) — backend half
 
-- **Type:** Bug · **Severity:** Medium · **Effort:** M · **Status:** OPEN
+- **Type:** Bug · **Severity:** Medium · **Effort:** M · **Status:** DONE — added batch endpoint
+  `GET /api/devlogs/:devlogId/comments/reactions` (`OptionalJwtAuthGuard`). The service
+  resolves counts + viewer reactions for *all* non-deleted comments on a devlog in **two
+  queries** (`groupBy` on `[commentId, type]` + a `findMany` for the viewer), returning a map
+  keyed by comment id — independent of comment count. Three integration tests added. Frontend
+  consumes it in #24.
 - **Files:** `apps/api/src/reactions/reactions.controller.ts`,
   `apps/api/src/reactions/reactions.service.ts` (frontend half: #24)
 - **Analysis:** Reaction counts are only available per-entity via

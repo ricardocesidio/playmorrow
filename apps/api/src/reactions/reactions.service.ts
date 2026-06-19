@@ -143,6 +143,55 @@ export class ReactionsService {
     return this.buildResponse('COMMENT', commentId, userId);
   }
 
+  /**
+   * Batch reactions for every (non-deleted) comment on a devlog in two queries,
+   * keyed by commentId — replaces the per-comment N+1 fan-out (#9 / #24).
+   * Comments with no reactions are simply absent from the map.
+   */
+  async getCommentReactionsForDevlog(devlogId: string, userId?: string) {
+    const devlog = await this.prisma.devlog.findUnique({ where: { id: devlogId } });
+    if (!devlog || !devlog.isPublished) {
+      throw new NotFoundException('Devlog not found');
+    }
+
+    const [grouped, viewer] = await Promise.all([
+      this.prisma.reaction.groupBy({
+        by: ['commentId', 'type'],
+        where: { comment: { devlogId, deletedAt: null } },
+        _count: { type: true },
+      }),
+      userId
+        ? this.prisma.reaction.findMany({
+            where: { userId, comment: { devlogId, deletedAt: null } },
+            select: { commentId: true, type: true },
+          })
+        : Promise.resolve([]),
+    ]);
+
+    const comments: Record<
+      string,
+      { counts: Record<string, number>; viewerReactions: string[] }
+    > = {};
+    const entryFor = (commentId: string) => {
+      comments[commentId] ??= {
+        counts: { LIKE: 0, LOVE: 0, HYPE: 0, INSIGHTFUL: 0 },
+        viewerReactions: [],
+      };
+      return comments[commentId];
+    };
+
+    for (const g of grouped) {
+      if (!g.commentId) continue;
+      entryFor(g.commentId).counts[g.type] = g._count.type;
+    }
+    for (const v of viewer) {
+      if (!v.commentId) continue;
+      entryFor(v.commentId).viewerReactions.push(v.type);
+    }
+
+    return { devlogId, comments };
+  }
+
   // ── SHARED ───────────────────────────────────────────────────────────
 
   private async buildResponse(
