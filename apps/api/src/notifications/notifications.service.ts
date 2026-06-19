@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '@playmorrow/database';
+import { Subject } from 'rxjs';
 
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -13,12 +14,21 @@ export interface CreateNotificationInput {
   targetId?: string;
 }
 
+/** Event emitted when a new notification is created (#21 SSE stream). */
+export interface NotificationEvent {
+  recipientId: string;
+  unreadCount: number;
+}
+
 const NOTIFICATION_INCLUDE = {
   actor: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
 } satisfies Prisma.NotificationInclude;
 
 @Injectable()
 export class NotificationsService {
+  /** RxJS Subject that emits events for the SSE stream. */
+  readonly events$ = new Subject<NotificationEvent>();
+
   constructor(private readonly prisma: PrismaService) {}
 
   async create(input: CreateNotificationInput) {
@@ -65,6 +75,16 @@ export class NotificationsService {
         targetId: i.targetId,
       })),
     });
+
+    // Emit SSE events for each unique recipient so the stream pushes
+    // the updated unread count in real-time (#21).
+    const uniqueRecipients = new Set(filtered.map((i) => i.recipientId));
+    for (const recipientId of uniqueRecipients) {
+      const count = await this.prisma.notification.count({
+        where: { recipientId, readAt: null },
+      });
+      this.events$.next({ recipientId, unreadCount: count });
+    }
   }
 
   async findByRecipientId(

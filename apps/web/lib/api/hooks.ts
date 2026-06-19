@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers } from './client';
 
@@ -331,11 +332,38 @@ export function useNotifications(status: string, page: number, pageSize: number,
 }
 
 export function useUnreadNotificationCount(token?: string) {
+  const qc = useQueryClient();
+  const queryKey = ['unreadNotificationCount'];
+
+  // Subscribe to SSE stream for real-time updates (#21)
+  useEffect(() => {
+    if (!token) return;
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+    const eventSource = new EventSource(`${apiUrl}/me/notifications/stream?token=${token}`);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (typeof data.unreadCount === 'number') {
+          qc.setQueryData(queryKey, { unreadCount: data.unreadCount });
+        }
+      } catch { /* ignore malformed messages */ }
+    };
+
+    eventSource.onerror = () => {
+      // SSE connection failed — polling will handle updates
+      eventSource.close();
+    };
+
+    return () => eventSource.close();
+  }, [token, qc]);
+
   return useQuery({
-    queryKey: ['unreadNotificationCount'],
+    queryKey,
     queryFn: () => api.get<{ unreadCount: number }>('/me/notifications/unread-count', token),
     enabled: !!token,
-    refetchInterval: 60_000, // poll every 60s
+    refetchInterval: 60_000, // fallback polling
   });
 }
 

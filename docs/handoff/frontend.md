@@ -179,7 +179,7 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 21. Notification badges don't update in real-time
 
-- **Type:** Feature · **Severity:** Low–Medium · **Effort:** M–L · `NEEDS DESIGN` · **Status:** OPEN
+- **Type:** Feature · **Severity:** Low–Medium · **Effort:** M–L · **Status:** DONE
 - **Files:** `apps/web/lib/api/hooks.ts` (`useUnreadNotificationCount`, polls 60s),
   `apps/web/components/nav.tsx`, backend (SSE/WS endpoint, new)
 - **Analysis:** `useUnreadNotificationCount` polls every 60s; new notifications appear only on

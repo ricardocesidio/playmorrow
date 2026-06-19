@@ -29,6 +29,7 @@
 | 2026-06-19 | 2 | #18 done | `e304064` | Image uploads MVP. Backend `POST /api/upload` (multer, local disk, auth-gated, 10 MB limit, image-only). Frontend `<ImageUpload>` component with file picker + preview; wired into studio edit (logo/banner), game edit (cover/banner), devlog edit (cover). Served via Express static at `/api/uploads/*`. |
 | 2026-06-19 | 2 | #2 done | `2c1fec2` | Refresh token rotation. Backend: `RefreshToken` Prisma model, sha256-hashed tokens with 30-day expiry, rotation on each refresh, revocation on logout. Access token shortened to 15m (from 7d). `POST /auth/refresh` + `POST /auth/logout`. Frontend: silent refresh on 401, dual-token storage, logout revokes server-side. |
 | 2026-06-19 | 2 | #6 done | `bb7c779` | OAuth login with Google + GitHub. Backend: passport-google-oauth20 + passport-github2 strategies, OAuthService links by email (existing user → update avatar; new user → create). Frontend: OAuth login buttons on /login, /oauth/callback page stores tokens and redirects to dashboard. Config vars added to .env.example. |
+| 2026-06-19 | 2 | #21 done | `0a52655` | Real-time notifications via SSE. Backend: GET /me/notifications/stream pushes unread count on notification creation (RxJS Subject + filter). Frontend: EventSource subscription updates TanStack Query cache in real-time; polling kept as fallback (60s). Works alongside existing poll — first SSE message arrives immediately, no delay. |
 | 2026-06-19 | 2 | #3 done | `7b89976` | Rate limiting via `@nestjs/throttler`: global 60/min/IP guard + tighter `@Throttle` overrides (login 10, register 5, comment 20, reaction 30 per min); health `@SkipThrottle()`. New spec asserts login → 429. Backend suite **226/226** green; lint clean. |
 | 2026-06-19 | 1 | #16 done | `6d06746` | Dev-mode E2E path: `PLAYWRIGHT_DEV=1` serves with `next dev` (no production build) via `test:e2e:dev`; CI keeps `next start`. README documents both + the `NEXT_PUBLIC_*` inlining caveat. Verified public spec 8/8 in dev mode. |
 | 2026-06-19 | polish | #22 done | `02a97c5` | Auth hydration flash: nav renders a stable skeleton while `isLoading` (no pop-in/shift); `/login` + `/register` gate on `authLoading` before redirect so the form doesn't flash for logged-in visitors. 25 E2E tests green. |
@@ -87,7 +88,7 @@ polish, then features. Within a phase, items are independent unless noted.
 | **2** | Backend correctness & security | #3, #7, #8 | Cheap, high-value hardening + schema integrity. |
 | **3** | Performance | #9 / #24 | One batch endpoint kills the comment-reaction N+1. |
 | **4** | UX polish | #22, #23, #27, #26 | Small, user-visible fixes. |
-| **5** | Features (`NEEDS DESIGN`) | #19, #20, #21, #25, #28, #32, #33, #34, (#4, #5 deferred) | Each needs its own design pass before coding. |
+| **5** | Features (`NEEDS DESIGN`) | #19, #20, #25, #28, #32, #33, #34, (#4, #5 deferred) | Each needs its own design pass before coding. |
 
 **Concrete first step:** open [`frontend.md`](./frontend.md) → issue **#12**, follow the
 "Reproduce" steps, and capture the *live* failure before touching code.
