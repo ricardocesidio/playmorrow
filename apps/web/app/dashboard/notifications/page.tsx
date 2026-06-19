@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Bell, Check, CheckCheck, EyeOff } from 'lucide-react';
+import { ArrowLeft, Bell, Check, CheckCheck, EyeOff, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
@@ -11,6 +11,7 @@ import {
   useNotifications,
   useMarkNotificationRead,
   useMarkAllNotificationsRead,
+  useDeleteNotification,
 } from '@/lib/api/hooks';
 const TABS = [
   { key: 'all', label: 'All' },
@@ -26,6 +27,7 @@ export default function NotificationsPage() {
   const { data, isLoading, error } = useNotifications(status, page, 20, token ?? undefined);
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
+  const dismiss = useDeleteNotification();
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.replace('/login');
@@ -43,6 +45,13 @@ export default function NotificationsPage() {
   const handleMarkAllRead = async () => {
     if (!token) return;
     try { await markAllRead.mutateAsync(token); } catch {
+      // ignore
+    }
+  };
+
+  const handleDismiss = async (id: string) => {
+    if (!token) return;
+    try { await dismiss.mutateAsync({ id, token }); } catch {
       // ignore
     }
   };
@@ -186,6 +195,14 @@ export default function NotificationsPage() {
                       <EyeOff className="size-4" />
                     </span>
                   )}
+                  <button
+                    onClick={() => handleDismiss(n.id)}
+                    disabled={dismiss.isPending}
+                    className="rounded p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                    title="Dismiss"
+                  >
+                    <X className="size-4" />
+                  </button>
                 </div>
               </div>
             </div>

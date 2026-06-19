@@ -227,6 +227,29 @@ export class DevlogsService {
     return this.toResponse(updated);
   }
 
+  async remove(userId: string, id: string) {
+    const devlog = await this.prisma.devlog.findUnique({
+      where: { id },
+      include: { game: { include: { studio: { include: { members: true } } } } },
+    });
+
+    if (!devlog) {
+      throw new NotFoundException('Devlog not found');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    assertStudioWriteAccess({ id: userId, role: user.role }, devlog.game.studio.members);
+
+    // onDelete: Cascade removes comments and reactions.
+    await this.prisma.devlog.delete({ where: { id } });
+
+    return { success: true };
+  }
+
   private toResponse(devlog: {
     id: string;
     title: string;

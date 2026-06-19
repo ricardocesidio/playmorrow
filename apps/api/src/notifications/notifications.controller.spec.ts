@@ -313,6 +313,47 @@ describe('NotificationsController (e2e)', () => {
     expect(unreadRes.body.unreadCount).toBe(0);
   });
 
+  // ── DISMISS / DELETE (#20) ────────────────────────────────────────────
+
+  it('DELETE /api/notifications/:id rejects unauthenticated', async () => {
+    const res = await request(httpServer).delete('/api/notifications/whatever');
+    expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+  });
+
+  it("DELETE /api/notifications/:id won't delete another user's notification (404)", async () => {
+    const owned = await request(httpServer)
+      .get('/api/me/notifications')
+      .set('Authorization', `Bearer ${ownerToken}`);
+    const someId = owned.body.items[0]?.id;
+    expect(someId).toBeDefined();
+
+    // followerToken does not own the owner's notification.
+    const res = await request(httpServer)
+      .delete(`/api/notifications/${someId}`)
+      .set('Authorization', `Bearer ${followerToken}`);
+    expect(res.status).toBe(HttpStatus.NOT_FOUND);
+  });
+
+  it('DELETE /api/notifications/:id dismisses the owner\'s notification', async () => {
+    const before = await request(httpServer)
+      .get('/api/me/notifications')
+      .set('Authorization', `Bearer ${ownerToken}`);
+    const id = before.body.items[0]?.id;
+    expect(id).toBeDefined();
+    const beforeTotal = before.body.total;
+
+    const del = await request(httpServer)
+      .delete(`/api/notifications/${id}`)
+      .set('Authorization', `Bearer ${ownerToken}`);
+    expect(del.status).toBe(HttpStatus.OK);
+
+    const after = await request(httpServer)
+      .get('/api/me/notifications')
+      .set('Authorization', `Bearer ${ownerToken}`);
+    expect(after.body.total).toBe(beforeTotal - 1);
+    expect(after.body.items.find((n: { id: string }) => n.id === id)).toBeUndefined();
+  });
+
   // ── SECURITY ──────────────────────────────────────────────────────────
 
   it('Responses never expose passwordHash', async () => {

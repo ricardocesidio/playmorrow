@@ -120,6 +120,25 @@ export class StudiosService {
     return this.toResponse(updated);
   }
 
+  async remove(userId: string, slug: string) {
+    const studio = await this.prisma.studio.findUnique({
+      where: { slug: slug.toLowerCase() },
+      include: { members: true },
+    });
+
+    if (!studio) {
+      throw new NotFoundException('Studio not found');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    assertStudioWriteAccess({ id: userId, role: user?.role }, studio.members);
+
+    // Schema uses onDelete: Cascade, so games/devlogs/etc. are removed with it.
+    await this.prisma.studio.delete({ where: { id: studio.id } });
+
+    return { success: true };
+  }
+
   async findMyStudios(userId: string) {
     const memberships = await this.prisma.studioMember.findMany({
       where: { userId },

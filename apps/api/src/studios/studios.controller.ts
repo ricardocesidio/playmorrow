@@ -2,7 +2,10 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -89,5 +92,14 @@ export class StudiosController {
     @Body() dto: UpdateStudioDto,
   ) {
     return this.studiosService.update(user.id, slug, dto);
+  }
+
+  @Delete(':slug')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Studio deleted (cascades to games, devlogs, etc.).' })
+  async remove(@CurrentUser() user: { id: string }, @Param('slug') slug: string) {
+    return this.studiosService.remove(user.id, slug);
   }
 }

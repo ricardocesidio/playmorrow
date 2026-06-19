@@ -1,7 +1,10 @@
 import {
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -62,5 +65,18 @@ export class NotificationsController {
   @ApiOkResponse({ description: 'All notifications marked as read.' })
   async markAllAsRead(@CurrentUser() user: { id: string }) {
     return this.notificationsService.markAllAsRead(user.id);
+  }
+
+  @Delete('notifications/:id')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Notification dismissed (deleted).' })
+  async remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
+    const result = await this.notificationsService.remove(id, user.id);
+    if (!result) {
+      throw new NotFoundException('Notification not found');
+    }
+    return result;
   }
 }

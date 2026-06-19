@@ -261,6 +261,29 @@ export class GamesService {
     return this.toResponse(updated);
   }
 
+  async remove(userId: string, slug: string) {
+    const game = await this.prisma.game.findUnique({
+      where: { slug: slug.toLowerCase() },
+      include: { studio: { include: { members: true } } },
+    });
+
+    if (!game) {
+      throw new NotFoundException('Game not found');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    assertStudioWriteAccess({ id: userId, role: user.role }, game.studio.members);
+
+    // onDelete: Cascade removes devlogs, media, platform links, etc.
+    await this.prisma.game.delete({ where: { id: game.id } });
+
+    return { success: true };
+  }
+
   private toResponse(game: {
     id: string;
     title: string;

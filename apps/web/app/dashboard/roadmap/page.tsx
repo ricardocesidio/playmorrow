@@ -3,11 +3,11 @@
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Pencil, ArrowUp, ArrowDown, Milestone, GripVertical } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, ArrowUp, ArrowDown, Milestone, GripVertical } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
-import { useMyStudios, useGameRoadmap, useCreateRoadmapItem, useUpdateRoadmapItem, useReorderRoadmapItems } from '@/lib/api/hooks';
+import { useMyStudios, useGameRoadmap, useCreateRoadmapItem, useUpdateRoadmapItem, useDeleteRoadmapItem, useReorderRoadmapItems } from '@/lib/api/hooks';
 import type { Game, RoadmapItem } from '@/lib/api/client';
 import { ApiError } from '@/lib/api/client';
 
@@ -40,6 +40,7 @@ function RoadmapContent() {
   const { data: roadmap, isLoading: roadmapLoading } = useGameRoadmap(gameSlug);
   const createItem = useCreateRoadmapItem();
   const updateItem = useUpdateRoadmapItem();
+  const deleteItem = useDeleteRoadmapItem();
   const reorderItems = useReorderRoadmapItems();
 
   // Form state
@@ -264,6 +265,15 @@ function RoadmapContent() {
                         <button onClick={() => startEdit(item)}
                           className="rounded p-1 text-muted-foreground hover:text-foreground" title="Edit">
                           <Pencil className="size-3.5" />
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!token || !confirm(`Delete roadmap item "${item.title}"?`)) return;
+                            try { await deleteItem.mutateAsync({ id: item.id, token }); } catch { /* ignore */ }
+                          }}
+                          disabled={deleteItem.isPending}
+                          className="rounded p-1 text-muted-foreground hover:text-destructive disabled:opacity-30" title="Delete">
+                          <Trash2 className="size-3.5" />
                         </button>
                       </div>
                     </div>

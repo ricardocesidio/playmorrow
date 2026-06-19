@@ -218,6 +218,19 @@ export class NotificationsService {
     return { success: true };
   }
 
+  /** Dismiss (delete) a notification the user owns. Returns null if not theirs. */
+  async remove(notificationId: string, userId: string) {
+    const notification = await this.prisma.notification.findUnique({
+      where: { id: notificationId },
+    });
+    if (!notification || notification.recipientId !== userId) {
+      return null;
+    }
+
+    await this.prisma.notification.delete({ where: { id: notificationId } });
+    return { success: true };
+  }
+
   // ── Event helpers called from other services ──────────────────────────
 
   /** Get studio OWNER/ADMIN member IDs directly from a studio (excluding the actor). */

@@ -239,6 +239,17 @@ export function useUpdateRoadmapItem() {
   });
 }
 
+export function useDeleteRoadmapItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { id: string; token: string }) =>
+      api.delete(`/roadmap-items/${data.id}`, data.token),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['gameRoadmap'] });
+    },
+  });
+}
+
 export function useReorderRoadmapItems() {
   const qc = useQueryClient();
   return useMutation({
@@ -345,6 +356,18 @@ export function useMarkAllNotificationsRead() {
   return useMutation({
     mutationFn: (token: string) =>
       api.patch('/me/notifications/read-all', undefined, token),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['unreadNotificationCount'] });
+    },
+  });
+}
+
+export function useDeleteNotification() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { id: string; token: string }) =>
+      api.delete(`/notifications/${data.id}`, data.token),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['notifications'] });
       qc.invalidateQueries({ queryKey: ['unreadNotificationCount'] });
@@ -475,6 +498,20 @@ export function useUpdateStudio() {
   });
 }
 
+export function useDeleteStudio() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; token: string }) =>
+      api.delete(`/studios/${data.slug}`, data.token),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['myStudios'] });
+      qc.invalidateQueries({ queryKey: ['studios'] });
+      qc.invalidateQueries({ queryKey: ['myGames'] });
+      qc.invalidateQueries({ queryKey: ['myDevlogs'] });
+    },
+  });
+}
+
 // ── My Devlogs ──────────────────────────────────────────────────────────
 
 export function useMyDevlogs(token?: string) {
@@ -531,6 +568,19 @@ export function useUpdateDevlog() {
       qc.invalidateQueries({ queryKey: ['myDevlogs'] });
       qc.invalidateQueries({ queryKey: ['gameDevlogs'] });
       qc.invalidateQueries({ queryKey: ['devlog'] });
+    },
+  });
+}
+
+export function useDeleteDevlog() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { id: string; token: string }) =>
+      api.delete(`/devlogs/${data.id}`, data.token),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['myDevlogs'] });
+      qc.invalidateQueries({ queryKey: ['gameDevlogs'] });
+      qc.invalidateQueries({ queryKey: ['devlogs'] });
     },
   });
 }
@@ -596,6 +646,19 @@ export function useUpdateGame() {
       qc.invalidateQueries({ queryKey: ['myGames'] });
       qc.invalidateQueries({ queryKey: ['games'] });
       qc.invalidateQueries({ queryKey: ['game'] });
+    },
+  });
+}
+
+export function useDeleteGame() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; token: string }) =>
+      api.delete(`/games/${data.slug}`, data.token),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['myGames'] });
+      qc.invalidateQueries({ queryKey: ['games'] });
+      qc.invalidateQueries({ queryKey: ['myDevlogs'] });
     },
   });
 }

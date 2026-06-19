@@ -2,7 +2,10 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -87,5 +90,14 @@ export class GamesController {
     @Body() dto: UpdateGameDto,
   ) {
     return this.gamesService.update(user.id, slug, dto);
+  }
+
+  @Delete('games/:slug')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Game deleted (cascades to devlogs, media, etc.).' })
+  async remove(@CurrentUser() user: { id: string }, @Param('slug') slug: string) {
+    return this.gamesService.remove(user.id, slug);
   }
 }
