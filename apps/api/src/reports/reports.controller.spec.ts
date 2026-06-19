@@ -256,6 +256,34 @@ describe('ReportsController (e2e)', () => {
     expect(res.body.status).toBe('RESOLVED');
   });
 
+  it('PATCH /api/admin/reports/:id persists a resolutionNote (#8)', async () => {
+    const res = await request(httpServer)
+      .patch(`/api/admin/reports/${reportId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ status: 'DISMISSED', resolutionNote: 'Reviewed — not a violation.' });
+
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.status).toBe('DISMISSED');
+    expect(res.body.resolutionNote).toBe('Reviewed — not a violation.');
+
+    // Persisted and surfaced on the detail endpoint.
+    const detail = await request(httpServer)
+      .get(`/api/admin/reports/${reportId}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(detail.body.resolutionNote).toBe('Reviewed — not a violation.');
+  });
+
+  it('PATCH /api/admin/reports/:id clears resolutionNote when reopened (#8)', async () => {
+    const res = await request(httpServer)
+      .patch(`/api/admin/reports/${reportId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ status: 'OPEN' });
+
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.status).toBe('OPEN');
+    expect(res.body.resolutionNote).toBeNull();
+  });
+
   it('PATCH /api/admin/reports/:missing returns 404', async () => {
     const res = await request(httpServer)
       .patch('/api/admin/reports/nonexistent')

@@ -87,6 +87,17 @@ enum ReportStatus {
   DISMISSED
 }
 
+enum ReportReason {
+  SPAM
+  HARASSMENT
+  HATE
+  SEXUAL_CONTENT
+  VIOLENCE
+  COPYRIGHT
+  MISLEADING
+  OTHER
+}
+
 enum PlatformKind {
   STEAM
   ITCH
@@ -417,12 +428,13 @@ model ModerationReport {
   reporterId   String
   targetType   ReportTargetType
   /// ID of the reported entity (polymorphic; resolved in app logic).
-  targetId     String
-  reason       String
-  details      String?
-  status       ReportStatus     @default(OPEN)
-  resolvedById String?
-  resolvedAt   DateTime?
+  targetId       String
+  reason         ReportReason
+  details        String?
+  status         ReportStatus   @default(OPEN)
+  resolutionNote String?
+  resolvedById   String?
+  resolvedAt     DateTime?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 

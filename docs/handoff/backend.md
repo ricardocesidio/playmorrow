@@ -92,7 +92,12 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 7. Report `reason` is a free string, not an enum
 
-- **Type:** Bug · **Severity:** Medium · **Effort:** S · **Status:** OPEN
+- **Type:** Bug · **Severity:** Medium · **Effort:** S · **Status:** DONE — added Prisma
+  `enum ReportReason` and changed `ModerationReport.reason` to it. Migration converts the
+  column in place with a `USING` cast (preserves existing rows; Prisma's default drop/recreate
+  was hand-edited out). `VALID_REPORT_REASONS` is now guarded by a compile-time
+  `AssertExact` check against the enum (proven to fail the build on drift), so DB and DTO are
+  a single source of truth.
 - **Files:** `packages/database/prisma/schema.prisma` (`ModerationReport.reason`),
   `apps/api/src/reports/dto/create-report.dto.ts` (`VALID_REPORT_REASONS`),
   `apps/api/src/reports/reports.service.ts`
@@ -106,7 +111,11 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 8. No `resolutionNote` on reports
 
-- **Type:** Limitation · **Severity:** Low · **Effort:** S · **Status:** OPEN
+- **Type:** Limitation · **Severity:** Low · **Effort:** S · **Status:** DONE — added
+  `resolutionNote String?` to `ModerationReport` (same migration as #7). `UpdateReportDto`
+  accepts an optional `resolutionNote` (≤2000 chars); the service persists it on resolve/
+  dismiss and clears it on reopen (status → OPEN). It's returned in `findAll`/detail/update
+  responses. Two integration tests added (persist + clear-on-reopen).
 - **Files:** `packages/database/prisma/schema.prisma` (`ModerationReport`),
   `apps/api/src/reports/dto/update-report.dto.ts`, `reports.service.ts`
 - **Analysis:** `ModerationReport` has `status`, `resolvedById`, `resolvedAt`, timestamps —
