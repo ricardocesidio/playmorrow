@@ -161,6 +161,17 @@ describe('ReactionsController (e2e)', () => {
     expect(res.status).toBe(HttpStatus.BAD_REQUEST);
   });
 
+  // Regression guard for handoff #1: the test harness must mirror prod's
+  // ValidationPipe (whitelist + forbidNonWhitelisted). An unknown body prop
+  // must be rejected, not silently stripped/ignored.
+  it('POST /api/devlogs/:id/reactions rejects unknown body props with 400', async () => {
+    const res = await request(httpServer)
+      .post(`/api/devlogs/${devlogId}/reactions`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ type: 'LIKE', notARealField: 'nope' });
+    expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+  });
+
   it('POST /api/devlogs/:missing/reactions returns 404', async () => {
     const res = await request(httpServer)
       .post('/api/devlogs/nonexistent-id/reactions')

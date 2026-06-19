@@ -9,7 +9,12 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 1. ValidationPipe not enforced in E2E (whitelist disabled in tests)
 
-- **Type:** Bug · **Severity:** High · **Effort:** M · **Status:** OPEN
+- **Type:** Bug · **Severity:** High · **Effort:** M · **Status:** DONE — the "SWC can't
+  emit metadata" claim was confirmed stale. Re-enabled `whitelist: true` +
+  `forbidNonWhitelisted: true` in `create-test-app.ts` (now mirrors prod); full backend
+  suite green **223/223**. Added a regression test in `reactions.controller.spec.ts`
+  (unknown body prop → 400) and verified it fails under the old `whitelist: false` config.
+  Rewrote the harness doc comment to reflect reality. Closes #31.
 - **Files:** `apps/api/src/main.ts`, `apps/api/src/test/create-test-app.ts`,
   `apps/api/vitest.config.ts`
 - **Analysis:** Production (`main.ts`) runs `ValidationPipe({ whitelist: true,
