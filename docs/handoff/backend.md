@@ -86,7 +86,7 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 6. No OAuth
 
-- **Type:** Feature · **Severity:** Low–Medium · **Effort:** L · `NEEDS DESIGN` · **Status:** OPEN
+- **Type:** Feature · **Severity:** Low–Medium · **Effort:** L · **Status:** DONE
 - **Files:** `apps/api/src/auth/*`, `User.passwordHash` is already nullable ("Null for
   OAuth-only accounts")
 - **Analysis:** Email/password only. Schema already anticipates OAuth (nullable
