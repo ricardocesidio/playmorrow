@@ -25,7 +25,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/45 bg-background/88 backdrop-blur-md">
-      <div className="mx-auto grid h-20 max-w-[1500px] grid-cols-[auto_1fr_auto] items-center gap-4 px-5 sm:px-8 lg:px-10">
+      <div className="mx-auto grid h-16 max-w-[1500px] grid-cols-[auto_1fr_auto] items-center gap-4 px-5 sm:px-8 lg:px-10">
         <HudLinkLogo />
 
         <nav className="hidden items-center justify-center gap-12 md:flex" aria-label="Main navigation">

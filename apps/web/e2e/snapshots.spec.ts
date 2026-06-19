@@ -17,7 +17,7 @@ test.describe('Visual snapshots', () => {
       test.slow();
       await page.setViewportSize({ width, height });
       await page.goto('/', { waitUntil: 'networkidle' });
-      await expect(page.getByRole('heading', { name: /Discover/i })).toBeVisible();
+      await expect(page.getByRole('heading', { name: /Follow games/i })).toBeVisible();
       await expect(page).toHaveScreenshot(`home-${viewport}.png`);
     });
 
