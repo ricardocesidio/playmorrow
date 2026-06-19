@@ -40,3 +40,4 @@ pnpm-debug.log*
 
 # misc
 .cache/
+storybook-static

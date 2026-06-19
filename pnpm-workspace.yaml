@@ -19,3 +19,4 @@ allowBuilds:
   esbuild: true
   prisma: true
   sharp: true
+  core-js-pure: true
