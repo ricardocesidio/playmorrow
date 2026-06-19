@@ -37,7 +37,7 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 2. No refresh tokens
 
-- **Type:** Feature · **Severity:** Medium · **Effort:** L · `NEEDS DESIGN` · **Status:** OPEN
+- **Type:** Feature · **Severity:** Medium · **Effort:** L · **Status:** DONE
 - **Files:** `apps/api/src/auth/*` (`auth.service.ts`, `auth.controller.ts`,
   `strategies/jwt.strategy.ts`), `apps/web/lib/api/auth-context.tsx`
 - **Analysis:** Single JWT, 7-day expiry, no refresh flow. Expiry = forced logout. `User`

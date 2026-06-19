@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 import { api } from './client';
 
 const TOKEN_KEY = 'playmorrow_token';
+const REFRESH_KEY = 'playmorrow_refresh';
 
 export interface AuthUser {
   id: string;
@@ -11,6 +12,12 @@ export interface AuthUser {
   username: string;
   displayName: string;
   role: string;
+}
+
+interface AuthResult {
+  user: AuthUser;
+  accessToken: string;
+  refreshToken: string;
 }
 
 interface AuthContextValue {
@@ -41,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .then(setUser)
         .catch(() => {
           localStorage.removeItem(TOKEN_KEY);
+          localStorage.removeItem(REFRESH_KEY);
           setToken(null);
         })
         .finally(() => setIsLoading(false));
@@ -49,30 +57,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const storeSession = useCallback((newToken: string, newUser: AuthUser) => {
+  const storeSession = useCallback((newToken: string, refreshToken: string, newUser: AuthUser) => {
     localStorage.setItem(TOKEN_KEY, newToken);
+    localStorage.setItem(REFRESH_KEY, refreshToken);
     setToken(newToken);
     setUser(newUser);
   }, []);
 
   const login = useCallback(async (emailOrUsername: string, password: string) => {
-    const res = await api.post<{ user: AuthUser; accessToken: string }>('/auth/login', {
-      emailOrUsername,
-      password,
-    });
-    storeSession(res.accessToken, res.user);
+    const res = await api.post<AuthResult>('/auth/login', { emailOrUsername, password });
+    storeSession(res.accessToken, res.refreshToken, res.user);
   }, [storeSession]);
 
   const register = useCallback(
     async (data: { email: string; username: string; displayName: string; password: string }) => {
-      const res = await api.post<{ user: AuthUser; accessToken: string }>('/auth/register', data);
-      storeSession(res.accessToken, res.user);
+      const res = await api.post<AuthResult>('/auth/register', data);
+      storeSession(res.accessToken, res.refreshToken, res.user);
     },
     [storeSession],
   );
 
   const logout = useCallback(() => {
+    const refresh = localStorage.getItem(REFRESH_KEY);
+    if (refresh) {
+      api.post('/auth/logout', { refreshToken: refresh }).catch(() => {});
+    }
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_KEY);
     setToken(null);
     setUser(null);
   }, []);

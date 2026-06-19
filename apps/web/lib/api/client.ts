@@ -16,6 +16,32 @@ export class ApiError extends Error {
   }
 }
 
+const REFRESH_KEY = 'playmorrow_refresh';
+let refreshPromise: Promise<boolean> | null = null;
+
+async function doRefresh(): Promise<boolean> {
+  const refreshToken = localStorage.getItem(REFRESH_KEY);
+  if (!refreshToken) return false;
+  try {
+    const res = await fetch(`${BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!res.ok) {
+      localStorage.removeItem(REFRESH_KEY);
+      localStorage.removeItem('playmorrow_token');
+      return false;
+    }
+    const data = await res.json();
+    localStorage.setItem('playmorrow_token', data.accessToken);
+    localStorage.setItem(REFRESH_KEY, data.refreshToken);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Real HTTP client — makes actual fetch requests to the backend. */
 function createRealClient() {
   async function request<T>(
@@ -32,6 +58,21 @@ function createRealClient() {
       headers,
       body: body ? JSON.stringify(body) : undefined,
     });
+
+    if (res.status === 401 && path !== '/auth/refresh' && token) {
+      // Attempt silent refresh once, then retry
+      refreshPromise = refreshPromise ?? doRefresh();
+      const refreshed = await refreshPromise;
+      refreshPromise = null;
+      if (refreshed) {
+        const newToken = localStorage.getItem('playmorrow_token');
+        headers['Authorization'] = `Bearer ${newToken}`;
+        const retry = await fetch(`${BASE_URL}${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined });
+        if (retry.ok) return retry.json() as Promise<T>;
+        const errBody = await retry.json().catch(() => ({ message: retry.statusText }));
+        throw new ApiError(retry.status, errBody);
+      }
+    }
 
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({ message: res.statusText }));
