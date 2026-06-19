@@ -284,3 +284,38 @@ export interface StudioWithMembers extends Studio {
     user: { id: string; username: string; displayName: string; avatarUrl: string | null };
   }[];
 }
+
+export interface SearchResultGame {
+  id: string;
+  title: string;
+  slug: string;
+  coverUrl: string | null;
+  tagline: string | null;
+  studio: { id: string; name: string; slug: string };
+}
+
+export interface SearchResultStudio {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl: string | null;
+  tagline: string | null;
+}
+
+export interface SearchResultDevlog {
+  id: string;
+  title: string;
+  slug: string;
+  coverUrl: string | null;
+  publishedAt: string | null;
+  game: { id: string; title: string; slug: string };
+}
+
+export interface SearchResponse {
+  games: { items: SearchResultGame[]; total: number };
+  studios: { items: SearchResultStudio[]; total: number };
+  devlogs: { items: SearchResultDevlog[]; total: number };
+  query: string;
+  page: number;
+  pageSize: number;
+}

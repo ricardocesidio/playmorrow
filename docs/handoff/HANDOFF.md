@@ -41,6 +41,7 @@
 | 2026-06-19 | post | Dark mode toggle | current | Manual theme toggle (Sun/Moon icon in Nav). Replaced hardcoded className='dark' with next-themes ThemeProvider. MarkdownEditor respects current theme. |
 | 2026-06-19 | post | Toast notifications | current | Installed sonner and added <Toaster> to Providers. Added toast.success/error to follow/unfollow, delete studio/game/devlog mutations. |
 | 2026-06-19 | post | Infinite scroll | current | Replaced Previous/Next pagination on feed and games pages with IntersectionObserver-based infinite scroll. New hooks: useInfinitePersonalFeed, useInfiniteGames, useIntersectionObserver. |
+| 2026-06-19 | post | Global search | current | Backend: GET /api/search?q= searches games/studios/devlogs in parallel. Frontend: /search page with debounced search (300ms), grouped results by type, search icon in Nav. |
 
 **Phase 0 verification:** `pnpm --filter @playmorrow/web lint` → 0 warnings; `prisma validate`
 clean (config + env load); turbo "no output files" warning gone on full `pnpm test`.
