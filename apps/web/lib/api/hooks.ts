@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers } from './client';
 
 // ── Feed ────────────────────────────────────────────────────────────────
@@ -436,7 +437,9 @@ export function useFollowStudio() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['studioFollow'] });
       qc.invalidateQueries({ queryKey: ['myFollows'] });
+      toast.success(`Following studio`);
     },
+    onError: () => toast.error('Failed to follow studio'),
   });
 }
 
@@ -448,7 +451,9 @@ export function useUnfollowStudio() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['studioFollow'] });
       qc.invalidateQueries({ queryKey: ['myFollows'] });
+      toast.success('Unfollowed studio');
     },
+    onError: () => toast.error('Failed to unfollow studio'),
   });
 }
 
@@ -460,7 +465,9 @@ export function useFollowGame() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['gameFollow'] });
       qc.invalidateQueries({ queryKey: ['myFollows'] });
+      toast.success('Following game');
     },
+    onError: () => toast.error('Failed to follow game'),
   });
 }
 
@@ -472,7 +479,9 @@ export function useUnfollowGame() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['gameFollow'] });
       qc.invalidateQueries({ queryKey: ['myFollows'] });
+      toast.success('Unfollowed game');
     },
+    onError: () => toast.error('Failed to unfollow game'),
   });
 }
 
@@ -536,7 +545,9 @@ export function useDeleteStudio() {
       qc.invalidateQueries({ queryKey: ['studios'] });
       qc.invalidateQueries({ queryKey: ['myGames'] });
       qc.invalidateQueries({ queryKey: ['myDevlogs'] });
+      toast.success('Studio deleted');
     },
+    onError: () => toast.error('Failed to delete studio'),
   });
 }
 
@@ -609,7 +620,9 @@ export function useDeleteDevlog() {
       qc.invalidateQueries({ queryKey: ['myDevlogs'] });
       qc.invalidateQueries({ queryKey: ['gameDevlogs'] });
       qc.invalidateQueries({ queryKey: ['devlogs'] });
+      toast.success('Devlog deleted');
     },
+    onError: () => toast.error('Failed to delete devlog'),
   });
 }
 
@@ -687,6 +700,8 @@ export function useDeleteGame() {
       qc.invalidateQueries({ queryKey: ['myGames'] });
       qc.invalidateQueries({ queryKey: ['games'] });
       qc.invalidateQueries({ queryKey: ['myDevlogs'] });
+      toast.success('Game deleted');
     },
+    onError: () => toast.error('Failed to delete game'),
   });
 }
