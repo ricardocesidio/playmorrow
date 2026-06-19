@@ -9,46 +9,49 @@
 :root {
   --radius: 0;
 
-  --background: oklch(0.12 0 0);
-  --foreground: oklch(0.92 0.01 260);
+  --background: #02070b;
+  --foreground: #f2f5f4;
 
-  --elevated: oklch(0.16 0.005 260);
-  --elevated-foreground: oklch(0.92 0.01 260);
+  --elevated: #071117;
+  --elevated-foreground: #f2f5f4;
 
-  --card: oklch(0.14 0.005 260);
-  --card-foreground: oklch(0.88 0.01 260);
+  --card: #09161d;
+  --card-foreground: #e6eceb;
 
-  --popover: oklch(0.16 0.005 260);
-  --popover-foreground: oklch(0.92 0.01 260);
+  --popover: #09161d;
+  --popover-foreground: #f2f5f4;
 
-  --cyan: oklch(0.75 0.12 200);
-  --cyan-foreground: oklch(0.1 0 0);
+  --cyan: #3ee7ff;
+  --cyan-foreground: #021014;
 
-  --coral: oklch(0.62 0.18 25);
-  --coral-foreground: oklch(0.95 0 0);
+  --coral: #ff574d;
+  --coral-foreground: #120302;
 
-  --violet: oklch(0.6 0.18 286);
-  --violet-foreground: oklch(0.95 0 0);
+  --violet: #a65cff;
+  --violet-foreground: #f6efff;
 
-  --amber: oklch(0.72 0.14 80);
-  --amber-foreground: oklch(0.1 0 0);
+  --amber: #e4a83b;
+  --amber-foreground: #120b02;
 
-  --success: oklch(0.65 0.15 150);
-  --error: oklch(0.6 0.2 25);
+  --success: #70ff9b;
+  --error: #ff574d;
 
-  --muted: oklch(0.18 0.005 260);
-  --muted-foreground: oklch(0.5 0.01 260);
+  --muted: #0d1a22;
+  --muted-foreground: #8c969b;
 
-  --accent: oklch(0.2 0.01 260);
-  --accent-foreground: oklch(0.85 0.01 260);
+  --accent: #10222b;
+  --accent-foreground: #dce7e7;
 
-  --border: oklch(0.25 0.01 260);
-  --border-bright: oklch(0.35 0.02 260);
-  --input: oklch(0.22 0.01 260);
+  --border: #1b3038;
+  --border-bright: #51666d;
+  --input: #263940;
   --ring: var(--cyan);
 
-  --glow-cyan: 0 0 12px oklch(0.75 0.12 200 / 0.25);
-  --glow-coral: 0 0 12px oklch(0.62 0.18 25 / 0.25);
+  --hud-line: #24414b;
+  --hud-line-bright: #789099;
+  --hud-shadow: 0 20px 80px rgb(0 0 0 / 0.5);
+  --glow-cyan: 0 0 18px rgb(62 231 255 / 0.34);
+  --glow-coral: 0 0 20px rgb(255 87 77 / 0.32);
 
   --font-family-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
   --font-family-body: var(--font-body), ui-sans-serif, system-ui, sans-serif;
@@ -97,12 +100,16 @@
   body {
     @apply bg-background text-foreground font-body;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background:
+      radial-gradient(circle at 18% 10%, rgb(62 231 255 / 0.07), transparent 24rem),
+      radial-gradient(circle at 88% 2%, rgb(255 87 77 / 0.06), transparent 22rem),
+      linear-gradient(180deg, #02070b 0%, #03090d 52%, #010507 100%);
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-family-display);
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 
   /* Selection */
@@ -144,7 +151,7 @@
 }
 
 @utility clip-corner {
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
 }
 
 @utility clip-corner-sm {
@@ -159,7 +166,12 @@
 
 @utility panel {
   @apply border border-border bg-elevated;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+  background:
+    linear-gradient(180deg, rgb(62 231 255 / 0.035), transparent 42%),
+    linear-gradient(90deg, rgb(255 87 77 / 0.025), transparent 38%),
+    var(--elevated);
+  box-shadow: var(--hud-shadow);
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
 }
 
 @utility panel-accent {
@@ -223,4 +235,42 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+.pm-display {
+  font-family: var(--font-family-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+}
+
+.pm-micro {
+  font-family: var(--font-family-mono);
+  font-size: 0.68rem;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.pm-scanline {
+  position: relative;
+  isolation: isolate;
+}
+
+.pm-scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: linear-gradient(rgb(255 255 255 / 0.025) 1px, transparent 1px);
+  background-size: 100% 4px;
+  mix-blend-mode: screen;
+}
+
+.pm-circuit-bg {
+  background-image:
+    linear-gradient(90deg, rgb(62 231 255 / 0.06) 1px, transparent 1px),
+    linear-gradient(rgb(62 231 255 / 0.035) 1px, transparent 1px);
+  background-size: 72px 72px;
 }

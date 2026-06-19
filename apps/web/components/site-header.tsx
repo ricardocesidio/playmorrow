@@ -2,53 +2,41 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { useTheme } from 'next-themes';
+import { useState } from 'react';
 import { useAuth } from '@/lib/api/auth-context';
 import { useUnreadNotificationCount } from '@/lib/api/hooks';
-import { Gamepad2, Bell, Sun, Moon, Menu, X } from 'lucide-react';
+import { ArrowUpRight, Bell, Menu, Search, X } from 'lucide-react';
+import { HudLinkLogo } from '@/components/playmorrow/hud';
 
 const NAV_LINKS = [
   { href: '/games', label: 'Games' },
   { href: '/studios', label: 'Studios' },
-  { href: '/feed', label: 'Feed' },
-  { href: '/search', label: 'Search' },
+  { href: '/feed', label: 'Live Feed' },
 ] as const;
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
   const { user, token, isAuthenticated, isLoading } = useAuth();
   const { data: unreadData } = useUnreadNotificationCount(token ?? undefined);
-  const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => setMounted(true), []);
 
   const unreadCount = unreadData?.unreadCount ?? 0;
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 lg:px-6">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-display text-lg font-semibold tracking-tight">
-          <span className="grid size-8 place-items-center rounded-none bg-cyan/10 text-cyan">
-            <Gamepad2 className="size-4" />
-          </span>
-          <span>Playmorrow</span>
-        </Link>
+    <header className="sticky top-0 z-40 border-b border-border/45 bg-background/88 backdrop-blur-md">
+      <div className="mx-auto grid h-20 max-w-[1500px] grid-cols-[auto_1fr_auto] items-center gap-4 px-5 sm:px-8 lg:px-10">
+        <HudLinkLogo />
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
+        <nav className="hidden items-center justify-center gap-12 md:flex" aria-label="Main navigation">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               aria-current={isActive(link.href) ? 'page' : undefined}
-              className={`px-3 py-1.5 font-mono text-xs uppercase tracking-widest transition-colors ${
+              className={`relative py-2 text-sm transition-colors ${
                 isActive(link.href)
-                  ? 'text-cyan'
+                  ? 'text-cyan after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:bg-cyan after:shadow-[0_0_10px_rgb(62_231_255_/_0.8)]'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -57,18 +45,15 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        {/* Right side */}
-        <div className="flex items-center gap-2">
-          {/* Theme toggle */}
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="grid size-8 place-items-center text-muted-foreground hover:text-foreground"
-            aria-label={mounted && theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        <div className="flex items-center justify-end gap-5">
+          <Link
+            href="/search"
+            className="clip-corner hidden h-10 w-[340px] items-center gap-3 border border-border bg-background/60 px-4 text-sm text-muted-foreground transition hover:border-border-bright xl:flex"
           >
-            {mounted && theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
-          </button>
+            <Search className="size-4" />
+            <span>Search games, studios, genres...</span>
+          </Link>
 
-          {/* Auth */}
           {isLoading ? (
             <div className="flex items-center gap-2" aria-hidden>
               <div className="h-7 w-16 animate-pulse bg-muted" />
@@ -78,7 +63,7 @@ export function SiteHeader() {
             <>
               <Link
                 href="/dashboard/notifications"
-                className="relative grid size-8 place-items-center text-muted-foreground hover:text-foreground"
+                className="relative grid size-8 place-items-center text-muted-foreground hover:text-cyan"
                 aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
               >
                 <Bell className="size-4" />
@@ -90,7 +75,7 @@ export function SiteHeader() {
               </Link>
               <Link
                 href="/dashboard"
-                className="font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground"
+                className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline"
               >
                 {user.displayName}
               </Link>
@@ -99,20 +84,20 @@ export function SiteHeader() {
             <>
               <Link
                 href="/login"
-                className="font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground"
+                className="text-sm text-foreground hover:text-cyan"
               >
                 Sign in
-              </Link>
-              <Link
-                href="/register"
-                className="rounded-none border border-coral bg-coral/10 px-3 py-1 font-mono text-xs uppercase tracking-widest text-coral transition-colors hover:bg-coral hover:text-coral-foreground"
-              >
-                Register
               </Link>
             </>
           )}
 
-          {/* Mobile menu toggle */}
+          <Link
+            href={isAuthenticated ? '/dashboard/games/new' : '/register'}
+            className="clip-corner hidden border border-coral bg-coral px-5 py-3 pm-display text-[0.68rem] text-coral-foreground shadow-[0_0_24px_rgb(255_87_77_/_0.22)] transition hover:bg-[#ff6a61] sm:inline-flex"
+          >
+            Share your game <ArrowUpRight className="size-4" />
+          </Link>
+
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="grid size-8 place-items-center text-muted-foreground md:hidden"
