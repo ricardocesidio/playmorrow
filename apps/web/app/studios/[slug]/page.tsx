@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Globe, Calendar } from 'lucide-react';
+import { ArrowLeft, MapPin, Globe, Calendar, Users, Gamepad2, Heart } from 'lucide-react';
 
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
@@ -105,6 +105,25 @@ export default function StudioDetailPage() {
         {studio.tagline && (
           <p className="mb-6 text-lg text-muted-foreground">{studio.tagline}</p>
         )}
+
+        {/* Stats */}
+        <div className="mb-8 grid grid-cols-3 gap-4">
+          <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card/20 p-4">
+            <Heart className="size-5 text-primary" />
+            <span className="text-2xl font-semibold">{studio.followersCount}</span>
+            <span className="text-xs text-muted-foreground">Followers</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card/20 p-4">
+            <Gamepad2 className="size-5 text-primary" />
+            <span className="text-2xl font-semibold">{studio.gamesCount}</span>
+            <span className="text-xs text-muted-foreground">Games</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card/20 p-4">
+            <Users className="size-5 text-primary" />
+            <span className="text-2xl font-semibold">{studio.membersCount}</span>
+            <span className="text-xs text-muted-foreground">Members</span>
+          </div>
+        </div>
 
         {studio.description && (
           <section className="mb-10">
