@@ -15,6 +15,7 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
+    "test:e2e:snapshots": "UPDATE_SNAPSHOTS=1 playwright test snapshots.spec.ts --update-snapshots",
     "clean": "rm -rf .next .turbo"
   },
   "dependencies": {
