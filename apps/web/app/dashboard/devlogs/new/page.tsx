@@ -11,6 +11,8 @@ import { useMyStudios, useCreateDevlog } from '@/lib/api/hooks';
 import type { Game } from '@/lib/api/client';
 import { ApiError } from '@/lib/api/client';
 
+import { MarkdownEditor } from '@/components/md-editor';
+
 export default function CreateDevlogPage() {
   return (
     <Suspense fallback={<div className="mx-auto max-w-2xl px-6 py-10"><div className="h-96 animate-pulse rounded-xl bg-muted" /></div>}>
@@ -158,9 +160,7 @@ function CreateDevlogForm() {
 
         <div>
           <label className="mb-1.5 block text-sm font-medium">Body *</label>
-          <textarea rows={12} value={body} onChange={(e) => setBody(e.target.value)}
-            placeholder="Write your devlog content here…"
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-mono leading-relaxed focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+          <MarkdownEditor value={body} onChange={setBody} />
         </div>
 
         <div>

@@ -236,7 +236,7 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 25. No rich text editor for devlogs
 
-- **Type:** Feature · **Severity:** Low–Medium · **Effort:** M–L · `NEEDS DESIGN` · **Status:** OPEN
+- **Type:** Feature · **Severity:** Low–Medium · **Effort:** M–L · **Status:** DONE
 - **Files:** devlog create/edit (`apps/web/app/dashboard/devlogs/new/page.tsx`,
   `.../devlogs/[id]/...`), devlog render (`apps/web/app/devlogs/[id]/page.tsx`),
   `Devlog.body` is plain `String`

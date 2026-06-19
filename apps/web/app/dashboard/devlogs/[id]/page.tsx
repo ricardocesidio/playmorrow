@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, Save, ExternalLink, FileText, Trash2 } from 'lucide-react';
 
 import { ImageUpload } from '@/components/image-upload';
+import { MarkdownEditor } from '@/components/md-editor';
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
@@ -137,8 +138,7 @@ export default function EditDevlogPage() {
 
         <div>
           <label className="mb-1.5 block text-sm font-medium">Body</label>
-          <textarea rows={16} value={body} onChange={(e) => setBody(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-mono leading-relaxed focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+          <MarkdownEditor value={body} onChange={setBody} />
         </div>
 
         <ImageUpload value={coverUrl} onChange={setCoverUrl} label="Cover image" />
