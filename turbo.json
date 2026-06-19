@@ -20,7 +20,8 @@
       "dependsOn": ["^build"]
     },
     "typecheck": {
-      "dependsOn": ["^build", "db:generate"]
+      "dependsOn": ["^build", "db:generate"],
+      "cache": false
     },
     "test": {
       "dependsOn": ["^build"],
