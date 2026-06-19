@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, ExternalLink, FileText, Trash2 } from 'lucide-react';
 
+import { ImageUpload } from '@/components/image-upload';
+
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
 import { useDevlog, useUpdateDevlog, useDeleteDevlog } from '@/lib/api/hooks';
@@ -139,11 +141,7 @@ export default function EditDevlogPage() {
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-mono leading-relaxed focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Cover image URL</label>
-          <input type="url" value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-        </div>
+        <ImageUpload value={coverUrl} onChange={setCoverUrl} label="Cover image" />
 
         <div className="flex items-center gap-3 rounded-xl border border-border bg-card/20 p-4">
           <input type="checkbox" id="isPublished" checked={isPublished}

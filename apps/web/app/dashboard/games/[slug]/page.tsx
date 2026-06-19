@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, ExternalLink, Gamepad2, Milestone, FileText, ScrollText, Trash2 } from 'lucide-react';
 
+import { ImageUpload } from '@/components/image-upload';
+
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
 import { useGame, useUpdateGame, useDeleteGame } from '@/lib/api/hooks';
@@ -212,16 +214,8 @@ export default function EditGamePage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Cover image URL</label>
-            <input type="url" value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Banner URL</label>
-            <input type="url" value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
+          <ImageUpload value={coverUrl} onChange={setCoverUrl} label="Cover image" />
+          <ImageUpload value={bannerUrl} onChange={setBannerUrl} label="Banner" />
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">

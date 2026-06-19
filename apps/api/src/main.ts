@@ -2,6 +2,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { join } from 'node:path';
+import express from 'express';
 
 import { AppModule } from './app.module';
 
@@ -20,6 +22,10 @@ async function bootstrap() {
   );
 
   app.setGlobalPrefix('api', { exclude: ['health'] });
+
+  // Serve uploaded files at /api/uploads/*
+  const uploadsDir = join(process.cwd(), 'apps', 'api', 'uploads');
+  app.use('/api/uploads', express.static(uploadsDir));
 
   app.enableCors({
     origin: config.get<string>('WEB_ORIGIN', 'http://localhost:3000'),
