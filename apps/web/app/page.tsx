@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Gamepad2, Sparkles } from 'lucide-react';
+import { ArrowRight, Gamepad2, Rss, Building2 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
-import { Nav } from '@/components/nav';
-import { Footer } from '@/components/footer';
+import { SiteHeader } from '@/components/site-header';
+import { SiteFooter } from '@/components/site-footer';
 import { GameCard } from '@/components/game-card';
 import { FeedItemCard } from '@/components/feed-item';
+import { SectionHeading } from '@/components/section-heading';
+import { SignalLabel } from '@/components/signal-label';
 import { usePublicFeed, useGames } from '@/lib/api/hooks';
 
 export default function HomePage() {
@@ -16,97 +17,131 @@ export default function HomePage() {
 
   return (
     <>
-      <Nav />
-
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6">
+      <SiteHeader />
+      <main>
         {/* Hero */}
-        <section className="flex flex-col items-center py-20 text-center sm:py-28">
-          <h1 className="max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-6xl">
-            Discover{' '}
-            <span className="bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent">
-              tomorrow&apos;s
-            </span>{' '}
-            indie games today.
-          </h1>
-
-          <p className="mt-6 max-w-2xl text-pretty text-lg text-muted-foreground">
-            Follow indie studios, watch games evolve through devlogs and roadmaps, try early demos,
-            and find the next project worth believing in.
-          </p>
-
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href="/games">
-                Explore games
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link href="/studios/new">Create studio profile</Link>
-            </Button>
+        <section className="relative border-b border-border">
+          <div className="mx-auto max-w-7xl px-4 py-20 lg:px-6 lg:py-28">
+            <div className="max-w-2xl">
+              <SignalLabel color="cyan">Next-gen indie discovery</SignalLabel>
+              <h1 className="mt-4 font-display text-5xl font-semibold leading-tight tracking-tight lg:text-7xl">
+                Discover tomorrow&apos;s
+                <br />
+                <span className="text-cyan">indie games</span> today.
+              </h1>
+              <p className="mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground">
+                Playmorrow is a curated social platform where indie studios showcase their games,
+                share development logs, publish roadmaps, and build communities around their work.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Link
+                  href="/games"
+                  className="inline-flex items-center gap-2 border border-coral bg-coral/10 px-6 py-3 font-mono text-xs uppercase tracking-widest text-coral transition-colors hover:bg-coral hover:text-coral-foreground"
+                >
+                  Explore games <ArrowRight className="size-3" />
+                </Link>
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-2 border border-border px-6 py-3 font-mono text-xs uppercase tracking-widest text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+                >
+                  Join as a studio
+                </Link>
+              </div>
+            </div>
+          </div>
+          {/* Circuit decoration */}
+          <div aria-hidden className="pointer-events-none absolute right-0 top-0 hidden h-full w-1/2 opacity-[0.03] lg:block">
+            <svg viewBox="0 0 400 400" fill="none" className="size-full">
+              <path d="M0 200h100v100h100" stroke="currentColor" strokeWidth="0.5" />
+              <path d="M200 0v100h100v100h100" stroke="currentColor" strokeWidth="0.5" />
+              <circle cx="100" cy="200" r="2" fill="currentColor" />
+              <circle cx="200" cy="100" r="2" fill="currentColor" />
+              <circle cx="300" cy="200" r="2" fill="currentColor" />
+            </svg>
           </div>
         </section>
 
         {/* Latest games */}
-        <section className="pb-12">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Latest games</h2>
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/games">
-                View all <ArrowRight className="size-3" />
-              </Link>
-            </Button>
+        <section className="mx-auto max-w-7xl px-4 py-16 lg:px-6 lg:py-20">
+          <div className="flex items-end justify-between">
+            <SectionHeading tag="Games" as="h2">Latest releases</SectionHeading>
+            <Link
+              href="/games"
+              className="mb-6 flex items-center gap-1 font-mono text-xs uppercase tracking-widest text-cyan transition-colors hover:text-cyan/80"
+            >
+              View all <ArrowRight className="size-3" />
+            </Link>
           </div>
+
           {gamesLoading ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="aspect-[3/2] animate-pulse rounded-xl bg-muted" />
-              ))}
-            </div>
-          ) : gamesData?.items.length ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {gamesData.items.slice(0, 4).map((game) => (
-                <GameCard key={game.id} game={game} />
+                <div key={i} className="aspect-[3/4] animate-pulse border border-border bg-elevated" />
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card/30 py-12">
-              <Sparkles className="size-8 text-muted-foreground/40" />
-              <p className="text-muted-foreground">No games yet. Be the first!</p>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/studios/new">Create a studio</Link>
-              </Button>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {gamesData?.items.map((game) => (
+                <GameCard key={game.id} game={game} />
+              ))}
             </div>
           )}
         </section>
 
         {/* Recent activity */}
-        <section className="pb-20">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Recent activity</h2>
+        <section className="border-t border-border">
+          <div className="mx-auto max-w-5xl px-4 py-16 lg:px-6 lg:py-20">
+            <SectionHeading tag="Feed" as="h2">Recent activity</SectionHeading>
+
+            {feedLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="h-20 animate-pulse border border-border bg-elevated" />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {feedData?.items.map((item) => (
+                  <FeedItemCard key={`${item.type}-${item.id}`} item={item} />
+                ))}
+              </div>
+            )}
+
+            <div className="mt-8 text-center">
+              <Link
+                href="/feed"
+                className="inline-flex items-center gap-2 border border-border px-6 py-3 font-mono text-xs uppercase tracking-widest text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+              >
+                <Rss className="size-3" /> View full feed
+              </Link>
+            </div>
           </div>
-          {feedLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-24 animate-pulse rounded-xl bg-muted" />
-              ))}
+        </section>
+
+        {/* Stats */}
+        <section className="border-t border-border">
+          <div className="mx-auto max-w-7xl px-4 py-16 lg:px-6 lg:py-20">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="flex flex-col items-center gap-2 border border-border bg-elevated p-8">
+                <Gamepad2 className="size-6 text-cyan" />
+                <span className="font-display text-4xl font-semibold text-foreground">Indie</span>
+                <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Curated games</span>
+              </div>
+              <div className="flex flex-col items-center gap-2 border border-border bg-elevated p-8">
+                <Building2 className="size-6 text-amber" />
+                <span className="font-display text-4xl font-semibold text-foreground">Studios</span>
+                <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Independent creators</span>
+              </div>
+              <div className="flex flex-col items-center gap-2 border border-border bg-elevated p-8">
+                <Rss className="size-6 text-violet" />
+                <span className="font-display text-4xl font-semibold text-foreground">Devlogs</span>
+                <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Development feeds</span>
+              </div>
             </div>
-          ) : feedData?.items.length ? (
-            <div className="space-y-3">
-              {feedData.items.map((item) => (
-                <FeedItemCard key={`${item.type}-${item.id}`} item={item} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card/30 py-12">
-              <Gamepad2 className="size-8 text-muted-foreground/40" />
-              <p className="text-muted-foreground">No activity yet.</p>
-            </div>
-          )}
+          </div>
         </section>
       </main>
-
-      <Footer />
+      <SiteFooter />
     </>
   );
 }

@@ -1,167 +1,136 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Gamepad2, UserPlus } from 'lucide-react';
+import { Gamepad2 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
-import { ApiError } from '@/lib/api/client';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register, isAuthenticated, isLoading: authLoading } = useAuth();
-
-  const [displayName, setDisplayName] = useState('');
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Wait for auth to resolve before deciding what to show, so an already
-  // logged-in visitor doesn't see the form flash before the redirect (#22).
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) router.replace('/dashboard');
+  }, [authLoading, isAuthenticated, router]);
+
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="size-6 animate-spin border border-cyan border-t-transparent" />
       </div>
     );
   }
 
-  if (isAuthenticated) {
-    router.replace('/dashboard');
-    return null;
-  }
+  if (isAuthenticated) return null;
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email.trim() || !username.trim() || !displayName.trim() || !password) {
+      setError('All fields required');
+      return;
+    }
     setError('');
-    if (!displayName.trim() || !username.trim() || !email.trim() || !password.trim()) {
-      setError('All fields are required');
-      return;
-    }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
     setLoading(true);
     try {
       await register({ email: email.trim(), username: username.trim(), displayName: displayName.trim(), password });
-      router.replace('/dashboard');
-    } catch (err) {
-      if (err instanceof ApiError) {
-        const msg =
-          typeof err.body === 'object' && err.body && 'message' in (err.body as object)
-            ? (err.body as { message: string }).message
-            : Array.isArray((err.body as { message?: string[] })?.message)
-              ? (err.body as { message: string[] }).message.join(', ')
-              : 'Registration failed';
-        setError(msg);
-      } else {
-        setError('Something went wrong. Please try again.');
-      }
+      router.push('/dashboard');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Registration failed';
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2 font-semibold tracking-tight">
-            <span className="grid size-8 place-items-center rounded-lg bg-primary/15 text-primary">
-              <Gamepad2 className="size-5" />
-            </span>
-            <span className="text-lg">Playmorrow</span>
-          </Link>
-        </div>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+      <Link href="/" className="mb-8 flex items-center gap-2 font-display text-lg font-semibold tracking-tight">
+        <span className="grid size-8 place-items-center bg-cyan/10 text-cyan">
+          <Gamepad2 className="size-4" />
+        </span>
+        <span>Playmorrow</span>
+      </Link>
 
-        <h1 className="mb-1 text-center text-2xl font-semibold tracking-tight">Create account</h1>
-        <p className="mb-8 text-center text-sm text-muted-foreground">
-          Join Playmorrow and discover indie games.
-        </p>
+      <div className="w-full max-w-sm border border-border bg-elevated p-8">
+        <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight">Create account</h1>
+        <p className="mb-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">Join the network</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">
-              {error}
-            </div>
-          )}
-
           <div>
-            <label htmlFor="displayName" className="mb-1.5 block text-sm font-medium">
-              Name
-            </label>
-            <input
-              id="displayName"
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Your name"
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="username" className="mb-1.5 block text-sm font-medium">
-              Username
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="yourname"
-              autoComplete="username"
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
-              Email
-            </label>
+            <label htmlFor="email" className="mb-1 block font-mono text-xs uppercase tracking-widest text-muted-foreground">Email</label>
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              className="w-full border border-input bg-background px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-cyan focus:outline-none"
+              placeholder="user@example.com"
               autoComplete="email"
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
-              Password
-            </label>
+            <label htmlFor="username" className="mb-1 block font-mono text-xs uppercase tracking-widest text-muted-foreground">Username</label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full border border-input bg-background px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-cyan focus:outline-none"
+              placeholder="yourusername"
+              autoComplete="username"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="displayName" className="mb-1 block font-mono text-xs uppercase tracking-widest text-muted-foreground">Display name</label>
+            <input
+              id="displayName"
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className="w-full border border-input bg-background px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-cyan focus:outline-none"
+              placeholder="Your Name"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="mb-1 block font-mono text-xs uppercase tracking-widest text-muted-foreground">Password</label>
             <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 8 characters"
+              className="w-full border border-input bg-background px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-cyan focus:outline-none"
+              placeholder="••••••••"
               autoComplete="new-password"
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? 'Creating account…' : 'Create account'}
-            <UserPlus className="size-4" />
-          </Button>
+          {error && <p className="font-mono text-xs uppercase tracking-widest text-coral">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full border border-coral bg-coral/10 py-2.5 font-mono text-xs uppercase tracking-widest text-coral transition-colors hover:bg-coral hover:text-coral-foreground disabled:opacity-50"
+          >
+            {loading ? 'Creating...' : 'Create account'}
+          </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          Already have an account?{' '}
-          <Link href="/login" className="text-primary underline-offset-2 hover:underline">
-            Sign in
+        <div className="mt-6 text-center">
+          <Link href="/login" className="font-mono text-xs uppercase tracking-widest text-cyan transition-colors hover:text-cyan/80">
+            Already have an account?
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );

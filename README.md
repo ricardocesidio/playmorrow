@@ -148,8 +148,10 @@ left a process wedged on the port, clear it with
 | Home (feed preview + latest games) | `/` |
 | Explore games (infinite scroll, search) | `/games` |
 | Game detail (devlogs, roadmap, media, press kit) | `/games/[slug]` |
+| Studios directory | `/studios` |
 | Studio detail (members, games, followers) | `/studios/[slug]` |
 | Devlog detail (body with rich text, comments, reactions) | `/devlogs/[id]` |
+| Live development feed | `/feed` |
 | Global search (games, studios, devlogs) | `/search` |
 | User profile (avatar, bio, studios) | `/users/[username]` |
 | Public feed | `/feed/public` |
@@ -200,7 +202,7 @@ All 34 issues are catalogued in [`docs/handoff/`](docs/handoff/).
 
 ## Status
 
-🚧 **v0.5 — near feature-complete.** All core CRUD + community features are implemented:
+🚧 **v0.6 — redesigned.** Complete visual overhaul: obsidian-black theme with cyan/coral/violet/amber palette, geometric typography (Space Grotesk + JetBrains Mono), clipped corners, circuit-line decorations. All pages redesigned: homepage, games, game detail, studios, studio detail, feed, login, register. Preserves all existing functionality.
 auth (JWT + refresh tokens + OAuth), studios, games, devlogs (rich text editor), roadmap,
 press kits, follows, comments, reactions, notifications (real-time SSE), personalized feed,
 image uploads, moderation reports, E2E test suite (with visual snapshots), and Storybook
