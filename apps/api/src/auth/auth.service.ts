@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { User } from '@playmorrow/database';
@@ -7,17 +7,15 @@ import { createHash, randomBytes } from 'node:crypto';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
+import { TokenService } from './token.service';
 import type { LoginDto } from './dto/login.dto';
 import type { RegisterDto } from './dto/register.dto';
 
+const LOCKOUT_THRESHOLD = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 min
+
 export interface AuthResult {
-  user: {
-    id: string;
-    email: string;
-    username: string;
-    displayName: string;
-    role: string;
-  };
+  user: { id: string; email: string; username: string; displayName: string; role: string };
   accessToken: string;
   refreshToken: string;
 }
@@ -46,18 +44,21 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
+    private readonly tokenService: TokenService,
   ) {
     this.refreshSecret = this.configService.getOrThrow<string>('JWT_SECRET');
   }
 
   async register(dto: RegisterDto): Promise<AuthResult> {
     const passwordHash = await argon2.hash(dto.password);
-
     const user = await this.usersService.create({
-      email: dto.email,
-      username: dto.username,
-      displayName: dto.displayName,
-      passwordHash,
+      email: dto.email, username: dto.username, displayName: dto.displayName, passwordHash,
+    });
+
+    // Create verification token
+    const token = this.tokenService.generate();
+    await this.prisma.verificationToken.create({
+      data: { tokenHash: token.hash, userId: user.id, expiresAt: token.expiresAt },
     });
 
     return this.buildResult(user);
@@ -73,110 +74,179 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Account lockout check
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      throw new UnauthorizedException('Account temporarily locked. Try again later.');
+    }
+
     const passwordValid = await argon2.verify(user.passwordHash, dto.password);
     if (!passwordValid) {
+      // Increment failed attempts
+      const attempts = user.failedLoginAttempts + 1;
+      const updateData: Record<string, unknown> = { failedLoginAttempts: attempts };
+      if (attempts >= LOCKOUT_THRESHOLD) {
+        updateData.lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MS);
+      }
+      await this.prisma.user.update({ where: { id: user.id }, data: updateData as any });
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    // Reset failed attempts on success
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date() },
+    });
 
     return this.buildResult(user);
   }
 
   async refresh(refreshToken: string): Promise<RefreshResult> {
     const tokenHash = hashToken(refreshToken);
-
     const stored = await this.prisma.refreshToken.findFirst({
       where: { tokenHash, revokedAt: null, expiresAt: { gt: new Date() } },
     });
+    if (!stored) throw new UnauthorizedException('Invalid or expired refresh token');
 
-    if (!stored) {
-      throw new UnauthorizedException('Invalid or expired refresh token');
-    }
-
-    // Rotate: revoke old, issue new
     await this.prisma.refreshToken.update({
-      where: { id: stored.id },
-      data: { revokedAt: new Date() },
+      where: { id: stored.id }, data: { revokedAt: new Date() },
     });
 
     const user = await this.usersService.findById(stored.userId);
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-
+    if (!user) throw new UnauthorizedException('User not found');
     return this.issueTokens(user);
   }
 
   async logout(refreshToken: string): Promise<void> {
     const tokenHash = hashToken(refreshToken);
     await this.prisma.refreshToken.updateMany({
-      where: { tokenHash, revokedAt: null },
-      data: { revokedAt: new Date() },
+      where: { tokenHash, revokedAt: null }, data: { revokedAt: new Date() },
     });
   }
 
   async getProfile(userId: string) {
     const user = await this.usersService.findById(userId);
-    if (!user) {
-      throw new UnauthorizedException();
-    }
+    if (!user) throw new UnauthorizedException();
     return {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      displayName: user.displayName,
-      role: user.role,
+      id: user.id, email: user.email, username: user.username,
+      displayName: user.displayName, role: user.role,
+      isVerified: user.isVerified,
     };
   }
 
-  /** Validates credentials and returns user data (used by session login). */
   async validateUser(emailOrUsername: string, password: string) {
     const isEmail = emailOrUsername.includes('@');
     const user = isEmail
       ? await this.usersService.findByEmail(emailOrUsername)
       : await this.usersService.findByUsername(emailOrUsername);
 
-    if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('Invalid credentials');
+    if (!user || !user.passwordHash) throw new UnauthorizedException('Invalid credentials');
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      throw new UnauthorizedException('Account temporarily locked. Try again later.');
     }
 
     const passwordValid = await argon2.verify(user.passwordHash, password);
     if (!passwordValid) {
+      const attempts = user.failedLoginAttempts + 1;
+      const updateData: Record<string, unknown> = { failedLoginAttempts: attempts };
+      if (attempts >= LOCKOUT_THRESHOLD) updateData.lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MS);
+      await this.prisma.user.update({ where: { id: user.id }, data: updateData as any });
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date() },
+    });
 
     return user;
   }
 
+  // ── Email verification ───────────────────────────────────────────────
+
+  async createVerificationToken(userId: string) {
+    // Invalidate previous tokens
+    await this.prisma.verificationToken.updateMany({
+      where: { userId, consumedAt: null },
+      data: { consumedAt: new Date() },
+    });
+
+    const token = this.tokenService.generate();
+    await this.prisma.verificationToken.create({
+      data: { tokenHash: token.hash, userId, expiresAt: token.expiresAt },
+    });
+    return token.raw;
+  }
+
+  async verifyEmail(rawToken: string) {
+    const tokenHash = hashToken(rawToken);
+    const stored = await this.prisma.verificationToken.findUnique({ where: { tokenHash } });
+    if (!stored || stored.consumedAt || stored.expiresAt < new Date()) {
+      throw new BadRequestException('Invalid or expired verification token');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.verificationToken.update({ where: { id: stored.id }, data: { consumedAt: new Date() } }),
+      this.prisma.user.update({ where: { id: stored.userId }, data: { isVerified: true } }),
+    ]);
+  }
+
+  // ── Password reset ───────────────────────────────────────────────────
+
+  async createPasswordResetToken(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) return; // Don't reveal whether email exists
+
+    await this.prisma.passwordResetToken.updateMany({
+      where: { userId: user.id, consumedAt: null },
+      data: { consumedAt: new Date() },
+    });
+
+    const token = this.tokenService.generate();
+    await this.prisma.passwordResetToken.create({
+      data: { tokenHash: token.hash, userId: user.id, expiresAt: token.expiresAt },
+    });
+    return token.raw;
+  }
+
+  async resetPassword(rawToken: string, newPassword: string) {
+    const tokenHash = hashToken(rawToken);
+    const stored = await this.prisma.passwordResetToken.findUnique({ where: { tokenHash } });
+    if (!stored || stored.consumedAt || stored.expiresAt < new Date()) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    const passwordHash = await argon2.hash(newPassword);
+    const newAuthVersion = Date.now();
+
+    await this.prisma.$transaction([
+      this.prisma.passwordResetToken.update({ where: { id: stored.id }, data: { consumedAt: new Date() } }),
+      this.prisma.user.update({
+        where: { id: stored.userId },
+        data: { passwordHash, authVersion: newAuthVersion },
+      }),
+      // Revoke all sessions
+      this.prisma.session.updateMany({
+        where: { userId: stored.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
+  }
+
+  // ── Token helpers ────────────────────────────────────────────────────
+
   private async buildResult(user: User): Promise<AuthResult> {
     const tokens = await this.issueTokens(user);
-    return {
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        displayName: user.displayName,
-        role: user.role,
-      },
-      ...tokens,
-    };
+    return { user: { id: user.id, email: user.email, username: user.username, displayName: user.displayName, role: user.role }, ...tokens };
   }
 
   private async issueTokens(user: User): Promise<RefreshResult> {
     const payload = { sub: user.id, email: user.email, role: user.role };
-
     const accessToken = this.jwtService.sign(payload);
-
     const rawRefresh = generateRefreshToken();
     const tokenHash = hashToken(rawRefresh);
-
     await this.prisma.refreshToken.create({
-      data: {
-        tokenHash,
-        userId: user.id,
-        expiresAt: new Date(Date.now() + REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000),
-      },
+      data: { tokenHash, userId: user.id, expiresAt: new Date(Date.now() + REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000) },
     });
-
     return { accessToken, refreshToken: rawRefresh };
   }
 }

@@ -149,6 +149,8 @@ model User {
   notificationsActed    Notification[] @relation("NotificationActor")
   refreshTokens         RefreshToken[]
   sessions              Session[]
+  verificationTokens    VerificationToken[]
+  passwordResetTokens   PasswordResetToken[]
 
   @@index([role])
   @@map("users")
@@ -530,4 +532,38 @@ model Session {
   @@index([userId])
   @@index([expiresAt])
   @@map("sessions")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Email verification & password reset tokens
+// ──────────────────────────────────────────────────────────────────────────
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  consumedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("verification_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  consumedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
 }
