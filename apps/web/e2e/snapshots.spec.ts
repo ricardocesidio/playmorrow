@@ -25,7 +25,7 @@ test.describe('Visual snapshots', () => {
       test.slow();
       await page.setViewportSize({ width, height });
       await page.goto('/games', { waitUntil: 'networkidle' });
-      await expect(page.getByRole('heading', { name: /Browse games/i })).toBeVisible();
+      await expect(page.getByRole('heading', { name: /Browse the next generation/i })).toBeVisible();
       await expect(page).toHaveScreenshot(`games-${viewport}.png`);
     });
 
@@ -49,7 +49,7 @@ test.describe('Visual snapshots', () => {
       test.slow();
       await page.setViewportSize({ width, height });
       await page.goto('/register', { waitUntil: 'networkidle' });
-      await expect(page.getByRole('heading', { name: 'Create account' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Create your signal' })).toBeVisible();
       await expect(page).toHaveScreenshot(`register-${viewport}.png`);
     });
 

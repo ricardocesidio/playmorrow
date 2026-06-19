@@ -10,20 +10,20 @@ test.describe('Public pages', () => {
     page.on('pageerror', (e) => { throw new Error(`Page error: ${e.message}`); });
 
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: /Discover/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Explore games/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Follow games/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Browse all games/i })).toBeVisible();
   });
 
   test('Explore games renders game cards', async ({ page }) => {
     await page.goto('/games');
-    await expect(page.getByRole('heading', { name: /Browse games/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Browse the next generation/i })).toBeVisible();
     // Wait for game cards to appear
     await expect(page.getByText('Neon Warden').first()).toBeVisible({ timeout: 15_000 });
   });
 
   test('Explore games search input works', async ({ page }) => {
     await page.goto('/games');
-    const searchInput = page.getByPlaceholder('Search games...').first();
+    const searchInput = page.getByPlaceholder('Search games, studios, genres...').first();
     await expect(searchInput).toBeVisible();
     await searchInput.fill('Test');
     await searchInput.press('Enter');
