@@ -1,0 +1,119 @@
+/**
+ * Dev-mode mock API client (#32).
+ * When NEXT_PUBLIC_USE_MOCKS=true this client replaces the real fetch-based
+ * API, returning deterministic data so the frontend can run without a backend.
+ *
+ * Mock implementations mirror the shapes returned by the real NestJS API.
+ */
+import {
+  MOCK_USER,
+  MOCK_STUDIO,
+  MOCK_GAME,
+  MOCK_DEVLOG,
+  MOCK_ROADMAP_ITEM,
+  MOCK_FEED_ITEM_DEVLOG,
+  MOCK_FEED_ITEM_ROADMAP,
+  MOCK_COMMENT,
+  MOCK_NOTIFICATION,
+  paginated,
+  followStatus,
+} from './mock-data';
+import type { ReactionStatus } from './client';
+
+/** Small helpers to simulate async delay (remove in production). */
+const delay = (ms = 80) => new Promise((r) => setTimeout(r, ms));
+
+export function createMockApi() {
+  const handler = {
+    get: <T>(path: string): Promise<T> => handleRequest('GET', path) as Promise<T>,
+    post: <T>(path: string, _body?: unknown): Promise<T> => handleRequest('POST', path, _body) as Promise<T>,
+    put: <T>(path: string, _body?: unknown): Promise<T> => handleRequest('PUT', path, _body) as Promise<T>,
+    patch: <T>(path: string, _body?: unknown): Promise<T> => handleRequest('PATCH', path, _body) as Promise<T>,
+    delete: <T>(path: string): Promise<T> => handleRequest('DELETE', path) as Promise<T>,
+  };
+
+  return handler;
+}
+
+function parsePath(path: string) {
+  const segments = path.split('?')[0]!.split('/').filter(Boolean);
+  const searchParams = new URLSearchParams(path.split('?')[1] ?? '');
+  return { segments, searchParams };
+}
+
+async function handleRequest(method: string, path: string, _body?: unknown): Promise<unknown> {
+  await delay();
+
+  const { segments, searchParams } = parsePath(path);
+
+  // Auth
+  if (path === '/auth/me') return MOCK_USER;
+  if (path === '/auth/login') return { user: MOCK_USER, accessToken: 'mock-token' };
+  if (path === '/auth/register') return { user: MOCK_USER, accessToken: 'mock-token' };
+
+  // Feed
+  if (path === '/feed/public') {
+    const pageSize = parseInt(searchParams.get('pageSize') ?? '10');
+    return paginated([MOCK_FEED_ITEM_DEVLOG, MOCK_FEED_ITEM_ROADMAP], 2, 1, pageSize);
+  }
+  if (path === '/me/feed') {
+    const page = parseInt(searchParams.get('page') ?? '1');
+    const ps = parseInt(searchParams.get('pageSize') ?? '10');
+    return paginated([MOCK_FEED_ITEM_DEVLOG, MOCK_FEED_ITEM_ROADMAP], 2, page, ps);
+  }
+
+  // Games
+  if (segments[0] === 'games' && segments.length === 2 && segments[1] !== 'me') {
+    const slug = segments[1]!;
+    if (slug === 'test-game') return MOCK_GAME;
+  }
+  if (path === '/games' || (segments[0] === 'games' && segments.length === 1)) {
+    return paginated([MOCK_GAME, { ...MOCK_GAME, id: 'game-2', slug: 'test-game-2', title: 'Test Game 2' }]);
+  }
+
+  // Studios
+  if (segments[0] === 'studios' && segments.length === 2 && segments[1] === 'me') {
+    return [MOCK_STUDIO];
+  }
+  if (segments[0] === 'studios' && segments.length === 2) {
+    return MOCK_STUDIO;
+  }
+
+  // Studio sub-routes
+  if (path.includes('/members')) return { members: [] };
+  if (path.includes('/games')) return paginated([MOCK_GAME]);
+  if (path.includes('/follow-status')) return followStatus('STUDIO', 'studio-1', false, 5);
+  if (path.includes('/follow')) {
+    if (method === 'POST') return followStatus('STUDIO', 'studio-1', true, 6);
+    return followStatus('STUDIO', 'studio-1', false, 5);
+  }
+
+  // Game sub-routes
+  if (path.includes('/devlogs')) return paginated([MOCK_DEVLOG]);
+  if (path.includes('/roadmap')) return [MOCK_ROADMAP_ITEM];
+  if (path.includes('/press-kit')) throw Object.assign(new Error('Not found'), { status: 404 });
+
+  // Devlogs
+  if (segments[0] === 'devlogs' && segments.length === 2) {
+    return MOCK_DEVLOG;
+  }
+  if (path.includes('/comments')) return [MOCK_COMMENT];
+  if (path.includes('/reactions')) {
+    return { targetType: 'DEVLOG', targetId: 'devlog-1', counts: { LIKE: 0, LOVE: 0, HYPE: 0, INSIGHTFUL: 0 }, viewerReactions: [] } as ReactionStatus;
+  }
+
+  // Roadmap items
+  if (segments[0] === 'roadmap-items') return MOCK_ROADMAP_ITEM;
+
+  // Notifications
+  if (path === '/me/notifications/unread-count') return { unreadCount: 3 };
+  if (path === '/me/notifications') return paginated([MOCK_NOTIFICATION]);
+  if (path.includes('/notifications') && method === 'PATCH') return { ...MOCK_NOTIFICATION, readAt: new Date().toISOString() };
+  if (path.includes('/read-all')) return { success: true };
+
+  // Follows
+  if (path === '/me/follows') return { studios: [MOCK_STUDIO], games: [MOCK_GAME] };
+
+  // Fallback
+  return {};
+}

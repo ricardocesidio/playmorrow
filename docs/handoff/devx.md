@@ -42,7 +42,7 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 32. No seed/mock data for independent frontend development
 
-- **Type:** DX · **Severity:** Medium · **Effort:** M · **Status:** OPEN
+- **Type:** DX · **Severity:** Medium · **Effort:** M · **Status:** DONE
 - **Files:** `packages/database/prisma/seed.ts` (DB seed exists),
   `apps/web/e2e/fixtures/mocks.ts` (E2E mocks exist), new shared mock fixtures
 - **Analysis:** Frontend dev requires either a running+seeded backend or Playwright mocks.
