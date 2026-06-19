@@ -62,7 +62,7 @@ const liveItems = [
 
 export default function HomePage() {
   const { data: feedData } = usePublicFeed(1, 4);
-  const { data: gamesData, isLoading: gamesLoading } = useGames(1, 4);
+  const { data: gamesData } = useGames(1, 4);
 
   const latestGames = normalizeLatestGames(gamesData?.items);
 
@@ -108,19 +108,11 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {gamesLoading ? (
-              <div className="grid gap-4 lg:grid-cols-3">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} className="h-64 animate-pulse border border-border bg-elevated" />
-                ))}
-              </div>
-            ) : (
-              <div className="grid gap-4 lg:grid-cols-3">
-                {latestGames.map((game) => (
-                  <LatestGameCard key={game.id} game={game} />
-                ))}
-              </div>
-            )}
+            <div className="grid gap-4 lg:grid-cols-3">
+              {latestGames.map((game) => (
+                <LatestGameCard key={game.id} game={game} />
+              ))}
+            </div>
           </HudPanel>
         </div>
         <HudStatusRail />
