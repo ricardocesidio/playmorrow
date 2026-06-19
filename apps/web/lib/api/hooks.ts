@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers } from './client';
+import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile } from './client';
 
 // ── Infinite scroll helpers ─────────────────────────────────────────────
 
@@ -23,6 +23,16 @@ export function useIntersectionObserver(onIntersect: () => void, enabled: boolea
   }, [enabled, onIntersect]);
 
   return sentinelRef;
+}
+
+// ── Users ───────────────────────────────────────────────────────────────
+
+export function useUserProfile(username: string) {
+  return useQuery({
+    queryKey: ['userProfile', username],
+    queryFn: () => api.get<UserProfile>(`/users/${username}`),
+    enabled: !!username,
+  });
 }
 
 // ── Feed ────────────────────────────────────────────────────────────────

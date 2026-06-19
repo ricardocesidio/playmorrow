@@ -151,6 +151,7 @@ left a process wedged on the port, clear it with
 | Studio detail (members, games, followers) | `/studios/[slug]` |
 | Devlog detail (body with rich text, comments, reactions) | `/devlogs/[id]` |
 | Global search (games, studios, devlogs) | `/search` |
+| User profile (avatar, bio, studios) | `/users/[username]` |
 | Public feed | `/feed/public` |
 
 ### Authenticated

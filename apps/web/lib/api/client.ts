@@ -319,3 +319,22 @@ export interface SearchResponse {
   page: number;
   pageSize: number;
 }
+
+export interface UserProfile {
+  id: string;
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  bio: string | null;
+  role: string;
+  isVerified: boolean;
+  createdAt: string;
+  studios: {
+    id: string;
+    name: string;
+    slug: string;
+    logoUrl: string | null;
+    tagline: string | null;
+    role: string;
+  }[];
+}
