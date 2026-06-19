@@ -127,4 +127,41 @@ export class AuthController {
   async listSessions(@CurrentUser() user: { id: string }) {
     return this.sessionService.listForUser(user.id);
   }
+
+  // ── Email verification ──────────────────────────────────────────────
+
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  async verifyEmail(@Body('token') token: string) {
+    await this.authService.verifyEmail(token);
+    return { success: true };
+  }
+
+  @Post('resend-verification')
+  @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 3 } })
+  @HttpCode(HttpStatus.OK)
+  async resendVerification(@CurrentUser() user: { id: string }) {
+    const token = await this.authService.createVerificationToken(user.id);
+    // In production: send email with verification link
+    return { message: 'Verification email sent', devToken: token };
+  }
+
+  // ── Password reset ─────────────────────────────────────────────────
+
+  @Post('forgot-password')
+  @Throttle({ default: { ttl: 60_000, limit: 3 } })
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body('email') email: string) {
+    const token = await this.authService.createPasswordResetToken(email);
+    // In production: send email with reset link
+    return { message: 'If the email exists, a reset link has been sent.', devToken: token };
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body('token') token: string, @Body('password') password: string) {
+    await this.authService.resetPassword(token, password);
+    return { success: true };
+  }
 }

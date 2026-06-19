@@ -14,6 +14,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { SessionAuthGuard } from './guards/session-auth.guard';
 import { OptionalSessionGuard } from './guards/optional-session.guard';
+import { TokenService } from './token.service';
 
 @Module({
   imports: [
@@ -35,7 +36,7 @@ import { OptionalSessionGuard } from './guards/optional-session.guard';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RolesGuard, SessionAuthGuard, OptionalSessionGuard],
-  exports: [JwtModule, JwtStrategy, RolesGuard, SessionAuthGuard, OptionalSessionGuard],
+  providers: [AuthService, JwtStrategy, RolesGuard, SessionAuthGuard, OptionalSessionGuard, TokenService],
+  exports: [JwtModule, JwtStrategy, RolesGuard, SessionAuthGuard, OptionalSessionGuard, TokenService],
 })
 export class AuthModule {}

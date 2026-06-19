@@ -124,7 +124,7 @@ export default function LoginPage() {
                     <input type="checkbox" className="size-4 appearance-none border border-border-bright bg-background checked:border-cyan checked:bg-cyan" />
                     Remember me
                   </label>
-                  <Link href="/login" className="text-cyan hover:text-cyan/80">Forgot password?</Link>
+                  <Link href="/forgot-password" className="text-cyan hover:text-cyan/80">Forgot password?</Link>
                 </div>
 
                 {error && <p className="pm-micro text-coral">{error}</p>}
