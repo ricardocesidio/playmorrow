@@ -2,90 +2,225 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ── Playmorrow design tokens (shadcn/ui, Tailwind v4) ──────────────────────
-   Brand primary is a slightly-futuristic violet. Neutral greys elsewhere keep
-   the product feeling curated and trustworthy rather than corporate. */
+/* ── Playmorrow design system v2 ───────────────────────────────────────
+   Direction: obsidian-black surfaces, restrained glow, technical framing,
+   geometric typography, cyan/coral/violet/amber accent palette. */
+
 :root {
-  --radius: 0.625rem;
+  --radius: 0;
 
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --background: oklch(0.12 0 0);
+  --foreground: oklch(0.92 0.01 260);
 
-  --primary: oklch(0.55 0.224 286);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --elevated: oklch(0.16 0.005 260);
+  --elevated-foreground: oklch(0.92 0.01 260);
 
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.55 0.224 286);
-}
+  --card: oklch(0.14 0.005 260);
+  --card-foreground: oklch(0.88 0.01 260);
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.16 0.005 260);
+  --popover-foreground: oklch(0.92 0.01 260);
 
-  --primary: oklch(0.62 0.214 286);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  --cyan: oklch(0.75 0.12 200);
+  --cyan-foreground: oklch(0.1 0 0);
 
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.62 0.214 286);
+  --coral: oklch(0.62 0.18 25);
+  --coral-foreground: oklch(0.95 0 0);
+
+  --violet: oklch(0.6 0.18 286);
+  --violet-foreground: oklch(0.95 0 0);
+
+  --amber: oklch(0.72 0.14 80);
+  --amber-foreground: oklch(0.1 0 0);
+
+  --success: oklch(0.65 0.15 150);
+  --error: oklch(0.6 0.2 25);
+
+  --muted: oklch(0.18 0.005 260);
+  --muted-foreground: oklch(0.5 0.01 260);
+
+  --accent: oklch(0.2 0.01 260);
+  --accent-foreground: oklch(0.85 0.01 260);
+
+  --border: oklch(0.25 0.01 260);
+  --border-bright: oklch(0.35 0.02 260);
+  --input: oklch(0.22 0.01 260);
+  --ring: var(--cyan);
+
+  --glow-cyan: 0 0 12px oklch(0.75 0.12 200 / 0.25);
+  --glow-coral: 0 0 12px oklch(0.62 0.18 25 / 0.25);
+
+  --font-family-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-family-body: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-family-mono: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-elevated: var(--elevated);
+  --color-elevated-foreground: var(--elevated-foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
+  --color-cyan: var(--cyan);
+  --color-cyan-foreground: var(--cyan-foreground);
+  --color-coral: var(--coral);
+  --color-coral-foreground: var(--coral-foreground);
+  --color-violet: var(--violet);
+  --color-violet-foreground: var(--violet-foreground);
+  --color-amber: var(--amber);
+  --color-amber-foreground: var(--amber-foreground);
+  --color-success: var(--success);
+  --color-error: var(--error);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
   --color-border: var(--border);
+  --color-border-bright: var(--border-bright);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --font-display: var(--font-family-display);
+  --font-body: var(--font-family-body);
+  --font-mono: var(--font-family-mono);
 }
+
+/* ── Base layer ──────────────────────────────────────────────────────── */
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
-    font-family:
-      ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    @apply bg-background text-foreground font-body;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  /* Selection */
+  ::selection {
+    background: oklch(0.75 0.12 200 / 0.3);
+    color: var(--foreground);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--background);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 0;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--border-bright);
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    outline: 1px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+/* ── Utility classes ─────────────────────────────────────────────────── */
+
+@utility text-technical {
+  font-family: var(--font-family-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@utility clip-corner {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+
+@utility clip-corner-sm {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%);
+}
+
+@utility clip-diagonal {
+  clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);
+}
+
+/* ── Technical panel ─────────────────────────────────────────────────── */
+
+@utility panel {
+  @apply border border-border bg-elevated;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+
+@utility panel-accent {
+  @apply border-l-2;
+  border-left-color: var(--cyan);
+}
+
+/* ── Signal indicator ────────────────────────────────────────────────── */
+
+@utility signal-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 0;
+  background: var(--cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+/* ── Circuit decoration ──────────────────────────────────────────────── */
+
+@utility circuit-h {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--border-bright) 20%, var(--border-bright) 80%, transparent 100%);
+    pointer-events: none;
+  }
+}
+
+@utility circuit-v {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg, transparent 0%, var(--border-bright) 20%, var(--border-bright) 80%, transparent 100%);
+    pointer-events: none;
+  }
+}
+
+/* ── Glow effects ────────────────────────────────────────────────────── */
+
+@utility glow-cyan {
+  box-shadow: var(--glow-cyan);
+}
+
+@utility glow-coral {
+  box-shadow: var(--glow-coral);
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

@@ -125,7 +125,15 @@ export function useStudioGames(studioSlug: string) {
   return useQuery({
     queryKey: ['studioGames', studioSlug],
     queryFn: () => api.get<Paginated<Game>>(`/studios/${studioSlug}/games`),
-    enabled: !!studioSlug,
+  });
+}
+
+export function useStudios(page = 1, pageSize = 20, search?: string) {
+  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  if (search) params.set('search', search);
+  return useQuery({
+    queryKey: ['studios', page, pageSize, search],
+    queryFn: () => api.get<Paginated<Studio>>(`/studios?${params}`),
   });
 }
 

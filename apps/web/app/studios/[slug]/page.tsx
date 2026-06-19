@@ -4,9 +4,12 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, MapPin, Globe, Calendar, Users, Gamepad2, Heart } from 'lucide-react';
 
-import { Nav } from '@/components/nav';
-import { Footer } from '@/components/footer';
+import { SiteHeader } from '@/components/site-header';
+import { SiteFooter } from '@/components/site-footer';
 import { GameCard } from '@/components/game-card';
+import { SignalLabel } from '@/components/signal-label';
+import { LoadingSkeleton } from '@/components/loading-skeleton';
+import { ErrorState } from '@/components/error-state';
 import { useStudio, useStudioMembers, useStudioGames } from '@/lib/api/hooks';
 import { FollowButton } from '@/components/follow-button';
 
@@ -19,15 +22,11 @@ export default function StudioDetailPage() {
   if (isLoading) {
     return (
       <>
-        <Nav />
-        <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-10">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 w-48 rounded bg-muted" />
-            <div className="aspect-[3/1] rounded-xl bg-muted" />
-            <div className="h-4 w-96 rounded bg-muted" />
-          </div>
+        <SiteHeader />
+        <main className="mx-auto max-w-5xl px-4 py-8 lg:px-6 lg:py-10">
+          <LoadingSkeleton count={6} height="h-16" />
         </main>
-        <Footer />
+        <SiteFooter />
       </>
     );
   }
@@ -35,33 +34,32 @@ export default function StudioDetailPage() {
   if (error || !studio) {
     return (
       <>
-        <Nav />
-        <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-20 text-center">
-          <h1 className="text-2xl font-semibold">Studio not found</h1>
-          <p className="mt-2 text-muted-foreground">This studio doesn&apos;t exist or was removed.</p>
-          <Link href="/games" className="mt-6 inline-flex items-center gap-2 text-sm text-primary underline">
-            <ArrowLeft className="size-4" /> Back to games
-          </Link>
+        <SiteHeader />
+        <main className="mx-auto max-w-5xl px-4 py-8 lg:px-6 lg:py-10">
+          <ErrorState message="Studio not found." />
+          <div className="mt-4 text-center">
+            <Link href="/games" className="font-mono text-xs uppercase tracking-widest text-cyan underline">Back to games</Link>
+          </div>
         </main>
-        <Footer />
+        <SiteFooter />
       </>
     );
   }
 
   return (
     <>
-      <Nav />
-      <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-10">
+      <SiteHeader />
+      <main className="mx-auto max-w-5xl px-4 py-8 lg:px-6 lg:py-10">
         <Link
           href="/games"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="mb-6 inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
         >
-          <ArrowLeft className="size-4" /> Back
+          <ArrowLeft className="size-3" /> Back
         </Link>
 
         {/* Banner */}
         {studio.bannerUrl && (
-          <div className="mb-6 overflow-hidden rounded-xl">
+          <div className="mb-6 border border-border">
             <img src={studio.bannerUrl} alt="" className="aspect-[3/1] w-full object-cover" />
           </div>
         )}
@@ -69,22 +67,25 @@ export default function StudioDetailPage() {
         {/* Header */}
         <div className="mb-8 flex flex-wrap items-start gap-6">
           {studio.logoUrl && (
-            <div className="size-20 shrink-0 overflow-hidden rounded-xl">
+            <div className="size-20 shrink-0 border border-border">
               <img src={studio.logoUrl} alt={studio.name} className="size-full object-cover" />
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h1 className="text-3xl font-semibold tracking-tight">{studio.name}</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="font-display text-3xl font-semibold tracking-tight">{studio.name}</h1>
+              {studio.isVerified && <SignalLabel color="cyan">Verified</SignalLabel>}
+            </div>
 
-            <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <div className="mt-2 flex flex-wrap items-center gap-4 font-mono text-xs uppercase tracking-widest text-muted-foreground">
               {studio.location && (
                 <span className="inline-flex items-center gap-1">
-                  <MapPin className="size-3.5" /> {studio.location}
+                  <MapPin className="size-3" /> {studio.location}
                 </span>
               )}
               {studio.foundedYear && (
                 <span className="inline-flex items-center gap-1">
-                  <Calendar className="size-3.5" /> Founded {studio.foundedYear}
+                  <Calendar className="size-3" /> Founded {studio.foundedYear}
                 </span>
               )}
               <FollowButton targetType="studio" slug={slug} />
@@ -93,9 +94,9 @@ export default function StudioDetailPage() {
                   href={studio.websiteUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-primary underline-offset-2 hover:underline"
+                  className="inline-flex items-center gap-1 text-cyan underline-offset-2 hover:underline"
                 >
-                  <Globe className="size-3.5" /> Website
+                  <Globe className="size-3" /> Website
                 </a>
               )}
             </div>
@@ -103,57 +104,52 @@ export default function StudioDetailPage() {
         </div>
 
         {studio.tagline && (
-          <p className="mb-6 text-lg text-muted-foreground">{studio.tagline}</p>
+          <p className="mb-8 text-sm leading-relaxed text-muted-foreground">{studio.tagline}</p>
         )}
 
         {/* Stats */}
         <div className="mb-8 grid grid-cols-3 gap-4">
-          <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card/20 p-4">
-            <Heart className="size-5 text-primary" />
-            <span className="text-2xl font-semibold">{studio.followersCount}</span>
-            <span className="text-xs text-muted-foreground">Followers</span>
+          <div className="flex flex-col items-center gap-1 border border-border bg-elevated p-4">
+            <Heart className="size-5 text-coral" />
+            <span className="font-display text-2xl font-semibold">{studio.followersCount}</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Followers</span>
           </div>
-          <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card/20 p-4">
-            <Gamepad2 className="size-5 text-primary" />
-            <span className="text-2xl font-semibold">{studio.gamesCount}</span>
-            <span className="text-xs text-muted-foreground">Games</span>
+          <div className="flex flex-col items-center gap-1 border border-border bg-elevated p-4">
+            <Gamepad2 className="size-5 text-cyan" />
+            <span className="font-display text-2xl font-semibold">{studio.gamesCount}</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Games</span>
           </div>
-          <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card/20 p-4">
-            <Users className="size-5 text-primary" />
-            <span className="text-2xl font-semibold">{studio.membersCount}</span>
-            <span className="text-xs text-muted-foreground">Members</span>
+          <div className="flex flex-col items-center gap-1 border border-border bg-elevated p-4">
+            <Users className="size-5 text-amber" />
+            <span className="font-display text-2xl font-semibold">{studio.membersCount}</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Members</span>
           </div>
         </div>
 
         {studio.description && (
-          <section className="mb-10">
-            <h2 className="mb-3 text-lg font-semibold">About</h2>
-            <div className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-              {studio.description}
-            </div>
+          <section className="mb-8">
+            <h2 className="mb-3 font-display text-xl font-semibold">About</h2>
+            <div className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">{studio.description}</div>
           </section>
         )}
 
         {/* Members */}
         {members?.members && members.members.length > 0 && (
-          <section className="mb-10">
-            <h2 className="mb-3 text-lg font-semibold">Team ({members.members.length})</h2>
+          <section className="mb-8">
+            <h2 className="mb-3 font-display text-xl font-semibold">Team ({members.members.length})</h2>
             <div className="flex flex-wrap gap-3">
               {members.members.map((m) => (
-                <div
-                  key={m.id}
-                  className="flex items-center gap-3 rounded-lg border border-border bg-card/20 p-3"
-                >
+                <div key={m.id} className="flex items-center gap-3 border border-border bg-elevated p-3">
                   {m.user.avatarUrl ? (
-                    <img src={m.user.avatarUrl} alt="" className="size-10 rounded-full object-cover" />
+                    <img src={m.user.avatarUrl} alt="" className="size-10 border border-border object-cover" />
                   ) : (
-                    <div className="grid size-10 place-items-center rounded-full bg-primary/10 text-xs text-primary">
+                    <div className="grid size-10 place-items-center border border-border bg-muted font-mono text-xs uppercase text-muted-foreground">
                       {m.user.displayName.charAt(0)}
                     </div>
                   )}
                   <div>
                     <p className="text-sm font-medium">{m.user.displayName}</p>
-                    <p className="text-xs text-muted-foreground">{m.title ?? m.role}</p>
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">{m.title ?? m.role}</p>
                   </div>
                 </div>
               ))}
@@ -162,8 +158,8 @@ export default function StudioDetailPage() {
         )}
 
         {/* Games */}
-        <section className="mb-10">
-          <h2 className="mb-3 text-lg font-semibold">Games ({studio.gamesCount})</h2>
+        <section className="mb-8">
+          <h2 className="mb-3 font-display text-xl font-semibold">Games ({studio.gamesCount})</h2>
           {gamesData?.items.length ? (
             <div className="grid gap-4 sm:grid-cols-2">
               {gamesData.items.map((game) => (
@@ -171,11 +167,11 @@ export default function StudioDetailPage() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No games yet.</p>
+            <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">No games yet.</p>
           )}
         </section>
       </main>
-      <Footer />
+      <SiteFooter />
     </>
   );
 }
