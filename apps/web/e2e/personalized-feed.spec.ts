@@ -135,7 +135,7 @@ test.describe('Personalized feed', () => {
         body: JSON.stringify(feedResponse([makeItem('devlog', 0)], 1, 1, 10, false)),
       });
     });
-    await page.getByText('Retry').click();
+    await page.getByText('Try again').click();
     await expect(page.getByRole('heading', { name: 'Devlog Item 0' })).toBeVisible();
   });
 
