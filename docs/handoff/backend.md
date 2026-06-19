@@ -50,7 +50,13 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 3. No rate limiting
 
-- **Type:** Limitation · **Severity:** High · **Effort:** S–M · **Status:** OPEN
+- **Type:** Limitation · **Severity:** High · **Effort:** S–M · **Status:** DONE — added
+  `@nestjs/throttler`. Global `ThrottlerModule` (60 req/min/IP) + `ThrottlerGuard` as
+  `APP_GUARD` in `AppModule`. Tighter `@Throttle` overrides: login 10/min, register 5/min,
+  comment create 20/min, reaction create 30/min. Health probe is `@SkipThrottle()`. New spec
+  asserts the login limit → **429**. In-memory store (fine for single instance; swap for Redis
+  if multi-instance later). Note: existing per-module integration tests don't import
+  `AppModule`, so they're unthrottled and unaffected.
 - **Files:** `apps/api/src/app.module.ts`, auth/comments/reactions controllers
 - **Analysis:** No throttling anywhere. Auth endpoints (brute-force), comments/reactions
   (spam) are exposed.

@@ -21,6 +21,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.0.2",
+    "@nestjs/throttler": "^6.5.0",
     "@playmorrow/database": "workspace:*",
     "@playmorrow/types": "workspace:*",
     "argon2": "^0.44.0",

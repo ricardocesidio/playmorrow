@@ -11,6 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -26,6 +27,7 @@ export class ReactionsController {
   // ── DEVOOG REACTIONS ─────────────────────────────────────────────────
 
   @Post('devlogs/:devlogId/reactions')
+  @Throttle({ default: { ttl: 60_000, limit: 30 } }) // anti-spam (#3)
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
@@ -64,6 +66,7 @@ export class ReactionsController {
   // ── COMMENT REACTIONS ────────────────────────────────────────────────
 
   @Post('comments/:commentId/reactions')
+  @Throttle({ default: { ttl: 60_000, limit: 30 } }) // anti-spam (#3)
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
