@@ -88,7 +88,7 @@ polish, then features. Within a phase, items are independent unless noted.
 | **2** | Backend correctness & security | #3, #7, #8 | Cheap, high-value hardening + schema integrity. |
 | **3** | Performance | #9 / #24 | One batch endpoint kills the comment-reaction N+1. |
 | **4** | UX polish | #22, #23, #27, #26 | Small, user-visible fixes. |
-| **5** | Features (`NEEDS DESIGN`) | #19, #20, #25, #28, #32, #33, #34, (#4, #5 deferred) | Each needs its own design pass before coding. |
+| **5** | Features (`NEEDS DESIGN`) | #25, #33, (#4, #5 deferred) | Each needs its own design pass before coding. |
 
 **Concrete first step:** open [`frontend.md`](./frontend.md) → issue **#12**, follow the
 "Reproduce" steps, and capture the *live* failure before touching code.
