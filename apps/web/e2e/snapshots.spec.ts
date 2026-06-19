@@ -10,8 +10,8 @@ test.describe('Visual snapshots', () => {
   // ── Public pages ──────────────────────────────────────────────────────
 
   for (const viewport of ['desktop', 'mobile'] as const) {
-    const width = viewport === 'desktop' ? 1440 : 412;
-    const height = viewport === 'desktop' ? 900 : 915;
+    const width = viewport === 'desktop' ? 1536 : 412;
+    const height = viewport === 'desktop' ? 1024 : 915;
 
     test(`homepage at ${viewport}`, async ({ page }) => {
       test.slow();
@@ -25,7 +25,7 @@ test.describe('Visual snapshots', () => {
       test.slow();
       await page.setViewportSize({ width, height });
       await page.goto('/games', { waitUntil: 'networkidle' });
-      await expect(page.getByRole('heading', { name: 'Explore games' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: /Browse games/i })).toBeVisible();
       await expect(page).toHaveScreenshot(`games-${viewport}.png`);
     });
 
@@ -33,7 +33,7 @@ test.describe('Visual snapshots', () => {
       test.slow();
       await page.setViewportSize({ width, height });
       await page.goto('/games/test-game', { waitUntil: 'networkidle' });
-      await expect(page.getByRole('heading', { name: 'Test Game' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Neon Warden' })).toBeVisible();
       await expect(page).toHaveScreenshot(`game-detail-${viewport}.png`);
     });
 
@@ -97,8 +97,8 @@ test.describe('Visual snapshots', () => {
   // ── Protected pages (authenticated) ────────────────────────────────────
 
   for (const viewport of ['desktop', 'mobile'] as const) {
-    const width = viewport === 'desktop' ? 1440 : 412;
-    const height = viewport === 'desktop' ? 900 : 915;
+    const width = viewport === 'desktop' ? 1536 : 412;
+    const height = viewport === 'desktop' ? 1024 : 915;
 
     test(`dashboard at ${viewport}`, async ({ page }) => {
       test.slow();

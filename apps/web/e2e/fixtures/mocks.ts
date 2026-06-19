@@ -18,15 +18,30 @@ export const MOCK_STUDIO = {
 };
 
 export const MOCK_GAME = {
-  id: 'game-1', title: 'Test Game', slug: 'test-game', tagline: 'A test game',
-  description: 'Full game description', status: 'IN_DEVELOPMENT',
+  id: 'game-1', title: 'Neon Warden', slug: 'test-game', tagline: 'Tactical stealth in a rain-slick cyberpunk city.',
+  description: 'Full game description', status: 'BETA',
   releaseDate: null, expectedReleaseText: 'Q4 2026', priceCents: 1999,
-  currency: 'USD', isFree: false, coverUrl: null, bannerUrl: null,
-  isPublished: true, followersCount: 10,
-  studio: { id: 'studio-1', name: 'Test Studio', slug: 'test-studio' },
-  media: [], platformLinks: [], tags: ['adventure'],
+  currency: 'USD', isFree: false, coverUrl: '/playmorrow/neon-warden.png', bannerUrl: '/playmorrow/neon-warden.png',
+  isPublished: true, followersCount: 12400,
+  studio: { id: 'studio-1', name: 'Obsidian Signal', slug: 'test-studio' },
+  media: [], platformLinks: [
+    { id: 'pc', platform: 'PC', url: '#', label: 'PC' },
+    { id: 'ps5', platform: 'PS5', url: '#', label: 'PS5' },
+    { id: 'xbox', platform: 'XBOX', url: '#', label: 'XBOX' },
+  ], tags: ['Tactical Stealth', 'Cyberpunk'],
   createdAt: '2025-01-01T00:00:00.000Z', updatedAt: '2025-01-01T00:00:00.000Z',
 };
+
+export const MOCK_GAMES = [
+  MOCK_GAME,
+  { ...MOCK_GAME, id: 'game-2', title: 'Starfall Tactics', slug: 'starfall-tactics', status: 'IN_DEVELOPMENT', coverUrl: '/playmorrow/starfall-tactics.png', bannerUrl: '/playmorrow/starfall-tactics.png', followersCount: 8700, studio: { id: 'studio-2', name: 'Ironlight Studios', slug: 'ironlight-studios' }, tags: ['Tactical RPG', 'Space Opera'] },
+  { ...MOCK_GAME, id: 'game-3', title: 'Mossbound', slug: 'mossbound', status: 'ALPHA', coverUrl: '/playmorrow/mossbound.png', bannerUrl: '/playmorrow/mossbound.png', followersCount: 5100, studio: { id: 'studio-3', name: 'Wildbriar', slug: 'wildbriar' }, tags: ['Adventure', 'Atmospheric'] },
+  { ...MOCK_GAME, id: 'game-4', title: 'Paper Relics', slug: 'paper-relics', status: 'PRE_ALPHA', coverUrl: '/playmorrow/paper-relics.png', bannerUrl: '/playmorrow/paper-relics.png', followersCount: 3200, studio: { id: 'studio-4', name: 'Second Story Games', slug: 'second-story-games' }, tags: ['Card Battler', 'Roguelike'] },
+  { ...MOCK_GAME, id: 'game-5', title: 'Voidrunner', slug: 'voidrunner', status: 'ALPHA', coverUrl: '/playmorrow/voidrunner.png', bannerUrl: '/playmorrow/voidrunner.png', followersCount: 6300, studio: { id: 'studio-5', name: 'Voidrunner', slug: 'voidrunner-studio' }, tags: ['Roguelite', 'Twin Stick Shooter'] },
+  { ...MOCK_GAME, id: 'game-6', title: 'Little Giants', slug: 'little-giants', status: 'IN_DEVELOPMENT', coverUrl: '/playmorrow/little-giants.png', bannerUrl: '/playmorrow/little-giants.png', followersCount: 4200, studio: { id: 'studio-6', name: 'Tiny Forge', slug: 'tiny-forge' }, tags: ['City Builder', 'Sandbox'] },
+  { ...MOCK_GAME, id: 'game-7', title: 'Echobloom', slug: 'echobloom', status: 'ALPHA', coverUrl: '/playmorrow/echobloom.png', bannerUrl: '/playmorrow/echobloom.png', followersCount: 2900, studio: { id: 'studio-7', name: 'Lumen Garden', slug: 'lumen-garden' }, tags: ['Narrative', 'Puzzle'] },
+  { ...MOCK_GAME, id: 'game-8', title: 'Northlight', slug: 'northlight', status: 'PRE_ALPHA', coverUrl: '/playmorrow/northlight.png', bannerUrl: '/playmorrow/northlight.png', followersCount: 3800, studio: { id: 'studio-8', name: 'Frostfire Games', slug: 'frostfire-games' }, tags: ['Survival', 'Open World'] },
+];
 
 export async function setupAuth(page: Page) {
   await page.goto('/');
@@ -93,7 +108,7 @@ export async function mockApi(page: Page) {
       // ── Games listing (no slug) ─────────────────────────────────────
       if (path === '/api/games') {
         const search = params.get('search') || '';
-        const items = search ? [{ ...MOCK_GAME, title: 'Searched Game' }] : [MOCK_GAME, { ...MOCK_GAME, id: 'game-2', slug: 'test-game-2', title: 'Test Game 2' }];
+        const items = search ? [{ ...MOCK_GAME, title: 'Searched Game' }] : MOCK_GAMES;
         return await json({ items, total: items.length, page: 1, pageSize: 20, hasMore: false });
       }
 

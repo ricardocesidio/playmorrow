@@ -128,23 +128,20 @@ test.describe('Personalized feed', () => {
     await page.goto('/dashboard/feed');
     await expect(page.getByText('Could not load your feed')).toBeVisible({ timeout: 15_000 });
 
-    // Endpoint recovers; the manual "Try again" refetch should now succeed.
+    // Endpoint recovers; the manual retry should now succeed.
     await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/me/feed', async (route) => {
       await route.fulfill({
         status: 200, contentType: 'application/json',
         body: JSON.stringify(feedResponse([makeItem('devlog', 0)], 1, 1, 10, false)),
       });
     });
-    await page.getByText('Try again').click();
+    await page.getByText('Retry').click();
     await expect(page.getByRole('heading', { name: 'Devlog Item 0' })).toBeVisible();
   });
 
-  test('Pagination: next page requests page=2', async ({ page }) => {
-    const requests: string[] = [];
+  test('Infinite scroll loads next page', async ({ page }) => {
     await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/me/feed', async (route) => {
-      const reqUrl = route.request().url();
-      requests.push(reqUrl);
-      const urlP = new URL(reqUrl);
+      const urlP = new URL(route.request().url());
       const pageN = parseInt(urlP.searchParams.get('page') ?? '1');
       await route.fulfill({
         status: 200, contentType: 'application/json',
@@ -155,11 +152,11 @@ test.describe('Personalized feed', () => {
       });
     });
     await page.goto('/dashboard/feed');
-    // Wait for page 1 to load
+    // First page loads immediately
     await expect(page.getByRole('heading', { name: 'Devlog Item 0' })).toBeVisible({ timeout: 15_000 });
-    // Click Next
-    await page.getByRole('button', { name: 'Next' }).click();
-    // Verify page=2 was requested
-    expect(requests.some((u) => new URL(u).searchParams.get('page') === '2')).toBeTruthy();
+    // Scroll to trigger infinite scroll sentinel
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    // Wait for second page items
+    await expect(page.getByText("You've reached the end")).toBeVisible({ timeout: 20_000 });
   });
 });

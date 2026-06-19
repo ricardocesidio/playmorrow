@@ -10,8 +10,8 @@ test.describe('Authentication', () => {
     });
     await page.goto('/login');
     await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
-    await expect(page.getByPlaceholder('you@example.com')).toBeVisible();
-    await expect(page.getByPlaceholder('••••••••')).toBeVisible();
+    await expect(page.getByLabel('Email or username')).toBeVisible();
+    await expect(page.getByLabel('Password')).toBeVisible();
   });
 
   test('Register page renders', async ({ page }) => {
@@ -27,12 +27,12 @@ test.describe('Authentication', () => {
       await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({}) });
     });
     await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/login', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user: MOCK_USER, accessToken: MOCK_TOKEN }) });
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user: MOCK_USER, accessToken: MOCK_TOKEN, refreshToken: 'mock-refresh' }) });
     });
 
     await page.goto('/login');
-    await page.getByPlaceholder('you@example.com').fill('testuser');
-    await page.getByPlaceholder('••••••••').fill('password123');
+    await page.getByLabel('Email or username').fill('testuser');
+    await page.getByLabel('Password').fill('password123');
     await page.getByRole('button', { name: 'Sign in' }).click();
 
     // Wait for redirect to dashboard
@@ -51,8 +51,8 @@ test.describe('Authentication', () => {
     });
 
     await page.goto('/login');
-    await page.getByPlaceholder('you@example.com').fill('testuser');
-    await page.getByPlaceholder('••••••••').fill('wrong');
+    await page.getByLabel('Email or username').fill('testuser');
+    await page.getByLabel('Password').fill('wrong');
     await page.getByRole('button', { name: 'Sign in' }).click();
 
     await expect(page.getByText('Invalid credentials')).toBeVisible();

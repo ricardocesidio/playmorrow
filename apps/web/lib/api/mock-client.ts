@@ -9,6 +9,7 @@ import {
   MOCK_USER,
   MOCK_STUDIO,
   MOCK_GAME,
+  MOCK_GAMES,
   MOCK_DEVLOG,
   MOCK_ROADMAP_ITEM,
   MOCK_FEED_ITEM_DEVLOG,
@@ -68,7 +69,11 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
     if (slug === 'test-game') return MOCK_GAME;
   }
   if (path === '/games' || (segments[0] === 'games' && segments.length === 1)) {
-    return paginated([MOCK_GAME, { ...MOCK_GAME, id: 'game-2', slug: 'test-game-2', title: 'Test Game 2' }]);
+    const search = searchParams.get('search')?.toLowerCase();
+    const games = search
+      ? MOCK_GAMES.filter((game) => game.title.toLowerCase().includes(search))
+      : MOCK_GAMES;
+    return paginated(games);
   }
 
   // Studios

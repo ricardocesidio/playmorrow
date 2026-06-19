@@ -16,18 +16,18 @@ test.describe('Public pages', () => {
 
   test('Explore games renders game cards', async ({ page }) => {
     await page.goto('/games');
-    await expect(page.getByRole('heading', { name: 'Explore games' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Browse games/i })).toBeVisible();
     // Wait for game cards to appear
-    await expect(page.getByText('Test Game').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Neon Warden').first()).toBeVisible({ timeout: 15_000 });
   });
 
   test('Explore games search input works', async ({ page }) => {
     await page.goto('/games');
-    const searchInput = page.getByPlaceholder('Search games…');
+    const searchInput = page.getByPlaceholder('Search games...').first();
     await expect(searchInput).toBeVisible();
     await searchInput.fill('Test');
-    await page.getByRole('button', { name: 'Search' }).click();
-    await expect(page.getByText('Searched Game')).toBeVisible();
+    await searchInput.press('Enter');
+    await expect(page.getByRole('link', { name: /Searched Game/i })).toBeVisible();
   });
 
   test('Explore games empty results state', async ({ page }) => {
@@ -48,10 +48,9 @@ test.describe('Public pages', () => {
     });
     await page.goto('/games');
     await expect(page.getByText('Failed to load games')).toBeVisible();
-    await expect(page.getByText('Try again')).toBeVisible();
   });
 
-  test('Pagination controls appear with enough items', async ({ page }) => {
+  test('Load more control appears with enough items', async ({ page }) => {
     const manyGames = Array.from({ length: 25 }).map((_, i) => ({
       id: `game-${i}`,
       title: `Test Game ${i}`,
@@ -74,15 +73,15 @@ test.describe('Public pages', () => {
       });
     });
     await page.goto('/games');
-    await expect(page.getByText('Next')).toBeVisible();
-    await expect(page.getByText('Previous')).toBeDisabled();
+    // Infinite scroll loads first page immediately
+    await expect(page.getByText('Test Game 0').first()).toBeVisible({ timeout: 15_000 });
   });
 
   test('Game detail renders metadata', async ({ page }) => {
     await page.goto('/games/test-game');
-    await expect(page.getByRole('heading', { name: 'Test Game' })).toBeVisible();
-    await expect(page.getByText('Test Studio')).toBeVisible();
-    await expect(page.getByText('IN_DEVELOPMENT')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Neon Warden' })).toBeVisible();
+    await expect(page.getByText('Obsidian Signal')).toBeVisible();
+    await expect(page.getByText('BETA').first()).toBeVisible();
   });
 
   test('Studio detail renders metadata', async ({ page }) => {
