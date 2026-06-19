@@ -86,8 +86,9 @@ pnpm dev
 | `pnpm build`        | Build all apps/packages                                |
 | `pnpm lint`         | Lint everything                                        |
 | `pnpm typecheck`    | Type-check everything                                  |
-| `pnpm test`         | Backend unit tests (Vitest)                            |
+| `pnpm test`         | Backend unit tests only (Vitest) — does **not** run E2E |
 | `pnpm test:e2e`     | Frontend E2E tests (Playwright, desktop + mobile)      |
+| `pnpm test:all`     | Backend unit tests, then E2E (kept separate; E2E needs a build) |
 | `pnpm format`       | Prettier write                                         |
 | `pnpm db:migrate`   | Create/apply a Prisma migration                        |
 | `pnpm db:seed`      | Seed demo data (studio + game + devlog)                |
@@ -110,6 +111,21 @@ pnpm --filter @playmorrow/web test:e2e:headed
 ```
 
 Tests use **mocked API** — no database or backend required.
+
+> `pnpm test` runs backend Vitest only; E2E is a separate command (it needs a
+> production build). Use `pnpm test:all` to run both, as CI does.
+
+### Ports
+
+| Port | Process                          |
+| ---- | -------------------------------- |
+| 3000 | Web dev server (`pnpm dev`)      |
+| 3099 | Web server for E2E (Playwright)  |
+| 4000 | API (NestJS)                     |
+
+Playwright owns the 3099 server for the duration of a run. If a previous run
+left a process wedged on the port, clear it with
+`pnpm --filter @playmorrow/web clean-port` (override the port via `PLAYWRIGHT_PORT`).
 
 ## Features
 

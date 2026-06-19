@@ -65,7 +65,9 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 34. `next dev --turbopack` port conflict with E2E
 
-- **Type:** DX · **Severity:** Low · **Effort:** S · **Status:** OPEN
+- **Type:** DX · **Severity:** Low · **Effort:** S · **Status:** DONE — documented the port
+  map (3000 dev web · 3099 E2E web · 4000 api) in the README and added a `clean-port` script
+  (honours `PLAYWRIGHT_PORT`) to clear a wedged E2E port. Paired with #15.
 - **Files:** `apps/web/package.json` (`dev` = port 3000, `test:e2e:server` = 3099),
   `apps/web/playwright.config.ts` (PORT 3099)
 - **Analysis:** Dev server uses 3000, E2E uses 3099 — they shouldn't collide by default, but

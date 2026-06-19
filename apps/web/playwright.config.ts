@@ -42,7 +42,11 @@ export default defineConfig({
   webServer: {
     command: `pnpm --filter @playmorrow/web start -p ${PORT}`,
     port: PORT,
-    reuseExistingServer: !process.env.CI,
+    // Always let Playwright own the server lifecycle (#15). Reusing an existing
+    // server silently adopts a stale/wedged process left over from a killed run,
+    // which hangs the suite. If the port is busy, fail loudly instead — run
+    // `pnpm --filter @playmorrow/web clean-port` to clear it (see #34 port map).
+    reuseExistingServer: false,
     timeout: 60_000,
     env: { NEXT_PUBLIC_API_URL: 'http://localhost:4000/api' },
   },

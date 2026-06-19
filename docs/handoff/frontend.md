@@ -100,7 +100,10 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 15. `reuseExistingServer: true` reuses a dead server
 
-- **Type:** Bug/DX · **Severity:** Medium · **Effort:** S · **Status:** OPEN
+- **Type:** Bug/DX · **Severity:** Medium · **Effort:** S · **Status:** DONE — set
+  `reuseExistingServer: false` in `playwright.config.ts` so Playwright always owns the server
+  lifecycle (no silent reuse of a wedged process). Added a `clean-port` script to clear a busy
+  port. Desktop suite 31/31 green.
 - **Files:** `apps/web/playwright.config.ts` (`webServer.reuseExistingServer`)
 - **Analysis:** Locally `reuseExistingServer: !process.env.CI`. If a prior `next start` on
   3099 was killed/crashed, Playwright can silently reuse a dead port and hang/fail until the
@@ -194,7 +197,9 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 23. Feed page doesn't scroll to top on pagination
 
-- **Type:** Bug · **Severity:** Low · **Effort:** S · **Status:** OPEN
+- **Type:** Bug · **Severity:** Low · **Effort:** S · **Status:** DONE — added a `useEffect`
+  keyed on `page` in `dashboard/feed/page.tsx` that calls `window.scrollTo({ top: 0 })`,
+  using `behavior: 'auto'` when `prefers-reduced-motion: reduce`.
 - **Files:** `apps/web/app/dashboard/feed/page.tsx` (Next/Previous `setPage`)
 - **Analysis:** Clicking Next/Previous loads new items but the viewport stays scrolled down.
 - **Suggested fix:** On page change (`useEffect` keyed on `page`, or in the click handler)
@@ -237,7 +242,13 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 27. Dashboard "Feed" card links to a protected page when logged out
 
-- **Type:** Bug (UX) · **Severity:** Low · **Effort:** S · **Status:** OPEN
+- **Type:** Bug (UX) · **Severity:** Low · **Effort:** S · **Status:** DONE (not reproducible)
+  — verified the only link to `/dashboard/feed` is the card on `dashboard/page.tsx`, which is
+  itself auth-gated (redirects to `/login` and returns `null` before render when
+  unauthenticated). A logged-out user never sees the card, so there is nothing to hide. No
+  code change. Follow-up nice-to-have (separate, S–M): the login page hardcodes a redirect to
+  `/dashboard` with no `next` support, so protected pages can't send users back to their
+  intended destination after login — tracked informally, not part of #27.
 - **Files:** `apps/web/app/dashboard/page.tsx` (the Feed card),
   `apps/web/app/dashboard/feed/page.tsx` (redirects to `/login` when unauthenticated)
 - **Analysis:** `/dashboard/feed` redirects logged-out users to `/login`; a card linking
@@ -257,7 +268,10 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 29. `pnpm test` doesn't run E2E
 
-- **Type:** DX · **Severity:** Low · **Effort:** S · **Status:** OPEN
+- **Type:** DX · **Severity:** Low · **Effort:** S · **Status:** DONE — kept E2E out of the
+  default `test` (it needs a build), but made the split explicit: added a root `test:all`
+  script (`turbo run test && … test:e2e`) and documented in the README that `pnpm test` is
+  backend-only.
 - **Files:** root `package.json` (`test` = `turbo run test`; `test:e2e` separate), `turbo.json`
 - **Analysis:** `pnpm test` runs only backend Vitest (207 passing). E2E is the separate
   `pnpm test:e2e`. Intentional, but easy to forget E2E exists.

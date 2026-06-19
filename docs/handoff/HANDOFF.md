@@ -21,6 +21,7 @@
 | 2026-06-18 | 1 | #13 done | `c3e5e6d` | Mobile project run + triaged. Same auth-setup race fixed in `auth`/`social-actions`/`responsive` via `addInitScript`. Desktop & mobile `--repeat-each=2` → 62/62 each. |
 | 2026-06-18 | 1 | #14 done | `13bec33` | GitHub Actions CI green: quality + backend(postgres:16) + e2e(desktop+mobile). [First green run](https://github.com/ricardocesidio/playmorrow/actions/runs/27785284477). Backend suite verified against real Postgres. CI uses Node 22 (pnpm 11.1.3 needs ≥22.13). |
 | 2026-06-19 | 2 | #1, #31 done | `8415fdc` | ValidationPipe parity restored. The "SWC can't emit class-validator metadata" claim was stale — re-enabled `whitelist: true` + `forbidNonWhitelisted: true` in `create-test-app.ts`. Full backend suite green **223/223** against local Postgres. Added regression test (unknown body prop → 400), verified it fails under the old config. |
+| 2026-06-19 | quick wins | #23, #27, #15, #29, #34 done | _pending_ | Effort-S sweep. #23 feed scrolls to top on pagination (reduced-motion aware). #27 not reproducible — dashboard (only Feed-card link) is auth-gated. #15 `reuseExistingServer: false` so Playwright owns the server. #34 port map documented + `clean-port` script. #29 README clarified + root `test:all`. Desktop E2E 31/31 green; web typecheck+lint clean. |
 
 **Phase 0 verification:** `pnpm --filter @playmorrow/web lint` → 0 warnings; `prisma validate`
 clean (config + env load); turbo "no output files" warning gone on full `pnpm test`.

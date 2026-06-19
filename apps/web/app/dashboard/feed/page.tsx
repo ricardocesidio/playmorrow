@@ -36,6 +36,12 @@ export default function PersonalFeedPage() {
     if (!authLoading && !isAuthenticated) router.replace('/login');
   }, [authLoading, isAuthenticated, router]);
 
+  // Reset the viewport to the top when paginating so new items start in view (#23).
+  useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }, [page]);
+
   const handleTypeChange = (newType: string) => {
     setType(newType);
     setPage(1);
