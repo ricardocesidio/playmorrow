@@ -40,6 +40,7 @@
 | 2026-06-19 | 5 | #33 done | `ffd168a` | Storybook 10.4 + @storybook/nextjs. 9 stories covering all shared UI components. Compatible addons only (blocks/docs deferred — incompatible with storybook@10.x). Tailwind v4 CSS + dark mode + autodocs. |
 | 2026-06-19 | post | Dark mode toggle | current | Manual theme toggle (Sun/Moon icon in Nav). Replaced hardcoded className='dark' with next-themes ThemeProvider. MarkdownEditor respects current theme. |
 | 2026-06-19 | post | Toast notifications | current | Installed sonner and added <Toaster> to Providers. Added toast.success/error to follow/unfollow, delete studio/game/devlog mutations. |
+| 2026-06-19 | post | Infinite scroll | current | Replaced Previous/Next pagination on feed and games pages with IntersectionObserver-based infinite scroll. New hooks: useInfinitePersonalFeed, useInfiniteGames, useIntersectionObserver. |
 
 **Phase 0 verification:** `pnpm --filter @playmorrow/web lint` → 0 warnings; `prisma validate`
 clean (config + env load); turbo "no output files" warning gone on full `pnpm test`.
