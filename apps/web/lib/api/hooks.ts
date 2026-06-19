@@ -294,6 +294,7 @@ export interface NotificationItem {
   body: string | null;
   targetType: string | null;
   targetId: string | null;
+  targetUrl: string | null;
   readAt: string | null;
   createdAt: string;
   actor: { id: string; username: string; displayName: string; avatarUrl: string | null } | null;

@@ -192,6 +192,8 @@ describe('NotificationsController (e2e)', () => {
     const commentNotif = res.body.items.find((n: { type: string }) => n.type === 'NEW_COMMENT');
     expect(commentNotif).toBeDefined();
     expect(commentNotif.targetType).toBe('DEVLOG');
+    // #26: notification carries a resolved deep link to the target.
+    expect(commentNotif.targetUrl).toBe(`/devlogs/${devlogId}`);
   });
 
   it('New reply notifies parent comment author', async () => {
