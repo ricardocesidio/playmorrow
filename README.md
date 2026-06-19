@@ -36,7 +36,7 @@ Tooling: **pnpm** workspaces + **Turborepo**.
 | ORM / DB    | Prisma 6 + PostgreSQL                                         |
 | Auth        | JWT (argon2 password hashing)                                 |
 | API docs    | OpenAPI (Swagger) at `/docs`                                  |
-| Testing     | Vitest (unit, 207+ tests), Playwright (E2E, 31 tests)         |
+| Testing     | Vitest (backend, 241+ tests), Playwright (E2E, 31 tests)      |
 
 ## Prerequisites
 
@@ -147,29 +147,34 @@ left a process wedged on the port, clear it with
 | Explore games (search, pagination) | `/games` |
 | Game detail (devlogs, roadmap, media, press kit) | `/games/[slug]` |
 | Studio detail (members, games, followers) | `/studios/[slug]` |
-| Devlog detail (body, comments, reactions) | `/devlogs/[id]` |
+| Devlog detail (body with rich text, comments, reactions) | `/devlogs/[id]` |
 | Public feed | `/feed/public` |
 
 ### Authenticated
 
 | Page | Route |
 | ---- | ----- |
-| Login / Register | `/login` · `/register` |
+| Login / Register / OAuth (Google, GitHub) | `/login` · `/register` · `/oauth/callback` |
 | Dashboard | `/dashboard` |
-| Create / Edit studio | `/studios/new` · `/dashboard/studios/[slug]` |
-| Create / Edit game | `/dashboard/games/new` · `/dashboard/games/[slug]` |
-| Write / Edit devlog | `/dashboard/devlogs/new` · `/dashboard/devlogs/[id]` |
+| Create / Edit studio (with logo/banner uploads) | `/studios/new` · `/dashboard/studios/[slug]` |
+| Create / Edit game (with cover/banner uploads) | `/dashboard/games/new` · `/dashboard/games/[slug]` |
+| Write / Edit devlog (rich text editor, cover upload) | `/dashboard/devlogs/new` · `/dashboard/devlogs/[id]` |
 | Manage roadmap | `/dashboard/roadmap` |
 | Manage press kit | `/dashboard/games/[slug]/press-kit` |
-| Personalized feed | `/dashboard/feed` |
-| Notifications | `/dashboard/notifications` |
+| Personalized feed (type filters, pagination) | `/dashboard/feed` |
+| Notifications (real-time SSE, read/unread tabs) | `/dashboard/notifications` |
+| Manage following | `/dashboard/following` |
+| Moderation reports (admin) | `/dashboard/reports` |
 
-### Follow, comment, react
+### Community
 
 - Follow/unfollow studios and games
-- Comment on devlogs (including threaded replies)
-- Edit/delete own comments
+- Comment on devlogs (including threaded replies, edit/delete)
 - React to devlogs and comments (LIKE, LOVE, HYPE, INSIGHTFUL)
+- OAuth login with Google and GitHub
+- Real-time notification badges via SSE
+- Image uploads (local disk, 10MB limit)
+- Moderation reports with review workflow
 
 ## Data model
 
@@ -179,9 +184,10 @@ left a process wedged on the port, clear it with
 
 See [`packages/database/prisma/schema.prisma`](packages/database/prisma/schema.prisma).
 
-## Known issues
+## Issues
 
-All 34 known issues are catalogued in [`docs/handoff/`](docs/handoff/):
+All 34 issues are catalogued in [`docs/handoff/`](docs/handoff/).
+**31 DONE · 2 DEFERRED · 1 OPEN** (#33 — Storybook):
 
 - [`HANDOFF.md`](docs/handoff/HANDOFF.md) — master index + progress log
 - [`backend.md`](docs/handoff/backend.md) — #1–#11
@@ -190,7 +196,9 @@ All 34 known issues are catalogued in [`docs/handoff/`](docs/handoff/):
 
 ## Status
 
-🚧 **v0.3 — public beta.** All core CRUD + community features are implemented:
-auth, studios, games, devlogs, roadmap, press kits, follows, comments, reactions,
-notifications, personalized feed, and E2E test suite. Remaining work focuses on
-hardening, CI, and optional features (search, realtime, uploads).
+🚧 **v0.5 — near feature-complete.** All core CRUD + community features are implemented:
+auth (JWT + refresh tokens + OAuth), studios, games, devlogs (rich text editor), roadmap,
+press kits, follows, comments, reactions, notifications (real-time SSE), personalized feed,
+image uploads, moderation reports, and E2E test suite (with visual snapshots). Remaining
+work: Storybook/component previews (#33). Deferred: email verification (#4), password
+reset (#5).

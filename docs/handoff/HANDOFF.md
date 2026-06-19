@@ -5,12 +5,13 @@
 > order. Each issue has root-cause analysis, affected files, a suggested fix, and an
 > effort estimate. Work top-to-bottom through the phases unless told otherwise.
 
-- **Generated:** 2026-06-18
+- **Generated:** 2026-06-19
 - **Repo:** https://github.com/ricardocesidio/playmorrow (`main`)
-- **Source list:** 34 issues — 11 backend, 18 frontend, 5 dev-ex.
-- **Decisions captured so far:** email-based features (#4 verification, #5 password reset)
-  are **deferred** by product owner. Other feature infra (uploads storage, realtime
-  transport, OAuth providers) is **undecided** — those issues are flagged `NEEDS DESIGN`.
+- **Source list:** 34 issues — 11 backend, 18 frontend, 5 dev-ex (31 DONE, 2 DEFERRED, 1 OPEN).
+- **Decisions captured:** email-based features (#4 verification, #5 password reset) are
+  **deferred** by product owner. All other design decisions have been made: uploads use **local
+  disk** (multer), realtime uses **SSE** (RxJS Subject), OAuth uses **Google + GitHub**
+  (passport strategies, account linking by verified email).
 
 ## Progress log
 
@@ -40,11 +41,8 @@
 **Phase 0 verification:** `pnpm --filter @playmorrow/web lint` → 0 warnings; `prisma validate`
 clean (config + env load); turbo "no output files" warning gone on full `pnpm test`.
 
-> ✅ **Baseline update (2026-06-19):** a local Postgres is now reachable on `localhost:5432`
-> (schema up to date via `prisma migrate status`). The full backend suite runs green —
-> **223/223** across all 14 test files. The earlier "5 failed · no local backend baseline"
-> note (2026-06-18) was caused by the missing DB and no longer applies. E2E (#12) remains
-> API-mocked and does not need a DB.
+> ✅ **Baseline (2026-06-19):** backend suite runs **241/241** across 16 test files (when a
+> local Postgres is available). E2E remains API-mocked and does not need a DB.
 
 ## Issue catalogue (by area)
 
@@ -84,15 +82,15 @@ polish, then features. Within a phase, items are independent unless noted.
 
 | Phase | Theme | Issues | Why this order |
 |-------|-------|--------|----------------|
-| **0** | Quick wins / clear the noise | #11, #10, #17, #30, #31 | Trivial, remove warnings/friction before real work. |
-| **1** | Green E2E + CI (critical path) | #12 → #1 → #15/#16 → #13 → #29 → #14 | A trustworthy, automated test gate. #12 first (reproduce!). |
-| **2** | Backend correctness & security | #3, #7, #8 | Cheap, high-value hardening + schema integrity. |
-| **3** | Performance | #9 / #24 | One batch endpoint kills the comment-reaction N+1. |
-| **4** | UX polish | #22, #23, #27, #26 | Small, user-visible fixes. |
-| **5** | Features (`NEEDS DESIGN`) | #33, (#4, #5 deferred) | Each needs its own design pass before coding. |
+| **0** | Quick wins / clear the noise | #11, #10, #17, #30, #31 | ✅ Done. |
+| **1** | Green E2E + CI (critical path) | #12 → #1 → #15/#16 → #13 → #29 → #14 | ✅ Done. |
+| **2** | Backend correctness & security | #3, #7, #8 | ✅ Done. |
+| **3** | Performance | #9 / #24 | ✅ Done. |
+| **4** | UX polish | #22, #23, #27, #26 | ✅ Done. |
+| **5** | Features (1 remaining) | #33, (#4, #5 deferred) | Storybook needs design pass. |
 
-**Concrete first step:** open [`frontend.md`](./frontend.md) → issue **#12**, follow the
-"Reproduce" steps, and capture the *live* failure before touching code.
+**Next step:** open [`devx.md`](./devx.md) → issue **#33** (Storybook) which needs a
+design decision before coding.
 
 ---
 
@@ -139,10 +137,10 @@ pnpm test:e2e                            # playwright starts `next start -p 3099
 ### Environment / infra facts
 
 - **Docker is not installed on the dev machine.** Local Postgres options: hosted Neon /
-  Supabase, or install Docker for `docker-compose.yml`. CI must use a Postgres **service
-  container** (#14).
-- `apps/api/.env` is gitignored; copy from `.env.example` (#30).
-- No `.github/` workflows yet (#14). No `docs/` other than this handoff.
+  Supabase, or install Docker for `docker-compose.yml`. CI already uses a Postgres **service
+  container**.
+- `apps/api/.env` is gitignored; `pnpm setup:env` copies from `.env.example` automatically.
+- CI workflows exist in `.github/workflows/ci.yml` (quality + backend + e2e).
 
 ### Conventions to follow
 

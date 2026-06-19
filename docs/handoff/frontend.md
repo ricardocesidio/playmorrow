@@ -147,14 +147,15 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 ## 18. No image uploads
 
 - **Type:** Feature · **Severity:** Medium · **Effort:** L · **Status:** DONE
-- **Files:** create/edit forms in `apps/web/app/...` (studios/games/devlogs/press-kit),
-  backend upload endpoint (new), storage adapter (new)
-- **Analysis:** All media (cover/banner/logo/avatar/game media) are pasted URLs — no file
-  picker, no upload endpoint. Storage backend **undecided** (R2/S3 vs Supabase vs
-  Cloudinary/UploadThing).
-- **Suggested approach:** Decide storage first. Then presigned-upload endpoint on the API,
-  a reusable `<ImageUpload>` component (drag/drop + progress + preview) replacing URL inputs,
-  validation (type/size), and persisting the returned URL. **Design note required.**
+- **Files:** create/edit forms in `apps/web/app/...` (studios/games/devlogs),
+  `apps/api/src/upload/` (new module)
+- **Analysis:** All media (cover/banner/logo/avatar/game media) were pasted URLs — no file
+  picker, no upload endpoint.
+- **Solution:** Local disk storage via multer: `POST /api/upload` (auth-gated, 10 MB limit,
+  image-only). Frontend `<ImageUpload>` component with file picker + preview, wired into
+  studio edit (logo/banner), game edit (cover/banner), devlog edit (cover). Served via
+  Express static at `/api/uploads/*`. Storage choice: local disk (MVP pragmatism — swap for
+  S3/R2 when needed).
 
 ## 19. No studio/game/devlog/roadmap deletion UI
 
@@ -181,12 +182,13 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 - **Type:** Feature · **Severity:** Low–Medium · **Effort:** M–L · **Status:** DONE
 - **Files:** `apps/web/lib/api/hooks.ts` (`useUnreadNotificationCount`, polls 60s),
-  `apps/web/components/nav.tsx`, backend (SSE/WS endpoint, new)
-- **Analysis:** `useUnreadNotificationCount` polls every 60s; new notifications appear only on
-  refresh/poll. Transport (SSE vs WebSocket vs better polling) **undecided**.
-- **Suggested approach:** Pick transport. Cheapest interim: reduce interval + `refetchOnWindowFocus`.
-  Real-time: SSE endpoint (`GET /api/me/notifications/stream`) that pushes unread count;
-  frontend `EventSource` updates the query cache. **Design note required.**
+  `apps/web/components/nav.tsx`, `apps/api/src/notifications/notifications.controller.ts`
+- **Analysis:** `useUnreadNotificationCount` polled every 60s; new notifications appeared only
+  on refresh/poll.
+- **Solution:** SSE transport: backend `GET /api/me/notifications/stream` pushes unread count
+  on notification creation via RxJS Subject + filter. Frontend `EventSource` subscription
+  updates the TanStack Query cache in real-time (cache invalidation). 60s polling kept as
+  fallback. SSE chosen over WebSocket for simplicity — unidirectional push is sufficient.
 
 ## 22. Auth hydration flash
 

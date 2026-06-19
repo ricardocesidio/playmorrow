@@ -42,11 +42,11 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
   `strategies/jwt.strategy.ts`), `apps/web/lib/api/auth-context.tsx`
 - **Analysis:** Single JWT, 7-day expiry, no refresh flow. Expiry = forced logout. `User`
   has no token/session table.
-- **Suggested approach:** Short-lived access token (~15m) + rotating refresh token. Decide
-  storage (httpOnly cookie vs. DB-backed refresh-token table with rotation + revocation).
-  Add `POST /auth/refresh`, `POST /auth/logout`. Frontend: silent refresh on 401, update
-  `auth-context`. **Design note required** (cookie vs. localStorage has CORS/security
-  implications — current setup is `Authorization: Bearer` from localStorage).
+- **Solution:** Short-lived access token (15m) + rotating refresh token stored in a
+  `RefreshToken` Prisma model (sha256-hashed, 30-day expiry). Token is stored in
+  `localStorage` (same as the access token) as the existing `Authorization: Bearer` flow
+  is already CORS-compatible. Rotation on each `POST /auth/refresh`, revocation on
+  `POST /auth/logout`. Frontend silent refresh on 401 logged in the auth context.
 
 ## 3. No rate limiting
 
@@ -91,10 +91,10 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
   OAuth-only accounts")
 - **Analysis:** Email/password only. Schema already anticipates OAuth (nullable
   `passwordHash`).
-- **Suggested approach:** `passport` strategies for chosen provider(s) (Google / GitHub /
-  Discord — **provider list undecided**), account-linking rules (match by verified email),
-  callback routes, and frontend buttons. **Design note required** (which providers; link vs.
-  separate accounts).
+- **Solution:** Google + GitHub via `passport-google-oauth20` and `passport-github2`.
+  Account linking by verified email (existing user → update avatar; new user → create).
+  Frontend buttons on `/login` and a `/oauth/callback` page that stores tokens and
+  redirects to dashboard.
 
 ## 7. Report `reason` is a free string, not an enum
 
@@ -139,15 +139,14 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
   keyed by comment id — independent of comment count. Three integration tests added. Frontend
   consumes it in #24.
 - **Files:** `apps/api/src/reactions/reactions.controller.ts`,
-  `apps/api/src/reactions/reactions.service.ts` (frontend half: #24)
+  `apps/api/src/reactions/reactions.service.ts`
 - **Analysis:** Reaction counts are only available per-entity via
   `GET /api/comments/:id/reactions` and `GET /api/devlogs/:id/reactions`. A devlog thread with
   N comments => N requests (the frontend fans these out — see #24).
-- **Suggested fix:** Add a **batch endpoint**, e.g.
-  `GET /api/devlogs/:devlogId/comments/reactions` (or accept `?commentIds=` / return reactions
-  embedded in the comments list) that returns counts + viewer reactions for all comments in
-  one query (`groupBy` on `commentId`). Coordinate the response shape with #24 so the
-  frontend can key a single `useQuery` per devlog.
+- **Solution:** Added `GET /api/devlogs/:devlogId/comments/reactions` that returns counts +
+  viewer reactions for all non-deleted comments in 2 queries (`groupBy` on `[commentId, type]`
+  + viewer `findMany`), keyed by comment id. Frontend (`#24`) consumes it via a single
+  `useDevlogCommentReactions` query.
 
 ## 10. Prisma v7 deprecation: seed config in `package.json`
 
