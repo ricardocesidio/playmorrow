@@ -3,11 +3,11 @@
 import { useState, type FormEvent, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, ExternalLink, FileText } from 'lucide-react';
+import { ArrowLeft, Save, ExternalLink, FileText, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
-import { useDevlog, useUpdateDevlog } from '@/lib/api/hooks';
+import { useDevlog, useUpdateDevlog, useDeleteDevlog } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
 
 export default function EditDevlogPage() {
@@ -16,6 +16,7 @@ export default function EditDevlogPage() {
   const { token, isAuthenticated, isLoading: authLoading } = useAuth();
   const { data: devlog, isLoading: devlogLoading } = useDevlog(id);
   const updateDevlog = useUpdateDevlog();
+  const deleteDevlog = useDeleteDevlog();
 
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
@@ -154,12 +155,31 @@ export default function EditDevlogPage() {
             : <span className="text-xs text-muted-foreground">(publishedAt will be cleared)</span>}
         </div>
 
-        <div className="flex gap-3 pt-2">
-          <Button type="submit" disabled={updateDevlog.isPending}>
-            {updateDevlog.isPending ? 'Saving…' : 'Save changes'}
-            <Save className="size-4" />
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div className="flex gap-3">
+            <Button type="submit" disabled={updateDevlog.isPending}>
+              {updateDevlog.isPending ? 'Saving…' : 'Save changes'}
+              <Save className="size-4" />
+            </Button>
+            <Button asChild variant="outline"><Link href="/dashboard">Cancel</Link></Button>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="border-destructive/30 text-destructive hover:bg-destructive/10"
+            onClick={async () => {
+              if (!token || !confirm(`Delete devlog "${devlog?.title}" permanently? This cannot be undone.`)) return;
+              try {
+                await deleteDevlog.mutateAsync({ id, token });
+                router.push('/dashboard');
+              } catch { /* ignore */ }
+            }}
+            disabled={deleteDevlog.isPending}
+          >
+            <Trash2 className="size-4" />
+            {deleteDevlog.isPending ? 'Deleting…' : 'Delete devlog'}
           </Button>
-          <Button asChild variant="outline"><Link href="/dashboard">Cancel</Link></Button>
         </div>
       </form>
     </div>

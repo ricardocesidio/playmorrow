@@ -3,11 +3,11 @@
 import { useState, type FormEvent, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Save, ExternalLink, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
-import { useStudio, useUpdateStudio } from '@/lib/api/hooks';
+import { useStudio, useUpdateStudio, useDeleteStudio } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
 
 export default function EditStudioPage() {
@@ -16,6 +16,7 @@ export default function EditStudioPage() {
   const { token, isAuthenticated, isLoading: authLoading } = useAuth();
   const { data: studio, isLoading: studioLoading } = useStudio(slug);
   const updateStudio = useUpdateStudio();
+  const deleteStudio = useDeleteStudio();
 
   const [name, setName] = useState('');
   const [tagline, setTagline] = useState('');
@@ -202,13 +203,32 @@ export default function EditStudioPage() {
           </div>
         </div>
 
-        <div className="flex gap-3 pt-2">
-          <Button type="submit" disabled={updateStudio.isPending}>
-            {updateStudio.isPending ? 'Saving…' : 'Save changes'}
-            <Save className="size-4" />
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/dashboard">Cancel</Link>
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div className="flex gap-3">
+            <Button type="submit" disabled={updateStudio.isPending}>
+              {updateStudio.isPending ? 'Saving…' : 'Save changes'}
+              <Save className="size-4" />
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/dashboard">Cancel</Link>
+            </Button>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="border-destructive/30 text-destructive hover:bg-destructive/10"
+            onClick={async () => {
+              if (!token || !confirm(`Delete studio "${studio?.name}" permanently? This cannot be undone.`)) return;
+              try {
+                await deleteStudio.mutateAsync({ slug, token });
+                router.push('/dashboard');
+              } catch { /* ignore */ }
+            }}
+            disabled={deleteStudio.isPending}
+          >
+            <Trash2 className="size-4" />
+            {deleteStudio.isPending ? 'Deleting…' : 'Delete studio'}
           </Button>
         </div>
       </form>

@@ -158,7 +158,7 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 19. No studio/game/devlog/roadmap deletion UI
 
-- **Type:** Feature/Gap · **Severity:** Medium · **Effort:** M · **Status:** OPEN
+- **Type:** Feature/Gap · **Severity:** Medium · **Effort:** M · **Status:** DONE
 - **Files:** dashboard pages under `apps/web/app/dashboard/...`, corresponding API DELETE
   endpoints (verify they exist per domain in `apps/api/src/*`)
 - **Analysis:** Users can create/edit but not delete studios, games, devlogs, or roadmap items.

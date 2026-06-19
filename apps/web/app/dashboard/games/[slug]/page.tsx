@@ -3,11 +3,11 @@
 import { useState, type FormEvent, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, ExternalLink, Gamepad2, Milestone, FileText, ScrollText } from 'lucide-react';
+import { ArrowLeft, Save, ExternalLink, Gamepad2, Milestone, FileText, ScrollText, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
-import { useGame, useUpdateGame } from '@/lib/api/hooks';
+import { useGame, useUpdateGame, useDeleteGame } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
 
 const STATUSES = ['CONCEPT', 'IN_DEVELOPMENT', 'ALPHA', 'BETA', 'EARLY_ACCESS', 'RELEASED', 'CANCELLED', 'ON_HOLD'];
@@ -18,6 +18,7 @@ export default function EditGamePage() {
   const { token, isAuthenticated, isLoading: authLoading } = useAuth();
   const { data: game, isLoading: gameLoading } = useGame(slug);
   const updateGame = useUpdateGame();
+  const deleteGame = useDeleteGame();
 
   const [title, setTitle] = useState('');
   const [tagline, setTagline] = useState('');
@@ -223,12 +224,31 @@ export default function EditGamePage() {
           </div>
         </div>
 
-        <div className="flex gap-3 pt-2">
-          <Button type="submit" disabled={updateGame.isPending}>
-            {updateGame.isPending ? 'Saving…' : 'Save changes'}
-            <Save className="size-4" />
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div className="flex gap-3">
+            <Button type="submit" disabled={updateGame.isPending}>
+              {updateGame.isPending ? 'Saving…' : 'Save changes'}
+              <Save className="size-4" />
+            </Button>
+            <Button asChild variant="outline"><Link href="/dashboard">Cancel</Link></Button>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="border-destructive/30 text-destructive hover:bg-destructive/10"
+            onClick={async () => {
+              if (!token || !confirm(`Delete game "${game?.title}" permanently? This cannot be undone.`)) return;
+              try {
+                await deleteGame.mutateAsync({ slug, token });
+                router.push('/dashboard');
+              } catch { /* ignore */ }
+            }}
+            disabled={deleteGame.isPending}
+          >
+            <Trash2 className="size-4" />
+            {deleteGame.isPending ? 'Deleting…' : 'Delete game'}
           </Button>
-          <Button asChild variant="outline"><Link href="/dashboard">Cancel</Link></Button>
         </div>
       </form>
 
