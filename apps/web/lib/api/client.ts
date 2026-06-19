@@ -1,4 +1,5 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
 
 export class ApiError extends Error {
   status: number;
@@ -12,39 +13,55 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(
-  path: string,
-  options: { method?: string; body?: unknown; token?: string } = {},
-): Promise<T> {
-  const { method = 'GET', body, token } = options;
+/** Real HTTP client — makes actual fetch requests to the backend. */
+function createRealClient() {
+  async function request<T>(
+    path: string,
+    options: { method?: string; body?: unknown; token?: string } = {},
+  ): Promise<T> {
+    const { method = 'GET', body, token } = options;
 
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
 
-  if (!res.ok) {
-    const errBody = await res.json().catch(() => ({ message: res.statusText }));
-    throw new ApiError(res.status, errBody);
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({ message: res.statusText }));
+      throw new ApiError(res.status, errBody);
+    }
+
+    return res.json() as Promise<T>;
   }
 
-  return res.json() as Promise<T>;
+  return {
+    get: <T>(path: string, token?: string) => request<T>(path, { token }),
+    post: <T>(path: string, body?: unknown, token?: string) =>
+      request<T>(path, { method: 'POST', body, token }),
+    put: <T>(path: string, body?: unknown, token?: string) =>
+      request<T>(path, { method: 'PUT', body, token }),
+    patch: <T>(path: string, body?: unknown, token?: string) =>
+      request<T>(path, { method: 'PATCH', body, token }),
+    delete: <T>(path: string, token?: string) => request<T>(path, { method: 'DELETE', token }),
+  };
 }
 
-export const api = {
-  get: <T>(path: string, token?: string) => request<T>(path, { token }),
-  post: <T>(path: string, body?: unknown, token?: string) =>
-    request<T>(path, { method: 'POST', body, token }),
-  put: <T>(path: string, body?: unknown, token?: string) =>
-    request<T>(path, { method: 'PUT', body, token }),
-  patch: <T>(path: string, body?: unknown, token?: string) =>
-    request<T>(path, { method: 'PATCH', body, token }),
-  delete: <T>(path: string, token?: string) => request<T>(path, { method: 'DELETE', token }),
-};
+/**
+ * Dev-mode mock client (#32) — returns deterministic mock data instead of
+ * making network requests. Enable via NEXT_PUBLIC_USE_MOCKS=true.
+ * See mock-client.ts for implementation.
+ */
+function createMockClient(): ReturnType<typeof createRealClient> {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { createMockApi } = require('./mock-client') as { createMockApi: () => ReturnType<typeof createRealClient> };
+  return createMockApi();
+}
+
+export const api = USE_MOCKS ? createMockClient() : createRealClient();
 
 // ── Response types (matching backend shapes) ────────────────────────────
 
