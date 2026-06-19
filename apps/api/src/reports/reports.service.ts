@@ -67,6 +67,7 @@ export class ReportsService {
         reason: r.reason,
         details: r.details,
         status: r.status,
+        resolutionNote: r.resolutionNote,
         reporter: r.reporter,
         createdAt: r.createdAt.toISOString(),
         updatedAt: r.updatedAt.toISOString(),
@@ -94,6 +95,7 @@ export class ReportsService {
       reason: report.reason,
       details: report.details,
       status: report.status,
+      resolutionNote: report.resolutionNote,
       reporter: report.reporter,
       createdAt: report.createdAt.toISOString(),
       updatedAt: report.updatedAt.toISOString(),
@@ -108,12 +110,16 @@ export class ReportsService {
       throw new NotFoundException('Report not found');
     }
 
+    const reopening = dto.status === 'OPEN';
     const updated = await this.prisma.moderationReport.update({
       where: { id },
       data: {
         status: dto.status,
-        resolvedById: dto.status === 'OPEN' ? null : resolvedById,
-        resolvedAt: dto.status === 'OPEN' ? null : new Date(),
+        resolvedById: reopening ? null : resolvedById,
+        resolvedAt: reopening ? null : new Date(),
+        // Clear the note when reopening; otherwise persist it when provided
+        // (undefined leaves the existing note untouched).
+        resolutionNote: reopening ? null : dto.resolutionNote,
       },
       include: { reporter: { select: { id: true, username: true } } },
     });
@@ -125,6 +131,7 @@ export class ReportsService {
       reason: updated.reason,
       details: updated.details,
       status: updated.status,
+      resolutionNote: updated.resolutionNote,
       reporter: updated.reporter,
       createdAt: updated.createdAt.toISOString(),
       updatedAt: updated.updatedAt.toISOString(),
