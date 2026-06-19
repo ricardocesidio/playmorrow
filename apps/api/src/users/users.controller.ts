@@ -1,5 +1,5 @@
-import { Controller, Get, Param, NotFoundException, ParseIntPipe, Query, DefaultValuePipe } from '@nestjs/common';
-import { ApiTags, ApiOkResponse, ApiNotFoundResponse, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { ApiTags, ApiOkResponse, ApiNotFoundResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
 
