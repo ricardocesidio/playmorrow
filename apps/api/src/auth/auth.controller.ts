@@ -15,7 +15,6 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // Tight limits to blunt account enumeration / brute force (#3).
   @Post('register')
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @ApiCreatedResponse({ description: 'User registered successfully.' })
@@ -29,6 +28,21 @@ export class AuthController {
   @ApiOkResponse({ description: 'Login successful.' })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: 'Tokens refreshed.' })
+  async refresh(@Body('refreshToken') refreshToken: string) {
+    return this.authService.refresh(refreshToken);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: 'Logged out / refresh token revoked.' })
+  async logout(@Body('refreshToken') refreshToken: string) {
+    await this.authService.logout(refreshToken);
+    return { success: true };
   }
 
   @Get('me')

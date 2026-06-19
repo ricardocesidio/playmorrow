@@ -142,6 +142,7 @@ model User {
   reportsResolved   ModerationReport[] @relation("ReportResolver")
   notificationsReceived Notification[] @relation("NotificationRecipient")
   notificationsActed    Notification[] @relation("NotificationActor")
+  refreshTokens         RefreshToken[]
 
   @@index([role])
   @@map("users")
@@ -482,4 +483,22 @@ model Notification {
   @@index([recipientId, readAt, createdAt])
   @@index([targetType, targetId])
   @@map("notifications")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Refresh tokens (#2)
+// ──────────────────────────────────────────────────────────────────────────
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  tokenHash String
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
 }
