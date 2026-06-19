@@ -20,16 +20,16 @@
 | 2026-06-18 | 1 | #12 done | `e48e341` | Feed E2E flake fixed (auth-setup hydration race + locator/retry bugs). Desktop suite 31/31; feed `--repeat-each=3` 18/18. |
 | 2026-06-18 | 1 | #13 done | `c3e5e6d` | Mobile project run + triaged. Same auth-setup race fixed in `auth`/`social-actions`/`responsive` via `addInitScript`. Desktop & mobile `--repeat-each=2` → 62/62 each. |
 | 2026-06-18 | 1 | #14 done | `13bec33` | GitHub Actions CI green: quality + backend(postgres:16) + e2e(desktop+mobile). [First green run](https://github.com/ricardocesidio/playmorrow/actions/runs/27785284477). Backend suite verified against real Postgres. CI uses Node 22 (pnpm 11.1.3 needs ≥22.13). |
+| 2026-06-19 | 2 | #1, #31 done | `a6ce2a2` | ValidationPipe parity restored. The "SWC can't emit class-validator metadata" claim was stale — re-enabled `whitelist: true` + `forbidNonWhitelisted: true` in `create-test-app.ts`. Full backend suite green **223/223** against local Postgres. Added regression test (unknown body prop → 400), verified it fails under the old config. |
 
 **Phase 0 verification:** `pnpm --filter @playmorrow/web lint` → 0 warnings; `prisma validate`
 clean (config + env load); turbo "no output files" warning gone on full `pnpm test`.
 
-> ⚠️ **Baseline reality check (2026-06-18):** despite the "207 passing" note below, a full
-> `pnpm test` on the dev machine reported **5 failed · 29 passed · 188 skipped (222)**, with
-> 11 of 14 backend test files failing — consistent with **no local Postgres** (integration
-> tests can't run). This is pre-existing and unrelated to the Phase 0 edits, but it means
-> there is **no green local backend baseline** yet. Resolve before Phase 1 #14 (CI) and to
-> fully trust Phase 2 backend work. E2E (#12) is API-mocked and does not need a DB.
+> ✅ **Baseline update (2026-06-19):** a local Postgres is now reachable on `localhost:5432`
+> (schema up to date via `prisma migrate status`). The full backend suite runs green —
+> **223/223** across all 14 test files. The earlier "5 failed · no local backend baseline"
+> note (2026-06-18) was caused by the missing DB and no longer applies. E2E (#12) remains
+> API-mocked and does not need a DB.
 
 ## Issue catalogue (by area)
 

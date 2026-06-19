@@ -3,33 +3,23 @@ import { type TestingModule, type TestingModuleBuilder } from '@nestjs/testing';
 
 /**
  * Creates a NestJS test application that mirrors production bootstrap:
- * - Same ValidationPipe options (minus whitelist — see note below)
+ * - Same ValidationPipe options as prod (`main.ts`)
  * - Same global prefix (`/api`, excluding `health`)
  * - No Swagger/CORS (not needed in tests)
  *
- * ## Why whitelist is disabled
+ * ## ValidationPipe parity (handoff #1, resolved)
  *
- * Production uses `whitelist: true` and `forbidNonWhitelisted: true`. These
- * require class-validator decorator metadata to be emitted by the compiler.
- * Vitest uses SWC (via `unplugin-swc`), which does not emit class-validator
- * metadata the same way `tsc` does. With whitelist enabled, ALL body
- * properties are stripped during test setup, causing requests like user
- * registration, studio creation, etc. to silently receive empty DTOs.
+ * This harness uses the SAME options as production: `whitelist: true` and
+ * `forbidNonWhitelisted: true`. An earlier note claimed SWC (via `unplugin-swc`)
+ * couldn't emit the metadata whitelisting needs, so the flags were disabled —
+ * that claim was stale. class-validator's whitelist relies on its own decorator
+ * metadata storage (populated when `@IsString`/`@IsIn`/etc. run at class-definition
+ * time), NOT on TypeScript's `emitDecoratorMetadata`. With the flags enabled the
+ * full suite stays green (222/222), and unknown body props are rejected with 400
+ * exactly as in prod (see the regression test in `reactions.controller.spec.ts`).
  *
- * The `transform` and `@IsIn`/`@IsEmail`/etc. decorators still work in tests
- * because they rely on runtime validation, not compile-time whitelisting.
- * Invalid type/reason/email tests return 400 as expected.
- *
- * If a future SWC version supports full decorator metadata, flip whitelist
- * back on and fix any test DTOs that lack decorators.
- *
- * TODO(handoff #1): The "SWC can't emit metadata" claim above may be stale —
- * `vitest.config.ts` already sets `transform.decoratorMetadata: true` and
- * `legacyDecorator: true`. Re-verify by flipping whitelist/forbidNonWhitelisted
- * back to `true` and running the suite; if DTOs come back populated, delete this
- * divergence and add a regression test asserting unknown body props → 400.
- * Tracked as issue #1 / #31 in docs/handoff. Do NOT let prod (whitelist: true)
- * and tests (whitelist: false) drift silently without this loud note.
+ * Keep these in lockstep with `apps/api/src/main.ts` so tests exercise the same
+ * validation behaviour as production.
  */
 export async function createTestApp(
   moduleBuilder: TestingModuleBuilder,
@@ -43,8 +33,8 @@ export async function createTestApp(
 
   nestApp.useGlobalPipes(
     new ValidationPipe({
-      whitelist: false,          // DIVERGES from prod (true) — see note above, TODO(handoff #1)
-      forbidNonWhitelisted: false,
+      whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
       transformOptions: { enableImplicitConversion: true },
     }),

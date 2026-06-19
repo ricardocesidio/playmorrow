@@ -28,9 +28,9 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 ## 31. Test harness whitelist disabled (mirrors prod gap)
 
 - **Type:** DX · **Severity:** Medium · **Effort:** — (resolved alongside #1) · **Status:**
-  PARTIAL (`cf21a50`) — added a loud `TODO(handoff #1)` note in `create-test-app.ts` (doc
-  comment + inline on `whitelist: false`) so the prod/test divergence isn't silently forgotten.
-  The actual re-enable/investigation remains tracked under **#1** (Phase 2).
+  DONE — prod/test divergence eliminated. `create-test-app.ts` now uses `whitelist: true` +
+  `forbidNonWhitelisted: true` (matches prod); the stale SWC note was removed and a
+  regression test guards the parity. See **#1** for detail.
 - **Files:** `apps/api/src/test/create-test-app.ts`
 - **Analysis:** `create-test-app.ts` uses `whitelist: false` while prod uses `whitelist: true`.
   Documented as an SWC limitation but easy to forget, and it means tests don't match prod
