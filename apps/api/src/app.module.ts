@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -25,6 +27,10 @@ import { UsersModule } from './users/users.module';
       isGlobal: true,
       envFilePath: ['.env', 'apps/api/.env'],
     }),
+    // Global rate limiting (#3): 60 req/min per IP by default. Per-route
+    // `@Throttle()` overrides tighten abuse-prone endpoints (auth, comment/
+    // reaction creates); `@SkipThrottle()` exempts the health probe.
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
     PrismaModule,
     HealthModule,
     NotificationsModule,
@@ -42,6 +48,6 @@ import { UsersModule } from './users/users.module';
     PressKitsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

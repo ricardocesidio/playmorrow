@@ -1,11 +1,13 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import type { HealthStatus } from '@playmorrow/types';
 
 import { PrismaService } from '../prisma/prisma.service';
 
 @ApiTags('health')
 @Controller('health')
+@SkipThrottle() // liveness probes must not be rate limited (#3)
 export class HealthController {
   constructor(private readonly prisma: PrismaService) {}
 
