@@ -6,16 +6,20 @@ import { PassportModule } from '@nestjs/passport';
 
 import { PrismaModule } from '../prisma/prisma.module';
 import { UsersModule } from '../users/users.module';
+import { SessionModule } from '../session/session.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { OAuthModule } from './oauth/oauth.module';
 import { RolesGuard } from './guards/roles.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { SessionAuthGuard } from './guards/session-auth.guard';
+import { OptionalSessionGuard } from './guards/optional-session.guard';
 
 @Module({
   imports: [
     PrismaModule,
     UsersModule,
+    SessionModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     OAuthModule,
     JwtModule.registerAsync({
@@ -31,7 +35,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RolesGuard],
-  exports: [JwtModule, JwtStrategy, RolesGuard],
+  providers: [AuthService, JwtStrategy, RolesGuard, SessionAuthGuard, OptionalSessionGuard],
+  exports: [JwtModule, JwtStrategy, RolesGuard, SessionAuthGuard, OptionalSessionGuard],
 })
 export class AuthModule {}

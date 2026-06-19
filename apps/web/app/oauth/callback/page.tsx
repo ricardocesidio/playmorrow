@@ -13,36 +13,38 @@ function OAuthCallbackInner() {
     const accessToken = searchParams.get('accessToken');
     const refreshToken = searchParams.get('refreshToken');
 
-    if (accessToken && refreshToken) {
+    if (accessToken) {
+      // Store tokens for legacy JWT auth (will be migrated to session-based OAuth)
       localStorage.setItem('playmorrow_token', accessToken);
-      localStorage.setItem('playmorrow_refresh', refreshToken);
+      if (refreshToken) localStorage.setItem('playmorrow_refresh', refreshToken);
       router.replace('/dashboard');
     } else {
-      setError('OAuth failed — no tokens received');
+      setError('OAuth authentication failed');
     }
   }, [searchParams, router]);
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <p className="text-destructive">{error}</p>
-          <a href="/login" className="mt-4 inline-block text-sm text-primary underline">Back to login</a>
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="border border-coral/30 bg-coral/5 p-8 text-center">
+          <p className="font-mono text-xs uppercase tracking-widest text-coral">Error</p>
+          <p className="mt-2 text-sm text-muted-foreground">{error}</p>
+          <a href="/login" className="mt-4 inline-block font-mono text-xs uppercase tracking-widest text-cyan underline">Back to login</a>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="size-6 animate-spin border border-cyan border-t-transparent" />
     </div>
   );
 }
 
 export default function OAuthCallbackPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-background"><div className="size-6 animate-spin border border-cyan border-t-transparent" /></div>}>
       <OAuthCallbackInner />
     </Suspense>
   );
