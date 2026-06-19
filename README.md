@@ -89,6 +89,8 @@ pnpm dev
 | `pnpm test`         | Backend unit tests only (Vitest) — does **not** run E2E |
 | `pnpm test:e2e`     | Frontend E2E tests (Playwright, desktop + mobile)      |
 | `pnpm test:all`     | Backend unit tests, then E2E (kept separate; E2E needs a build) |
+| `pnpm storybook`    | Storybook dev server (port 6006)                       |
+| `pnpm storybook:build` | Build static Storybook to `storybook-static/`         |
 | `pnpm format`       | Prettier write                                         |
 | `pnpm db:migrate`   | Create/apply a Prisma migration                        |
 | `pnpm db:seed`      | Seed demo data (studio + game + devlog)                |
@@ -184,10 +186,10 @@ left a process wedged on the port, clear it with
 
 See [`packages/database/prisma/schema.prisma`](packages/database/prisma/schema.prisma).
 
-## Issues
+## Issue catalogue
 
 All 34 issues are catalogued in [`docs/handoff/`](docs/handoff/).
-**31 DONE · 2 DEFERRED · 1 OPEN** (#33 — Storybook):
+**31 DONE · 2 DEFERRED · 1 OPEN** (all resolved except deferred):
 
 - [`HANDOFF.md`](docs/handoff/HANDOFF.md) — master index + progress log
 - [`backend.md`](docs/handoff/backend.md) — #1–#11
@@ -199,6 +201,5 @@ All 34 issues are catalogued in [`docs/handoff/`](docs/handoff/).
 🚧 **v0.5 — near feature-complete.** All core CRUD + community features are implemented:
 auth (JWT + refresh tokens + OAuth), studios, games, devlogs (rich text editor), roadmap,
 press kits, follows, comments, reactions, notifications (real-time SSE), personalized feed,
-image uploads, moderation reports, and E2E test suite (with visual snapshots). Remaining
-work: Storybook/component previews (#33). Deferred: email verification (#4), password
-reset (#5).
+image uploads, moderation reports, E2E test suite (with visual snapshots), and Storybook
+component previews. Deferred: email verification (#4), password reset (#5).

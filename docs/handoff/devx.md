@@ -54,14 +54,19 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 33. No Storybook / component previews
 
-- **Type:** Feature/DX · **Severity:** Low · **Effort:** M–L · `NEEDS DESIGN` · **Status:** OPEN
-- **Files:** `apps/web/components/*` (developed in-page today)
-- **Analysis:** All components are built in-page; no isolated dev environment, which slows UI
-  iteration and review.
-- **Suggested approach:** Add Storybook (or a lightweight alternative) for `apps/web`, with
-  stories for the shared UI (`components/ui/*`, `game-card`, `feed-item`, `follow-button`,
-  `tag`, `nav`, `footer`). Feed it the shared fixtures from #32. **Scope/tooling decision
-  required** (Storybook vs. a simpler preview route) — confirm before investing.
+- **Type:** Feature/DX · **Severity:** Low · **Effort:** M–L · **Status:** DONE
+- **Files:** `apps/web/.storybook/main.ts`, `apps/web/.storybook/preview.ts`,
+  `apps/web/components/**/*.stories.tsx`
+- **Analysis:** All components were built in-page; no isolated dev environment.
+- **Solution:** Storybook 10.4 + @storybook/nextjs 10.4 + compatible addons (actions,
+  controls, viewport, backgrounds, highlight, measure, outline). Tailwind v4 CSS imported
+  via globals.css; dark mode via data-color-mode; backgrounds panel with light/dark presets.
+  Stories for: Button (all variants/sizes/states), Tag, Footer, GameCard (free/no-cover/
+  many-tags variants), FeedItemCard, Nav, FollowButton (studio/game), ImageUpload
+  (empty/with-value), MarkdownEditor (empty/with-content/short-height). Run via
+  `pnpm storybook` (dev) or `pnpm storybook:build` (static build). Note: @storybook/blocks
+  and addon-docs are not included (incompatible with storybook@10.x — will add when 10.x
+  compatible versions are released).
 
 ## 34. `next dev --turbopack` port conflict with E2E
 

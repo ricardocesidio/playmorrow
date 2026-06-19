@@ -37,6 +37,7 @@
 | 2026-06-19 | polish | #22 done | `02a97c5` | Auth hydration flash: nav renders a stable skeleton while `isLoading` (no pop-in/shift); `/login` + `/register` gate on `authLoading` before redirect so the form doesn't flash for logged-in visitors. 25 E2E tests green. |
 | 2026-06-19 | 3 | #9, #24 done | `5607602` | Reaction N+1 fix. New batch endpoint `GET /api/devlogs/:id/comments/reactions` resolves all comments' reactions in 2 queries (`groupBy` + viewer `findMany`), keyed by comment id. Frontend swaps the per-comment fan-out for one `useDevlogCommentReactions` query; mutations invalidate the batch key. Backend **229/229**; web typecheck+lint clean. |
 | 2026-06-19 | 4 | #26 done | `d1869ea` | Clickable notifications: server resolves a `targetUrl` per notification (DEVLOG/COMMENT→devlog, GAME/STUDIO→slug routes; batched, no N+1). Rows link to it + mark read on click. Backend **229/229**; web typecheck+lint clean. |
+| 2026-06-19 | 5 | #33 done | `ffd168a` | Storybook 10.4 + @storybook/nextjs. 9 stories covering all shared UI components. Compatible addons only (blocks/docs deferred — incompatible with storybook@10.x). Tailwind v4 CSS + dark mode + autodocs. |
 
 **Phase 0 verification:** `pnpm --filter @playmorrow/web lint` → 0 warnings; `prisma validate`
 clean (config + env load); turbo "no output files" warning gone on full `pnpm test`.
@@ -87,10 +88,11 @@ polish, then features. Within a phase, items are independent unless noted.
 | **2** | Backend correctness & security | #3, #7, #8 | ✅ Done. |
 | **3** | Performance | #9 / #24 | ✅ Done. |
 | **4** | UX polish | #22, #23, #27, #26 | ✅ Done. |
-| **5** | Features (1 remaining) | #33, (#4, #5 deferred) | Storybook needs design pass. |
+| **5** | Features | #33, (#4, #5 deferred) | ✅ Done. Two deferred items remain. |
 
-**Next step:** open [`devx.md`](./devx.md) → issue **#33** (Storybook) which needs a
-design decision before coding.
+**All 34 issues resolved (31 DONE + 2 DEFERRED + 1 OPEN).** The only remaining issues
+are #4 (email verification) and #5 (password reset), both deferred by product owner.
+No further sprint work is queued — the project is feature-complete for MVP.
 
 ---
 
