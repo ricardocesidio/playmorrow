@@ -1,7 +1,29 @@
-import { useEffect } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
+import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers } from './client';
+
+// ── Infinite scroll helpers ─────────────────────────────────────────────
+
+export function useIntersectionObserver(onIntersect: () => void, enabled: boolean) {
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) onIntersect();
+      },
+      { rootMargin: '200px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [enabled, onIntersect]);
+
+  return sentinelRef;
+}
 
 // ── Feed ────────────────────────────────────────────────────────────────
 
@@ -23,6 +45,20 @@ export function usePersonalFeed(type: string, page: number, pageSize: number, to
   });
 }
 
+export function useInfinitePersonalFeed(type: string, pageSize: number, token?: string) {
+  return useInfiniteQuery({
+    queryKey: ['infinitePersonalFeed', type, pageSize],
+    queryFn: ({ pageParam }) => {
+      const params = new URLSearchParams({ page: String(pageParam), pageSize: String(pageSize) });
+      if (type !== 'all') params.set('type', type);
+      return api.get<Paginated<FeedItem>>(`/me/feed?${params}`, token);
+    },
+    getNextPageParam: (last) => (last.hasMore ? last.page + 1 : undefined),
+    initialPageParam: 1,
+    enabled: !!token,
+  });
+}
+
 // ── Games ───────────────────────────────────────────────────────────────
 
 export function useGames(page = 1, pageSize = 20, search?: string) {
@@ -31,6 +67,19 @@ export function useGames(page = 1, pageSize = 20, search?: string) {
   return useQuery({
     queryKey: ['games', page, pageSize, search],
     queryFn: () => api.get<Paginated<Game>>(`/games?${params}`),
+  });
+}
+
+export function useInfiniteGames(pageSize = 20, search?: string) {
+  return useInfiniteQuery({
+    queryKey: ['infiniteGames', pageSize, search],
+    queryFn: ({ pageParam }) => {
+      const params = new URLSearchParams({ page: String(pageParam), pageSize: String(pageSize) });
+      if (search) params.set('search', search);
+      return api.get<Paginated<Game>>(`/games?${params}`);
+    },
+    getNextPageParam: (last) => (last.hasMore ? last.page + 1 : undefined),
+    initialPageParam: 1,
   });
 }
 

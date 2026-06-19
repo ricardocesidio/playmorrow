@@ -1,22 +1,38 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, Gamepad2, Sparkles } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { Search, Gamepad2, Sparkles, Loader2 } from 'lucide-react';
 
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
 import { GameCard } from '@/components/game-card';
-import { useGames } from '@/lib/api/hooks';
+import { useInfiniteGames, useIntersectionObserver } from '@/lib/api/hooks';
 
 export default function GamesPage() {
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-  const { data, isLoading, error } = useGames(page, 20, search || undefined);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteGames(20, searchQuery || undefined);
+
+  const loadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const sentinelRef = useIntersectionObserver(loadMore, !!hasNextPage && !isFetchingNextPage);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setPage(1);
+    setSearchQuery(search);
   };
+
+  const items = data?.pages.flatMap((p) => p.items) ?? [];
 
   return (
     <>
@@ -64,7 +80,7 @@ export default function GamesPage() {
           <div className="flex flex-col items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 py-12">
             <p className="text-destructive">Failed to load games</p>
             <button
-              onClick={() => setPage(1)}
+              onClick={() => window.location.reload()}
               className="text-sm text-primary underline"
             >
               Try again
@@ -73,14 +89,14 @@ export default function GamesPage() {
         )}
 
         {/* Empty */}
-        {!isLoading && !error && data?.items.length === 0 && (
+        {!isLoading && !error && items.length === 0 && (
           <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card/30 py-16">
             <Sparkles className="size-10 text-muted-foreground/40" />
-            {search ? (
+            {searchQuery ? (
               <>
-                <p className="text-muted-foreground">No games matching &ldquo;{search}&rdquo;</p>
+                <p className="text-muted-foreground">No games matching &ldquo;{searchQuery}&rdquo;</p>
                 <button
-                  onClick={() => setSearch('')}
+                  onClick={() => { setSearch(''); setSearchQuery(''); }}
                   className="text-sm text-primary underline"
                 >
                   Clear search
@@ -96,37 +112,26 @@ export default function GamesPage() {
         )}
 
         {/* Games grid */}
-        {!isLoading && data && data.items.length > 0 && (
-          <>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {data.items.map((game) => (
-                <GameCard key={game.id} game={game} />
-              ))}
-            </div>
+        {items.length > 0 && (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {items.map((game) => (
+              <GameCard key={game.id} game={game} />
+            ))}
+          </div>
+        )}
 
-            {/* Pagination */}
-            {data.total > data.pageSize && (
-              <div className="mt-8 flex items-center justify-center gap-3">
-                <button
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => p - 1)}
-                  className="rounded-lg border border-input px-4 py-2 text-sm transition-colors hover:bg-accent disabled:opacity-40"
-                >
-                  Previous
-                </button>
-                <span className="text-sm text-muted-foreground">
-                  Page {data.page} of {Math.ceil(data.total / data.pageSize)}
-                </span>
-                <button
-                  disabled={!data.hasMore}
-                  onClick={() => setPage((p) => p + 1)}
-                  className="rounded-lg border border-input px-4 py-2 text-sm transition-colors hover:bg-accent disabled:opacity-40"
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </>
+        {/* Sentinel for infinite scroll */}
+        {hasNextPage && (
+          <div ref={sentinelRef} className="flex justify-center py-8">
+            {isFetchingNextPage && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
+          </div>
+        )}
+
+        {/* End of list */}
+        {!hasNextPage && items.length > 0 && (
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            {searchQuery ? `All results for "${searchQuery}"` : 'All games loaded.'}
+          </p>
         )}
       </main>
 

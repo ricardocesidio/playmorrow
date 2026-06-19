@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Rss, RefreshCw } from 'lucide-react';
+import { Rss, RefreshCw, Loader2 } from 'lucide-react';
 
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
 import { FeedItemCard } from '@/components/feed-item';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
-import { usePersonalFeed } from '@/lib/api/hooks';
+import { useInfinitePersonalFeed, useIntersectionObserver } from '@/lib/api/hooks';
 
 const TABS = [
   { key: 'all', label: 'All' },
@@ -22,32 +22,26 @@ export default function PersonalFeedPage() {
   const router = useRouter();
   const { token, isAuthenticated, isLoading: authLoading } = useAuth();
   const [type, setType] = useState('all');
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
 
-  const { data, isLoading, error, refetch, isRefetching } = usePersonalFeed(
-    type,
-    page,
-    pageSize,
-    token ?? undefined,
-  );
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfinitePersonalFeed(type, 10, token ?? undefined);
+
+  const loadMore = () => { if (hasNextPage && !isFetchingNextPage) fetchNextPage(); };
+  const sentinelRef = useIntersectionObserver(loadMore, !!hasNextPage && !isFetchingNextPage);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.replace('/login');
   }, [authLoading, isAuthenticated, router]);
 
-  // Reset the viewport to the top when paginating so new items start in view (#23).
-  useEffect(() => {
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
-  }, [page]);
-
-  const handleTypeChange = (newType: string) => {
-    setType(newType);
-    setPage(1);
-  };
-
-  const totalPages = data ? Math.ceil(data.total / data.pageSize) : 0;
+  const items = data?.pages.flatMap((p) => p.items) ?? [];
 
   if (authLoading) {
     return (
@@ -78,7 +72,7 @@ export default function PersonalFeedPage() {
           {TABS.map((tab) => (
             <button
               key={tab.key}
-              onClick={() => handleTypeChange(tab.key)}
+              onClick={() => setType(tab.key)}
               aria-pressed={type === tab.key}
               className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                 type === tab.key
@@ -117,7 +111,7 @@ export default function PersonalFeedPage() {
         )}
 
         {/* Empty: no follows */}
-        {!isLoading && !error && data && data.items.length === 0 && type === 'all' && (
+        {!isLoading && !error && items.length === 0 && type === 'all' && (
           <div className="rounded-xl border border-border bg-card/20 py-16 text-center">
             <Rss className="mx-auto mb-3 size-10 text-muted-foreground/40" />
             <p className="text-muted-foreground">
@@ -130,49 +124,36 @@ export default function PersonalFeedPage() {
         )}
 
         {/* Empty: filter has no results */}
-        {!isLoading && !error && data && data.items.length === 0 && type !== 'all' && (
+        {!isLoading && !error && items.length === 0 && type !== 'all' && (
           <div className="rounded-xl border border-border bg-card/20 py-16 text-center">
             <p className="text-muted-foreground">
               No {type} updates found.
             </p>
-            <Button variant="outline" className="mt-4" onClick={() => handleTypeChange('all')}>
+            <Button variant="outline" className="mt-4" onClick={() => setType('all')}>
               Show all
             </Button>
           </div>
         )}
 
         {/* Feed items */}
-        {data && data.items.length > 0 && (
-          <>
-            <div className="space-y-3">
-              {data.items.map((item) => (
-                <FeedItemCard key={`${item.type}-${item.id}`} item={item} />
-              ))}
-            </div>
+        {items.length > 0 && (
+          <div className="space-y-3">
+            {items.map((item) => (
+              <FeedItemCard key={`${item.type}-${item.id}`} item={item} />
+            ))}
+          </div>
+        )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-3">
-                <button
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="rounded-lg border border-input px-3 py-1.5 text-sm transition-colors hover:bg-accent disabled:opacity-40"
-                >
-                  Previous
-                </button>
-                <span className="text-sm text-muted-foreground">
-                  Page {data.page} of {totalPages}
-                </span>
-                <button
-                  disabled={!data.hasMore}
-                  onClick={() => setPage((p) => p + 1)}
-                  className="rounded-lg border border-input px-3 py-1.5 text-sm transition-colors hover:bg-accent disabled:opacity-40"
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </>
+        {/* Sentinel for infinite scroll */}
+        {hasNextPage && (
+          <div ref={sentinelRef} className="flex justify-center py-8">
+            {isFetchingNextPage && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
+          </div>
+        )}
+
+        {/* End of list */}
+        {!hasNextPage && items.length > 0 && (
+          <p className="mt-8 text-center text-sm text-muted-foreground">You've reached the end.</p>
         )}
       </main>
       <Footer />
