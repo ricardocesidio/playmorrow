@@ -146,10 +146,11 @@ left a process wedged on the port, clear it with
 | Page | Route |
 | ---- | ----- |
 | Home (feed preview + latest games) | `/` |
-| Explore games (search, pagination) | `/games` |
+| Explore games (infinite scroll, search) | `/games` |
 | Game detail (devlogs, roadmap, media, press kit) | `/games/[slug]` |
 | Studio detail (members, games, followers) | `/studios/[slug]` |
 | Devlog detail (body with rich text, comments, reactions) | `/devlogs/[id]` |
+| Global search (games, studios, devlogs) | `/search` |
 | Public feed | `/feed/public` |
 
 ### Authenticated

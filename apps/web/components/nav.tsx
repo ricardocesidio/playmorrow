@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Gamepad2, Bell, Sun, Moon } from 'lucide-react';
+import { Gamepad2, Bell, Sun, Moon, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
@@ -33,6 +33,12 @@ export function Nav() {
           className={`transition-colors hover:text-foreground ${pathname === '/games' ? 'text-foreground' : ''}`}
         >
           Games
+        </Link>
+        <Link
+          href="/search"
+          className={`transition-colors hover:text-foreground ${pathname === '/search' ? 'text-foreground' : ''}`}
+        >
+          <Search className="size-4" />
         </Link>
       </nav>
       <div className="flex items-center gap-2">
