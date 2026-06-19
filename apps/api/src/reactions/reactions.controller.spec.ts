@@ -330,6 +330,32 @@ describe('ReactionsController (e2e)', () => {
     expect(res.body.viewerReactions).toContain('LIKE');
   });
 
+  // ── BATCH COMMENT REACTIONS (#9 / #24) ───────────────────────────────
+
+  it('GET /api/devlogs/:id/comments/reactions returns a map keyed by comment id', async () => {
+    const res = await request(httpServer).get(`/api/devlogs/${devlogId}/comments/reactions`);
+
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.devlogId).toBe(devlogId);
+    // user2 added a LIKE to the comment earlier in this suite.
+    expect(res.body.comments[commentId].counts.LIKE).toBe(1);
+    expect(res.body.comments[commentId].viewerReactions).toEqual([]);
+  });
+
+  it('GET /api/devlogs/:id/comments/reactions includes viewerReactions for logged-in user', async () => {
+    const res = await request(httpServer)
+      .get(`/api/devlogs/${devlogId}/comments/reactions`)
+      .set('Authorization', `Bearer ${user2Token}`);
+
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.comments[commentId].viewerReactions).toContain('LIKE');
+  });
+
+  it('GET /api/devlogs/:missing/comments/reactions returns 404', async () => {
+    const res = await request(httpServer).get('/api/devlogs/nonexistent/comments/reactions');
+    expect(res.status).toBe(HttpStatus.NOT_FOUND);
+  });
+
   it('Response never exposes passwordHash', async () => {
     const res = await request(httpServer).get(`/api/devlogs/${devlogId}/reactions`);
     expect(res.body.passwordHash).toBeUndefined();

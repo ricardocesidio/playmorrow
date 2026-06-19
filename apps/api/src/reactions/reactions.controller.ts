@@ -101,4 +101,15 @@ export class ReactionsController {
   ) {
     return this.reactionsService.getCommentReactions(commentId, user?.id);
   }
+
+  // Batch: all comment reactions for a devlog in one request (#9 / #24).
+  @Get('devlogs/:devlogId/comments/reactions')
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiOkResponse({ description: 'Reaction counts + viewer reactions for every comment on a devlog, keyed by comment id.' })
+  async getDevlogCommentReactions(
+    @Param('devlogId') devlogId: string,
+    @CurrentUser() user?: { id: string },
+  ) {
+    return this.reactionsService.getCommentReactionsForDevlog(devlogId, user?.id);
+  }
 }

@@ -18,10 +18,11 @@ import {
   useCreateComment,
   useUpdateComment,
   useDeleteComment,
-  useCommentReactions,
+  useDevlogCommentReactions,
   useReactToComment,
   useRemoveCommentReaction,
 } from '@/lib/api/hooks';
+import type { CommentReactionSummary } from '@/lib/api/client';
 const REACTION_ICONS: Record<string, React.ReactNode> = {
   LIKE: <ThumbsUp className="size-3.5" />,
   LOVE: <Heart className="size-3.5" />,
@@ -96,22 +97,29 @@ function DevlogReactions({ devlogId }: { devlogId: string }) {
   );
 }
 
-function CommentReactions({ commentId }: { commentId: string }) {
+function CommentReactions({
+  commentId,
+  devlogId,
+  reactions,
+}: {
+  commentId: string;
+  devlogId: string;
+  reactions?: CommentReactionSummary;
+}) {
   const { token, isAuthenticated } = useAuth();
-  const { data } = useCommentReactions(commentId, token ?? undefined);
   const reactMut = useReactToComment();
   const unreactMut = useRemoveCommentReaction();
-  const counts = data?.counts ?? { LIKE: 0, LOVE: 0, HYPE: 0, INSIGHTFUL: 0 };
-  const viewerReactions = data?.viewerReactions ?? [];
+  const counts = reactions?.counts ?? { LIKE: 0, LOVE: 0, HYPE: 0, INSIGHTFUL: 0 };
+  const viewerReactions = reactions?.viewerReactions ?? [];
 
   const handleReact = async (type: string) => {
     if (!isAuthenticated) return;
     const isActive = viewerReactions.includes(type);
     try {
       if (isActive) {
-        await unreactMut.mutateAsync({ commentId, type, token: token! });
+        await unreactMut.mutateAsync({ commentId, devlogId, type, token: token! });
       } else {
-        await reactMut.mutateAsync({ commentId, type, token: token! });
+        await reactMut.mutateAsync({ commentId, devlogId, type, token: token! });
       }
     } catch { /* ignore */ }
   };
@@ -146,6 +154,7 @@ function CommentItem({
   currentUserId,
   depth,
   token,
+  reactionsByComment,
 }: {
   token?: string | null;
 
@@ -153,6 +162,7 @@ function CommentItem({
   devlogId: string;
   currentUserId: string | undefined;
   depth: number;
+  reactionsByComment?: Record<string, CommentReactionSummary>;
 }) {
   const [replying, setReplying] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -216,7 +226,11 @@ function CommentItem({
             </span>
           </div>
           <p className="mt-2 text-sm leading-relaxed">{comment.body}</p>
-          <CommentReactions commentId={comment.id} />
+          <CommentReactions
+            commentId={comment.id}
+            devlogId={devlogId}
+            reactions={reactionsByComment?.[comment.id]}
+          />
           <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
             <button onClick={() => setReplying(!replying)} className="hover:text-foreground transition-colors">
               Reply
@@ -261,6 +275,8 @@ export default function DevlogDetailPage() {
   const { user, token, isAuthenticated } = useAuth();
   const { data: devlog, isLoading, error } = useDevlog(id);
   const { data: comments } = useDevlogComments(id, token ?? undefined);
+  // One batched request for every comment's reactions (#9 / #24).
+  const { data: commentReactions } = useDevlogCommentReactions(id, token ?? undefined);
   const createComment = useCreateComment();
   const [newComment, setNewComment] = useState('');
 
@@ -378,12 +394,12 @@ export default function DevlogDetailPage() {
             <div className="space-y-4">
               {topLevelComments.map((comment) => (
                 <div key={comment.id}>
-                  <CommentItem comment={comment} devlogId={id} currentUserId={user?.id} depth={0} token={token} />
+                  <CommentItem comment={comment} devlogId={id} currentUserId={user?.id} depth={0} token={token} reactionsByComment={commentReactions?.comments} />
                   {replies
                     .filter((r) => r.parentId === comment.id)
                     .map((reply) => (
                       <div key={reply.id} className="mt-2">
-                        <CommentItem comment={reply} devlogId={id} currentUserId={user?.id} depth={1} token={token} />
+                        <CommentItem comment={reply} devlogId={id} currentUserId={user?.id} depth={1} token={token} reactionsByComment={commentReactions?.comments} />
                       </div>
                     ))}
                 </div>

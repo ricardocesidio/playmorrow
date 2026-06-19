@@ -219,7 +219,12 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 24. Comment reactions cause N+1 API calls (frontend half)
 
-- **Type:** Bug · **Severity:** Medium · **Effort:** M · **Status:** OPEN
+- **Type:** Bug · **Severity:** Medium · **Effort:** M · **Status:** DONE — replaced the
+  per-comment `useCommentReactions` fan-out with a single `useDevlogCommentReactions(devlogId)`
+  query (key `['devlogCommentReactions', devlogId]`) hitting the #9 batch endpoint.
+  `CommentReactions` is now presentational — it receives its slice from the map via
+  `CommentItem` and no longer fetches. The react/unreact mutations invalidate the single batch
+  key. 20+ comments → 1 request instead of 20+.
 - **Files:** `apps/web/app/devlogs/[id]/page.tsx` (`<CommentReactions>` renders per comment,
   ~line 219; each calls `useCommentReactions(comment.id)`),
   `apps/web/lib/api/hooks.ts` (`useCommentReactions`)

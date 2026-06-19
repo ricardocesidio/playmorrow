@@ -204,6 +204,17 @@ export interface ReactionStatus {
   viewerReactions: string[];
 }
 
+export interface CommentReactionSummary {
+  counts: { LIKE: number; LOVE: number; HYPE: number; INSIGHTFUL: number };
+  viewerReactions: string[];
+}
+
+// Batch reactions for all comments on a devlog, keyed by comment id (#9 / #24).
+export interface DevlogCommentReactions {
+  devlogId: string;
+  comments: Record<string, CommentReactionSummary>;
+}
+
 export interface StudioWithMembers extends Studio {
   members: {
     id: string;
