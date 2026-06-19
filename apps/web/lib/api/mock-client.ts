@@ -111,6 +111,21 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
   if (path.includes('/notifications') && method === 'PATCH') return { ...MOCK_NOTIFICATION, readAt: new Date().toISOString() };
   if (path.includes('/read-all')) return { success: true };
 
+  // Users
+  if (segments[0] === 'users' && segments.length === 2) {
+    return {
+      id: 'user-1',
+      username: segments[1],
+      displayName: segments[1] === 'testuser' ? 'Test User' : segments[1],
+      avatarUrl: null,
+      bio: 'A test user profile.',
+      role: 'PLAYER',
+      isVerified: false,
+      createdAt: '2025-01-01T00:00:00.000Z',
+      studios: [MOCK_STUDIO],
+    };
+  }
+
   // Follows
   if (path === '/me/follows') return { studios: [MOCK_STUDIO], games: [MOCK_GAME] };
 
