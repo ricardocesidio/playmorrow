@@ -19,7 +19,7 @@ test.describe('Authentication', () => {
       await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({}) });
     });
     await page.goto('/register');
-    await expect(page.getByRole('heading', { name: 'Create account' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Create your signal' })).toBeVisible();
   });
 
   test('Login success stores token and redirects', async ({ page }) => {

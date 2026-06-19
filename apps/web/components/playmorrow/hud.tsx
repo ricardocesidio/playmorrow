@@ -6,15 +6,18 @@ import { cn } from '@/lib/utils';
 
 export function PlaymorrowMark({ className }: { className?: string }) {
   return (
-    <span className={cn('inline-flex items-center gap-4', className)}>
-      <span className="relative block size-8 text-coral drop-shadow-[0_0_14px_rgb(255_87_77_/_0.38)]">
-        <svg viewBox="0 0 32 32" aria-hidden className="size-full">
-          <path fill="currentColor" d="M4 3h15.5L28 11.5v7L18.5 28H4v-7h11.2l5.8-5.8v-.9L15.2 8.5H4V3Z" />
-          <path fill="#02070b" d="M4 12h10.8l3.5 3.5-3.5 3.5H4v-7Z" />
+    <span className={cn('inline-flex items-center gap-3 sm:gap-4', className)} aria-label="PLAYMORROW">
+      <span className="relative block size-7 shrink-0 text-coral drop-shadow-[0_0_13px_rgb(255_87_77_/_0.4)] sm:size-8">
+        <svg viewBox="0 0 40 40" aria-hidden className="size-full">
+          <path
+            fill="currentColor"
+            d="M5 4h21.2L35 12.8v7.1L25.4 29.5H13.2V36H5V22.5h17l5.3-5.3v-1.7L22 10.2H5V4Z"
+          />
+          <path fill="#02070b" d="M5 14.2h14.5l3.5 3.5-3.5 3.5H5v-7Z" />
         </svg>
       </span>
-      <span className="pm-display text-[1rem] text-foreground sm:text-[1.15rem]">
-        Playmorrow
+      <span className="font-mono text-[0.95rem] font-semibold uppercase tracking-[0.3em] text-[#eef2f2] [text-shadow:0_0_12px_rgb(255_255_255_/_0.14)] sm:text-[1.05rem] sm:tracking-[0.42em]">
+        PLAYMORROW
       </span>
     </span>
   );
