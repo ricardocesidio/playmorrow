@@ -12,7 +12,8 @@ test.describe('Public pages', () => {
     await page.goto('/');
     await expect(page.getByRole('heading', { name: /Follow games/i })).toBeVisible();
     // Link is hidden on mobile (<sm breakpoint); heading is sufficient
-    if (page.viewportSize()?.width && page.viewportSize().width >= 640) {
+    const vs = page.viewportSize();
+    if (vs && vs.width >= 640) {
       await expect(page.getByRole('link', { name: /Browse all games/i })).toBeVisible();
     }
   });
