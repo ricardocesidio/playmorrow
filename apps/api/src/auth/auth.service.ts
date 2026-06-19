@@ -47,7 +47,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
   ) {
-    this.refreshSecret = this.configService.get<string>('JWT_SECRET', 'change-me-in-production');
+    this.refreshSecret = this.configService.getOrThrow<string>('JWT_SECRET');
   }
 
   async register(dto: RegisterDto): Promise<AuthResult> {
@@ -126,6 +126,25 @@ export class AuthService {
       displayName: user.displayName,
       role: user.role,
     };
+  }
+
+  /** Validates credentials and returns user data (used by session login). */
+  async validateUser(emailOrUsername: string, password: string) {
+    const isEmail = emailOrUsername.includes('@');
+    const user = isEmail
+      ? await this.usersService.findByEmail(emailOrUsername)
+      : await this.usersService.findByUsername(emailOrUsername);
+
+    if (!user || !user.passwordHash) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const passwordValid = await argon2.verify(user.passwordHash, password);
+    if (!passwordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return user;
   }
 
   private async buildResult(user: User): Promise<AuthResult> {

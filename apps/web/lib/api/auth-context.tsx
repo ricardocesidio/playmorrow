@@ -3,9 +3,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { api } from './client';
 
-const TOKEN_KEY = 'playmorrow_token';
-const REFRESH_KEY = 'playmorrow_refresh';
-
 export interface AuthUser {
   id: string;
   email: string;
@@ -14,15 +11,9 @@ export interface AuthUser {
   role: string;
 }
 
-interface AuthResult {
-  user: AuthUser;
-  accessToken: string;
-  refreshToken: string;
-}
-
 interface AuthContextValue {
   user: AuthUser | null;
-  token: string | null;
+  token: string | null; // Always null with httpOnly cookies; kept for compatibility
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (emailOrUsername: string, password: string) => Promise<void>;
@@ -35,74 +26,48 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Hydrate token from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(TOKEN_KEY);
-    if (stored) {
-      setToken(stored);
-      api
-        .get<AuthUser>('/auth/me', stored)
-        .then(setUser)
-        .catch(() => {
-          localStorage.removeItem(TOKEN_KEY);
-          localStorage.removeItem(REFRESH_KEY);
-          setToken(null);
-        })
-        .finally(() => setIsLoading(false));
-    } else {
+  const fetchMe = useCallback(async () => {
+    try {
+      const u = await api.get<AuthUser>('/auth/session/me');
+      setUser(u);
+    } catch {
+      setUser(null);
+    } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const storeSession = useCallback((newToken: string, refreshToken: string, newUser: AuthUser) => {
-    localStorage.setItem(TOKEN_KEY, newToken);
-    localStorage.setItem(REFRESH_KEY, refreshToken);
-    setToken(newToken);
-    setUser(newUser);
-  }, []);
+  // Hydrate session on mount
+  useEffect(() => {
+    fetchMe();
+  }, [fetchMe]);
 
   const login = useCallback(async (emailOrUsername: string, password: string) => {
-    const res = await api.post<AuthResult>('/auth/login', { emailOrUsername, password });
-    storeSession(res.accessToken, res.refreshToken, res.user);
-  }, [storeSession]);
+    const u = await api.post<AuthUser>('/auth/session/login', { emailOrUsername, password });
+    setUser(u);
+  }, []);
 
-  const register = useCallback(
-    async (data: { email: string; username: string; displayName: string; password: string }) => {
-      const res = await api.post<AuthResult>('/auth/register', data);
-      storeSession(res.accessToken, res.refreshToken, res.user);
-    },
-    [storeSession],
-  );
+  const register = useCallback(async (data: { email: string; username: string; displayName: string; password: string }) => {
+    const result = await api.post<{ user: AuthUser; accessToken: string; refreshToken: string }>('/auth/register', data);
+    setUser(result.user);
+  }, []);
 
-  const logout = useCallback(() => {
-    const refresh = localStorage.getItem(REFRESH_KEY);
-    if (refresh) {
-      api.post('/auth/logout', { refreshToken: refresh }).catch(() => {});
-    }
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(REFRESH_KEY);
-    setToken(null);
+  const logout = useCallback(async () => {
+    try { await api.post('/auth/session/logout'); } catch { /* ignore */ }
     setUser(null);
   }, []);
 
-  const refreshMe = useCallback(async () => {
-    if (!token) return;
-    const u = await api.get<AuthUser>('/auth/me', token);
-    setUser(u);
-  }, [token]);
-
   const value: AuthContextValue = {
     user,
-    token,
+    token: null, // httpOnly cookie; no client-accessible token
     isLoading,
     isAuthenticated: !!user,
     login,
     register,
     logout,
-    refreshMe,
+    refreshMe: fetchMe,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

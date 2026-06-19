@@ -1,19 +1,44 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards, Req, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import type { Request, Response } from 'express';
 
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Roles } from './decorators/roles.decorator';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { SessionAuthGuard } from './guards/session-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { AuthService } from './auth.service';
+import { SessionService } from '../session/session.service';
+
+const SESSION_COOKIE = '__Host-playmorrow_session';
+const SESSION_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
+
+function setSessionCookie(res: Response, raw: string, expiresAt: Date) {
+  res.cookie(SESSION_COOKIE, raw, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+    expires: expiresAt,
+  });
+}
+
+function clearSessionCookie(res: Response) {
+  res.clearCookie(SESSION_COOKIE, { path: '/' });
+}
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly sessionService: SessionService,
+  ) {}
+
+  // ── JWT endpoints (legacy) ───────────────────────────────────────────
 
   @Post('register')
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
@@ -60,5 +85,46 @@ export class AuthController {
   @ApiOkResponse({ description: 'Admin-only test route.' })
   adminOnly() {
     return { message: 'Welcome, admin.' };
+  }
+
+  // ── Session-based endpoints (secure) ─────────────────────────────────
+
+  @Post('session/login')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  @HttpCode(HttpStatus.OK)
+  async sessionLogin(@Body() dto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const user = await this.authService.validateUser(dto.emailOrUsername, dto.password);
+    const ua = (req.headers['user-agent'] ?? '').slice(0, 512);
+    const ip = req.ip ?? req.socket?.remoteAddress;
+
+    const { raw, expiresAt } = await this.sessionService.create(user.id, ip, ua);
+    setSessionCookie(res, raw, expiresAt);
+
+    return { id: user.id, username: user.username, displayName: user.displayName, role: user.role };
+  }
+
+  @Post('session/logout')
+  @HttpCode(HttpStatus.OK)
+  async sessionLogout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const raw = req.cookies?.[SESSION_COOKIE];
+    if (raw) {
+      const { createHash } = require('crypto');
+      const hash = createHash('sha256').update(raw).digest('hex');
+      await this.sessionService.revoke(hash);
+    }
+    clearSessionCookie(res);
+    return { success: true };
+  }
+
+  @Get('session/me')
+  @UseGuards(SessionAuthGuard)
+  async sessionMe(@CurrentUser() user: { id: string }) {
+    return this.authService.getProfile(user.id);
+  }
+
+  @Get('session/list')
+  @UseGuards(SessionAuthGuard)
+  async listSessions(@CurrentUser() user: { id: string }) {
+    return this.sessionService.listForUser(user.id);
   }
 }

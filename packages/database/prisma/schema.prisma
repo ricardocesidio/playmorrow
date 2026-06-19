@@ -133,6 +133,11 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  authVersion         Int       @default(0)
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+
   studioMemberships StudioMember[]
   devlogs           Devlog[]
   comments          Comment[]
@@ -143,6 +148,7 @@ model User {
   notificationsReceived Notification[] @relation("NotificationRecipient")
   notificationsActed    Notification[] @relation("NotificationActor")
   refreshTokens         RefreshToken[]
+  sessions              Session[]
 
   @@index([role])
   @@map("users")
@@ -501,4 +507,27 @@ model RefreshToken {
 
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Server-side sessions (opaque, httpOnly cookie)
+// ──────────────────────────────────────────────────────────────────────────
+
+model Session {
+  id           String    @id @default(cuid())
+  sessionHash  String    @unique
+  userId       String
+  createdAt    DateTime  @default(now())
+  lastSeenAt   DateTime  @default(now())
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  ipHash       String?
+  userAgent    String?
+  authVersion  Int       @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
 }

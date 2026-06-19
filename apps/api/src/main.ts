@@ -4,12 +4,23 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { join } from 'node:path';
 import express from 'express';
+import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
+
+  // Security headers
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'same-origin' },
+    contentSecurityPolicy: false, // Configure via Next.js if needed
+  }));
+
+  // Cookie parser for session auth
+  app.use(cookieParser());
 
   // Strip unknown props, transform payloads into DTO instances.
   app.useGlobalPipes(
