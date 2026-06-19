@@ -13,6 +13,7 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "test:all": "turbo run test && pnpm --filter @playmorrow/web test:e2e",
     "typecheck": "turbo run typecheck",
     "setup:env": "cp -n .env.example .env; cp -n apps/web/.env.example apps/web/.env.local; cp -n apps/api/.env.example apps/api/.env; cp -n packages/database/.env.example packages/database/.env; echo '✅ env files created (existing files left untouched). Set DATABASE_URL + JWT_SECRET.'",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
