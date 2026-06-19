@@ -108,7 +108,17 @@ pnpm --filter @playmorrow/web test:e2e --project=desktop
 
 # With browser UI
 pnpm --filter @playmorrow/web test:e2e:headed
+
+# Dev mode — serves with `next dev` (hot reload, no production build) for fast
+# iteration while writing a UI fix and its test. CI uses the production build.
+pnpm --filter @playmorrow/web test:e2e:dev
 ```
+
+The default run builds and serves the app with `next start` (the production
+build, 3–5 min). `test:e2e:dev` (`PLAYWRIGHT_DEV=1`) skips the build and serves
+with `next dev` instead — much faster to iterate, though behaviour can differ
+slightly from the shipped build. Note `NEXT_PUBLIC_*` env is inlined at build
+time, so the Playwright `webServer.env` override only takes effect in dev mode.
 
 Tests use **mocked API** — no database or backend required.
 

@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
+    "test:e2e:dev": "PLAYWRIGHT_DEV=1 playwright test",
     "clean-port": "lsof -ti:${PLAYWRIGHT_PORT:-3099} | xargs kill -9 2>/dev/null || true",
     "test:e2e:server": "next dev -p 3099",
     "test:e2e:headed": "playwright test --headed",

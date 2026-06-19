@@ -114,7 +114,12 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 16. Production build required before E2E (no auto-rebuild)
 
-- **Type:** DX · **Severity:** Medium · **Effort:** S–M · **Status:** OPEN
+- **Type:** DX · **Severity:** Medium · **Effort:** S–M · **Status:** DONE — added a dev-mode
+  E2E path. `PLAYWRIGHT_DEV=1` makes `webServer` run `next dev -p <PORT>` (hot reload, no
+  3–5 min build) via the `test:e2e:dev` script; the default/CI run keeps the production
+  `next start` build. Dev-mode startup timeout raised to 120s for lazy route compilation.
+  Documented in the README incl. the `NEXT_PUBLIC_*` build-time-inlining caveat. Verified:
+  public spec 8/8 green in dev mode.
 - **Files:** `apps/web/playwright.config.ts` (`webServer.command` uses `start`, not `dev`),
   `apps/web/package.json`
 - **Analysis:** E2E runs against `next start` (production build); `next build` takes 3–5 min
