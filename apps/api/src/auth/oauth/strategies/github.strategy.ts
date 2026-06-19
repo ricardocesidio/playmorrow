@@ -15,8 +15,8 @@ export interface OAuthProfile {
 export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(configService: ConfigService) {
     super({
-      clientID: configService.getOrThrow<string>('GITHUB_CLIENT_ID'),
-      clientSecret: configService.getOrThrow<string>('GITHUB_CLIENT_SECRET'),
+      clientID: configService.get<string>('GITHUB_CLIENT_ID') ?? 'noop',
+      clientSecret: configService.get<string>('GITHUB_CLIENT_SECRET') ?? 'noop',
       callbackURL: configService.get<string>('GITHUB_CALLBACK_URL', 'http://localhost:4000/api/auth/github/callback'),
       scope: ['user:email'],
     });

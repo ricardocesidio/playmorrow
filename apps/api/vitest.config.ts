@@ -7,12 +7,6 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.spec.ts'],
     root: './',
-    env: {
-      GOOGLE_CLIENT_ID: 'test',
-      GOOGLE_CLIENT_SECRET: 'test',
-      GITHUB_CLIENT_ID: 'test',
-      GITHUB_CLIENT_SECRET: 'test',
-    },
   },
   plugins: [
     swc.vite({
