@@ -7,6 +7,7 @@ import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
 import { Tag } from '@/components/tag';
+import { MediaGallery } from '@/components/media-gallery';
 import { useGame, useGameDevlogs, useGameRoadmap, useGamePressKit } from '@/lib/api/hooks';
 import { FollowButton } from '@/components/follow-button';
 
@@ -117,22 +118,8 @@ export default function GameDetailPage() {
           </section>
         )}
 
-        {/* Media */}
-        {game.media?.length > 0 && (
-          <section className="mb-10">
-            <h2 className="mb-3 text-lg font-semibold">Media</h2>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {game.media.map((m) => (
-                <div key={m.id} className="overflow-hidden rounded-lg border border-border">
-                  <img src={m.url} alt={m.caption ?? ''} className="aspect-video w-full object-cover" />
-                  {m.caption && (
-                    <p className="p-2 text-xs text-muted-foreground">{m.caption}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* Media gallery */}
+        <MediaGallery media={game.media ?? []} />
 
         {/* Platform links */}
         {game.platformLinks?.length > 0 && (

@@ -43,6 +43,7 @@
 | 2026-06-19 | post | Infinite scroll | current | Replaced Previous/Next pagination on feed and games pages with IntersectionObserver-based infinite scroll. New hooks: useInfinitePersonalFeed, useInfiniteGames, useIntersectionObserver. |
 | 2026-06-19 | post | Global search | current | Backend: GET /api/search?q= searches games/studios/devlogs in parallel. Frontend: /search page with debounced search (300ms), grouped results by type, search icon in Nav. |
 | 2026-06-19 | post | User profile pages | current | Backend: GET /api/users/:username returns profile info + studio memberships. Frontend: /users/[username] page with avatar, displayName, bio, role badge, join date, studio list. |
+| 2026-06-19 | post | Media gallery + lightbox | current | New MediaGallery component: separates TRAILER/VIDEO (play overlay, external link) from SCREENSHOT/IMAGE (grid with thumbnails). Lightbox modal with prev/next navigation, keyboard support (Escape to close), caption overlay on hover. thumbnailUrl added to frontend Game Media type. |
 
 **Phase 0 verification:** `pnpm --filter @playmorrow/web lint` → 0 warnings; `prisma validate`
 clean (config + env load); turbo "no output files" warning gone on full `pnpm test`.
