@@ -2,7 +2,10 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   ParseBoolPipe,
@@ -88,5 +91,14 @@ export class DevlogsController {
     @Body() dto: UpdateDevlogDto,
   ) {
     return this.devlogsService.update(user.id, id, dto);
+  }
+
+  @Delete('devlogs/:id')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Devlog deleted (cascades to comments, reactions).' })
+  async remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
+    return this.devlogsService.remove(user.id, id);
   }
 }

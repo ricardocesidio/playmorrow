@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   Patch,
@@ -71,5 +74,14 @@ export class RoadmapItemsController {
     @Body() dto: UpdateRoadmapItemDto,
   ) {
     return this.roadmapService.update(user.id, id, dto);
+  }
+
+  @Delete('roadmap-items/:id')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Roadmap item deleted.' })
+  async remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
+    return this.roadmapService.remove(user.id, id);
   }
 }

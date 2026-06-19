@@ -116,6 +116,28 @@ export class RoadmapItemsService {
     return this.toResponse(updated, studio ?? { id: item.game.studioId, name: '', slug: '' });
   }
 
+  async remove(userId: string, id: string) {
+    const item = await this.prisma.roadmapItem.findUnique({
+      where: { id },
+      include: { game: { include: { studio: { include: { members: true } } } } },
+    });
+
+    if (!item) {
+      throw new NotFoundException('Roadmap item not found');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    assertStudioWriteAccess({ id: userId, role: user.role }, item.game.studio.members);
+
+    await this.prisma.roadmapItem.delete({ where: { id } });
+
+    return { success: true };
+  }
+
   async reorder(userId: string, gameSlug: string, items: { id: string; position: number }[]) {
     const game = await this.prisma.game.findUnique({
       where: { slug: gameSlug.toLowerCase() },
