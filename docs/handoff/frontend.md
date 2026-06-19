@@ -247,7 +247,11 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 26. Notifications aren't clickable targets
 
-- **Type:** Feature/Gap · **Severity:** Low–Medium · **Effort:** M · **Status:** OPEN
+- **Type:** Feature/Gap · **Severity:** Low–Medium · **Effort:** M · **Status:** DONE — the
+  notifications list now resolves a `targetUrl` **server-side** (`findByRecipientId`): DEVLOG →
+  `/devlogs/:id`, COMMENT → its devlog, GAME/STUDIO → slug routes, batched one query per kind
+  (no N+1), null when unlinkable. The frontend renders each row's title as a `Link` to
+  `targetUrl` (when present) and marks it read on click. Backend test asserts the resolved URL.
 - **Files:** `apps/web/app/dashboard/notifications/page.tsx`, `apps/web/lib/api/hooks.ts`
   (`useNotifications`), possibly a backend resolver for slugs
 - **Analysis:** Notifications expose `targetType` + `targetId` but don't link to the content

@@ -27,6 +27,7 @@
 | 2026-06-19 | 1 | #16 done | `6d06746` | Dev-mode E2E path: `PLAYWRIGHT_DEV=1` serves with `next dev` (no production build) via `test:e2e:dev`; CI keeps `next start`. README documents both + the `NEXT_PUBLIC_*` inlining caveat. Verified public spec 8/8 in dev mode. |
 | 2026-06-19 | polish | #22 done | `02a97c5` | Auth hydration flash: nav renders a stable skeleton while `isLoading` (no pop-in/shift); `/login` + `/register` gate on `authLoading` before redirect so the form doesn't flash for logged-in visitors. 25 E2E tests green. |
 | 2026-06-19 | 3 | #9, #24 done | `5607602` | Reaction N+1 fix. New batch endpoint `GET /api/devlogs/:id/comments/reactions` resolves all comments' reactions in 2 queries (`groupBy` + viewer `findMany`), keyed by comment id. Frontend swaps the per-comment fan-out for one `useDevlogCommentReactions` query; mutations invalidate the batch key. Backend **229/229**; web typecheck+lint clean. |
+| 2026-06-19 | 4 | #26 done | _pending_ | Clickable notifications: server resolves a `targetUrl` per notification (DEVLOG/COMMENT→devlog, GAME/STUDIO→slug routes; batched, no N+1). Rows link to it + mark read on click. Backend **229/229**; web typecheck+lint clean. |
 
 **Phase 0 verification:** `pnpm --filter @playmorrow/web lint` → 0 warnings; `prisma validate`
 clean (config + env load); turbo "no output files" warning gone on full `pnpm test`.

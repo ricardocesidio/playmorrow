@@ -147,9 +147,19 @@ export default function NotificationsPage() {
                     </span>
                     <span>{formatDate(n.createdAt)}</span>
                   </div>
-                  <p className={`mt-1 text-sm ${n.readAt ? 'text-muted-foreground' : 'font-medium text-foreground'}`}>
-                    {n.title}
-                  </p>
+                  {n.targetUrl ? (
+                    <Link
+                      href={n.targetUrl}
+                      onClick={() => { if (!n.readAt) handleMarkRead(n.id); }}
+                      className={`mt-1 block text-sm hover:underline ${n.readAt ? 'text-muted-foreground' : 'font-medium text-foreground'}`}
+                    >
+                      {n.title}
+                    </Link>
+                  ) : (
+                    <p className={`mt-1 text-sm ${n.readAt ? 'text-muted-foreground' : 'font-medium text-foreground'}`}>
+                      {n.title}
+                    </p>
+                  )}
                   {n.body && (
                     <p className="mt-0.5 text-xs text-muted-foreground">{n.body}</p>
                   )}
