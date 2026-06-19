@@ -1,6 +1,9 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
 
+/** Export for direct fetch calls (e.g. file upload). */
+export const API = BASE_URL;
+
 export class ApiError extends Error {
   status: number;
   body: unknown;

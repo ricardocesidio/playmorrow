@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, ExternalLink, Trash2 } from 'lucide-react';
 
+import { ImageUpload } from '@/components/image-upload';
+
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
 import { useStudio, useUpdateStudio, useDeleteStudio } from '@/lib/api/hooks';
@@ -191,16 +193,8 @@ export default function EditStudioPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="logoUrl" className="mb-1.5 block text-sm font-medium">Logo URL</label>
-            <input id="logoUrl" type="url" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-          <div>
-            <label htmlFor="bannerUrl" className="mb-1.5 block text-sm font-medium">Banner URL</label>
-            <input id="bannerUrl" type="url" value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
+          <ImageUpload value={logoUrl} onChange={setLogoUrl} label="Logo" />
+          <ImageUpload value={bannerUrl} onChange={setBannerUrl} label="Banner" />
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">

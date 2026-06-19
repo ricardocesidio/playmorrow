@@ -146,7 +146,7 @@ Legend — **Type**: Bug / Limitation / Feature / DX · **Effort**: S (≤½d) /
 
 ## 18. No image uploads
 
-- **Type:** Feature · **Severity:** Medium · **Effort:** L · `NEEDS DESIGN` · **Status:** OPEN
+- **Type:** Feature · **Severity:** Medium · **Effort:** L · **Status:** DONE
 - **Files:** create/edit forms in `apps/web/app/...` (studios/games/devlogs/press-kit),
   backend upload endpoint (new), storage adapter (new)
 - **Analysis:** All media (cover/banner/logo/avatar/game media) are pasted URLs — no file
