@@ -1,17 +1,23 @@
 'use client';
 
 import Link from 'next/link';
-import { Gamepad2, Bell } from 'lucide-react';
+import { Gamepad2, Bell, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import { useAuth } from '@/lib/api/auth-context';
 import { useUnreadNotificationCount } from '@/lib/api/hooks';
+import { useState, useEffect } from 'react';
 
 export function Nav() {
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const { user, token, isAuthenticated, isLoading } = useAuth();
   const { data: unreadData } = useUnreadNotificationCount(token ?? undefined);
   const unreadCount = unreadData?.unreadCount ?? 0;
+
+  useEffect(() => setMounted(true), []);
 
   return (
     <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
@@ -30,6 +36,15 @@ export function Nav() {
         </Link>
       </nav>
       <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="text-muted-foreground"
+          aria-label="Toggle theme"
+        >
+          {mounted && theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+        </Button>
         {isLoading ? (
           // Stable placeholder while auth resolves (#22) — reserves the button
           // area so the chrome doesn't flash/shift in once `isLoading` clears.
