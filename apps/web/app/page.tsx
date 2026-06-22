@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
+import { SiteFooter } from '@/components/site-footer';
 import { StatusBadge } from '@/components/status-badge';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { usePublicFeed, useGames } from '@/lib/api/hooks';
@@ -117,6 +118,7 @@ export default function HomePage() {
         </div>
         <HudStatusRail />
       </main>
+      <SiteFooter />
     </>
   );
 }
