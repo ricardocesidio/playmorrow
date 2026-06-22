@@ -101,4 +101,12 @@ export class DevlogsController {
   async remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.devlogsService.remove(user.id, id);
   }
+
+  @Get('me/devlogs')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: "Current user's devlogs (all studios/games)." })
+  async findMyDevlogs(@CurrentUser() user: { id: string }) {
+    return this.devlogsService.findAllByAuthorId(user.id);
+  }
 }

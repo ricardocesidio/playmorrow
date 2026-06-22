@@ -233,14 +233,9 @@ export class DevlogsService {
       include: { game: { include: { studio: { include: { members: true } } } } },
     });
 
-    if (!devlog) {
-      throw new NotFoundException('Devlog not found');
-    }
-
+    if (!devlog) throw new NotFoundException('Devlog not found');
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    if (!user) throw new NotFoundException('User not found');
 
     assertStudioWriteAccess({ id: userId, role: user.role }, devlog.game.studio.members);
 
@@ -248,6 +243,18 @@ export class DevlogsService {
     await this.prisma.devlog.delete({ where: { id } });
 
     return { success: true };
+  }
+
+  async findAllByAuthorId(userId: string) {
+    const devlogs = await this.prisma.devlog.findMany({
+      where: { authorId: userId },
+      include: {
+        game: { select: { id: true, title: true, slug: true, studioId: true } },
+        author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    return devlogs.map((d) => this.toResponse(d));
   }
 
   private toResponse(devlog: {
