@@ -29,9 +29,14 @@ export const metadata: Metadata = {
   },
   description:
     'Playmorrow is a curated social platform where indie studios showcase their games, share devlogs, publish roadmaps, grow communities, and connect with players, press, and publishers.',
-  metadataBase: new URL('https://playmorrow.example'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://playmorrow.example'),
   icons: {
     icon: '/favicon.svg',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Playmorrow — Discover tomorrow\'s indie games today',
+    description: 'The social discovery layer for indie games.',
   },
   openGraph: {
     title: 'Playmorrow — Discover tomorrow\'s indie games today',
