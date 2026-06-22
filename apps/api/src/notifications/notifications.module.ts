@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule } from '../prisma/prisma.module';
+import { SessionModule } from '../session/session.module';
 import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 
@@ -10,6 +11,7 @@ import { NotificationsService } from './notifications.service';
 @Module({
   imports: [
     PrismaModule,
+    SessionModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
