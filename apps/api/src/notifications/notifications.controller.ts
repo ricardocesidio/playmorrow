@@ -24,6 +24,9 @@ import { JwtService } from '@nestjs/jwt';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { NotificationsService } from './notifications.service';
+import { SessionService } from '../session/session.service';
+
+const SESSION_COOKIE = '__Host-playmorrow_session';
 
 @ApiTags('notifications')
 @Controller()
@@ -31,6 +34,7 @@ export class NotificationsController {
   constructor(
     private readonly notificationsService: NotificationsService,
     private readonly jwtService: JwtService,
+    private readonly sessionService: SessionService,
   ) {}
 
   @Get('me/notifications')
@@ -63,9 +67,7 @@ export class NotificationsController {
   @ApiOkResponse({ description: 'Notification marked as read.' })
   async markAsRead(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     const result = await this.notificationsService.markAsRead(id, user.id);
-    if (!result) {
-      throw new NotFoundException('Notification not found');
-    }
+    if (!result) throw new NotFoundException('Notification not found');
     return result;
   }
 
@@ -84,9 +86,7 @@ export class NotificationsController {
   @ApiOkResponse({ description: 'Notification dismissed (deleted).' })
   async remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     const result = await this.notificationsService.remove(id, user.id);
-    if (!result) {
-      throw new NotFoundException('Notification not found');
-    }
+    if (!result) throw new NotFoundException('Notification not found');
     return result;
   }
 
@@ -96,34 +96,39 @@ export class NotificationsController {
   @Header('Connection', 'keep-alive')
   @ApiOkResponse({ description: 'SSE stream for real-time notification updates (#21).' })
   async stream(@Query('token') token: string, @Res() res: Response, @Req() req: Request) {
-    // Validate JWT via query param since EventSource can't set custom headers (#21).
-    let userId: string;
-    try {
-      const payload = this.jwtService.verify(token) as { sub: string };
-      userId = payload.sub;
-    } catch {
+    // Try session cookie first (preferred, no token in URL)
+    let userId: string | null = null;
+    const rawSession = req.cookies?.[SESSION_COOKIE];
+    if (rawSession) {
+      const result = await this.sessionService.validate(rawSession);
+      if (result) userId = result.user.id;
+    }
+
+    // Fallback to JWT query param (legacy)
+    if (!userId && token) {
+      try {
+        const payload = this.jwtService.verify(token) as { sub: string };
+        userId = payload.sub;
+      } catch { /* ignore */ }
+    }
+
+    if (!userId) {
       res.status(401).end();
       return;
     }
+
     res.flushHeaders();
 
-    // Send initial count
     const { unreadCount } = await this.notificationsService.getUnreadCount(userId);
     res.write(`data: ${JSON.stringify({ unreadCount })}\n\n`);
 
-    // Subscribe to events matching this user
     const subscription = this.notificationsService.events$
       .pipe(
         filter((e) => e.recipientId === userId),
         map((e) => `data: ${JSON.stringify({ unreadCount: e.unreadCount })}\n\n`),
       )
-      .subscribe((msg) => {
-        res.write(msg);
-      });
+      .subscribe((msg) => { res.write(msg); });
 
-    // Cleanup on disconnect
-    req.on('close', () => {
-      subscription.unsubscribe();
-    });
+    req.on('close', () => { subscription.unsubscribe(); });
   }
 }

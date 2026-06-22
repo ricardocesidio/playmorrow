@@ -7,24 +7,54 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { extname, join } from 'node:path';
 import { diskStorage } from 'multer';
 import type { Express } from 'express';
-
-// Express.Multer.File is provided by @types/multer
+import { createReadStream } from 'node:fs';
+import { unlink } from 'node:fs/promises';
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 const UPLOADS_DIR = join(process.cwd(), 'apps', 'api', 'uploads');
 
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+
+// Magic bytes signatures for allowed image types
+const MAGIC_BYTES: Record<string, Uint8Array[]> = {
+  'image/jpeg': [new Uint8Array([0xFF, 0xD8, 0xFF])],
+  'image/png': [new Uint8Array([0x89, 0x50, 0x4E, 0x47])],
+  'image/gif': [new Uint8Array([0x47, 0x49, 0x46])],
+  'image/webp': [new Uint8Array([0x52, 0x49, 0x46, 0x46])], // RIFF header
+  'image/svg+xml': [new Uint8Array([0x3C, 0x73, 0x76, 0x67]), new Uint8Array([0x3C, 0x3F, 0x78, 0x6D])], // <svg or <?xm
+};
+
 function generateFilename(original: string): string {
   const ts = Date.now();
   const rand = Math.random().toString(36).slice(2, 8);
   return `${ts}-${rand}${extname(original)}`;
+}
+
+async function validateMagicBytes(filePath: string, mimeType: string): Promise<boolean> {
+  const signatures = MAGIC_BYTES[mimeType];
+  if (!signatures) return false;
+
+  const buffer = Buffer.alloc(16);
+  const stream = createReadStream(filePath, { start: 0, end: 15 });
+  await new Promise<void>((resolve, reject) => {
+    stream.on('data', (chunk: string | Buffer) => {
+      const buf = typeof chunk === 'string' ? Buffer.from(chunk, 'utf-8') : chunk;
+      buf.copy(buffer);
+    });
+    stream.on('end', () => resolve());
+    stream.on('error', reject);
+  });
+
+  return signatures.some((sig) => sig.every((byte, i) => byte === buffer[i]));
 }
 
 @ApiTags('upload')
@@ -57,6 +87,17 @@ export class UploadController {
     )
     file: Express.Multer.File,
   ) {
+    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      await unlink(file.path).catch(() => {});
+      throw new BadRequestException('Invalid file type');
+    }
+
+    const isValid = await validateMagicBytes(file.path, file.mimetype);
+    if (!isValid) {
+      await unlink(file.path).catch(() => {});
+      throw new BadRequestException('File content does not match expected type');
+    }
+
     const url = `/api/uploads/${file.filename}`;
     return { url, filename: file.filename, size: file.size };
   }
