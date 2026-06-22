@@ -59,7 +59,7 @@ export default function EditDevlogPage() {
           body: body.trim(),
           coverUrl: coverUrl.trim() || null,
           isPublished,
-          publishedAt: isPublished ? new Date().toISOString() : null,
+          publishedAt: isPublished && !devlog?.publishedAt ? new Date().toISOString() : isPublished ? devlog?.publishedAt : null,
         },
       });
       setSuccess(true);

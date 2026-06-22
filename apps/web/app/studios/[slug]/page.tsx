@@ -38,7 +38,7 @@ export default function StudioDetailPage() {
         <main className="mx-auto max-w-5xl px-4 py-8 lg:px-6 lg:py-10">
           <ErrorState message="Studio not found." />
           <div className="mt-4 text-center">
-            <Link href="/games" className="font-mono text-xs uppercase tracking-widest text-cyan underline">Back to games</Link>
+            <Link href="/studios" className="font-mono text-xs uppercase tracking-widest text-cyan underline">Back to studios</Link>
           </div>
         </main>
         <SiteFooter />
