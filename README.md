@@ -2,13 +2,29 @@
 
 **Discover tomorrow's indie games today.**
 
-Playmorrow is a curated social platform where indie studios showcase their games, share development logs, publish roadmaps, grow communities, and connect with players, press, streamers, and publishers. It is the *social discovery layer* for indie games — not a store. Steam is where people buy; itch.io is where people upload; Discord is where communities talk; **Playmorrow is where studios build their public presence.**
+Playmorrow is a curated social platform where indie studios showcase their games,
+share development logs, publish roadmaps, grow communities, and connect with players,
+press, streamers, and publishers.
 
-## The product
+### For studios
 
-Playmorrow lets anyone browse an evolving catalogue of indie games in development, follow studios and games to receive live updates, read devlogs, comment and react, and discover upcoming titles before they ship.
+Playmorrow gives indie studios a professional public presence — not just a store page.
+Create a studio profile, publish devlogs with rich text and images, maintain a roadmap,
+share press kits, and build a following. Every studio gets analytics-ready engagement
+metrics and real-time notifications when followers interact.
 
-For studios, Playmorrow provides a complete toolkit:
+### For players
+
+Follow the games you care about. Get live updates when studios post devlogs, hit
+milestones, or update their roadmap. Comment, react, and be part of the development
+journey before the game ships.
+
+### The market gap
+
+- **Steam** is where people buy
+- **itch.io** is where people upload
+- **Discord** is where communities talk
+- **Playmorrow** is where studios build their public presence and grow their audience
 
 - **Studio profiles** — brand page with logo, banner, description, team, location, and website
 - **Game profiles** — cover art, screenshots, trailers, tags, platform links, pricing, status, and roadmap
@@ -234,6 +250,8 @@ All 34 known issues are catalogued in [`docs/handoff/`](docs/handoff/):
 
 ## License
 
-**All Rights Reserved.** This project is proprietary software. See [LICENSE](LICENSE) for details.
+**All Rights Reserved.** Playmorrow is proprietary software. See [LICENSE](LICENSE) for details.
 
-🚧 **v0.7 — redesigned + hardened.** Complete visual overhaul: obsidian-black theme with cyan/coral/violet/amber palette, geometric typography, clipped corners, circuit-line decorations. Auth migrated from localStorage JWT to opaque httpOnly server-side sessions with email verification, password reset, and account lockout. All core CRUD and community features implemented. Deferred: email verification (#5), password reset (#4) — now delivered in v0.7. No active sprint — project is in maintenance and handoff state.
+---
+
+*Playmorrow — Discover tomorrow's indie games today.*
