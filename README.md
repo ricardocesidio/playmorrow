@@ -234,4 +234,4 @@ All 34 known issues are catalogued in [`docs/handoff/`](docs/handoff/):
 
 ## License and status
 
-🚧 **v0.6 — public beta.** Feature-complete for MVP. All core CRUD and community features are implemented. Deferred features: email verification, password reset. No active sprint — project is in maintenance and handoff state.
+🚧 **v0.7 — redesigned + hardened.** Complete visual overhaul: obsidian-black theme with cyan/coral/violet/amber palette, geometric typography, clipped corners, circuit-line decorations. Auth migrated from localStorage JWT to opaque httpOnly server-side sessions with email verification, password reset, and account lockout. All core CRUD and community features implemented. Deferred: email verification (#5), password reset (#4) — now delivered in v0.7. No active sprint — project is in maintenance and handoff state.
