@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
@@ -21,6 +22,7 @@ export class FollowsController {
   constructor(private readonly followsService: FollowsService) {}
 
   @Post('studios/:slug/follow')
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @HttpCode(HttpStatus.OK)
   @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Followed studio.' })
@@ -29,6 +31,7 @@ export class FollowsController {
   }
 
   @Delete('studios/:slug/follow')
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @HttpCode(HttpStatus.OK)
   @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Unfollowed studio.' })
@@ -37,6 +40,7 @@ export class FollowsController {
   }
 
   @Post('games/:slug/follow')
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @HttpCode(HttpStatus.OK)
   @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Followed game.' })
@@ -45,6 +49,7 @@ export class FollowsController {
   }
 
   @Delete('games/:slug/follow')
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @HttpCode(HttpStatus.OK)
   @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Unfollowed game.' })

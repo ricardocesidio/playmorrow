@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   BadRequestException,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { extname, join } from 'node:path';
@@ -61,6 +62,7 @@ async function validateMagicBytes(filePath: string, mimeType: string): Promise<b
 @Controller('upload')
 export class UploadController {
   @Post()
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @UseGuards(SessionAuthGuard)
   @UseInterceptors(
     FileInterceptor('file', {

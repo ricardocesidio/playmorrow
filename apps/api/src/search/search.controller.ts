@@ -1,5 +1,6 @@
 import { Controller, Get, Query, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
 import { ApiTags, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { SearchService } from './search.service';
 
 @ApiTags('search')
@@ -8,6 +9,7 @@ export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
   @Get()
+  @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @ApiOkResponse({ description: 'Global search results.' })
   @ApiQuery({ name: 'q', required: true })
   @ApiQuery({ name: 'page', required: false })
