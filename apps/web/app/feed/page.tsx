@@ -236,7 +236,7 @@ function TransmissionRow({ item }: { item: Transmission }) {
       <div className="relative hidden px-6 py-6 md:block">
         <div className="text-start text-sm text-muted-foreground">{item.time}</div>
         <div className="pm-micro mt-4 text-start text-muted-foreground">
-          <span className={accent.text}>•</span> {item.type.toLowerCase().replace('_', ' ')}
+          <span className="text-muted-foreground">•</span> {item.type.toLowerCase().replace('_', ' ')}
         </div>
         <span className="absolute right-[10px] top-9 size-3 rounded-full border border-cyan bg-elevated shadow-[0_0_12px_rgb(62_231_255_/_0.75)]" />
       </div>
@@ -248,8 +248,8 @@ function TransmissionRow({ item }: { item: Transmission }) {
               {iconForAccent(item.accent)}
             </span>
             <div className="min-w-0">
-              <p className="pm-display text-sm text-foreground">
-                {item.studio} <span className={accent.text}>●</span>
+              <p className="pm-display text-xs text-foreground">
+                {item.studio} <span className="text-muted-foreground">●</span>
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {verbForType(item.type)} for <span className="uppercase">{item.game}</span>
