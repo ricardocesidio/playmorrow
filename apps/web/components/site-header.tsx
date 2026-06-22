@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { useAuth } from '@/lib/api/auth-context';
 import { useUnreadNotificationCount } from '@/lib/api/hooks';
-import { ArrowUpRight, Bell, Menu, Search, X } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { ArrowUpRight, Bell, Menu, Moon, Search, Sun, X } from 'lucide-react';
 import { HudLinkLogo } from '@/components/playmorrow/hud';
 
 const NAV_LINKS = [
@@ -56,6 +57,8 @@ export function SiteHeader() {
             <Search className="size-4" />
             <span>Search games, studios, genres...</span>
           </Link>
+
+          <ThemeToggle />
 
           {!isLoading && isAuthenticated && user ? (
             <>
@@ -128,5 +131,20 @@ export function SiteHeader() {
         </nav>
       )}
     </header>
+  );
+}
+
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useState(() => setMounted(true));
+  return (
+    <button
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      className="grid size-8 place-items-center text-muted-foreground hover:text-cyan"
+      aria-label={mounted && theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      {mounted && theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+    </button>
   );
 }
