@@ -1,7 +1,8 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { User } from '@playmorrow/database';
+import type { Prisma } from '@playmorrow/database';
 import * as argon2 from 'argon2';
 import { createHash, randomBytes } from 'node:crypto';
 
@@ -87,7 +88,7 @@ export class AuthService {
       if (attempts >= LOCKOUT_THRESHOLD) {
         updateData.lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MS);
       }
-      await this.prisma.user.update({ where: { id: user.id }, data: updateData as any });
+      await this.prisma.user.update({ where: { id: user.id }, data: updateData as Prisma.UserUpdateInput });
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -149,7 +150,7 @@ export class AuthService {
       const attempts = user.failedLoginAttempts + 1;
       const updateData: Record<string, unknown> = { failedLoginAttempts: attempts };
       if (attempts >= LOCKOUT_THRESHOLD) updateData.lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MS);
-      await this.prisma.user.update({ where: { id: user.id }, data: updateData as any });
+      await this.prisma.user.update({ where: { id: user.id }, data: updateData as Prisma.UserUpdateInput });
       throw new UnauthorizedException('Invalid credentials');
     }
 

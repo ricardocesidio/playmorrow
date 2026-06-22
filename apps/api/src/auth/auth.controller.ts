@@ -2,6 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards, Req, Res 
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
+import { createHash } from 'node:crypto';
 
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Roles } from './decorators/roles.decorator';
@@ -12,9 +13,9 @@ import { SessionAuthGuard } from './guards/session-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { AuthService } from './auth.service';
 import { SessionService } from '../session/session.service';
+import { UsersService } from '../users/users.service';
 
 const SESSION_COOKIE = '__Host-playmorrow_session';
-const SESSION_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
 
 function setSessionCookie(res: Response, raw: string, expiresAt: Date) {
   res.cookie(SESSION_COOKIE, raw, {
@@ -36,6 +37,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly sessionService: SessionService,
+    private readonly usersService: UsersService,
   ) {}
 
   // ── JWT endpoints (legacy) ───────────────────────────────────────────
@@ -108,7 +110,6 @@ export class AuthController {
   async sessionLogout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const raw = req.cookies?.[SESSION_COOKIE];
     if (raw) {
-      const { createHash } = require('crypto');
       const hash = createHash('sha256').update(raw).digest('hex');
       await this.sessionService.revoke(hash);
     }
@@ -138,13 +139,15 @@ export class AuthController {
   }
 
   @Post('resend-verification')
-  @UseGuards(SessionAuthGuard)
   @Throttle({ default: { ttl: 60_000, limit: 3 } })
   @HttpCode(HttpStatus.OK)
-  async resendVerification(@CurrentUser() user: { id: string }) {
+  async resendVerification(@Body('email') email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) return { message: 'If the email exists, a verification link has been sent.' };
+    if (user.isVerified) return { message: 'Email is already verified.' };
     const token = await this.authService.createVerificationToken(user.id);
     // In production: send email with verification link
-    return { message: 'Verification email sent', devToken: token };
+    return { message: 'Verification email sent.', devToken: token };
   }
 
   // ── Password reset ─────────────────────────────────────────────────
