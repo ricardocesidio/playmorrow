@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Gamepad2 } from 'lucide-react';
+import { LogoIcon } from '@/components/logo-icon';
 import { api, ApiError } from '@/lib/api/client';
 
 export default function ForgotPasswordPage() {
@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <Link href="/" className="mb-8 flex items-center gap-2 font-display text-lg font-semibold">
-        <span className="grid size-8 place-items-center bg-cyan/10 text-cyan"><Gamepad2 className="size-4" /></span>
+        <span className="grid size-8 place-items-center bg-cyan/10 text-cyan"><LogoIcon className="size-4" /></span>
         <span>Playmorrow</span>
       </Link>
       <div className="w-full max-w-sm border border-border bg-elevated p-8">
