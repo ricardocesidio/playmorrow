@@ -235,9 +235,6 @@ function TransmissionRow({ item }: { item: Transmission }) {
     <article className="grid border-b border-border/70 last:border-b-0 md:h-[150px] md:grid-cols-[112px_1fr]">
       <div className="relative hidden px-6 py-6 md:block">
         <div className="text-start text-sm text-muted-foreground">{item.time}</div>
-        <div className="pm-micro mt-4 text-start text-muted-foreground">
-          <span className="text-muted-foreground">•</span> {item.type.toLowerCase().replace('_', ' ')}
-        </div>
         <span className="absolute right-[10px] top-9 size-3 rounded-full border border-cyan bg-elevated shadow-[0_0_12px_rgb(62_231_255_/_0.75)]" />
       </div>
 
