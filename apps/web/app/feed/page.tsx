@@ -372,7 +372,7 @@ function PanelLink({ href, children }: { href: string; children: React.ReactNode
 
 function Stat({ icon, value }: { icon: React.ReactNode; value: number }) {
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className="inline-flex items-center gap-2 text-xs">
       {icon} {value}
     </span>
   );
