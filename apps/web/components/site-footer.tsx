@@ -40,19 +40,26 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Social */}
           <div>
-            <h3 className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">Legal</h3>
+            <h3 className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">Follow</h3>
             <ul className="space-y-2">
-              <li><span className="text-sm text-muted-foreground">Terms of Service</span></li>
-              <li><span className="text-sm text-muted-foreground">Privacy Policy</span></li>
-              <li><span className="text-sm text-muted-foreground">Contact</span></li>
+              <li>
+                <a
+                  href="https://instagram.com/playmorrow"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Instagram
+                </a>
+              </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-8 border-t border-border pt-6 text-center font-mono text-xs uppercase tracking-widest text-muted-foreground/60">
-          &copy; {new Date().getFullYear()} Playmorrow. All rights reserved.
+        <div className="mt-8 flex flex-col items-center gap-2 border-t border-border pt-6 text-center font-mono text-xs uppercase tracking-widest text-muted-foreground/60">
+          <p>&copy; {new Date().getFullYear()} Playmorrow. All rights reserved.</p>
         </div>
       </div>
     </footer>
