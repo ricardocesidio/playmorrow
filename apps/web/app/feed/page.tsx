@@ -257,7 +257,7 @@ function TransmissionRow({ item }: { item: Transmission }) {
             </div>
           </div>
 
-          <h2 className={`mt-2 line-clamp-2 text-sm leading-5 ${item.metric ? 'text-foreground' : 'text-foreground'}`}>
+          <h2 className={`mt-2 line-clamp-2 text-xs leading-5 ${item.metric ? 'text-foreground' : 'text-foreground'}`}>
             {item.metric ?? item.title}
           </h2>
           {item.metric && <h3 className="sr-only">{item.title}</h3>}
