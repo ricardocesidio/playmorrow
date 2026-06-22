@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Gamepad2 } from 'lucide-react';
+import { LogoIcon } from './logo-icon';
 
 const FOOTER_LINKS = [
   { href: '/games', label: 'Browse Games' },
@@ -17,7 +17,7 @@ export function SiteFooter() {
           <div>
             <Link href="/" className="flex items-center gap-2 font-display text-lg font-semibold tracking-tight">
               <span className="grid size-8 place-items-center rounded-none bg-cyan/10 text-cyan">
-                <Gamepad2 className="size-4" />
+                <LogoIcon className="size-4 text-cyan" />
               </span>
               <span>Playmorrow</span>
             </Link>
