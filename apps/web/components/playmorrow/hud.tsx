@@ -173,7 +173,7 @@ export function AuthArtCollage() {
           Sign in to follow studios, track roadmaps, and join the conversation.
         </p>
       </div>
-      <div className="absolute bottom-11 left-3 grid gap-6">
+      <div className="absolute bottom-11 left-3 grid gap-6 rounded-xl bg-background/20 p-4 backdrop-blur-sm">
         <SignalBenefit icon={<Radio className="size-8" />} title="Follow studios" body="See what they're building." />
         <SignalBenefit icon={<Activity className="size-8" />} title="Track roadmaps" body="Never miss what's next." />
         <SignalBenefit icon={<Users className="size-8" />} title="Join the conversation" body="Connect with the community." />
