@@ -399,16 +399,13 @@ export function useNotifications(status: string, page: number, pageSize: number,
   });
 }
 
-export function useUnreadNotificationCount(token?: string) {
+export function useUnreadNotificationCount() {
   const qc = useQueryClient();
   const queryKey = ['unreadNotificationCount'];
 
-  // Subscribe to SSE stream for real-time updates (#21)
   useEffect(() => {
-    if (!token) return;
-
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-    const eventSource = new EventSource(`${apiUrl}/me/notifications/stream?token=${token}`);
+    const eventSource = new EventSource(`${apiUrl}/me/notifications/stream`, { withCredentials: true });
 
     eventSource.onmessage = (event) => {
       try {
@@ -416,22 +413,18 @@ export function useUnreadNotificationCount(token?: string) {
         if (typeof data.unreadCount === 'number') {
           qc.setQueryData(queryKey, { unreadCount: data.unreadCount });
         }
-      } catch { /* ignore malformed messages */ }
+      } catch { /* ignore */ }
     };
 
-    eventSource.onerror = () => {
-      // SSE connection failed — polling will handle updates
-      eventSource.close();
-    };
+    eventSource.onerror = () => { eventSource.close(); };
 
     return () => eventSource.close();
-  }, [token, qc]);
+  }, [qc]);
 
   return useQuery({
     queryKey,
-    queryFn: () => api.get<{ unreadCount: number }>('/me/notifications/unread-count', token),
-    enabled: !!token,
-    refetchInterval: 60_000, // fallback polling
+    queryFn: () => api.get<{ unreadCount: number }>('/me/notifications/unread-count'),
+    refetchInterval: 60_000,
   });
 }
 

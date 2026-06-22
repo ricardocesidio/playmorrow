@@ -18,7 +18,7 @@ const NAV_LINKS = [
 export function SiteHeader() {
   const pathname = usePathname();
   const { user, token, isAuthenticated, isLoading } = useAuth();
-  const { data: unreadData } = useUnreadNotificationCount(token ?? undefined);
+  const { data: unreadData } = useUnreadNotificationCount();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const unreadCount = unreadData?.unreadCount ?? 0;

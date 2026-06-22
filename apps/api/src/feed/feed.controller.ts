@@ -9,7 +9,7 @@ import {
 import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { FeedService, type FeedResult } from './feed.service';
 
 @ApiTags('feed')
@@ -18,7 +18,7 @@ export class FeedController {
   constructor(private readonly feedService: FeedService) {}
 
   @Get('me/feed')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Personalized feed for current user.' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'pageSize', required: false })

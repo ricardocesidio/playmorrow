@@ -6,10 +6,10 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import type { PressKitResponse } from './press-kits.service';
 import { UpsertPressKitDto } from './dto/upsert-press-kit.dto';
 import { PressKitsService } from './press-kits.service';
@@ -20,8 +20,7 @@ export class PressKitsController {
   constructor(private readonly pressKitsService: PressKitsService) {}
 
   @Put('games/:gameSlug/press-kit')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiCreatedResponse({ description: 'Press kit created or updated.' })
   async upsert(
     @CurrentUser() user: { id: string },

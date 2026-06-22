@@ -14,10 +14,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GamesService } from './games.service';
@@ -28,8 +28,7 @@ export class GamesController {
   constructor(private readonly gamesService: GamesService) {}
 
   @Post('studios/:studioSlug/games')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiCreatedResponse({ description: 'Game created.' })
   async create(
     @CurrentUser() user: { id: string },
@@ -81,8 +80,7 @@ export class GamesController {
   }
 
   @Patch('games/:slug')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Game updated.' })
   async update(
     @CurrentUser() user: { id: string },
@@ -93,9 +91,8 @@ export class GamesController {
   }
 
   @Delete('games/:slug')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Game deleted (cascades to devlogs, media, etc.).' })
   async remove(@CurrentUser() user: { id: string }, @Param('slug') slug: string) {
     return this.gamesService.remove(user.id, slug);

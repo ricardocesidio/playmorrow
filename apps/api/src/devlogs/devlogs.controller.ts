@@ -15,11 +15,11 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { CreateDevlogDto } from './dto/create-devlog.dto';
 import { UpdateDevlogDto } from './dto/update-devlog.dto';
 import { DevlogsService } from './devlogs.service';
@@ -30,8 +30,7 @@ export class DevlogsController {
   constructor(private readonly devlogsService: DevlogsService) {}
 
   @Post('games/:gameSlug/devlogs')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiCreatedResponse({ description: 'Devlog created.' })
   async create(
     @CurrentUser() user: { id: string },
@@ -42,7 +41,7 @@ export class DevlogsController {
   }
 
   @Get('games/:gameSlug/devlogs')
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalSessionGuard)
   @ApiOkResponse({ description: 'Paginated devlogs for a game.' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'pageSize', required: false })
@@ -71,7 +70,7 @@ export class DevlogsController {
   }
 
   @Get('devlogs/:id')
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalSessionGuard)
   @ApiOkResponse({ description: 'Devlog detail.' })
   async findById(@Param('id') id: string, @CurrentUser() user?: { id: string }) {
     const devlog = await this.devlogsService.findById(id, user?.id);
@@ -82,8 +81,7 @@ export class DevlogsController {
   }
 
   @Patch('devlogs/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Devlog updated.' })
   async update(
     @CurrentUser() user: { id: string },
@@ -94,17 +92,15 @@ export class DevlogsController {
   }
 
   @Delete('devlogs/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Devlog deleted (cascades to comments, reactions).' })
   async remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.devlogsService.remove(user.id, id);
   }
 
   @Get('me/devlogs')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: "Current user's devlogs (all studios/games)." })
   async findMyDevlogs(@CurrentUser() user: { id: string }) {
     return this.devlogsService.findAllByAuthorId(user.id);

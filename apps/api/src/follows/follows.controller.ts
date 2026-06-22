@@ -8,11 +8,11 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { FollowsService } from './follows.service';
 
 @ApiTags('follows')
@@ -22,8 +22,7 @@ export class FollowsController {
 
   @Post('studios/:slug/follow')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Followed studio.' })
   async followStudio(@CurrentUser() user: { id: string }, @Param('slug') slug: string) {
     return this.followsService.followStudio(user.id, slug);
@@ -31,8 +30,7 @@ export class FollowsController {
 
   @Delete('studios/:slug/follow')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Unfollowed studio.' })
   async unfollowStudio(@CurrentUser() user: { id: string }, @Param('slug') slug: string) {
     return this.followsService.unfollowStudio(user.id, slug);
@@ -40,8 +38,7 @@ export class FollowsController {
 
   @Post('games/:slug/follow')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Followed game.' })
   async followGame(@CurrentUser() user: { id: string }, @Param('slug') slug: string) {
     return this.followsService.followGame(user.id, slug);
@@ -49,15 +46,14 @@ export class FollowsController {
 
   @Delete('games/:slug/follow')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Unfollowed game.' })
   async unfollowGame(@CurrentUser() user: { id: string }, @Param('slug') slug: string) {
     return this.followsService.unfollowGame(user.id, slug);
   }
 
   @Get('studios/:slug/follow-status')
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalSessionGuard)
   @ApiOkResponse({ description: 'Studio follow status.' })
   async studioFollowStatus(
     @CurrentUser() user: { id: string } | undefined,
@@ -67,7 +63,7 @@ export class FollowsController {
   }
 
   @Get('games/:slug/follow-status')
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalSessionGuard)
   @ApiOkResponse({ description: 'Game follow status.' })
   async gameFollowStatus(
     @CurrentUser() user: { id: string } | undefined,
@@ -77,8 +73,7 @@ export class FollowsController {
   }
 
   @Get('me/follows')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: "Current user's follows." })
   async getMyFollows(@CurrentUser() user: { id: string }) {
     return this.followsService.getMyFollows(user.id);
