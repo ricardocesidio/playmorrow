@@ -27,7 +27,7 @@ function VerifyEmailInner() {
     if (!resendEmail.trim()) return;
     setResending(true);
     try {
-      await api.post('/auth/forgot-password', { email: resendEmail.trim() });
+      await api.post('/auth/resend-verification', { email: resendEmail.trim() });
       setResent(true);
     } catch { /* ignore */ }
     setResending(false);
