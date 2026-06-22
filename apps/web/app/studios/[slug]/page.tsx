@@ -12,6 +12,7 @@ import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { ErrorState } from '@/components/error-state';
 import { useStudio, useStudioMembers, useStudioGames } from '@/lib/api/hooks';
 import { FollowButton } from '@/components/follow-button';
+import { ReportForm } from '@/components/report-form';
 
 export default function StudioDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -89,6 +90,7 @@ export default function StudioDetailPage() {
                 </span>
               )}
               <FollowButton targetType="studio" slug={slug} />
+              {studio && <ReportForm targetType="STUDIO" targetId={studio.id} />}
               {studio.websiteUrl && (
                 <a
                   href={studio.websiteUrl}

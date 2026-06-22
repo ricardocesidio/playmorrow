@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile } from './client';
+import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile, type Report, type CreateReportDto } from './client';
 
 // ── Infinite scroll helpers ─────────────────────────────────────────────
 
@@ -758,5 +758,45 @@ export function useDeleteGame() {
       toast.success('Game deleted');
     },
     onError: () => toast.error('Failed to delete game'),
+  });
+}
+
+// ── Reports (admin) ──────────────────────────────────────────────────────
+
+export function useCreateReport() {
+  return useMutation({
+    mutationFn: (data: CreateReportDto & { token?: string }) => {
+      const { token: _t, ...body } = data;
+      return api.post<Report>('/reports', body);
+    },
+  });
+}
+
+export function useAdminReports(page = 1, pageSize = 20, status?: string) {
+  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  if (status && status !== 'all') params.set('status', status);
+  return useQuery({
+    queryKey: ['adminReports', page, pageSize, status],
+    queryFn: () => api.get<Paginated<Report>>(`/admin/reports?${params}`),
+  });
+}
+
+export function useAdminReport(id: string) {
+  return useQuery({
+    queryKey: ['adminReport', id],
+    queryFn: () => api.get<Report>(`/admin/reports/${id}`),
+    enabled: !!id,
+  });
+}
+
+export function useUpdateReport() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { id: string; body: Record<string, unknown> }) =>
+      api.patch<Report>(`/admin/reports/${data.id}`, data.body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['adminReports'] });
+      qc.invalidateQueries({ queryKey: ['adminReport'] });
+    },
   });
 }

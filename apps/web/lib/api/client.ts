@@ -220,6 +220,27 @@ export interface UserProfile {
   studios: { id: string; name: string; slug: string; logoUrl: string | null; tagline: string | null; role: string }[];
 }
 
+export interface Report {
+  id: string;
+  targetType: string;
+  targetId: string;
+  reason: string;
+  details: string | null;
+  status: string;
+  createdAt: string;
+  reporter: { id: string; username: string; displayName: string };
+  resolutionNote?: string | null;
+  resolvedBy?: { id: string; username: string; displayName: string } | null;
+  resolvedAt?: string | null;
+}
+
+export interface CreateReportDto {
+  targetType: 'GAME' | 'STUDIO' | 'DEVLOG' | 'COMMENT' | 'USER';
+  targetId: string;
+  reason: string;
+  details?: string;
+}
+
 // ── HTTP Client ─────────────────────────────────────────────────────────
 
 function createRealClient() {

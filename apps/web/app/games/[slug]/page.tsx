@@ -13,6 +13,7 @@ import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { ErrorState } from '@/components/error-state';
 import { useGame, useGameDevlogs, useGameRoadmap } from '@/lib/api/hooks';
 import { FollowButton } from '@/components/follow-button';
+import { ReportForm } from '@/components/report-form';
 
 export default function GameDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -79,6 +80,7 @@ export default function GameDetailPage() {
                   <SignalLabel color="amber">{game.expectedReleaseText}</SignalLabel>
                 )}
                 <FollowButton targetType="game" slug={slug} />
+                <ReportForm targetType="GAME" targetId={game.id} />
               </div>
             </div>
           </div>
