@@ -623,19 +623,7 @@ export function useDeleteStudio() {
 export function useMyDevlogs(token?: string) {
   return useQuery({
     queryKey: ['myDevlogs', token],
-    queryFn: async () => {
-      const studios = await api.get<Studio[]>('/studios/me', token);
-      const results = await Promise.all(
-        studios.map((s) => api.get<Paginated<Game>>(`/studios/${s.slug}/games`, token)),
-      );
-      const games = results.flatMap((r) => r.items);
-      const devlogResults = await Promise.all(
-        games.map((g) =>
-          api.get<Paginated<Devlog>>(`/games/${g.slug}/devlogs?includeDrafts=true`, token),
-        ),
-      );
-      return devlogResults.flatMap((r) => r.items);
-    },
+    queryFn: () => api.get<Devlog[]>('/me/devlogs', token),
     enabled: !!token,
   });
 }
