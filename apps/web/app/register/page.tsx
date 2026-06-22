@@ -49,7 +49,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await register({ email: email.trim(), username: username.trim(), displayName: displayName.trim(), password });
-      router.push('/dashboard');
+      router.push('/welcome');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Registration failed';
       setError(msg);
