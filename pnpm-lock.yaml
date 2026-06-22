@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      superpowers:
+        specifier: github:obra/superpowers
+        version: https://codeload.github.com/obra/superpowers/tar.gz/896224c4b1879920ab573417e68fd51d2ccc9072
     devDependencies:
       prettier:
         specifier: ^3.3.3
@@ -5793,6 +5797,10 @@ packages:
   superagent@10.3.0:
     resolution: {integrity: sha512-B+4Ik7ROgVKrQsXTV0Jwp2u+PXYLSlqtDAhYnkkD+zn3yg8s/zjA2MeGayPoY/KICrbitwneDHrjSotxKL+0XQ==}
     engines: {node: '>=14.18.0'}
+
+  superpowers@https://codeload.github.com/obra/superpowers/tar.gz/896224c4b1879920ab573417e68fd51d2ccc9072:
+    resolution: {gitHosted: true, integrity: sha512-arj7t7UEUl99r91havDA1EneCPmR+Ji4qE6LSN3Ynn1DLrFVJTn9D94Du8l+axU1Nbt3keT7ICAvXbwt9LPpXw==, tarball: https://codeload.github.com/obra/superpowers/tar.gz/896224c4b1879920ab573417e68fd51d2ccc9072}
+    version: 6.0.3
 
   supertest@7.2.2:
     resolution: {integrity: sha512-oK8WG9diS3DlhdUkcFn4tkNIiIbBx9lI2ClF8K+b2/m8Eyv47LSawxUzZQSNKUrVb2KsqeTDCcjAAVPYaSLVTA==}
@@ -12454,6 +12462,8 @@ snapshots:
       qs: 6.15.2
     transitivePeerDependencies:
       - supports-color
+
+  superpowers@https://codeload.github.com/obra/superpowers/tar.gz/896224c4b1879920ab573417e68fd51d2ccc9072: {}
 
   supertest@7.2.2:
     dependencies:
