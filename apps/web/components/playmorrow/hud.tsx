@@ -113,7 +113,6 @@ export function HudStatusRail({ className }: { className?: string }) {
           ))}
         </span>
       </div>
-      <div className="pm-micro">34.0522 N, 118.2437 W</div>
       <div className="pm-micro flex items-center gap-2">
         <span className="size-1.5 bg-success shadow-[0_0_10px_rgb(112_255_155_/_0.6)]" />
         Connected
