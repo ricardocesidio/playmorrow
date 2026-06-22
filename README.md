@@ -232,6 +232,8 @@ All 34 known issues are catalogued in [`docs/handoff/`](docs/handoff/):
 - [`frontend.md`](docs/handoff/frontend.md) — issues #12–#29
 - [`devx.md`](docs/handoff/devx.md) — issues #30–#34
 
-## License and status
+## License
+
+**All Rights Reserved.** This project is proprietary software. See [LICENSE](LICENSE) for details.
 
 🚧 **v0.7 — redesigned + hardened.** Complete visual overhaul: obsidian-black theme with cyan/coral/violet/amber palette, geometric typography, clipped corners, circuit-line decorations. Auth migrated from localStorage JWT to opaque httpOnly server-side sessions with email verification, password reset, and account lockout. All core CRUD and community features implemented. Deferred: email verification (#5), password reset (#4) — now delivered in v0.7. No active sprint — project is in maintenance and handoff state.
