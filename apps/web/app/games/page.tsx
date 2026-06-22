@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowRight, BarChart3, ChevronDown, Search, X } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
+import { SiteFooter } from '@/components/site-footer';
 import { GameCard } from '@/components/game-card';
 import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { EmptyState } from '@/components/empty-state';
@@ -155,6 +156,7 @@ export default function GamesPage() {
         </div>
         <HudStatusRail />
       </main>
+      <SiteFooter />
     </>
   );
 }
