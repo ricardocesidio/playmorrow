@@ -34,13 +34,16 @@ export function SiteHeader() {
               key={link.href}
               href={link.href}
               aria-current={isActive(link.href) ? 'page' : undefined}
-              className={`relative py-2 text-sm transition-colors ${
+              className={`relative inline-flex items-center gap-2 py-2 text-sm transition-colors ${
                 isActive(link.href)
                   ? 'text-cyan after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:bg-cyan after:shadow-[0_0_10px_rgb(62_231_255_/_0.8)]'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {link.label}
+              {(isActive(link.href) || link.href === '/feed') && (
+                <span className="size-1.5 rounded-full bg-cyan shadow-[0_0_10px_rgb(62_231_255_/_0.85)]" />
+              )}
             </Link>
           ))}
         </nav>
@@ -54,12 +57,7 @@ export function SiteHeader() {
             <span>Search games, studios, genres...</span>
           </Link>
 
-          {isLoading ? (
-            <div className="flex items-center gap-2" aria-hidden>
-              <div className="h-7 w-16 animate-pulse bg-muted" />
-              <div className="h-7 w-20 animate-pulse bg-muted" />
-            </div>
-          ) : isAuthenticated && user ? (
+          {!isLoading && isAuthenticated && user ? (
             <>
               <Link
                 href="/dashboard/notifications"
