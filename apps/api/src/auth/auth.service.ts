@@ -15,6 +15,18 @@ import type { RegisterDto } from './dto/register.dto';
 const LOCKOUT_THRESHOLD = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 min
 
+const COMMON_PASSWORDS = new Set([
+  'password', 'password123', '12345678', '123456789', '1234567890',
+  'qwerty123', 'qwertyuiop', 'letmein', 'welcome', 'monkey',
+  'dragon', 'master', 'football', 'baseball', 'sunshine',
+  'trustno1', 'iloveyou', 'princess', 'abc123', 'admin123',
+]);
+
+function isCommonPassword(password: string): boolean {
+  const lower = password.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return COMMON_PASSWORDS.has(lower) || COMMON_PASSWORDS.has(password.toLowerCase());
+}
+
 export interface AuthResult {
   user: { id: string; email: string; username: string; displayName: string; role: string };
   accessToken: string;
@@ -51,6 +63,16 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto): Promise<AuthResult> {
+    if (isCommonPassword(dto.password)) {
+      throw new BadRequestException('This password is too common. Choose a more unique password.');
+    }
+
+    // Also reject passwords containing email or username parts
+    const lowerPw = dto.password.toLowerCase();
+    if (lowerPw.includes(dto.email.split('@')[0]!.toLowerCase()) || lowerPw.includes(dto.username.toLowerCase())) {
+      throw new BadRequestException('Password cannot contain your email or username.');
+    }
+
     const passwordHash = await argon2.hash(dto.password);
     const user = await this.usersService.create({
       email: dto.email, username: dto.username, displayName: dto.displayName, passwordHash,
