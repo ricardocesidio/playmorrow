@@ -8,12 +8,12 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -25,8 +25,7 @@ export class CommentsController {
 
   @Post('devlogs/:devlogId/comments')
   @Throttle({ default: { ttl: 60_000, limit: 20 } }) // anti-spam (#3)
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiCreatedResponse({ description: 'Comment created.' })
   async create(
     @CurrentUser() user: { id: string },
@@ -37,7 +36,7 @@ export class CommentsController {
   }
 
   @Get('devlogs/:devlogId/comments')
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalSessionGuard)
   @ApiOkResponse({ description: 'List of comments for a devlog.' })
   async findByDevlogId(
     @Param('devlogId') devlogId: string,
@@ -47,8 +46,7 @@ export class CommentsController {
   }
 
   @Patch('comments/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Comment updated.' })
   async update(
     @CurrentUser() user: { id: string },
@@ -59,8 +57,7 @@ export class CommentsController {
   }
 
   @Delete('comments/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Comment soft-deleted.' })
   async delete(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.commentsService.delete(user.id, id);

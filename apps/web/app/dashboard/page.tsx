@@ -198,7 +198,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, token, isLoading, isAuthenticated, logout } = useAuth();
   const { data: studios, isLoading: studiosLoading } = useMyStudios(token ?? undefined);
-  const { data: unreadData } = useUnreadNotificationCount(token ?? undefined);
+  const { data: unreadData } = useUnreadNotificationCount();
   const unreadCount = unreadData?.unreadCount ?? 0;
 
   useEffect(() => {

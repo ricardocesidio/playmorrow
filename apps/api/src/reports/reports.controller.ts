@@ -9,10 +9,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CreateReportDto } from './dto/create-report.dto';
@@ -25,17 +25,15 @@ export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Post('reports')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiCreatedResponse({ description: 'Report created.' })
   async create(@CurrentUser() user: { id: string }, @Body() dto: CreateReportDto) {
     return this.reportsService.create(user.id, dto);
   }
 
   @Get('admin/reports')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(SessionAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Paginated reports list.' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'pageSize', required: false })
@@ -49,18 +47,16 @@ export class ReportsController {
   }
 
   @Get('admin/reports/:id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(SessionAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Single report detail.' })
   async findById(@Param('id') id: string) {
     return this.reportsService.findById(id);
   }
 
   @Patch('admin/reports/:id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(SessionAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Report status updated.' })
   async update(
     @CurrentUser() user: { id: string },

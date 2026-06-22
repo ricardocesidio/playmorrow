@@ -14,10 +14,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CreateStudioDto } from './dto/create-studio.dto';
 import { UpdateStudioDto } from './dto/update-studio.dto';
 import { StudiosService } from './studios.service';
@@ -28,8 +28,7 @@ export class StudiosController {
   constructor(private readonly studiosService: StudiosService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiCreatedResponse({ description: 'Studio created.' })
   async create(@CurrentUser() user: { id: string }, @Body() dto: CreateStudioDto) {
     return this.studiosService.create(user.id, dto);
@@ -49,8 +48,7 @@ export class StudiosController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: "Current user's studios." })
   async findMyStudios(@CurrentUser() user: { id: string }) {
     return this.studiosService.findMyStudios(user.id);
@@ -83,8 +81,7 @@ export class StudiosController {
   }
 
   @Patch(':slug')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Studio updated.' })
   async update(
     @CurrentUser() user: { id: string },
@@ -95,9 +92,8 @@ export class StudiosController {
   }
 
   @Delete(':slug')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Studio deleted (cascades to games, devlogs, etc.).' })
   async remove(@CurrentUser() user: { id: string }, @Param('slug') slug: string) {
     return this.studiosService.remove(user.id, slug);

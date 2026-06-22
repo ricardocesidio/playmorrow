@@ -11,10 +11,10 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CreateRoadmapItemDto } from './dto/create-roadmap-item.dto';
 import { UpdateRoadmapItemDto } from './dto/update-roadmap-item.dto';
 import { RoadmapItemsService } from './roadmap-items.service';
@@ -25,8 +25,7 @@ export class RoadmapItemsController {
   constructor(private readonly roadmapService: RoadmapItemsService) {}
 
   @Post('games/:gameSlug/roadmap')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiCreatedResponse({ description: 'Roadmap item created.' })
   async create(
     @CurrentUser() user: { id: string },
@@ -43,8 +42,7 @@ export class RoadmapItemsController {
   }
 
   @Patch('games/:gameSlug/roadmap/reorder')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Roadmap items reordered.' })
   async reorder(
     @CurrentUser() user: { id: string },
@@ -65,8 +63,7 @@ export class RoadmapItemsController {
   }
 
   @Patch('roadmap-items/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Roadmap item updated.' })
   async update(
     @CurrentUser() user: { id: string },
@@ -77,9 +74,8 @@ export class RoadmapItemsController {
   }
 
   @Delete('roadmap-items/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Roadmap item deleted.' })
   async remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.roadmapService.remove(user.id, id);

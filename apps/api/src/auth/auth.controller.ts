@@ -45,8 +45,13 @@ export class AuthController {
   @Post('register')
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @ApiCreatedResponse({ description: 'User registered successfully.' })
-  async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  async register(@Body() dto: RegisterDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.register(dto);
+    const ua = (req.headers['user-agent'] ?? '').slice(0, 512);
+    const ip = req.ip ?? req.socket?.remoteAddress;
+    const { raw, expiresAt } = await this.sessionService.create(result.user.id, ip, ua);
+    setSessionCookie(res, raw, expiresAt);
+    return { id: result.user.id, username: result.user.username, displayName: result.user.displayName, role: result.user.role };
   }
 
   @Post('login')

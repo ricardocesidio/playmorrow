@@ -10,12 +10,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { ReactDto } from './dto/react.dto';
 import { ReactionsService } from './reactions.service';
 
@@ -28,9 +28,8 @@ export class ReactionsController {
 
   @Post('devlogs/:devlogId/reactions')
   @Throttle({ default: { ttl: 60_000, limit: 30 } }) // anti-spam (#3)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Reaction added to devlog.' })
   async reactToDevlog(
     @CurrentUser() user: { id: string },
@@ -41,9 +40,8 @@ export class ReactionsController {
   }
 
   @Delete('devlogs/:devlogId/reactions')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Reaction removed from devlog.' })
   async removeDevlogReaction(
     @CurrentUser() user: { id: string },
@@ -54,7 +52,7 @@ export class ReactionsController {
   }
 
   @Get('devlogs/:devlogId/reactions')
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalSessionGuard)
   @ApiOkResponse({ description: 'Devlog reaction counts and viewer reactions.' })
   async getDevlogReactions(
     @Param('devlogId') devlogId: string,
@@ -67,9 +65,8 @@ export class ReactionsController {
 
   @Post('comments/:commentId/reactions')
   @Throttle({ default: { ttl: 60_000, limit: 30 } }) // anti-spam (#3)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Reaction added to comment.' })
   async reactToComment(
     @CurrentUser() user: { id: string },
@@ -80,9 +77,8 @@ export class ReactionsController {
   }
 
   @Delete('comments/:commentId/reactions')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Reaction removed from comment.' })
   async removeCommentReaction(
     @CurrentUser() user: { id: string },
@@ -93,7 +89,7 @@ export class ReactionsController {
   }
 
   @Get('comments/:commentId/reactions')
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalSessionGuard)
   @ApiOkResponse({ description: 'Comment reaction counts and viewer reactions.' })
   async getCommentReactions(
     @Param('commentId') commentId: string,
@@ -104,7 +100,7 @@ export class ReactionsController {
 
   // Batch: all comment reactions for a devlog in one request (#9 / #24).
   @Get('devlogs/:devlogId/comments/reactions')
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalSessionGuard)
   @ApiOkResponse({ description: 'Reaction counts + viewer reactions for every comment on a devlog, keyed by comment id.' })
   async getDevlogCommentReactions(
     @Param('devlogId') devlogId: string,

@@ -10,14 +10,14 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { extname, join } from 'node:path';
 import { diskStorage } from 'multer';
 import type { Express } from 'express';
 import { createReadStream } from 'node:fs';
 import { unlink } from 'node:fs/promises';
 
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 const UPLOADS_DIR = join(process.cwd(), 'apps', 'api', 'uploads');
@@ -61,7 +61,7 @@ async function validateMagicBytes(filePath: string, mimeType: string): Promise<b
 @Controller('upload')
 export class UploadController {
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -70,7 +70,6 @@ export class UploadController {
       }),
     }),
   )
-  @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } },
