@@ -132,7 +132,7 @@ export default function GamesPage() {
                 <div className="flex flex-wrap items-center justify-start gap-5 xl:justify-end">
                   <ToggleControl label="Free" active={freeOnly} onChange={setFreeOnly} />
                   <ToggleControl label="Playtest available" active={playtestOnly} onChange={setPlaytestOnly} />
-                  <button type="button" onClick={clearAll} className="pm-micro inline-flex items-center gap-3 text-coral">
+                  <button type="button" onClick={clearAll} className="pm-micro inline-flex items-center gap-3 text-coral transition-colors hover:text-coral/80">
                     Clear all <X className="size-4" />
                   </button>
                 </div>
@@ -156,7 +156,7 @@ export default function GamesPage() {
                     {chip} <X className="size-3" />
                   </button>
                 ))}
-                {activeFilters.length > 0 && <button type="button" onClick={clearAll} className="px-3 py-1.5 pm-micro text-coral">Clear all</button>}
+                {activeFilters.length > 0 && <button type="button" onClick={clearAll} className="px-3 py-1.5 pm-micro text-coral transition-colors hover:text-coral/80">Clear all</button>}
                 <span className="ml-auto hidden text-xs text-muted-foreground/70 lg:inline">
                   Showing {displayedItems.length} of {totalGames.toLocaleString()} games
                 </span>
