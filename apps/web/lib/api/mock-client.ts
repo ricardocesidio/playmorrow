@@ -140,6 +140,14 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
   // Follows
   if (path === '/me/follows') return { studios: [MOCK_STUDIO], games: [MOCK_GAME] };
 
+  // Wishlist
+  if (path === '/me/wishlist') return { items: [] };
+  if (path.includes('/wishlist-status') || path.includes('/wishlist')) {
+    if (method === 'POST') return { gameId: 'game-1', gameSlug: segments[1], isWishlisted: true };
+    if (method === 'DELETE') return { gameId: 'game-1', gameSlug: segments[1], isWishlisted: false };
+    if (path.includes('/wishlist-status')) return { gameId: 'game-1', gameSlug: segments[1], isWishlisted: false };
+  }
+
   // Fallback
   return {};
 }
