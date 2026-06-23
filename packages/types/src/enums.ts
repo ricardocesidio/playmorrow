@@ -16,6 +16,7 @@ export const STUDIO_ROLES = ['OWNER', 'ADMIN', 'MEMBER'] as const;
 /** Where a game is in its lifecycle. Drives the public status badge. */
 export type GameStatus =
   | 'CONCEPT'
+  | 'PRE_ALPHA'
   | 'IN_DEVELOPMENT'
   | 'ALPHA'
   | 'BETA'
@@ -25,6 +26,7 @@ export type GameStatus =
   | 'ON_HOLD';
 export const GAME_STATUSES = [
   'CONCEPT',
+  'PRE_ALPHA',
   'IN_DEVELOPMENT',
   'ALPHA',
   'BETA',
