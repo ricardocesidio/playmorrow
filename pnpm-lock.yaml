@@ -7,14 +7,13 @@ settings:
 importers:
 
   .:
-    dependencies:
-      superpowers:
-        specifier: github:obra/superpowers
-        version: https://codeload.github.com/obra/superpowers/tar.gz/896224c4b1879920ab573417e68fd51d2ccc9072
     devDependencies:
       prettier:
         specifier: ^3.3.3
         version: 3.8.4
+      superpowers:
+        specifier: github:obra/superpowers
+        version: https://codeload.github.com/obra/superpowers/tar.gz/896224c4b1879920ab573417e68fd51d2ccc9072
       turbo:
         specifier: ^2.3.3
         version: 2.9.18

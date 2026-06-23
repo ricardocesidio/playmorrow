@@ -3,7 +3,7 @@ services:
     name: playmorrow-api
     env: node
     nodeVersion: 22
-    buildCommand: pnpm exec turbo run build --filter=@playmorrow/api...
+    buildCommand: pnpm exec turbo run build --filter=@playmorrow/api^...
     startCommand: node apps/api/dist/main.js
     healthCheckPath: /health
     envVars:
