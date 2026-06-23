@@ -51,7 +51,7 @@ export class AuthController {
     const ip = req.ip ?? req.socket?.remoteAddress;
     const { raw, expiresAt } = await this.sessionService.create(result.user.id, ip, ua);
     setSessionCookie(res, raw, expiresAt);
-    return { id: result.user.id, username: result.user.username, displayName: result.user.displayName, role: result.user.role };
+    return { id: result.user.id, username: result.user.username, displayName: result.user.displayName, role: result.user.role, accountType: result.user.accountType ?? 'PLAYER' };
   }
 
   @Post('login')
@@ -107,7 +107,7 @@ export class AuthController {
     const { raw, expiresAt } = await this.sessionService.create(user.id, ip, ua);
     setSessionCookie(res, raw, expiresAt);
 
-    return { id: user.id, username: user.username, displayName: user.displayName, role: user.role };
+    return { id: user.id, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER' };
   }
 
   @Post('session/logout')
