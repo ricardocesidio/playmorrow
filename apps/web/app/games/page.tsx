@@ -232,7 +232,7 @@ function FilterGroup({ label, options, selected, onChange }: { label: string; op
             key={option}
             type="button"
             onClick={() => onChange(option)}
-            className={`clip-corner border px-4 py-1.5 pm-micro ${
+            className={`clip-corner border px-4 py-1.5 pm-micro cursor-pointer ${
               selected === option
                 ? 'border-cyan bg-cyan/10 text-cyan'
                 : 'border-border bg-background/50 text-muted-foreground'
@@ -252,7 +252,7 @@ function FilterSelect({ label, value, icon }: { label: string; value: string; ic
       <div className="pm-micro mb-1.5 text-muted-foreground">{label}</div>
       <button
         type="button"
-        className="clip-corner flex h-9 w-full items-center justify-between gap-3 border border-border-bright/60 bg-background/60 px-3 pm-micro text-cyan"
+        className="clip-corner flex h-9 w-full items-center justify-between gap-3 border border-border-bright/60 bg-background/60 px-3 pm-micro text-cyan cursor-pointer"
       >
         {value}
         <span className="flex items-center gap-2 text-muted-foreground">
@@ -380,8 +380,8 @@ function PaginationControl({
             type="button"
             className={
               page === '1'
-                ? 'grid size-8 place-items-center border border-cyan bg-cyan/10 font-mono text-sm text-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.18)]'
-                : 'font-mono text-sm text-foreground/90'
+                ? 'grid size-8 place-items-center border border-cyan bg-cyan/10 font-mono text-sm text-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.18)] cursor-pointer'
+                : 'font-mono text-sm text-foreground/90 cursor-pointer'
             }
           >
             {page}
@@ -395,7 +395,7 @@ function PaginationControl({
           type="button"
           onClick={onNext}
           disabled={disabled}
-          className="clip-corner inline-flex h-8 items-center gap-3 border border-cyan/70 px-5 pm-display text-xs text-cyan transition hover:bg-cyan hover:text-cyan-foreground disabled:opacity-70"
+          className="clip-corner inline-flex h-8 items-center gap-3 border border-cyan/70 px-5 pm-display text-xs text-cyan transition hover:bg-cyan hover:text-cyan-foreground disabled:opacity-70 cursor-pointer"
         >
           {isLoading ? 'Loading' : 'Next'} <ArrowRight className="size-4" />
         </button>
