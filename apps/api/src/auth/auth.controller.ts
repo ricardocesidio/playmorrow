@@ -148,11 +148,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async resendVerification(@Body('email') email: string) {
     const user = await this.usersService.findByEmail(email);
-    if (!user) return { message: 'If the email exists, a verification link has been sent.' };
-    if (user.isVerified) return { message: 'Email is already verified.' };
-    const token = await this.authService.createVerificationToken(user.id);
-    // In production: send email with verification link
-    return { message: 'Verification email sent.', devToken: token };
+    if (user && !user.isVerified) {
+      const raw = await this.authService.createVerificationToken(user.id);
+      // In production: send email with verification link (use `raw`)
+    }
+    // Always return the same message — never reveal whether the email exists
+    return { message: 'If the email exists, a verification link has been sent.' };
   }
 
   // ── Password reset ─────────────────────────────────────────────────
@@ -161,9 +162,9 @@ export class AuthController {
   @Throttle({ default: { ttl: 60_000, limit: 3 } })
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body('email') email: string) {
-    const token = await this.authService.createPasswordResetToken(email);
-    // In production: send email with reset link
-    return { message: 'If the email exists, a reset link has been sent.', devToken: token };
+    await this.authService.createPasswordResetToken(email);
+    // Always return the same message — never reveal whether the email exists
+    return { message: 'If the email exists, a reset link has been sent.' };
   }
 
   @Post('reset-password')
