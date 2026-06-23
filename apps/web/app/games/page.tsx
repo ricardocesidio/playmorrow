@@ -104,7 +104,7 @@ export default function GamesPage() {
   return (
     <>
       <SiteHeader />
-      <main className="relative flex-1 overflow-hidden px-5 pb-28 pt-4 sm:px-8 lg:px-10">
+      <main className="relative flex-1 px-5 pb-28 pt-4 sm:px-8 lg:px-10">
         <CircuitFrame className="opacity-70" />
         <div className="relative z-10 mx-auto max-w-[1448px]">
           <HudPanel className="mb-3 px-4 py-3 sm:px-8 sm:py-4" accent="muted">
