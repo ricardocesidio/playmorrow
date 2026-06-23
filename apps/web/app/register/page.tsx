@@ -46,7 +46,11 @@ export default function RegisterPage() {
       setError('All fields required');
       return;
     }
-    if (!/^[a-zA-Z0-9]+$/.test(username) || username.length > 12) {
+    if (!/^[a-zA-Z0-9\s]+$/.test(displayName.trim()) || displayName.trim().length > 30) {
+      setError('Name can only contain letters, numbers, and spaces (max 30 characters).');
+      return;
+    }
+    if (!/^[a-zA-Z0-9]+$/.test(username.trim()) || username.trim().length > 12) {
       setError('Username can only contain letters and numbers (max 12 characters).');
       return;
     }

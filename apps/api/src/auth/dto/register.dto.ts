@@ -21,7 +21,8 @@ export class RegisterDto {
   @ApiProperty({ example: 'Dev Name' })
   @IsString()
   @MinLength(1)
-  @MaxLength(100)
+  @MaxLength(30)
+  @Matches(/^[a-zA-Z0-9\s]+$/, { message: 'Name can only contain letters, numbers, and spaces (max 30 characters).' })
   displayName!: string;
 
   @ApiProperty({ example: 'StrongPassword123!' })
