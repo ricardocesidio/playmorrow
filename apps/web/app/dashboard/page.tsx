@@ -16,11 +16,12 @@ import {
   Gamepad,
   FileText,
   Users,
+  Heart,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
-import { useMyStudios, useMyGames, useMyDevlogs, useUnreadNotificationCount, useMyFollows } from '@/lib/api/hooks';
+import { useMyStudios, useMyGames, useMyDevlogs, useUnreadNotificationCount, useMyFollows, useMyWishlist } from '@/lib/api/hooks';
 import { Footer } from '@/components/footer';
 
 function MyFollowsList({ token }: { token: string | null }) {
@@ -190,6 +191,49 @@ function MyGamesList({ token }: { token: string | null }) {
       <Button asChild className="mt-4" size="sm">
         <Link href="/dashboard/games/new">Create your first game</Link>
       </Button>
+    </div>
+  );
+}
+
+function MyWishlistSection() {
+  const { data: wishlist, isLoading } = useMyWishlist();
+
+  if (isLoading) {
+    return <div className="h-16 animate-pulse rounded border border-border bg-elevated" />;
+  }
+
+  if (!wishlist || wishlist.items.length === 0) {
+    return (
+      <div className="rounded border border-border bg-elevated py-8 text-center">
+        <Heart className="mx-auto mb-2 size-6 text-muted-foreground/40" />
+        <p className="text-sm text-muted-foreground">Your wishlist is empty. Save games you want to follow later.</p>
+        <Link href="/games" className="mt-3 inline-block border border-coral bg-coral/10 px-4 py-2 font-mono text-xs uppercase tracking-widest text-coral">
+          Explore games
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {wishlist.items.slice(0, 5).map((item) => (
+        <Link
+          key={item.id}
+          href={`/games/${item.game.slug}`}
+          className="flex items-center gap-3 rounded border border-border bg-elevated p-3 transition-colors hover:border-border-bright"
+        >
+          {item.game.coverUrl ? (
+            <img src={item.game.coverUrl} alt="" className="size-10 rounded object-cover" />
+          ) : (
+            <div className="flex size-10 items-center justify-center rounded bg-muted font-mono text-xs text-muted-foreground/30">No cover</div>
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-medium text-sm">{item.game.title}</p>
+            <p className="truncate text-xs text-muted-foreground">{item.game.studio.name}</p>
+          </div>
+          <Heart className="size-3 shrink-0 text-coral fill-coral" />
+        </Link>
+      ))}
     </div>
   );
 }
@@ -380,6 +424,15 @@ export default function DashboardPage() {
             Following
           </h2>
           <MyFollowsList token={token} />
+        </section>
+
+        {/* Wishlist */}
+        <section className="mb-10">
+          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+            <Heart className="size-5 text-coral" />
+            My Wishlist
+          </h2>
+          <MyWishlistSection />
         </section>
 
         {/* Other placeholder cards */}

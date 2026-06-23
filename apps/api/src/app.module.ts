@@ -11,6 +11,7 @@ import { DevlogsModule } from './devlogs/devlogs.module';
 import { ReactionsModule } from './reactions/reactions.module';
 import { ReportsModule } from './reports/reports.module';
 import { SearchModule } from './search/search.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 import { FeedModule } from './feed/feed.module';
 import { FollowsModule } from './follows/follows.module';
 import { GamesModule } from './games/games.module';
@@ -50,6 +51,7 @@ import { UsersModule } from './users/users.module';
     FeedModule,
     PressKitsModule,
     SearchModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
