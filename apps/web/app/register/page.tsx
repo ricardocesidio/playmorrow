@@ -108,7 +108,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setAccountType('PLAYER')}
-                  className={`flex flex-col items-center gap-2 border p-4 transition-colors ${
+                  className={`flex flex-col items-center gap-2 border p-4 transition-colors cursor-pointer ${
                     accountType === 'PLAYER'
                       ? 'border-cyan bg-cyan/10 text-cyan'
                       : 'border-border bg-background/50 text-muted-foreground'
@@ -120,7 +120,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setAccountType('STUDIO')}
-                  className={`flex flex-col items-center gap-2 border p-4 transition-colors ${
+                  className={`flex flex-col items-center gap-2 border p-4 transition-colors cursor-pointer ${
                     accountType === 'STUDIO'
                       ? 'border-coral bg-coral/10 text-coral'
                       : 'border-border bg-background/50 text-muted-foreground'
