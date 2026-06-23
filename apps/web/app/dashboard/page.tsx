@@ -290,7 +290,11 @@ export default function DashboardPage() {
             <LayoutDashboard className="size-6 text-primary" />
             <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
           </div>
-          <p className="mt-2 text-muted-foreground">Welcome back, {user.displayName}.</p>
+          <p className="mt-2 text-muted-foreground">
+            {user.accountType === 'STUDIO'
+              ? 'Share your games with players. Create a studio profile, publish devlogs, and build your community.'
+              : 'Track the games you care about. Follow studios, save games to your wishlist, and stay updated.'}
+          </p>
         </div>
 
         {/* User summary */}
@@ -302,8 +306,7 @@ export default function DashboardPage() {
             <div>
               <p className="font-medium">{user.displayName}</p>
               <p className="text-sm text-muted-foreground">@{user.username}</p>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
-              <p className="text-xs text-muted-foreground/60">Role: {user.role}</p>
+              <p className="text-xs text-muted-foreground/60">{user.accountType === 'STUDIO' ? 'Studio account' : 'Player account'}</p>
             </div>
           </div>
         </div>
