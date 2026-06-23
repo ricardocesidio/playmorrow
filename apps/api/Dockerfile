@@ -27,6 +27,7 @@ COPY --from=build /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=build /app/apps/api/package.json ./apps/api/package.json
 COPY --from=build /app/packages ./packages
 RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @playmorrow/database db:generate
 RUN mkdir -p apps/api/uploads
 EXPOSE 4000
 CMD ["dumb-init", "node", "apps/api/dist/main.js"]
