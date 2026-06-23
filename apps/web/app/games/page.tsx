@@ -60,6 +60,9 @@ const trendingGames = [
 export default function GamesPage() {
   const [search, setSearch] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [freeOnly, setFreeOnly] = useState(false);
+  const [playtestOnly, setPlaytestOnly] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('All');
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteGames(20, searchQuery || undefined);
@@ -73,9 +76,22 @@ export default function GamesPage() {
     setSearchQuery(search);
   };
 
+  const clearAll = () => {
+    setSearchQuery('');
+    setSearch('');
+    setFreeOnly(false);
+    setPlaytestOnly(false);
+    setStatusFilter('All');
+  };
+
   const items = data?.pages.flatMap((p) => p.items) ?? [];
-  const displayedItems = items.length > 0 ? items.slice(0, 8) : isLoading ? referenceGames : [];
-  const totalGames = data?.pages[0]?.total ?? 2431;
+  const displayedItems = items.length > 0 ? items.slice(0, 8) : isLoading ? [] : [];
+  const totalGames = data?.pages[0]?.total ?? 0;
+  const activeFilters = [
+    statusFilter !== 'All' ? `Status: ${statusFilter}` : null,
+    freeOnly ? 'Free' : null,
+    playtestOnly ? 'Playtest available' : null,
+  ].filter(Boolean) as string[];
 
   return (
     <>
@@ -114,16 +130,16 @@ export default function GamesPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-start gap-5 xl:justify-end">
-                  <ToggleControl label="Free" />
-                  <ToggleControl label="Playtest available" />
-                  <button type="button" className="pm-micro inline-flex items-center gap-3 text-coral">
+                  <ToggleControl label="Free" active={freeOnly} onChange={setFreeOnly} />
+                  <ToggleControl label="Playtest available" active={playtestOnly} onChange={setPlaytestOnly} />
+                  <button type="button" onClick={clearAll} className="pm-micro inline-flex items-center gap-3 text-coral">
                     Clear all <X className="size-4" />
                   </button>
                 </div>
               </div>
 
               <div className="grid gap-3 xl:grid-cols-[520px_1fr_1fr_1.1fr_1.2fr]">
-                <FilterGroup label="Status" options={['All', 'In development', 'Alpha', 'Pre-alpha']} />
+                <FilterGroup label="Status" options={['All', 'IN_DEVELOPMENT', 'ALPHA', 'PRE_ALPHA']} selected={statusFilter} onChange={setStatusFilter} />
                 <FilterSelect label="Genre" value="All" />
                 <FilterSelect label="Platform" value="All" />
                 <FilterSelect label="Release window" value="All time" />
@@ -131,7 +147,7 @@ export default function GamesPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                {['Status: In development', 'Alpha', 'Pre-alpha', 'Playtest available'].map((chip) => (
+                {activeFilters.map((chip) => (
                   <button
                     key={chip}
                     type="button"
@@ -140,9 +156,9 @@ export default function GamesPage() {
                     {chip} <X className="size-3" />
                   </button>
                 ))}
-                <button type="button" className="px-3 py-1.5 pm-micro text-coral">Clear all</button>
+                {activeFilters.length > 0 && <button type="button" onClick={clearAll} className="px-3 py-1.5 pm-micro text-coral">Clear all</button>}
                 <span className="ml-auto hidden text-xs text-muted-foreground/70 lg:inline">
-                  Showing 1-8 of {totalGames.toLocaleString()} games
+                  Showing {displayedItems.length} of {totalGames.toLocaleString()} games
                 </span>
               </div>
             </form>
@@ -206,22 +222,23 @@ export default function GamesPage() {
   );
 }
 
-function FilterGroup({ label, options }: { label: string; options: string[] }) {
+function FilterGroup({ label, options, selected, onChange }: { label: string; options: string[]; selected: string; onChange: (value: string) => void }) {
   return (
     <div>
       <div className="pm-micro mb-1.5 text-muted-foreground">{label} <ChevronDown className="inline size-3" /></div>
       <div className="flex flex-wrap gap-2">
-        {options.map((option, index) => (
+        {options.map((option) => (
           <button
             key={option}
             type="button"
+            onClick={() => onChange(option)}
             className={`clip-corner border px-4 py-1.5 pm-micro ${
-              index === 0
+              selected === option
                 ? 'border-cyan bg-cyan/10 text-cyan'
                 : 'border-border bg-background/50 text-muted-foreground'
             }`}
           >
-            {option}
+            {option === 'All' ? 'All' : option.replace(/_/g, ' ')}
           </button>
         ))}
       </div>
@@ -247,11 +264,17 @@ function FilterSelect({ label, value, icon }: { label: string; value: string; ic
   );
 }
 
-function ToggleControl({ label }: { label: string }) {
+function ToggleControl({ label, active, onChange }: { label: string; active: boolean; onChange: (value: boolean) => void }) {
   return (
-    <button type="button" className="group inline-flex items-center gap-3 pm-micro text-muted-foreground">
-      <span className="relative h-4 w-8 rounded-full border border-cyan/65 bg-cyan/10 shadow-[0_0_14px_rgb(62_231_255_/_0.14)]">
-        <span className="absolute left-0.5 top-1/2 size-3 -translate-y-1/2 rounded-full bg-cyan shadow-[0_0_12px_rgb(62_231_255_/_0.75)] transition group-hover:left-4" />
+    <button type="button" onClick={() => onChange(!active)} className="group inline-flex items-center gap-3 pm-micro text-muted-foreground">
+      <span className={`relative h-4 w-8 rounded-full border transition-colors ${
+        active
+          ? 'border-cyan bg-cyan/20 shadow-[0_0_14px_rgb(62_231_255_/_0.25)]'
+          : 'border-cyan/65 bg-cyan/10 shadow-[0_0_14px_rgb(62_231_255_/_0.14)]'
+      }`}>
+        <span className={`absolute top-1/2 size-3 -translate-y-1/2 rounded-full bg-cyan shadow-[0_0_12px_rgb(62_231_255_/_0.75)] transition-all ${
+          active ? 'left-4' : 'left-0.5'
+        }`} />
       </span>
       {label}
     </button>
