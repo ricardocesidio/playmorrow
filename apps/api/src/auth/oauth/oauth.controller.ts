@@ -51,7 +51,7 @@ export class OAuthController {
     res.cookie(SESSION_COOKIE, raw, {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       path: '/',
       expires: expiresAt,
     });
