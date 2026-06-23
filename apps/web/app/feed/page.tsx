@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   Activity,
@@ -205,22 +206,43 @@ export default function FeedPage() {
 }
 
 function SignalTabs() {
+  const [activeTab, setActiveTab] = useState('All signals');
+  const [followingOnly, setFollowingOnly] = useState(false);
+
   return (
     <div className="grid border-b border-border/80 bg-background/55 text-muted-foreground md:grid-cols-[150px_1fr_1fr_1fr_1fr_190px]">
-      {['All signals', 'Devlogs', 'Roadmap', 'Releases', 'Milestones'].map((tab, index) => (
-        <button
-          key={tab}
-          type="button"
-          className={`relative h-12 border-b border-r border-border/55 px-4 pm-micro transition md:border-b-0 ${
-            index === 0 ? 'bg-cyan/8 text-cyan after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-cyan after:shadow-[0_0_12px_rgb(62_231_255_/_0.85)]' : 'hover:text-foreground'
-          }`}
-        >
-          {tab}
-        </button>
-      ))}
-      <button type="button" className="flex h-12 items-center justify-center gap-3 px-4 pm-micro hover:text-foreground">
-        <span className="relative h-4 w-8 rounded-full border border-border-bright bg-background">
-          <span className="absolute left-1 top-1/2 size-2.5 -translate-y-1/2 rounded-full bg-muted-foreground" />
+      {['All signals', 'Devlogs', 'Roadmap', 'Releases', 'Milestones'].map((tab) => {
+        const isActive = activeTab === tab;
+        return (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveTab(tab)}
+            className={`relative h-12 cursor-pointer border-b border-r border-border/55 px-4 pm-micro transition md:border-b-0 ${
+              isActive
+                ? 'bg-cyan/8 text-cyan after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-cyan after:shadow-[0_0_12px_rgb(62_231_255_/_0.85)]'
+                : 'hover:text-foreground'
+            }`}
+          >
+            {tab}
+          </button>
+        );
+      })}
+      <button
+        type="button"
+        onClick={() => setFollowingOnly(!followingOnly)}
+        className="flex h-12 cursor-pointer items-center justify-center gap-3 px-4 pm-micro hover:text-foreground"
+      >
+        <span className={`relative h-4 w-8 rounded-full border transition-colors ${
+          followingOnly
+            ? 'border-cyan bg-cyan/20'
+            : 'border-border-bright bg-background'
+        }`}>
+          <span className={`absolute top-1/2 size-2.5 -translate-y-1/2 rounded-full transition-all ${
+            followingOnly
+              ? 'left-[18px] bg-cyan shadow-[0_0_6px_rgb(62_231_255_/_0.8)]'
+              : 'left-1 bg-muted-foreground'
+          }`} />
         </span>
         Following only
       </button>
