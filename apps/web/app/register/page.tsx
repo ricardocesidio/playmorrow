@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowUpRight, Lock, Mail, User, Gamepad2, Building2 } from 'lucide-react';
+import { ArrowUpRight, Eye, EyeOff, Lock, Mail, User, Gamepad2, Building2 } from 'lucide-react';
 
 import { useAuth } from '@/lib/api/auth-context';
 import {
@@ -224,6 +224,8 @@ function HudTextField({
   icon: ReactNode;
   hint?: string;
 }) {
+  const [show, setShow] = useState(false);
+  const isPassword = type === 'password';
   return (
     <div>
       <label htmlFor={id} className="pm-micro mb-3 block text-muted-foreground">{label}</label>
@@ -233,13 +235,23 @@ function HudTextField({
         </span>
         <input
           id={id}
-          type={type}
+          type={isPassword && show ? 'text' : type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="clip-corner h-12 w-full border border-input bg-background/80 px-14 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan"
+          className="clip-corner h-12 w-full border border-input bg-background/80 px-14 pr-12 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan"
           placeholder={placeholder}
           autoComplete={autoComplete}
         />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShow(!show)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            aria-label={show ? 'Hide password' : 'Show password'}
+          >
+            {show ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+          </button>
+        )}
       </div>
       {hint && <p className="pm-micro mt-2 text-muted-foreground/60">{hint}</p>}
     </div>
