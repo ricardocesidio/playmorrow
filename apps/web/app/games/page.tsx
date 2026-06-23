@@ -256,20 +256,34 @@ function FilterGroup({ label, options, selected, onChange }: { label: string; op
 
 function FilterSelect({ label, value, onChange, options, icon }: { label: string; value: string; onChange: (v: string) => void; options: string[]; icon?: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+
+  useEffect(() => {
+    if (!open || !buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: 'fixed',
+      top: `${rect.bottom + 4}px`,
+      left: `${rect.left}px`,
+      width: `${rect.width}px`,
+      zIndex: 9999,
+    });
+  }, [open]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
   return (
-    <div ref={ref} className="relative">
+    <div className="relative">
       <div className="pm-micro mb-1.5 text-muted-foreground">{label}</div>
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setOpen(!open)}
         className="clip-corner flex h-9 w-full items-center justify-between gap-3 border border-border-bright/60 bg-background/60 px-3 pm-micro text-cyan cursor-pointer"
@@ -281,7 +295,7 @@ function FilterSelect({ label, value, onChange, options, icon }: { label: string
         </span>
       </button>
       {open && (
-        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto border border-border bg-elevated shadow-lg">
+        <div style={dropdownStyle} className="max-h-60 overflow-y-auto border border-border bg-elevated shadow-lg">
           {options.map((opt) => (
             <button
               key={opt}
