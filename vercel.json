@@ -1,0 +1,6 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "turbo run build --filter=@playmorrow/web...",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "ignoreCommand": "npx turbo-ignore @playmorrow/web"
+}
