@@ -22,7 +22,7 @@ import { filter, map } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { NotificationsService } from './notifications.service';
 import { SessionService } from '../session/session.service';
 
@@ -38,7 +38,7 @@ export class NotificationsController {
   ) {}
 
   @Get('me/notifications')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Current user notifications.' })
   @ApiQuery({ name: 'status', required: false, enum: ['all', 'unread', 'read'] })
@@ -54,7 +54,7 @@ export class NotificationsController {
   }
 
   @Get('me/notifications/unread-count')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Unread notification count.' })
   async getUnreadCount(@CurrentUser() user: { id: string }) {
@@ -62,7 +62,7 @@ export class NotificationsController {
   }
 
   @Patch('notifications/:id/read')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Notification marked as read.' })
   async markAsRead(@CurrentUser() user: { id: string }, @Param('id') id: string) {
@@ -72,7 +72,7 @@ export class NotificationsController {
   }
 
   @Patch('me/notifications/read-all')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'All notifications marked as read.' })
   async markAllAsRead(@CurrentUser() user: { id: string }) {
@@ -80,7 +80,7 @@ export class NotificationsController {
   }
 
   @Delete('notifications/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Notification dismissed (deleted).' })
