@@ -71,7 +71,7 @@ export function NotificationDropdown() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="relative grid size-8 place-items-center text-muted-foreground hover:text-cyan"
+        className="relative grid size-8 place-items-center text-muted-foreground hover:text-cyan cursor-pointer"
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
       >
         <Bell className="size-4" />
