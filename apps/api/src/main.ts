@@ -48,7 +48,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api', { exclude: ['health'] });
 
   // Serve uploaded files at /api/uploads/*
-  const uploadsDir = join(process.cwd(), 'apps', 'api', 'uploads');
+  const uploadsDir = process.env.UPLOADS_DIR || join(__dirname, '..', 'uploads');
   app.use('/api/uploads', express.static(uploadsDir));
 
   app.enableCors({
