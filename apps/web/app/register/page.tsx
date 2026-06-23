@@ -1,22 +1,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Gamepad2, Building2 } from 'lucide-react';
+import { ArrowUpRight, Lock, Mail, User, Gamepad2, Building2 } from 'lucide-react';
 
 import { useAuth } from '@/lib/api/auth-context';
+import {
+  AuthArtCollage,
+  CircuitFrame,
+  HudButton,
+  HudLinkLogo,
+  HudPanel,
+} from '@/components/playmorrow/hud';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register, isAuthenticated, isLoading: authLoading } = useAuth();
-  const [step, setStep] = useState<'type' | 'form'>('type');
-  const [accountType, setAccountType] = useState<'PLAYER' | 'STUDIO' | null>(null);
-  const [displayName, setDisplayName] = useState('');
-  const [username, setUsername] = useState('');
+  const [accountType, setAccountType] = useState<'PLAYER' | 'STUDIO'>('PLAYER');
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -24,158 +31,213 @@ export default function RegisterPage() {
   }, [authLoading, isAuthenticated, router]);
 
   if (authLoading) {
-    return <div className="flex min-h-screen items-center justify-center bg-background"><div className="size-6 animate-spin border border-cyan border-t-transparent" /></div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background pm-circuit-bg">
+        <div className="size-6 animate-spin border border-cyan border-t-transparent" />
+      </div>
+    );
   }
 
   if (isAuthenticated) return null;
 
-  const validate = () => {
-    const errs: Record<string, string> = {};
-    if (!displayName.trim()) errs.displayName = 'Name is required';
-    if (!username.trim()) errs.username = 'Username is required';
-    else if (!/^[a-zA-Z0-9]+$/.test(username)) errs.username = 'Username can only contain letters and numbers';
-    else if (username.length > 12) errs.username = 'Username must be at most 12 characters';
-    else if (username.length < 3) errs.username = 'Username must be at least 3 characters';
-    if (!email.trim()) errs.email = 'Email is required';
-    else if (!email.includes('@')) errs.email = 'Enter a valid email address';
-    if (!password) errs.password = 'Password is required';
-    else if (password.length < 8) errs.password = 'Password must be at least 8 characters';
-    else if (!/[^a-zA-Z0-9]/.test(password)) errs.password = 'Password must include at least one special character';
-    return errs;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const errs = validate();
-    setErrors(errs);
-    if (Object.keys(errs).length > 0) return;
-
+    if (!email.trim() || !username.trim() || !displayName.trim() || !password) {
+      setError('All fields required');
+      return;
+    }
+    if (!/^[a-zA-Z0-9]+$/.test(username) || username.length > 12) {
+      setError('Username can only contain letters and numbers (max 12 characters).');
+      return;
+    }
+    if (password.length < 8 || !/[^a-zA-Z0-9]/.test(password)) {
+      setError('Password must be at least 8 characters and include one special character.');
+      return;
+    }
+    setError('');
     setLoading(true);
     try {
-      const result = await register({
-        email: email.trim(),
-        username: username.trim(),
-        displayName: displayName.trim(),
-        password,
-        accountType: accountType ?? 'PLAYER',
-      });
+      const result = await register({ email: email.trim(), username: username.trim(), displayName: displayName.trim(), password, accountType });
       if (result.accountType === 'STUDIO') {
         router.push('/studios/new?from=register');
       } else {
         router.push('/dashboard');
       }
     } catch (err: unknown) {
-      setErrors({ form: err instanceof Error ? err.message : 'Registration failed' });
+      const msg = err instanceof Error ? err.message : 'Registration failed';
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  if (step === 'type') {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-        <div className="w-full max-w-lg">
-          <div className="mb-8 text-center">
-            <h1 className="font-display text-3xl font-semibold tracking-tight">Join Playmorrow</h1>
-            <p className="mt-2 text-sm text-muted-foreground">Choose how you want to start.</p>
-          </div>
-          <div className="grid gap-4">
-            <button
-              type="button"
-              onClick={() => { setAccountType('PLAYER'); setStep('form'); }}
-              className="group flex items-start gap-5 border border-border bg-elevated p-6 text-left transition-colors hover:border-cyan/50"
-            >
-              <span className="grid size-12 shrink-0 place-items-center border border-border bg-background/60 text-cyan">
-                <Gamepad2 className="size-5" />
-              </span>
-              <div>
-                <p className="font-display text-lg font-semibold">Player</p>
-                <p className="mt-1 text-sm text-muted-foreground">Discover games, follow updates, comment, and save games to your wishlist.</p>
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={() => { setAccountType('STUDIO'); setStep('form'); }}
-              className="group flex items-start gap-5 border border-border bg-elevated p-6 text-left transition-colors hover:border-coral/50"
-            >
-              <span className="grid size-12 shrink-0 place-items-center border border-border bg-background/60 text-coral">
-                <Building2 className="size-5" />
-              </span>
-              <div>
-                <p className="font-display text-lg font-semibold">Indie Studio / Company</p>
-                <p className="mt-1 text-sm text-muted-foreground">Share your game, create a studio profile, publish devlogs, and grow your community.</p>
-              </div>
-            </button>
-          </div>
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link href="/login" className="text-cyan underline">Sign in</Link>
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-      <button type="button" onClick={() => setStep('type')} className="mb-6 font-mono text-xs uppercase tracking-widest text-muted-foreground underline">
-        &larr; Back
-      </button>
-      <div className="w-full max-w-sm border border-border bg-elevated p-8">
-        <div className="mb-2 inline-flex items-center gap-2 rounded border border-border px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          {accountType === 'STUDIO' ? <Building2 className="size-3 text-coral" /> : <Gamepad2 className="size-3 text-cyan" />}
-          {accountType === 'STUDIO' ? 'Indie Studio / Company' : 'Player'}
+    <div className="relative min-h-screen overflow-hidden bg-background px-5 pb-8 text-foreground sm:px-8 lg:px-10">
+      <CircuitFrame className="opacity-45" />
+      <header className="relative z-10 mx-auto flex h-20 max-w-[1500px] items-center justify-between">
+        <HudLinkLogo />
+        <nav className="hidden items-center gap-14 text-sm text-muted-foreground md:flex" aria-label="Main navigation">
+          <Link href="/games" className="hover:text-cyan">Games</Link>
+          <Link href="/studios" className="hover:text-cyan">Studios</Link>
+          <Link href="/feed" className="hover:text-cyan">Live Feed</Link>
+        </nav>
+        <div className="flex items-center gap-6">
+          <Link href="/login" className="text-sm text-muted-foreground hover:text-cyan">Sign in</Link>
+          <Link
+            href="/register"
+            className="clip-corner hidden border border-coral bg-coral px-6 py-3 pm-display text-xs text-coral-foreground shadow-[0_0_24px_rgb(255_87_77_/_0.25)] sm:inline-flex"
+          >
+            Share your game <ArrowUpRight className="size-4" />
+          </Link>
         </div>
-        <h1 className="mb-6 font-display text-2xl font-semibold tracking-tight">Create account</h1>
+      </header>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="displayName" className="mb-1 block font-mono text-xs uppercase tracking-widest text-muted-foreground">Name</label>
-            <input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full border border-input bg-background px-3 py-2 font-mono text-sm focus:border-cyan focus:outline-none"
-              placeholder="Your name" autoComplete="name" />
-            {errors.displayName && <p className="mt-1 font-mono text-[10px] text-coral">{errors.displayName}</p>}
-          </div>
+      <main className="relative z-10 mx-auto grid max-w-[1500px] gap-8 pt-3 lg:grid-cols-[1.25fr_0.95fr] xl:gap-12">
+        <AuthArtCollage />
 
-          <div>
-            <label htmlFor="username" className="mb-1 block font-mono text-xs uppercase tracking-widest text-muted-foreground">Username</label>
-            <input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)}
-              className="w-full border border-input bg-background px-3 py-2 font-mono text-sm focus:border-cyan focus:outline-none"
-              placeholder="yourname" autoComplete="username" maxLength={12} />
-            {errors.username && <p className="mt-1 font-mono text-[10px] text-coral">{errors.username}</p>}
-            <p className="mt-1 font-mono text-[10px] text-muted-foreground/60">Letters and numbers only. Max 12 characters.</p>
-          </div>
+        <div className="flex min-h-[calc(100vh-7rem)] items-center justify-center py-8 lg:justify-end">
+          <HudPanel className="pm-scanline w-full max-w-[600px] px-6 py-9 sm:px-12 sm:py-12 lg:px-14" accent="muted">
+            <div className="mx-auto max-w-[480px]">
+              <div className="text-center">
+                <h1 className="pm-display text-xl sm:text-2xl">Create your signal</h1>
+                <div className="mx-auto mt-5 h-0.5 w-12 bg-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.7)]" />
+              </div>
 
-          <div>
-            <label htmlFor="email" className="mb-1 block font-mono text-xs uppercase tracking-widest text-muted-foreground">Email</label>
-            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-input bg-background px-3 py-2 font-mono text-sm focus:border-cyan focus:outline-none"
-              placeholder="you@example.com" autoComplete="email" />
-            {errors.email && <p className="mt-1 font-mono text-[10px] text-coral">{errors.email}</p>}
-          </div>
+              {/* Account type toggle */}
+              <div className="mt-8 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setAccountType('PLAYER')}
+                  className={`flex flex-col items-center gap-2 border p-4 transition-colors ${
+                    accountType === 'PLAYER'
+                      ? 'border-cyan bg-cyan/10 text-cyan'
+                      : 'border-border bg-background/50 text-muted-foreground'
+                  }`}
+                >
+                  <Gamepad2 className="size-5" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest">Player</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAccountType('STUDIO')}
+                  className={`flex flex-col items-center gap-2 border p-4 transition-colors ${
+                    accountType === 'STUDIO'
+                      ? 'border-coral bg-coral/10 text-coral'
+                      : 'border-border bg-background/50 text-muted-foreground'
+                  }`}
+                >
+                  <Building2 className="size-5" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest">Studio</span>
+                </button>
+              </div>
 
-          <div>
-            <label htmlFor="password" className="mb-1 block font-mono text-xs uppercase tracking-widest text-muted-foreground">Password</label>
-            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-input bg-background px-3 py-2 font-mono text-sm focus:border-cyan focus:outline-none"
-              placeholder="••••••••" autoComplete="new-password" />
-            {errors.password && <p className="mt-1 font-mono text-[10px] text-coral">{errors.password}</p>}
-            <p className="mt-1 font-mono text-[10px] text-muted-foreground/60">Use at least 8 characters and one special character.</p>
-          </div>
+              <form onSubmit={handleSubmit} className="mt-10 space-y-5">
+                <HudTextField
+                  id="displayName"
+                  label="Name"
+                  value={displayName}
+                  onChange={setDisplayName}
+                  placeholder="Your name"
+                  icon={<User className="size-5" />}
+                />
+                <HudTextField
+                  id="username"
+                  label="Username"
+                  value={username}
+                  onChange={setUsername}
+                  placeholder="Choose a username"
+                  autoComplete="username"
+                  icon={<User className="size-5" />}
+                  hint="Letters and numbers only. Max 12 characters."
+                />
+                <HudTextField
+                  id="email"
+                  label="Email"
+                  type="email"
+                  value={email}
+                  onChange={setEmail}
+                  placeholder="Enter your email"
+                  autoComplete="email"
+                  icon={<Mail className="size-5" />}
+                />
+                <HudTextField
+                  id="password"
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={setPassword}
+                  placeholder="Create a password"
+                  autoComplete="new-password"
+                  icon={<Lock className="size-5" />}
+                  hint="Use at least 8 characters and one special character."
+                />
 
-          {errors.form && <p className="font-mono text-xs uppercase tracking-widest text-coral">{errors.form}</p>}
+                {error && <p className="pm-micro text-coral">{error}</p>}
 
-          <button type="submit" disabled={loading}
-            className="w-full border border-coral bg-coral/10 py-2.5 font-mono text-xs uppercase tracking-widest text-coral transition-colors hover:bg-coral hover:text-coral-foreground disabled:opacity-50">
-            {loading ? 'Creating...' : 'Create account'}
-          </button>
-        </form>
+                <HudButton type="submit" disabled={loading} className="w-full">
+                  {loading ? 'Creating...' : 'Create account'}
+                  <ArrowUpRight className="ml-auto size-5" />
+                </HudButton>
+              </form>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          Already have an account?{' '}
-          <Link href="/login" className="text-cyan underline">Sign in</Link>
-        </p>
+              <p className="mt-10 text-center text-sm text-muted-foreground">
+                Already transmitting?{' '}
+                <Link href="/login" className="text-cyan hover:text-cyan/80">
+                  Sign in
+                </Link>
+              </p>
+
+              <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-2"><Lock className="size-3" /> Secure session</span>
+                <span>Creator access ready</span>
+              </div>
+            </div>
+          </HudPanel>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function HudTextField({
+  id,
+  label,
+  type = 'text',
+  value,
+  onChange,
+  placeholder,
+  autoComplete,
+  icon,
+  hint,
+}: {
+  id: string;
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  autoComplete?: string;
+  icon: ReactNode;
+  hint?: string;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="pm-micro mb-3 block text-muted-foreground">{label}</label>
+      <div className="relative">
+        <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground">
+          {icon}
+        </span>
+        <input
+          id={id}
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="clip-corner h-12 w-full border border-input bg-background/80 px-14 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan"
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+        />
       </div>
+      {hint && <p className="pm-micro mt-2 text-muted-foreground/60">{hint}</p>}
     </div>
   );
 }
