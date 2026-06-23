@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, BarChart3, Bookmark, ChevronDown, Search, Users, X } from 'lucide-react';
@@ -63,6 +63,10 @@ export default function GamesPage() {
   const [freeOnly, setFreeOnly] = useState(false);
   const [playtestOnly, setPlaytestOnly] = useState(false);
   const [statusFilter, setStatusFilter] = useState('All');
+  const [genreFilter, setGenreFilter] = useState('All');
+  const [platformFilter, setPlatformFilter] = useState('All');
+  const [releaseFilter, setReleaseFilter] = useState('All time');
+  const [sortFilter, setSortFilter] = useState('Most active');
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteGames(20, searchQuery || undefined);
@@ -82,6 +86,10 @@ export default function GamesPage() {
     setFreeOnly(false);
     setPlaytestOnly(false);
     setStatusFilter('All');
+    setGenreFilter('All');
+    setPlatformFilter('All');
+    setReleaseFilter('All time');
+    setSortFilter('Most active');
   };
 
   const items = data?.pages.flatMap((p) => p.items) ?? [];
@@ -140,10 +148,10 @@ export default function GamesPage() {
 
               <div className="grid gap-3 xl:grid-cols-[520px_1fr_1fr_1.1fr_1.2fr]">
                 <FilterGroup label="Status" options={['All', 'IN_DEVELOPMENT', 'ALPHA', 'PRE_ALPHA']} selected={statusFilter} onChange={setStatusFilter} />
-                <FilterSelect label="Genre" value="All" />
-                <FilterSelect label="Platform" value="All" />
-                <FilterSelect label="Release window" value="All time" />
-                <FilterSelect label="Sort by" value="Most active" icon={<BarChart3 className="size-4" />} />
+                <FilterSelect label="Genre" value={genreFilter} onChange={setGenreFilter} options={GENRES} />
+                <FilterSelect label="Platform" value={platformFilter} onChange={setPlatformFilter} options={PLATFORMS} />
+                <FilterSelect label="Release window" value={releaseFilter} onChange={setReleaseFilter} options={RELEASE_WINDOWS} />
+                <FilterSelect label="Sort by" value={sortFilter} onChange={setSortFilter} options={SORT_OPTIONS} icon={<BarChart3 className="size-4" />} />
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
@@ -246,12 +254,24 @@ function FilterGroup({ label, options, selected, onChange }: { label: string; op
   );
 }
 
-function FilterSelect({ label, value, icon }: { label: string; value: string; icon?: ReactNode }) {
+function FilterSelect({ label, value, onChange, options, icon }: { label: string; value: string; onChange: (v: string) => void; options: string[]; icon?: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
   return (
-    <div>
+    <div ref={ref} className="relative">
       <div className="pm-micro mb-1.5 text-muted-foreground">{label}</div>
       <button
         type="button"
+        onClick={() => setOpen(!open)}
         className="clip-corner flex h-9 w-full items-center justify-between gap-3 border border-border-bright/60 bg-background/60 px-3 pm-micro text-cyan cursor-pointer"
       >
         {value}
@@ -260,6 +280,24 @@ function FilterSelect({ label, value, icon }: { label: string; value: string; ic
           <ChevronDown className="size-3" />
         </span>
       </button>
+      {open && (
+        <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto border border-border bg-elevated shadow-lg">
+          {options.map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => { onChange(opt); setOpen(false); }}
+              className={`block w-full px-3 py-2 text-left font-mono text-xs transition-colors cursor-pointer ${
+                value === opt
+                  ? 'bg-cyan/10 text-cyan'
+                  : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+              }`}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -484,3 +522,24 @@ function formatFollowers(count: number) {
   if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
   return String(count);
 }
+
+const GENRES = [
+  'All', 'Action', 'Adventure', 'RPG', 'Strategy', 'Simulation', 'Puzzle',
+  'Platformer', 'Shooter', 'Fighting', 'Racing', 'Sports', 'Horror',
+  'Visual Novel', 'Roguelike', 'Roguelite', 'Metroidvania', 'Souls-like',
+  'Tactical', 'Card Battler', 'City Builder', 'Sandbox', 'Open World',
+  'Survival', 'Stealth', 'Rhythm', 'Party', 'Educational',
+];
+
+const PLATFORMS = [
+  'All', 'PC', 'Mac', 'Linux', 'PS5', 'PS4', 'XBOX', 'Nintendo Switch',
+  'iOS', 'Android', 'Web', 'VR', 'Meta Quest',
+];
+
+const RELEASE_WINDOWS = [
+  'All time', 'This year', 'Next year', 'Coming soon', 'Already released',
+];
+
+const SORT_OPTIONS = [
+  'Most active', 'Newest', 'Most followed', 'Alphabetical', 'Recently updated',
+];
