@@ -12,13 +12,13 @@ export interface AuthUser {
   accountType: 'PLAYER' | 'STUDIO';
 }
 
-interface AuthContextValue {
+  interface AuthContextValue {
   user: AuthUser | null;
-  token: string | null; // Always null with httpOnly cookies; kept for compatibility
+  token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (emailOrUsername: string, password: string) => Promise<void>;
-  register: (data: { email: string; username: string; displayName: string; password: string }) => Promise<void>;
+  login: (emailOrUsername: string, password: string) => Promise<AuthUser>;
+  register: (data: { email: string; username: string; displayName: string; password: string; accountType?: 'PLAYER' | 'STUDIO' }) => Promise<{ id: string; username: string; displayName: string; role: string; accountType: string }>;
   logout: () => void;
   refreshMe: () => Promise<void>;
 }
@@ -48,11 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (emailOrUsername: string, password: string) => {
     const u = await api.post<AuthUser>('/auth/session/login', { emailOrUsername, password });
     setUser(u);
+    return u;
   }, []);
 
-  const register = useCallback(async (data: { email: string; username: string; displayName: string; password: string }) => {
-    await api.post<{ id: string; username: string; displayName: string; role: string }>('/auth/register', data);
+  const register = useCallback(async (data: { email: string; username: string; displayName: string; password: string; accountType?: 'PLAYER' | 'STUDIO' }) => {
+    const result = await api.post<{ id: string; username: string; displayName: string; role: string; accountType: string }>('/auth/register', data);
     await fetchMe();
+    return result;
   }, [fetchMe]);
 
   const logout = useCallback(async () => {
