@@ -53,10 +53,23 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
   if (path === '/auth/register') {
     const body = _body as Record<string, unknown> | undefined;
     const at = body?.accountType as string | undefined;
-    return { id: 'user-1', username: 'testuser', displayName: 'Test User', role: 'PLAYER', accountType: at ?? 'PLAYER' };
+    return {
+      requiresEmailVerification: true,
+      email: body?.email as string ?? 'test@example.com',
+      user: { id: 'user-1', displayName: 'Test User', username: 'testuser', email: body?.email as string ?? 'test@example.com', accountType: at ?? 'PLAYER', emailVerifiedAt: null },
+    };
   }
   if (path === '/auth/session/login') return { id: 'user-1', username: 'testuser', displayName: 'Test User', role: 'PLAYER', accountType: 'PLAYER' };
   if (path === '/auth/session/me') return MOCK_USER;
+  if (path === '/auth/verify-email') {
+    const body = _body as Record<string, unknown> | undefined;
+    const code = body?.code as string | undefined;
+    if (code === '000000') throw Object.assign(new Error('Invalid verification code'), { status: 400 });
+    return { user: MOCK_USER, accessToken: 'mock-token' };
+  }
+  if (path === '/auth/resend-verification') {
+    return { message: 'If this email needs verification, a new code has been sent.' };
+  }
 
   // Feed
   if (segments[0] === 'feed' && segments[1] === 'public') {

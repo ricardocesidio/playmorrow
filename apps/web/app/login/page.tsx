@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowUpRight, Chrome, Eye, EyeOff, Github, Lock, User } from 'lucide-react';
 
-import { useAuth } from '@/lib/api/auth-context';
+import { useAuth, EmailNotVerifiedError } from '@/lib/api/auth-context';
 import { API } from '@/lib/api/client';
 import {
   AuthArtCollage,
@@ -47,6 +47,11 @@ export default function LoginPage() {
       await login(email.trim(), password);
       router.push('/dashboard');
     } catch (err: unknown) {
+      if (err instanceof EmailNotVerifiedError) {
+        const params = new URLSearchParams({ email: err.email, from: 'login' });
+        router.push(`/verify-email?${params.toString()}`);
+        return;
+      }
       const msg = err instanceof Error ? err.message : 'Invalid credentials';
       setError(msg);
     } finally {

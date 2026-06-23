@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 export enum RegisterAccountType {
   PLAYER = 'PLAYER',
@@ -36,4 +36,18 @@ export class RegisterDto {
   @IsOptional()
   @IsEnum(RegisterAccountType)
   accountType?: RegisterAccountType;
+
+  @ApiProperty()
+  @IsBoolean()
+  acceptedTerms!: boolean;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  marketingOptIn?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  partnerMarketingOptIn?: boolean;
 }

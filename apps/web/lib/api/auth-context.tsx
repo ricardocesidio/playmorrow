@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import { api } from './client';
+import { api, ApiError, type RegisterResponse } from './client';
 
 export interface AuthUser {
   id: string;
@@ -12,13 +12,44 @@ export interface AuthUser {
   accountType: 'PLAYER' | 'STUDIO';
 }
 
-  interface AuthContextValue {
+export interface RegisterResult {
+  requiresEmailVerification: boolean;
+  email: string;
+  user: {
+    id: string;
+    username: string;
+    displayName: string;
+    accountType: string;
+  };
+}
+
+export class EmailNotVerifiedError extends Error {
+  email: string;
+  constructor(email: string) {
+    super('Please verify your email before signing in.');
+    this.name = 'EmailNotVerifiedError';
+    this.email = email;
+  }
+}
+
+interface AuthContextValue {
   user: AuthUser | null;
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (emailOrUsername: string, password: string) => Promise<AuthUser>;
-  register: (data: { email: string; username: string; displayName: string; password: string; accountType?: 'PLAYER' | 'STUDIO' }) => Promise<{ id: string; username: string; displayName: string; role: string; accountType: string }>;
+  register: (data: {
+    email: string;
+    username: string;
+    displayName: string;
+    password: string;
+    accountType?: 'PLAYER' | 'STUDIO';
+    acceptedTerms: boolean;
+    marketingOptIn?: boolean;
+    partnerMarketingOptIn?: boolean;
+  }) => Promise<RegisterResult>;
+  verifyEmail: (email: string, code: string) => Promise<AuthUser>;
+  resendVerificationCode: (email: string) => Promise<void>;
   logout: () => void;
   refreshMe: () => Promise<void>;
 }
@@ -46,16 +77,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchMe]);
 
   const login = useCallback(async (emailOrUsername: string, password: string) => {
-    const u = await api.post<AuthUser>('/auth/session/login', { emailOrUsername, password });
-    setUser(u);
-    return u;
+    try {
+      const u = await api.post<AuthUser>('/auth/session/login', { emailOrUsername, password });
+      setUser(u);
+      return u;
+    } catch (err) {
+      if (err instanceof ApiError) {
+        const body = err.body as Record<string, unknown> | undefined;
+        if (body?.code === 'EMAIL_NOT_VERIFIED' && typeof body?.email === 'string') {
+          throw new EmailNotVerifiedError(body.email);
+        }
+      }
+      throw err;
+    }
   }, []);
 
-  const register = useCallback(async (data: { email: string; username: string; displayName: string; password: string; accountType?: 'PLAYER' | 'STUDIO' }) => {
-    const result = await api.post<{ id: string; username: string; displayName: string; role: string; accountType: string }>('/auth/register', data);
-    await fetchMe();
-    return result;
-  }, [fetchMe]);
+  const register = useCallback(async (data: {
+    email: string;
+    username: string;
+    displayName: string;
+    password: string;
+    accountType?: 'PLAYER' | 'STUDIO';
+    acceptedTerms: boolean;
+    marketingOptIn?: boolean;
+    partnerMarketingOptIn?: boolean;
+  }) => {
+    const result = await api.post<RegisterResponse>('/auth/register', data);
+    return {
+      requiresEmailVerification: result.requiresEmailVerification,
+      email: result.email,
+      user: {
+        id: result.user.id,
+        username: result.user.username,
+        displayName: result.user.displayName,
+        accountType: result.user.accountType,
+      },
+    };
+  }, []);
+
+  const verifyEmail = useCallback(async (email: string, code: string) => {
+    const result = await api.post<{ user: AuthUser; accessToken: string }>('/auth/verify-email', { email, code });
+    setUser(result.user);
+    return result.user;
+  }, []);
+
+  const resendVerificationCode = useCallback(async (email: string) => {
+    await api.post('/auth/resend-verification', { email });
+  }, []);
 
   const logout = useCallback(async () => {
     try { await api.post('/auth/session/logout'); } catch { /* ignore */ }
@@ -64,11 +132,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value: AuthContextValue = {
     user,
-    token: null, // httpOnly cookie; no client-accessible token
+    token: null,
     isLoading,
     isAuthenticated: !!user,
     login,
     register,
+    verifyEmail,
+    resendVerificationCode,
     logout,
     refreshMe: fetchMe,
   };

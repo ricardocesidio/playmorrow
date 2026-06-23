@@ -13,7 +13,6 @@ import { SessionAuthGuard } from './guards/session-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { AuthService } from './auth.service';
 import { SessionService } from '../session/session.service';
-import { UsersService } from '../users/users.service';
 
 const SESSION_COOKIE = '__Host-playmorrow_session';
 
@@ -37,7 +36,6 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly sessionService: SessionService,
-    private readonly usersService: UsersService,
   ) {}
 
   // ── JWT endpoints (legacy) ───────────────────────────────────────────
@@ -45,13 +43,9 @@ export class AuthController {
   @Post('register')
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @ApiCreatedResponse({ description: 'User registered successfully.' })
-  async register(@Body() dto: RegisterDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async register(@Body() dto: RegisterDto) {
     const result = await this.authService.register(dto);
-    const ua = (req.headers['user-agent'] ?? '').slice(0, 512);
-    const ip = req.ip ?? req.socket?.remoteAddress;
-    const { raw, expiresAt } = await this.sessionService.create(result.user.id, ip, ua);
-    setSessionCookie(res, raw, expiresAt);
-    return { id: result.user.id, username: result.user.username, displayName: result.user.displayName, role: result.user.role, accountType: result.user.accountType ?? 'PLAYER' };
+    return result;
   }
 
   @Post('login')
@@ -138,22 +132,21 @@ export class AuthController {
 
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
-  async verifyEmail(@Body('token') token: string) {
-    await this.authService.verifyEmail(token);
-    return { success: true };
+  async verifyEmail(@Body('email') email: string, @Body('code') code: string, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.verifyEmail(email, code);
+    const ua = (req.headers['user-agent'] ?? '').slice(0, 512);
+    const ip = req.ip ?? req.socket?.remoteAddress;
+    const { raw, expiresAt } = await this.sessionService.create(result.user.id, ip, ua);
+    setSessionCookie(res, raw, expiresAt);
+    return result;
   }
 
   @Post('resend-verification')
   @Throttle({ default: { ttl: 60_000, limit: 3 } })
   @HttpCode(HttpStatus.OK)
   async resendVerification(@Body('email') email: string) {
-    const user = await this.usersService.findByEmail(email);
-    if (user && !user.isVerified) {
-      const raw = await this.authService.createVerificationToken(user.id);
-      // In production: send email with verification link (use `raw`)
-    }
-    // Always return the same message — never reveal whether the email exists
-    return { message: 'If the email exists, a verification link has been sent.' };
+    await this.authService.resendVerificationCode(email);
+    return { message: 'If this email needs verification, a new code has been sent.' };
   }
 
   // ── Password reset ─────────────────────────────────────────────────

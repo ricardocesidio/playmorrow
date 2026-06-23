@@ -25,6 +25,14 @@ export class UsersService {
     displayName: string;
     passwordHash: string;
     accountType?: 'PLAYER' | 'STUDIO';
+    termsAcceptedAt?: Date;
+    privacyAcceptedAt?: Date;
+    communityGuidelinesAcceptedAt?: Date;
+    termsVersion?: string;
+    privacyVersion?: string;
+    communityGuidelinesVersion?: string;
+    marketingOptInAt?: Date;
+    partnerMarketingOptInAt?: Date;
   }): Promise<User> {
     const emailLower = data.email.toLowerCase();
 
@@ -46,6 +54,14 @@ export class UsersService {
         passwordHash: data.passwordHash,
         role: 'PLAYER',
         accountType: data.accountType ?? 'PLAYER',
+        termsAcceptedAt: data.termsAcceptedAt,
+        privacyAcceptedAt: data.privacyAcceptedAt,
+        communityGuidelinesAcceptedAt: data.communityGuidelinesAcceptedAt,
+        termsVersion: data.termsVersion,
+        privacyVersion: data.privacyVersion,
+        communityGuidelinesVersion: data.communityGuidelinesVersion,
+        marketingOptInAt: data.marketingOptInAt,
+        partnerMarketingOptInAt: data.partnerMarketingOptInAt,
       },
     });
   }
