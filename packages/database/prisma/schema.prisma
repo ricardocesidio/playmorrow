@@ -158,6 +158,7 @@ model User {
   sessions              Session[]
   verificationTokens    VerificationToken[]
   passwordResetTokens   PasswordResetToken[]
+  wishlistItems         WishlistItem[]
 
   @@index([role])
   @@map("users")
@@ -238,6 +239,7 @@ model Game {
   platformLinks PlatformLink[]
   tags          GameTag[]
   followers     Follow[]
+  wishlistItems WishlistItem[]
 
   @@index([studioId])
   @@index([status])
@@ -573,4 +575,23 @@ model PasswordResetToken {
   @@index([userId])
   @@index([expiresAt])
   @@map("password_reset_tokens")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Wishlist — private game saves (not public follows)
+// ──────────────────────────────────────────────────────────────────────────
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  gameId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+  @@index([userId, createdAt])
+  @@index([gameId])
+  @@map("wishlist_items")
 }

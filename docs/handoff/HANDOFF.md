@@ -52,6 +52,8 @@
 | 2026-06-22 | design | Custom SVG logo + favicon | `217027b`, `501160a` | Created LogoIcon component with custom SVG path. Replaced Gamepad2 site icons. Added SVG favicon with coral color. |
 | 2026-06-22 | design | Footer redesign | `302f251`, `336c385` | Centered inline layout, copyright, Instagram social link, coral logo without background. Added footer to homepage and games page. |
 | 2026-06-22 | design | Feed page refinements | `5b040fb` | Reduced font sizes, removed type label, removed accent colors from feed items. |
+| 2026-06-23 | security | Backend security audit | `59d3817` | Audited all 68 endpoints across 18 controllers. Fixed notifications controller (last on JwtAuthGuard). Created route-audit.md, protected-content.md, security-hardening-report.md. Added security-auth.spec.ts (16 auth enforcement tests + rate limit test). |
+| 2026-06-23 | product | Account types + wishlist | current | Added AccountType enum (PLAYER/STUDIO). Registration accepts accountType (default PLAYER). Private wishlist: WishlistItem model, 4 API endpoints, wishlist button on game detail, My Wishlist on dashboard. accountType is onboarding intent only (not authorization). Docs: docs/product/account-types-and-wishlist.md. |
 
 **Phase 0 verification:** `pnpm --filter @playmorrow/web lint` → 0 warnings; `prisma validate`
 clean (config + env load); turbo "no output files" warning gone on full `pnpm test`.

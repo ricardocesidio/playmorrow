@@ -72,7 +72,7 @@ The interface uses an **obsidian-black** background with **graphite** elevated s
 | Search | `/search` | Global search across games, studios, and devlogs |
 | User profile | `/users/[username]` | Avatar, bio, role badge, studio memberships |
 | Sign in | `/login` | Email/password login with OAuth buttons |
-| Create account | `/register` | Registration form |
+| Create account | `/register` | Player or Studio account type selection |
 | OAuth callback | `/oauth/callback` | Handles Google/GitHub OAuth redirects |
 
 ### Authenticated pages (dashboard)
@@ -93,6 +93,7 @@ The interface uses an **obsidian-black** background with **graphite** elevated s
 ### Community features
 
 - Follow/unfollow studios and games
+- Private game wishlist (only you can see your saved games)
 - Comment on devlogs (threaded replies, edit, delete)
 - React to devlogs and comments (LIKE, LOVE, HYPE, INSIGHTFUL)
 - OAuth sign-in with Google and GitHub
@@ -100,6 +101,15 @@ The interface uses an **obsidian-black** background with **graphite** elevated s
 - Image uploads (local disk, 10 MB limit, image-only)
 - Rate-limited endpoints (60 req/min global, tighter per-route limits)
 - Moderation reports with review workflow
+
+### Account types
+
+| Type | For | Features |
+|---|---|---|
+| **Player** | Normal users | Follow, comment, react, wishlist games, build feed |
+| **Studio / Indie Creator** | Indie devs, studios, publishers | Create studio profile, publish games, devlogs, roadmaps, press kits |
+
+Account type is **onboarding intent only** — it does not grant permissions. All authorization is enforced server-side via studio membership roles. A Player can create a studio and become an Owner.
 
 ## Data model
 
@@ -110,11 +120,13 @@ users → studio_members → studios → games → game_media
                                     → roadmap_items
                                     → press_kits
                                     → platform_links
+                                    → wishlist_items
                                     → game_tags → tags
 studios → follows
 games → follows
 users → notifications
 users → moderation_reports
+users → wishlist_items
 ```
 
 16 models in total. Full Prisma schema at [`packages/database/prisma/schema.prisma`](packages/database/prisma/schema.prisma).

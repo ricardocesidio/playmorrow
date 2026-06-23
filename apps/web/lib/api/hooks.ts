@@ -793,3 +793,66 @@ export function useUpdateReport() {
     },
   });
 }
+
+// ── Wishlist ────────────────────────────────────────────────────────────
+
+export interface WishlistStatus {
+  gameId: string;
+  gameSlug: string;
+  isWishlisted: boolean;
+}
+
+export interface WishlistItem {
+  id: string;
+  createdAt: string;
+  game: {
+    id: string;
+    title: string;
+    slug: string;
+    tagline: string | null;
+    coverUrl: string | null;
+    status: string;
+    studio: { id: string; name: string; slug: string };
+  };
+}
+
+export interface WishlistResponse {
+  items: WishlistItem[];
+}
+
+export function useGameWishlistStatus(slug: string) {
+  return useQuery({
+    queryKey: ['gameWishlistStatus', slug],
+    queryFn: () => api.get<WishlistStatus>(`/games/${slug}/wishlist-status`),
+    enabled: !!slug,
+  });
+}
+
+export function useAddGameToWishlist() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string }) => api.post<WishlistStatus>(`/games/${data.slug}/wishlist`),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['gameWishlistStatus', vars.slug] });
+      qc.invalidateQueries({ queryKey: ['myWishlist'] });
+    },
+  });
+}
+
+export function useRemoveGameFromWishlist() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string }) => api.delete<WishlistStatus>(`/games/${data.slug}/wishlist`),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['gameWishlistStatus', vars.slug] });
+      qc.invalidateQueries({ queryKey: ['myWishlist'] });
+    },
+  });
+}
+
+export function useMyWishlist() {
+  return useQuery({
+    queryKey: ['myWishlist'],
+    queryFn: () => api.get<WishlistResponse>('/me/wishlist'),
+  });
+}
