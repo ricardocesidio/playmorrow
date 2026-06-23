@@ -281,7 +281,7 @@ function FilterSelect({ label, value, onChange, options, icon }: { label: string
         </span>
       </button>
       {open && (
-        <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto border border-border bg-elevated shadow-lg">
+        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto border border-border bg-elevated shadow-lg">
           {options.map((opt) => (
             <button
               key={opt}
