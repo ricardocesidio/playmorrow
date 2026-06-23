@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { useAuth } from '@/lib/api/auth-context';
-import { useUnreadNotificationCount } from '@/lib/api/hooks';
-import { ArrowUpRight, Bell, Menu, Search, X } from 'lucide-react';
+import { ArrowUpRight, Menu, Search, X } from 'lucide-react';
 import { HudLinkLogo } from '@/components/playmorrow/hud';
+import { NotificationDropdown } from '@/components/notification-dropdown';
 
 const NAV_LINKS = [
   { href: '/games', label: 'Games' },
@@ -17,10 +17,8 @@ const NAV_LINKS = [
 export function SiteHeader() {
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading } = useAuth();
-  const { data: unreadData } = useUnreadNotificationCount();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const unreadCount = unreadData?.unreadCount ?? 0;
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
   return (
@@ -60,18 +58,7 @@ export function SiteHeader() {
 
           {!isLoading && isAuthenticated && user ? (
             <>
-              <Link
-                href="/dashboard/notifications"
-                className="relative grid size-8 place-items-center text-muted-foreground hover:text-cyan"
-                aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
-              >
-                <Bell className="size-4" />
-                {unreadCount > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-none bg-coral text-[9px] font-bold text-coral-foreground">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </Link>
+              <NotificationDropdown />
               <Link
                 href="/dashboard"
                 className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline"
