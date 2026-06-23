@@ -50,7 +50,13 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
   // Auth
   if (path === '/auth/me') return MOCK_USER;
   if (path === '/auth/login') return { user: MOCK_USER, accessToken: 'mock-token' };
-  if (path === '/auth/register') return { user: MOCK_USER, accessToken: 'mock-token' };
+  if (path === '/auth/register') {
+    const body = _body as Record<string, unknown> | undefined;
+    const at = body?.accountType as string | undefined;
+    return { id: 'user-1', username: 'testuser', displayName: 'Test User', role: 'PLAYER', accountType: at ?? 'PLAYER' };
+  }
+  if (path === '/auth/session/login') return { id: 'user-1', username: 'testuser', displayName: 'Test User', role: 'PLAYER', accountType: 'PLAYER' };
+  if (path === '/auth/session/me') return MOCK_USER;
 
   // Feed
   if (path === '/feed/public') {
