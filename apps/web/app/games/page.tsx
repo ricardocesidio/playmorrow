@@ -126,13 +126,13 @@ export default function GamesPage() {
                     aria-label="Search games"
                     className="clip-corner h-10 w-full border border-border-bright/50 bg-background/70 pl-12 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground/45 focus:border-cyan focus:ring-1 focus:ring-cyan"
                   />
-                  <button type="submit" className="sr-only">Search</button>
+                  <button type="submit" className="cursor-pointer sr-only">Search</button>
                 </div>
 
                 <div className="flex flex-wrap items-center justify-start gap-5 xl:justify-end">
                   <ToggleControl label="Free" active={freeOnly} onChange={setFreeOnly} />
                   <ToggleControl label="Playtest available" active={playtestOnly} onChange={setPlaytestOnly} />
-                  <button type="button" onClick={clearAll} className="pm-micro inline-flex items-center gap-3 text-coral transition-colors hover:text-coral/80">
+                  <button type="button" onClick={clearAll} className="cursor-pointer pm-micro inline-flex items-center gap-3 text-coral transition-colors hover:text-coral/80">
                     Clear all <X className="size-4" />
                   </button>
                 </div>
@@ -156,7 +156,7 @@ export default function GamesPage() {
                     {chip} <X className="size-3" />
                   </button>
                 ))}
-                {activeFilters.length > 0 && <button type="button" onClick={clearAll} className="px-3 py-1.5 pm-micro text-coral transition-colors hover:text-coral/80">Clear all</button>}
+                {activeFilters.length > 0 && <button type="button" onClick={clearAll} className="cursor-pointer px-3 py-1.5 pm-micro text-coral transition-colors hover:text-coral/80">Clear all</button>}
                 <span className="ml-auto hidden text-xs text-muted-foreground/70 lg:inline">
                   Showing {displayedItems.length} of {totalGames.toLocaleString()} games
                 </span>
@@ -266,7 +266,7 @@ function FilterSelect({ label, value, icon }: { label: string; value: string; ic
 
 function ToggleControl({ label, active, onChange }: { label: string; active: boolean; onChange: (value: boolean) => void }) {
   return (
-    <button type="button" onClick={() => onChange(!active)} className="group inline-flex items-center gap-3 pm-micro text-muted-foreground">
+    <button type="button" onClick={() => onChange(!active)} className="cursor-pointer group inline-flex items-center gap-3 pm-micro text-muted-foreground">
       <span className={`relative h-4 w-8 rounded-full border transition-colors ${
         active
           ? 'border-cyan bg-cyan/20 shadow-[0_0_14px_rgb(62_231_255_/_0.25)]'
@@ -371,7 +371,7 @@ function PaginationControl({
     <div className="mt-7 flex items-center justify-center gap-4">
       <div className="hidden h-px flex-1 bg-gradient-to-r from-transparent via-border-bright/45 to-border md:block" />
       <div className="clip-corner flex items-center gap-6 border border-border bg-background/70 px-7 py-3">
-        <button type="button" className="text-cyan/60" aria-label="Previous page">
+        <button type="button" className="cursor-pointer text-cyan/60" aria-label="Previous page">
           <ArrowLeft className="size-4" />
         </button>
         {['1', '2', '3', '4', '5', '...', '122'].map((page) => (
@@ -387,7 +387,7 @@ function PaginationControl({
             {page}
           </button>
         ))}
-        <button type="button" className="text-cyan/60" aria-label="Next page icon">
+        <button type="button" className="cursor-pointer text-cyan/60" aria-label="Next page icon">
           <ArrowRight className="size-4" />
         </button>
         <span className="h-8 w-px bg-border" />
