@@ -25,6 +25,19 @@ export interface Paginated<T> {
   hasMore: boolean;
 }
 
+export interface RegisterResponse {
+  requiresEmailVerification: boolean;
+  email: string;
+  user: {
+    id: string;
+    displayName: string;
+    username: string;
+    email: string;
+    accountType: string;
+    emailVerifiedAt: string | null;
+  };
+}
+
 export interface StudioSummary {
   id: string;
   name: string;

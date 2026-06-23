@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import type { ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowUpRight, Eye, EyeOff, Lock, Mail, User, Gamepad2, Building2 } from 'lucide-react';
@@ -23,6 +22,9 @@ export default function RegisterPage() {
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
+  const [partnerMarketingOptIn, setPartnerMarketingOptIn] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -58,14 +60,28 @@ export default function RegisterPage() {
       setError('Password must be at least 8 characters and include one special character.');
       return;
     }
+    if (!acceptedTerms) {
+      setError('You must agree to the Terms of Service, Privacy Policy, and Community Guidelines.');
+      return;
+    }
     setError('');
     setLoading(true);
     try {
-      const result = await register({ email: email.trim(), username: username.trim(), displayName: displayName.trim(), password, accountType });
-      if (result.accountType === 'STUDIO') {
-        router.push('/studios/new?from=register');
+      const result = await register({
+        email: email.trim(),
+        username: username.trim(),
+        displayName: displayName.trim(),
+        password,
+        accountType,
+        acceptedTerms,
+        marketingOptIn,
+        partnerMarketingOptIn,
+      });
+      if (result.requiresEmailVerification) {
+        const params = new URLSearchParams({ email: result.email, accountType });
+        router.push(`/verify-email?${params.toString()}`);
       } else {
-        router.push('/dashboard');
+        router.push(accountType === 'STUDIO' ? '/studios/new?from=register' : '/dashboard');
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Registration failed';
@@ -107,31 +123,37 @@ export default function RegisterPage() {
                 <div className="mx-auto mt-5 h-0.5 w-12 bg-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.7)]" />
               </div>
 
-              {/* Account type toggle */}
+              {/* Account type cards */}
               <div className="mt-8 grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setAccountType('PLAYER')}
-                  className={`flex flex-col items-center gap-2 border p-4 transition-colors cursor-pointer ${
+                  className={`flex flex-col items-start gap-2 border p-4 text-left transition-colors cursor-pointer ${
                     accountType === 'PLAYER'
                       ? 'border-cyan bg-cyan/10 text-cyan'
-                      : 'border-border bg-background/50 text-muted-foreground'
+                      : 'border-border bg-background/50 text-muted-foreground hover:border-cyan/50'
                   }`}
                 >
                   <Gamepad2 className="size-5" />
                   <span className="font-mono text-[10px] uppercase tracking-widest">Player</span>
+                  <span className="text-[11px] leading-relaxed text-muted-foreground">
+                    I want to discover games, follow updates, comment, and save games to my wishlist.
+                  </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setAccountType('STUDIO')}
-                  className={`flex flex-col items-center gap-2 border p-4 transition-colors cursor-pointer ${
+                  className={`flex flex-col items-start gap-2 border p-4 text-left transition-colors cursor-pointer ${
                     accountType === 'STUDIO'
                       ? 'border-coral bg-coral/10 text-coral'
-                      : 'border-border bg-background/50 text-muted-foreground'
+                      : 'border-border bg-background/50 text-muted-foreground hover:border-coral/50'
                   }`}
                 >
                   <Building2 className="size-5" />
-                  <span className="font-mono text-[10px] uppercase tracking-widest">Studio</span>
+                  <span className="font-mono text-[10px] uppercase tracking-widest">Studio / Indie Company</span>
+                  <span className="text-[11px] leading-relaxed text-muted-foreground">
+                    I want to share my game, create a studio profile, publish devlogs, and grow my community.
+                  </span>
                 </button>
               </div>
 
@@ -175,6 +197,57 @@ export default function RegisterPage() {
                   icon={<Lock className="size-5" />}
                   hint="Use at least 8 characters and one special character."
                 />
+
+                {/* Consent checkboxes */}
+                <div className="space-y-4 pt-2">
+                  <label className="flex items-start gap-3 text-sm text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      className="mt-0.5 size-4 shrink-0 appearance-none border border-border-bright bg-background checked:border-cyan checked:bg-cyan"
+                    />
+                    <span>
+                      I agree to the{' '}
+                      <Link href="/terms" className="text-cyan hover:text-cyan/80 underline underline-offset-2">
+                        Terms of Service
+                      </Link>
+                      ,{' '}
+                      <Link href="/privacy" className="text-cyan hover:text-cyan/80 underline underline-offset-2">
+                        Privacy Policy
+                      </Link>
+                      , and{' '}
+                      <Link href="/community-guidelines" className="text-cyan hover:text-cyan/80 underline underline-offset-2">
+                        Community Guidelines
+                      </Link>
+                      .
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-3 text-sm text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={marketingOptIn}
+                      onChange={(e) => setMarketingOptIn(e.target.checked)}
+                      className="mt-0.5 size-4 shrink-0 appearance-none border border-border-bright bg-background checked:border-cyan checked:bg-cyan"
+                    />
+                    <span>
+                      Yes, PlayMorrow may send me news about indie games, devlogs, roadmap updates, launches, events, and creator opportunities.
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-3 text-sm text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={partnerMarketingOptIn}
+                      onChange={(e) => setPartnerMarketingOptIn(e.target.checked)}
+                      className="mt-0.5 size-4 shrink-0 appearance-none border border-border-bright bg-background checked:border-cyan checked:bg-cyan"
+                    />
+                    <span>
+                      Yes, PlayMorrow may use my activity to personalize recommendations and, where allowed, share limited information with trusted partners for marketing and advertising.
+                    </span>
+                  </label>
+                </div>
 
                 {error && <p className="pm-micro text-coral">{error}</p>}
 

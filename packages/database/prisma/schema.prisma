@@ -137,8 +137,17 @@ model User {
   avatarUrl    String?
   bio          String?
   isVerified   Boolean  @default(false)
-  accountType  AccountType @default(PLAYER)
-  createdAt    DateTime @default(now())
+  accountType                 AccountType @default(PLAYER)
+  termsAcceptedAt             DateTime?
+  privacyAcceptedAt           DateTime?
+  communityGuidelinesAcceptedAt DateTime?
+  marketingOptInAt            DateTime?
+  partnerMarketingOptInAt     DateTime?
+  termsVersion                String?
+  privacyVersion              String?
+  communityGuidelinesVersion  String?
+  emailVerifiedAt             DateTime?
+  createdAt                   DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   authVersion         Int       @default(0)
@@ -157,8 +166,9 @@ model User {
   notificationsActed    Notification[] @relation("NotificationActor")
   refreshTokens         RefreshToken[]
   sessions              Session[]
-  verificationTokens    VerificationToken[]
-  passwordResetTokens   PasswordResetToken[]
+  verificationTokens      VerificationToken[]
+  emailVerificationCodes  EmailVerificationCode[]
+  passwordResetTokens     PasswordResetToken[]
   wishlistItems         WishlistItem[]
 
   @@index([role])
@@ -561,6 +571,20 @@ model VerificationToken {
   @@index([userId])
   @@index([expiresAt])
   @@map("verification_tokens")
+}
+
+model EmailVerificationCode {
+  id        String    @id @default(cuid())
+  userId    String
+  codeHash  String
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("email_verification_codes")
 }
 
 model PasswordResetToken {

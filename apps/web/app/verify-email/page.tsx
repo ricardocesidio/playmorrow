@@ -1,88 +1,196 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { api, ApiError } from '@/lib/api/client';
+import { ArrowUpRight, Mail } from 'lucide-react';
+
+import { useAuth } from '@/lib/api/auth-context';
+import {
+  CircuitFrame,
+  HudButton,
+  HudLinkLogo,
+  HudPanel,
+} from '@/components/playmorrow/hud';
 
 function VerifyEmailInner() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const { verifyEmail, resendVerificationCode } = useAuth();
+
+  const email = searchParams.get('email') ?? '';
+  const accountType = searchParams.get('accountType') ?? 'PLAYER';
+  const fromLogin = searchParams.get('from') === 'login';
+
+  const [code, setCode] = useState('');
   const [error, setError] = useState('');
-  const [resendEmail, setResendEmail] = useState('');
-  const [resending, setResending] = useState(false);
-  const [resent, setResent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const [resendMessage, setResendMessage] = useState('');
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    if (!token) { setStatus('error'); setError('No verification token provided.'); return; }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
-    api.post('/auth/verify-email', { token })
-      .then(() => setStatus('success'))
-      .catch((err) => { setStatus('error'); setError(err instanceof ApiError ? String((err.body as Record<string, unknown>)?.message ?? '') || 'Verification failed' : 'Verification failed'); });
-  }, [searchParams]);
+  const startCooldown = useCallback(() => {
+    setCooldown(60);
+    intervalRef.current = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
 
-  const handleResend = async () => {
-    if (!resendEmail.trim()) return;
-    setResending(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (code.trim().length !== 6) {
+      setError('Please enter the full 6-digit code.');
+      return;
+    }
+    setError('');
+    setLoading(true);
     try {
-      await api.post('/auth/resend-verification', { email: resendEmail.trim() });
-      setResent(true);
-    } catch { /* ignore */ }
-    setResending(false);
+      await verifyEmail(email, code.trim());
+      setSuccess(true);
+      if (accountType === 'STUDIO') {
+        router.push('/studios/new?from=register');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Verification failed';
+      if (msg.toLowerCase().includes('expired')) {
+        setError('This code has expired. Request a new one.');
+      } else {
+        setError(msg);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (status === 'loading') {
-    return <div className="flex min-h-screen items-center justify-center bg-background"><div className="size-6 animate-spin border border-cyan border-t-transparent" /></div>;
-  }
+  const handleResend = async () => {
+    setResendMessage('');
+    setError('');
+    try {
+      await resendVerificationCode(email);
+      setResendMessage('If your account still needs verification, a new code has been sent.');
+      startCooldown();
+    } catch {
+      setResendMessage('Failed to resend code. Please try again.');
+    }
+  };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm border border-border bg-elevated p-8 text-center">
-        {status === 'success' ? (
-          <>
-            <h1 className="mb-2 font-display text-2xl font-semibold">Email verified</h1>
-            <p className="mb-6 text-sm text-muted-foreground">Your email has been verified successfully.</p>
-            <Link href="/login" className="inline-block border border-coral bg-coral/10 px-6 py-2 font-mono text-xs uppercase tracking-widest text-coral">Sign in</Link>
-          </>
-        ) : (
-          <>
-            <h1 className="mb-2 font-display text-2xl font-semibold">Verification failed</h1>
-            <p className="mb-4 text-sm text-muted-foreground">{error}</p>
+    <div className="relative min-h-screen overflow-hidden bg-background px-5 pb-8 text-foreground sm:px-8 lg:px-10">
+      <CircuitFrame className="opacity-45" />
+      <header className="relative z-10 mx-auto flex h-20 max-w-[1500px] items-center justify-between">
+        <HudLinkLogo />
+        <nav className="hidden items-center gap-14 text-sm text-muted-foreground md:flex" aria-label="Main navigation">
+          <Link href="/games" className="hover:text-cyan">Games</Link>
+          <Link href="/studios" className="hover:text-cyan">Studios</Link>
+          <Link href="/feed" className="hover:text-cyan">Live Feed</Link>
+        </nav>
+        <div className="flex items-center gap-6">
+          <Link href="/login" className="text-sm text-muted-foreground hover:text-cyan">Sign in</Link>
+          <Link
+            href="/register"
+            className="clip-corner hidden border border-coral bg-coral px-6 py-3 pm-display text-xs text-coral-foreground shadow-[0_0_24px_rgb(255_87_77_/_0.25)] sm:inline-flex"
+          >
+            Share your game <ArrowUpRight className="size-4" />
+          </Link>
+        </div>
+      </header>
 
-            {!resent ? (
-              <div className="space-y-3">
-                <p className="text-xs text-muted-foreground">Enter your email to receive a new verification link:</p>
-                <input
-                  type="email"
-                  value={resendEmail}
-                  onChange={(e) => setResendEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  className="w-full border border-input bg-background px-3 py-2 font-mono text-sm focus:border-cyan focus:outline-none"
-                />
-                <button
-                  onClick={handleResend}
-                  disabled={resending || !resendEmail.trim()}
-                  className="w-full border border-coral bg-coral/10 py-2 font-mono text-xs uppercase tracking-widest text-coral transition-colors hover:bg-coral hover:text-coral-foreground disabled:opacity-50"
-                >
-                  {resending ? 'Sending...' : 'Resend verification email'}
-                </button>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">If the email exists, a verification link has been sent.</p>
+      <main className="relative z-10 mx-auto flex min-h-[calc(100vh-7rem)] items-center justify-center px-4 py-8">
+        <HudPanel className="pm-scanline w-full max-w-[440px] px-6 py-9 sm:px-10 sm:py-12" accent="muted">
+          <div className="mx-auto max-w-[380px] text-center">
+            <Mail className="mx-auto size-10 text-cyan drop-shadow-[0_0_14px_rgb(62_231_255_/_0.5)]" />
+            {fromLogin && (
+              <p className="pm-micro mt-4 text-coral">Please verify your email to continue.</p>
+            )}
+            <h1 className="pm-display mt-6 text-xl sm:text-2xl">Verify your email</h1>
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+              We sent a 6-digit code to <strong className="text-foreground">{email}</strong>.
+              Enter it below to activate your PlayMorrow account.
+            </p>
+
+            {!success && (
+              <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+                <div>
+                  <label htmlFor="code" className="pm-micro mb-3 block text-left text-muted-foreground">
+                    Verification code
+                  </label>
+                  <input
+                    id="code"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    value={code}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                      setCode(val);
+                    }}
+                    placeholder="000000"
+                    className="clip-corner h-14 w-full border border-cyan bg-background/80 px-4 text-center text-2xl tracking-[0.5em] text-foreground shadow-[0_0_24px_rgb(62_231_255_/_0.12)] outline-none placeholder:text-muted-foreground/30 focus:border-cyan focus:ring-1 focus:ring-cyan"
+                  />
+                </div>
+
+                {error && <p className="pm-micro text-coral">{error}</p>}
+                {resendMessage && <p className="pm-micro text-cyan">{resendMessage}</p>}
+
+                <HudButton type="submit" disabled={loading || code.length !== 6} className="w-full">
+                  {loading ? 'Verifying...' : 'Verify email'}
+                  <ArrowUpRight className="ml-auto size-5" />
+                </HudButton>
+              </form>
             )}
 
-            <div className="mt-4">
-              <Link href="/login" className="font-mono text-xs uppercase tracking-widest text-cyan underline">Back to login</Link>
-            </div>
-          </>
-        )}
-      </div>
+            {!success && (
+              <div className="mt-6">
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={cooldown > 0}
+                  className="pm-micro cursor-pointer text-muted-foreground underline underline-offset-2 hover:text-cyan disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
+                >
+                  {cooldown > 0
+                    ? `Resend code in ${cooldown}s`
+                    : 'Resend code'}
+                </button>
+              </div>
+            )}
+
+            {success && (
+              <div className="mt-8">
+                <p className="text-sm text-cyan">Email verified successfully! Redirecting...</p>
+              </div>
+            )}
+          </div>
+        </HudPanel>
+      </main>
     </div>
   );
 }
 
 export default function VerifyEmailPage() {
-  return <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-background"><div className="size-6 animate-spin border border-cyan border-t-transparent" /></div>}><VerifyEmailInner /></Suspense>;
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="size-6 animate-spin border border-cyan border-t-transparent" />
+      </div>
+    }>
+      <VerifyEmailInner />
+    </Suspense>
+  );
 }

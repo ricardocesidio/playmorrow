@@ -6,6 +6,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { EmailModule } from './email/email.module';
 import { CommentsModule } from './comments/comments.module';
 import { DevlogsModule } from './devlogs/devlogs.module';
 import { ReactionsModule } from './reactions/reactions.module';
@@ -38,6 +39,7 @@ import { UsersModule } from './users/users.module';
     HealthModule,
     NotificationsModule,
     UsersModule,
+    EmailModule,
     AuthModule,
     StudiosModule,
     UploadModule,

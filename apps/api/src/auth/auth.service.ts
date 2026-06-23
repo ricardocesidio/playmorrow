@@ -4,10 +4,11 @@ import { JwtService } from '@nestjs/jwt';
 import type { User } from '@playmorrow/database';
 import type { Prisma } from '@playmorrow/database';
 import * as argon2 from 'argon2';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomInt } from 'node:crypto';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
+import { EmailService } from '../email/email.service';
 import { TokenService } from './token.service';
 import type { LoginDto } from './dto/login.dto';
 import type { RegisterDto } from './dto/register.dto';
@@ -22,6 +23,11 @@ const COMMON_PASSWORDS = new Set([
   'trustno1', 'iloveyou', 'princess', 'abc123', 'admin123',
 ]);
 
+const CURRENT_TERMS_VERSION = '2026-06-23';
+const CURRENT_PRIVACY_VERSION = '2026-06-23';
+const CURRENT_COMMUNITY_GUIDELINES_VERSION = '2026-06-23';
+const VERIFICATION_CODE_TTL_MINUTES = 15;
+
 function isCommonPassword(password: string): boolean {
   const lower = password.toLowerCase().replace(/[^a-z0-9]/g, '');
   return COMMON_PASSWORDS.has(lower) || COMMON_PASSWORDS.has(password.toLowerCase());
@@ -31,6 +37,16 @@ export interface AuthResult {
   user: { id: string; email: string; username: string; displayName: string; role: string; accountType: string };
   accessToken: string;
   refreshToken: string;
+}
+
+export interface RegisterResult {
+  requiresEmailVerification: boolean;
+  email: string;
+  user: { id: string; displayName: string; username: string; email: string; accountType: string; emailVerifiedAt: Date | null };
+}
+
+export interface VerifyEmailResult {
+  user: { id: string; email: string; username: string; displayName: string; role: string; accountType: string };
 }
 
 export interface RefreshResult {
@@ -58,13 +74,18 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly tokenService: TokenService,
+    private readonly emailService: EmailService,
   ) {
     this.refreshSecret = this.configService.getOrThrow<string>('JWT_SECRET');
   }
 
-  async register(dto: RegisterDto): Promise<AuthResult> {
+  async register(dto: RegisterDto): Promise<RegisterResult> {
     if (isCommonPassword(dto.password)) {
       throw new BadRequestException('This password is too common. Choose a more unique password.');
+    }
+
+    if (dto.acceptedTerms !== true) {
+      throw new BadRequestException('You must accept the terms of service.');
     }
 
     const accountType = dto.accountType ?? 'PLAYER';
@@ -72,25 +93,42 @@ export class AuthService {
       throw new BadRequestException('accountType must be PLAYER or STUDIO');
     }
 
-    // Also reject passwords containing email or username parts
     const lowerPw = dto.password.toLowerCase();
     if (lowerPw.includes(dto.email.split('@')[0]!.toLowerCase()) || lowerPw.includes(dto.username.toLowerCase())) {
       throw new BadRequestException('Password cannot contain your email or username.');
     }
 
     const passwordHash = await argon2.hash(dto.password);
+    const now = new Date();
     const user = await this.usersService.create({
       email: dto.email, username: dto.username, displayName: dto.displayName, passwordHash,
       accountType,
+      termsAcceptedAt: now,
+      privacyAcceptedAt: now,
+      communityGuidelinesAcceptedAt: now,
+      termsVersion: CURRENT_TERMS_VERSION,
+      privacyVersion: CURRENT_PRIVACY_VERSION,
+      communityGuidelinesVersion: CURRENT_COMMUNITY_GUIDELINES_VERSION,
+      marketingOptInAt: dto.marketingOptIn ? now : undefined,
+      partnerMarketingOptInAt: dto.partnerMarketingOptIn ? now : undefined,
     });
 
-    // Create verification token
-    const token = this.tokenService.generate();
-    await this.prisma.verificationToken.create({
-      data: { tokenHash: token.hash, userId: user.id, expiresAt: token.expiresAt },
+    const { raw, hash, expiresAt } = this.generateVerificationCode();
+    await this.prisma.emailVerificationCode.create({
+      data: { codeHash: hash, userId: user.id, expiresAt },
     });
 
-    return this.buildResult(user);
+    await this.emailService.sendVerificationCode(user.email, raw);
+
+    return {
+      requiresEmailVerification: true,
+      email: user.email,
+      user: {
+        id: user.id, displayName: user.displayName, username: user.username,
+        email: user.email, accountType: user.accountType ?? 'PLAYER',
+        emailVerifiedAt: null,
+      },
+    };
   }
 
   async login(dto: LoginDto): Promise<AuthResult> {
@@ -125,6 +163,10 @@ export class AuthService {
       where: { id: user.id },
       data: { failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date() },
     });
+
+    if (!user.emailVerifiedAt) {
+      throw new UnauthorizedException({ message: 'Please verify your email before signing in.', code: 'EMAIL_NOT_VERIFIED', email: user.email });
+    }
 
     return this.buildResult(user);
   }
@@ -187,36 +229,72 @@ export class AuthService {
       data: { failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date() },
     });
 
+    if (!user.emailVerifiedAt) {
+      throw new UnauthorizedException({ message: 'Please verify your email before signing in.', code: 'EMAIL_NOT_VERIFIED', email: user.email });
+    }
+
     return user;
   }
 
   // ── Email verification ───────────────────────────────────────────────
 
-  async createVerificationToken(userId: string) {
-    // Invalidate previous tokens
-    await this.prisma.verificationToken.updateMany({
-      where: { userId, consumedAt: null },
+  async verifyEmail(email: string, code: string): Promise<VerifyEmailResult> {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException('Invalid verification code');
+    }
+
+    if (user.emailVerifiedAt) {
+      return { user: { id: user.id, email: user.email, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER' } };
+    }
+
+    const codeHash = createHash('sha256').update(code).digest('hex');
+    const stored = await this.prisma.emailVerificationCode.findFirst({
+      where: { userId: user.id, consumedAt: null, expiresAt: { gt: new Date() } },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!stored || stored.codeHash !== codeHash) {
+      throw new BadRequestException('Invalid verification code');
+    }
+
+    const now = new Date();
+    await this.prisma.$transaction([
+      this.prisma.emailVerificationCode.update({
+        where: { id: stored.id },
+        data: { consumedAt: now },
+      }),
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerifiedAt: now, isVerified: true },
+      }),
+    ]);
+
+    return { user: { id: user.id, email: user.email, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER' } };
+  }
+
+  async resendVerificationCode(email: string): Promise<void> {
+    const user = await this.usersService.findByEmail(email);
+    if (!user || user.emailVerifiedAt) return;
+
+    await this.prisma.emailVerificationCode.updateMany({
+      where: { userId: user.id, consumedAt: null },
       data: { consumedAt: new Date() },
     });
 
-    const token = this.tokenService.generate();
-    await this.prisma.verificationToken.create({
-      data: { tokenHash: token.hash, userId, expiresAt: token.expiresAt },
+    const { raw, hash, expiresAt } = this.generateVerificationCode();
+    await this.prisma.emailVerificationCode.create({
+      data: { codeHash: hash, userId: user.id, expiresAt },
     });
-    return token.raw;
+
+    await this.emailService.sendVerificationCode(user.email, raw);
   }
 
-  async verifyEmail(rawToken: string) {
-    const tokenHash = hashToken(rawToken);
-    const stored = await this.prisma.verificationToken.findUnique({ where: { tokenHash } });
-    if (!stored || stored.consumedAt || stored.expiresAt < new Date()) {
-      throw new BadRequestException('Invalid or expired verification token');
-    }
-
-    await this.prisma.$transaction([
-      this.prisma.verificationToken.update({ where: { id: stored.id }, data: { consumedAt: new Date() } }),
-      this.prisma.user.update({ where: { id: stored.userId }, data: { isVerified: true } }),
-    ]);
+  private generateVerificationCode(): { raw: string; hash: string; expiresAt: Date } {
+    const raw = randomInt(100000, 1000000).toString();
+    const hash = createHash('sha256').update(raw).digest('hex');
+    const expiresAt = new Date(Date.now() + VERIFICATION_CODE_TTL_MINUTES * 60 * 1000);
+    return { raw, hash, expiresAt };
   }
 
   // ── Password reset ───────────────────────────────────────────────────
