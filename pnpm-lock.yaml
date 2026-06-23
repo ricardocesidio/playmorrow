@@ -66,6 +66,9 @@ importers:
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
+      express:
+        specifier: ^5.1.0
+        version: 5.2.1
       helmet:
         specifier: ^8.2.0
         version: 8.2.0
