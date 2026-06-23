@@ -59,11 +59,11 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
   if (path === '/auth/session/me') return MOCK_USER;
 
   // Feed
-  if (path === '/feed/public') {
+  if (segments[0] === 'feed' && segments[1] === 'public') {
     const pageSize = parseInt(searchParams.get('pageSize') ?? '10');
     return paginated([MOCK_FEED_ITEM_DEVLOG, MOCK_FEED_ITEM_ROADMAP], 2, 1, pageSize);
   }
-  if (path === '/me/feed') {
+  if (segments[0] === 'me' && segments[1] === 'feed') {
     const page = parseInt(searchParams.get('page') ?? '1');
     const ps = parseInt(searchParams.get('pageSize') ?? '10');
     return paginated([MOCK_FEED_ITEM_DEVLOG, MOCK_FEED_ITEM_ROADMAP], 2, page, ps);
@@ -117,8 +117,8 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
   if (segments[0] === 'roadmap-items') return MOCK_ROADMAP_ITEM;
 
   // Notifications
-  if (path === '/me/notifications/unread-count') return { unreadCount: 3 };
-  if (path === '/me/notifications') return paginated([MOCK_NOTIFICATION]);
+  if (segments[0] === 'me' && segments[1] === 'notifications' && segments[2] === 'unread-count') return { unreadCount: 3 };
+  if (segments[0] === 'me' && segments[1] === 'notifications') return paginated([MOCK_NOTIFICATION]);
   if (path.includes('/notifications') && method === 'PATCH') return { ...MOCK_NOTIFICATION, readAt: new Date().toISOString() };
   if (path.includes('/read-all')) return { success: true };
 
