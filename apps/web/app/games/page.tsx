@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, BarChart3, Bookmark, ChevronDown, Search, Users, X } from 'lucide-react';
@@ -280,7 +281,7 @@ function FilterSelect({ label, value, onChange, options, icon }: { label: string
   }, []);
 
   return (
-    <div className="relative">
+    <div>
       <div className="pm-micro mb-1.5 text-muted-foreground">{label}</div>
       <button
         ref={buttonRef}
@@ -294,7 +295,7 @@ function FilterSelect({ label, value, onChange, options, icon }: { label: string
           <ChevronDown className="size-3" />
         </span>
       </button>
-      {open && (
+      {open && typeof document !== 'undefined' && createPortal(
         <div style={dropdownStyle} className="max-h-60 overflow-y-auto border border-border bg-elevated shadow-lg">
           {options.map((opt) => (
             <button
@@ -310,7 +311,8 @@ function FilterSelect({ label, value, onChange, options, icon }: { label: string
               {opt}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
