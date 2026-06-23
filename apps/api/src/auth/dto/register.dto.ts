@@ -1,5 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+
+export enum RegisterAccountType {
+  PLAYER = 'PLAYER',
+  STUDIO = 'STUDIO',
+}
 
 export class RegisterDto {
   @ApiProperty({ example: 'dev@example.com' })
@@ -23,4 +28,9 @@ export class RegisterDto {
   @MinLength(8)
   @MaxLength(128)
   password!: string;
+
+  @ApiProperty({ enum: RegisterAccountType, required: false, default: 'PLAYER' })
+  @IsOptional()
+  @IsEnum(RegisterAccountType)
+  accountType?: RegisterAccountType;
 }

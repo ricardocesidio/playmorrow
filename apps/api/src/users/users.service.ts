@@ -24,6 +24,7 @@ export class UsersService {
     username: string;
     displayName: string;
     passwordHash: string;
+    accountType?: 'PLAYER' | 'STUDIO';
   }): Promise<User> {
     const emailLower = data.email.toLowerCase();
 
@@ -44,6 +45,7 @@ export class UsersService {
         displayName: data.displayName,
         passwordHash: data.passwordHash,
         role: 'PLAYER',
+        accountType: data.accountType ?? 'PLAYER',
       },
     });
   }

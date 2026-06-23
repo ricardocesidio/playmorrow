@@ -67,6 +67,12 @@ enum ReactionType {
   INSIGHTFUL
 }
 
+/// Registration intent — not a permission level.
+enum AccountType {
+  PLAYER
+  STUDIO
+}
+
 enum FollowTargetType {
   STUDIO
   GAME
@@ -130,6 +136,7 @@ model User {
   avatarUrl    String?
   bio          String?
   isVerified   Boolean  @default(false)
+  accountType  AccountType @default(PLAYER)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

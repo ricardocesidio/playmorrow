@@ -28,7 +28,7 @@ function isCommonPassword(password: string): boolean {
 }
 
 export interface AuthResult {
-  user: { id: string; email: string; username: string; displayName: string; role: string };
+  user: { id: string; email: string; username: string; displayName: string; role: string; accountType: string };
   accessToken: string;
   refreshToken: string;
 }
@@ -67,6 +67,11 @@ export class AuthService {
       throw new BadRequestException('This password is too common. Choose a more unique password.');
     }
 
+    const accountType = dto.accountType ?? 'PLAYER';
+    if (!['PLAYER', 'STUDIO'].includes(accountType)) {
+      throw new BadRequestException('accountType must be PLAYER or STUDIO');
+    }
+
     // Also reject passwords containing email or username parts
     const lowerPw = dto.password.toLowerCase();
     if (lowerPw.includes(dto.email.split('@')[0]!.toLowerCase()) || lowerPw.includes(dto.username.toLowerCase())) {
@@ -76,6 +81,7 @@ export class AuthService {
     const passwordHash = await argon2.hash(dto.password);
     const user = await this.usersService.create({
       email: dto.email, username: dto.username, displayName: dto.displayName, passwordHash,
+      accountType,
     });
 
     // Create verification token
@@ -152,7 +158,7 @@ export class AuthService {
     return {
       id: user.id, email: user.email, username: user.username,
       displayName: user.displayName, role: user.role,
-      isVerified: user.isVerified,
+      isVerified: user.isVerified, accountType: user.accountType ?? 'PLAYER',
     };
   }
 
@@ -259,7 +265,7 @@ export class AuthService {
 
   private async buildResult(user: User): Promise<AuthResult> {
     const tokens = await this.issueTokens(user);
-    return { user: { id: user.id, email: user.email, username: user.username, displayName: user.displayName, role: user.role }, ...tokens };
+    return { user: { id: user.id, email: user.email, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER' }, ...tokens };
   }
 
   private async issueTokens(user: User): Promise<RefreshResult> {

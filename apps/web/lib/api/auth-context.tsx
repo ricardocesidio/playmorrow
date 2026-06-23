@@ -9,6 +9,7 @@ export interface AuthUser {
   username: string;
   displayName: string;
   role: string;
+  accountType: 'PLAYER' | 'STUDIO';
 }
 
 interface AuthContextValue {

@@ -8,6 +8,7 @@ export const MOCK_USER = {
   username: 'testuser',
   displayName: 'Test User',
   role: 'PLAYER',
+  accountType: 'PLAYER',
 };
 
 export const MOCK_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-token';
