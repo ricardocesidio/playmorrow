@@ -130,7 +130,7 @@ export function HudButton({
   return (
     <button
       className={cn(
-        'clip-corner inline-flex h-14 items-center justify-center gap-3 px-7 pm-display text-sm transition disabled:pointer-events-none disabled:opacity-50',
+        'clip-corner inline-flex h-14 items-center justify-center gap-3 px-7 pm-display text-sm transition disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
         variant === 'primary'
           ? 'border border-coral bg-coral text-coral-foreground shadow-[0_0_30px_rgb(255_87_77_/_0.24)] hover:bg-[#ff6a61]'
           : 'border border-border-bright bg-background/50 text-muted-foreground hover:border-cyan hover:text-cyan',
