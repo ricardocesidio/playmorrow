@@ -36,6 +36,8 @@ export class UsersController {
       role: user.role,
       isVerified: user.isVerified,
       createdAt: user.createdAt,
+      followersCount: 0, // User-to-user follows not yet implemented
+      followingCount: 0,
       studios: studioMemberships.map((m) => ({ ...m.studio, role: m.role })),
     };
   }

@@ -352,8 +352,10 @@ async function main() {
 
   // Create demo follow relationships
   for (const gameId of gameIds) {
-    await prisma.follow.create({
-      data: { userId: user.id, targetType: 'GAME', gameId },
+    await prisma.follow.upsert({
+      where: { userId_gameId: { userId: user.id, gameId } },
+      update: {},
+      create: { userId: user.id, targetType: 'GAME', gameId },
     });
   }
   console.log('  ✅ Demo follows created');

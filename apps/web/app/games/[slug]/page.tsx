@@ -197,7 +197,7 @@ function PremiumGameDetail({
               </div>
 
               <div className="grid items-stretch gap-4 lg:grid-cols-[0.82fr_1.08fr_0.82fr]">
-                <AboutPanel game={game} />
+                <AboutPanel game={game} slug={slug} />
                 <RoadmapPanel roadmap={roadmap} />
                 <DevlogsPanel devlogs={devlogs} slug={slug} />
               </div>
@@ -552,7 +552,7 @@ function ScreenshotsPanel({
   );
 }
 
-function AboutPanel({ game }: { game: Game }) {
+function AboutPanel({ game, slug }: { game: Game; slug: string }) {
   return (
     <TechPanel title="About" className="h-full min-h-[284px] lg:h-[334px]">
       <p className="text-xs leading-6 text-muted-foreground">
@@ -568,7 +568,7 @@ function AboutPanel({ game }: { game: Game }) {
           <li key={item} className="flex gap-2"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-cyan shadow-[0_0_8px_rgb(62_231_255_/_0.8)]" />{item}</li>
         ))}
       </ul>
-      <Link href="#about" className="mt-5 inline-flex items-center gap-3 pm-micro text-cyan">Read full readme <ArrowRight className="size-4" /></Link>
+      <Link href={`/games/${slug}/readme`} className="mt-5 inline-flex items-center gap-3 pm-micro text-cyan">Read full readme <ArrowRight className="size-4" /></Link>
     </TechPanel>
   );
 }

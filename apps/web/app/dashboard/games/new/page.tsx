@@ -38,6 +38,14 @@ function CreateGameForm() {
   const [slugAuto, setSlugAuto] = useState(true);
   const [tagline, setTagline] = useState('');
   const [description, setDescription] = useState('');
+  const [readme, setReadme] = useState('');
+  const [demoStatus, setDemoStatus] = useState('NO_DEMO');
+  const [demoUrl, setDemoUrl] = useState('');
+  const [edition, setEdition] = useState('');
+  const [engine, setEngine] = useState('');
+  const [languages, setLanguages] = useState('');
+  const [genres, setGenres] = useState('');
+  const [modes, setModes] = useState('');
   const [status, setStatus] = useState('IN_DEVELOPMENT');
   const [releaseDate, setReleaseDate] = useState('');
   const [expectedReleaseText, setExpectedReleaseText] = useState('');
@@ -89,6 +97,14 @@ function CreateGameForm() {
         slug: slug.trim().toLowerCase(),
         tagline: tagline.trim() || undefined,
         description: description.trim() || undefined,
+        readme: readme.trim() || undefined,
+        demoStatus: demoStatus !== 'NO_DEMO' ? demoStatus : undefined,
+        demoUrl: demoUrl.trim() || undefined,
+        edition: edition.trim() || undefined,
+        engine: engine.trim() || undefined,
+        languages: languages.trim() || undefined,
+        genres: genres.trim() || undefined,
+        modes: modes.trim() || undefined,
         status,
         releaseDate: releaseDate || undefined,
         expectedReleaseText: expectedReleaseText.trim() || undefined,
@@ -162,6 +178,62 @@ function CreateGameForm() {
         <div>
           <label className="mb-1.5 block text-sm font-medium">Description</label>
           <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
+            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium">Full README</label>
+          <textarea id="readme" rows={10} value={readme} onChange={(e) => setReadme(e.target.value)} placeholder="Write the full game README here..."
+            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Demo status</label>
+            <select id="demoStatus" value={demoStatus} onChange={(e) => setDemoStatus(e.target.value)}
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+              <option value="NO_DEMO">No demo</option>
+              <option value="DEMO_LOCKED">Demo locked</option>
+              <option value="DEMO_PLAYABLE">Demo playable</option>
+              <option value="PLAYTEST_AVAILABLE">Playtest available</option>
+            </select>
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Demo URL (if playable)</label>
+            <input type="url" id="demoUrl" value={demoUrl} onChange={(e) => setDemoUrl(e.target.value)} placeholder="https://..."
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Edition</label>
+            <input type="text" id="edition" value={edition} onChange={(e) => setEdition(e.target.value)} placeholder="Standard Edition"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Engine</label>
+            <input type="text" id="engine" value={engine} onChange={(e) => setEngine(e.target.value)} placeholder="e.g. Unreal Engine 5"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Languages (comma-separated)</label>
+            <input type="text" id="languages" value={languages} onChange={(e) => setLanguages(e.target.value)} placeholder="EN, FR, DE, JP, ZH"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Genres (comma-separated)</label>
+            <input type="text" id="genres" value={genres} onChange={(e) => setGenres(e.target.value)} placeholder="Tactical, Stealth, Cyberpunk"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium">Modes (comma-separated)</label>
+          <input type="text" id="modes" value={modes} onChange={(e) => setModes(e.target.value)} placeholder="Single Player, Multiplayer"
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
 

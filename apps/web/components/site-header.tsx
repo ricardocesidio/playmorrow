@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/api/auth-context';
-import { ArrowUpRight, Menu, Search, X } from 'lucide-react';
+import { ArrowUpRight, Building2, Gamepad2, Loader2, Menu, Search, X } from 'lucide-react';
 import { HudLinkLogo } from '@/components/playmorrow/hud';
 import { NotificationDropdown } from '@/components/notification-dropdown';
+import { api, type SearchResponse } from '@/lib/api/client';
 
 const NAV_LINKS = [
   { href: '/games', label: 'Games' },
@@ -18,6 +19,36 @@ export function SiteHeader() {
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchDebounced, setSearchDebounced] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResponse | null>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchDebounced(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (!searchDebounced.trim()) { setSearchResults(null); setSearchOpen(false); return; }
+    setSearchLoading(true);
+    api.get<SearchResponse>(`/search?q=${encodeURIComponent(searchDebounced)}&pageSize=5`)
+      .then((data) => { setSearchResults(data); setSearchOpen(true); })
+      .catch(() => setSearchResults(null))
+      .finally(() => setSearchLoading(false));
+  }, [searchDebounced]);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
@@ -47,13 +78,83 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center justify-end gap-5">
-          <Link
-            href="/search"
-            className="clip-corner hidden h-10 w-[340px] items-center gap-3 border border-border bg-background/60 px-4 text-sm text-muted-foreground transition hover:border-border-bright xl:flex"
-          >
-            <Search className="size-4" />
-            <span>Search games, studios, genres...</span>
-          </Link>
+          <div ref={searchRef} className="relative hidden xl:block">
+            <div className="clip-corner flex h-10 w-[340px] items-center gap-3 border border-border bg-background/60 px-4 text-sm text-muted-foreground">
+              <Search className="size-4 shrink-0" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => { if (searchResults) setSearchOpen(true); }}
+                placeholder="Search games, studios, genres..."
+                className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground/60"
+              />
+              {searchLoading && <Loader2 className="size-4 animate-spin shrink-0" />}
+              {searchQuery && !searchLoading && (
+                <button type="button" onClick={() => { setSearchQuery(''); setSearchResults(null); setSearchOpen(false); }} className="shrink-0 text-muted-foreground hover:text-foreground">
+                  <X className="size-3.5" />
+                </button>
+              )}
+            </div>
+
+            {searchOpen && searchResults && (
+              <div className="absolute right-0 top-full mt-2 w-[400px] rounded-lg border border-border bg-background shadow-xl">
+                <div className="max-h-[480px] overflow-y-auto p-2">
+                  {searchResults.games.total > 0 && (
+                    <div className="mb-2">
+                      <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Games ({searchResults.games.total})</p>
+                      {searchResults.games.items.map((g) => (
+                        <Link key={g.id} href={`/games/${g.slug}`} onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
+                          className="flex items-center gap-3 rounded px-2 py-2 transition hover:bg-muted"
+                        >
+                          {g.coverUrl ? (
+                            <img src={g.coverUrl} alt="" className="size-9 shrink-0 rounded object-cover" />
+                          ) : (
+                            <div className="flex size-9 shrink-0 items-center justify-center rounded bg-muted text-muted-foreground/30"><Gamepad2 className="size-4" /></div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-foreground">{g.title}</p>
+                            {g.tagline && <p className="truncate text-xs text-muted-foreground">{g.tagline}</p>}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {searchResults.studios.total > 0 && (
+                    <div className="mb-2">
+                      <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Studios ({searchResults.studios.total})</p>
+                      {searchResults.studios.items.map((s) => (
+                        <Link key={s.id} href={`/studios/${s.slug}`} onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
+                          className="flex items-center gap-3 rounded px-2 py-2 transition hover:bg-muted"
+                        >
+                          {s.logoUrl ? (
+                            <img src={s.logoUrl} alt="" className="size-9 shrink-0 rounded object-cover" />
+                          ) : (
+                            <div className="flex size-9 shrink-0 items-center justify-center rounded bg-muted text-muted-foreground/30"><Building2 className="size-4" /></div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-foreground">{s.name}</p>
+                            {s.tagline && <p className="truncate text-xs text-muted-foreground">{s.tagline}</p>}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {searchResults.games.total + searchResults.studios.total + searchResults.devlogs.total === 0 && (
+                    <p className="px-2 py-4 text-center text-sm text-muted-foreground">No results found.</p>
+                  )}
+
+                  <Link href={`/search?q=${encodeURIComponent(searchQuery)}`} onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
+                    className="mt-1 flex items-center justify-center rounded px-2 py-2 text-xs font-medium text-cyan transition hover:bg-muted"
+                  >
+                    View all results <ArrowUpRight className="ml-1 size-3" />
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
 
 
           {!isLoading && isAuthenticated && user ? (
