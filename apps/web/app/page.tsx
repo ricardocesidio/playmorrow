@@ -125,7 +125,8 @@ export default function HomePage() {
 
 function FeaturedGameCard() {
   return (
-    <HudPanel className="relative min-h-[438px] overflow-hidden p-6 sm:p-7" accent="muted">
+    <Link href="/games/test-game" className="block cursor-pointer">
+    <HudPanel className="relative min-h-[438px] overflow-hidden p-6 sm:p-7 transition hover:border-cyan/70" accent="muted">
       <img
         src="/playmorrow/neon-warden.png"
         alt="Neon Warden key art"
@@ -196,6 +197,7 @@ function FeaturedGameCard() {
         </div>
       </div>
     </HudPanel>
+    </Link>
   );
 }
 
