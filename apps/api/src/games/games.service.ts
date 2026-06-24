@@ -12,7 +12,7 @@ const GAME_INCLUDE = {
   platformLinks: { orderBy: { position: 'asc' as const } },
   tags: { include: { tag: true } },
   _count: { select: { followers: true } },
-} satisfies Prisma.GameInclude;
+} as const;
 
 @Injectable()
 export class GamesService {
@@ -284,30 +284,8 @@ export class GamesService {
     return { success: true };
   }
 
-  private toResponse(game: {
-    id: string;
-    title: string;
-    slug: string;
-    studioId: string;
-    tagline: string | null;
-    description: string | null;
-    status: string;
-    releaseDate: Date | null;
-    expectedReleaseText: string | null;
-    priceCents: number | null;
-    currency: string | null;
-    isFree: boolean;
-    coverUrl: string | null;
-    bannerUrl: string | null;
-    isPublished: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-    studio: { id: string; name: string; slug: string };
-    media: { id: string; type: string; url: string; caption: string | null; position: number }[];
-    platformLinks: { id: string; kind: string; url: string; label: string | null; position: number }[];
-    tags: { tag: { slug: string; name: string; kind: string | null } }[];
-    _count?: { followers: number };
-  }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private toResponse(game: any) {
     return {
       id: game.id,
       title: game.title,
@@ -323,16 +301,28 @@ export class GamesService {
       coverUrl: game.coverUrl,
       bannerUrl: game.bannerUrl,
       isPublished: game.isPublished,
-      followersCount: game._count?.followers ?? 0,
+      followersCount: game.followersCount ?? game._count?.followers ?? 0,
+      wishlistsCount: game.wishlistsCount ?? 0,
+      commentsCount: game.commentsCount ?? 0,
+      viewsCount: game.viewsCount ?? 0,
+      featured: game.featured ?? false,
+      readme: game.readme ?? null,
+      demoStatus: game.demoStatus ?? null,
+      demoUrl: game.demoUrl ?? null,
+      edition: game.edition ?? null,
+      engine: game.engine ?? null,
+      languages: game.languages ?? null,
+      genres: game.genres ?? null,
+      modes: game.modes ?? null,
       studio: game.studio,
       media: game.media,
-      platformLinks: game.platformLinks.map((pl) => ({
+      platformLinks: ((game.platformLinks ?? []) as Array<{ id: string; kind: string; url: string; label: string | null }>).map((pl) => ({
         id: pl.id,
         platform: pl.kind,
         url: pl.url,
         label: pl.label,
       })),
-      tags: game.tags.map((gt) => gt.tag.slug),
+      tags: ((game.tags ?? []) as Array<{ tag: { slug: string } }>).map((gt) => gt.tag.slug),
       createdAt: game.createdAt.toISOString(),
       updatedAt: game.updatedAt.toISOString(),
     };
