@@ -50,9 +50,20 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
 
   // Auth
   if (path === '/auth/me') return MOCK_USER;
-  if (path === '/auth/login') {
+  if (path === '/auth/session/login') {
+    const body = _body as Record<string, unknown> | undefined;
+    const emailOrUsername = String(body?.emailOrUsername ?? '');
+    const password = String(body?.password ?? '');
+    if (!emailOrUsername || !password) {
+      throw Object.assign(new Error('Invalid credentials'), { status: 401 });
+    }
+    // Accept demo credentials only
+    const demoEmails = ['dev@playmorrow.example', 'testuser', 'ricardocesidio@hotmail.com'];
+    if (!demoEmails.includes(emailOrUsername.toLowerCase()) || password !== 'Demo123!@') {
+      throw Object.assign(new Error('Invalid credentials'), { status: 401 });
+    }
     mockSessionUser = MOCK_USER;
-    return { user: MOCK_USER, accessToken: 'mock-token' };
+    return { id: 'user-1', username: 'testuser', displayName: 'Test User', role: 'PLAYER', accountType: 'PLAYER' };
   }
   if (path === '/auth/register') {
     const body = _body as Record<string, unknown> | undefined;
