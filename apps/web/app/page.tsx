@@ -1,6 +1,9 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/lib/api/auth-context';
 import {
   Activity,
   ArrowRight,
@@ -62,65 +65,28 @@ const liveItems = [
 ];
 
 export default function HomePage() {
-  const { data: feedData } = usePublicFeed(1, 4);
-  const { data: gamesData } = useGames(1, 4);
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
 
-  const latestGames = normalizeLatestGames(gamesData?.items);
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.replace('/login');
+      } else {
+        router.replace('/dashboard');
+      }
+    }
+  }, [isLoading, isAuthenticated, router]);
 
-  return (
-    <>
-      <SiteHeader />
-      <main className="relative min-h-screen overflow-hidden bg-background px-5 pb-24 pt-4 sm:px-8 lg:px-10">
-        <CircuitFrame className="opacity-60" />
-        <div className="relative z-10 mx-auto max-w-[1500px]">
-          <section className="grid gap-7 lg:grid-cols-[0.92fr_1.08fr]">
-            <HudPanel className="flex min-h-[438px] items-center px-6 py-8 sm:px-12 lg:px-14" accent="muted">
-              <div className="max-w-[620px]">
-                <div className="pm-micro mb-6 flex items-center gap-4 text-cyan">
-                  <span>The indie development network</span>
-                  <span className="h-px w-28 bg-gradient-to-r from-cyan/70 to-transparent" />
-                </div>
-                <h1 className="font-display text-[3.25rem] font-black leading-[1.06] text-foreground sm:text-[3.8rem] lg:text-[4.15rem]">
-                  Follow games<br />while they&apos;re<br />being made.
-                </h1>
-                <p className="mt-5 max-w-[520px] text-base leading-7 text-muted-foreground">
-                  Discover games in development, follow studios, and get real-time updates from the creators.
-                </p>
-                <div className="mt-8 grid gap-5 text-sm text-muted-foreground sm:grid-cols-3">
-                  <HeroSignal icon={<Radio className="size-7" />} title="Live updates" body="From the source" />
-                  <HeroSignal icon={<Users className="size-7" />} title="Build your feed" body="Follow what matters" />
-                  <HeroSignal icon={<Activity className="size-7" />} title="Back indie" body="Fuel what's next" />
-                </div>
-              </div>
-            </HudPanel>
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="size-6 animate-spin border border-cyan border-t-transparent" />
+      </div>
+    );
+  }
 
-            <FeaturedGameCard />
-          </section>
-
-          <LiveTicker feedCount={feedData?.items.length ?? 0} />
-
-          <HudPanel className="mt-5 px-4 py-5 sm:px-7" accent="muted">
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <h2 className="pm-display flex items-center gap-3 text-base text-foreground">
-                <span className="text-coral">...</span> Latest games
-              </h2>
-              <Link href="/games" className="pm-micro hidden items-center gap-2 text-coral sm:inline-flex">
-                Browse all games <ArrowRight className="size-4" />
-              </Link>
-            </div>
-
-            <div className="grid gap-4 lg:grid-cols-3">
-              {latestGames.map((game) => (
-                <LatestGameCard key={game.id} game={game} />
-              ))}
-            </div>
-          </HudPanel>
-        </div>
-        <HudStatusRail />
-      </main>
-      <SiteFooter />
-    </>
-  );
+  return null;
 }
 
 function FeaturedGameCard() {
