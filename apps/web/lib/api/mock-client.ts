@@ -23,6 +23,7 @@ import type { ReactionStatus } from './client';
 
 /** Small helpers to simulate async delay (remove in production). */
 const delay = (ms = 80) => new Promise((r) => setTimeout(r, ms));
+let mockSessionUser: typeof MOCK_USER | null = null;
 
 export function createMockApi() {
   const handler = {
@@ -49,7 +50,10 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
 
   // Auth
   if (path === '/auth/me') return MOCK_USER;
-  if (path === '/auth/login') return { user: MOCK_USER, accessToken: 'mock-token' };
+  if (path === '/auth/login') {
+    mockSessionUser = MOCK_USER;
+    return { user: MOCK_USER, accessToken: 'mock-token' };
+  }
   if (path === '/auth/register') {
     const body = _body as Record<string, unknown> | undefined;
     const at = body?.accountType as string | undefined;
@@ -59,12 +63,23 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
       user: { id: 'user-1', displayName: 'Test User', username: 'testuser', email: body?.email as string ?? 'test@example.com', accountType: at ?? 'PLAYER', emailVerifiedAt: null },
     };
   }
-  if (path === '/auth/session/login') return { id: 'user-1', username: 'testuser', displayName: 'Test User', role: 'PLAYER', accountType: 'PLAYER' };
-  if (path === '/auth/session/me') return MOCK_USER;
+  if (path === '/auth/session/login') {
+    mockSessionUser = MOCK_USER;
+    return { id: 'user-1', username: 'testuser', displayName: 'Test User', role: 'PLAYER', accountType: 'PLAYER' };
+  }
+  if (path === '/auth/session/logout') {
+    mockSessionUser = null;
+    return { ok: true };
+  }
+  if (path === '/auth/session/me') {
+    if (!mockSessionUser) throw Object.assign(new Error('Not authenticated'), { status: 401 });
+    return mockSessionUser;
+  }
   if (path === '/auth/verify-email') {
     const body = _body as Record<string, unknown> | undefined;
     const code = body?.code as string | undefined;
     if (code === '000000') throw Object.assign(new Error('Invalid verification code'), { status: 400 });
+    mockSessionUser = MOCK_USER;
     return { user: MOCK_USER, accessToken: 'mock-token' };
   }
   if (path === '/auth/resend-verification') {

@@ -79,18 +79,6 @@ export function CircuitFrame({ className }: { className?: string }) {
         <path d="M368 134h70l26 26h62" stroke="#3ee7ff" strokeWidth="1.4" fill="none" filter="url(#pmGlow)" />
         <path d="M896 104h82l20 20h72" stroke="#ff574d" strokeWidth="1.2" fill="none" filter="url(#pmGlow)" />
         <path d="M360 608h96l26-26h72" stroke="#3ee7ff" strokeWidth="1.2" fill="none" filter="url(#pmGlow)" />
-        {[
-          { cx: 64, cy: 132, fill: '#ff574d' },
-          { cx: 104, cy: 270, fill: '#3ee7ff' },
-          { cx: 366, cy: 132, fill: '#3ee7ff' },
-          { cx: 874, cy: 104, fill: '#ff574d' },
-          { cx: 1050, cy: 126, fill: '#3ee7ff' },
-          { cx: 1140, cy: 592, fill: '#3ee7ff' },
-          { cx: 370, cy: 608, fill: '#3ee7ff' },
-          { cx: 72, cy: 548, fill: '#ff574d' },
-        ].map(({ cx, cy, fill }) => (
-          <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="2.5" fill={fill} filter="url(#pmGlow)" />
-        ))}
       </svg>
     </div>
   );

@@ -1,20 +1,90 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChevronDown,
+  CircleDollarSign,
+  Clipboard,
+  Disc3,
+  Facebook,
+  Flame,
+  Fullscreen,
+  Gamepad2,
+  Globe,
+  Heart,
+  Link as LinkIcon,
+  Lock,
+  MessageCircle,
+  Monitor,
+  Play,
+  Plus,
+  Radio,
+  Send,
+  Settings,
+  Share2,
+  Shield,
+  Store,
+  Volume2,
+  X,
+} from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
-import { StatusBadge } from '@/components/status-badge';
-import { SignalLabel } from '@/components/signal-label';
-import { MediaGallery } from '@/components/media-gallery';
-import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { ErrorState } from '@/components/error-state';
-import { useGame, useGameDevlogs, useGameRoadmap } from '@/lib/api/hooks';
-import { FollowButton } from '@/components/follow-button';
-import { ReportForm } from '@/components/report-form';
-import { WishlistButton } from '@/components/wishlist-button';
+import { LoadingSkeleton } from '@/components/loading-skeleton';
+import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
+import { useAuth } from '@/lib/api/auth-context';
+import type { Devlog, Game, RoadmapItem } from '@/lib/api/client';
+import {
+  useAddGameToWishlist,
+  useFollowGame,
+  useGame,
+  useGameDevlogs,
+  useGameFollowStatus,
+  useGameRoadmap,
+  useGameWishlistStatus,
+  useRemoveGameFromWishlist,
+  useUnfollowGame,
+} from '@/lib/api/hooks';
+
+const fallbackTags = ['Stealth', 'Cyberpunk', 'Tactical', 'Strategy', 'Sci-Fi', 'Singleplayer', 'Story Rich', 'Atmospheric'];
+const fallbackScreenshots = [
+  '/playmorrow/neon-warden.png',
+  '/playmorrow/mossbound.png',
+  '/playmorrow/voidrunner.png',
+  '/playmorrow/starfall-tactics.png',
+  '/playmorrow/paper-relics.png',
+];
+
+const fallbackRoadmap = [
+  ['Q2 2025', 'Prototype', 'Core stealth mechanics', 'Vertical slice & AI prototype', 'done'],
+  ['Q3 2025', 'Alpha', 'Mission systems & hubs', 'Combat & hacking v1', 'done'],
+  ['Q4 2025', 'Beta', 'Full missions & story', 'Optimization & feedback', 'active'],
+  ['Q4 2026', 'Release', 'Launch', 'Post-launch support', 'locked'],
+] as const;
+
+const fallbackDevlogs = [
+  ['AI Overhaul: Smarter Guards, Smarter City', 'May 19, 2025', '/playmorrow/voidrunner.png', 256, 32],
+  ['Lighting the Rain: Visual Upgrades in 0.7', 'May 5, 2025', '/playmorrow/neon-warden.png', 184, 21],
+  ['Designing the Neon Districts', 'Apr 21, 2025', '/playmorrow/starfall-tactics.png', 143, 18],
+] as const;
+
+const communityComments = [
+  ['ShadowRunner', '2h ago', "The level of detail in this world is insane. Can't wait to play the demo!", 24],
+  ['GhostProtocol', '5h ago', 'The AI looks next level. Finally, a stealth game that respects your patience.', 16],
+  ['NeonSpectre', '7h ago', 'That rooftop infiltration in the trailer gave me chills.', 12],
+] as const;
+
+type GameWithDemoSettings = Game & {
+  demoAvailable?: boolean | null;
+  demoUrl?: string | null;
+  playDemoUrl?: string | null;
+  playtestUrl?: string | null;
+};
 
 export default function GameDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -26,10 +96,11 @@ export default function GameDetailPage() {
     return (
       <>
         <SiteHeader />
-        <main className="mx-auto max-w-5xl px-4 py-8 lg:px-6 lg:py-10">
-          <LoadingSkeleton count={6} height="h-16" />
+        <main className="relative min-h-screen px-5 py-8 sm:px-8 lg:px-10">
+          <div className="mx-auto max-w-[1500px]">
+            <LoadingSkeleton count={8} height="h-16" />
+          </div>
         </main>
-        <SiteFooter />
       </>
     );
   }
@@ -38,195 +109,623 @@ export default function GameDetailPage() {
     return (
       <>
         <SiteHeader />
-        <main className="mx-auto max-w-5xl px-4 py-8 lg:px-6 lg:py-10">
-          <ErrorState message="Game not found." />
-          <div className="mt-4 text-center">
-            <Link href="/games" className="font-mono text-xs uppercase tracking-widest text-cyan underline">Back to games</Link>
+        <main className="relative min-h-screen px-5 py-8 sm:px-8 lg:px-10">
+          <div className="mx-auto max-w-5xl">
+            <ErrorState message="Game not found." />
+            <div className="mt-4 text-center">
+              <Link href="/games" className="pm-micro text-cyan underline">Back to games</Link>
+            </div>
           </div>
         </main>
-        <SiteFooter />
       </>
     );
   }
 
+  return <PremiumGameDetail game={game} devlogs={devlogs?.items ?? []} roadmap={roadmap ?? []} slug={slug} />;
+}
+
+function PremiumGameDetail({
+  game,
+  devlogs,
+  roadmap,
+  slug,
+}: {
+  game: Game;
+  devlogs: Devlog[];
+  roadmap: RoadmapItem[];
+  slug: string;
+}) {
+  const [activeScreenshot, setActiveScreenshot] = useState(0);
+  const title = game.title || 'Neon Warden';
+  const heroImage = game.bannerUrl || game.coverUrl || '/playmorrow/neon-warden.png';
+  const tags = game.tags?.length && game.tags.length >= 6 ? game.tags : fallbackTags;
+  const screenshots = useMemo(() => {
+    const mediaImages = game.media?.filter((item) => item.type !== 'VIDEO').map((item) => item.thumbnailUrl ?? item.url) ?? [];
+    return mediaImages.length ? mediaImages.slice(0, 5) : fallbackScreenshots;
+  }, [game.media]);
+
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-5xl px-4 py-8 lg:px-6 lg:py-10">
-        <Link
-          href="/games"
-          className="mb-6 inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-3" /> Back
-        </Link>
+      <main className="relative min-h-screen overflow-hidden px-5 pb-24 pt-3 sm:px-8 lg:px-10">
+        <CircuitFrame className="opacity-65" />
+        <div className="relative z-10 mx-auto max-w-[1500px]">
+          <Breadcrumbs title={title} />
 
-        {/* Header */}
-        <div className="mb-8 border-b border-border pb-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-3">
-                <h1 className="font-display text-4xl font-semibold tracking-tight">{game.title}</h1>
-                <StatusBadge status={game.status} />
+          <section className="grid items-start gap-5 xl:grid-cols-[1fr_330px]">
+            <GameHero game={game} title={title} heroImage={heroImage} slug={slug} />
+            <PurchasePanel game={game} slug={slug} title={title} />
+          </section>
+
+          <TagRow tags={tags} />
+
+          <section className="mt-4 grid items-start gap-4 xl:grid-cols-[1fr_430px]">
+            <div className="grid gap-4">
+              <div className="grid items-start gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+                <TrailerPanel title={title} image={heroImage} />
+                <ScreenshotsPanel
+                  screenshots={screenshots}
+                  active={activeScreenshot}
+                  onSelect={setActiveScreenshot}
+                  title={title}
+                />
               </div>
-              <div className="mt-2 flex flex-wrap items-center gap-4">
-                {game.studio && (
-                  <Link
-                    href={`/studios/${game.studio.slug}`}
-                    className="font-mono text-xs uppercase tracking-widest text-cyan transition-colors hover:text-cyan/80"
-                  >
-                    {game.studio.name}
-                  </Link>
-                )}
-                {game.expectedReleaseText && (
-                  <SignalLabel color="amber">{game.expectedReleaseText}</SignalLabel>
-                )}
-                <FollowButton targetType="game" slug={slug} />
-                <WishlistButton slug={slug} />
-                <ReportForm targetType="GAME" targetId={game.id} />
+
+              <div className="grid items-stretch gap-4 lg:grid-cols-[0.82fr_1.08fr_0.82fr]">
+                <AboutPanel game={game} />
+                <RoadmapPanel roadmap={roadmap} />
+                <DevlogsPanel devlogs={devlogs} />
               </div>
             </div>
-          </div>
 
-          {game.tagline && (
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">{game.tagline}</p>
-          )}
-
-          {/* Tags */}
-          {game.tags && game.tags.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {game.tags.map((t) => (
-                <span key={t} className="border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">
-                  {t}
-                </span>
-              ))}
-            </div>
-          )}
+            <aside className="grid gap-4">
+              <InfoLinksPanel game={game} slug={slug} />
+              <CommunityPanel />
+            </aside>
+          </section>
         </div>
-
-        <div className="grid gap-10 lg:grid-cols-3">
-          {/* Main content */}
-          <div className="lg:col-span-2">
-            {/* Cover */}
-            {game.coverUrl && (
-              <div className="mb-8 border border-border">
-                <img src={game.coverUrl} alt={game.title} className="w-full object-cover" />
-              </div>
-            )}
-
-            {/* Description */}
-            {game.description && (
-              <section className="mb-8">
-                <h2 className="mb-3 font-display text-xl font-semibold">About</h2>
-                <div className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-                  {game.description}
-                </div>
-              </section>
-            )}
-
-            {/* Media gallery */}
-            <MediaGallery media={game.media ?? []} />
-
-            {/* Devlogs */}
-            {devlogs && devlogs.items.length > 0 && (
-              <section className="mb-8">
-                <h2 className="mb-3 font-display text-xl font-semibold">Devlogs ({devlogs.total})</h2>
-                <div className="space-y-3">
-                  {devlogs.items.map((dl) => (
-                    <Link
-                      key={dl.id}
-                      href={`/devlogs/${dl.id}`}
-                      className="block border border-border bg-elevated p-4 transition-colors hover:border-border-bright"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0 flex-1">
-                          <p className="font-display font-semibold">{dl.title}</p>
-                          {dl.excerpt && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{dl.excerpt}</p>}
-                        </div>
-                        {dl.coverUrl && (
-                          <img src={dl.coverUrl} alt="" className="size-16 shrink-0 border border-border object-cover" />
-                        )}
-                      </div>
-                      <div className="mt-2 flex gap-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">
-                        {dl.publishedAt && <span>{new Date(dl.publishedAt).toLocaleDateString()}</span>}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Stats */}
-            <div className="border border-border bg-elevated p-4">
-              <h3 className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">Details</h3>
-              <div className="space-y-2 font-mono text-xs text-muted-foreground">
-                <div className="flex justify-between">
-                  <span className="uppercase tracking-widest">Followers</span>
-                  <span className="text-foreground">{game.followersCount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="uppercase tracking-widest">Status</span>
-                  <StatusBadge status={game.status} />
-                </div>
-                {game.expectedReleaseText && (
-                  <div className="flex justify-between">
-                    <span className="uppercase tracking-widest">Release</span>
-                    <span className="text-foreground">{game.expectedReleaseText}</span>
-                  </div>
-                )}
-                {game.priceCents != null && (
-                  <div className="flex justify-between">
-                    <span className="uppercase tracking-widest">Price</span>
-                    <span className="text-foreground">{game.isFree ? 'Free' : `$${(game.priceCents / 100).toFixed(2)}`}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Platform links */}
-            {game.platformLinks && game.platformLinks.length > 0 && (
-              <div className="border border-border bg-elevated p-4">
-                <h3 className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">Where to find</h3>
-                <div className="space-y-2">
-                  {game.platformLinks.map((pl) => (
-                    <a
-                      key={pl.id}
-                      href={pl.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-cyan transition-colors hover:text-cyan/80"
-                    >
-                      <ExternalLink className="size-3" />
-                      {pl.label ?? pl.platform}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Roadmap */}
-            {roadmap && roadmap.length > 0 && (
-              <div className="border border-border bg-elevated p-4">
-                <h3 className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">Roadmap</h3>
-                <div className="space-y-3">
-                  {roadmap.map((item) => (
-                    <div key={item.id} className="relative pl-4 before:absolute before:left-0 before:top-1.5 before:size-1.5 before:bg-cyan before:shadow-[0_0_6px_oklch(0.75_0.12_200_/_0.4)]">
-                      <p className="font-display text-sm font-medium">{item.title}</p>
-                      {item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
-                      {item.targetDate && (
-                        <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">{item.targetDate}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        <HudStatusRail />
       </main>
-      <SiteFooter />
     </>
   );
+}
+
+function Breadcrumbs({ title }: { title: string }) {
+  return (
+    <nav className="mb-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground" aria-label="Breadcrumb">
+      <Link href="/games" className="inline-flex items-center gap-1 transition hover:text-cyan">
+        <ArrowLeft className="size-3" /> Back to browse
+      </Link>
+      <span>/</span>
+      <Link href="/games" className="transition hover:text-cyan">Games</Link>
+      <span>/</span>
+      <span className="text-foreground/70">{title}</span>
+    </nav>
+  );
+}
+
+function GameHero({ game, title, heroImage, slug }: { game: Game; title: string; heroImage: string; slug: string }) {
+  return (
+    <HudPanel className="relative min-h-[420px] overflow-hidden p-0 xl:h-[420px] xl:min-h-0" accent="muted">
+      <img src={heroImage} alt={`${title} hero art`} className="absolute inset-0 size-full object-cover" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background/82 via-background/28 to-background/0" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background/72 via-transparent to-background/5" />
+
+      <div className="relative z-10 grid min-h-[420px] content-between p-6 pb-0 sm:p-8 sm:pb-0 xl:h-full xl:min-h-0 xl:px-12 xl:pb-0 xl:pt-8">
+        <div>
+          <span className="clip-corner-sm border border-cyan/70 bg-background/70 px-3.5 py-1.5 pm-micro text-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.18)]">Featured</span>
+          <h1 className="mt-5 font-display text-[4rem] font-black uppercase leading-[0.86] text-foreground drop-shadow-[0_6px_18px_rgb(0_0_0_/_0.85)] sm:text-[5.05rem] xl:text-[5.25rem]">
+            {title.split(' ').map((word) => (
+              <span key={word} className="block">{word}</span>
+            ))}
+          </h1>
+          <p className="pm-micro mb-[10px] mt-5 text-[0.78rem] text-muted-foreground">
+            {(game.tags?.slice(0, 2).join(' • ') || 'Tactical stealth • Cyberpunk')}
+          </p>
+        </div>
+
+        <div>
+          <div className="mb-4 mt-[5px] flex flex-wrap items-center gap-4">
+            <div className="grid size-14 place-items-center rounded-[3px] border border-border-bright bg-background/78 shadow-[inset_0_0_0_1px_rgb(255_255_255_/_0.04)]">
+              <Shield className="size-7 text-foreground" />
+            </div>
+            <div>
+              <p className="pm-display text-[0.95rem] leading-none text-foreground">{game.studio?.name ?? 'Obsidian Signal'} <span className="text-cyan">●</span></p>
+              <p className="mt-2 text-xs text-muted-foreground">Independent Studio</p>
+            </div>
+            <DetailFollowButton slug={slug} />
+          </div>
+          <div className="-mx-6 grid border-y border-border/55 bg-background/38 shadow-[inset_0_18px_34px_rgb(0_0_0_/_0.28)] sm:-mx-8 sm:grid-cols-[205px_205px_205px_205px_1fr] xl:-mx-12">
+            <HeroStat icon={<Heart className="size-[28px] stroke-[2]" />} value={formatFollowers(game.followersCount || 12400)} label="Followers" />
+            <HeroStat icon={<Flame className="size-[26px] fill-coral text-coral" />} value="312" label="Wishlists" />
+            <HeroStat icon={<MessageCircle className="size-[29px] stroke-[1.9]" />} value="48" label="Comments" />
+            <HeroStat icon={<ActivityIcon />} value="9.1K" label="Views" />
+          </div>
+        </div>
+      </div>
+    </HudPanel>
+  );
+}
+
+function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title: string }) {
+  const price = game.priceCents == null ? '$19.99' : game.isFree ? 'Free' : `$${(game.priceCents / 100).toFixed(2)}`;
+  const demoHref = getDemoHref(game) ?? undefined;
+  const hasDemo = Boolean(demoHref);
+
+  return (
+    <HudPanel className="p-4" accent="muted">
+      <p className="pm-micro text-foreground">Standard Edition</p>
+      <div className="mt-3 flex items-start justify-between gap-4">
+        <p className="font-display text-2xl font-black text-foreground">{price}</p>
+        <button type="button" className="clip-corner inline-flex items-center gap-1 border border-border px-2 py-1 font-mono text-[10px] uppercase text-muted-foreground">
+          USD <ChevronDown className="size-3" />
+        </button>
+      </div>
+      <p className={`mt-2 text-xs ${hasDemo ? 'text-cyan' : 'text-muted-foreground'}`}>
+        {hasDemo ? 'Demo available' : 'Demo locked'} <span className={`inline-block size-2 rounded-full border ${hasDemo ? 'border-cyan' : 'border-muted-foreground/60'}`} />
+      </p>
+
+      {hasDemo ? (
+        <a
+          href={demoHref}
+          className="clip-corner mt-3 flex h-10 items-center justify-center gap-4 border border-coral bg-coral px-5 pm-display text-xs text-coral-foreground shadow-[0_0_24px_rgb(255_87_77_/_0.24)] transition hover:bg-[#ff6a61]"
+        >
+          Play demo <Play className="ml-auto size-4 fill-current" />
+        </a>
+      ) : (
+        <button
+          type="button"
+          disabled
+          className="clip-corner mt-3 flex h-10 w-full cursor-not-allowed items-center justify-center gap-4 border border-border-bright/50 bg-background/55 px-5 pm-display text-xs text-muted-foreground"
+        >
+          Play demo <Lock className="ml-auto size-4" />
+        </button>
+      )}
+
+      <DetailWishlistButton slug={slug} />
+      <p className="mt-3 border-b border-border/60 pb-3 text-xs text-muted-foreground">
+        Expected release: <span className="text-foreground">{game.expectedReleaseText ?? 'Q4 2026'}</span>
+      </p>
+
+      <p className="pm-micro mt-3 text-muted-foreground">Platforms</p>
+      <div className="mt-2 grid grid-cols-3 gap-2">
+        {(game.platformLinks?.length ? game.platformLinks.map((p) => p.platform) : ['PC', 'PS5', 'XBOX SERIES X|S']).slice(0, 3).map((platform) => (
+          <span key={platform} className="flex min-h-8 items-center justify-center gap-2 border border-border bg-background/65 px-2 font-mono text-[11px] uppercase text-foreground">
+            {platform.includes('PC') ? <Monitor className="size-4 text-cyan" /> : <Gamepad2 className="size-4" />}
+            {platform}
+          </span>
+        ))}
+      </div>
+
+      <ShareButtons title={title} />
+    </HudPanel>
+  );
+}
+
+function DetailFollowButton({ slug }: { slug: string }) {
+  const router = useRouter();
+  const { token, isAuthenticated } = useAuth();
+  const { data: status, isLoading } = useGameFollowStatus(slug, token ?? undefined);
+  const follow = useFollowGame();
+  const unfollow = useUnfollowGame();
+  const isFollowing = status?.isFollowing ?? false;
+
+  const onClick = async () => {
+    if (!isAuthenticated || !token) {
+      router.push('/login');
+      return;
+    }
+    if (isFollowing) await unfollow.mutateAsync({ slug, token });
+    else await follow.mutateAsync({ slug, token });
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={isLoading || follow.isPending || unfollow.isPending}
+      className="clip-corner ml-0 inline-flex h-9 min-w-24 items-center justify-center border border-cyan/60 bg-background/50 px-5 text-sm text-cyan transition hover:bg-cyan hover:text-cyan-foreground disabled:opacity-60 sm:ml-4"
+    >
+      {isFollowing ? 'Following' : 'Follow'}
+    </button>
+  );
+}
+
+function DetailWishlistButton({ slug }: { slug: string }) {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const { data: status } = useGameWishlistStatus(slug);
+  const add = useAddGameToWishlist();
+  const remove = useRemoveGameFromWishlist();
+  const isWishlisted = status?.isWishlisted ?? false;
+
+  const onClick = () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    if (isWishlisted) remove.mutate({ slug });
+    else add.mutate({ slug });
+  };
+
+  return (
+    <div className="mt-3 grid grid-cols-[1fr_58px] gap-2">
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={add.isPending || remove.isPending}
+        className="clip-corner inline-flex h-9 items-center justify-center gap-2 border border-border-bright/55 bg-background/55 pm-micro text-muted-foreground transition hover:border-coral hover:text-coral disabled:opacity-60"
+      >
+        <Plus className="size-3" /> {isWishlisted ? 'Wishlisted' : 'Add to wishlist'}
+      </button>
+      <span className="clip-corner grid place-items-center border border-border-bright/55 bg-background/55 font-mono text-xs text-muted-foreground">312</span>
+    </div>
+  );
+}
+
+function ShareButtons({ title }: { title: string }) {
+  const [copied, setCopied] = useState(false);
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const encodedUrl = encodeURIComponent(shareUrl);
+  const encodedTitle = encodeURIComponent(title);
+
+  const copyLink = async () => {
+    if (navigator?.clipboard && shareUrl) {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    }
+  };
+
+  return (
+      <div className="mt-3">
+      <p className="pm-micro text-muted-foreground">Share</p>
+      <div className="mt-2 grid grid-cols-5 justify-items-center gap-2">
+        <button type="button" onClick={copyLink} aria-label="Copy link" className="grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan">
+          {copied ? <Check className="size-4 text-success" /> : <LinkIcon className="size-4" />}
+        </button>
+        <a aria-label="Share on X" href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`} target="_blank" rel="noopener noreferrer" className="grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan"><X className="size-4" /></a>
+        <a aria-label="Share on Facebook" href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer" className="grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan"><Facebook className="size-4" /></a>
+        <a aria-label="Share on Reddit" href={`https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`} target="_blank" rel="noopener noreferrer" className="grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan"><Disc3 className="size-4" /></a>
+        <button type="button" aria-label="Copy Discord share link" onClick={copyLink} className="grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan"><Share2 className="size-4" /></button>
+      </div>
+    </div>
+  );
+}
+
+function TagRow({ tags }: { tags: string[] }) {
+  return (
+    <div className="mt-5 flex flex-wrap items-center gap-3 sm:gap-4">
+      <span className="pm-micro mr-1 text-muted-foreground">Tags</span>
+      {tags.slice(0, 8).map((tag, index) => (
+        <span key={tag} className={`clip-corner-sm border bg-background/52 px-4 py-1.5 font-mono text-xs font-semibold shadow-[inset_0_0_12px_rgb(62_231_255_/_0.04)] ${index === 3 || index === 4 ? 'border-violet/55 text-violet' : 'border-cyan/35 text-cyan'}`}>
+          {tag}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function TrailerPanel({ title, image }: { title: string; image: string }) {
+  return (
+    <TechPanel id="trailer" title="Trailer" className="min-h-[268px]">
+      <div className="relative min-h-[210px] overflow-hidden border border-border bg-muted">
+        <img src={image} alt={`${title} trailer thumbnail`} className="absolute inset-0 size-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/65 via-background/22 to-background/20" />
+        <div className="absolute inset-0 grid place-items-center text-center">
+          <button type="button" aria-label="Play trailer" className="grid size-14 place-items-center rounded-full border border-foreground/45 bg-background/45 text-foreground backdrop-blur-sm">
+            <Play className="ml-1 size-7 fill-current" />
+          </button>
+          <div className="pointer-events-none absolute right-8 top-10 font-display text-4xl font-black uppercase leading-none text-foreground">
+            {title}<br /><span className="text-lg tracking-[0.3em]">Gameplay Trailer</span>
+          </div>
+        </div>
+        <div className="absolute inset-x-5 bottom-4">
+          <div className="h-1 bg-border"><div className="h-full w-[43%] bg-cyan shadow-[0_0_12px_rgb(62_231_255_/_0.8)]" /></div>
+          <div className="mt-3 flex items-center gap-4 text-xs text-foreground">
+            <Play className="size-4 fill-current" />
+            <span>0:00 / 1:42</span>
+            <span className="ml-auto flex gap-4"><Volume2 className="size-4" /><Settings className="size-4" /><Fullscreen className="size-4" /></span>
+          </div>
+        </div>
+      </div>
+    </TechPanel>
+  );
+}
+
+function ScreenshotsPanel({
+  screenshots,
+  active,
+  onSelect,
+  title,
+}: {
+  screenshots: string[];
+  active: number;
+  onSelect: (index: number) => void;
+  title: string;
+}) {
+  return (
+    <TechPanel title="Screenshots" action="View all (18)" className="min-h-[268px]">
+      <div className="grid gap-2">
+        <img src={screenshots[active]} alt={`${title} screenshot`} className="h-[142px] w-full border border-border object-cover" />
+        <div className="grid grid-cols-4 gap-2">
+          {screenshots.slice(1, 5).map((image, index) => (
+            <button key={image} type="button" onClick={() => onSelect(index + 1)} className="border border-border transition hover:border-cyan">
+              <img src={image} alt={`${title} thumbnail ${index + 1}`} className="h-14 w-full object-cover" />
+            </button>
+          ))}
+        </div>
+      </div>
+    </TechPanel>
+  );
+}
+
+function AboutPanel({ game }: { game: Game }) {
+  return (
+    <TechPanel title="About" className="h-full min-h-[284px] lg:h-[334px]">
+      <p className="text-xs leading-6 text-muted-foreground">
+        {game.description || `${game.title.toUpperCase()} is a tactical stealth game set in a dystopian cyberpunk city where corporate control and surveillance dictate every move. You are the Warden, a ghost in the system. Infiltrate fortified districts, outthink elite security, and unravel the conspiracy behind the Neon Veil.`}
+      </p>
+      <ul className="mt-4 grid gap-2 text-xs text-muted-foreground">
+        {[
+          'Plan your approach with deep tactical tools.',
+          'Use gadgets, hacking, and the environment to stay unseen.',
+          'Dynamic AI that adapts to your every move.',
+          'A living cyberpunk world with reactive systems.',
+        ].map((item) => (
+          <li key={item} className="flex gap-2"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-cyan shadow-[0_0_8px_rgb(62_231_255_/_0.8)]" />{item}</li>
+        ))}
+      </ul>
+      <Link href="#about" className="mt-5 inline-flex items-center gap-3 pm-micro text-cyan">Read full readme <ArrowRight className="size-4" /></Link>
+    </TechPanel>
+  );
+}
+
+function RoadmapPanel({ roadmap }: { roadmap: RoadmapItem[] }) {
+  const rows = roadmap.length
+    ? roadmap.slice(0, 4).map((item, index) => [
+        item.targetDate ? new Date(item.targetDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : `Q${index + 2} 2025`,
+        item.status,
+        item.title,
+        item.description ?? 'Development milestone',
+        getRoadmapVisualState(item.status),
+      ] as const)
+    : fallbackRoadmap;
+
+  return (
+    <TechPanel title="Roadmap" className="h-full min-h-[284px] px-4 pb-5 pt-4 lg:h-[334px]">
+      <div className="mt-1 border-t border-border/42 pt-3">
+        <div className="relative pl-[30px] before:absolute before:bottom-[42px] before:left-[11px] before:top-[17px] before:w-px before:bg-cyan before:shadow-[0_0_12px_rgb(62_231_255_/_0.75)]">
+        {rows.map(([date, phase, title, body, state]) => (
+          <div
+            key={`${date}-${phase}`}
+            className="relative grid min-h-[54px] grid-cols-[84px_1fr] gap-3 border-b border-border/32 py-2.5 last:min-h-[58px]"
+          >
+            <RoadmapNode state={state} />
+            <span className={`pm-micro pt-0.5 leading-[1.45] ${state === 'active' ? 'text-cyan' : 'text-[#9aa0a5]'}`}>
+              <span className="block text-[0.72rem]">{date}</span>
+              <span className="block text-[0.68rem]">{phase}</span>
+            </span>
+            <span className="border-l border-border-bright/50 pl-4 text-[0.79rem] leading-[1.55] text-[#a8adb0]">
+              <span className="block text-[#d3d7d8]">{title}</span>
+              <span className="block">{body}</span>
+            </span>
+          </div>
+        ))}
+        </div>
+      </div>
+    </TechPanel>
+  );
+}
+
+function RoadmapNode({ state }: { state: string }) {
+  if (state === 'locked') {
+    return (
+      <span className="absolute -left-[31px] top-[13px] grid size-[24px] place-items-center text-[#9aa0a5]">
+        <Lock className="size-[18px] stroke-[2.4]" />
+      </span>
+    );
+  }
+
+  if (state === 'active') {
+    return (
+      <span className="absolute -left-[31px] top-[13px] grid size-[24px] place-items-center rounded-full border-2 border-cyan bg-background shadow-[0_0_14px_rgb(62_231_255_/_0.75)]">
+        <span className="size-[10px] rounded-full bg-cyan shadow-[0_0_10px_rgb(62_231_255_/_0.9)]" />
+      </span>
+    );
+  }
+
+  return (
+    <span className="absolute -left-[31px] top-[13px] grid size-[24px] place-items-center rounded-full border border-success bg-success/20 text-success shadow-[0_0_16px_rgb(112_255_155_/_0.75)]">
+      <span className="grid size-[18px] place-items-center rounded-full bg-[#02070b]">
+        <Check className="size-[15px] stroke-[3]" />
+      </span>
+    </span>
+  );
+}
+
+function DevlogsPanel({ devlogs }: { devlogs: Devlog[] }) {
+  const rows = devlogs.length
+    ? devlogs.slice(0, 3).map((item) => [item.title, item.publishedAt ? new Date(item.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent', item.coverUrl ?? '/playmorrow/neon-warden.png', 184, 21, `/devlogs/${item.id}`] as const)
+    : fallbackDevlogs.map((item) => [...item, '/devlogs/devlog-1'] as const);
+
+  return (
+    <TechPanel title="Latest Devlogs" action="View all" className="h-full min-h-[284px] lg:h-[334px]">
+      <div className="grid gap-3">
+        {rows.map(([title, date, image, reactions, comments, href]) => (
+          <Link href={href} key={title} className="grid grid-cols-[92px_1fr] gap-3 border-b border-border/45 pb-3 last:border-b-0">
+            <img src={image} alt="" className="h-14 w-[92px] object-cover" />
+            <span className="min-w-0">
+              <span className="line-clamp-2 font-mono text-xs font-bold text-foreground">{title}</span>
+              <span className="mt-1 flex items-center gap-4 text-[11px] text-muted-foreground">{date}<span className="inline-flex items-center gap-1"><Flame className="size-3" />{reactions}</span><span className="inline-flex items-center gap-1"><MessageCircle className="size-3" />{comments}</span></span>
+            </span>
+          </Link>
+        ))}
+      </div>
+    </TechPanel>
+  );
+}
+
+function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
+  return (
+    <HudPanel className="p-4" accent="muted">
+      <h2 className="pm-micro mb-3 text-foreground">Quick Info</h2>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
+        <InfoField label="Developer" value="Independent Studio" />
+        <InfoField label="Status" value={labelStatus(game.status)} />
+        <InfoField label="Publisher" value="Self-Published" />
+        <InfoField label="Release" value={game.expectedReleaseText ?? 'Q4 2026'} />
+        <InfoField label="Engine" value="Unreal Engine 5" />
+        <InfoField label="Price" value={game.priceCents == null ? '$19.99 USD' : game.isFree ? 'Free' : `$${(game.priceCents / 100).toFixed(2)} USD`} />
+        <InfoField label="Genres" value={game.tags?.[0] ?? 'Tactical Stealth'} />
+        <InfoField label="Languages" value="EN, FR, DE, JP, ZH" />
+        <InfoField label="Modes" value="Single Player" />
+      </div>
+      <Link href="#details" className="mt-3 inline-flex items-center gap-3 text-sm text-cyan">View all details <ArrowRight className="size-4" /></Link>
+
+      <div className="mt-4 border-t border-border pt-3">
+        <h2 className="pm-micro mb-2 text-foreground">External Links</h2>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { label: 'Steam', href: '#', Icon: Store },
+            { label: 'Epic Games Store', href: '#', Icon: Store },
+            { label: 'Official Website', href: '#', Icon: Globe },
+            { label: 'Discord', href: '#', Icon: Radio },
+            { label: 'Press Kit', href: `/games/${slug}/press-kit`, Icon: Clipboard },
+            { label: 'Contact Studio', href: '/login', Icon: CircleDollarSign },
+          ].map(({ label, href, Icon }) => (
+            <Link key={label} href={href} className="clip-corner flex h-7 items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
+              <Icon className="size-3.5" /> {label}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </HudPanel>
+  );
+}
+
+function CommunityPanel() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <HudPanel className="p-4" accent="muted">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="pm-micro text-foreground">Community Discussion</h2>
+        <Link href="/login" className="pm-micro text-coral">View all <ArrowRight className="inline size-3" /></Link>
+      </div>
+      <div className="grid gap-2.5">
+        {communityComments.map(([name, time, body, hearts], index) => (
+          <div key={name} className="grid grid-cols-[32px_1fr_auto] gap-3">
+            <span className="grid size-7 place-items-center rounded-full bg-muted text-xs text-foreground">{name.slice(0, 1)}{index === 1 ? 'P' : ''}</span>
+            <span className="min-w-0 text-[11px] text-muted-foreground">
+              <span className="font-mono font-bold text-foreground">{name}</span> <span className="ml-2">{time}</span>
+              <span className="block leading-5">{body}</span>
+            </span>
+            <span className="flex items-start gap-4 text-xs text-muted-foreground"><Heart className="size-3.5" />{hearts}<span>Reply</span></span>
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          if (!isAuthenticated) router.push('/login');
+        }}
+        className="mt-3 flex h-8 w-full items-center justify-between border border-border bg-background/55 px-4 text-sm text-muted-foreground"
+      >
+        {isAuthenticated ? 'Join the conversation...' : 'Sign in to join the conversation'} <Send className="size-4 text-cyan" />
+      </button>
+    </HudPanel>
+  );
+}
+
+function TechPanel({
+  title,
+  action,
+  children,
+  className,
+  id,
+}: {
+  title: string;
+  action?: string;
+  children: React.ReactNode;
+  className?: string;
+  id?: string;
+}) {
+  return (
+    <HudPanel id={id} className={`p-4 ${className ?? ''}`} accent="muted">
+      <div className="mb-3 flex items-center justify-between gap-4">
+        <h2 className="pm-micro text-foreground">{title}</h2>
+        {action && <button type="button" className="pm-micro text-coral">{action} <ArrowRight className="inline size-3" /></button>}
+      </div>
+      {children}
+    </HudPanel>
+  );
+}
+
+function InfoField({ label, value }: { label: string; value: string }) {
+  return (
+    <>
+      <span className="pm-micro text-muted-foreground">{label}</span>
+      <span className="text-muted-foreground">{value}</span>
+    </>
+  );
+}
+
+function HeroStat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
+  return (
+    <div className="flex min-h-[66px] items-center gap-[14px] border-r border-border/60 px-7 last:border-r-0 sm:px-8">
+      <span className="grid size-8 shrink-0 place-items-center text-foreground">{icon}</span>
+      <span className="pt-[2px]">
+        <span className="block font-mono text-[1.25rem] font-bold leading-none tracking-[0.03em] text-foreground">{value}</span>
+        <span className="block pt-[5px] font-mono text-[0.52rem] font-bold uppercase leading-none tracking-[0.22em] text-[#8d969b]">{label}</span>
+      </span>
+    </div>
+  );
+}
+
+function ActivityIcon() {
+  return (
+    <svg viewBox="0 0 42 32" className="size-[30px] text-cyan" aria-hidden="true">
+      <path
+        d="M3 18h7l3-8 5 17 6-24 5 19 3-8h7"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.2"
+      />
+    </svg>
+  );
+}
+
+function labelStatus(status: string) {
+  return status.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function formatFollowers(count: number) {
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+  return String(count);
+}
+
+function getRoadmapVisualState(status: string) {
+  const normalized = status.toUpperCase();
+  if (['DONE', 'COMPLETED', 'COMPLETE', 'SHIPPED', 'RELEASED'].includes(normalized)) return 'done';
+  if (['IN_PROGRESS', 'IN PROGRESS', 'ACTIVE', 'BETA', 'ALPHA'].includes(normalized)) return 'active';
+  return 'locked';
+}
+
+function getDemoHref(game: Game) {
+  const demoGame = game as GameWithDemoSettings;
+  if (demoGame.demoAvailable === false) return null;
+
+  const directDemoUrl = demoGame.demoUrl ?? demoGame.playDemoUrl ?? demoGame.playtestUrl;
+  if (directDemoUrl) return directDemoUrl;
+
+  const platformDemo = game.platformLinks?.find((link) => {
+    const searchable = `${link.platform} ${link.label ?? ''} ${link.url}`.toLowerCase();
+    return searchable.includes('demo') || searchable.includes('playtest');
+  });
+
+  return platformDemo?.url ?? null;
 }
