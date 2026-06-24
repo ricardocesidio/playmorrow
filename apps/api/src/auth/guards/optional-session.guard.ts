@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { SessionService } from '../../session/session.service';
 
-const SESSION_COOKIE = '__Host-playmorrow_session';
+const SESSION_COOKIE = 'playmorrow_session';
 
 @Injectable()
 export class OptionalSessionGuard implements CanActivate {

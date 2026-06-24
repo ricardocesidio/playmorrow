@@ -26,7 +26,7 @@ import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { NotificationsService } from './notifications.service';
 import { SessionService } from '../session/session.service';
 
-const SESSION_COOKIE = '__Host-playmorrow_session';
+const SESSION_COOKIE = 'playmorrow_session';
 
 @ApiTags('notifications')
 @Controller()

@@ -14,7 +14,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { AuthService } from './auth.service';
 import { SessionService } from '../session/session.service';
 
-const SESSION_COOKIE = '__Host-playmorrow_session';
+const SESSION_COOKIE = 'playmorrow_session';
 
 function setSessionCookie(res: Response, raw: string, expiresAt: Date) {
   res.cookie(SESSION_COOKIE, raw, {
