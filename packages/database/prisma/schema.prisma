@@ -136,6 +136,7 @@ model User {
   role         UserRole @default(PLAYER)
   avatarUrl    String?
   bio          String?
+  location     String?
   isVerified   Boolean  @default(false)
   accountType                 AccountType @default(PLAYER)
   termsAcceptedAt             DateTime?
@@ -147,6 +148,7 @@ model User {
   privacyVersion              String?
   communityGuidelinesVersion  String?
   emailVerifiedAt             DateTime?
+  emailChangeCount            Int       @default(0)
   createdAt                   DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -241,6 +243,7 @@ model Game {
   coverUrl            String?
   bannerUrl           String?
   readme              String?
+  trailerUrl          String?
   demoStatus          String?    @default("NO_DEMO")
   demoUrl             String?
   edition             String?
@@ -267,6 +270,7 @@ model Game {
   tags          GameTag[]
   followers     Follow[]
   wishlistItems WishlistItem[]
+  views         GameView[]
 
   @@index([studioId])
   @@index([status])
@@ -638,4 +642,15 @@ model WishlistItem {
   @@index([userId, createdAt])
   @@index([gameId])
   @@map("wishlist_items")
+}
+
+model GameView {
+  id        String   @id @default(cuid())
+  gameId    String
+  createdAt DateTime @default(now())
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId, createdAt])
+  @@map("game_views")
 }

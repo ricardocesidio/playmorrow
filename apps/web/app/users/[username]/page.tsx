@@ -2,15 +2,19 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Building2, Calendar, Heart, ShieldCheck, User, Users } from 'lucide-react';
+import { Building2, Calendar, Heart, Settings, ShieldCheck, User, Users } from 'lucide-react';
 
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
+import { useAuth } from '@/lib/api/auth-context';
 import { useUserProfile } from '@/lib/api/hooks';
 
 export default function UserProfilePage() {
   const { username } = useParams<{ username: string }>();
+  const { user: currentUser } = useAuth();
   const { data, isLoading, error } = useUserProfile(username);
+
+  const isOwnProfile = currentUser?.username === username;
 
   if (isLoading) {
     return (
@@ -65,6 +69,14 @@ export default function UserProfilePage() {
                 <Calendar className="size-3" />
                 Joined {new Date(data.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
               </span>
+              {isOwnProfile && (
+                <Link
+                  href="/settings/profile"
+                  className="inline-flex items-center gap-1 rounded bg-cyan/10 px-2 py-0.5 text-cyan transition-colors hover:bg-cyan/20"
+                >
+                  <Settings className="size-3" /> Edit profile
+                </Link>
+              )}
             </div>
           </div>
         </div>

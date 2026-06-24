@@ -179,6 +179,16 @@ export class GamesService {
       return null;
     }
 
+    // Track view (increment async, don't block response)
+    this.prisma.game.update({
+      where: { id: game.id },
+      data: { viewsCount: { increment: 1 } },
+    }).catch(() => {});
+
+    this.prisma.gameView.create({
+      data: { gameId: game.id },
+    }).catch(() => {});
+
     return this.toResponse(game);
   }
 
