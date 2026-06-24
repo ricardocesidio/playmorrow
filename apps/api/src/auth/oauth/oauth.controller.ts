@@ -8,7 +8,7 @@ import { OAuthService } from './oauth.service';
 import { SessionService } from '../../session/session.service';
 
 const FRONTEND_URL_KEY = 'WEB_ORIGIN';
-const SESSION_COOKIE = '__Host-playmorrow_session';
+const SESSION_COOKIE = 'playmorrow_session';
 
 @ApiTags('auth')
 @Controller('auth')
