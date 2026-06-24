@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyStudios, useMyGames, useMyDevlogs, useUnreadNotificationCount, useMyFollows, useMyWishlist } from '@/lib/api/hooks';
 import { Footer } from '@/components/footer';
+import { PlayerDashboard } from '@/components/dashboard/PlayerDashboard';
 
 function MyFollowsList({ token }: { token: string | null }) {
   const { data: follows, isLoading } = useMyFollows(token ?? undefined);
@@ -261,6 +262,12 @@ export default function DashboardPage() {
 
   if (!user) return null;
 
+  // PLAYER account sees PlayerDashboard
+  if (user.accountType === 'PLAYER') {
+    return <PlayerDashboard />;
+  }
+
+  // STUDIO account sees the existing StudioDashboard
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
