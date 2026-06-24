@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#0a0e12"/>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.06" stroke-width="0.6">
+    <polygon points="100,100 200,150 180,250 80,200"/>
+    <polygon points="150,80 260,120 240,230 130,190"/>
+    <polygon points="500,100 600,150 580,250 480,200"/>
+    <polygon points="550,80 660,120 640,230 530,190"/>
+  </g>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.04" stroke-width="0.5">
+    <polygon points="250,300 350,350 330,430 230,380"/>
+    <polygon points="300,280 400,330 380,410 280,360"/>
+    <polygon points="450,300 550,350 530,430 430,380"/>
+    <polygon points="500,280 600,330 580,410 480,360"/>
+  </g>
+  <g stroke="#f59e0b" stroke-opacity="0.03" stroke-width="0.4">
+    <line x1="0" y1="150" x2="800" y2="150"/>
+    <line x1="0" y1="300" x2="800" y2="300"/>
+  </g>
+  <g fill="#f59e0b" opacity="0.04">
+    <circle cx="200" cy="150" r="2"/>
+    <circle cx="600" cy="150" r="2"/>
+    <circle cx="350" cy="330" r="2"/>
+    <circle cx="500" cy="330" r="2"/>
+  </g>
+  <polygon points="680,350 760,350 720,300" fill="#f59e0b" opacity="0.03"/>
+  <polygon points="680,350 760,350 720,300" fill="none" stroke="#f59e0b" stroke-opacity="0.08" stroke-width="0.6"/>
+  <text x="40" y="430" font-family="serif" font-size="14" fill="#f59e0b" opacity="0.4">CRANE TEMPLE — ORIGAMI SANCTUARY</text>
+</svg>

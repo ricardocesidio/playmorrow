@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600">
+  <defs>
+    <radialGradient id="sf-h-nebula" cx="0.7" cy="0.3" r="0.6">
+      <stop offset="0%" stop-color="#4a6cf7" stop-opacity="0.2"/>
+      <stop offset="40%" stop-color="#8b5cf6" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#0a0e12" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sf-h-nebula2" cx="0.3" cy="0.7" r="0.5">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#0a0e12" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sf-h-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#05080c"/>
+      <stop offset="100%" stop-color="#0a0e12"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#sf-h-bg)"/>
+  <rect width="1200" height="600" fill="url(#sf-h-nebula)"/>
+  <rect width="1200" height="600" fill="url(#sf-h-nebula2)"/>
+  <g fill="white" opacity="0.9">
+    <circle cx="200" cy="100" r="1.5"/><circle cx="450" cy="50" r="1"/>
+    <circle cx="700" cy="80" r="2"/><circle cx="950" cy="120" r="1"/>
+    <circle cx="1100" cy="60" r="1.5"/><circle cx="150" cy="250" r="1"/>
+    <circle cx="350" cy="200" r="2"/><circle cx="550" cy="180" r="1"/>
+    <circle cx="800" cy="220" r="1.5"/><circle cx="1050" cy="170" r="1"/>
+    <circle cx="100" cy="400" r="1.5"/><circle cx="300" cy="450" r="1"/>
+    <circle cx="500" cy="380" r="2"/><circle cx="650" cy="420" r="1"/>
+    <circle cx="850" cy="480" r="1.5"/><circle cx="1000" cy="350" r="1"/>
+    <circle cx="1150" cy="500" r="1.5"/><circle cx="250" cy="550" r="1"/>
+    <circle cx="600" cy="520" r="2"/><circle cx="900" cy="560" r="1"/>
+    <circle cx="750" cy="300" r="1.5"/><circle cx="400" cy="320" r="1"/>
+    <circle cx="50" cy="150" r="1"/><circle cx="1150" cy="250" r="1"/>
+    <circle cx="680" cy="140" r="1"/><circle cx="320" cy="380" r="1.5"/>
+    <circle cx="520" cy="500" r="1"/><circle cx="80" cy="520" r="1"/>
+  </g>
+  <circle cx="700" cy="200" r="120" fill="none" stroke="#4a6cf7" stroke-opacity="0.08" stroke-width="1"/>
+  <circle cx="700" cy="200" r="80" fill="none" stroke="#8b5cf6" stroke-opacity="0.06" stroke-width="1"/>
+  <circle cx="700" cy="200" r="40" fill="none" stroke="#4a6cf7" stroke-opacity="0.1" stroke-width="0.5"/>
+  <ellipse cx="700" cy="200" rx="180" ry="60" fill="none" stroke="#4a6cf7" stroke-opacity="0.04" stroke-width="1" transform="rotate(-20,700,200)"/>
+  <ellipse cx="700" cy="200" rx="250" ry="80" fill="none" stroke="#8b5cf6" stroke-opacity="0.03" stroke-width="1" transform="rotate(-20,700,200)"/>
+  <g stroke="#4a6cf7" stroke-opacity="0.06" stroke-width="0.5" fill="none">
+    <line x1="0" y1="100" x2="1200" y2="100"/>
+    <line x1="0" y1="200" x2="1200" y2="200"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="0" y1="400" x2="1200" y2="400"/>
+    <line x1="0" y1="500" x2="1200" y2="500"/>
+  </g>
+  <text x="60" y="480" font-family="sans-serif" font-size="72" font-weight="bold" fill="#4a6cf7" opacity="0.9">STARFALL</text>
+  <text x="60" y="545" font-family="sans-serif" font-size="72" font-weight="bold" fill="#8b5cf6" opacity="0.9">TACTICS</text>
+  <text x="60" y="580" font-family="sans-serif" font-size="14" fill="#4a6cf7" opacity="0.5">SPACE STRATEGY CARD GAME</text>
+  <polygon points="1100,500 1150,520 1100,540 1050,520" fill="#4a6cf7" opacity="0.08"/>
+  <polygon points="1100,500 1150,520 1100,540" fill="none" stroke="#4a6cf7" stroke-opacity="0.2" stroke-width="1"/>
+  <circle cx="1100" cy="520" r="2" fill="#8b5cf6" opacity="0.5"/>
+</svg>

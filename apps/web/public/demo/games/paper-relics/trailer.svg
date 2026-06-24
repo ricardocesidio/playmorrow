@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#0a0e12"/>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.08" stroke-width="0.8">
+    <polygon points="400,50 500,150 400,250 300,150"/>
+    <polygon points="400,90 440,150 400,210 360,150"/>
+  </g>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.05" stroke-width="0.6">
+    <polygon points="150,120 250,220 150,320 50,220"/>
+    <polygon points="650,120 750,220 650,320 550,220"/>
+  </g>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.03" stroke-width="0.4">
+    <polygon points="250,200 320,270 250,340 180,270"/>
+    <polygon points="550,200 620,270 550,340 480,270"/>
+  </g>
+  <g stroke="#f59e0b" stroke-opacity="0.05" stroke-width="0.5">
+    <line x1="0" y1="75" x2="800" y2="75"/>
+    <line x1="0" y1="225" x2="800" y2="225"/>
+    <line x1="0" y1="375" x2="800" y2="375"/>
+  </g>
+  <polygon points="370,185 370,215 400,200" fill="#f59e0b" opacity="0.2"/>
+  <circle cx="400" cy="200" r="25" fill="none" stroke="white" stroke-opacity="0.1" stroke-width="1"/>
+  <text x="40" y="420" font-family="serif" font-size="42" font-weight="bold" fill="#f59e0b" opacity="0.85">PAPER RELIC</text>
+  <text x="40" y="440" font-family="serif" font-size="13" fill="#f59e0b" opacity="0.4">GAMEPLAY TRAILER</text>
+</svg>

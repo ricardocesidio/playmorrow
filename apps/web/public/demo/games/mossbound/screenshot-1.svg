@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#0a0e12"/>
+  <g fill="#22c55e" opacity="0.03">
+    <polygon points="0,450 100,300 200,450"/>
+    <polygon points="150,450 280,280 400,450"/>
+    <polygon points="350,450 500,310 650,450"/>
+    <polygon points="550,450 700,290 800,450"/>
+  </g>
+  <g fill="none" stroke="#22c55e" stroke-opacity="0.06" stroke-width="0.8">
+    <polygon points="0,450 100,300 200,450"/>
+    <polygon points="150,450 280,280 400,450"/>
+    <polygon points="350,450 500,310 650,450"/>
+    <polygon points="550,450 700,290 800,450"/>
+  </g>
+  <g fill="#22c55e" opacity="0.04">
+    <polygon points="50,450 160,340 280,450"/>
+    <polygon points="220,450 360,320 500,450"/>
+    <polygon points="420,450 560,340 700,450"/>
+    <polygon points="580,450 720,310 800,450"/>
+  </g>
+  <g fill="#eab308" opacity="0.06">
+    <circle cx="160" cy="280" r="2"/>
+    <circle cx="360" cy="310" r="2"/>
+    <circle cx="560" cy="290" r="2"/>
+    <circle cx="280" cy="320" r="1.5"/>
+    <circle cx="500" cy="340" r="1.5"/>
+  </g>
+  <g fill="none" stroke="#22c55e" stroke-opacity="0.08" stroke-width="0.5">
+    <circle cx="100" cy="200" r="10"/><circle cx="300" cy="180" r="8"/>
+    <circle cx="600" cy="210" r="12"/><circle cx="700" cy="170" r="10"/>
+  </g>
+  <path d="M0,380 Q100,360 200,370 Q300,380 400,365 Q500,350 600,370 Q700,390 800,370" fill="none" stroke="#22c55e" stroke-opacity="0.1" stroke-width="1"/>
+  <path d="M0,400 Q150,380 300,395 Q450,410 600,390 Q750,370 800,385" fill="none" stroke="#22c55e" stroke-opacity="0.06" stroke-width="0.8"/>
+  <text x="40" y="430" font-family="serif" font-size="14" fill="#22c55e" opacity="0.4">WHISPERING WOODS — CANOPY TRAIL</text>
+</svg>

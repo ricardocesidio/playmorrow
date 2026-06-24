@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="nws3-bg" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0e12"/>
+      <stop offset="100%" stop-color="#060a0f"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#nws3-bg)"/>
+  <g stroke="#3ee7ff" stroke-opacity="0.08" stroke-width="0.5">
+    <line x1="0" y1="75" x2="800" y2="75"/>
+    <line x1="0" y1="150" x2="800" y2="150"/>
+    <line x1="0" y1="225" x2="800" y2="225"/>
+    <line x1="0" y1="300" x2="800" y2="300"/>
+    <line x1="0" y1="375" x2="800" y2="375"/>
+  </g>
+  <g stroke="#3ee7ff" stroke-opacity="0.12" stroke-width="0.5">
+    <line x1="133" y1="0" x2="133" y2="450"/>
+    <line x1="266" y1="0" x2="266" y2="450"/>
+    <line x1="400" y1="0" x2="400" y2="450"/>
+    <line x1="533" y1="0" x2="533" y2="450"/>
+    <line x1="666" y1="0" x2="666" y2="450"/>
+  </g>
+  <g fill="none" stroke="#3ee7ff" stroke-opacity="0.3" stroke-width="1">
+    <circle cx="400" cy="180" r="60"/>
+    <circle cx="400" cy="180" r="40"/>
+    <circle cx="400" cy="180" r="20"/>
+    <circle cx="400" cy="180" r="5" fill="#3ee7ff" opacity="0.5"/>
+  </g>
+  <line x1="400" y1="180" x2="300" y2="270" stroke="#3ee7ff" stroke-opacity="0.2" stroke-width="1"/>
+  <line x1="400" y1="180" x2="520" y2="270" stroke="#3ee7ff" stroke-opacity="0.2" stroke-width="1"/>
+  <line x1="400" y1="180" x2="400" y2="100" stroke="#3ee7ff" stroke-opacity="0.2" stroke-width="1"/>
+  <circle cx="300" cy="270" r="4" fill="#ff574d" opacity="0.6"/>
+  <circle cx="520" cy="270" r="4" fill="#ff574d" opacity="0.6"/>
+  <circle cx="400" cy="100" r="4" fill="#ff574d" opacity="0.6"/>
+  <line x1="300" y1="270" x2="200" y2="350" stroke="#ff574d" stroke-opacity="0.2" stroke-width="0.5"/>
+  <line x1="520" y1="270" x2="620" y2="350" stroke="#ff574d" stroke-opacity="0.2" stroke-width="0.5"/>
+  <line x1="400" y1="100" x2="400" y2="40" stroke="#ff574d" stroke-opacity="0.2" stroke-width="0.5"/>
+  <circle cx="200" cy="350" r="2" fill="#ff574d" opacity="0.4"/>
+  <circle cx="620" cy="350" r="2" fill="#ff574d" opacity="0.4"/>
+  <circle cx="400" cy="40" r="2" fill="#ff574d" opacity="0.4"/>
+  <g fill="none" stroke="#ff574d" stroke-opacity="0.15" stroke-width="0.5">
+    <circle cx="300" cy="270" r="15"/>
+    <circle cx="520" cy="270" r="15"/>
+    <circle cx="400" cy="100" r="15"/>
+  </g>
+  <polygon points="580,380 680,380 630,330" fill="#3ee7ff" opacity="0.04"/>
+  <polygon points="580,380 680,380 630,330" fill="none" stroke="#3ee7ff" stroke-opacity="0.15" stroke-width="1"/>
+  <line x1="630" y1="330" x2="630" y2="310" stroke="#3ee7ff" stroke-opacity="0.2" stroke-width="1"/>
+  <text x="40" y="430" font-family="monospace" font-size="14" fill="#3ee7ff" opacity="0.4">NEON QUAD — ARENA SECTOR 7G</text>
+</svg>

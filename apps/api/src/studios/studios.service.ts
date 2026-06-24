@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { Prisma } from '@playmorrow/database';
+import { StudioRole } from '@playmorrow/database';
 
 import { assertStudioWriteAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
@@ -177,6 +178,26 @@ export class StudiosService {
         user: m.user,
       })),
     };
+  }
+
+  async isStudioMember(userId: string, studioSlug: string, allowedRoles?: StudioRole[]) {
+    const roles = allowedRoles ?? ['OWNER', 'ADMIN', 'MEMBER'];
+    const member = await this.prisma.studioMember.findFirst({
+      where: {
+        userId,
+        studio: { slug: studioSlug.toLowerCase() },
+        role: { in: roles },
+      },
+    });
+    return !!member;
+  }
+
+  async isStudioAdmin(userId: string, studioSlug: string) {
+    return this.isStudioMember(userId, studioSlug, ['OWNER', 'ADMIN']);
+  }
+
+  async isStudioOwner(userId: string, studioSlug: string) {
+    return this.isStudioMember(userId, studioSlug, ['OWNER']);
   }
 
   private toResponse(studio: {

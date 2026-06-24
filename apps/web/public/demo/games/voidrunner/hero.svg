@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600">
+  <defs>
+    <linearGradient id="vr-h-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#05080c"/>
+      <stop offset="100%" stop-color="#0a0e12"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#vr-h-bg)"/>
+  <g stroke="#a855f7" stroke-opacity="0.12" stroke-width="1.5">
+    <line x1="0" y1="0" x2="900" y2="600"/>
+    <line x1="0" y1="50" x2="950" y2="600"/>
+    <line x1="0" y1="100" x2="1000" y2="600"/>
+    <line x1="0" y1="150" x2="1050" y2="600"/>
+    <line x1="0" y1="200" x2="1100" y2="600"/>
+    <line x1="0" y1="250" x2="1150" y2="600"/>
+    <line x1="0" y1="300" x2="1200" y2="600"/>
+  </g>
+  <g stroke="#ff574d" stroke-opacity="0.08" stroke-width="1">
+    <line x1="0" y1="50" x2="850" y2="600"/>
+    <line x1="0" y1="150" x2="950" y2="600"/>
+    <line x1="0" y1="250" x2="1050" y2="600"/>
+    <line x1="0" y1="350" x2="1150" y2="600"/>
+  </g>
+  <g stroke="#a855f7" stroke-opacity="0.05" stroke-width="0.5">
+    <line x1="0" y1="100" x2="1200" y2="100"/>
+    <line x1="0" y1="200" x2="1200" y2="200"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="0" y1="400" x2="1200" y2="400"/>
+    <line x1="0" y1="500" x2="1200" y2="500"/>
+  </g>
+  <polygon points="600,150 650,200 600,250 550,200" fill="#a855f7" opacity="0.04"/>
+  <polygon points="600,150 650,200 600,250" fill="none" stroke="#a855f7" stroke-opacity="0.12" stroke-width="1"/>
+  <g fill="none" stroke="#a855f7" stroke-opacity="0.08" stroke-width="0.5">
+    <circle cx="800" cy="200" r="4"/>
+    <circle cx="820" cy="190" r="4"/>
+    <circle cx="840" cy="210" r="4"/>
+    <circle cx="860" cy="185" r="4"/>
+    <circle cx="880" cy="215" r="4"/>
+  </g>
+  <g fill="#ff574d" opacity="0.15">
+    <circle cx="800" cy="200" r="2"/>
+    <circle cx="820" cy="190" r="2"/>
+    <circle cx="840" cy="210" r="2"/>
+    <circle cx="860" cy="185" r="2"/>
+    <circle cx="880" cy="215" r="2"/>
+  </g>
+  <circle cx="1050" cy="150" r="60" fill="none" stroke="#a855f7" stroke-opacity="0.06" stroke-width="1"/>
+  <circle cx="1050" cy="150" r="40" fill="none" stroke="#ff574d" stroke-opacity="0.04" stroke-width="1"/>
+  <circle cx="1050" cy="150" r="20" fill="none" stroke="#a855f7" stroke-opacity="0.08" stroke-width="0.5"/>
+  <text x="60" y="480" font-family="sans-serif" font-size="72" font-weight="bold" fill="#a855f7" opacity="0.9">VOID</text>
+  <text x="60" y="545" font-family="sans-serif" font-size="72" font-weight="bold" fill="#ff574d" opacity="0.9">RUNNER</text>
+  <text x="60" y="580" font-family="sans-serif" font-size="14" fill="#a855f7" opacity="0.5">HIGH-SPEED VOID RACING</text>
+  <polygon points="1100,450 1160,480 1100,510 1040,480" fill="#ff574d" opacity="0.04"/>
+  <polygon points="1100,450 1160,480 1100,510" fill="none" stroke="#ff574d" stroke-opacity="0.1" stroke-width="0.8"/>
+  <line x1="1040" y1="480" x2="1040" y2="520" stroke="#ff574d" stroke-opacity="0.06" stroke-width="0.8"/>
+  <line x1="1160" y1="480" x2="1160" y2="520" stroke="#ff574d" stroke-opacity="0.06" stroke-width="0.8"/>
+</svg>

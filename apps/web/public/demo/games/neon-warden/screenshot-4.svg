@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="nws4-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#080c10"/>
+      <stop offset="100%" stop-color="#05080c"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#nws4-bg)"/>
+  <g stroke="#3ee7ff" stroke-opacity="0.15" stroke-width="1">
+    <line x1="50" y1="50" x2="50" y2="400"/>
+    <line x1="80" y1="50" x2="80" y2="400"/>
+    <line x1="110" y1="50" x2="110" y2="400"/>
+  </g>
+  <g stroke="#ff574d" stroke-opacity="0.15" stroke-width="1">
+    <line x1="140" y1="50" x2="140" y2="400"/>
+    <line x1="170" y1="50" x2="170" y2="400"/>
+    <line x1="200" y1="50" x2="200" y2="400"/>
+  </g>
+  <g fill="none" stroke="#3ee7ff" stroke-opacity="0.2" stroke-width="1">
+    <rect x="250" y="80" width="220" height="290" rx="4"/>
+    <rect x="260" y="90" width="200" height="130" rx="2"/>
+    <rect x="260" y="240" width="200" height="110" rx="2"/>
+  </g>
+  <g fill="#3ee7ff" opacity="0.08">
+    <rect x="260" y="90" width="200" height="4"/>
+    <rect x="260" y="240" width="200" height="4"/>
+  </g>
+  <g fill="#ff574d" opacity="0.6">
+    <circle cx="280" cy="120" r="3"/>
+    <circle cx="350" cy="150" r="3"/>
+    <circle cx="420" cy="130" r="3"/>
+    <circle cx="300" cy="200" r="3"/>
+    <circle cx="400" cy="190" r="3"/>
+  </g>
+  <line x1="280" y1="120" x2="350" y2="150" stroke="#ff574d" stroke-opacity="0.3" stroke-width="0.5"/>
+  <line x1="350" y1="150" x2="420" y2="130" stroke="#ff574d" stroke-opacity="0.3" stroke-width="0.5"/>
+  <line x1="300" y1="200" x2="400" y2="190" stroke="#ff574d" stroke-opacity="0.3" stroke-width="0.5"/>
+  <rect x="280" y="260" width="60" height="40" rx="2" fill="none" stroke="#3ee7ff" stroke-opacity="0.25" stroke-width="1"/>
+  <rect x="360" y="260" width="60" height="40" rx="2" fill="none" stroke="#3ee7ff" stroke-opacity="0.25" stroke-width="1"/>
+  <rect x="280" y="310" width="60" height="20" rx="2" fill="#3ee7ff" opacity="0.1"/>
+  <rect x="360" y="310" width="60" height="20" rx="2" fill="#ff574d" opacity="0.1"/>
+  <path d="M530,400 L530,200 L560,200 L560,400 Z" fill="#3ee7ff" opacity="0.06"/>
+  <path d="M570,400 L570,150 L600,150 L600,400 Z" fill="#ff574d" opacity="0.06"/>
+  <path d="M610,400 L610,250 L640,250 L640,400 Z" fill="#3ee7ff" opacity="0.06"/>
+  <g fill="#3ee7ff" opacity="0.3">
+    <rect x="532" y="200" width="4" height="4"/>
+    <rect x="572" y="150" width="4" height="4"/>
+    <rect x="612" y="250" width="4" height="4"/>
+  </g>
+  <text x="40" y="430" font-family="monospace" font-size="14" fill="#3ee7ff" opacity="0.4">HACK TERMINAL — SECURITY OVERRIDE</text>
+</svg>

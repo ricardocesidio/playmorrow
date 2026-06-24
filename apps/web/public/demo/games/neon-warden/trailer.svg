@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="nwt-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#05080c"/>
+      <stop offset="100%" stop-color="#0a0e12"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#nwt-bg)"/>
+  <g stroke="#3ee7ff" stroke-opacity="0.08" stroke-width="1">
+    <line x1="0" y1="0" x2="800" y2="450"/>
+    <line x1="100" y1="0" x2="800" y2="280"/>
+    <line x1="200" y1="0" x2="800" y2="180"/>
+    <line x1="0" y1="150" x2="500" y2="450"/>
+    <line x1="0" y1="300" x2="250" y2="450"/>
+  </g>
+  <rect x="0" y="0" width="800" height="4" fill="#3ee7ff" opacity="0.2"/>
+  <rect x="0" y="446" width="800" height="4" fill="#ff574d" opacity="0.2"/>
+  <g fill="none" stroke="#3ee7ff" stroke-opacity="0.15" stroke-width="1">
+    <polygon points="350,150 500,150 575,280 425,280"/>
+    <polygon points="380,180 470,180 515,260 425,260"/>
+  </g>
+  <circle cx="560" cy="215" r="80" fill="none" stroke="#ff574d" stroke-opacity="0.12" stroke-width="1"/>
+  <circle cx="560" cy="215" r="50" fill="none" stroke="#3ee7ff" stroke-opacity="0.1" stroke-width="1"/>
+  <g stroke="#3ee7ff" stroke-opacity="0.2" stroke-width="0.5">
+    <line x1="0" y1="50" x2="800" y2="50"/>
+    <line x1="0" y1="100" x2="800" y2="100"/>
+    <line x1="0" y1="150" x2="800" y2="150"/>
+    <line x1="0" y1="200" x2="800" y2="200"/>
+    <line x1="0" y1="250" x2="800" y2="250"/>
+    <line x1="0" y1="300" x2="800" y2="300"/>
+    <line x1="0" y1="350" x2="800" y2="350"/>
+    <line x1="0" y1="400" x2="800" y2="400"/>
+  </g>
+  <g fill="#3ee7ff" opacity="0.15">
+    <rect x="50" y="50" width="4" height="4"/>
+    <rect x="150" y="120" width="4" height="4"/>
+    <rect x="250" y="80" width="4" height="4"/>
+    <rect x="680" y="100" width="4" height="4"/>
+    <rect x="720" y="300" width="4" height="4"/>
+    <rect x="100" y="380" width="4" height="4"/>
+  </g>
+  <text x="40" y="400" font-family="monospace" font-size="48" font-weight="bold" fill="#3ee7ff" opacity="0.85">NEON WARDEN</text>
+  <text x="40" y="425" font-family="monospace" font-size="14" fill="#3ee7ff" opacity="0.4">OFFICIAL TRAILER</text>
+  <polygon points="370,200 370,230 395,215" fill="#ff574d" opacity="0.4"/>
+  <circle cx="560" cy="215" r="30" fill="none" stroke="#ff574d" stroke-opacity="0.2" stroke-width="2"/>
+  <rect x="0" y="0" width="800" height="450" fill="none" stroke="#3ee7ff" stroke-opacity="0.1" stroke-width="1"/>
+</svg>
