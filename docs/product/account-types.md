@@ -1,42 +1,52 @@
-# Account Types — Product Design
+# Account Types
 
-## Definition
+## PLAYER
 
-Account type (`accountType`) represents the user's registration intent.
+A normal user who discovers games, follows studios, wishlists games, comments, and reacts.
 
-| Type | Meaning |
-|---|---|
-| `PLAYER` | Follow games, comment, react, build feed |
-| `STUDIO` | Publish games, post devlogs, manage roadmaps, create press kits |
+**Can do:**
+- Browse games, studios, feed
+- Follow/unfollow games and studios
+- Wishlist/unwishlist games
+- Comment on game pages
+- Like/unlike community comments
+- Edit own profile
+- Receive notifications
 
-## Important: accountType is NOT authorization
+**Cannot do:**
+- Create games
+- Create/edit studios
+- Publish devlogs
+- Manage roadmaps
+- Access studio dashboard
+- Access admin dashboard
 
-A `STUDIO` account does NOT automatically get studio permissions. Permission
-to create/edit studio content still requires:
+## STUDIO
 
-- Authenticated user (session cookie)
-- Studio membership (`StudioMember` record)
-- Appropriate studio role (`OWNER` or `ADMIN`) for destructive operations
+An indie developer, studio, or company account that publishes games and content.
 
-This is enforced server-side via `assertStudioWriteAccess()` and service-layer
-ownership checks. Account type is never checked in permission logic.
+**Can do everything PLAYER can, plus:**
+- Create and manage a studio profile
+- Create games (requires OWNER/ADMIN studio membership)
+- Publish devlogs
+- Manage roadmaps
+- Create press kits
+- Manage game media and external links
 
-A `PLAYER` account can create a studio through the normal studio creation
-endpoint and become an `OWNER` of that studio.
+**Important:** Having `accountType: STUDIO` alone does NOT grant permissions to edit any studio or game. The user must be a `StudioMember` with `OWNER` or `ADMIN` role in that specific studio.
 
-## Where accountType is used
+## ADMIN (Role, not Account Type)
 
-- Registration flow — to customize onboarding copy
-- Dashboard — to personalize CTAs and suggestions
-- User profile — informational display
+ADMIN is a **global role**, not an account type. It's set on the `User.role` field.
 
-## Database
+**There is no way to register as ADMIN.**
+- Registration ignores any submitted `role` field
+- Only the configured owner email (`PLAYMORROW_OWNER_EMAIL`) can be promoted to ADMIN
+- Admin promotion is done via `pnpm admin:ensure`
 
-Stored in `User.accountType` with a default of `PLAYER`.
-Existing users get `PLAYER` automatically via the default.
+## Backend enforcement
 
-## Future account types
-
-If the product adds subscription plans, account type could inform default
-limits (e.g., `STUDIO` starts with higher devlog quota). However, limits
-should be enforced via a separate `subscriptionTier` field, not accountType.
+- `RolesGuard` checks `user.role` against required roles
+- `StudioMember` roles check `OWNER`/`ADMIN`/`MEMBER` via `StudiosService`
+- Game creation endpoints check studio membership + role
+- Registration DTO does NOT have a `role` field
