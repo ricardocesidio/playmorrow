@@ -244,6 +244,7 @@ model Game {
 
   studio        Studio         @relation(fields: [studioId], references: [id], onDelete: Cascade)
   media         GameMedia[]
+  comments      Comment[]
   devlogs       Devlog[]
   roadmapItems  RoadmapItem[]
   pressKit      PressKit?
@@ -379,7 +380,8 @@ model Follow {
 
 model Comment {
   id        String    @id @default(cuid())
-  devlogId  String
+  devlogId  String?
+  gameId    String?
   authorId  String
   body      String
   /// Self-relation for threaded replies.
@@ -388,13 +390,15 @@ model Comment {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  devlog    Devlog     @relation(fields: [devlogId], references: [id], onDelete: Cascade)
+  devlog    Devlog?    @relation(fields: [devlogId], references: [id], onDelete: Cascade)
+  game      Game?      @relation(fields: [gameId], references: [id], onDelete: Cascade)
   author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
   parent    Comment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   Comment[]  @relation("CommentReplies")
   reactions Reaction[]
 
   @@index([devlogId])
+  @@index([gameId])
   @@index([authorId])
   @@index([parentId])
   @@map("comments")

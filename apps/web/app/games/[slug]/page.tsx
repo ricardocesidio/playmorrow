@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -41,12 +41,16 @@ import { useAuth } from '@/lib/api/auth-context';
 import type { Devlog, Game, RoadmapItem } from '@/lib/api/client';
 import {
   useAddGameToWishlist,
+  useCreateGameComment,
   useFollowGame,
   useGame,
+  useGameComments,
   useGameDevlogs,
   useGameFollowStatus,
   useGameRoadmap,
   useGameWishlistStatus,
+  useReactToGameComment,
+  useRemoveGameCommentReaction,
   useRemoveGameFromWishlist,
   useUnfollowGame,
 } from '@/lib/api/hooks';
@@ -73,11 +77,32 @@ const fallbackDevlogs = [
   ['Designing the Neon Districts', 'Apr 21, 2025', '/playmorrow/starfall-tactics.png', 143, 18],
 ] as const;
 
-const communityComments = [
-  ['ShadowRunner', '2h ago', "The level of detail in this world is insane. Can't wait to play the demo!", 24],
-  ['GhostProtocol', '5h ago', 'The AI looks next level. Finally, a stealth game that respects your patience.', 16],
-  ['NeonSpectre', '7h ago', 'That rooftop infiltration in the trailer gave me chills.', 12],
-] as const;
+interface GameCommentItem {
+  id: string;
+  body: string | null;
+  parentId: string | null;
+  author: { id: string; username: string; displayName: string; avatarUrl: string | null };
+  createdAt: string;
+  updatedAt: string;
+  reactions?: { LIKE: number };
+  viewerReactions?: string[];
+}
+
+function timeAgo(dateStr: string): string {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const seconds = Math.floor((now - then) / 1000);
+  if (seconds < 60) return 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}mo ago`;
+  return `${Math.floor(months / 12)}y ago`;
+}
 
 type GameWithDemoSettings = Game & {
   demoAvailable?: boolean | null;
@@ -174,13 +199,13 @@ function PremiumGameDetail({
               <div className="grid items-stretch gap-4 lg:grid-cols-[0.82fr_1.08fr_0.82fr]">
                 <AboutPanel game={game} />
                 <RoadmapPanel roadmap={roadmap} />
-                <DevlogsPanel devlogs={devlogs} />
+                <DevlogsPanel devlogs={devlogs} slug={slug} />
               </div>
             </div>
 
             <aside className="grid gap-4">
               <InfoLinksPanel game={game} slug={slug} />
-              <CommunityPanel />
+              <CommunityPanel slug={slug} />
             </aside>
           </section>
         </div>
@@ -268,7 +293,7 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
       {hasDemo ? (
         <a
           href={demoHref}
-          className="clip-corner mt-3 flex h-10 items-center justify-center gap-4 border border-coral bg-coral px-5 pm-display text-xs text-coral-foreground shadow-[0_0_24px_rgb(255_87_77_/_0.24)] transition hover:bg-[#ff6a61]"
+          className="clip-corner mt-3 flex h-10 cursor-pointer items-center justify-center gap-4 border border-coral bg-coral px-5 pm-display text-xs text-coral-foreground shadow-[0_0_24px_rgb(255_87_77_/_0.24)] transition hover:bg-[#ff6a61]"
         >
           Play demo <Play className="ml-auto size-4 fill-current" />
         </a>
@@ -290,7 +315,7 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
       <p className="pm-micro mt-3 text-muted-foreground">Platforms</p>
       <div className="mt-2 grid grid-cols-3 gap-2">
         {(game.platformLinks?.length ? game.platformLinks.map((p) => p.platform) : ['PC', 'PS5', 'XBOX SERIES X|S']).slice(0, 3).map((platform) => (
-          <span key={platform} className="flex min-h-8 items-center justify-center gap-2 border border-border bg-background/65 px-2 font-mono text-[11px] uppercase text-foreground">
+          <span key={platform} className="flex min-h-8 cursor-pointer items-center justify-center gap-2 border border-border bg-background/65 px-2 font-mono text-[11px] uppercase text-foreground transition hover:border-cyan">
             {platform.includes('PC') ? <Monitor className="size-4 text-cyan" /> : <Gamepad2 className="size-4" />}
             {platform}
           </span>
@@ -324,7 +349,7 @@ function DetailFollowButton({ slug }: { slug: string }) {
       type="button"
       onClick={onClick}
       disabled={isLoading || follow.isPending || unfollow.isPending}
-      className="clip-corner ml-0 inline-flex h-9 min-w-24 items-center justify-center border border-cyan/60 bg-background/50 px-5 text-sm text-cyan transition hover:bg-cyan hover:text-cyan-foreground disabled:opacity-60 sm:ml-4"
+      className="clip-corner ml-0 inline-flex h-9 min-w-24 cursor-pointer items-center justify-center border border-cyan/60 bg-background/50 px-5 text-sm text-cyan transition hover:bg-cyan hover:text-cyan-foreground disabled:opacity-60 sm:ml-4"
     >
       {isFollowing ? 'Following' : 'Follow'}
     </button>
@@ -354,7 +379,7 @@ function DetailWishlistButton({ slug }: { slug: string }) {
         type="button"
         onClick={onClick}
         disabled={add.isPending || remove.isPending}
-        className="clip-corner inline-flex h-9 items-center justify-center gap-2 border border-border-bright/55 bg-background/55 pm-micro text-muted-foreground transition hover:border-coral hover:text-coral disabled:opacity-60"
+        className="clip-corner inline-flex h-9 cursor-pointer items-center justify-center gap-2 border border-border-bright/55 bg-background/55 pm-micro text-muted-foreground transition hover:border-coral hover:text-coral disabled:opacity-60"
       >
         <Plus className="size-3" /> {isWishlisted ? 'Wishlisted' : 'Add to wishlist'}
       </button>
@@ -364,30 +389,32 @@ function DetailWishlistButton({ slug }: { slug: string }) {
 }
 
 function ShareButtons({ title }: { title: string }) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<'link' | 'discord' | null>(null);
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedTitle = encodeURIComponent(title);
 
-  const copyLink = async () => {
+  const copyLink = async (type: 'link' | 'discord') => {
     if (navigator?.clipboard && shareUrl) {
       await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
+      setCopied(type);
+      window.setTimeout(() => setCopied(null), 1600);
     }
   };
 
   return (
-      <div className="mt-3">
+    <div className="mt-3">
       <p className="pm-micro text-muted-foreground">Share</p>
       <div className="mt-2 grid grid-cols-5 justify-items-center gap-2">
-        <button type="button" onClick={copyLink} aria-label="Copy link" className="grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan">
-          {copied ? <Check className="size-4 text-success" /> : <LinkIcon className="size-4" />}
+        <button type="button" onClick={() => copyLink('link')} aria-label="Copy link" className="cursor-pointer grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan">
+          {copied === 'link' ? <Check className="size-4 text-success" /> : <LinkIcon className="size-4" />}
         </button>
-        <a aria-label="Share on X" href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`} target="_blank" rel="noopener noreferrer" className="grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan"><X className="size-4" /></a>
-        <a aria-label="Share on Facebook" href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer" className="grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan"><Facebook className="size-4" /></a>
-        <a aria-label="Share on Reddit" href={`https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`} target="_blank" rel="noopener noreferrer" className="grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan"><Disc3 className="size-4" /></a>
-        <button type="button" aria-label="Copy Discord share link" onClick={copyLink} className="grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan"><Share2 className="size-4" /></button>
+        <a aria-label="Share on X" href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`} target="_blank" rel="noopener noreferrer" className="cursor-pointer grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan"><X className="size-4" /></a>
+        <a aria-label="Share on Facebook" href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer" className="cursor-pointer grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan"><Facebook className="size-4" /></a>
+        <a aria-label="Share on Reddit" href={`https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`} target="_blank" rel="noopener noreferrer" className="cursor-pointer grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan"><Disc3 className="size-4" /></a>
+        <button type="button" aria-label="Copy Discord share link" onClick={() => copyLink('discord')} className="cursor-pointer grid size-8 place-items-center border border-border bg-background/55 text-muted-foreground hover:text-cyan">
+          {copied === 'discord' ? <Check className="size-4 text-success" /> : <Share2 className="size-4" />}
+        </button>
       </div>
     </div>
   );
@@ -436,7 +463,7 @@ function TrailerPanel({ title, image }: { title: string; image: string }) {
 function ScreenshotsPanel({
   screenshots,
   active,
-  onSelect,
+  onSelect: _onSelect,
   title,
 }: {
   screenshots: string[];
@@ -444,18 +471,83 @@ function ScreenshotsPanel({
   onSelect: (index: number) => void;
   title: string;
 }) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(active);
+
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => setLightboxOpen(false);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { closeLightbox(); return; }
+      if (e.key === 'ArrowRight') { setLightboxIndex((i) => (i + 1) % screenshots.length); }
+      if (e.key === 'ArrowLeft') { setLightboxIndex((i) => (i - 1 + screenshots.length) % screenshots.length); }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [lightboxOpen, screenshots.length]);
+
   return (
     <TechPanel title="Screenshots" action="View all (18)" className="min-h-[268px]">
       <div className="grid gap-2">
-        <img src={screenshots[active]} alt={`${title} screenshot`} className="h-[142px] w-full border border-border object-cover" />
+        <button type="button" onClick={() => openLightbox(active)} className="cursor-pointer">
+          <img src={screenshots[active]} alt={`${title} screenshot`} className="h-[142px] w-full border border-border object-cover" />
+        </button>
         <div className="grid grid-cols-4 gap-2">
           {screenshots.slice(1, 5).map((image, index) => (
-            <button key={image} type="button" onClick={() => onSelect(index + 1)} className="border border-border transition hover:border-cyan">
+            <button key={image} type="button" onClick={() => openLightbox(index + 1)} className="cursor-pointer border border-border transition hover:border-cyan">
               <img src={image} alt={`${title} thumbnail ${index + 1}`} className="h-14 w-full object-cover" />
             </button>
           ))}
         </div>
       </div>
+
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+          onClick={closeLightbox}
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i - 1 + screenshots.length) % screenshots.length); }}
+            className="absolute left-4 top-1/2 z-10 -translate-y-1/2 grid size-12 cursor-pointer place-items-center rounded-full border border-cyan/60 bg-background/60 text-cyan hover:bg-cyan hover:text-cyan-foreground"
+          >
+            <ArrowLeft className="size-6" />
+          </button>
+
+          <img
+            src={screenshots[lightboxIndex]}
+            alt={`${title} screenshot ${lightboxIndex + 1}`}
+            className="max-h-[85vh] max-w-[90vw] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i + 1) % screenshots.length); }}
+            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 grid size-12 cursor-pointer place-items-center rounded-full border border-cyan/60 bg-background/60 text-cyan hover:bg-cyan hover:text-cyan-foreground"
+          >
+            <ArrowRight className="size-6" />
+          </button>
+
+          <span className="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-sm text-foreground/80">
+            {lightboxIndex + 1} / {screenshots.length}
+          </span>
+
+          <button
+            type="button"
+            onClick={closeLightbox}
+            className="absolute right-4 top-4 grid size-10 cursor-pointer place-items-center rounded-full border border-border bg-background/60 text-foreground hover:text-coral"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+      )}
     </TechPanel>
   );
 }
@@ -544,16 +636,16 @@ function RoadmapNode({ state }: { state: string }) {
   );
 }
 
-function DevlogsPanel({ devlogs }: { devlogs: Devlog[] }) {
+function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
   const rows = devlogs.length
     ? devlogs.slice(0, 3).map((item) => [item.title, item.publishedAt ? new Date(item.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent', item.coverUrl ?? '/playmorrow/neon-warden.png', 184, 21, `/devlogs/${item.id}`] as const)
     : fallbackDevlogs.map((item) => [...item, '/devlogs/devlog-1'] as const);
 
   return (
-    <TechPanel title="Latest Devlogs" action="View all" className="h-full min-h-[284px] lg:h-[334px]">
+    <TechPanel title="Latest Devlogs" action="View all" actionHref={`/games/${slug}/devlogs`} className="h-full min-h-[284px] lg:h-[334px]">
       <div className="grid gap-3">
         {rows.map(([title, date, image, reactions, comments, href]) => (
-          <Link href={href} key={title} className="grid grid-cols-[92px_1fr] gap-3 border-b border-border/45 pb-3 last:border-b-0">
+          <Link href={href} key={title} className="grid cursor-pointer grid-cols-[92px_1fr] gap-3 border-b border-border/45 pb-3 last:border-b-0 transition hover:border-cyan">
             <img src={image} alt="" className="h-14 w-[92px] object-cover" />
             <span className="min-w-0">
               <span className="line-clamp-2 font-mono text-xs font-bold text-foreground">{title}</span>
@@ -594,7 +686,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
             { label: 'Press Kit', href: `/games/${slug}/press-kit`, Icon: Clipboard },
             { label: 'Contact Studio', href: '/login', Icon: CircleDollarSign },
           ].map(({ label, href, Icon }) => (
-            <Link key={label} href={href} className="clip-corner flex h-7 items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
+            <Link key={label} href={href} className="clip-corner flex h-7 cursor-pointer items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
               <Icon className="size-3.5" /> {label}
             </Link>
           ))}
@@ -604,37 +696,126 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
   );
 }
 
-function CommunityPanel() {
+function CommunityPanel({ slug }: { slug: string }) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const { data: commentsData, isLoading } = useGameComments(slug);
+  const createComment = useCreateGameComment(slug);
+  const reactToComment = useReactToGameComment();
+  const removeReaction = useRemoveGameCommentReaction();
+  const [newComment, setNewComment] = useState('');
+
+  const comments = (commentsData?.items ?? []) as GameCommentItem[];
+  const total = commentsData?.total ?? 0;
+
+  const handleSubmit = async () => {
+    if (!newComment.trim()) return;
+    await createComment.mutateAsync(newComment.trim());
+    setNewComment('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
+  const handleLike = (comment: GameCommentItem) => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    const hasLiked = comment.viewerReactions?.includes('LIKE') ?? false;
+    if (hasLiked) {
+      removeReaction.mutate({ commentId: comment.id, type: 'LIKE' });
+    } else {
+      reactToComment.mutate({ commentId: comment.id, type: 'LIKE' });
+    }
+  };
 
   return (
     <HudPanel className="p-4" accent="muted">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="pm-micro text-foreground">Community Discussion</h2>
-        <Link href="/login" className="pm-micro text-coral">View all <ArrowRight className="inline size-3" /></Link>
+        {total > 0 && (
+          <Link href={`/games/${slug}/comments`} className="pm-micro text-coral">View all <ArrowRight className="inline size-3" /></Link>
+        )}
       </div>
-      <div className="grid gap-2.5">
-        {communityComments.map(([name, time, body, hearts], index) => (
-          <div key={name} className="grid grid-cols-[32px_1fr_auto] gap-3">
-            <span className="grid size-7 place-items-center rounded-full bg-muted text-xs text-foreground">{name.slice(0, 1)}{index === 1 ? 'P' : ''}</span>
-            <span className="min-w-0 text-[11px] text-muted-foreground">
-              <span className="font-mono font-bold text-foreground">{name}</span> <span className="ml-2">{time}</span>
-              <span className="block leading-5">{body}</span>
-            </span>
-            <span className="flex items-start gap-4 text-xs text-muted-foreground"><Heart className="size-3.5" />{hearts}<span>Reply</span></span>
-          </div>
-        ))}
-      </div>
-      <button
-        type="button"
-        onClick={() => {
-          if (!isAuthenticated) router.push('/login');
-        }}
-        className="mt-3 flex h-8 w-full items-center justify-between border border-border bg-background/55 px-4 text-sm text-muted-foreground"
-      >
-        {isAuthenticated ? 'Join the conversation...' : 'Sign in to join the conversation'} <Send className="size-4 text-cyan" />
-      </button>
+      {isLoading ? (
+        <div className="grid gap-2.5">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex animate-pulse gap-3">
+              <div className="size-7 rounded-full bg-muted" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3 w-24 rounded bg-muted" />
+                <div className="h-8 w-full rounded bg-muted" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : comments.length === 0 ? (
+        <p className="py-4 text-center text-xs text-muted-foreground">
+          No comments yet. Be the first to join the conversation.
+        </p>
+      ) : (
+        <div className="grid gap-2.5">
+          {comments.map((comment) => (
+            <div key={comment.id} className="grid grid-cols-[32px_1fr_auto] gap-3">
+              {comment.author.avatarUrl ? (
+                <img src={comment.author.avatarUrl} alt="" className="size-7 rounded-full object-cover" />
+              ) : (
+                <span className="grid size-7 place-items-center rounded-full bg-muted text-xs text-foreground">
+                  {comment.author.displayName.slice(0, 1)}
+                </span>
+              )}
+              <span className="min-w-0 text-[11px] text-muted-foreground">
+                <span className="font-mono font-bold text-foreground">{comment.author.displayName}</span>{' '}
+                <span className="ml-2">{timeAgo(comment.createdAt)}</span>
+                <span className="block leading-5">{comment.body}</span>
+              </span>
+              <span className="flex items-start gap-4 text-xs text-muted-foreground">
+                <button
+                  type="button"
+                  onClick={() => handleLike(comment)}
+                  className="inline-flex cursor-pointer items-center gap-1 hover:text-coral"
+                >
+                  <Heart className="size-3.5" />
+                  {comment.reactions?.LIKE ?? 0}
+                </button>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      {isAuthenticated ? (
+        <div className="mt-3 flex h-8 w-full items-center border border-border bg-background/55">
+          <input
+            type="text"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Join the conversation..."
+            className="h-full flex-1 bg-transparent px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          />
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!newComment.trim() || createComment.isPending}
+            className="grid size-8 cursor-pointer place-items-center text-cyan hover:text-cyan/80 disabled:opacity-40"
+          >
+            <Send className="size-4" />
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => router.push('/login')}
+          className="mt-3 flex h-8 w-full cursor-pointer items-center justify-between border border-border bg-background/55 px-4 text-sm text-muted-foreground"
+        >
+          Sign in to join the conversation <Send className="size-4 text-cyan" />
+        </button>
+      )}
     </HudPanel>
   );
 }
@@ -642,12 +823,14 @@ function CommunityPanel() {
 function TechPanel({
   title,
   action,
+  actionHref,
   children,
   className,
   id,
 }: {
   title: string;
   action?: string;
+  actionHref?: string;
   children: React.ReactNode;
   className?: string;
   id?: string;
@@ -656,7 +839,13 @@ function TechPanel({
     <HudPanel id={id} className={`p-4 ${className ?? ''}`} accent="muted">
       <div className="mb-3 flex items-center justify-between gap-4">
         <h2 className="pm-micro text-foreground">{title}</h2>
-        {action && <button type="button" className="pm-micro text-coral">{action} <ArrowRight className="inline size-3" /></button>}
+        {action && (
+          actionHref ? (
+            <Link href={actionHref} className="pm-micro cursor-pointer text-coral">{action} <ArrowRight className="inline size-3" /></Link>
+          ) : (
+            <button type="button" className="pm-micro cursor-pointer text-coral">{action} <ArrowRight className="inline size-3" /></button>
+          )
+        )}
       </div>
       {children}
     </HudPanel>
