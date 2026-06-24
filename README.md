@@ -33,6 +33,9 @@ and be part of the development journey before the game ships.
 - **Press kits** — structured fact sheets with media assets for journalists and publishers
 - **Image uploads** — cover art, banners, screenshots, and logos served via the API
 - **Real-time notifications** — followers are notified of new devlogs, roadmap updates, and replies via SSE
+- **Notification dropdown** — cyberpunk/HUD-styled dropdown in header with recent notifications + view all link
+- **Email verification** — 6-digit code verification via Resend; login blocked until email is verified
+- **Consent-based registration** — required terms/privacy/community guidelines acceptance with timestamps
 - **Private wishlist** — save games you're interested in (only you can see your list)
 
 ## Tech stack
@@ -42,7 +45,7 @@ and be part of the development journey before the game ships.
 | Frontend | Next.js 15 (React 19, TypeScript, Tailwind CSS v4) |
 | Backend | NestJS 11 (TypeScript, class-validator, Passport) |
 | ORM / DB | Prisma 6 + PostgreSQL 16 (Neon serverless in production) |
-| Auth | Opaque session cookies (SHA-256 hashed, httpOnly, SameSite=Lax) + JWT (legacy) |
+| Auth | Opaque session cookies (SHA-256 hashed, httpOnly, SameSite=None, Secure) + consent-based registration + email verification (6-digit code via Resend) |
 | API | RESTful, auto-documented via Swagger/OpenAPI at `/docs` |
 | Data fetching | TanStack Query v5 (React Query) |
 | State | Server state via React Query; auth via React context + session cookies |
@@ -92,7 +95,9 @@ The interface uses an **obsidian-black** background with **graphite** elevated s
 | Create account | `/register` | Player or Studio account type selection |
 | Forgot password | `/forgot-password` | Request password reset email |
 | Reset password | `/reset-password` | Set new password with reset token |
-| Verify email | `/verify-email` | Email verification after registration |
+| Verify email | `/verify-email` | Enter 6-digit code sent to email; redirects based on account type |
+| Forgot password | `/forgot-password` | Request password reset email |
+| Reset password | `/reset-password` | Set new password with reset token |
 | OAuth callback | `/oauth/callback` | Handles Google/GitHub OAuth redirects |
 
 ### Authenticated pages (dashboard)
@@ -114,6 +119,14 @@ The interface uses an **obsidian-black** background with **graphite** elevated s
 | Profile edit | `/dashboard/profile` |
 | Account deletion | `/dashboard/delete-account` |
 
+### Legal pages (draft — pending legal review)
+
+| Page | Route |
+|---|---|
+| Terms of Service | `/terms` |
+| Privacy Policy | `/privacy` |
+| Community Guidelines | `/community-guidelines` |
+
 ### Community features
 
 - Follow/unfollow studios and games
@@ -134,6 +147,39 @@ The interface uses an **obsidian-black** background with **graphite** elevated s
 | **Studio / Indie Creator** | Indie devs, studios, publishers | Create studio profile, publish games, devlogs, roadmaps, press kits |
 
 Account type is **onboarding intent only** — it does not grant permissions. All authorization is enforced server-side via studio membership roles. A Player can create a studio and become an Owner.
+
+## Registration & email verification
+
+### Consent requirements
+
+| Consent | Required? |
+|---|---|
+| Terms of Service | Yes |
+| Privacy Policy | Yes |
+| Community Guidelines | Yes |
+| Marketing opt-in (news, updates) | No (unchecked) |
+| Partner marketing opt-in | No (unchecked, not yet implemented) |
+
+All consents are stored with timestamps and version strings. Registration fails if required terms are not accepted (`acceptedTerms: true`).
+
+### Email verification flow
+
+1. User submits registration with account type, required consent, and credentials
+2. Backend creates user with `emailVerifiedAt = null` and sends 6-digit code via Resend
+3. Frontend redirects to `/verify-email?email=...`
+4. User enters the 6-digit code (SHA-256 hashed, 15 min expiry, single-use)
+5. Backend verifies code, sets `emailVerifiedAt`, creates session
+6. Player → redirected to `/dashboard`; Studio → redirected to `/studios/new?from=register`
+
+### Login behavior
+
+- Unverified accounts receive `EMAIL_NOT_VERIFIED` (403) and are redirected to `/verify-email`
+- Same generic response for wrong credentials — no email enumeration
+- `SameSite=None` cookie allows cross-origin auth between frontend (Vercel) and API (Render)
+
+### Development email
+
+When `RESEND_API_KEY` is not set in development, verification codes are logged to the console. Never logged in production.
 
 ## Data model
 
@@ -272,7 +318,7 @@ Tests use **mocked API** (Playwright route interception) — no database or back
 
 - **Backend**: NestJS module-per-domain. Controllers are thin; services hold business logic. DTOs use `class-validator` decorators. Module imports are explicit (AuthModule/SessionModule for guards). SessionModule is global for SessionService DI.
 - **Frontend**: Next.js 15 App Router with React 19. TanStack Query hooks are centralized in `lib/api/hooks.ts` (50+ hooks). The typed fetch wrapper is `lib/api/client.ts`. Auth state lives in `lib/api/auth-context.tsx` (session-cookie-based).
-- **Auth flow**: Opaque session cookies (SHA-256 hashed tokens, httpOnly/Secure/SameSite=Lax). Login creates a session record and sets the cookie. SessionAuthGuard resolves the session and injects the user. No JWTs in localStorage.
+- **Auth flow**: Opaque session cookies (SHA-256 hashed tokens, httpOnly/Secure/SameSite=None). Login creates a session record and sets the cookie. SessionAuthGuard resolves the session and injects the user. No JWTs in localStorage. Registration requires terms/privacy/community guidelines acceptance. Email verification via 6-digit code (Resend) before account is active.
 - **Email verification**: Users register with `isVerified: false`. A VerificationToken is created. The verify-email endpoint marks the user as verified.
 - **Password reset**: Forgot-password creates a time-limited PasswordResetToken. Reset-password consumes it and revokes all sessions.
 - **Account lockout**: 5 consecutive failed login attempts on an email locks the account for 15 minutes.
@@ -314,6 +360,9 @@ Tests use **mocked API** (Playwright route interception) — no database or back
   - `WEB_ORIGIN` — frontend URL (CORS origin)
   - `NODE_ENV` — `production`
   - `UPLOADS_DIR` — `/var/data/uploads`
+  - `RESEND_API_KEY` — Resend API key for email verification
+  - `EMAIL_FROM` — sender address (e.g. `PlayMorrow <onboarding@resend.dev>`)
+  - `EMAIL_CODE_SECRET` — secret for HMAC code hashing
 
 ### Database (Neon)
 
