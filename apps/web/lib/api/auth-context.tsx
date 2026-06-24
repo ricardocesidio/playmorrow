@@ -8,8 +8,12 @@ export interface AuthUser {
   email: string;
   username: string;
   displayName: string;
+  avatarUrl?: string;
+  bio?: string;
+  location?: string;
   role: string;
   accountType: 'PLAYER' | 'STUDIO';
+  emailChangeCount?: number;
 }
 
 export interface RegisterResult {

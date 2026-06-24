@@ -6,6 +6,7 @@ import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -45,7 +46,7 @@ export class UsersController {
   @Patch('me')
   @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Profile updated.' })
-  async updateProfile(
+  async patchProfileSimple(
     @CurrentUser() user: { id: string },
     @Body() body: { displayName?: string; bio?: string; avatarUrl?: string },
   ) {
@@ -54,6 +55,12 @@ export class UsersController {
       data: { displayName: body.displayName, bio: body.bio, avatarUrl: body.avatarUrl },
     });
     return { id: updated.id, username: updated.username, displayName: updated.displayName, bio: updated.bio, avatarUrl: updated.avatarUrl, role: updated.role };
+  }
+
+  @Patch('me/profile')
+  @UseGuards(SessionAuthGuard)
+  async updateProfile(@CurrentUser() user: { id: string }, @Body() dto: UpdateProfileDto) {
+    return this.usersService.updateProfile(user.id, dto);
   }
 
   @Delete('me')
