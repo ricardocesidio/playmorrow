@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#0a0e12"/>
+  <g stroke="#a855f7" stroke-opacity="0.08" stroke-width="0.8">
+    <line x1="0" y1="0" x2="400" y2="450"/>
+    <line x1="0" y1="100" x2="500" y2="450"/>
+    <line x1="0" y1="200" x2="600" y2="450"/>
+    <line x1="0" y1="300" x2="700" y2="450"/>
+  </g>
+  <g stroke="#ff574d" stroke-opacity="0.05" stroke-width="0.6">
+    <line x1="0" y1="50" x2="350" y2="450"/>
+    <line x1="0" y1="150" x2="450" y2="450"/>
+    <line x1="0" y1="250" x2="550" y2="450"/>
+    <line x1="0" y1="350" x2="650" y2="450"/>
+  </g>
+  <g fill="none" stroke="#a855f7" stroke-opacity="0.1" stroke-width="0.8">
+    <polygon points="500,100 600,150 550,250 450,200"/>
+    <polygon points="520,120 580,155 550,220 490,185"/>
+  </g>
+  <g fill="none" stroke="#ff574d" stroke-opacity="0.06" stroke-width="0.6">
+    <polygon points="200,100 300,150 250,250 150,200"/>
+    <polygon points="220,120 280,155 250,220 190,185"/>
+  </g>
+  <g fill="#a855f7" opacity="0.04">
+    <polygon points="500,100 600,150 550,250 450,200"/>
+    <polygon points="200,100 300,150 250,250 150,200"/>
+  </g>
+  <g stroke="#a855f7" stroke-opacity="0.05" stroke-width="0.5">
+    <line x1="0" y1="100" x2="800" y2="100"/>
+    <line x1="0" y1="200" x2="800" y2="200"/>
+    <line x1="0" y1="300" x2="800" y2="300"/>
+  </g>
+  <circle cx="680" cy="360" r="50" fill="none" stroke="#a855f7" stroke-opacity="0.06" stroke-width="0.8"/>
+  <circle cx="680" cy="360" r="30" fill="none" stroke="#ff574d" stroke-opacity="0.04" stroke-width="0.6"/>
+  <text x="40" y="430" font-family="sans-serif" font-size="14" fill="#a855f7" opacity="0.4">CORONA LOOP — BOOST ZONE ACTIVATION</text>
+</svg>

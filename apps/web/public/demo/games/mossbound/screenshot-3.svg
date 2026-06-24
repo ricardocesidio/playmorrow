@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#0a0e12"/>
+  <g fill="none" stroke="#22c55e" stroke-opacity="0.08" stroke-width="0.8">
+    <polygon points="0,380 80,250 160,380"/>
+    <polygon points="120,380 220,240 320,380"/>
+    <polygon points="260,380 380,260 500,380"/>
+    <polygon points="440,380 560,230 680,380"/>
+    <polygon points="600,380 720,250 800,380"/>
+  </g>
+  <path d="M0,380 Q200,350 400,360 Q600,370 800,355 L800,450 L0,450 Z" fill="#22c55e" opacity="0.02"/>
+  <path d="M0,395 Q200,375 400,385 Q600,395 800,380" fill="none" stroke="#22c55e" stroke-opacity="0.06" stroke-width="0.5"/>
+  <g fill="#eab308" opacity="0.05">
+    <circle cx="200" cy="200" r="2"/>
+    <circle cx="400" cy="180" r="2"/>
+    <circle cx="600" cy="210" r="2"/>
+    <circle cx="300" cy="230" r="1.5"/>
+    <circle cx="500" cy="190" r="1.5"/>
+  </g>
+  <g fill="none" stroke="#22c55e" stroke-opacity="0.07" stroke-width="0.5">
+    <rect x="80" y="100" width="40" height="60" rx="3"/>
+    <rect x="180" y="120" width="40" height="50" rx="3"/>
+    <rect x="520" y="100" width="40" height="65" rx="3"/>
+    <rect x="640" y="130" width="40" height="45" rx="3"/>
+  </g>
+  <path d="M300,450 Q330,380 360,450" fill="none" stroke="#22c55e" stroke-opacity="0.08" stroke-width="1"/>
+  <path d="M340,450 Q370,390 400,450" fill="none" stroke="#22c55e" stroke-opacity="0.08" stroke-width="1"/>
+  <path d="M380,450 Q410,400 440,450" fill="none" stroke="#22c55e" stroke-opacity="0.08" stroke-width="1"/>
+  <path d="M420,450 Q450,370 480,450" fill="none" stroke="#22c55e" stroke-opacity="0.08" stroke-width="1"/>
+  <text x="40" y="430" font-family="serif" font-size="14" fill="#22c55e" opacity="0.4">SUNKEN RUINS — ELDER ROOT TEMPLE</text>
+</svg>

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600">
+  <defs>
+    <linearGradient id="pr-h-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#080c0f"/>
+      <stop offset="100%" stop-color="#0a0e12"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#pr-h-bg)"/>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.08" stroke-width="1">
+    <polygon points="600,50 700,150 600,250 500,150"/>
+    <polygon points="600,100 650,150 600,200 550,150"/>
+  </g>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.06" stroke-width="0.8">
+    <polygon points="200,150 350,300 200,450 50,300"/>
+    <polygon points="1000,150 1150,300 1000,450 850,300"/>
+  </g>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.04" stroke-width="0.5">
+    <polygon points="300,200 400,300 300,400 200,300"/>
+    <polygon points="900,200 1000,300 900,400 800,300"/>
+  </g>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.03" stroke-width="0.5">
+    <polygon points="400,250 450,300 400,350 350,300"/>
+    <polygon points="800,250 850,300 800,350 750,300"/>
+  </g>
+  <g stroke="#f59e0b" stroke-opacity="0.04" stroke-width="0.5">
+    <line x1="0" y1="100" x2="1200" y2="100"/>
+    <line x1="0" y1="200" x2="1200" y2="200"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="0" y1="400" x2="1200" y2="400"/>
+    <line x1="0" y1="500" x2="1200" y2="500"/>
+  </g>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.04" stroke-width="0.5">
+    <line x1="300" y1="0" x2="300" y2="600"/>
+    <line x1="600" y1="0" x2="600" y2="600"/>
+    <line x1="900" y1="0" x2="900" y2="600"/>
+  </g>
+  <polygon points="1060,400 1140,400 1100,340" fill="#f59e0b" opacity="0.04"/>
+  <polygon points="1060,400 1140,400 1100,340" fill="none" stroke="#f59e0b" stroke-opacity="0.12" stroke-width="0.8"/>
+  <line x1="1100" y1="340" x2="1100" y2="300" stroke="#f59e0b" stroke-opacity="0.08" stroke-width="0.8"/>
+  <line x1="1060" y1="400" x2="1060" y2="420" stroke="#f59e0b" stroke-opacity="0.08" stroke-width="0.8"/>
+  <line x1="1140" y1="400" x2="1140" y2="420" stroke="#f59e0b" stroke-opacity="0.08" stroke-width="0.8"/>
+  <text x="60" y="480" font-family="serif" font-size="72" font-weight="bold" fill="#f59e0b" opacity="0.9">PAPER</text>
+  <text x="60" y="545" font-family="serif" font-size="72" font-weight="bold" fill="#f59e0b" opacity="0.9">RELIC</text>
+  <text x="60" y="580" font-family="serif" font-size="14" stroke="#f59e0b" stroke-opacity="0.5">ORIGAMI REALM ADVENTURE</text>
+  <circle cx="80" cy="80" r="2" fill="#f59e0b" opacity="0.3"/>
+  <circle cx="90" cy="75" r="1.5" fill="#f59e0b" opacity="0.2"/>
+  <circle cx="85" cy="90" r="1" fill="#f59e0b" opacity="0.15"/>
+</svg>

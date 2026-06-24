@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#0a0e12"/>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.07" stroke-width="0.8">
+    <polygon points="400,50 500,150 400,250 300,150"/>
+    <polygon points="400,80 460,150 400,220 340,150"/>
+  </g>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.05" stroke-width="0.6">
+    <polygon points="400,150 500,250 400,350 300,250"/>
+    <polygon points="400,180 450,250 400,320 350,250"/>
+  </g>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.04" stroke-width="0.5">
+    <polygon points="200,80 260,140 200,200 140,140"/>
+    <polygon points="600,80 660,140 600,200 540,140"/>
+    <polygon points="200,250 260,310 200,370 140,310"/>
+    <polygon points="600,250 660,310 600,370 540,310"/>
+  </g>
+  <g stroke="#f59e0b" stroke-opacity="0.04" stroke-width="0.5">
+    <line x1="0" y1="100" x2="800" y2="100"/>
+    <line x1="0" y1="200" x2="800" y2="200"/>
+    <line x1="0" y1="300" x2="800" y2="300"/>
+    <line x1="0" y1="400" x2="800" y2="400"/>
+    <line x1="200" y1="0" x2="200" y2="450"/>
+    <line x1="400" y1="0" x2="400" y2="450"/>
+    <line x1="600" y1="0" x2="600" y2="450"/>
+  </g>
+  <line x1="400" y1="50" x2="400" y2="250" stroke="#f59e0b" stroke-opacity="0.03" stroke-width="0.5"/>
+  <line x1="400" y1="150" x2="400" y2="350" stroke="#f59e0b" stroke-opacity="0.03" stroke-width="0.5"/>
+  <text x="40" y="430" font-family="serif" font-size="14" fill="#f59e0b" opacity="0.4">ORIGAMI GARDENS — GEOMETRIC PEACE</text>
+</svg>

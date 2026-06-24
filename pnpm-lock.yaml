@@ -14,6 +14,9 @@ importers:
       superpowers:
         specifier: github:obra/superpowers
         version: https://codeload.github.com/obra/superpowers/tar.gz/896224c4b1879920ab573417e68fd51d2ccc9072
+      tsx:
+        specifier: ^4.22.4
+        version: 4.22.4
       turbo:
         specifier: ^2.3.3
         version: 2.9.18
@@ -274,6 +277,9 @@ importers:
       '@prisma/client':
         specifier: ^6.2.1
         version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
+      argon2:
+        specifier: ^0.44.0
+        version: 0.44.0
     devDependencies:
       '@playmorrow/config':
         specifier: workspace:*

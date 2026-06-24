@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <radialGradient id="sf-s2-g" cx="0.5" cy="0.5" r="0.4">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#0a0e12" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="450" fill="#0a0e12"/>
+  <rect width="800" height="450" fill="url(#sf-s2-g)"/>
+  <g fill="white" opacity="0.5">
+    <circle cx="50" cy="50" r="1"/><circle cx="150" cy="80" r="1.5"/>
+    <circle cx="300" cy="30" r="1"/><circle cx="500" cy="60" r="2"/>
+    <circle cx="680" cy="40" r="1"/><circle cx="770" cy="90" r="1.5"/>
+    <circle cx="100" cy="200" r="1"/><circle cx="250" cy="180" r="1"/>
+    <circle cx="600" cy="250" r="1.5"/><circle cx="700" cy="350" r="1"/>
+    <circle cx="80" cy="400" r="1"/><circle cx="400" cy="420" r="1.5"/>
+    <circle cx="550" cy="380" r="1"/><circle cx="760" cy="410" r="1"/>
+  </g>
+  <ellipse cx="400" cy="220" rx="200" ry="70" fill="none" stroke="#4a6cf7" stroke-opacity="0.12" stroke-width="1.5" transform="rotate(-15,400,220)"/>
+  <ellipse cx="400" cy="220" rx="160" ry="50" fill="none" stroke="#8b5cf6" stroke-opacity="0.1" stroke-width="1.5" transform="rotate(-15,400,220)"/>
+  <ellipse cx="400" cy="220" rx="100" ry="30" fill="none" stroke="#4a6cf7" stroke-opacity="0.08" stroke-width="1" transform="rotate(-15,400,220)"/>
+  <circle cx="400" cy="220" r="20" fill="#4a6cf7" opacity="0.08"/>
+  <circle cx="400" cy="220" r="10" fill="#8b5cf6" opacity="0.1"/>
+  <g stroke="#4a6cf7" stroke-opacity="0.05" stroke-width="0.5">
+    <line x1="0" y1="110" x2="800" y2="110"/>
+    <line x1="0" y1="330" x2="800" y2="330"/>
+  </g>
+  <g fill="none" stroke="#4a6cf7" stroke-opacity="0.1" stroke-width="0.5">
+    <polygon points="600,130 660,170 630,210 570,170"/>
+    <polygon points="180,130 240,170 210,210 150,170"/>
+  </g>
+  <text x="40" y="430" font-family="sans-serif" font-size="14" fill="#4a6cf7" opacity="0.4">SPIRAL NEBULA — HYPERLANE CROSSING</text>
+</svg>

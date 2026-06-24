@@ -1,0 +1,10 @@
+-- AlterTable
+ALTER TABLE "games" ADD COLUMN     "commentsCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "featured" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "followersCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "viewsCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "wishlistsCount" INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "studios" ADD COLUMN     "followersCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "gamesCount" INTEGER NOT NULL DEFAULT 0;

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#0a0e12"/>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.08" stroke-width="0.8">
+    <polygon points="400,50 550,200 400,350 250,200"/>
+    <polygon points="400,100 480,200 400,300 320,200"/>
+    <polygon points="400,140 450,200 400,260 350,200"/>
+  </g>
+  <g fill="none" stroke="#f59e0b" stroke-opacity="0.05" stroke-width="0.5">
+    <polygon points="550,80 650,180 550,280 450,180"/>
+    <polygon points="250,80 350,180 250,280 150,180"/>
+  </g>
+  <g stroke="#f59e0b" stroke-opacity="0.03" stroke-width="0.4">
+    <line x1="0" y1="100" x2="800" y2="100"/>
+    <line x1="0" y1="200" x2="800" y2="200"/>
+    <line x1="0" y1="300" x2="800" y2="300"/>
+  </g>
+  <polygon points="100,380 180,380 140,330" fill="#f59e0b" opacity="0.03"/>
+  <polygon points="100,380 180,380 140,330" fill="none" stroke="#f59e0b" stroke-opacity="0.07" stroke-width="0.5"/>
+  <line x1="140" y1="330" x2="140" y2="300" stroke="#f59e0b" stroke-opacity="0.05" stroke-width="0.5"/>
+  <g fill="#f59e0b" opacity="0.04">
+    <circle cx="400" cy="260" r="2"/>
+    <circle cx="400" cy="300" r="1.5"/>
+    <circle cx="400" cy="140" r="2"/>
+    <circle cx="320" cy="200" r="1.5"/>
+    <circle cx="480" cy="200" r="1.5"/>
+  </g>
+  <text x="40" y="430" font-family="serif" font-size="14" fill="#f59e0b" opacity="0.4">SCROLL CHAMBER — UNFOLDING LEGACY</text>
+</svg>

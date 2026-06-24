@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#0a0e12"/>
+  <g fill="none" stroke="#22c55e" stroke-opacity="0.07" stroke-width="1">
+    <polygon points="0,350 100,200 200,350"/>
+    <polygon points="150,370 280,220 400,370"/>
+    <polygon points="350,390 500,240 650,390"/>
+    <polygon points="550,410 700,260 800,410"/>
+  </g>
+  <g fill="#22c55e" opacity="0.03">
+    <polygon points="0,350 100,200 200,350"/>
+    <polygon points="150,370 280,220 400,370"/>
+    <polygon points="350,390 500,240 650,390"/>
+    <polygon points="550,410 700,260 800,410"/>
+  </g>
+  <path d="M0,300 Q100,280 200,290 Q300,300 400,285 Q500,270 600,290 Q700,310 800,295" fill="none" stroke="#22c55e" stroke-opacity="0.08" stroke-width="0.8"/>
+  <circle cx="400" cy="160" r="20" fill="#eab308" opacity="0.06"/>
+  <circle cx="400" cy="160" r="12" fill="#eab308" opacity="0.04"/>
+  <g stroke="#22c55e" stroke-opacity="0.04" stroke-width="0.5">
+    <line x1="400" y1="160" x2="400" y2="200"/>
+    <line x1="400" y1="160" x2="370" y2="185"/>
+    <line x1="400" y1="160" x2="430" y2="185"/>
+    <line x1="400" y1="160" x2="355" y2="170"/>
+    <line x1="400" y1="160" x2="445" y2="170"/>
+  </g>
+  <g fill="#eab308" opacity="0.05">
+    <circle cx="100" cy="240" r="2"/>
+    <circle cx="300" cy="220" r="2"/>
+    <circle cx="600" cy="250" r="2"/>
+    <circle cx="700" cy="230" r="1.5"/>
+  </g>
+  <text x="40" y="430" font-family="serif" font-size="14" fill="#22c55e" opacity="0.4">ELDER'S VIEW — SACRED GLADE</text>
+</svg>

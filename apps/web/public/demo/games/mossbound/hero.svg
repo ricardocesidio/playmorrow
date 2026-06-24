@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600">
+  <defs>
+    <linearGradient id="mb-h-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#060d08"/>
+      <stop offset="100%" stop-color="#0a0e12"/>
+    </linearGradient>
+    <radialGradient id="mb-h-moon" cx="0.8" cy="0.15" r="0.2">
+      <stop offset="0%" stop-color="#eab308" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#0a0e12" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#mb-h-bg)"/>
+  <rect width="1200" height="600" fill="url(#mb-h-moon)"/>
+  <circle cx="900" cy="100" r="30" fill="#eab308" opacity="0.15"/>
+  <circle cx="900" cy="100" r="22" fill="#eab308" opacity="0.1"/>
+  <g fill="#22c55e" opacity="0.04">
+    <polygon points="0,400 200,280 400,400"/>
+    <polygon points="150,420 400,300 600,420"/>
+    <polygon points="350,430 600,320 800,430"/>
+    <polygon points="550,450 800,340 1000,450"/>
+    <polygon points="750,460 1000,350 1200,460"/>
+  </g>
+  <g fill="none" stroke="#22c55e" stroke-opacity="0.08" stroke-width="1">
+    <polygon points="0,400 200,280 400,400"/>
+    <polygon points="150,420 400,300 600,420"/>
+    <polygon points="350,430 600,320 800,430"/>
+    <polygon points="550,450 800,340 1000,450"/>
+    <polygon points="750,460 1000,350 1200,460"/>
+  </g>
+  <g fill="#22c55e" opacity="0.03">
+    <polygon points="100,500 300,380 500,500"/>
+    <polygon points="300,520 500,400 700,520"/>
+    <polygon points="500,540 700,420 900,540"/>
+    <polygon points="700,560 900,440 1100,560"/>
+  </g>
+  <g stroke="#22c55e" stroke-opacity="0.05" stroke-width="0.5">
+    <line x1="0" y1="100" x2="1200" y2="100"/>
+    <line x1="0" y1="200" x2="1200" y2="200"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/>
+  </g>
+  <g fill="#eab308" opacity="0.06">
+    <circle cx="200" cy="350" r="2"/>
+    <circle cx="400" cy="320" r="1.5"/>
+    <circle cx="600" cy="360" r="2"/>
+    <circle cx="800" cy="340" r="1.5"/>
+    <circle cx="1000" cy="370" r="2"/>
+  </g>
+  <text x="60" y="480" font-family="serif" font-size="72" font-weight="bold" fill="#22c55e" opacity="0.9">MOSS</text>
+  <text x="60" y="545" font-family="serif" font-size="72" font-weight="bold" fill="#eab308" opacity="0.9">BOUND</text>
+  <text x="60" y="580" font-family="serif" font-size="14" fill="#22c55e" opacity="0.5">ANCIENT FOREST ADVENTURE</text>
+  <polygon points="1080,480 1140,500 1080,520 1020,500" fill="#22c55e" opacity="0.05"/>
+  <polygon points="1080,480 1140,500 1080,520" fill="none" stroke="#22c55e" stroke-opacity="0.15" stroke-width="1"/>
+  <line x1="1080" y1="500" x2="1080" y2="560" stroke="#22c55e" stroke-opacity="0.1" stroke-width="1"/>
+  <line x1="1020" y1="500" x2="1020" y2="550" stroke="#22c55e" stroke-opacity="0.1" stroke-width="1"/>
+  <line x1="1140" y1="500" x2="1140" y2="550" stroke="#22c55e" stroke-opacity="0.1" stroke-width="1"/>
+</svg>

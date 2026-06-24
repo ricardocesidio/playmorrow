@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="nws1-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#060a0f"/>
+      <stop offset="100%" stop-color="#0a0e12"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#nws1-bg)"/>
+  <g stroke="#3ee7ff" stroke-opacity="0.2" stroke-width="0.5">
+    <line x1="0" y1="50" x2="800" y2="50"/>
+    <line x1="0" y1="100" x2="800" y2="100"/>
+    <line x1="0" y1="150" x2="800" y2="150"/>
+    <line x1="0" y1="200" x2="800" y2="200"/>
+    <line x1="0" y1="250" x2="800" y2="250"/>
+    <line x1="0" y1="300" x2="800" y2="300"/>
+    <line x1="0" y1="350" x2="800" y2="350"/>
+    <line x1="0" y1="400" x2="800" y2="400"/>
+  </g>
+  <g stroke="#3ee7ff" stroke-opacity="0.15" stroke-width="0.5">
+    <line x1="100" y1="0" x2="100" y2="450"/>
+    <line x1="200" y1="0" x2="200" y2="450"/>
+    <line x1="300" y1="0" x2="300" y2="450"/>
+    <line x1="400" y1="0" x2="400" y2="450"/>
+    <line x1="500" y1="0" x2="500" y2="450"/>
+    <line x1="600" y1="0" x2="600" y2="450"/>
+    <line x1="700" y1="0" x2="700" y2="450"/>
+  </g>
+  <g fill="none" stroke="#3ee7ff" stroke-opacity="0.25" stroke-width="1.5">
+    <rect x="150" y="100" width="80" height="80" rx="3"/>
+    <rect x="250" y="100" width="80" height="80" rx="3"/>
+    <rect x="350" y="100" width="80" height="80" rx="3"/>
+    <rect x="150" y="200" width="80" height="80" rx="3"/>
+    <rect x="250" y="200" width="80" height="80" rx="3"/>
+    <rect x="350" y="200" width="80" height="80" rx="3"/>
+    <rect x="150" y="300" width="80" height="80" rx="3"/>
+    <rect x="250" y="300" width="80" height="80" rx="3"/>
+    <rect x="350" y="300" width="80" height="80" rx="3"/>
+  </g>
+  <g fill="#ff574d" opacity="0.6">
+    <circle cx="190" cy="140" r="3"/>
+    <circle cx="290" cy="180" r="3"/>
+    <circle cx="390" cy="120" r="3"/>
+    <circle cx="230" cy="240" r="3"/>
+    <circle cx="330" cy="300" r="3"/>
+    <circle cx="170" cy="340" r="3"/>
+    <circle cx="350" cy="260" r="3"/>
+  </g>
+  <line x1="190" y1="140" x2="290" y2="180" stroke="#ff574d" stroke-opacity="0.3" stroke-width="0.5"/>
+  <line x1="290" y1="180" x2="390" y2="120" stroke="#ff574d" stroke-opacity="0.3" stroke-width="0.5"/>
+  <line x1="230" y1="240" x2="330" y2="300" stroke="#ff574d" stroke-opacity="0.3" stroke-width="0.5"/>
+  <line x1="170" y1="340" x2="350" y2="260" stroke="#ff574d" stroke-opacity="0.3" stroke-width="0.5"/>
+  <polygon points="550,150 650,100 700,250 600,300" fill="#3ee7ff" opacity="0.05"/>
+  <polygon points="550,150 650,100 700,250" fill="none" stroke="#3ee7ff" stroke-opacity="0.2" stroke-width="1"/>
+  <line x1="600" y1="300" x2="700" y2="250" stroke="#3ee7ff" stroke-opacity="0.2" stroke-width="1"/>
+  <rect x="500" y="320" width="200" height="80" fill="none" stroke="#ff574d" stroke-opacity="0.15" stroke-width="1"/>
+  <text x="40" y="430" font-family="monospace" font-size="14" fill="#3ee7ff" opacity="0.4">GRID ASSAULT — CITY CENTER</text>
+</svg>

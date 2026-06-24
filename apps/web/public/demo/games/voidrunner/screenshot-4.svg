@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#0a0e12"/>
+  <g stroke="#a855f7" stroke-opacity="0.06" stroke-width="0.6">
+    <line x1="0" y1="0" x2="300" y2="450"/>
+    <line x1="0" y1="150" x2="450" y2="450"/>
+    <line x1="0" y1="300" x2="600" y2="450"/>
+    <line x1="0" y1="450" x2="750" y2="450"/>
+  </g>
+  <g stroke="#ff574d" stroke-opacity="0.04" stroke-width="0.5">
+    <line x1="0" y1="75" x2="225" y2="450"/>
+    <line x1="0" y1="225" x2="375" y2="450"/>
+    <line x1="0" y1="375" x2="525" y2="450"/>
+  </g>
+  <g fill="none" stroke="#a855f7" stroke-opacity="0.08" stroke-width="0.8">
+    <rect x="100" y="100" width="100" height="60" rx="4"/>
+    <rect x="220" y="100" width="100" height="60" rx="4"/>
+    <rect x="340" y="100" width="100" height="60" rx="4"/>
+    <rect x="460" y="100" width="100" height="60" rx="4"/>
+  </g>
+  <g fill="#a855f7" opacity="0.04">
+    <rect x="100" y="100" width="100" height="60" rx="4"/>
+    <rect x="220" y="100" width="100" height="60" rx="4"/>
+    <rect x="340" y="100" width="100" height="60" rx="4"/>
+    <rect x="460" y="100" width="100" height="60" rx="4"/>
+  </g>
+  <g fill="#ff574d" opacity="0.06">
+    <rect x="120" y="110" width="60" height="8" rx="2"/>
+    <rect x="240" y="110" width="60" height="8" rx="2"/>
+    <rect x="360" y="110" width="60" height="8" rx="2"/>
+    <rect x="480" y="110" width="60" height="8" rx="2"/>
+  </g>
+  <g fill="#a855f7" opacity="0.03">
+    <rect x="120" y="130" width="40" height="6" rx="2"/>
+    <rect x="240" y="130" width="40" height="6" rx="2"/>
+    <rect x="360" y="130" width="40" height="6" rx="2"/>
+    <rect x="480" y="130" width="40" height="6" rx="2"/>
+  </g>
+  <g fill="none" stroke="#ff574d" stroke-opacity="0.05" stroke-width="0.5">
+    <rect x="100" y="260" width="100" height="60" rx="4"/>
+    <rect x="220" y="260" width="100" height="60" rx="4"/>
+    <rect x="340" y="260" width="100" height="60" rx="4"/>
+    <rect x="460" y="260" width="100" height="60" rx="4"/>
+  </g>
+  <text x="40" y="430" font-family="sans-serif" font-size="14" fill="#a855f7" opacity="0.4">DASHBOARD — VOID RUNNER MK-VI HUD</text>
+</svg>

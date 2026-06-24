@@ -190,9 +190,11 @@ model Studio {
   websiteUrl  String?
   location    String?
   foundedYear Int?
-  isVerified  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isVerified      Boolean  @default(false)
+  followersCount  Int      @default(0)
+  gamesCount      Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   members   StudioMember[]
   games     Game[]
@@ -239,6 +241,11 @@ model Game {
   coverUrl            String?
   bannerUrl           String?
   isPublished         Boolean    @default(false)
+  followersCount      Int        @default(0)
+  wishlistsCount      Int        @default(0)
+  commentsCount       Int        @default(0)
+  viewsCount          Int        @default(0)
+  featured            Boolean    @default(false)
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
 

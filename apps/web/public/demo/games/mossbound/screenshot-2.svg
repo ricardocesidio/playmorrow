@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <rect width="800" height="450" fill="#0a0e12"/>
+  <g fill="#22c55e" opacity="0.03">
+    <polygon points="0,450 120,330 240,450"/>
+    <polygon points="100,450 250,310 400,450"/>
+    <polygon points="300,450 470,340 640,450"/>
+    <polygon points="500,450 660,300 800,450"/>
+  </g>
+  <g fill="none" stroke="#22c55e" stroke-opacity="0.05" stroke-width="0.8">
+    <polygon points="0,450 120,330 240,450"/>
+    <polygon points="100,450 250,310 400,450"/>
+    <polygon points="300,450 470,340 640,450"/>
+    <polygon points="500,450 660,300 800,450"/>
+  </g>
+  <ellipse cx="400" cy="200" rx="120" ry="40" fill="none" stroke="#22c55e" stroke-opacity="0.08" stroke-width="1"/>
+  <ellipse cx="400" cy="200" rx="80" ry="25" fill="none" stroke="#eab308" stroke-opacity="0.06" stroke-width="0.8"/>
+  <ellipse cx="400" cy="200" rx="50" ry="15" fill="none" stroke="#22c55e" stroke-opacity="0.1" stroke-width="0.5"/>
+  <circle cx="400" cy="200" r="8" fill="#eab308" opacity="0.08"/>
+  <g fill="none" stroke="#22c55e" stroke-opacity="0.06" stroke-width="0.5">
+    <circle cx="100" cy="150" r="12"/>
+    <circle cx="250" cy="130" r="16"/>
+    <circle cx="550" cy="140" r="14"/>
+    <circle cx="700" cy="160" r="10"/>
+  </g>
+  <g fill="#eab308" opacity="0.04">
+    <circle cx="100" cy="150" r="3"/>
+    <circle cx="250" cy="130" r="3"/>
+    <circle cx="550" cy="140" r="3"/>
+    <circle cx="700" cy="160" r="3"/>
+  </g>
+  <g stroke="#22c55e" stroke-opacity="0.04" stroke-width="0.5">
+    <line x1="0" y1="100" x2="800" y2="100"/>
+    <line x1="0" y1="300" x2="800" y2="300"/>
+  </g>
+  <text x="40" y="430" font-family="serif" font-size="14" fill="#22c55e" opacity="0.4">MOSSGROT CAVERNS — UNDERGROWTH</text>
+</svg>
