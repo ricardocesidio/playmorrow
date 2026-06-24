@@ -240,6 +240,14 @@ model Game {
   isFree              Boolean    @default(false)
   coverUrl            String?
   bannerUrl           String?
+  readme              String?
+  demoStatus          String?    @default("NO_DEMO")
+  demoUrl             String?
+  edition             String?
+  engine              String?
+  languages           String?
+  genres              String?
+  modes               String?
   isPublished         Boolean    @default(false)
   followersCount      Int        @default(0)
   wishlistsCount      Int        @default(0)

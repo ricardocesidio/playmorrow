@@ -78,6 +78,14 @@ export interface Game {
   slug: string;
   tagline: string | null;
   description: string | null;
+  readme?: string | null;
+  demoStatus?: string | null;
+  demoUrl?: string | null;
+  edition?: string | null;
+  engine?: string | null;
+  languages?: string | null;
+  genres?: string | null;
+  modes?: string | null;
   status: string;
   releaseDate: string | null;
   expectedReleaseText: string | null;
@@ -229,6 +237,8 @@ export interface UserProfile {
   bio: string | null;
   role: string;
   isVerified: boolean;
+  followersCount: number;
+  followingCount: number;
   createdAt: string;
   studios: { id: string; name: string; slug: string; logoUrl: string | null; tagline: string | null; role: string }[];
 }

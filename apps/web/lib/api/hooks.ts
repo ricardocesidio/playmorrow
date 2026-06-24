@@ -701,6 +701,14 @@ export function useCreateGame() {
       slug: string;
       tagline?: string;
       description?: string;
+      readme?: string;
+      demoStatus?: string;
+      demoUrl?: string;
+      edition?: string;
+      engine?: string;
+      languages?: string;
+      genres?: string;
+      modes?: string;
       status?: string;
       releaseDate?: string;
       expectedReleaseText?: string;

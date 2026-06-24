@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Building2, Calendar, ShieldCheck, User } from 'lucide-react';
+import { Building2, Calendar, Heart, ShieldCheck, User, Users } from 'lucide-react';
 
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
@@ -65,6 +65,24 @@ export default function UserProfilePage() {
                 <Calendar className="size-3" />
                 Joined {new Date(data.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
               </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Follower stats */}
+        <div className="mt-6 grid grid-cols-2 gap-4">
+          <div className="flex items-center gap-3 rounded-lg border border-border bg-card/20 p-4">
+            <Heart className="size-5 text-coral" />
+            <div>
+              <p className="text-lg font-semibold text-foreground">{data.followersCount}</p>
+              <p className="text-xs text-muted-foreground">Followers</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 rounded-lg border border-border bg-card/20 p-4">
+            <Users className="size-5 text-cyan" />
+            <div>
+              <p className="text-lg font-semibold text-foreground">{data.followingCount}</p>
+              <p className="text-xs text-muted-foreground">Following</p>
             </div>
           </div>
         </div>
