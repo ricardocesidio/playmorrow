@@ -284,7 +284,10 @@ function createRealClient() {
     post: <T>(path: string, body?: unknown, _token?: string) => request<T>(path, { method: 'POST', body }),
     put: <T>(path: string, body?: unknown, _token?: string) => request<T>(path, { method: 'PUT', body }),
     patch: <T>(path: string, body?: unknown, _token?: string) => request<T>(path, { method: 'PATCH', body }),
-    delete: <T>(path: string, _token?: string) => request<T>(path, { method: 'DELETE' }),
+    delete: <T>(path: string, bodyOrToken?: unknown) => {
+      const body = bodyOrToken != null && typeof bodyOrToken === 'object' ? bodyOrToken : undefined;
+      return request<T>(path, { method: 'DELETE', body });
+    },
   };
 }
 

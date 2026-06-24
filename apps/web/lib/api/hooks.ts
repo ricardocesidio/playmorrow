@@ -856,3 +856,38 @@ export function useMyWishlist() {
     queryFn: () => api.get<WishlistResponse>('/me/wishlist'),
   });
 }
+
+// ── Game Comments ──────────────────────────────────────────────────────────
+
+export function useGameComments(slug: string) {
+  return useQuery({
+    queryKey: ['gameComments', slug],
+    queryFn: () => api.get<{ items: Comment[]; total: number }>(`/games/${slug}/comments`),
+  });
+}
+
+export function useCreateGameComment(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: string) => api.post(`/games/${slug}/comments`, { body }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['gameComments', slug] }),
+  });
+}
+
+export function useReactToGameComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ commentId, type }: { commentId: string; type: string }) =>
+      api.post(`/game-comments/${commentId}/reactions`, { type }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['gameComments'] }),
+  });
+}
+
+export function useRemoveGameCommentReaction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ commentId, type }: { commentId: string; type: string }) =>
+      api.delete(`/game-comments/${commentId}/reactions`, { type }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['gameComments'] }),
+  });
+}

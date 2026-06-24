@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateCommentDto } from './dto/create-comment.dto';
@@ -172,9 +172,11 @@ export class CommentsService {
     // Check authorization
     const isAuthor = comment.authorId === userId;
     const isGlobalAdmin = user.role === 'ADMIN';
-    const isStudioAdmin = comment.devlog.game.studio.members.some(
-      (m) => m.userId === userId && (m.role === 'OWNER' || m.role === 'ADMIN'),
-    );
+    const isStudioAdmin = comment.devlog
+      ? comment.devlog.game.studio.members.some(
+          (m) => m.userId === userId && (m.role === 'OWNER' || m.role === 'ADMIN'),
+        )
+      : false;
 
     if (!isAuthor && !isGlobalAdmin && !isStudioAdmin) {
       throw new ForbiddenException('You are not allowed to delete this comment');
@@ -189,6 +191,63 @@ export class CommentsService {
     });
 
     return this.toResponse(updated);
+  }
+
+  async findByGame(slug: string, page: number, pageSize: number) {
+    const game = await this.prisma.game.findUniqueOrThrow({ where: { slug }, select: { id: true } });
+    const where = { gameId: game.id, parentId: null, deletedAt: null };
+    const [items, total] = await Promise.all([
+      this.prisma.comment.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+          reactions: { select: { type: true, userId: true } },
+        },
+      }),
+      this.prisma.comment.count({ where }),
+    ]);
+    return { items, total, page, pageSize };
+  }
+
+  async createForGame(slug: string, authorId: string, body: string) {
+    const game = await this.prisma.game.findUniqueOrThrow({ where: { slug }, select: { id: true } });
+    const trimmed = body.trim();
+    if (!trimmed) throw new BadRequestException('Comment cannot be empty');
+    if (trimmed.length > 1000) throw new BadRequestException('Comment must be 1000 characters or fewer');
+    return this.prisma.comment.create({
+      data: { gameId: game.id, authorId, body: trimmed },
+      include: {
+        author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+      },
+    });
+  }
+
+  async reactToGameComment(commentId: string, userId: string, type: string) {
+    const comment = await this.prisma.comment.findUnique({ where: { id: commentId }, select: { id: true, gameId: true } });
+    if (!comment || !comment.gameId) throw new NotFoundException('Comment not found');
+
+    const reactionType = type as never;
+    const validTypes = ['LIKE', 'LOVE', 'HYPE', 'INSIGHTFUL'];
+    if (!validTypes.includes(type)) {
+      throw new BadRequestException('Invalid reaction type');
+    }
+
+    return this.prisma.reaction.upsert({
+      where: { userId_commentId_type: { userId, commentId, type: reactionType } },
+      create: { userId, commentId, type: reactionType, devlogId: null },
+      update: {},
+    });
+  }
+
+  async removeGameCommentReaction(commentId: string, userId: string, type: string) {
+    const reactionType = type as never;
+    await this.prisma.reaction.deleteMany({
+      where: { userId, commentId, type: reactionType, devlogId: null },
+    });
+    return { success: true };
   }
 
   private toResponse(comment: {
