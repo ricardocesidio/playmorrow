@@ -17,10 +17,11 @@ import { SessionService } from '../session/session.service';
 const SESSION_COOKIE = 'playmorrow_session';
 
 function setSessionCookie(res: Response, raw: string, expiresAt: Date) {
+  const isProduction = process.env.NODE_ENV === 'production';
   res.cookie(SESSION_COOKIE, raw, {
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/',
     expires: expiresAt,
   });

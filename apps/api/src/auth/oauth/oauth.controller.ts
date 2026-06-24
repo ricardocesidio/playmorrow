@@ -48,10 +48,11 @@ export class OAuthController {
     const ua = (req.headers['user-agent'] ?? '').slice(0, 512);
     const ip = req.ip ?? req.socket?.remoteAddress;
     const { raw, expiresAt } = await this.sessionService.create(result.user.id, ip, ua);
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie(SESSION_COOKIE, raw, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
       expires: expiresAt,
     });
