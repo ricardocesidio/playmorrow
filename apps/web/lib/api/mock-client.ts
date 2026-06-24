@@ -136,6 +136,9 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
   if (segments[0] === 'devlogs' && segments.length === 2) {
     return MOCK_DEVLOG;
   }
+  if (path.includes('/comments') && segments[0] === 'games') {
+    return { items: [{ ...MOCK_COMMENT, reactions: [], viewerReactions: [] }], total: 1, page: 1, pageSize: 20 };
+  }
   if (path.includes('/comments')) return [MOCK_COMMENT];
   if (path.includes('/reactions')) {
     return { targetType: 'DEVLOG', targetId: 'devlog-1', counts: { LIKE: 0, LOVE: 0, HYPE: 0, INSIGHTFUL: 0 }, viewerReactions: [] } as ReactionStatus;
