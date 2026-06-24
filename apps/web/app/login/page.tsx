@@ -91,13 +91,14 @@ export default function LoginPage() {
                 <div className="mx-auto mt-5 h-0.5 w-12 bg-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.7)]" />
               </div>
 
-              <form onSubmit={handleSubmit} className="mt-12 space-y-8">
+              <form onSubmit={handleSubmit} className="mt-12 space-y-8" autoComplete="on">
                 <div>
                   <label htmlFor="email" className="pm-micro mb-4 block text-muted-foreground">Email or username</label>
                   <div className="relative">
                     <User className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
                     <input
                       id="email"
+                      name="email"
                       type="text"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -114,6 +115,7 @@ export default function LoginPage() {
                     <Lock className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
                     <input
                       id="password"
+                      name="password"
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
