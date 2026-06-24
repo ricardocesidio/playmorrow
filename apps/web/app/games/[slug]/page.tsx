@@ -602,8 +602,8 @@ function RoadmapPanel({ roadmap }: { roadmap: RoadmapItem[] }) {
               <span className="block text-[#d3d7d8]">{title}</span>
               <span className="block">{body}</span>
             </span>
-          </div>
-        ))}
+            </div>
+          ))}
         </div>
       </div>
     </TechPanel>
@@ -760,17 +760,19 @@ function CommunityPanel({ slug }: { slug: string }) {
         </p>
       ) : (
         <div className="grid gap-2.5">
-          {comments.map((comment) => (
+          {(comments ?? []).map((comment) => {
+            const author = comment.author ?? { displayName: '?', avatarUrl: null };
+            return (
             <div key={comment.id} className="grid grid-cols-[32px_1fr_auto] gap-3">
-              {comment.author.avatarUrl ? (
-                <img src={comment.author.avatarUrl} alt="" className="size-7 rounded-full object-cover" />
+              {author.avatarUrl ? (
+                <img src={author.avatarUrl} alt="" className="size-7 rounded-full object-cover" />
               ) : (
                 <span className="grid size-7 place-items-center rounded-full bg-muted text-xs text-foreground">
-                  {comment.author.displayName.slice(0, 1)}
+                  {author.displayName.slice(0, 1)}
                 </span>
               )}
               <span className="min-w-0 text-[11px] text-muted-foreground">
-                <span className="font-mono font-bold text-foreground">{comment.author.displayName}</span>{' '}
+                <span className="font-mono font-bold text-foreground">{author.displayName}</span>{' '}
                 <span className="ml-2">{timeAgo(comment.createdAt)}</span>
                 <span className="block leading-5">{comment.body}</span>
               </span>
@@ -785,7 +787,8 @@ function CommunityPanel({ slug }: { slug: string }) {
                 </button>
               </span>
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
       {isAuthenticated ? (
