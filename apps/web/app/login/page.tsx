@@ -45,16 +45,13 @@ export default function LoginPage() {
 
   if (isAuthenticated) return null;
 
-  // Client-side validation only — form submits natively for Chrome password save
+  // Client-side validation — form submits natively for Chrome password save
   const handleSubmit = (e: React.FormEvent) => {
-    setLoading(true);
     if (!email.trim() || !password) {
       e.preventDefault();
       setError('All fields required');
-      setLoading(false);
-      return;
     }
-    // Let the form submit naturally to /api/auth/form-login
+    // If valid, form submits naturally to /api/auth/form-login (no preventDefault)
   };
 
   return (
@@ -96,7 +93,7 @@ export default function LoginPage() {
                     <User className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
                     <input
                       id="email"
-                      name="email"
+                      name="emailOrUsername"
                       type="text"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
