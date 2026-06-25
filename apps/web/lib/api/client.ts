@@ -307,4 +307,18 @@ function createMockClient(): ReturnType<typeof createRealClient> {
   return createMockApi();
 }
 
-export const api = USE_MOCKS ? createMockClient() : createRealClient();
+// Auth endpoints ALWAYS use the real backend — never mock
+function createHybridClient(): ReturnType<typeof createRealClient> {
+  const real = createRealClient();
+  const mock = createMockClient();
+  const isAuth = (path: string) => path.startsWith('/auth/');
+  return {
+    get: <T>(path: string, token?: string) => isAuth(path) ? real.get<T>(path, token) : mock.get<T>(path, token),
+    post: <T>(path: string, body?: unknown, token?: string) => isAuth(path) ? real.post<T>(path, body, token) : mock.post<T>(path, body, token),
+    put: <T>(path: string, body?: unknown, token?: string) => isAuth(path) ? real.put<T>(path, body, token) : mock.put<T>(path, body, token),
+    patch: <T>(path: string, body?: unknown, token?: string) => isAuth(path) ? real.patch<T>(path, body, token) : mock.patch<T>(path, body, token),
+    delete: <T>(path: string, bodyOrToken?: unknown) => isAuth(path) ? real.delete<T>(path, bodyOrToken) : mock.delete<T>(path, bodyOrToken),
+  };
+}
+
+export const api = USE_MOCKS ? createHybridClient() : createRealClient();
