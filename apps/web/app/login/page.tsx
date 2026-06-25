@@ -45,7 +45,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email.trim(), password);
-      router.push('/dashboard');
+      router.push('/games');
     } catch (err: unknown) {
       if (err instanceof EmailNotVerifiedError) {
         const params = new URLSearchParams({ email: err.email, from: 'login' });
