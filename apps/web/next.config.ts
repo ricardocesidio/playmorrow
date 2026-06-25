@@ -4,11 +4,19 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  // Compile shared workspace TS packages instead of expecting prebuilt JS.
   transpilePackages: ['@playmorrow/types'],
   typedRoutes: true,
-  // Pin the monorepo root so Next ignores unrelated lockfiles elsewhere on disk.
   outputFileTracingRoot: path.join(process.cwd(), '..', '..'),
+  // Proxy API requests in dev to avoid cross-origin cookie issues
+  async rewrites() {
+    if (process.env.NODE_ENV !== 'development') return [];
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:4000/api/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

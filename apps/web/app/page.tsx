@@ -65,28 +65,17 @@ const liveItems = [
 ];
 
 export default function HomePage() {
-  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!isAuthenticated) {
-        router.replace('/login');
-      } else {
-        router.replace('/dashboard');
-      }
-    }
-  }, [isLoading, isAuthenticated, router]);
+    router.replace('/games');
+  }, [router]);
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="size-6 animate-spin border border-cyan border-t-transparent" />
-      </div>
-    );
-  }
-
-  return null;
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="size-6 animate-spin border border-cyan border-t-transparent" />
+    </div>
+  );
 }
 
 function FeaturedGameCard() {
