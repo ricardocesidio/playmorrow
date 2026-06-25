@@ -11,21 +11,19 @@ async function main() {
   const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
 
   if (!user) {
-    const username = process.env.PLAYMORROW_OWNER_USERNAME || 'owner';
-    console.error(`User with email "${email}" not found. Create the user first via registration, then run this script again.`);
-    console.error(`Expected username: ${username}`);
+    console.error('User with configured owner email not found. Create the user first via registration, then run this script again.');
     await prisma.$disconnect();
     process.exit(1);
   }
 
   if (user.role === 'ADMIN') {
-    console.log(`User ${email} is already ADMIN.`);
+    console.log('Owner user is already ADMIN.');
   } else {
     await prisma.user.update({
       where: { id: user.id },
       data: { role: 'ADMIN' },
     });
-    console.log(`Promoted ${email} to ADMIN.`);
+    console.log('Owner user promoted to ADMIN successfully.');
   }
 
   await prisma.$disconnect();
