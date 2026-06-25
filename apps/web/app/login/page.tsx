@@ -45,6 +45,17 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email.trim(), password);
+
+      // Prompt browser to save password
+      try {
+        const w = window as unknown as { PasswordCredential?: new (o: { id: string; password: string }) => { type: string } };
+        const n = navigator as unknown as { credentials?: { store: (c: { type: string }) => Promise<void> } };
+        if (w.PasswordCredential && n.credentials) {
+          const cred = new w.PasswordCredential({ id: email.trim(), password });
+          await n.credentials.store(cred);
+        }
+      } catch { /* ignore */ }
+
       router.push('/games');
     } catch (err: unknown) {
       if (err instanceof EmailNotVerifiedError) {
