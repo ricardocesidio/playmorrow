@@ -51,7 +51,7 @@ export default function LoginPage() {
       frame.name = 'pm-login';
       frame.style.display = 'none';
       document.body.appendChild(frame);
-      const form = e.currentTarget;
+      const form = e.currentTarget as HTMLFormElement;
       form.target = frame.name;
       form.submit();
       setTimeout(() => {
