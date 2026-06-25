@@ -6,6 +6,10 @@ export async function POST(request: NextRequest) {
     const emailOrUsername = formData.get('emailOrUsername') as string;
     const password = formData.get('password') as string;
 
+    if (!emailOrUsername || !password) {
+      return NextResponse.redirect(new URL('/login?error=All+fields+required', request.url));
+    }
+
     const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
     const res = await fetch(`${API}/auth/session/login`, {
       method: 'POST',
@@ -13,7 +17,16 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({ emailOrUsername, password }),
     });
 
-    // Forward the session cookie from the API response
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ message: 'Invalid email/username or password' }));
+      // If email not verified, redirect to verify page
+      if (body.code === 'EMAIL_NOT_VERIFIED' && body.email) {
+        return NextResponse.redirect(new URL(`/verify-email?email=${encodeURIComponent(body.email)}&from=login`, request.url));
+      }
+      const msg = encodeURIComponent(body.message || 'Invalid email/username or password');
+      return NextResponse.redirect(new URL(`/login?error=${msg}`, request.url));
+    }
+
     const setCookie = res.headers.get('set-cookie');
     const response = NextResponse.redirect(new URL('/games', request.url));
 
@@ -23,6 +36,6 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch {
-    return NextResponse.redirect(new URL('/login?error=1', request.url));
+    return NextResponse.redirect(new URL('/login?error=Connection+error', request.url));
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowUpRight, Chrome, Eye, EyeOff, Github, Lock, User } from 'lucide-react';
 
@@ -23,6 +23,13 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+
+  // Show error from form-login redirect
+  useEffect(() => {
+    const err = searchParams.get('error');
+    if (err) setError(decodeURIComponent(err));
+  }, [searchParams]);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) router.replace('/games');
@@ -38,34 +45,16 @@ export default function LoginPage() {
 
   if (isAuthenticated) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !password) { setError('All fields required'); return; }
-    setError('');
+  // Client-side validation only — form submits natively for Chrome password save
+  const handleSubmit = (e: React.FormEvent) => {
     setLoading(true);
-
-    // Check credentials via AJAX first
-    try {
-      await login(email.trim(), password);
-    } catch (err: unknown) {
-      if (err instanceof EmailNotVerifiedError) {
-        const params = new URLSearchParams({ email: err.email, from: 'login' });
-        router.push(`/verify-email?${params.toString()}`);
-        return;
-      }
+    if (!email.trim() || !password) {
+      e.preventDefault();
+      setError('All fields required');
       setLoading(false);
-      const msg = err instanceof Error ? err.message : 'Invalid credentials';
-      setError(msg);
       return;
     }
-
-    // Use native form submission for Chrome password manager detection
-    // Chrome only saves passwords on native form submits (no preventDefault)
-    const form = e.currentTarget as HTMLFormElement;
-    form.action = '/api/auth/form-login';
-    form.method = 'POST';
-    form.removeEventListener('submit', handleSubmit as unknown as EventListener);
-    form.submit();
+    // Let the form submit naturally to /api/auth/form-login
   };
 
   return (
@@ -100,7 +89,7 @@ export default function LoginPage() {
                 <div className="mx-auto mt-5 h-0.5 w-12 bg-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.7)]" />
               </div>
 
-              <form onSubmit={handleSubmit} action="/api/auth/session/login" method="POST" className="mt-12 space-y-8" autoComplete="on">
+              <form onSubmit={handleSubmit} action="/api/auth/form-login" method="POST" className="mt-12 space-y-8" autoComplete="on">
                 <div>
                   <label htmlFor="email" className="pm-micro mb-4 block text-muted-foreground">Email or username</label>
                   <div className="relative">
