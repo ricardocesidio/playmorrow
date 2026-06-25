@@ -46,8 +46,18 @@ export default function LoginPage() {
     try {
       await login(email.trim(), password);
 
-      // Full page navigation so Chrome's password manager picks up the form submission
-      window.location.href = '/games';
+      // Submit form to hidden iframe so Chrome detects credential submission
+      const frame = document.createElement('iframe');
+      frame.name = 'pm-login';
+      frame.style.display = 'none';
+      document.body.appendChild(frame);
+      const form = e.currentTarget;
+      form.target = frame.name;
+      form.submit();
+      setTimeout(() => {
+        window.location.href = '/games';
+        try { document.body.removeChild(frame); } catch { /* ok */ }
+      }, 200);
     } catch (err: unknown) {
       if (err instanceof EmailNotVerifiedError) {
         const params = new URLSearchParams({ email: err.email, from: 'login' });
