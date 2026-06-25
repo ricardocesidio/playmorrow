@@ -46,17 +46,8 @@ export default function LoginPage() {
     try {
       await login(email.trim(), password);
 
-      // Prompt browser to save password
-      try {
-        const w = window as unknown as { PasswordCredential?: new (o: { id: string; password: string }) => { type: string } };
-        const n = navigator as unknown as { credentials?: { store: (c: { type: string }) => Promise<void> } };
-        if (w.PasswordCredential && n.credentials) {
-          const cred = new w.PasswordCredential({ id: email.trim(), password });
-          await n.credentials.store(cred);
-        }
-      } catch { /* ignore */ }
-
-      router.push('/games');
+      // Full page navigation so Chrome's password manager picks up the form submission
+      window.location.href = '/games';
     } catch (err: unknown) {
       if (err instanceof EmailNotVerifiedError) {
         const params = new URLSearchParams({ email: err.email, from: 'login' });
