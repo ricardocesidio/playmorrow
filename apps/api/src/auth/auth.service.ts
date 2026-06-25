@@ -138,7 +138,7 @@ export class AuthService {
       : await this.usersService.findByUsername(dto.emailOrUsername);
 
     if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Invalid email/username or password');
     }
 
     // Account lockout check
@@ -155,7 +155,7 @@ export class AuthService {
         updateData.lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MS);
       }
       await this.prisma.user.update({ where: { id: user.id }, data: updateData as Prisma.UserUpdateInput });
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Invalid email/username or password');
     }
 
     // Reset failed attempts on success
@@ -210,7 +210,7 @@ export class AuthService {
       ? await this.usersService.findByEmail(emailOrUsername)
       : await this.usersService.findByUsername(emailOrUsername);
 
-    if (!user || !user.passwordHash) throw new UnauthorizedException('Invalid credentials');
+    if (!user || !user.passwordHash) throw new UnauthorizedException('Invalid email/username or password');
     if (user.lockedUntil && user.lockedUntil > new Date()) {
       throw new UnauthorizedException('Account temporarily locked. Try again later.');
     }
@@ -221,7 +221,7 @@ export class AuthService {
       const updateData: Record<string, unknown> = { failedLoginAttempts: attempts };
       if (attempts >= LOCKOUT_THRESHOLD) updateData.lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MS);
       await this.prisma.user.update({ where: { id: user.id }, data: updateData as Prisma.UserUpdateInput });
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Invalid email/username or password');
     }
 
     await this.prisma.user.update({
