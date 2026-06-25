@@ -45,15 +45,6 @@ export default function LoginPage() {
 
   if (isAuthenticated) return null;
 
-  // Client-side validation — form submits natively for Chrome password save
-  const handleSubmit = (e: React.FormEvent) => {
-    if (!email.trim() || !password) {
-      e.preventDefault();
-      setError('All fields required');
-    }
-    // If valid, form submits naturally to /api/auth/form-login (no preventDefault)
-  };
-
   return (
     <div className="relative min-h-screen overflow-hidden bg-background px-5 pb-8 text-foreground sm:px-8 lg:px-10">
       <CircuitFrame className="opacity-45" />
@@ -86,7 +77,7 @@ export default function LoginPage() {
                 <div className="mx-auto mt-5 h-0.5 w-12 bg-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.7)]" />
               </div>
 
-              <form onSubmit={handleSubmit} action="/api/auth/form-login" method="POST" className="mt-12 space-y-8" autoComplete="on">
+              <form action="/api/auth/form-login" method="POST" className="mt-12 space-y-8" autoComplete="on">
                 <div>
                   <label htmlFor="email" className="pm-micro mb-4 block text-muted-foreground">Email or username</label>
                   <div className="relative">
@@ -95,11 +86,10 @@ export default function LoginPage() {
                       id="email"
                       name="emailOrUsername"
                       type="text"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
                       className="clip-corner h-14 w-full border border-cyan bg-background/80 px-14 text-sm text-foreground shadow-[0_0_24px_rgb(62_231_255_/_0.12)] outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan"
                       placeholder="Enter your email or username"
                       autoComplete="username"
+                      required
                     />
                   </div>
                 </div>
@@ -112,11 +102,10 @@ export default function LoginPage() {
                       id="password"
                       name="password"
                       type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
                       className="clip-corner h-14 w-full border border-input bg-background/80 px-14 pr-12 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan"
                       placeholder="Enter your password"
                       autoComplete="current-password"
+                      required
                     />
                     <button
                       type="button"
