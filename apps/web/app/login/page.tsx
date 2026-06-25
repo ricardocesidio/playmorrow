@@ -43,32 +43,29 @@ export default function LoginPage() {
     if (!email.trim() || !password) { setError('All fields required'); return; }
     setError('');
     setLoading(true);
+
+    // Check credentials via AJAX first
     try {
       await login(email.trim(), password);
-
-      // Submit form to hidden iframe so Chrome detects credential submission
-      const frame = document.createElement('iframe');
-      frame.name = 'pm-login';
-      frame.style.display = 'none';
-      document.body.appendChild(frame);
-      const form = e.currentTarget as HTMLFormElement;
-      form.target = frame.name;
-      form.submit();
-      setTimeout(() => {
-        window.location.href = '/games';
-        try { document.body.removeChild(frame); } catch { /* ok */ }
-      }, 200);
     } catch (err: unknown) {
       if (err instanceof EmailNotVerifiedError) {
         const params = new URLSearchParams({ email: err.email, from: 'login' });
         router.push(`/verify-email?${params.toString()}`);
         return;
       }
+      setLoading(false);
       const msg = err instanceof Error ? err.message : 'Invalid credentials';
       setError(msg);
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    // Use native form submission for Chrome password manager detection
+    // Chrome only saves passwords on native form submits (no preventDefault)
+    const form = e.currentTarget as HTMLFormElement;
+    form.action = '/api/auth/form-login';
+    form.method = 'POST';
+    form.removeEventListener('submit', handleSubmit as unknown as EventListener);
+    form.submit();
   };
 
   return (
