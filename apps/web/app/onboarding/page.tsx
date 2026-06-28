@@ -80,9 +80,19 @@ export default function OnboardingPage() {
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { setError('Image too large. Max 5MB.'); return; }
     setAvatarFile(file);
-    const reader = new FileReader();
-    reader.onload = () => setAvatarDataUrl(reader.result as string);
-    reader.readAsDataURL(file);
+    // Resize to 256x256 before creating data URL to avoid body size issues
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, 256, 256);
+      setAvatarDataUrl(canvas.toDataURL('image/jpeg', 0.8));
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
   };
 
   const handleFinish = async () => {
