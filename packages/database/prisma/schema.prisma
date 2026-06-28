@@ -138,9 +138,12 @@ model User {
   avatarUrl    String?
   bio          String?
   location     String?
+  country      String?
+  level        Int      @default(0)
+  xp           Int      @default(0)
   isVerified   Boolean  @default(false)
   accountType                 AccountType @default(PLAYER)
-  isOnboardingCompleted       Boolean     @default(true)
+  isOnboardingCompleted       Boolean     @default(false)
   termsAcceptedAt             DateTime?
   privacyAcceptedAt           DateTime?
   communityGuidelinesAcceptedAt DateTime?
