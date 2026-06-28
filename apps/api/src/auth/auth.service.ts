@@ -203,7 +203,8 @@ export class AuthService {
     if (!user) throw new UnauthorizedException();
     return {
       id: user.id, email: user.email, username: user.username,
-      displayName: user.displayName, role: user.role,
+      displayName: user.displayName, role: user.role, avatarUrl: user.avatarUrl,
+      bio: user.bio, location: user.location, country: user.country,
       isVerified: user.isVerified, accountType: user.accountType ?? 'PLAYER',
       isOnboardingCompleted: user.isOnboardingCompleted,
     };
