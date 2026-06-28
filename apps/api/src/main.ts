@@ -13,10 +13,9 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    bodyParser: { json: { limit: '10mb' } },
-  });
+  const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
+  app.use(express.json({ limit: '10mb' }));
 
   // Security headers
   app.use(helmet({
