@@ -203,18 +203,18 @@ export default function OnboardingPage() {
               <h2 className="font-display text-xl font-bold text-foreground">{accountType === 'STUDIO' ? 'Studio Profile' : 'Profile Setup'}</h2>
 
               {/* Avatar upload */}
-              <div className="space-y-1">
-                <label className="pm-micro text-muted-foreground">Profile picture</label>
-                <div className="flex items-center gap-4">
-                  <div className="size-16 shrink-0 rounded-full border border-border bg-background/60 flex items-center justify-center overflow-hidden">
+              <div className="space-y-3">
+                <label className="pm-micro text-muted-foreground text-center block">Profile picture</label>
+                <div className="flex flex-col items-center gap-3">
+                  <div className="size-20 rounded-full border-2 border-border bg-background/60 flex items-center justify-center overflow-hidden">
                     {avatarDataUrl ? (
                       <img src={avatarDataUrl} alt="" className="size-full object-cover" />
                     ) : (
-                      <User className="size-6 text-muted-foreground" />
+                      <User className="size-8 text-muted-foreground" />
                     )}
                   </div>
                   <button type="button" onClick={() => fileInputRef.current?.click()}
-                    className="cursor-pointer border border-border px-4 py-2 font-mono text-xs uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
+                    className="cursor-pointer border border-border px-5 py-2 font-mono text-xs uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
                     <Upload className="mr-1 inline size-3" /> Upload photo
                   </button>
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
