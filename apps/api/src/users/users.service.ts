@@ -13,7 +13,9 @@ export class UsersService {
   }
 
   async findByUsername(username: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { username } });
+    return this.prisma.user.findFirst({
+      where: { OR: [{ username }, { usernameLowercase: username.toLowerCase() }] },
+    });
   }
 
   async findById(id: string): Promise<User | null> {
@@ -29,6 +31,7 @@ export class UsersService {
         throw new ConflictException('Username already taken');
       }
       data.username = dto.username;
+      data.usernameLowercase = dto.username.toLowerCase();
     }
 
     if (dto.email !== undefined) {
@@ -63,6 +66,7 @@ export class UsersService {
     displayName: string;
     passwordHash: string;
     accountType?: 'PLAYER' | 'STUDIO';
+    isOnboardingCompleted?: boolean;
     termsAcceptedAt?: Date;
     privacyAcceptedAt?: Date;
     communityGuidelinesAcceptedAt?: Date;
@@ -88,10 +92,12 @@ export class UsersService {
       data: {
         email: emailLower,
         username: data.username,
+        usernameLowercase: data.username.toLowerCase(),
         displayName: data.displayName,
         passwordHash: data.passwordHash,
         role: 'PLAYER',
         accountType: data.accountType ?? 'PLAYER',
+        isOnboardingCompleted: data.isOnboardingCompleted ?? true,
         termsAcceptedAt: data.termsAcceptedAt,
         privacyAcceptedAt: data.privacyAcceptedAt,
         communityGuidelinesAcceptedAt: data.communityGuidelinesAcceptedAt,
