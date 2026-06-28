@@ -63,29 +63,26 @@ export class OAuthController {
 
       const frontendUrl = this.configService.get<string>(FRONTEND_URL_KEY, 'http://localhost:3000');
 
-    // Check if user already exists
-    const existingUser = await this.oauthService.findByEmail(profile.email.toLowerCase());
+      const existingUser = await this.oauthService.findByEmail(profile.email.toLowerCase());
 
-    if (existingUser) {
-      // Returning user — create session and redirect to dashboard
-      const ua = (req.headers['user-agent'] ?? '').slice(0, 512);
-      const ip = req.ip ?? req.socket?.remoteAddress;
-      const { raw, expiresAt } = await this.sessionService.create(existingUser.id, ip, ua);
-      const isProduction = process.env.NODE_ENV === 'production';
-      res.cookie(SESSION_COOKIE, raw, {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? 'none' : 'lax',
-        path: '/',
-        expires: expiresAt,
-      });
-      res.redirect(`${frontendUrl}/oauth/callback`);
-    } else {
-      // NEW user — redirect to onboarding (NO account created yet)
-      const params = new URLSearchParams({ provider: profile.provider, email: profile.email, displayName: profile.displayName });
-      if (profile.avatarUrl) params.set('avatarUrl', profile.avatarUrl);
-      res.redirect(`${frontendUrl}/onboarding?${params.toString()}`);
-    }
+      if (existingUser) {
+        const ua = (req.headers['user-agent'] ?? '').slice(0, 512);
+        const ip = req.ip ?? req.socket?.remoteAddress;
+        const { raw, expiresAt } = await this.sessionService.create(existingUser.id, ip, ua);
+        const isProduction = process.env.NODE_ENV === 'production';
+        res.cookie(SESSION_COOKIE, raw, {
+          httpOnly: true,
+          secure: isProduction,
+          sameSite: isProduction ? 'none' : 'lax',
+          path: '/',
+          expires: expiresAt,
+        });
+        res.redirect(`${frontendUrl}/oauth/callback`);
+      } else {
+        const params = new URLSearchParams({ provider: profile.provider, email: profile.email, displayName: profile.displayName });
+        if (profile.avatarUrl) params.set('avatarUrl', profile.avatarUrl);
+        res.redirect(`${frontendUrl}/onboarding?${params.toString()}`);
+      }
     } catch (err) {
       this.logger.error('OAuth callback error', err instanceof Error ? err.stack : err);
       const fallbackUrl = this.configService.get<string>(FRONTEND_URL_KEY, 'http://localhost:3000');
