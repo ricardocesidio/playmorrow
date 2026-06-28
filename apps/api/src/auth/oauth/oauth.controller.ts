@@ -88,7 +88,8 @@ export class OAuthController {
     }
     } catch (err) {
       this.logger.error('OAuth callback error', err instanceof Error ? err.stack : err);
-      res.redirect(`${frontendUrl}/login?error=Authentication+failed`);
+      const fallbackUrl = this.configService.get<string>(FRONTEND_URL_KEY, 'http://localhost:3000');
+      res.redirect(`${fallbackUrl}/login?error=Authentication+failed`);
     }
   }
 }
