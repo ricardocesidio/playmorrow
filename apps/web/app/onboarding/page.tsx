@@ -324,6 +324,7 @@ export default function OnboardingPage() {
                   if (usernameAvailable !== true) { setError('Username is not available'); return; }
                 }
                 if (step === 2) {
+                  setTouched({ country: true, bio: true, studioName: true, studioSlug: true, studioWebsite: true });
                   if (!country) { setError('Select your country'); return; }
                   if (!bio.trim()) { setError('Bio is required'); return; }
                   if (accountType === 'STUDIO' && (!studioName || !studioSlug || !studioWebsite)) { setError('Studio name, slug, and website are required'); return; }
