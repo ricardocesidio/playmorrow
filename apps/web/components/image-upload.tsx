@@ -2,7 +2,6 @@
 
 import { useRef, useState } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
-import { useAuth } from '@/lib/api/auth-context';
 import { API } from '@/lib/api/client';
 
 interface ImageUploadProps {
@@ -14,13 +13,12 @@ interface ImageUploadProps {
 
 export function ImageUpload({ value, onChange, label = 'Image', accept = 'image/png,image/jpeg,image/gif,image/webp,image/svg+xml' }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { token } = useAuth();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !token) return;
+    if (!file) return;
     setError('');
     setUploading(true);
     try {
@@ -28,7 +26,7 @@ export function ImageUpload({ value, onChange, label = 'Image', accept = 'image/
       formData.append('file', file);
       const res = await fetch(`${API}/upload`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
         body: formData,
       });
       if (!res.ok) {
