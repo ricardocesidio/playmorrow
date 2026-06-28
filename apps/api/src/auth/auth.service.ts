@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { User } from '@playmorrow/database';
@@ -355,5 +355,62 @@ export class AuthService {
       data: { tokenHash, userId: user.id, expiresAt: new Date(Date.now() + REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000) },
     });
     return { accessToken, refreshToken: rawRefresh };
+  }
+
+  async completeOnboarding(dto: Record<string, unknown>) {
+    const accountType = dto.accountType as string;
+    if (!['PLAYER', 'STUDIO'].includes(accountType)) throw new BadRequestException('Invalid account type');
+
+    const username = (dto.username as string)?.trim().toLowerCase();
+    if (!username || username.length < 3 || username.length > 20) throw new BadRequestException('Username must be 3-20 characters');
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) throw new BadRequestException('Username can only contain letters, numbers, and underscores');
+
+    const existingUser = await this.prisma.user.findUnique({ where: { username } });
+    if (existingUser) throw new ConflictException('Username already taken');
+
+    const email = (dto.email as string)?.toLowerCase();
+    if (email) {
+      const existingEmail = await this.prisma.user.findUnique({ where: { email } });
+      if (existingEmail) throw new ConflictException('Email already registered');
+    }
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: email || `${username}@placeholder.playmorrow`,
+        username,
+        displayName: (dto.displayName as string) || username,
+        passwordHash: null,
+        avatarUrl: (dto.avatarUrl as string) || null,
+        bio: (dto.bio as string) || null,
+        accountType: accountType as 'PLAYER' | 'STUDIO',
+        role: 'PLAYER',
+        emailVerifiedAt: email ? new Date() : null,
+        termsAcceptedAt: new Date(),
+        privacyAcceptedAt: new Date(),
+        communityGuidelinesAcceptedAt: new Date(),
+        termsVersion: '2026-06-28',
+        privacyVersion: '2026-06-28',
+        communityGuidelinesVersion: '2026-06-28',
+      },
+    });
+
+    // If STUDIO, create the studio
+    if (accountType === 'STUDIO') {
+      const studioSlug = ((dto.studioSlug as string) || dto.username as string).toLowerCase();
+      const slugExists = await this.prisma.studio.findUnique({ where: { slug: studioSlug } });
+      if (slugExists) throw new ConflictException('Studio slug already taken');
+
+      await this.prisma.studio.create({
+        data: {
+          slug: studioSlug,
+          name: (dto.studioName as string) || (dto.displayName as string) || username,
+          websiteUrl: (dto.studioWebsite as string) || null,
+          isVerified: false,
+          members: { create: { userId: user.id, role: 'OWNER' } },
+        },
+      });
+    }
+
+    return { user };
   }
 }

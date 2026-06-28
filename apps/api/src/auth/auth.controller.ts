@@ -168,4 +168,15 @@ export class AuthController {
     await this.authService.resetPassword(token, password);
     return { success: true };
   }
+
+  @Post('complete-onboarding')
+  @HttpCode(HttpStatus.CREATED)
+  async completeOnboarding(@Body() dto: Record<string, unknown>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.completeOnboarding(dto);
+    const ua = (req.headers['user-agent'] ?? '').slice(0, 512);
+    const ip = req.ip ?? req.socket?.remoteAddress;
+    const { raw, expiresAt } = await this.sessionService.create(result.user.id, ip, ua);
+    setSessionCookie(res, raw, expiresAt);
+    return { user: { id: result.user.id, username: result.user.username, displayName: result.user.displayName, role: result.user.role, accountType: result.user.accountType } };
+  }
 }

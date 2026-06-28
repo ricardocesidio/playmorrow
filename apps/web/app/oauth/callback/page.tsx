@@ -8,8 +8,9 @@ function OAuthCallbackInner() {
   const router = useRouter();
 
   useEffect(() => {
-    // Session cookie is already set by the backend redirect.
+    // Session cookie is already set by the backend redirect for returning users.
     // The auth-context will pick it up on next render via /auth/session/me.
+    // New users without accounts are redirected to /onboarding by the backend.
     router.replace('/dashboard');
   }, [router]);
 
