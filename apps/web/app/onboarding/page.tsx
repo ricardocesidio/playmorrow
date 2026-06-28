@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, Check, Gamepad2, Building2, User, Globe, Mail, AtSign, Upload } from 'lucide-react';
 import { HudButton, HudPanel } from '@/components/playmorrow/hud';
-import { api } from '@/lib/api/client';
+import { api, API } from '@/lib/api/client';
 
 const STEPS = ['Account Type', 'Username', 'Profile', 'Review'];
 
@@ -116,7 +116,7 @@ export default function OnboardingPage() {
         body.studioDiscord = studioDiscord || undefined;
       }
       // Use direct fetch instead of api client to ensure cookies are captured
-      const res = await fetch('/api/auth/complete-onboarding', {
+      const res = await fetch(`${API}/auth/complete-onboarding`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
