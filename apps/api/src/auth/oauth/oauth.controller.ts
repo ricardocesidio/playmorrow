@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, Res, UseGuards, Logger } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
@@ -13,6 +13,8 @@ const SESSION_COOKIE = 'playmorrow_session';
 @ApiTags('auth')
 @Controller('auth')
 export class OAuthController {
+  private readonly logger = new Logger(OAuthController.name);
+
   constructor(
     private readonly oauthService: OAuthService,
     private readonly configService: ConfigService,
@@ -26,7 +28,12 @@ export class OAuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: Request, @Res() res: Response) {
-    await this.handleCallback(req, res);
+    try {
+      await this.handleCallback(req, res);
+    } catch (err) {
+      this.logger.error('Google OAuth callback failed', err instanceof Error ? err.stack : err);
+      throw err;
+    }
   }
 
   @Get('github')
@@ -36,7 +43,12 @@ export class OAuthController {
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
   async githubCallback(@Req() req: Request, @Res() res: Response) {
-    await this.handleCallback(req, res);
+    try {
+      await this.handleCallback(req, res);
+    } catch (err) {
+      this.logger.error('GitHub OAuth callback failed', err instanceof Error ? err.stack : err);
+      throw err;
+    }
   }
 
   private async handleCallback(req: Request, res: Response) {
