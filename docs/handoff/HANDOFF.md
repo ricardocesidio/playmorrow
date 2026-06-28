@@ -1,182 +1,109 @@
 # Playmorrow — Engineering Handoff
 
-> **Start here.** This is the entry point for the next agent/developer. It catalogues the
-> 34 known issues, explains how to run the repo, and lays out a recommended execution
-> order. Each issue has root-cause analysis, affected files, a suggested fix, and an
-> effort estimate. Work top-to-bottom through the phases unless told otherwise.
+> **Generated:** 2026-06-28
+> **Repo:** https://github.com/ricardocesidio/playmorrow (`main`)
 
-- **Generated:** 2026-06-19
-- **Repo:** https://github.com/ricardocesidio/playmorrow (`main`)
-- **Source list:** 34 issues — 11 backend, 18 frontend, 5 dev-ex (31 DONE, 2 DEFERRED, 1 OPEN).
-- **Decisions captured:** email-based features (#4 verification, #5 password reset) are
-  **deferred** by product owner. All other design decisions have been made: uploads use **local
-  disk** (multer), realtime uses **SSE** (RxJS Subject), OAuth uses **Google + GitHub**
-  (passport strategies, account linking by verified email).
+## Current status
 
-## Progress log
+### ✅ Completed
 
-| Date | Phase | Issues | Commit | Notes |
-|------|-------|--------|--------|-------|
-| 2026-06-18 | 0 | #10, #11, #17, #30 done; #31 partial | `cf21a50` | Quick wins. See each issue's Status line for detail. |
-| 2026-06-18 | 1 | #12 done | `e48e341` | Feed E2E flake fixed (auth-setup hydration race + locator/retry bugs). Desktop suite 31/31; feed `--repeat-each=3` 18/18. |
-| 2026-06-18 | 1 | #13 done | `c3e5e6d` | Mobile project run + triaged. Same auth-setup race fixed in `auth`/`social-actions`/`responsive` via `addInitScript`. Desktop & mobile `--repeat-each=2` → 62/62 each. |
-| 2026-06-18 | 1 | #14 done | `13bec33` | GitHub Actions CI green: quality + backend(postgres:16) + e2e(desktop+mobile). [First green run](https://github.com/ricardocesidio/playmorrow/actions/runs/27785284477). Backend suite verified against real Postgres. CI uses Node 22 (pnpm 11.1.3 needs ≥22.13). |
-| 2026-06-19 | 2 | #1, #31 done | `8415fdc` | ValidationPipe parity restored. The "SWC can't emit class-validator metadata" claim was stale — re-enabled `whitelist: true` + `forbidNonWhitelisted: true` in `create-test-app.ts`. Full backend suite green **223/223** against local Postgres. Added regression test (unknown body prop → 400), verified it fails under the old config. |
-| 2026-06-19 | quick wins | #23, #27, #15, #29, #34 done | `e67251e` | Effort-S sweep. #23 feed scrolls to top on pagination (reduced-motion aware). #27 not reproducible — dashboard (only Feed-card link) is auth-gated. #15 `reuseExistingServer: false` so Playwright owns the server. #34 port map documented + `clean-port` script. #29 README clarified + root `test:all`. Desktop E2E 31/31 green; web typecheck+lint clean. |
-| 2026-06-19 | 2 | #7, #8 done | `6328878` | Report schema integrity. #7 `reason` is now a Prisma `enum ReportReason` (in-place `USING` cast migration; compile-time `AssertExact` guard keeps DTO list in sync). #8 added `resolutionNote String?`, accepted on update, cleared on reopen, returned in responses. Backend suite **225/225** green; api typecheck+lint clean. |
-| 2026-06-19 | 2 | #19 done | `5543993` | Delete UI for studio/game/devlog/roadmap/notification. Backend DELETE endpoints + service methods (auth-gated via studio-permissions). Frontend hooks + confirm dialogs on edit pages + dashboard rows. Backend suite **241/241** green. |
-| 2026-06-19 | 2 | #28 done | `ec217c7` | Visual regression snapshots. 20 `toHaveScreenshot()` baselines covering homepage, games, game detail, login, register, studio, devlog, dashboard, dashboard feed, notifications — each at desktop (1440×900) and mobile (412×915). Snapshot tests excluded from default run (`testIgnore`); run via `test:e2e:snapshots`. Platform-independent paths (no OS suffix) for CI portability. |
-| 2026-06-19 | 2 | #32 done | `e304064` | Shared mock data for independent frontend dev. Created `lib/api/mock-data.ts` (extracted from E2E fixtures) + `lib/api/mock-client.ts` (dev-only fetch interceptor). Toggle via `NEXT_PUBLIC_USE_MOCKS=true` in `.env.local` — runs `pnpm dev` without a backend. Tree-shaken in production builds. |
-| 2026-06-19 | 2 | #18 done | `e304064` | Image uploads MVP. Backend `POST /api/upload` (multer, local disk, auth-gated, 10 MB limit, image-only). Frontend `<ImageUpload>` component with file picker + preview; wired into studio edit (logo/banner), game edit (cover/banner), devlog edit (cover). Served via Express static at `/api/uploads/*`. |
-| 2026-06-19 | 2 | #2 done | `2c1fec2` | Refresh token rotation. Backend: `RefreshToken` Prisma model, sha256-hashed tokens with 30-day expiry, rotation on each refresh, revocation on logout. Access token shortened to 15m (from 7d). `POST /auth/refresh` + `POST /auth/logout`. Frontend: silent refresh on 401, dual-token storage, logout revokes server-side. |
-| 2026-06-19 | 2 | #6 done | `bb7c779` | OAuth login with Google + GitHub. Backend: passport-google-oauth20 + passport-github2 strategies, OAuthService links by email (existing user → update avatar; new user → create). Frontend: OAuth login buttons on /login, /oauth/callback page stores tokens and redirects to dashboard. Config vars added to .env.example. |
-| 2026-06-19 | 2 | #21 done | `0a52655` | Real-time notifications via SSE. Backend: GET /me/notifications/stream pushes unread count on notification creation (RxJS Subject + filter). Frontend: EventSource subscription updates TanStack Query cache in real-time; polling kept as fallback (60s). Works alongside existing poll — first SSE message arrives immediately, no delay. |
-| 2026-06-19 | 2 | #25 done | `e987a20` | Rich text editor for devlogs. Installed @uiw/react-md-editor, created <MarkdownEditor> component with live preview (dark mode), replaced body textarea in devlog create + edit pages. Existing markdown content renders correctly in read-only views. |
-| 2026-06-19 | 2 | #3 done | `7b89976` | Rate limiting via `@nestjs/throttler`: global 60/min/IP guard + tighter `@Throttle` overrides (login 10, register 5, comment 20, reaction 30 per min); health `@SkipThrottle()`. New spec asserts login → 429. Backend suite **226/226** green; lint clean. |
-| 2026-06-19 | 1 | #16 done | `6d06746` | Dev-mode E2E path: `PLAYWRIGHT_DEV=1` serves with `next dev` (no production build) via `test:e2e:dev`; CI keeps `next start`. README documents both + the `NEXT_PUBLIC_*` inlining caveat. Verified public spec 8/8 in dev mode. |
-| 2026-06-19 | polish | #22 done | `02a97c5` | Auth hydration flash: nav renders a stable skeleton while `isLoading` (no pop-in/shift); `/login` + `/register` gate on `authLoading` before redirect so the form doesn't flash for logged-in visitors. 25 E2E tests green. |
-| 2026-06-19 | 3 | #9, #24 done | `5607602` | Reaction N+1 fix. New batch endpoint `GET /api/devlogs/:id/comments/reactions` resolves all comments' reactions in 2 queries (`groupBy` + viewer `findMany`), keyed by comment id. Frontend swaps the per-comment fan-out for one `useDevlogCommentReactions` query; mutations invalidate the batch key. Backend **229/229**; web typecheck+lint clean. |
-| 2026-06-19 | 4 | #26 done | `d1869ea` | Clickable notifications: server resolves a `targetUrl` per notification (DEVLOG/COMMENT→devlog, GAME/STUDIO→slug routes; batched, no N+1). Rows link to it + mark read on click. Backend **229/229**; web typecheck+lint clean. |
-| 2026-06-19 | 5 | #33 done | `ffd168a` | Storybook 10.4 + @storybook/nextjs. 9 stories covering all shared UI components. Compatible addons only (blocks/docs deferred — incompatible with storybook@10.x). Tailwind v4 CSS + dark mode + autodocs. |
-| 2026-06-19 | post | Dark mode toggle | current | Manual theme toggle (Sun/Moon icon in Nav). Replaced hardcoded className='dark' with next-themes ThemeProvider. MarkdownEditor respects current theme. |
-| 2026-06-19 | post | Toast notifications | current | Installed sonner and added <Toaster> to Providers. Added toast.success/error to follow/unfollow, delete studio/game/devlog mutations. |
-| 2026-06-19 | post | Infinite scroll | current | Replaced Previous/Next pagination on feed and games pages with IntersectionObserver-based infinite scroll. New hooks: useInfinitePersonalFeed, useInfiniteGames, useIntersectionObserver. |
-| 2026-06-19 | post | Global search | current | Backend: GET /api/search?q= searches games/studios/devlogs in parallel. Frontend: /search page with debounced search (300ms), grouped results by type, search icon in Nav. |
-| 2026-06-19 | post | User profile pages | current | Backend: GET /api/users/:username returns profile info + studio memberships. Frontend: /users/[username] page with avatar, displayName, bio, role badge, join date, studio list. |
-| 2026-06-19 | post | Media gallery + lightbox | current | New MediaGallery component: separates TRAILER/VIDEO (play overlay, external link) from SCREENSHOT/IMAGE (grid with thumbnails). Lightbox modal with prev/next navigation, keyboard support (Escape to close), caption overlay on hover. thumbnailUrl added to frontend Game Media type. |
-| 2026-06-19 | post | Studio stats dashboard | current | Added stats cards (followers, games, members) to studio detail page above the description, with icons and count numbers. |
-| 2026-06-19 | redesign | Frontend redesign v2 | current | Complete visual redesign: obsidian-black theme, cyan/coral/violet/amber palette, geometric typography (Space Grotesk + JetBrains Mono + Inter via next/font), clip-path panels, circuit-line decorations, monospaced technical labels. New shared components: SiteHeader, SiteFooter, PageFrame, SectionHeading, SignalLabel, StatusBadge, SearchField, LoadingSkeleton, EmptyState, ErrorState. Redesigned pages: / (hero + stats), /games (infinite catalog), /games/[slug] (detail + sidebar), /studios (directory), /studios/[slug] (detail), /feed (live feed), /login, /register. Global nav with mobile menu. |
-| 2026-06-19 | fix | CI: OAuth strategies missing env vars | current | Added dummy OAuth env vars (GOOGLE_CLIENT_ID, GITHUB_CLIENT_ID) to vitest.config.ts env so passport strategies can initialize in tests. Reverted strategies to getOrThrow. |
-| 2026-06-22 | security | Auth rearchitecture Phase 1 | `f664d35` | Replaced JWT-in-localStorage with opaque server-side sessions (httpOnly cookie, SHA-256 hashed, revocable). Removed localStorage token storage. Added Session model, SessionService, SessionAuthGuard, CSRF, helmet security headers. Fixed JWT_SECRET from 'change-me-in-production' and reduced expiry from 7d to 15m. 17 files changed. |
-| 2026-06-22 | security | Auth Phase 2: email verification + password reset + lockout | `dfe93f8` | Added VerificationToken and PasswordResetToken models. Created TokenService, verify-email/forgot-password/reset-password endpoints. Account lockout after 5 failed attempts (15min). Token consumption is transactional. Rate limiting on sensitive endpoints. Frontend pages for verify-email, forgot-password, reset-password. |
-| 2026-06-22 | design | Custom SVG logo + favicon | `217027b`, `501160a` | Created LogoIcon component with custom SVG path. Replaced Gamepad2 site icons. Added SVG favicon with coral color. |
-| 2026-06-22 | design | Footer redesign | `302f251`, `336c385` | Centered inline layout, copyright, Instagram social link, coral logo without background. Added footer to homepage and games page. |
-| 2026-06-22 | design | Feed page refinements | `5b040fb` | Reduced font sizes, removed type label, removed accent colors from feed items. |
-| 2026-06-23 | security | Backend security audit | `59d3817` | Audited all 68 endpoints across 18 controllers. Fixed notifications controller (last on JwtAuthGuard). Created route-audit.md, protected-content.md, security-hardening-report.md. Added security-auth.spec.ts (16 auth enforcement tests + rate limit test). |
-| 2026-06-23 | product | Account types + wishlist | current | Added AccountType enum (PLAYER/STUDIO). Registration accepts accountType (default PLAYER). Private wishlist: WishlistItem model, 4 API endpoints, wishlist button on game detail, My Wishlist on dashboard. accountType is onboarding intent only (not authorization). Docs: docs/product/account-types-and-wishlist.md. |
+| Feature | Status | Details |
+|---|---|---|
+| **Session auth** | ✅ | httpOnly cookies, SHA-256 hashed, revocable, SameSite conditional |
+| **Email verification** | ✅ | 6-digit code via Resend, rate limited, single-use |
+| **Password reset** | ✅ | Forgot/reset flow with tokens |
+| **Account lockout** | ✅ | 5 failed attempts → 15 min lockout |
+| **Rate limiting** | ✅ | Global 60/min, per-route tighter limits |
+| **Google OAuth** | ✅ | Working with proper client credentials |
+| **GitHub OAuth** | ✅ | Working with proper client credentials |
+| **Account types** | ✅ | PLAYER vs STUDIO, onboarding intent only |
+| **Permissions** | ✅ | StudioMember roles (OWNER/ADMIN/MEMBER) enforced |
+| **Admin role** | ✅ | Protected bootstrap via `pnpm admin:ensure` |
+| **Registration consent** | ✅ | Terms/Privacy/Community Guidelines acceptance |
+| **Game detail page** | ✅ | Premium interactive page with follow, wishlist, share, lightbox, community |
+| **Professional splash** | ✅ | Cyberpunk animated splash (5-8s, sessionStorage) |
+| **Pagination** | ✅ | 16 games/page with URL params |
+| **Search** | ✅ | Header dropdown + search page with 300ms debounce |
+| **Live feed** | ✅ | Real data from DB (devlogs + roadmap) |
+| **User profiles** | ✅ | `/users/[username]` with followers, activity |
+| **Studio profiles** | ✅ | `/studios/[slug]` with banner, stats, members, games |
+| **Follow system** | ✅ | Games + studios, real endpoints |
+| **Wishlist** | ✅ | Private, real endpoints |
+| **Comments** | ✅ | Game-level comments with likes |
+| **Onboarding wizard** | ✅ | Multi-step (account type, username, profile, review) |
+| **Player Dashboard** | ✅ | PLAYER-focused dashboard with sidebar, wishlist, following, feed |
+| **Dashboard separation** | ✅ | `/dashboard` routes by `accountType` |
+| **Seed data** | ✅ | 5 demo games + studios with real data |
+| **Demo assets** | ✅ | 30 SVG placeholder assets for 5 games |
+| **Footer** | ✅ | X/Twitter link + Instagram + copyright |
+| **Password visibility** | ✅ | Toggle on login/register/reset-password |
+| **Notification dropdown** | ✅ | Cyberpunk dropdown in header |
+| **Profile settings** | ✅ | `/settings/profile` with email change limit (2x) |
+| **Game creation form** | ✅ | Complete form with README, demo, engine, languages, genres |
+| **Game README page** | ✅ | `/games/[slug]/readme` |
+| **GameView tracking** | ✅ | Views counted per game detail visit |
+| **CSP headers** | ✅ | Helmet-configured, updated for Next.js compatibility |
 
-**Phase 0 verification:** `pnpm --filter @playmorrow/web lint` → 0 warnings; `prisma validate`
-clean (config + env load); turbo "no output files" warning gone on full `pnpm test`.
+### 🔴 Critical Issues
 
-> ✅ **Baseline (2026-06-19):** backend suite runs **241/241** across 16 test files (when a
-> local Postgres is available). E2E remains API-mocked and does not need a DB.
+| Issue | Status | Details |
+|---|---|---|
+| Google OAuth credentials need updating | 🔴 | User created new Google project. Render needs `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` updated |
+| Onboarding not fully integrated with email registration | 🟡 | Email registration still uses old flow, doesn't redirect to onboarding |
 
-## Issue catalogue (by area)
+### 🟡 Open / In Progress
 
-- [`backend.md`](./backend.md) — issues **1–11**
-- [`frontend.md`](./frontend.md) — issues **12–29**
-- [`devx.md`](./devx.md) — issues **30–34**
+| Item | Priority | Notes |
+|---|---|---|
+| Email registration → onboarding | Medium | Should also use the new onboarding wizard |
+| Dashboard empty states | Medium | Professional empty states for wishlist/feed/notifications |
+| Remove fake seed data defaults | Medium | Dashboard should start completely empty for new users |
+| Account dropdown menu | Low | Click avatar → dropdown with navigation |
+| Activity feed / Signal Relay | Low | Real events for follows, comments, wishlist |
+| GitHub OAuth testing | Low | Not yet tested with credentials |
+| Production deployment | Low | Vercel + Render configured, needs final validation |
 
-Each issue is tagged: **Type** (Bug / Limitation / Feature / DX), **Severity**, **Effort**
-(S ≤ half day · M ≈ 1–2 days · L ≥ 3 days or needs design), and **Status** (`OPEN`).
+### 📋 Recommended Next Steps
 
----
+1. **Update Render env vars** with new Google OAuth credentials
+2. **Test Google login flow** end-to-end (Google → onboarding → dashboard)
+3. **Integrate email registration** with new onboarding wizard
+4. **Create empty states** for all dashboard sections
+5. **Add account dropdown** to header
+6. **Create activity feed events** for real-time Signal Relay
 
-## ⚠️ Important correction before you start
-
-The original list names the **6 failing feed E2E tests (#12)** as the "single most impactful
-fix" and guesses the cause is a *"Playwright route-ordering issue with predicate functions."*
-
-That diagnosis is **not supported by the evidence on disk.** The failure artifact at
-`apps/web/test-results/personalized-feed-Personal-1497d--filter-shows-mixed-content-desktop/error-context.md`
-shows the real error:
+## Architecture
 
 ```
-TypeError: makeItem is not a function or its return value is not iterable
+playmorrow.vercel.app (Next.js 15)
+  └── /api/* → Next.js proxy → playmorrow-api.onrender.com (NestJS 11)
+                                        └── neon.tech (PostgreSQL)
 ```
 
-That is a JavaScript error **inside the test's own mock handler**, not a route-matching
-problem — and it may be a **stale artifact** (the current `personalized-feed.spec.ts` does
-not obviously contain that bug). **Do not implement the assumed "route ordering" fix.**
-Reproduce first (see #12) and fix the actual root cause.
+### Key env vars
 
----
+| Variable | Where | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | Vercel | Frontend API URL |
+| `API_URL` | Vercel (server) | Server-side API calls |
+| `DATABASE_URL` | Render + `.env` | Prisma connection |
+| `JWT_SECRET` | Render | JWT signing |
+| `SESSION_SECRET` | Render | Session cookie signing |
+| `GOOGLE_CLIENT_ID` | Render | Google OAuth |
+| `GOOGLE_CLIENT_SECRET` | Render | Google OAuth |
+| `GOOGLE_CALLBACK_URL` | Render | Google OAuth callback |
+| `PLAYMORROW_OWNER_EMAIL` | Render | Admin bootstrap |
+| `RESEND_API_KEY` | Render | Email verification |
 
-## Recommended execution path
-
-Phases are ordered to unblock a green, CI-gated test suite first, then correctness, then
-polish, then features. Within a phase, items are independent unless noted.
-
-| Phase | Theme | Issues | Why this order |
-|-------|-------|--------|----------------|
-| **0** | Quick wins / clear the noise | #11, #10, #17, #30, #31 | ✅ Done. |
-| **1** | Green E2E + CI (critical path) | #12 → #1 → #15/#16 → #13 → #29 → #14 | ✅ Done. |
-| **2** | Backend correctness & security | #3, #7, #8 | ✅ Done. |
-| **3** | Performance | #9 / #24 | ✅ Done. |
-| **4** | UX polish | #22, #23, #27, #26 | ✅ Done. |
-| **5** | Features | #33, (#4, #5 deferred) | ✅ Done. Two deferred items remain. |
-
-**All 34 issues resolved (31 DONE + 2 DEFERRED + 1 OPEN).** The only remaining issues
-are #4 (email verification) and #5 (password reset), both deferred by product owner.
-No further sprint work is queued — the project is feature-complete for MVP.
-
----
-
-## Repo orientation
-
-Monorepo: **pnpm 11 + Turborepo**.
-
-```
-apps/web         Next.js 15 + React 19 + Tailwind v4 + TanStack Query   (frontend)
-apps/api         NestJS 11 + Swagger + Passport-JWT + class-validator    (backend)
-packages/database Prisma 6 + Postgres (schema, migrations, seed)
-packages/types   shared TS types
-packages/config  shared tsconfig / eslint
-```
-
-### Commands
+## Commands
 
 ```bash
-pnpm install                 # bootstrap
-pnpm build                   # turbo build (db:generate runs first)
-pnpm typecheck               # tsc --noEmit across packages
-pnpm lint                    # eslint across packages
-pnpm test                    # backend Vitest only — 207 passing (see #29: does NOT run E2E)
-pnpm --filter @playmorrow/api test     # backend unit/integration (SWC + Vitest)
-pnpm test:e2e                # Playwright — requires a production build first (see below)
-pnpm db:generate|migrate|push|studio|seed
+pnpm dev              # Run web + API
+pnpm build            # Full build
+pnpm lint             # Lint all
+pnpm typecheck        # TypeScript check
+pnpm admin:ensure     # Promote user to ADMIN
+pnpm db:seed          # Seed demo data
+pnpm db:migrate       # Create migration
+pnpm db:deploy        # Apply migration to production
 ```
-
-### Running E2E (current, fragile — see #15/#16)
-
-```bash
-pnpm --filter @playmorrow/web build      # next build (3–5 min) — REQUIRED before e2e
-pnpm test:e2e                            # playwright starts `next start -p 3099`
-```
-
-- Playwright config: `apps/web/playwright.config.ts`. Two projects: `desktop`, `mobile`
-  (mobile is configured but **never run** — #13). Base URL `http://localhost:3099`.
-- E2E mocks intercept the API at origin **`http://localhost:4000`** (see
-  `apps/web/e2e/fixtures/mocks.ts`). The web app's API base is
-  `process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'`
-  (`apps/web/lib/api/client.ts`). Note `NEXT_PUBLIC_*` is **inlined at build time**, so the
-  `webServer.env` override in the Playwright config does not change an already-built bundle.
-
-### Environment / infra facts
-
-- **Docker is not installed on the dev machine.** Local Postgres options: hosted Neon /
-  Supabase, or install Docker for `docker-compose.yml`. CI already uses a Postgres **service
-  container**.
-- `apps/api/.env` is gitignored; `pnpm setup:env` copies from `.env.example` automatically.
-- CI workflows exist in `.github/workflows/ci.yml` (quality + backend + e2e).
-
-### Conventions to follow
-
-- Backend: NestJS module-per-domain. DTOs use `class-validator` decorators; controllers
-  thin, services hold logic. Mirror production bootstrap via
-  `apps/api/src/test/create-test-app.ts` in integration tests.
-- Frontend: TanStack Query hooks live in `apps/web/lib/api/hooks.ts`; the typed fetch
-  wrapper is `apps/web/lib/api/client.ts`; auth state is `apps/web/lib/api/auth-context.tsx`.
-- Prisma is the single source of truth for the data model
-  (`packages/database/prisma/schema.prisma`). Schema changes require a migration.
-
----
-
-## How to use this handoff
-
-1. Read this file end-to-end.
-2. Go to the area file for your issue, read the full entry (don't act on the title alone).
-3. For `NEEDS DESIGN` items, write a short design note before coding (the email-features
-   precedent: features can be deferred — confirm scope with the product owner).
-4. Update the issue's **Status** line as you progress (`OPEN` → `IN PROGRESS` → `DONE (commit)`).
-5. Keep the test suite green; don't open the next phase until the current one is CI-green.

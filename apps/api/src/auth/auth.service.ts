@@ -27,6 +27,8 @@ const CURRENT_TERMS_VERSION = '2026-06-23';
 const CURRENT_PRIVACY_VERSION = '2026-06-23';
 const CURRENT_COMMUNITY_GUIDELINES_VERSION = '2026-06-23';
 const VERIFICATION_CODE_TTL_MINUTES = 15;
+const USERNAME_PATTERN = /^[a-zA-Z0-9_]+$/;
+const STUDIO_SLUG_PATTERN = /^[a-z0-9-]+$/;
 
 function isCommonPassword(password: string): boolean {
   const lower = password.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -34,7 +36,7 @@ function isCommonPassword(password: string): boolean {
 }
 
 export interface AuthResult {
-  user: { id: string; email: string; username: string; displayName: string; role: string; accountType: string };
+  user: { id: string; email: string; username: string; displayName: string; role: string; accountType: string; isOnboardingCompleted: boolean };
   accessToken: string;
   refreshToken: string;
 }
@@ -42,11 +44,11 @@ export interface AuthResult {
 export interface RegisterResult {
   requiresEmailVerification: boolean;
   email: string;
-  user: { id: string; displayName: string; username: string; email: string; accountType: string; emailVerifiedAt: Date | null };
+  user: { id: string; displayName: string; username: string; email: string; accountType: string; emailVerifiedAt: Date | null; isOnboardingCompleted: boolean };
 }
 
 export interface VerifyEmailResult {
-  user: { id: string; email: string; username: string; displayName: string; role: string; accountType: string };
+  user: { id: string; email: string; username: string; displayName: string; role: string; accountType: string; isOnboardingCompleted: boolean };
 }
 
 export interface RefreshResult {
@@ -84,25 +86,26 @@ export class AuthService {
       throw new BadRequestException('This password is too common. Choose a more unique password.');
     }
 
-    if (dto.acceptedTerms !== true) {
-      throw new BadRequestException('You must accept the terms of service.');
-    }
-
-    const accountType = dto.accountType ?? 'PLAYER';
-    if (!['PLAYER', 'STUDIO'].includes(accountType)) {
-      throw new BadRequestException('accountType must be PLAYER or STUDIO');
+    if (dto.acceptedTerms !== true || dto.acceptedPrivacy !== true) {
+      throw new BadRequestException('You must accept the terms of service and privacy policy.');
     }
 
     const lowerPw = dto.password.toLowerCase();
-    if (lowerPw.includes(dto.email.split('@')[0]!.toLowerCase()) || lowerPw.includes(dto.username.toLowerCase())) {
-      throw new BadRequestException('Password cannot contain your email or username.');
+    if (lowerPw.includes(dto.email.split('@')[0]!.toLowerCase())) {
+      throw new BadRequestException('Password cannot contain your email.');
     }
 
     const passwordHash = await argon2.hash(dto.password);
     const now = new Date();
+    const emailLower = dto.email.toLowerCase();
+    const pendingUsername = await this.generatePendingUsername(emailLower);
     const user = await this.usersService.create({
-      email: dto.email, username: dto.username, displayName: dto.displayName, passwordHash,
-      accountType,
+      email: emailLower,
+      username: pendingUsername,
+      displayName: emailLower.split('@')[0]!,
+      passwordHash,
+      accountType: 'PLAYER',
+      isOnboardingCompleted: false,
       termsAcceptedAt: now,
       privacyAcceptedAt: now,
       communityGuidelinesAcceptedAt: now,
@@ -127,6 +130,7 @@ export class AuthService {
         id: user.id, displayName: user.displayName, username: user.username,
         email: user.email, accountType: user.accountType ?? 'PLAYER',
         emailVerifiedAt: null,
+        isOnboardingCompleted: false,
       },
     };
   }
@@ -201,6 +205,7 @@ export class AuthService {
       id: user.id, email: user.email, username: user.username,
       displayName: user.displayName, role: user.role,
       isVerified: user.isVerified, accountType: user.accountType ?? 'PLAYER',
+      isOnboardingCompleted: user.isOnboardingCompleted,
     };
   }
 
@@ -245,7 +250,7 @@ export class AuthService {
     }
 
     if (user.emailVerifiedAt) {
-      return { user: { id: user.id, email: user.email, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER' } };
+      return { user: { id: user.id, email: user.email, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER', isOnboardingCompleted: user.isOnboardingCompleted } };
     }
 
     const codeHash = createHash('sha256').update(code).digest('hex');
@@ -270,7 +275,7 @@ export class AuthService {
       }),
     ]);
 
-    return { user: { id: user.id, email: user.email, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER' } };
+    return { user: { id: user.id, email: user.email, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER', isOnboardingCompleted: user.isOnboardingCompleted } };
   }
 
   async resendVerificationCode(email: string): Promise<void> {
@@ -343,7 +348,7 @@ export class AuthService {
 
   private async buildResult(user: User): Promise<AuthResult> {
     const tokens = await this.issueTokens(user);
-    return { user: { id: user.id, email: user.email, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER' }, ...tokens };
+    return { user: { id: user.id, email: user.email, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER', isOnboardingCompleted: user.isOnboardingCompleted }, ...tokens };
   }
 
   private async issueTokens(user: User): Promise<RefreshResult> {
@@ -361,56 +366,93 @@ export class AuthService {
     const accountType = dto.accountType as string;
     if (!['PLAYER', 'STUDIO'].includes(accountType)) throw new BadRequestException('Invalid account type');
 
-    const username = (dto.username as string)?.trim().toLowerCase();
+    const username = (dto.username as string)?.trim();
+    const usernameLowercase = username?.toLowerCase();
     if (!username || username.length < 3 || username.length > 20) throw new BadRequestException('Username must be 3-20 characters');
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) throw new BadRequestException('Username can only contain letters, numbers, and underscores');
-
-    const existingUser = await this.prisma.user.findUnique({ where: { username } });
-    if (existingUser) throw new ConflictException('Username already taken');
+    if (!USERNAME_PATTERN.test(username)) throw new BadRequestException('Username can only contain letters, numbers, and underscores');
 
     const email = (dto.email as string)?.toLowerCase();
-    if (email) {
-      const existingEmail = await this.prisma.user.findUnique({ where: { email } });
-      if (existingEmail) throw new ConflictException('Email already registered');
+    if (!email) throw new BadRequestException('Email is required');
+
+    const existingByUsername = await this.prisma.user.findFirst({ where: { usernameLowercase } });
+    if (existingByUsername && existingByUsername.email !== email) throw new ConflictException('Username already taken');
+
+    const existingEmail = await this.prisma.user.findUnique({ where: { email } });
+    if (existingEmail?.isOnboardingCompleted) {
+      throw new ConflictException('Email already registered');
     }
 
-    const user = await this.prisma.user.create({
-      data: {
-        email: email || `${username}@placeholder.playmorrow`,
-        username,
-        displayName: (dto.displayName as string) || username,
-        passwordHash: null,
-        avatarUrl: (dto.avatarUrl as string) || null,
-        bio: (dto.bio as string) || null,
-        accountType: accountType as 'PLAYER' | 'STUDIO',
-        role: 'PLAYER',
-        emailVerifiedAt: email ? new Date() : null,
-        termsAcceptedAt: new Date(),
-        privacyAcceptedAt: new Date(),
-        communityGuidelinesAcceptedAt: new Date(),
-        termsVersion: '2026-06-28',
-        privacyVersion: '2026-06-28',
-        communityGuidelinesVersion: '2026-06-28',
-      },
-    });
-
-    // If STUDIO, create the studio
     if (accountType === 'STUDIO') {
-      const studioSlug = ((dto.studioSlug as string) || dto.username as string).toLowerCase();
+      const studioSlug = ((dto.studioSlug as string) || username).trim().toLowerCase();
+      if (!STUDIO_SLUG_PATTERN.test(studioSlug) || studioSlug.length < 3 || studioSlug.length > 40) {
+        throw new BadRequestException('Studio slug must be 3-40 lowercase letters, numbers, or hyphens.');
+      }
       const slugExists = await this.prisma.studio.findUnique({ where: { slug: studioSlug } });
       if (slugExists) throw new ConflictException('Studio slug already taken');
-
-      await this.prisma.studio.create({
-        data: {
-          slug: studioSlug,
-          name: (dto.studioName as string) || (dto.displayName as string) || username,
-          websiteUrl: (dto.studioWebsite as string) || null,
-          isVerified: false,
-          members: { create: { userId: user.id, role: 'OWNER' } },
-        },
-      });
     }
 
+    const now = new Date();
+    const user = await this.prisma.$transaction(async (tx) => {
+      const data = {
+        email,
+        username,
+        usernameLowercase,
+        displayName: ((dto.displayName as string) || username).trim(),
+        avatarUrl: (dto.avatarUrl as string) || null,
+        bio: (dto.bio as string) || null,
+        location: (dto.location as string) || null,
+        accountType: accountType as 'PLAYER' | 'STUDIO',
+        role: 'PLAYER' as const,
+        emailVerifiedAt: now,
+        isVerified: true,
+        isOnboardingCompleted: true,
+        termsAcceptedAt: existingEmail?.termsAcceptedAt ?? now,
+        privacyAcceptedAt: existingEmail?.privacyAcceptedAt ?? now,
+        communityGuidelinesAcceptedAt: existingEmail?.communityGuidelinesAcceptedAt ?? now,
+        termsVersion: existingEmail?.termsVersion ?? CURRENT_TERMS_VERSION,
+        privacyVersion: existingEmail?.privacyVersion ?? CURRENT_PRIVACY_VERSION,
+        communityGuidelinesVersion: existingEmail?.communityGuidelinesVersion ?? CURRENT_COMMUNITY_GUIDELINES_VERSION,
+      };
+
+      const completedUser = existingEmail
+        ? await tx.user.update({ where: { id: existingEmail.id }, data })
+        : await tx.user.create({ data: { ...data, passwordHash: null } });
+
+      if (accountType === 'STUDIO') {
+        await tx.studio.create({
+          data: {
+            slug: ((dto.studioSlug as string) || username).trim().toLowerCase(),
+            name: ((dto.studioName as string) || (dto.displayName as string) || username).trim(),
+            tagline: (dto.studioBio as string) || null,
+            description: (dto.studioBio as string) || null,
+            logoUrl: (dto.studioLogoUrl as string) || (dto.avatarUrl as string) || null,
+            websiteUrl: (dto.websiteUrl as string) || null,
+            location: (dto.location as string) || null,
+            isVerified: false,
+            members: { create: { userId: completedUser.id, role: 'OWNER' } },
+          },
+        });
+      }
+
+      return completedUser;
+    });
+
     return { user };
+  }
+
+  async isUsernameAvailable(username: string) {
+    const normalized = username.trim();
+    if (normalized.length < 3 || normalized.length > 20 || !USERNAME_PATTERN.test(normalized)) {
+      return { available: false, reason: 'INVALID' };
+    }
+    const existing = await this.prisma.user.findFirst({ where: { usernameLowercase: normalized.toLowerCase() } });
+    return { available: !existing, reason: existing ? 'TAKEN' : null };
+  }
+
+  private async generatePendingUsername(email: string) {
+    const base = `pending_${createHash('sha1').update(email).digest('hex').slice(0, 12)}`;
+    const existing = await this.usersService.findByUsername(base);
+    if (!existing) return base;
+    return `pending_${randomBytes(8).toString('hex')}`;
   }
 }

@@ -130,6 +130,7 @@ model User {
   id           String   @id @default(cuid())
   email        String   @unique
   username     String   @unique
+  usernameLowercase String? @unique
   displayName  String
   /// Null for OAuth-only accounts.
   passwordHash String?
@@ -139,6 +140,7 @@ model User {
   location     String?
   isVerified   Boolean  @default(false)
   accountType                 AccountType @default(PLAYER)
+  isOnboardingCompleted       Boolean     @default(true)
   termsAcceptedAt             DateTime?
   privacyAcceptedAt           DateTime?
   communityGuidelinesAcceptedAt DateTime?
