@@ -115,9 +115,20 @@ export default function OnboardingPage() {
         body.studioWebsite = studioWebsite || undefined;
         body.studioDiscord = studioDiscord || undefined;
       }
-      await api.post('/auth/complete-onboarding', body);
+      // Use direct fetch instead of api client to ensure cookies are captured
+      const res = await fetch('/api/auth/complete-onboarding', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({ message: 'Failed' }));
+        throw new Error(errBody.message || 'Failed to complete setup');
+      }
       setSuccess(true);
-      setTimeout(() => router.push('/dashboard'), 1500);
+      // Full page navigation ensures cookie is sent with the request
+      window.location.href = '/dashboard';
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to complete setup');
     } finally { setLoading(false); }
