@@ -52,8 +52,16 @@ export class OAuthController {
   }
 
   private async handleCallback(req: Request, res: Response) {
-    const profile = req.user as { provider: string; providerId: string; email: string; displayName: string; avatarUrl: string | null };
-    const frontendUrl = this.configService.get<string>(FRONTEND_URL_KEY, 'http://localhost:3000');
+    try {
+      const profile = req.user as { provider: string; providerId: string; email: string; displayName: string; avatarUrl: string | null };
+
+      if (!profile.email) {
+        this.logger.error('Google OAuth returned no email');
+        res.redirect(`${this.configService.get<string>(FRONTEND_URL_KEY, 'http://localhost:3000')}/login?error=No+email+from+Google`);
+        return;
+      }
+
+      const frontendUrl = this.configService.get<string>(FRONTEND_URL_KEY, 'http://localhost:3000');
 
     // Check if user already exists
     const existingUser = await this.oauthService.findByEmail(profile.email.toLowerCase());
@@ -77,6 +85,10 @@ export class OAuthController {
       const params = new URLSearchParams({ provider: profile.provider, email: encodeURIComponent(profile.email), displayName: profile.displayName });
       if (profile.avatarUrl) params.set('avatarUrl', profile.avatarUrl);
       res.redirect(`${frontendUrl}/onboarding?${params.toString()}`);
+    }
+    } catch (err) {
+      this.logger.error('OAuth callback error', err instanceof Error ? err.stack : err);
+      res.redirect(`${frontendUrl}/login?error=Authentication+failed`);
     }
   }
 }
