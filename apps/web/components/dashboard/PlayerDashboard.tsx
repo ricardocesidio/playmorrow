@@ -13,6 +13,7 @@ import {
   History,
   Library,
   Lock,
+  LogOut,
   MessageSquare,
   Radio,
   Settings,
@@ -26,6 +27,7 @@ import {
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyFollows, useMyWishlist, useNotifications, useUnreadNotificationCount } from '@/lib/api/hooks';
+import { useRouter } from 'next/navigation';
 
 const games = [
   {
@@ -131,7 +133,8 @@ const comments = [
 ];
 
 export function PlayerDashboard() {
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, logout } = useAuth();
   const { data: wishlist } = useMyWishlist();
   const { data: follows } = useMyFollows();
   const { data: unreadData } = useUnreadNotificationCount();
@@ -170,6 +173,12 @@ export function PlayerDashboard() {
               <SidebarLink href="/dashboard" icon={<Trophy className="size-4" />} label="Achievements" />
               <SidebarLink href="/dashboard/notifications" icon={<MessageSquare className="size-4" />} label="Messages" count={unreadCount} />
               <SidebarLink href="/settings/profile" icon={<Settings className="size-4" />} label="Settings" />
+              <button
+                onClick={() => { logout(); router.push('/'); }}
+                className="flex w-full cursor-pointer items-center gap-3 rounded-none px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground transition hover:bg-coral/10 hover:text-coral"
+              >
+                <LogOut className="size-3.5" /> Sign out
+              </button>
             </nav>
 
             <div className="mt-5 border-t border-border/70 px-2 pt-4">
