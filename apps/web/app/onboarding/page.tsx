@@ -1,13 +1,41 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRight, Check, Gamepad2, Building2, User, Globe, MapPin, Mail, AtSign } from 'lucide-react';
+import { ArrowRight, Check, Gamepad2, Building2, User, Globe, Mail, AtSign, Upload } from 'lucide-react';
 import { HudButton, HudPanel } from '@/components/playmorrow/hud';
 import { api } from '@/lib/api/client';
 
 const STEPS = ['Account Type', 'Username', 'Profile', 'Review'];
+
+const COUNTRIES = [
+  'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan',
+  'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan', 'Bolivia',
+  'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi',
+  'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo', 'Costa Rica', 'Croatia', 'Cuba', 'Cyprus', 'Czech Republic',
+  'Denmark', 'Djibouti', 'Dominican Republic',
+  'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia',
+  'Fiji', 'Finland', 'France',
+  'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Guatemala', 'Guinea', 'Guyana',
+  'Haiti', 'Honduras', 'Hungary',
+  'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy',
+  'Jamaica', 'Japan', 'Jordan',
+  'Kazakhstan', 'Kenya', 'Kuwait', 'Kyrgyzstan',
+  'Laos', 'Latvia', 'Lebanon', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg',
+  'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Mauritania', 'Mauritius', 'Mexico', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar',
+  'Namibia', 'Nepal', 'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway',
+  'Oman',
+  'Pakistan', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal',
+  'Qatar',
+  'Romania', 'Russia', 'Rwanda',
+  'Saudi Arabia', 'Senegal', 'Serbia', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Somalia', 'South Africa', 'South Korea', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland', 'Syria',
+  'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Togo', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan',
+  'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan',
+  'Vatican City', 'Venezuela', 'Vietnam',
+  'Yemen',
+  'Zambia', 'Zimbabwe',
+];
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -23,8 +51,9 @@ export default function OnboardingPage() {
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [country, setCountry] = useState('');
-  const [location, setLocation] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarDataUrl, setAvatarDataUrl] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [studioName, setStudioName] = useState('');
   const [studioSlug, setStudioSlug] = useState('');
   const [studioWebsite, setStudioWebsite] = useState('');
@@ -33,7 +62,6 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Username availability check with debounce
   useEffect(() => {
     if (username.length < 3) { setUsernameAvailable(null); return; }
     const timer = setTimeout(async () => {
@@ -47,6 +75,16 @@ export default function OnboardingPage() {
     return () => clearTimeout(timer);
   }, [username]);
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { setError('Image too large. Max 5MB.'); return; }
+    setAvatarFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setAvatarDataUrl(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const handleFinish = async () => {
     setError('');
     setLoading(true);
@@ -57,8 +95,7 @@ export default function OnboardingPage() {
         displayName: displayName || username,
         bio,
         country,
-        location,
-        avatarUrl: avatarUrl || undefined,
+        avatarUrl: avatarDataUrl || undefined,
         provider: provider || undefined,
         email: email || undefined,
       };
@@ -74,6 +111,13 @@ export default function OnboardingPage() {
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to complete setup');
     } finally { setLoading(false); }
+  };
+
+  const handleUsernameKeyDown = (e: React.KeyboardEvent) => {
+    const allowed = /^[a-zA-Z0-9_]$/;
+    if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Tab' || e.key === 'Enter' ||
+        e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Home' || e.key === 'End') return;
+    if (!allowed.test(e.key)) e.preventDefault();
   };
 
   if (success) {
@@ -93,7 +137,6 @@ export default function OnboardingPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-xl">
-        {/* Progress */}
         <div className="mb-8 flex items-center justify-between">
           {STEPS.map((label, i) => (
             <div key={label} className="flex flex-col items-center gap-1.5">
@@ -132,40 +175,68 @@ export default function OnboardingPage() {
               <h2 className="font-display text-xl font-bold text-foreground">Choose your username</h2>
               <div className="relative">
                 <AtSign className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <input value={username} onChange={e => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20))}
+                <input
+                  value={username}
+                  onChange={e => {
+                    const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+                    if (val.length <= 20) setUsername(val);
+                  }}
+                  onKeyDown={handleUsernameKeyDown}
                   className={`clip-corner h-12 w-full border bg-background/80 pl-10 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan ${username && usernameAvailable === false ? 'border-coral' : 'border-input'}`}
-                  placeholder="Choose a username" autoComplete="username" />
+                  placeholder="Choose a username" autoComplete="username" maxLength={20} />
               </div>
               {checkingUsername && <p className="pm-micro text-muted-foreground">Checking availability...</p>}
               {usernameAvailable === true && <p className="pm-micro text-success flex items-center gap-1"><Check className="size-3" /> Available</p>}
               {usernameAvailable === false && <p className="pm-micro text-coral">Already taken</p>}
-              <p className="text-xs text-muted-foreground">3-20 characters. Letters, numbers, and underscore only.</p>
-              <input value={displayName} onChange={e => setDisplayName(e.target.value)}
-                className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan"
-                placeholder="Display name (optional)" />
+              <p className="text-xs text-muted-foreground">3-20 characters. Letters, numbers, and underscore _ only.</p>
+              <div className="space-y-1">
+                <label className="pm-micro text-muted-foreground">Display name</label>
+                <input value={displayName} onChange={e => setDisplayName(e.target.value.slice(0, 40))}
+                  className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan"
+                  placeholder="Your display name (max 40 characters)" maxLength={40} />
+              </div>
             </div>
           )}
 
           {step === 2 && (
             <div className="space-y-5">
               <h2 className="font-display text-xl font-bold text-foreground">{accountType === 'STUDIO' ? 'Studio Profile' : 'Profile Setup'}</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <label className="pm-micro text-muted-foreground">Avatar URL</label>
-                  <input value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" placeholder="https://..." />
-                </div>
-                <div className="space-y-1">
-                  <label className="pm-micro text-muted-foreground">Country</label>
-                  <input value={country} onChange={e => setCountry(e.target.value)} className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" placeholder="Country" />
-                </div>
-                <div className="space-y-1">
-                  <label className="pm-micro text-muted-foreground">Location</label>
-                  <input value={location} onChange={e => setLocation(e.target.value)} className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" placeholder="City, State" />
+
+              {/* Avatar upload */}
+              <div className="space-y-1">
+                <label className="pm-micro text-muted-foreground">Profile picture</label>
+                <div className="flex items-center gap-4">
+                  <div className="size-16 shrink-0 rounded-full border border-border bg-background/60 flex items-center justify-center overflow-hidden">
+                    {avatarDataUrl ? (
+                      <img src={avatarDataUrl} alt="" className="size-full object-cover" />
+                    ) : (
+                      <User className="size-6 text-muted-foreground" />
+                    )}
+                  </div>
+                  <button type="button" onClick={() => fileInputRef.current?.click()}
+                    className="cursor-pointer border border-border px-4 py-2 font-mono text-xs uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
+                    <Upload className="mr-1 inline size-3" /> Upload photo
+                  </button>
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
                 </div>
               </div>
+
+              {/* Country dropdown */}
               <div className="space-y-1">
-                <label className="pm-micro text-muted-foreground">Bio</label>
-                <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} className="clip-corner h-24 w-full border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none focus:border-cyan resize-none" placeholder="Tell us about yourself (max 500)" maxLength={500} />
+                <label className="pm-micro text-muted-foreground">Country *</label>
+                <select value={country} onChange={e => setCountry(e.target.value)}
+                  className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan cursor-pointer">
+                  <option value="">Select your country</option>
+                  {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+
+              {/* Bio */}
+              <div className="space-y-1">
+                <label className="pm-micro text-muted-foreground">Bio *</label>
+                <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3}
+                  className="clip-corner h-24 w-full border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none focus:border-cyan resize-none"
+                  placeholder="Tell us about yourself (max 500)" maxLength={500} />
               </div>
 
               {accountType === 'STUDIO' && (
@@ -174,19 +245,27 @@ export default function OnboardingPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1">
                       <label className="pm-micro text-muted-foreground">Studio Name *</label>
-                      <input value={studioName} onChange={e => setStudioName(e.target.value)} className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" placeholder="Your studio name" />
+                      <input value={studioName} onChange={e => setStudioName(e.target.value)}
+                        className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan"
+                        placeholder="Your studio name" required />
                     </div>
                     <div className="space-y-1">
                       <label className="pm-micro text-muted-foreground">Studio Slug *</label>
-                      <input value={studioSlug} onChange={e => setStudioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" placeholder="studio-slug" />
+                      <input value={studioSlug} onChange={e => setStudioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                        className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan"
+                        placeholder="studio-slug" required />
                     </div>
                     <div className="space-y-1">
-                      <label className="pm-micro text-muted-foreground">Website</label>
-                      <input value={studioWebsite} onChange={e => setStudioWebsite(e.target.value)} className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" placeholder="https://..." />
+                      <label className="pm-micro text-muted-foreground">Website *</label>
+                      <input value={studioWebsite} onChange={e => setStudioWebsite(e.target.value)}
+                        className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan"
+                        placeholder="https://..." required />
                     </div>
                     <div className="space-y-1">
-                      <label className="pm-micro text-muted-foreground">Discord</label>
-                      <input value={studioDiscord} onChange={e => setStudioDiscord(e.target.value)} className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" placeholder="discord.gg/..." />
+                      <label className="pm-micro text-muted-foreground">Discord (optional)</label>
+                      <input value={studioDiscord} onChange={e => setStudioDiscord(e.target.value)}
+                        className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan"
+                        placeholder="discord.gg/..." />
                     </div>
                   </div>
                 </div>
@@ -202,7 +281,8 @@ export default function OnboardingPage() {
                 <div className="flex justify-between border-b border-border/60 pb-2"><span className="text-muted-foreground">Username</span><span className="font-medium text-foreground">@{username}</span></div>
                 {displayName && <div className="flex justify-between border-b border-border/60 pb-2"><span className="text-muted-foreground">Display Name</span><span className="font-medium text-foreground">{displayName}</span></div>}
                 {country && <div className="flex justify-between border-b border-border/60 pb-2"><span className="text-muted-foreground">Country</span><span className="font-medium text-foreground">{country}</span></div>}
-                {location && <div className="flex justify-between border-b border-border/60 pb-2"><span className="text-muted-foreground">Location</span><span className="font-medium text-foreground">{location}</span></div>}
+                {bio && <div className="flex justify-between border-b border-border/60 pb-2"><span className="text-muted-foreground">Bio</span><span className="font-medium text-foreground">{bio.slice(0, 80)}{bio.length > 80 ? '...' : ''}</span></div>}
+                {avatarDataUrl && <div className="flex justify-between border-b border-border/60 pb-2"><span className="text-muted-foreground">Avatar</span><span className="text-cyan">Uploaded ✓</span></div>}
               </div>
               {error && <p className="pm-micro text-coral">{error}</p>}
             </div>
@@ -217,8 +297,15 @@ export default function OnboardingPage() {
             {step < 3 ? (
               <button onClick={() => {
                 if (step === 0 && !accountType) { setError('Select an account type'); return; }
-                if (step === 1 && (!username || username.length < 3 || usernameAvailable !== true)) { setError('Choose an available username'); return; }
-                if (step === 2 && accountType === 'STUDIO' && (!studioName || !studioSlug)) { setError('Studio name and slug required'); return; }
+                if (step === 1) {
+                  if (!username || username.length < 3) { setError('Username must be at least 3 characters'); return; }
+                  if (usernameAvailable !== true) { setError('Username is not available'); return; }
+                }
+                if (step === 2) {
+                  if (!country) { setError('Select your country'); return; }
+                  if (!bio.trim()) { setError('Bio is required'); return; }
+                  if (accountType === 'STUDIO' && (!studioName || !studioSlug || !studioWebsite)) { setError('Studio name, slug, and website are required'); return; }
+                }
                 setError('');
                 setStep(step + 1);
               }}
