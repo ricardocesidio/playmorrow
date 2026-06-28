@@ -400,7 +400,7 @@ export class AuthService {
         displayName: ((dto.displayName as string) || username).trim(),
         avatarUrl: (dto.avatarUrl as string) || null,
         bio: (dto.bio as string) || null,
-        location: (dto.location as string) || null,
+        country: (dto.country as string) || null,
         accountType: accountType as 'PLAYER' | 'STUDIO',
         role: 'PLAYER' as const,
         emailVerifiedAt: now,
