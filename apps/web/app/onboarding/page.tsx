@@ -199,7 +199,7 @@ export default function OnboardingPage() {
                 <input
                   value={username}
                   onChange={e => {
-                    const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+                    const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
                     if (val.length <= 20) setUsername(val);
                   }}
                   onKeyDown={handleUsernameKeyDown}
