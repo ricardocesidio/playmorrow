@@ -36,7 +36,7 @@ export class OAuthService {
       }
     } else {
       // New user — create from OAuth profile
-      const username = `${profile.provider}_${profile.providerId.slice(0, 8)}`;
+      const username = `${profile.provider}${profile.providerId.slice(0, 8)}`;
       user = await this.prisma.user.create({
         data: {
           email: profile.email.toLowerCase(),
