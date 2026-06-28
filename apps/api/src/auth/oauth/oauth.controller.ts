@@ -82,7 +82,7 @@ export class OAuthController {
       res.redirect(`${frontendUrl}/oauth/callback`);
     } else {
       // NEW user — redirect to onboarding (NO account created yet)
-      const params = new URLSearchParams({ provider: profile.provider, email: encodeURIComponent(profile.email), displayName: profile.displayName });
+      const params = new URLSearchParams({ provider: profile.provider, email: profile.email, displayName: profile.displayName });
       if (profile.avatarUrl) params.set('avatarUrl', profile.avatarUrl);
       res.redirect(`${frontendUrl}/onboarding?${params.toString()}`);
     }
