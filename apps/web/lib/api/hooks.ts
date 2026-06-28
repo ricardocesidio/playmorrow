@@ -395,7 +395,6 @@ export function useNotifications(status: string, page: number, pageSize: number,
         `/me/notifications?status=${status}&page=${page}&pageSize=${pageSize}`,
         token,
       ),
-    enabled: !!token,
   });
 }
 
@@ -553,7 +552,6 @@ export function useMyFollows(token?: string) {
         '/me/follows',
         token,
       ),
-    enabled: !!token,
   });
 }
 
@@ -563,7 +561,6 @@ export function useMyStudios(token?: string) {
   return useQuery({
     queryKey: ['myStudios'],
     queryFn: () => api.get<Studio[]>('/studios/me', token),
-    enabled: !!token,
   });
 }
 
@@ -617,7 +614,6 @@ export function useMyDevlogs(token?: string) {
   return useQuery({
     queryKey: ['myDevlogs', token],
     queryFn: () => api.get<Devlog[]>('/me/devlogs', token),
-    enabled: !!token,
   });
 }
 
@@ -688,7 +684,6 @@ export function useMyGames(token?: string) {
         r.items.map((g) => ({ ...g, studio: studios[i] })),
       );
     },
-    enabled: !!token,
   });
 }
 

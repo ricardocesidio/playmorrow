@@ -96,6 +96,10 @@ export interface Game {
   bannerUrl: string | null;
   isPublished: boolean;
   followersCount: number;
+  wishlistsCount?: number;
+  commentsCount?: number;
+  viewsCount?: number;
+  featured?: boolean;
   studio: StudioSummary;
   media: { id: string; type: string; url: string; thumbnailUrl: string | null; caption: string | null; position: number }[];
   platformLinks: { id: string; platform: string; url: string; label: string | null }[];

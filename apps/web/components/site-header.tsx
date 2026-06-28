@@ -179,10 +179,10 @@ export function SiteHeader() {
           )}
 
           <Link
-            href={isAuthenticated ? '/dashboard/games/new' : '/register'}
+            href={isAuthenticated ? (user?.accountType === 'STUDIO' ? '/dashboard' : '/dashboard/games/new') : '/register'}
             className="clip-corner hidden border border-coral bg-coral px-5 py-3 pm-display text-[0.68rem] text-coral-foreground shadow-[0_0_24px_rgb(255_87_77_/_0.22)] transition hover:bg-[#ff6a61] sm:inline-flex"
           >
-            Share your game <ArrowUpRight className="size-4" />
+            {user?.accountType === 'STUDIO' ? 'Studio Dashboard' : 'Share your game'} <ArrowUpRight className="size-4" />
           </Link>
 
           <button
@@ -219,5 +219,4 @@ export function SiteHeader() {
     </header>
   );
 }
-
 

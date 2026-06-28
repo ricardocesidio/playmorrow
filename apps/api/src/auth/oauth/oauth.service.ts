@@ -22,6 +22,10 @@ export class OAuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  async findByEmail(email: string) {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+
   async handleOAuthLogin(profile: OAuthProfile) {
     // Try to find existing user by email
     let user = await this.prisma.user.findUnique({ where: { email: profile.email.toLowerCase() } });
