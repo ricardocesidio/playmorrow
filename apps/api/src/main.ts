@@ -18,20 +18,7 @@ async function bootstrap() {
   // Security headers
   app.use(helmet({
     crossOriginResourcePolicy: { policy: 'same-origin' },
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-eval'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
-        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-        connectSrc: ["'self'", config.get<string>('WEB_ORIGIN', 'http://localhost:3000')],
-        frameAncestors: ["'none'"],
-        objectSrc: ["'none'"],
-        baseUri: ["'self'"],
-        formAction: ["'self'"],
-      },
-    },
+    contentSecurityPolicy: false,
   }));
 
   // Cookie parser for session auth
