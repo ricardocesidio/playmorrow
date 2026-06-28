@@ -61,6 +61,7 @@ export default function OnboardingPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (username.length < 3) { setUsernameAvailable(null); return; }
@@ -245,8 +246,8 @@ export default function OnboardingPage() {
               {/* Country dropdown */}
               <div className="space-y-1">
                 <label className="pm-micro text-muted-foreground">Country *</label>
-                <select value={country} onChange={e => setCountry(e.target.value)}
-                  className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan cursor-pointer">
+                <select value={country} onChange={e => { setCountry(e.target.value); setTouched(prev => ({ ...prev, country: true })); }}
+                  className={`clip-corner h-12 w-full border bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan cursor-pointer ${touched.country && !country ? 'border-coral' : 'border-input'}`}>
                   <option value="">Select your country</option>
                   {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
@@ -255,8 +256,8 @@ export default function OnboardingPage() {
               {/* Bio */}
               <div className="space-y-1">
                 <label className="pm-micro text-muted-foreground">Bio *</label>
-                <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3}
-                  className="clip-corner h-24 w-full border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none focus:border-cyan resize-none"
+                <textarea value={bio} onChange={e => { setBio(e.target.value); setTouched(prev => ({ ...prev, bio: true })); }} rows={3}
+                  className={`clip-corner h-24 w-full border bg-background/80 px-4 py-3 text-sm text-foreground outline-none focus:border-cyan resize-none ${touched.bio && !bio.trim() ? 'border-coral' : 'border-input'}`}
                   placeholder="Tell us about yourself (max 500)" maxLength={500} />
               </div>
 
@@ -266,20 +267,20 @@ export default function OnboardingPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1">
                       <label className="pm-micro text-muted-foreground">Studio Name *</label>
-                      <input value={studioName} onChange={e => setStudioName(e.target.value)}
-                        className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan"
+                      <input value={studioName} onChange={e => { setStudioName(e.target.value); setTouched(prev => ({ ...prev, studioName: true })); }}
+                        className={`clip-corner h-12 w-full border bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan ${touched.studioName && !studioName ? 'border-coral' : 'border-input'}`}
                         placeholder="Your studio name" required />
                     </div>
                     <div className="space-y-1">
                       <label className="pm-micro text-muted-foreground">Studio Slug *</label>
-                      <input value={studioSlug} onChange={e => setStudioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                        className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan"
+                      <input value={studioSlug} onChange={e => { setStudioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')); setTouched(prev => ({ ...prev, studioSlug: true })); }}
+                        className={`clip-corner h-12 w-full border bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan ${touched.studioSlug && !studioSlug ? 'border-coral' : 'border-input'}`}
                         placeholder="studio-slug" required />
                     </div>
                     <div className="space-y-1">
                       <label className="pm-micro text-muted-foreground">Website *</label>
-                      <input value={studioWebsite} onChange={e => setStudioWebsite(e.target.value)}
-                        className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan"
+                      <input value={studioWebsite} onChange={e => { setStudioWebsite(e.target.value); setTouched(prev => ({ ...prev, studioWebsite: true })); }}
+                        className={`clip-corner h-12 w-full border bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan ${touched.studioWebsite && !studioWebsite ? 'border-coral' : 'border-input'}`}
                         placeholder="https://..." required />
                     </div>
                     <div className="space-y-1">
