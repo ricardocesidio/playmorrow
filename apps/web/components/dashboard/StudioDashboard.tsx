@@ -218,9 +218,7 @@ export function StudioDashboard() {
 function StudioSidebar({ unreadCount, studioLevel, studioSlug }: { unreadCount: number; studioLevel: number; studioSlug: string }) {
   return (
     <aside className="hidden xl:block">
-      <div className="clip-corner sticky top-20 min-h-full border border-border/90 bg-[#050b0f]/88 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)] p-3">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.03)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.02)_1px,transparent_1px)] bg-[size:44px_44px]" />
-        <div className="relative z-10">
+      <DashboardPanel className="sticky top-20 min-h-full p-3">
         <div className="border-b border-border/70 px-2 pb-3">
           <p className="flex items-center gap-2 font-mono text-[0.68rem] uppercase tracking-[0.18em] text-cyan">
             <Gauge className="size-3.5" /> Studio Dashboard
@@ -257,7 +255,7 @@ function StudioSidebar({ unreadCount, studioLevel, studioSlug }: { unreadCount: 
             </div>
           </div>
         </div>
-      </div>
+      </DashboardPanel>
     </aside>
   );
 }
