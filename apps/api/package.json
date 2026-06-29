@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "clean": "rm -rf dist .turbo"
+    "clean": "rm -rf dist .turbo",
+    "xp:recalculate": "npx ts-node src/scripts/recalculate-xp.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -55,6 +56,7 @@
     "@types/supertest": "^6.0.2",
     "eslint": "^9.17.0",
     "supertest": "^7.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "unplugin-swc": "^1.5.1",
     "vitest": "^2.1.8"
