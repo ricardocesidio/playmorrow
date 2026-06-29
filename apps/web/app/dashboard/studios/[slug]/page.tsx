@@ -113,7 +113,13 @@ export default function EditStudioPage() {
 
   const descLen = description.length;
   const profileStrength = [
-    name, tagline, description, logoUrl, bannerUrl, websiteUrl, location
+    !!name,
+    !!tagline,
+    description.length > 50,
+    !!logoUrl,
+    !!bannerUrl,
+    !!websiteUrl,
+    !!location,
   ].filter(Boolean).length * 14;
 
   if (authLoading || studioLoading) {
