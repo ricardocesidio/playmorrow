@@ -61,7 +61,6 @@ export default function EditStudioPage() {
     try {
       await updateStudio.mutateAsync({
         slug,
-        token: '',
         body: {
           name: name.trim(),
           tagline: tagline.trim() || null,
