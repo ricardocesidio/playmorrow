@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateCommentDto } from './dto/create-comment.dto';
 import type { UpdateCommentDto } from './dto/update-comment.dto';
 
@@ -9,6 +10,7 @@ export class CommentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly studioXpService: StudioXpService,
   ) {}
 
   async create(userId: string, devlogId: string, dto: CreateCommentDto) {
@@ -92,6 +94,8 @@ export class CommentsService {
     if (inputs.length > 0) {
       await this.notificationsService.createManyDeduped(inputs);
     }
+
+    await this.studioXpService.award(devlog.game.studio.id, 'COMMENT', undefined, comment.id);
 
     return this.toResponse(comment);
   }
@@ -213,16 +217,20 @@ export class CommentsService {
   }
 
   async createForGame(slug: string, authorId: string, body: string) {
-    const game = await this.prisma.game.findUniqueOrThrow({ where: { slug }, select: { id: true } });
+    const game = await this.prisma.game.findUniqueOrThrow({ where: { slug }, select: { id: true, studioId: true } });
     const trimmed = body.trim();
     if (!trimmed) throw new BadRequestException('Comment cannot be empty');
     if (trimmed.length > 1000) throw new BadRequestException('Comment must be 1000 characters or fewer');
-    return this.prisma.comment.create({
+    const comment = await this.prisma.comment.create({
       data: { gameId: game.id, authorId, body: trimmed },
       include: {
         author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
       },
     });
+
+    await this.studioXpService.award(game.studioId, 'COMMENT', undefined, comment.id);
+
+    return comment;
   }
 
   async reactToGameComment(commentId: string, userId: string, type: string) {

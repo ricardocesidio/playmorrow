@@ -3,6 +3,7 @@ import type { Prisma } from '@playmorrow/database';
 
 import { assertStudioWriteAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
+import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateGameDto } from './dto/create-game.dto';
 import type { UpdateGameDto } from './dto/update-game.dto';
 
@@ -16,7 +17,10 @@ const GAME_INCLUDE = {
 
 @Injectable()
 export class GamesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly studioXpService: StudioXpService,
+  ) {}
 
   async create(userId: string, studioSlug: string, dto: CreateGameDto) {
     const slug = dto.slug.toLowerCase();
@@ -93,6 +97,8 @@ export class GamesService {
       },
       include: GAME_INCLUDE,
     });
+
+    await this.studioXpService.award(studio.id, 'GAME_CREATE', undefined, game.id);
 
     return this.toResponse(game);
   }
@@ -267,6 +273,14 @@ export class GamesService {
       data,
       include: GAME_INCLUDE,
     });
+
+    if (dto.status && dto.status !== game.status) {
+      if (dto.status === 'BETA') {
+        await this.studioXpService.award(game.studio.id, 'GAME_BETA', undefined, game.id);
+      } else if (dto.status === 'RELEASED') {
+        await this.studioXpService.award(game.studio.id, 'GAME_RELEASE', undefined, game.id);
+      }
+    }
 
     return this.toResponse(updated);
   }

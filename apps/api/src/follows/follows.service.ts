@@ -2,12 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { StudioXpService } from '../studios/studio-xp.service';
 
 @Injectable()
 export class FollowsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly studioXpService: StudioXpService,
   ) {}
 
   async followStudio(userId: string, slug: string) {
@@ -23,6 +25,20 @@ export class FollowsService {
     });
 
     const followerCount = await this.prisma.follow.count({ where: { studioId: studio.id } });
+
+    await this.studioXpService.award(studio.id, 'FOLLOW');
+
+    const followerMilestones = [100, 500];
+    for (const m of followerMilestones) {
+      if (followerCount === m) {
+        const existing = await this.prisma.studioXpEvent.findFirst({
+          where: { studioId: studio.id, type: m === 100 ? 'FOLLOWER_MILESTONE_100' : 'FOLLOWER_MILESTONE_500' },
+        });
+        if (!existing) {
+          await this.studioXpService.award(studio.id, m === 100 ? 'FOLLOWER_MILESTONE_100' : 'FOLLOWER_MILESTONE_500');
+        }
+      }
+    }
 
     // Notify studio OWNER/ADMIN members
     const adminIds = await this.notificationsService.resolveStudioAdminIdsForStudio(studio.id, userId);

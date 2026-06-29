@@ -8,6 +8,7 @@ import { StudioRole } from '@playmorrow/database';
 
 import { assertStudioWriteAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
+import { StudioXpService } from './studio-xp.service';
 import type { CreateStudioDto } from './dto/create-studio.dto';
 import type { UpdateStudioDto } from './dto/update-studio.dto';
 
@@ -19,7 +20,10 @@ export type StudioResponse = Awaited<ReturnType<StudiosService['findBySlug']>>;
 
 @Injectable()
 export class StudiosService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly studioXpService: StudioXpService,
+  ) {}
 
   async create(userId: string, dto: CreateStudioDto) {
     const slug = dto.slug.toLowerCase();
@@ -45,6 +49,11 @@ export class StudiosService {
       },
       include: STUDIO_INCLUDE,
     });
+
+    const allFields = [studio.name, studio.tagline, studio.description, studio.location, studio.websiteUrl, studio.logoUrl, studio.bannerUrl];
+    if (allFields.every(Boolean)) {
+      await this.studioXpService.award(studio.id, 'PROFILE_COMPLETE');
+    }
 
     return this.toResponse(studio);
   }

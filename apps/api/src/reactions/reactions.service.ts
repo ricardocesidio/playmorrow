@@ -2,12 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { StudioXpService } from '../studios/studio-xp.service';
 
 @Injectable()
 export class ReactionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly studioXpService: StudioXpService,
   ) {}
 
   // ── DEVOOG REACTIONS ─────────────────────────────────────────────────
@@ -15,6 +17,7 @@ export class ReactionsService {
   async reactToDevlog(userId: string, devlogId: string, type: string) {
     const devlog = await this.prisma.devlog.findUnique({
       where: { id: devlogId },
+      include: { game: { select: { studioId: true } } },
     });
     if (!devlog || !devlog.isPublished) {
       throw new NotFoundException('Devlog not found');
@@ -25,6 +28,8 @@ export class ReactionsService {
       update: {},
       create: { userId, devlogId, type: type as never },
     });
+
+    await this.studioXpService.award(devlog.game.studioId, 'REACTION');
 
     // Notify studio OWNER/ADMIN members (exclude actor)
     const adminIds = await this.notificationsService.resolveStudioAdminIds(devlog.gameId, userId);
