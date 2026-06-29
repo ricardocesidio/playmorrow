@@ -200,14 +200,32 @@ model Studio {
   isVerified      Boolean  @default(false)
   followersCount  Int      @default(0)
   gamesCount      Int      @default(0)
+  level           Int      @default(1)
+  xp              Int      @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   members   StudioMember[]
   games     Game[]
   followers Follow[]
+  xpEvents  StudioXpEvent[]
 
   @@map("studios")
+}
+
+model StudioXpEvent {
+  id        String   @id @default(cuid())
+  studioId  String
+  type      String
+  amount    Int
+  sourceId  String?
+  createdAt DateTime @default(now())
+
+  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+
+  @@index([studioId])
+  @@index([studioId, createdAt])
+  @@map("studio_xp_events")
 }
 
 model StudioMember {
