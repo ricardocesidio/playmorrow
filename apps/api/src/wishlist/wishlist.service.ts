@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { StudioXpService } from '../studios/studio-xp.service';
 
 @Injectable()
 export class WishlistService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly studioXpService: StudioXpService,
+  ) {}
 
   async add(userId: string, gameSlug: string) {
     const game = await this.prisma.game.findUnique({ where: { slug: gameSlug } });
@@ -14,6 +18,26 @@ export class WishlistService {
       create: { userId, gameId: game.id },
       update: {},
     });
+
+    const studio = await this.prisma.studio.findUnique({
+      where: { id: game.studioId },
+    });
+    if (studio) {
+      await this.studioXpService.award(studio.id, 'WISHLIST');
+
+      const wishlistCount = await this.prisma.wishlistItem.count({ where: { gameId: game.id } });
+      const wishlistMilestones = [100, 1000];
+      for (const m of wishlistMilestones) {
+        if (wishlistCount === m) {
+          const existing = await this.prisma.studioXpEvent.findFirst({
+            where: { studioId: studio.id, type: m === 100 ? 'WISHLIST_MILESTONE_100' : 'WISHLIST_MILESTONE_1000' },
+          });
+          if (!existing) {
+            await this.studioXpService.award(studio.id, m === 100 ? 'WISHLIST_MILESTONE_100' : 'WISHLIST_MILESTONE_1000');
+          }
+        }
+      }
+    }
 
     return { gameId: game.id, gameSlug, isWishlisted: true };
   }

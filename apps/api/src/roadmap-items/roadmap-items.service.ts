@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { assertStudioWriteAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
+import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateRoadmapItemDto } from './dto/create-roadmap-item.dto';
 import type { UpdateRoadmapItemDto } from './dto/update-roadmap-item.dto';
 
@@ -11,7 +12,10 @@ const ROADMAP_INCLUDE = {
 
 @Injectable()
 export class RoadmapItemsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly studioXpService: StudioXpService,
+  ) {}
 
   async create(userId: string, gameSlug: string, dto: CreateRoadmapItemDto) {
     const game = await this.prisma.game.findUnique({
@@ -40,6 +44,8 @@ export class RoadmapItemsService {
       },
       include: ROADMAP_INCLUDE,
     });
+
+    await this.studioXpService.award(game.studio.id, 'ROADMAP_UPDATE', undefined, item.id);
 
     return this.toResponse(item, game.studio);
   }

@@ -3,6 +3,7 @@ import type { Prisma } from '@playmorrow/database';
 
 import { assertStudioWriteAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
+import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateDevlogDto } from './dto/create-devlog.dto';
 import type { UpdateDevlogDto } from './dto/update-devlog.dto';
 
@@ -13,7 +14,10 @@ const DEVLOG_INCLUDE = {
 
 @Injectable()
 export class DevlogsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly studioXpService: StudioXpService,
+  ) {}
 
   async create(userId: string, gameSlug: string, dto: CreateDevlogDto) {
     const game = await this.prisma.game.findUnique({
@@ -55,6 +59,10 @@ export class DevlogsService {
       },
       include: DEVLOG_INCLUDE,
     });
+
+    if (isPublished) {
+      await this.studioXpService.award(game.studio.id, 'DEVLOG_PUBLISH', undefined, devlog.id);
+    }
 
     return this.toResponse(devlog);
   }
