@@ -34,7 +34,7 @@ const COUNTRIES = ['Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Ar
 export default function EditStudioPage() {
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, setUser } = useAuth();
   const { data: studio, isLoading: studioLoading } = useStudio(slug);
   const updateStudio = useUpdateStudio();
   const deleteStudio = useDeleteStudio();
@@ -96,6 +96,9 @@ export default function EditStudioPage() {
     if (!name.trim()) { setError('Studio name is required'); return; }
     try {
       await updateStudio.mutateAsync({ slug, body: { name: name.trim(), tagline: tagline.trim() || null, description: description.trim() || null, location: location.trim() || null, websiteUrl: websiteUrl.trim() || null, logoUrl: logoUrl || null, bannerUrl: bannerUrl || null } });
+      if (user && logoUrl !== undefined) {
+        setUser({ ...user, avatarUrl: logoUrl || undefined });
+      }
       setSuccess(true); setHasChanges(false);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
