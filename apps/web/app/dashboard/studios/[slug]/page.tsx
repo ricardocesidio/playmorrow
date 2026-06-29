@@ -8,6 +8,7 @@ import {
   PanelLeft, FileText, Workflow, LineChart, Radio, Library, Users, ShieldCheck, Settings,
   CircleDollarSign, Gauge, ExternalLink, Gamepad2
 } from 'lucide-react';
+import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
 import { useStudio, useUpdateStudio, useDeleteStudio } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
@@ -132,7 +133,9 @@ export default function EditStudioPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#020609]">
+    <>
+      <SiteHeader />
+      <div className="relative min-h-screen bg-[#020609]">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
       <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
 
@@ -417,5 +420,6 @@ function AssetUpload({ label, value, uploading, onUpload, onRemove }: { label: s
           onChange={e => { const f = e.target.files?.[0]; if (f) onUpload(f); e.target.value = ''; }} />
       </div>
     </div>
+    </>
   );
 }
