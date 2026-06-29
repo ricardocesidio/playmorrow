@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {
   Activity,
   ArrowRight,
+  Award,
   BadgeCheck,
   BarChart3,
   Boxes,
@@ -236,6 +237,7 @@ function StudioSidebar({ unreadCount, studioLevel, studioXp, studioSlug }: { unr
           <SidebarLink href="/studios" icon={<Users className="size-4" />} label="Followers" />
           <SidebarLink href={`/dashboard/studios/${studioSlug}`} icon={<ShieldCheck className="size-4" />} label="Team" count={7} />
           <SidebarLink href="/dashboard/reports" icon={<CircleDollarSign className="size-4" />} label="Payouts" />
+          <SidebarLink href="/dashboard/studios/level" icon={<Award className="size-4" />} label="Level System" />
           <SidebarLink href={`/dashboard/studios/${studioSlug}`} icon={<Settings className="size-4" />} label="Settings" />
         </nav>
         {(() => {

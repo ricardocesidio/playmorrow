@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   ArrowLeft, Save, Trash2, Upload, X, Loader2, Check, Camera, AlertTriangle,
   PanelLeft, FileText, Workflow, LineChart, Radio, Library, Users, ShieldCheck, Settings,
-  CircleDollarSign, Gauge, ExternalLink, Gamepad2
+  CircleDollarSign, Gauge, ExternalLink, Gamepad2, Award
 } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
@@ -176,6 +176,7 @@ export default function EditStudioPage() {
                 { href: '/studios', icon: <Users className="size-4" />, label: 'Followers' },
                 { href: '#', icon: <ShieldCheck className="size-4" />, label: 'Team' },
                 { href: '#', icon: <CircleDollarSign className="size-4" />, label: 'Payouts' },
+                { href: '/dashboard/studios/level', icon: <Award className="size-4" />, label: 'Level System' },
                 { href: '#', icon: <Settings className="size-4" />, label: 'Settings', active: true },
               ].map((item) => (
                 <Link key={item.label} href={item.href}
