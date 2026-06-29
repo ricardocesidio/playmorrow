@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class CreateStudioDto {
   @ApiProperty({ example: 'Moonlit Forge' })
@@ -37,16 +37,16 @@ export class CreateStudioDto {
 
   @ApiPropertyOptional({ example: 'https://example.com' })
   @IsOptional()
-  @IsUrl({ require_tld: false })
+  @IsString()
   websiteUrl?: string;
 
   @ApiPropertyOptional({ example: 'https://example.com/logo.png' })
   @IsOptional()
-  @IsUrl({ require_tld: false })
+  @IsString()
   logoUrl?: string;
 
   @ApiPropertyOptional({ example: 'https://example.com/banner.png' })
   @IsOptional()
-  @IsUrl({ require_tld: false })
+  @IsString()
   bannerUrl?: string;
 }
