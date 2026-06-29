@@ -16,31 +16,20 @@ export function ImageUpload({ value, onChange, label = 'Image', accept = 'image/
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setError('');
+    if (file.size > 5 * 1024 * 1024) { setError('Image too large. Max 5MB.'); return; }
     setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch(`${API}/upload`, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: 'Upload failed' }));
-        throw new Error(err.message ?? 'Upload failed');
-      }
-      const data = await res.json();
-      onChange(data.url);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
-    } finally {
+    const reader = new FileReader();
+    reader.onload = () => {
+      onChange(reader.result as string);
       setUploading(false);
-      if (inputRef.current) inputRef.current.value = '';
-    }
+    };
+    reader.onerror = () => { setError('Failed to read file'); setUploading(false); };
+    reader.readAsDataURL(file);
+    if (inputRef.current) inputRef.current.value = '';
   };
 
   return (
