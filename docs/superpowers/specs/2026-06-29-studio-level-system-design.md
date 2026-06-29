@@ -12,7 +12,6 @@ A professional studio leveling system that tracks quality and engagement through
 ```prisma
 level        Int      @default(1)
 xp           Int      @default(0)
-totalXpEarned Int     @default(0)
 ```
 
 **New model:**
@@ -38,10 +37,12 @@ model StudioXpEvent {
 New service `StudioXpService` with a single public method:
 
 ```
-award(studioSlug: string, type: XpEventType, amount: number, sourceId?: string): Promise<{ levelUp: boolean; newLevel: number }>
+award(studioId: string, type: XpEventType, amount: number, sourceId?: string): Promise<{ levelUp: boolean; newLevel: number }>
 ```
 
-Called from existing controllers after successful actions. Calculates new total, checks level-up threshold, logs event, optionally fires a notification.
+Called from existing **service methods** after successful actions (not from controllers — the service layer has access to studio IDs and context). Calculates new total, checks level-up threshold, logs event in `StudioXpEvent` table, and returns whether the studio leveled up.
+
+**Daily cap implementation:** Before awarding community XP, query `StudioXpEvent` for events of community types (FOLLOW, WISHLIST, COMMENT, REACTION) in the last 24 hours for this studio. If sum + new amount > 200, reject the award (return without adding).
 
 ## XP Earning Rules
 
@@ -108,29 +109,35 @@ Total XP for Level N = (N × (N−1) / 2) × 100  (0 for Level 1)
 
 1. Add Prisma migration for `Studio.level`, `Studio.xp`, `Studio.totalXpEarned`, and `StudioXpEvent` model
 2. Create `StudioXpService` with `award()` method, level-up detection, daily cap logic
-3. Add XP awards to existing controllers:
-   - `StudiosController.follow()` → award FOLLOW
-   - `GamesController.create()` → award GAME_CREATE
-   - `GamesController.update()` → award GAME_RELEASE/GAME_BETA on status change
-   - `DevlogsController.create()` → award DEVLOG_PUBLISH
-   - `RoadmapItemsController.create()` → award ROADMAP_UPDATE
-   - `CommentsController.create()` → award COMMENT
-   - `ReactionsController.create()` → award REACTION
-   - `WishlistItemsController.create()` → award WISHLIST
-   - `StudiosController.update()` → award PROFILE_COMPLETE on 100% profile strength
+3. Add `StudioXpService.award()` calls to existing **service methods**:
+   - `StudiosService.follow()` → award FOLLOW (after successful follow insert)
+   - `StudiosService.unfollow()` → no XP (removing has no value)
+   - `GamesService.create()` → award GAME_CREATE
+   - `GamesService.update()` → award GAME_RELEASE or GAME_BETA on status change (compare old vs new status)
+   - `DevlogsService.create()` → award DEVLOG_PUBLISH (only when `isPublished: true`)
+   - `RoadmapItemsService.create()` → award ROADMAP_UPDATE
+   - `CommentsService.create()` → award COMMENT (on devlog or game)
+   - `ReactionsService.create()` → award REACTION
+   - `WishlistItemsService.create()` → award WISHLIST
+   - `StudiosService.update()` → award PROFILE_COMPLETE when profile strength reaches 100%
+   - `FollowsService` / milestone check → award FOLLOWER_MILESTONE_100, FOLLOWER_MILESTONE_500 when counts cross thresholds. Store achieved milestones in `StudioXpEvent.type` and check before awarding.
 4. Include `level`, `xp` in all Studio API responses
 5. Add `StudioXpEventsController` with GET endpoint for activity log (optional)
 
-### Phase 2: Seed Data
+### Phase 2: Retroactive XP + Seed Data
 
-1. Update seed script to award XP for existing studios based on their current data:
-   - +40 for complete profiles
-   - +50 per game
-   - +25 per devlog
+Run a one-time script (`pnpm xp:recalculate`) that calculates and awards XP for all existing data so existing studios don't start at Level 1 with 0 XP:
+
+1. For every studio, compute:
+   - +40 if profile is complete (name + tagline + description + logo + banner + website + location all filled)
+   - +50 per game owned by the studio
+   - +25 per published devlog
    - +15 per roadmap item
-   - +5 per follower
-   - +100 per released game
-2. Calculate initial levels from total XP
+   - +5 per follower (current `followersCount`)
+   - +100 per game with status RELEASED
+2. Insert into `StudioXpEvent` for each computed award
+3. Set `Studio.xp` and `Studio.level` to the computed totals
+4. Update seed script to also run this logic for seed studios
 
 ### Phase 3: Frontend
 
@@ -138,15 +145,12 @@ Total XP for Level N = (N × (N−1) / 2) × 100  (0 for Level 1)
    - `StudioDashboard.tsx`
    - Edit studio page sidebar
 2. Use real `studio.level` and `studio.xp` from API response
-3. Calculate `xpForNextLevel = (studio.level + 1) * 100`
-4. Calculate `totalXpForLevel = (studio.level * (studio.level - 1) / 2) * 100`
-5. Progress bar: `((studio.xp - totalXpForLevel) / (studio.level * 100)) * 100`
+3. Progress within current level: `((studio.xp - xpAtStartOfLevel) / xpForNextLevel) * 100`
+   - `xpAtStartOfLevel = (studio.level * (studio.level - 1) / 2) * 100`
+   - `xpForNextLevel = studio.level * 100`
+   - Display text: `{studio.xp - xpAtStartOfLevel} / {xpForNextLevel} XP`
 6. Add level-up toast notification (optional)
 7. Show level + title on public studio page
-
-### Phase 4: Retroactive XP for Existing Studios
-
-Run a one-time script to calculate and award XP for all existing data (games, devlogs, followers, etc.) so existing studios aren't starting at Level 1 with 0 XP.
 
 ## Future Considerations
 
