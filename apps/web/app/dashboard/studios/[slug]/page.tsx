@@ -15,7 +15,7 @@ import { ApiError } from '@/lib/api/client';
 export default function EditStudioPage() {
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
-  const { token, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { data: studio, isLoading: studioLoading } = useStudio(slug);
   const updateStudio = useUpdateStudio();
   const deleteStudio = useDeleteStudio();
@@ -58,15 +58,10 @@ export default function EditStudioPage() {
       setError('Name is required');
       return;
     }
-    if (!token) {
-      setError('You must be signed in');
-      return;
-    }
-
     try {
       await updateStudio.mutateAsync({
         slug,
-        token,
+        token: '',
         body: {
           name: name.trim(),
           tagline: tagline.trim() || null,

@@ -581,8 +581,8 @@ export function useCreateStudio() {
 export function useUpdateStudio() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { slug: string; body: Record<string, unknown>; token: string }) => {
-      return api.patch<Studio>(`/studios/${data.slug}`, data.body, data.token);
+    mutationFn: (data: { slug: string; body: Record<string, unknown> }) => {
+      return api.patch<Studio>(`/studios/${data.slug}`, data.body);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['myStudios'] });
