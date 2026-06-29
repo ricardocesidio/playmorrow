@@ -112,15 +112,16 @@ export default function EditStudioPage() {
   };
 
   const descLen = description.length;
-  const profileStrength = [
-    !!name,
-    !!tagline,
-    description.length > 50,
-    !!logoUrl,
-    !!bannerUrl,
-    !!websiteUrl,
-    !!location,
-  ].filter(Boolean).length * 14;
+  const descPct = Math.min(description.length, 50) / 50;
+  const profileStrength = Math.round(
+    (name ? 14 : 0) +
+    (tagline ? 14 : 0) +
+    descPct * 14 +
+    (logoUrl ? 14 : 0) +
+    (bannerUrl ? 14 : 0) +
+    (websiteUrl ? 14 : 0) +
+    (location ? 14 : 0)
+  );
 
   if (authLoading || studioLoading) {
     return (
