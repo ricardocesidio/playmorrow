@@ -345,6 +345,7 @@ export default function EditStudioPage() {
           </div>
         </aside>
       </div>
+      </div>
 
       {/* Delete Modal */}
       {showDeleteModal && (
