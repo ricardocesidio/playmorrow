@@ -124,7 +124,7 @@ export default function EditStudioPage() {
 
   const descLen = description.length;
   useEffect(() => {
-    const dc = description.length >= 50 ? 14 : Math.ceil(description.length / 50 * 14);
+    const dc = Math.min(Math.ceil(description.length / 50), 14);
     setProfileStrength(Math.min(
       (name ? 14 : 0) + (tagline ? 14 : 0) + dc +
       (logoUrl ? 14 : 0) + (bannerUrl ? 14 : 0) +
