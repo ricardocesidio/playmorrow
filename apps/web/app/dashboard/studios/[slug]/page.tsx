@@ -94,7 +94,7 @@ export default function EditStudioPage() {
     e.preventDefault(); setError(''); setSuccess(false);
     if (!name.trim()) { setError('Studio name is required'); return; }
     try {
-      await updateStudio.mutateAsync({ slug, body: { name: name.trim(), tagline: tagline.trim() || null, description: description.trim() || null, country: country || null, location: location.trim() || null, websiteUrl: websiteUrl.trim() || null, logoUrl: logoUrl || null, bannerUrl: bannerUrl || null } });
+      await updateStudio.mutateAsync({ slug, body: { name: name.trim(), tagline: tagline.trim() || null, description: description.trim() || null, location: location.trim() || null, websiteUrl: websiteUrl.trim() || null, logoUrl: logoUrl || null, bannerUrl: bannerUrl || null } });
       setSuccess(true); setHasChanges(false);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
