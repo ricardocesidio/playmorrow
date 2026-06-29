@@ -1,16 +1,35 @@
 'use client';
 
-import { useState, type FormEvent, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback, type FormEvent } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, ExternalLink, Trash2 } from 'lucide-react';
-
-import { ImageUpload } from '@/components/image-upload';
-
-import { Button } from '@/components/ui/button';
+import {
+  ArrowLeft, Save, Trash2, Upload, X, Loader2, Check, Camera, Globe, Mail, MessageSquare,
+  Twitter, Youtube, Instagram, Github, Linkedin, Gamepad2, Heart, Eye, EyeOff, AlertTriangle,
+  PanelLeft, FileText, Workflow, LineChart, Radio, Library, Users, ShieldCheck, Settings,
+  CircleDollarSign, Gauge, Zap, BadgeCheck, ChevronDown, ExternalLink
+} from 'lucide-react';
 import { useAuth } from '@/lib/api/auth-context';
 import { useStudio, useUpdateStudio, useDeleteStudio } from '@/lib/api/hooks';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, API } from '@/lib/api/client';
+
+const COUNTRIES = ['Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan',
+  'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan', 'Bolivia',
+  'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi',
+  'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo', 'Costa Rica', 'Croatia', 'Cuba', 'Cyprus', 'Czech Republic',
+  'Denmark', 'Djibouti', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia',
+  'Fiji', 'Finland', 'France', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Guatemala', 'Guinea', 'Guyana',
+  'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy',
+  'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kuwait', 'Kyrgyzstan',
+  'Laos', 'Latvia', 'Lebanon', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg',
+  'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Mauritania', 'Mauritius', 'Mexico', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar',
+  'Namibia', 'Nepal', 'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway',
+  'Oman', 'Pakistan', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal',
+  'Qatar', 'Romania', 'Russia', 'Rwanda', 'Saudi Arabia', 'Senegal', 'Serbia', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Somalia', 'South Africa', 'South Korea', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland', 'Syria',
+  'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Togo', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan',
+  'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan',
+  'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe',
+];
 
 export default function EditStudioPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -23,203 +42,404 @@ export default function EditStudioPage() {
   const [name, setName] = useState('');
   const [tagline, setTagline] = useState('');
   const [description, setDescription] = useState('');
+  const [country, setCountry] = useState('');
   const [location, setLocation] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
+  const [supportEmail, setSupportEmail] = useState('');
+  const [businessEmail, setBusinessEmail] = useState('');
+  const [discord, setDiscord] = useState('');
+  const [x, setX] = useState('');
+  const [youtube, setYoutube] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [linkedin, setLinkedin] = useState('');
+  const [github, setGithub] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const descRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.replace('/login');
-    }
+    if (!authLoading && !isAuthenticated) router.replace('/login');
   }, [authLoading, isAuthenticated, router]);
 
   useEffect(() => {
     if (studio && !initialized) {
-      setName(studio.name ?? '');
-      setTagline(studio.tagline ?? '');
-      setDescription(studio.description ?? '');
-      setLocation(studio.location ?? '');
-      setWebsiteUrl(studio.websiteUrl ?? '');
-      setLogoUrl(studio.logoUrl ?? '');
-      setBannerUrl(studio.bannerUrl ?? '');
+      setName(studio.name ?? ''); setTagline(studio.tagline ?? '');
+      setDescription(studio.description ?? ''); setCountry(studio.country ?? '');
+      setLocation(studio.location ?? ''); setWebsiteUrl(studio.websiteUrl ?? '');
+      setLogoUrl(studio.logoUrl ?? ''); setBannerUrl(studio.bannerUrl ?? '');
       setInitialized(true);
     }
   }, [studio, initialized]);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess(false);
-    if (!name.trim()) {
-      setError('Name is required');
-      return;
-    }
+  useEffect(() => { setHasChanges(true); }, [name, tagline, description, country, location, websiteUrl, logoUrl, bannerUrl]);
+
+  const autoResize = useCallback(() => {
+    const ta = descRef.current;
+    if (ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+  }, []);
+
+  const handleImageUpload = async (file: File, type: 'logo' | 'banner') => {
+    const setter = type === 'logo' ? setLogoUrl : setBannerUrl;
+    const loading = type === 'logo' ? setUploadingLogo : setUploadingBanner;
+    loading(true);
     try {
-      await updateStudio.mutateAsync({
-        slug,
-        body: {
-          name: name.trim(),
-          tagline: tagline.trim() || null,
-          description: description.trim() || null,
-          location: location.trim() || null,
-          websiteUrl: websiteUrl.trim() || null,
-          logoUrl: logoUrl.trim() || null,
-          bannerUrl: bannerUrl.trim() || null,
-        },
-      });
-      setSuccess(true);
+      const reader = new FileReader();
+      reader.onload = () => { setter(reader.result as string); loading(false); setHasChanges(true); };
+      reader.readAsDataURL(file);
+    } catch { loading(false); }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault(); setError(''); setSuccess(false);
+    if (!name.trim()) { setError('Studio name is required'); return; }
+    try {
+      await updateStudio.mutateAsync({ slug, body: { name: name.trim(), tagline: tagline.trim() || null, description: description.trim() || null, country: country || null, location: location.trim() || null, websiteUrl: websiteUrl.trim() || null, logoUrl: logoUrl || null, bannerUrl: bannerUrl || null } });
+      setSuccess(true); setHasChanges(false);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       if (err instanceof ApiError) {
-        if (err.status === 403) {
-          setError('You don\'t have permission to edit this studio.');
-        } else {
-          const msg = typeof err.body === 'object' && err.body
-            ? Array.isArray((err.body as { message?: string[] }).message)
-              ? (err.body as { message: string[] }).message.join(', ')
-              : (err.body as { message: string }).message || 'Failed to update'
-            : 'Failed to update';
-          setError(msg);
-        }
-      } else {
-        setError('Something went wrong');
-      }
+        const msg = typeof err.body === 'object' && err.body ? (err.body as { message: string }).message || 'Failed to update' : 'Failed to update';
+        setError(msg);
+      } else setError('Something went wrong');
     }
   };
 
+  const handleDelete = async () => {
+    try { await deleteStudio.mutateAsync({ slug }); router.push('/dashboard'); }
+    catch { setError('Failed to delete studio'); }
+  };
+
+  const descLen = description.length;
+  const profileStrength = [
+    name, tagline, description, logoUrl, bannerUrl, websiteUrl, location
+  ].filter(Boolean).length * 14;
+
   if (authLoading || studioLoading) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-10">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 w-32 rounded bg-muted" />
-          <div className="h-8 w-48 rounded bg-muted" />
-          <div className="h-10 rounded bg-muted" />
-          <div className="h-20 rounded bg-muted" />
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-[#020609]">
+        <div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
       </div>
     );
   }
 
   if (!studio) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-20 text-center">
-        <h1 className="text-2xl font-semibold">Studio not found</h1>
-        <Link href="/dashboard" className="mt-4 inline-flex items-center gap-2 text-sm text-primary underline">
-          <ArrowLeft className="size-4" /> Back to dashboard
-        </Link>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#020609] px-4">
+        <p className="font-display text-2xl font-semibold text-foreground">Studio not found</p>
+        <Link href="/dashboard" className="mt-4 font-mono text-xs uppercase tracking-widest text-cyan underline">Back to dashboard</Link>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-10">
-      <Link
-        href="/dashboard"
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" /> Back to dashboard
-      </Link>
+    <div className="relative min-h-screen bg-[#020609]">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+      <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
 
-      <div className="mb-8 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Edit studio</h1>
-          <p className="mt-1 text-muted-foreground">{studio.name}</p>
+      <div className="relative mx-auto grid max-w-[1540px] lg:grid-cols-[220px_minmax(0,1fr)_320px]">
+        {/* Sidebar */}
+        <aside className="hidden border-r border-border/50 lg:block">
+          <div className="clip-corner sticky top-0 min-h-screen border-border/90 bg-[#050b0f]/88 p-3 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
+            <div className="border-b border-border/70 px-2 pb-3">
+              <p className="flex items-center gap-2 font-mono text-[0.68rem] uppercase tracking-[0.18em] text-cyan"><Gauge className="size-3.5" /> Studio Dashboard</p>
+            </div>
+            <nav className="mt-3 space-y-1">
+              {[
+                { href: '/dashboard', icon: <PanelLeft className="size-4" />, label: 'Overview' },
+                { href: '/dashboard/games/new', icon: <Gamepad2 className="size-4" />, label: 'My Games' },
+                { href: '/dashboard/devlogs/new', icon: <FileText className="size-4" />, label: 'Devlogs' },
+                { href: '/dashboard/roadmap', icon: <Workflow className="size-4" />, label: 'Roadmaps' },
+                { href: '/dashboard/feed', icon: <LineChart className="size-4" />, label: 'Analytics' },
+                { href: '/dashboard/notifications', icon: <Radio className="size-4" />, label: 'Community' },
+                { href: '#', icon: <Library className="size-4" />, label: 'Media Library' },
+                { href: '/studios', icon: <Users className="size-4" />, label: 'Followers' },
+                { href: '#', icon: <ShieldCheck className="size-4" />, label: 'Team' },
+                { href: '#', icon: <CircleDollarSign className="size-4" />, label: 'Payouts' },
+                { href: '#', icon: <Settings className="size-4" />, label: 'Settings', active: true },
+              ].map((item) => (
+                <Link key={item.label} href={item.href}
+                  className={`group flex items-center gap-3 px-3 py-2.5 text-sm transition ${item.active ? 'border-r-2 border-cyan bg-cyan/10 text-foreground' : 'text-muted-foreground hover:bg-cyan/5 hover:text-foreground'}`}>
+                  <span className={item.active ? 'text-cyan' : 'text-muted-foreground group-hover:text-cyan'}>{item.icon}</span>
+                  <span className="flex-1 font-mono text-[0.62rem] uppercase tracking-widest">{item.label}</span>
+                </Link>
+              ))}
+            </nav>
+            <div className="mt-5 border-t border-border/70 px-2 pt-4">
+              <p className="font-mono text-[0.67rem] uppercase tracking-[0.22em] text-muted-foreground">Studio Level</p>
+              <p className="mt-1 font-mono text-xs text-cyan">Level 12</p>
+              <div className="mt-3 h-1.5 bg-border/40"><div className="h-full w-[73%] bg-cyan shadow-[0_0_12px_rgb(62_231_255_/_0.7)] transition-all" /></div>
+              <p className="mt-2 text-right font-mono text-[0.62rem] text-muted-foreground">8,750 / 12,000 XP</p>
+            </div>
+            <div className="mt-5 overflow-hidden border border-border/70 p-3">
+              <div className="relative min-h-24">
+                <img src="/playmorrow/neon-warden.png" alt="" className="absolute inset-y-0 right-[-20px] h-full w-24 object-cover opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
+                <div className="relative">
+                  <p className="font-mono text-xs font-semibold text-violet">Need more power?</p>
+                  <p className="mt-1 max-w-[130px] text-[0.68rem] text-muted-foreground">Unlock premium tools</p>
+                  <span className="mt-3 inline-flex border border-coral/70 px-3 py-1.5 text-[0.68rem] text-coral">Upgrade Studio</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Editor */}
+        <div className="min-w-0 px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mb-6 flex items-center justify-between">
+            <Link href="/dashboard" className="inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:text-cyan"><ArrowLeft className="size-3" /> Back to dashboard</Link>
+            <Link href={`/studios/${slug}`} className="inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:text-white"><ExternalLink className="size-3" /> View public page</Link>
+          </div>
+
+          <div className="mb-8">
+            <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Edit Studio</h1>
+            <p className="mt-2 font-mono text-[0.68rem] uppercase tracking-widest text-muted-foreground">Manage your studio identity and preferences.</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {error && <div className="clip-corner border border-coral/40 bg-coral/5 px-4 py-3 font-mono text-[0.68rem] text-coral">{error}</div>}
+            {success && <div className="clip-corner border border-cyan/40 bg-cyan/5 px-4 py-3 font-mono text-[0.68rem] text-cyan">Studio updated successfully.</div>}
+
+            {/* Identity */}
+            <Section title="Studio Identity" desc="Basic information about your studio.">
+              <Field label="Studio Name" error={!name.trim() && 'Required'}>
+                <input value={name} onChange={e => setName(e.target.value)} maxLength={40}
+                  className={`clip-corner h-11 w-full border bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] ${!name.trim() ? 'border-coral/60' : 'border-input'}`} />
+              </Field>
+              <Field label="Slug (immutable)">
+                <input value={slug} disabled className="clip-corner h-11 w-full border border-input bg-muted/30 px-4 text-sm text-muted-foreground outline-none cursor-not-allowed" />
+              </Field>
+              <Field label="Tagline" hint={`${tagline.length}/120`}>
+                <input value={tagline} onChange={e => setTagline(e.target.value.slice(0, 120))} maxLength={120}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </Field>
+              <Field label="Description" hint={`${descLen}/3000`}>
+                <textarea ref={descRef} value={description} onChange={e => { setDescription(e.target.value.slice(0, 3000)); autoResize(); }} rows={5} maxLength={3000}
+                  className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </Field>
+            </Section>
+
+            {/* Contact */}
+            <Section title="Contact & Links" desc="How players and press can reach you.">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Country">
+                  <select value={country} onChange={e => setCountry(e.target.value)}
+                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan cursor-pointer">
+                    <option value="">Select country</option>
+                    {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </Field>
+                <Field label="Location">
+                  <input value={location} onChange={e => setLocation(e.target.value)}
+                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                </Field>
+                <Field label="Website">
+                  <input value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)} placeholder="https://..."
+                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                </Field>
+                <Field label="Discord">
+                  <input value={discord} onChange={e => setDiscord(e.target.value)} placeholder="discord.gg/..."
+                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                </Field>
+                <Field label="X / Twitter">
+                  <input value={x} onChange={e => setX(e.target.value)} placeholder="@yourstudio"
+                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                </Field>
+                <Field label="YouTube">
+                  <input value={youtube} onChange={e => setYoutube(e.target.value)} placeholder="https://youtube.com/@..."
+                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                </Field>
+                <Field label="Instagram">
+                  <input value={instagram} onChange={e => setInstagram(e.target.value)} placeholder="@yourstudio"
+                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                </Field>
+                <Field label="GitHub">
+                  <input value={github} onChange={e => setGithub(e.target.value)} placeholder="https://github.com/..."
+                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                </Field>
+              </div>
+            </Section>
+
+            {/* Brand Assets */}
+            <Section title="Brand Assets" desc="Your studio logo and banner image.">
+              <div className="grid gap-6 sm:grid-cols-2">
+                <AssetUpload label="Studio Logo" value={logoUrl} uploading={uploadingLogo}
+                  onUpload={f => handleImageUpload(f, 'logo')} onRemove={() => setLogoUrl('')} />
+                <AssetUpload label="Studio Banner" value={bannerUrl} uploading={uploadingBanner}
+                  onUpload={f => handleImageUpload(f, 'banner')} onRemove={() => setBannerUrl('')} />
+              </div>
+            </Section>
+
+            {/* Danger Zone */}
+            <Section title="Danger Zone" desc="Irreversible actions.">
+              <div className="clip-corner border border-coral/30 bg-coral/5 p-4">
+                <p className="font-mono text-xs font-semibold text-coral">Delete this studio</p>
+                <p className="mt-1 text-xs text-muted-foreground">Permanently delete your studio and all associated data.</p>
+                <button type="button" onClick={() => setShowDeleteModal(true)}
+                  className="mt-3 cursor-pointer border border-coral/60 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-widest text-coral transition hover:bg-coral/20">
+                  <Trash2 className="mr-1 inline size-3" /> Delete Studio
+                </button>
+              </div>
+            </Section>
+
+            {/* Save Bar */}
+            <div className="sticky bottom-0 z-10 -mx-4 border-t border-border/70 bg-[#050b0f]/95 px-4 py-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <button type="submit" disabled={updateStudio.isPending || !hasChanges}
+                    className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+                    {updateStudio.isPending ? <Loader2 className="mr-1 inline size-3 animate-spin" /> : <Save className="mr-1 inline size-3" />}
+                    {updateStudio.isPending ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <Link href="/dashboard"
+                    className="border border-border/60 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
+                    Cancel
+                  </Link>
+                </div>
+                {hasChanges && <span className="font-mono text-[0.58rem] uppercase tracking-widest text-cyan/60 animate-pulse">● Unsaved changes</span>}
+              </div>
+            </div>
+          </form>
         </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/studios/${slug}`}>
-            <ExternalLink className="size-3" /> View public page
-          </Link>
-        </Button>
+
+        {/* Right Preview */}
+        <aside className="hidden border-l border-border/50 lg:block">
+          <div className="sticky top-0 space-y-4 p-4">
+            {/* Live Preview */}
+            <div className="clip-corner border border-border/90 bg-[#050b0f]/88 p-4 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
+              <p className="mb-3 font-mono text-[0.58rem] uppercase tracking-[0.22em] text-cyan">Live Preview</p>
+              <div className="aspect-[3/1] overflow-hidden border border-border/60 bg-background/60">
+                {bannerUrl ? <img src={bannerUrl} alt="" className="size-full object-cover" /> : <div className="flex h-full items-center justify-center font-mono text-[0.58rem] text-muted-foreground">No banner</div>}
+              </div>
+              <div className="-mt-6 ml-3 flex items-end gap-3">
+                <div className="size-12 border border-border/60 bg-background/80 overflow-hidden">
+                  {logoUrl ? <img src={logoUrl} alt="" className="size-full object-cover" /> : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="size-4" /></div>}
+                </div>
+                <div className="min-w-0 pb-1">
+                  <p className="truncate font-display text-sm font-bold text-white">{name || 'Studio Name'}</p>
+                  <p className="truncate font-mono text-[0.58rem] text-cyan/70">@{slug}</p>
+                </div>
+              </div>
+              {tagline && <p className="mt-3 text-[0.68rem] text-muted-foreground line-clamp-2">{tagline}</p>}
+              <div className="mt-3 grid grid-cols-3 gap-2 text-center font-mono text-[0.58rem] uppercase tracking-widest text-muted-foreground">
+                <div><p className="font-display text-sm font-semibold text-foreground">{studio.followersCount}</p>Followers</div>
+                <div><p className="font-display text-sm font-semibold text-foreground">{studio.gamesCount}</p>Games</div>
+                <div><p className="font-display text-sm font-semibold text-foreground">{studio.membersCount}</p>Members</div>
+              </div>
+            </div>
+
+            {/* Profile Strength */}
+            <div className="clip-corner border border-border/90 bg-[#050b0f]/88 p-4 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
+              <p className="mb-2 font-mono text-[0.58rem] uppercase tracking-[0.22em] text-muted-foreground">Profile Strength</p>
+              <div className="relative grid size-20 place-items-center mx-auto">
+                <svg className="size-20 -rotate-90" viewBox="0 0 72 72">
+                  <circle cx="36" cy="36" r="30" fill="none" stroke="rgb(62,231,255,0.15)" strokeWidth="4" />
+                  <circle cx="36" cy="36" r="30" fill="none" stroke="rgb(62,231,255)" strokeWidth="4" strokeDasharray={`${(profileStrength / 100) * 188.5} 188.5`} strokeLinecap="round" className="transition-all duration-700" />
+                </svg>
+                <span className="absolute font-display text-sm font-bold text-cyan">{profileStrength}%</span>
+              </div>
+              <ul className="mt-3 space-y-1.5">
+                {[
+                  { label: 'Studio Name', ok: !!name },
+                  { label: 'Tagline', ok: !!tagline },
+                  { label: 'Description', ok: description.length > 50 },
+                  { label: 'Logo', ok: !!logoUrl },
+                  { label: 'Banner', ok: !!bannerUrl },
+                  { label: 'Website', ok: !!websiteUrl },
+                  { label: 'Location', ok: !!location },
+                ].map(item => (
+                  <li key={item.label} className="flex items-center gap-2 font-mono text-[0.58rem] text-muted-foreground">
+                    {item.ok ? <Check className="size-3 text-cyan" /> : <div className="size-3 rounded-full border border-border" />}
+                    {item.label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </aside>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {error && (
-          <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-            {error}
+      {/* Delete Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="clip-corner w-full max-w-md border border-coral/40 bg-[#050b0f] p-6 shadow-[0_0_60px_rgb(0_0_0_/_0.5)]">
+            <AlertTriangle className="mx-auto size-10 text-coral" />
+            <h2 className="mt-4 text-center font-display text-lg font-bold text-foreground">Delete Studio</h2>
+            <p className="mt-2 text-center text-sm text-muted-foreground">Type <strong className="text-coral">{studio.name}</strong> to confirm:</p>
+            <input value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} placeholder="Type studio name..."
+              className="mt-4 w-full border border-coral/60 bg-background/80 px-4 py-3 text-sm text-foreground outline-none focus:border-coral" />
+            <div className="mt-5 flex gap-3">
+              <button onClick={() => { setShowDeleteModal(false); setDeleteConfirm(''); }}
+                className="flex-1 cursor-pointer border border-border/60 px-4 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">Cancel</button>
+              <button onClick={handleDelete} disabled={deleteConfirm !== studio.name || deleteStudio.isPending}
+                className="flex-1 cursor-pointer border border-coral bg-coral/10 px-4 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-coral transition hover:bg-coral hover:text-coral-foreground disabled:cursor-not-allowed disabled:opacity-40">
+                {deleteStudio.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Section({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) {
+  return (
+    <section className="clip-corner border border-border/90 bg-[#050b0f]/88 p-5 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)] sm:p-6">
+      <div className="mb-5 border-b border-border/60 pb-3">
+        <h2 className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">{title}</h2>
+        <p className="mt-1 font-mono text-[0.58rem] text-muted-foreground">{desc}</p>
+      </div>
+      <div className="space-y-4">{children}</div>
+    </section>
+  );
+}
+
+function Field({ label, children, hint, error }: { label: string; children: React.ReactNode; hint?: string; error?: string }) {
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center justify-between">
+        <label className="font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground">{label}</label>
+        {hint && <span className="font-mono text-[0.55rem] text-muted-foreground/60">{hint}</span>}
+      </div>
+      {children}
+      {error && <p className="mt-1 font-mono text-[0.55rem] text-coral">{error}</p>}
+    </div>
+  );
+}
+
+function AssetUpload({ label, value, uploading, onUpload, onRemove }: { label: string; value: string; uploading: boolean; onUpload: (f: File) => void; onRemove: () => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  return (
+    <div>
+      <label className="mb-1.5 block font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground">{label}</label>
+      <div className="clip-corner relative flex min-h-[140px] cursor-pointer flex-col items-center justify-center border border-dashed border-border/70 bg-background/40 transition hover:border-cyan/50"
+        onClick={() => inputRef.current?.click()}>
+        {value ? (
+          <div className="relative size-full">
+            <img src={value} alt="" className="max-h-[140px] w-full object-contain" />
+            <button type="button" onClick={e => { e.stopPropagation(); onRemove(); }}
+              className="absolute right-2 top-2 cursor-pointer border border-coral/60 bg-background/80 p-1.5 text-coral transition hover:bg-coral/20">
+              <X className="size-3" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2 py-8">
+            {uploading ? <Loader2 className="size-6 animate-spin text-cyan" /> : <Upload className="size-6 text-muted-foreground" />}
+            <p className="font-mono text-[0.58rem] text-muted-foreground">{uploading ? 'Uploading...' : 'Click to upload'}</p>
           </div>
         )}
-
-        {success && (
-          <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary">
-            Studio updated successfully.
-          </div>
-        )}
-
-        <div>
-          <label htmlFor="name" className="mb-1.5 block text-sm font-medium">Name</label>
-          <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Slug (immutable)</label>
-          <input type="text" value={slug} disabled
-            className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground" />
-        </div>
-
-        <div>
-          <label htmlFor="tagline" className="mb-1.5 block text-sm font-medium">Tagline</label>
-          <input id="tagline" type="text" value={tagline} onChange={(e) => setTagline(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-        </div>
-
-        <div>
-          <label htmlFor="description" className="mb-1.5 block text-sm font-medium">Description</label>
-          <textarea id="description" rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="location" className="mb-1.5 block text-sm font-medium">Location</label>
-            <input id="location" type="text" value={location} onChange={(e) => setLocation(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-          <div>
-            <label htmlFor="websiteUrl" className="mb-1.5 block text-sm font-medium">Website</label>
-            <input id="websiteUrl" type="url" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <ImageUpload value={logoUrl} onChange={setLogoUrl} label="Logo" />
-          <ImageUpload value={bannerUrl} onChange={setBannerUrl} label="Banner" />
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <div className="flex gap-3">
-            <Button type="submit" disabled={updateStudio.isPending}>
-              {updateStudio.isPending ? 'Saving…' : 'Save changes'}
-              <Save className="size-4" />
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/dashboard">Cancel</Link>
-            </Button>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="border-destructive/30 text-destructive hover:bg-destructive/10"
-            onClick={async () => {
-              if (!confirm(`Delete studio "${studio?.name}" permanently? This cannot be undone.`)) return;
-              try {
-                await deleteStudio.mutateAsync({ slug });
-                router.push('/dashboard');
-              } catch { /* ignore */ }
-            }}
-            disabled={deleteStudio.isPending}
-          >
-            <Trash2 className="size-4" />
-            {deleteStudio.isPending ? 'Deleting…' : 'Delete studio'}
-          </Button>
-        </div>
-      </form>
+        <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) onUpload(f); e.target.value = ''; }} />
+      </div>
     </div>
   );
 }
