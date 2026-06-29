@@ -595,8 +595,8 @@ export function useUpdateStudio() {
 export function useDeleteStudio() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { slug: string; token: string }) =>
-      api.delete(`/studios/${data.slug}`, data.token),
+    mutationFn: (data: { slug: string }) =>
+      api.delete(`/studios/${data.slug}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['myStudios'] });
       qc.invalidateQueries({ queryKey: ['studios'] });

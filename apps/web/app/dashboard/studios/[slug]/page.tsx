@@ -207,9 +207,9 @@ export default function EditStudioPage() {
             size="sm"
             className="border-destructive/30 text-destructive hover:bg-destructive/10"
             onClick={async () => {
-              if (!token || !confirm(`Delete studio "${studio?.name}" permanently? This cannot be undone.`)) return;
+              if (!confirm(`Delete studio "${studio?.name}" permanently? This cannot be undone.`)) return;
               try {
-                await deleteStudio.mutateAsync({ slug, token });
+                await deleteStudio.mutateAsync({ slug });
                 router.push('/dashboard');
               } catch { /* ignore */ }
             }}
