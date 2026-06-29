@@ -263,7 +263,7 @@ function StudioHero({ studio, studioName, studioTagline }: { studio: Studio; stu
     <DashboardPanel className="overflow-hidden">
       <div className="relative min-h-[160px]">
         <img src={studio.bannerUrl || '/playmorrow/neon-warden.png'} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_86%_24%,rgb(255_87_77_/_0.28),transparent_18rem),linear-gradient(90deg,#020609_0%,rgb(2_6_9_/_0.9)_34%,rgb(2_6_9_/_0.32)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_86%_24%,rgb(255_87_77_/_0.12),transparent_18rem),linear-gradient(90deg,#020609_0%,rgb(2_6_9_/_0.6)_34%,rgb(2_6_9_/_0.15)_100%)]" />
         <div className="absolute right-16 top-8 hidden text-coral drop-shadow-[0_0_20px_rgb(255_87_77_/_0.6)] lg:block">
           <Zap className="size-20 stroke-1" />
         </div>
