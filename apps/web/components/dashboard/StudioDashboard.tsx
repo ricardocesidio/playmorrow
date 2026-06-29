@@ -113,15 +113,17 @@ export function StudioDashboard() {
     <>
       <SiteHeader />
       <main className="relative overflow-hidden bg-[#020609] px-3 pb-4 pt-3 text-foreground sm:px-5">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.026)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.04)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.03)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+        <div className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-coral/20 to-transparent" />
 
-        <div className="relative mx-auto grid max-w-[1540px] gap-3 xl:grid-cols-[220px_minmax(0,1fr)]">
+        <div className="relative mx-auto grid max-w-[1540px] xl:grid-cols-[220px_minmax(0,1fr)]">
           <StudioSidebar unreadCount={unreadCount} studioLevel={12} studioSlug={studio.slug} />
 
-          <section className="min-w-0 space-y-3">
+          <section className="min-w-0">
             <StudioHero studio={studio} studioName={studioName} studioTagline={studioTagline} />
 
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 2xl:grid-cols-8">
+            <div className="grid grid-cols-2 gap-3 p-3 md:grid-cols-4 2xl:grid-cols-8">
               <StatCard icon={<Gamepad2 className="size-5" />} label="Games Published" value={publishedGames} tone="violet" />
               <StatCard icon={<Boxes className="size-5" />} label="In Development" value={inDevelopmentGames} tone="amber" />
               <StatCard icon={<Heart className="size-5" />} label="Followers" value={formatNumber(followers)} delta="+1.2K this week" tone="coral" />
@@ -216,7 +218,9 @@ export function StudioDashboard() {
 function StudioSidebar({ unreadCount, studioLevel, studioSlug }: { unreadCount: number; studioLevel: number; studioSlug: string }) {
   return (
     <aside className="hidden xl:block">
-      <DashboardPanel className="sticky top-20 min-h-[690px] p-3">
+      <div className="clip-corner sticky top-20 min-h-full border border-border/90 bg-[#050b0f]/88 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)] p-3">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.03)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.02)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        <div className="relative z-10">
         <div className="border-b border-border/70 px-2 pb-3">
           <p className="flex items-center gap-2 font-mono text-[0.68rem] uppercase tracking-[0.18em] text-cyan">
             <Gauge className="size-3.5" /> Studio Dashboard
@@ -253,17 +257,19 @@ function StudioSidebar({ unreadCount, studioLevel, studioSlug }: { unreadCount: 
             </div>
           </div>
         </div>
-      </DashboardPanel>
+      </div>
     </aside>
   );
 }
 
 function StudioHero({ studio, studioName, studioTagline }: { studio: Studio; studioName: string; studioTagline: string }) {
   return (
-    <DashboardPanel className="overflow-hidden">
+    <div className="clip-corner border-b border-border/90 bg-[#050b0f]/88 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)] overflow-hidden">
       <div className="relative min-h-[160px]">
         <img src={studio.bannerUrl || '/playmorrow/neon-warden.png'} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_86%_24%,rgb(255_87_77_/_0.06),transparent_18rem),linear-gradient(90deg,#020609_0%,rgb(2_6_9_/_0.35)_34%,rgb(2_6_9_/_0.08)_100%)]" />
+        <div className="pointer-events-none absolute right-0 top-0 size-64 translate-x-32 -translate-y-32 rounded-full border border-cyan/10" />
+        <div className="pointer-events-none absolute bottom-0 left-1/3 size-32 rounded-full border border-coral/5" />
         <div className="absolute right-16 top-8 hidden text-coral drop-shadow-[0_0_20px_rgb(255_87_77_/_0.6)] lg:block">
           <Zap className="size-20 stroke-1" />
         </div>
@@ -285,7 +291,7 @@ function StudioHero({ studio, studioName, studioTagline }: { studio: Studio; stu
           </Link>
         </div>
       </div>
-    </DashboardPanel>
+    </div>
   );
 }
 
@@ -305,10 +311,11 @@ function SidebarLink({ href, icon, label, count, active }: { href: string; icon:
 
 function StatCard({ icon, label, value, delta, tone }: { icon: React.ReactNode; label: string; value: string | number; delta?: string; tone: 'cyan' | 'coral' | 'violet' | 'amber' | 'muted' }) {
   const toneClass = tone === 'coral' ? 'text-coral' : tone === 'violet' ? 'text-violet' : tone === 'amber' ? 'text-amber' : tone === 'muted' ? 'text-muted-foreground' : 'text-cyan';
+  const shadow = tone === 'cyan' ? 'shadow-[0_0_20px_rgb(62_231_255_/_0.12)]' : tone === 'coral' ? 'shadow-[0_0_20px_rgb(255_87_77_/_0.12)]' : '';
   return (
-    <div className="clip-corner border border-border/90 bg-background/55 p-4">
+    <div className={`clip-corner border border-border/90 bg-background/55 p-4 transition hover:border-${tone}/50 ${shadow}`}>
       <div className="flex items-center gap-3">
-        <span className={toneClass}>{icon}</span>
+        <span className={`${toneClass} drop-shadow-[0_0_8px_var(--tw-shadow-color)]`}>{icon}</span>
         <p className="font-display text-2xl font-semibold">{value}</p>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">{label}</p>
