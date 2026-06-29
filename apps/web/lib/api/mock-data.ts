@@ -25,6 +25,8 @@ export const MOCK_STUDIO = {
   location: 'Test City',
   foundedYear: 2024,
   isVerified: false,
+  level: 1,
+  xp: 0,
   membersCount: 1,
   gamesCount: 1,
   followersCount: 5,
