@@ -4,14 +4,13 @@ import { useState, useEffect, useRef, useCallback, type FormEvent } from 'react'
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  ArrowLeft, Save, Trash2, Upload, X, Loader2, Check, Camera, Globe, Mail, MessageSquare,
-  Twitter, Youtube, Instagram, Github, Linkedin, Gamepad2, Heart, Eye, EyeOff, AlertTriangle,
+  ArrowLeft, Save, Trash2, Upload, X, Loader2, Check, Camera, AlertTriangle,
   PanelLeft, FileText, Workflow, LineChart, Radio, Library, Users, ShieldCheck, Settings,
-  CircleDollarSign, Gauge, Zap, BadgeCheck, ChevronDown, ExternalLink
+  CircleDollarSign, Gauge, ExternalLink, Gamepad2
 } from 'lucide-react';
 import { useAuth } from '@/lib/api/auth-context';
 import { useStudio, useUpdateStudio, useDeleteStudio } from '@/lib/api/hooks';
-import { ApiError, API } from '@/lib/api/client';
+import { ApiError } from '@/lib/api/client';
 
 const COUNTRIES = ['Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan',
   'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan', 'Bolivia',
@@ -45,14 +44,7 @@ export default function EditStudioPage() {
   const [country, setCountry] = useState('');
   const [location, setLocation] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
-  const [supportEmail, setSupportEmail] = useState('');
-  const [businessEmail, setBusinessEmail] = useState('');
   const [discord, setDiscord] = useState('');
-  const [x, setX] = useState('');
-  const [youtube, setYoutube] = useState('');
-  const [instagram, setInstagram] = useState('');
-  const [linkedin, setLinkedin] = useState('');
-  const [github, setGithub] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
   const [error, setError] = useState('');
@@ -72,8 +64,8 @@ export default function EditStudioPage() {
   useEffect(() => {
     if (studio && !initialized) {
       setName(studio.name ?? ''); setTagline(studio.tagline ?? '');
-      setDescription(studio.description ?? ''); setCountry(studio.country ?? '');
-      setLocation(studio.location ?? ''); setWebsiteUrl(studio.websiteUrl ?? '');
+      setDescription(studio.description ?? '');
+      setCountry(((studio as unknown as Record<string, unknown>).country as string) ?? '');
       setLogoUrl(studio.logoUrl ?? ''); setBannerUrl(studio.bannerUrl ?? '');
       setInitialized(true);
     }
@@ -210,7 +202,7 @@ export default function EditStudioPage() {
 
             {/* Identity */}
             <Section title="Studio Identity" desc="Basic information about your studio.">
-              <Field label="Studio Name" error={!name.trim() && 'Required'}>
+              <Field label="Studio Name" error={!name.trim() ? 'Required' : undefined}>
                 <input value={name} onChange={e => setName(e.target.value)} maxLength={40}
                   className={`clip-corner h-11 w-full border bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] ${!name.trim() ? 'border-coral/60' : 'border-input'}`} />
               </Field>
@@ -245,24 +237,8 @@ export default function EditStudioPage() {
                   <input value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)} placeholder="https://..."
                     className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
                 </Field>
-                <Field label="Discord">
+                <Field label="Discord (optional)">
                   <input value={discord} onChange={e => setDiscord(e.target.value)} placeholder="discord.gg/..."
-                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
-                </Field>
-                <Field label="X / Twitter">
-                  <input value={x} onChange={e => setX(e.target.value)} placeholder="@yourstudio"
-                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
-                </Field>
-                <Field label="YouTube">
-                  <input value={youtube} onChange={e => setYoutube(e.target.value)} placeholder="https://youtube.com/@..."
-                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
-                </Field>
-                <Field label="Instagram">
-                  <input value={instagram} onChange={e => setInstagram(e.target.value)} placeholder="@yourstudio"
-                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
-                </Field>
-                <Field label="GitHub">
-                  <input value={github} onChange={e => setGithub(e.target.value)} placeholder="https://github.com/..."
                     className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
                 </Field>
               </div>
