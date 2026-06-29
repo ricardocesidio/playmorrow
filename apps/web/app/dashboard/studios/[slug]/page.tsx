@@ -56,6 +56,7 @@ export default function EditStudioPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [profileStrength, setProfileStrength] = useState(0);
   const descRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -86,7 +87,14 @@ export default function EditStudioPage() {
     loading(true);
     try {
       const reader = new FileReader();
-      reader.onload = () => { setter(reader.result as string); loading(false); setHasChanges(true); };
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setter(reader.result);
+        }
+        loading(false);
+        setHasChanges(true);
+      };
+      reader.onerror = () => loading(false);
       reader.readAsDataURL(file);
     } catch { loading(false); }
   };
@@ -115,17 +123,15 @@ export default function EditStudioPage() {
   };
 
   const descLen = description.length;
-  const descContrib = description.length >= 50 ? 14 : Math.ceil(description.length / 50 * 14);
-  const profileStrength = Math.min(
-    (name ? 14 : 0) +
-    (tagline ? 14 : 0) +
-    descContrib +
-    (logoUrl ? 14 : 0) +
-    (bannerUrl ? 14 : 0) +
-    (websiteUrl ? 14 : 0) +
-    (location ? 14 : 0),
-    100
-  );
+  useEffect(() => {
+    const dc = description.length >= 50 ? 14 : Math.ceil(description.length / 50 * 14);
+    setProfileStrength(Math.min(
+      (name ? 14 : 0) + (tagline ? 14 : 0) + dc +
+      (logoUrl ? 14 : 0) + (bannerUrl ? 14 : 0) +
+      (websiteUrl ? 14 : 0) + (location ? 14 : 0),
+      100
+    ));
+  }, [name, tagline, description, logoUrl, bannerUrl, websiteUrl, location]);
 
   if (authLoading || studioLoading) {
     return (
