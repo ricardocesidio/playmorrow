@@ -68,6 +68,7 @@ export default function EditStudioPage() {
       setDescription(studio.description ?? '');
       setCountry(((studio as unknown as Record<string, unknown>).country as string) ?? '');
       setLogoUrl(studio.logoUrl ?? ''); setBannerUrl(studio.bannerUrl ?? '');
+      setLocation(studio.location ?? ''); setWebsiteUrl(studio.websiteUrl ?? '');
       setInitialized(true);
     }
   }, [studio, initialized]);
