@@ -68,6 +68,8 @@ export interface Studio {
   membersCount: number;
   gamesCount: number;
   followersCount: number;
+  level: number;
+  xp: number;
   createdAt: string;
   updatedAt: string;
 }
