@@ -159,6 +159,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@playmorrow/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@playmorrow/types':
         specifier: workspace:*
         version: link:../../packages/types
