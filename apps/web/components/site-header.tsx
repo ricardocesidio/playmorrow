@@ -8,6 +8,7 @@ import { ArrowUpRight, Building2, Gamepad2, Loader2, Menu, Search, X } from 'luc
 import { HudLinkLogo } from '@/components/playmorrow/hud';
 import { NotificationDropdown } from '@/components/notification-dropdown';
 import { api, type SearchResponse } from '@/lib/api/client';
+import { useMyInvitations } from '@/lib/api/hooks';
 
 const NAV_LINKS = [
   { href: '/games', label: 'Games' },
@@ -18,6 +19,8 @@ const NAV_LINKS = [
 export function SiteHeader() {
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { data: invitations } = useMyInvitations();
+  const pendingCount = invitations?.length ?? 0;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchDebounced, setSearchDebounced] = useState('');
@@ -159,6 +162,16 @@ export function SiteHeader() {
 
           {!isLoading && isAuthenticated && user ? (
             <>
+              <Link href="/my/invitations" className="relative hidden sm:block">
+                <div className="grid size-8 place-items-center rounded-full border border-border bg-background/60 text-muted-foreground hover:text-cyan transition-colors">
+                  <Building2 className="size-4" />
+                </div>
+                {pendingCount > 0 && (
+                  <span className="absolute -right-1 -top-1 grid min-w-[18px] place-items-center rounded-full bg-coral px-1 py-0.5 font-mono text-[9px] font-bold text-white leading-none">
+                    {pendingCount > 9 ? '9+' : pendingCount}
+                  </span>
+                )}
+              </Link>
               <NotificationDropdown />
               <div className="relative group hidden sm:block">
                 <button className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
