@@ -368,7 +368,11 @@ export default function TeamPage() {
             </p>
             <div className="clip-corner max-h-[400px] overflow-y-auto border border-border/60 bg-[#050b0f]/50">
               {feed.length === 0 ? (
-                <div className="px-4 py-8 text-center font-mono text-[0.58rem] text-muted-foreground">No activity yet</div>
+                <div className="px-4 py-12 text-center">
+                  <div className="mx-auto mb-3 grid size-12 place-items-center rounded-full bg-cyan/10 text-xl">🎮</div>
+                  <p className="font-mono text-[0.6rem] text-foreground">Welcome to the team!</p>
+                  <p className="mt-1 font-mono text-[0.55rem] text-muted-foreground">Start by sending a message below. Changes to the studio appear here automatically.</p>
+                </div>
               ) : (
                 <div className="space-y-0">
                   {feed.map((item, i) => (
