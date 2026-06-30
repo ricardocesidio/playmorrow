@@ -19,7 +19,6 @@ export interface TeamMemberCardProps {
   currentUserRole: StudioRole;
   onRemove: (userId: string) => void;
   onPromoteToAdmin?: (userId: string) => void;
-  onUpdateTitle?: (userId: string, title: string) => void;
   onTransferOwnership?: (userId: string) => void;
 }
 
@@ -30,7 +29,7 @@ const ROLE_STYLES: Record<StudioRole, { bg: string; text: string; label: string 
   MEMBER: { bg: 'bg-cyan/10', text: 'text-cyan', label: 'Member' },
 };
 
-export function TeamMemberCard({ member, currentUserId, currentUserRole, onRemove, onPromoteToAdmin, onUpdateTitle, onTransferOwnership }: TeamMemberCardProps) {
+export function TeamMemberCard({ member, currentUserId, currentUserRole, onRemove, onPromoteToAdmin, onTransferOwnership }: TeamMemberCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [_editingTitle, _setEditingTitle] = useState(false);
   const [_titleInput, _setTitleInput] = useState(member.title || '');
