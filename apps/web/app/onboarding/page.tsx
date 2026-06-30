@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowRight, Check, Gamepad2, Building2, User, Globe, Mail, AtSign, Upload } from 'lucide-react';
+import { ArrowRight, Check, Gamepad2, Building2, User, AtSign, Upload } from 'lucide-react';
 import { HudButton, HudPanel } from '@/components/playmorrow/hud';
 import { api, API } from '@/lib/api/client';
 

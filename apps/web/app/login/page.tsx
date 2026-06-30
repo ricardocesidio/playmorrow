@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowUpRight, Chrome, Eye, EyeOff, Github, Lock, User } from 'lucide-react';
 
-import { useAuth, EmailNotVerifiedError } from '@/lib/api/auth-context';
+import { useAuth } from '@/lib/api/auth-context';
 import { API } from '@/lib/api/client';
 import {
   AuthArtCollage,
@@ -17,12 +17,10 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const searchParams = useSearchParams();
 
   // Show error from form-login redirect
