@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, UserPlus, Users, Crown, Shield, Mail, History } from 'lucide-react';
+import { ArrowLeft, UserPlus, Users, Crown, Shield, Mail, History, UserCheck, UserX } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
-import { useStudio, useStudioMembers, useUpdateMemberRole, useRemoveMember, useTransferOwnership, useCreateInvitation, useCancelInvitation, useStudioInvitations, useStudioAuditLogs } from '@/lib/api/hooks';
+import { useStudio, useStudioMembers, useUpdateMemberRole, useRemoveMember, useTransferOwnership, useCreateInvitation, useCancelInvitation, useStudioInvitations, useStudioAuditLogs, useApproveJoinRequest, useRejectJoinRequest } from '@/lib/api/hooks';
 import type { AuditLogEntry } from '@/lib/api/hooks';
 import type { StudioWithMembers } from '@/lib/api/client';
 import { TeamMemberCard } from '@/components/team/team-member-card';
@@ -56,6 +56,8 @@ export default function TeamPage() {
   const transferOwnership = useTransferOwnership();
   const createInvitation = useCreateInvitation();
   const cancelInvitation = useCancelInvitation();
+  const approveJoin = useApproveJoinRequest();
+  const rejectJoin = useRejectJoinRequest();
 
   const rawMembers = (studioMembers as StudioWithMembers)?.members as RawMember[] | undefined ?? [];
   const members: CardMember[] = rawMembers.map(m => ({
@@ -66,6 +68,7 @@ export default function TeamPage() {
     joinedAt: '',
     user: { id: m.user.id, displayName: m.user.displayName, username: m.user.username, avatarUrl: m.user.avatarUrl },
   }));
+  const pendingRequests = (invitations ?? []).filter((inv) => inv.status === 'REQUESTED');
   const currentMember = members.find((m) => m.userId === user?.id);
   const currentUserRole = currentMember?.role;
   const grouped = members.reduce<Record<string, CardMember[]>>((acc, m) => {
@@ -190,6 +193,36 @@ export default function TeamPage() {
                     <button onClick={() => cancelInvitation.mutate({ slug, invitationId: inv.id })}
                       className="cursor-pointer font-mono text-[0.55rem] uppercase tracking-wider text-coral hover:text-coral/80">
                       Cancel
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Pending Requests */}
+          {(currentUserRole === 'OWNER' || currentUserRole === 'ADMIN') && pendingRequests.length > 0 && (
+            <div className="mt-6">
+              <h2 className="mb-3 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
+                Pending Requests ({pendingRequests.length})
+              </h2>
+              <div className="space-y-2">
+                {pendingRequests.map((req) => (
+                  <div key={req.id} className="clip-corner flex items-center gap-3 border border-border/60 bg-[#050b0f]/50 px-4 py-3">
+                    <div className="grid size-8 shrink-0 place-items-center rounded-full border border-border bg-background/60 text-xs font-bold overflow-hidden">
+                      {req.user?.avatarUrl ? <img src={req.user.avatarUrl} alt="" className="size-full object-cover" /> : (req.user?.displayName?.slice(0, 1) ?? '?')}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-mono text-[0.6rem] text-foreground">{req.user?.displayName ?? 'Unknown'}</p>
+                      <p className="font-mono text-[0.55rem] text-muted-foreground/60">{new Date(req.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <button onClick={() => approveJoin.mutate({ slug, userId: req.userId! })}
+                      className="clip-corner flex cursor-pointer items-center gap-1 border border-cyan bg-cyan/10 px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan hover:text-background">
+                      <UserCheck className="size-3" /> Approve
+                    </button>
+                    <button onClick={() => rejectJoin.mutate({ slug, userId: req.userId! })}
+                      className="clip-corner flex cursor-pointer items-center gap-1 border border-coral/60 px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-wider text-coral hover:bg-coral/20">
+                      <UserX className="size-3" /> Reject
                     </button>
                   </div>
                 ))}
