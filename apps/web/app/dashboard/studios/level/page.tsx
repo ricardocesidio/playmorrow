@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Award, TrendingUp, Users, MessageSquare, Heart, Star, Code, Play, BookOpen, ListChecks, Link2, Image, Crown, Shield, Zap, Timer } from 'lucide-react';
+import { ArrowLeft, Award, TrendingUp, Heart, Star, Code, Crown, Shield, Zap, Timer } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 
 const XP_TABLE = [

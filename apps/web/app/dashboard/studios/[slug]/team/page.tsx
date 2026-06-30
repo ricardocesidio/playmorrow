@@ -11,7 +11,7 @@ import type { AuditLogEntry } from '@/lib/api/hooks';
 import type { StudioWithMembers } from '@/lib/api/client';
 import { TeamMemberCard } from '@/components/team/team-member-card';
 import { InviteModal } from '@/components/team/invite-modal';
-import { Invitation } from '@/lib/api/hooks';
+import type { Invitation } from '@/lib/api/hooks';
 
 interface RawMember {
   id: string;
@@ -47,7 +47,7 @@ export default function TeamPage() {
   const { user } = useAuth();
   const { data: studio, isLoading: studioLoading } = useStudio(slug);
   const { data: studioMembers, isLoading: membersLoading } = useStudioMembers(slug);
-  const { data: invitations, refetch: refetchInvitations } = useStudioInvitations(slug);
+  const { data: invitations } = useStudioInvitations(slug);
   const { data: auditLogs } = useStudioAuditLogs(slug);
   const [inviteOpen, setInviteOpen] = useState(false);
 
