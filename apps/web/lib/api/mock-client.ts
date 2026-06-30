@@ -24,6 +24,12 @@ import type { ReactionStatus } from './client';
 /** Small helpers to simulate async delay (remove in production). */
 const delay = (ms = 80) => new Promise((r) => setTimeout(r, ms));
 let mockSessionUser: typeof MOCK_USER | null = null;
+const mockChatMessages: any[] = [
+  { type: 'chat', id: 'chat-welcome', author: MOCK_USER, message: 'Welcome to the team! 🎮', createdAt: new Date(Date.now() - 86400000).toISOString() },
+];
+const mockAuditEvents: any[] = [
+  { type: 'system', id: 'audit-welcome', action: 'STUDIO_CREATED', actor: MOCK_USER, metadata: null, createdAt: new Date(Date.now() - 86400000 * 2).toISOString() },
+];
 
 export function createMockApi() {
   const handler = {
@@ -138,8 +144,19 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
   };
   if (path.includes('/games')) return paginated([MOCK_GAME]);
   if (path.includes('/follow-status')) return followStatus('STUDIO', 'studio-1', false, 5);
-  if (path.includes('/activities')) return { items: [] };
-  if (path.includes('/chat')) return method === 'POST' ? { id: 'chat-1', message: (_body as Record<string, unknown>)?.message as string ?? '', author: MOCK_USER, createdAt: new Date().toISOString() } : [];
+  if (path.includes('/activities')) {
+    const all = [...mockChatMessages, ...mockAuditEvents];
+    all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return { items: all };
+  }
+  if (path.includes('/chat')) {
+    if (method === 'POST') {
+      const msg = { type: 'chat', id: `chat-${Date.now()}`, author: MOCK_USER, message: (_body as Record<string, unknown>)?.message as string ?? '', createdAt: new Date().toISOString() };
+      mockChatMessages.unshift(msg);
+      return msg;
+    }
+    return [];
+  }
   if (path.includes('/request-join')) return { status: 'REQUESTED' };
   if (path.includes('/follow')) {
     if (method === 'POST') return followStatus('STUDIO', 'studio-1', true, 6);
