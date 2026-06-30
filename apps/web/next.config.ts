@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   transpilePackages: ['@playmorrow/types'],
   typedRoutes: true,
   outputFileTracingRoot: path.join(process.cwd(), '..', '..'),
+
   // Proxy API requests in dev to avoid cross-origin cookie issues
   async rewrites() {
     if (process.env.NODE_ENV !== 'development') return [];
