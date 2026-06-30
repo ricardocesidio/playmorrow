@@ -123,7 +123,6 @@ export default function TeamPage() {
     STUDIO_LOGO_CHANGED: 'updated the studio logo',
     STUDIO_BANNER_CHANGED: 'updated the studio banner',
     STUDIO_NAME_CHANGED: 'changed the studio name',
-    MEMBER_INVITED: 'invited a new member',
     DEVLOG_PUBLISHED: 'published a devlog',
     ROADMAP_UPDATED: 'updated the roadmap',
   };
