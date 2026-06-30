@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, UserPlus, Users, Crown, Shield, Mail, History, UserCheck, UserX, Send, MessageCircle } from 'lucide-react';
+import { ArrowLeft, UserPlus, Users, Crown, Shield, Mail, History, UserCheck, UserX, Send, MessageCircle, Trash2 } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
 import { useStudio, useStudioMembers, useUpdateMemberRole, useRemoveMember, useTransferOwnership, useCreateInvitation, useCancelInvitation, useStudioInvitations, useStudioAuditLogs, useApproveJoinRequest, useRejectJoinRequest } from '@/lib/api/hooks';
@@ -93,6 +93,16 @@ export default function TeamPage() {
     }
     setSending(false);
   };
+
+  const deleteMessage = async (id: string) => {
+    try { await api.delete(`/studios/${slug}/chat/${id}`); setFeed(prev => prev.filter(i => i.id !== id)); } catch {}
+  };
+
+  const clearMessages = async () => {
+    try { await api.delete(`/studios/${slug}/chat`); setFeed(prev => prev.filter(i => i.type !== 'chat')); } catch {}
+  };
+
+  const isAdminOrOwner = currentUserRole === 'OWNER' || currentUserRole === 'ADMIN';
 
   const updateRole = useUpdateMemberRole();
   const removeMember = useRemoveMember();
@@ -344,9 +354,16 @@ export default function TeamPage() {
 
           {/* Team Feed */}
           <div className="mt-10">
-            <h2 className="mb-3 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
-              <MessageCircle className="mr-1 inline size-3.5" /> Team Feed
-            </h2>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
+                <MessageCircle className="mr-1 inline size-3.5" /> Team Feed
+              </h2>
+              {isAdminOrOwner && (
+                <button onClick={clearMessages} className="flex cursor-pointer items-center gap-1 font-mono text-[0.55rem] uppercase tracking-wider text-coral hover:text-coral/80">
+                  <Trash2 className="size-3" /> Clear all
+                </button>
+              )}
+            </div>
             <p className="mb-4 font-mono text-[0.55rem] leading-relaxed text-muted-foreground/60">
               Team members can post updates here. Changes to the studio (logo, games, trailers, etc.) appear automatically with a 🤖 icon.
             </p>
@@ -384,6 +401,11 @@ export default function TeamPage() {
                         )}
                       </div>
                       <p className="shrink-0 font-mono text-[0.5rem] text-muted-foreground/50">{formatRelativeTime(item.createdAt)}</p>
+                      {item.type === 'chat' && (isAdminOrOwner || (item as FeedChatItem).author?.id === user?.id) && (
+                        <button onClick={() => deleteMessage(item.id)} className="cursor-pointer p-1 text-muted-foreground/40 hover:text-coral transition-colors">
+                          <Trash2 className="size-3" />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>

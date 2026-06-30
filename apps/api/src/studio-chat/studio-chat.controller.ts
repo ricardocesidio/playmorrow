@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -34,5 +34,32 @@ export class StudioChatController {
     if (!studio) throw new NotFoundException('Studio not found');
     if (!body.message?.trim()) throw new BadRequestException('Message is required');
     return this.chatService.postMessage(studio.id, user.id, body.message.trim());
+  }
+
+  @Delete('chat/:id')
+  @UseGuards(SessionAuthGuard)
+  @ApiOkResponse({ description: 'Message deleted.' })
+  async deleteMessage(
+    @Param('slug') slug: string,
+    @Param('id') id: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    const studio = await this.prisma.studio.findUnique({ where: { slug } });
+    if (!studio) throw new NotFoundException('Studio not found');
+    await this.chatService.deleteMessage(studio.id, id, user.id);
+    return { ok: true };
+  }
+
+  @Delete('chat')
+  @UseGuards(SessionAuthGuard)
+  @ApiOkResponse({ description: 'All messages cleared.' })
+  async clearMessages(
+    @Param('slug') slug: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    const studio = await this.prisma.studio.findUnique({ where: { slug } });
+    if (!studio) throw new NotFoundException('Studio not found');
+    await this.chatService.clearMessages(studio.id, user.id);
+    return { ok: true };
   }
 }

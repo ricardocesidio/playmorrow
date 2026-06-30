@@ -149,13 +149,17 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
     all.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     return { items: all };
   }
-  if (path.includes('/chat')) {
-    if (method === 'POST') {
-      const msg = { type: 'chat', id: `chat-${Date.now()}`, author: MOCK_USER, message: (_body as Record<string, unknown>)?.message as string ?? '', createdAt: new Date().toISOString() };
-      mockChatMessages.push(msg);
-      return msg;
-    }
-    return [];
+  if (path.includes('/chat') && method === 'POST') {
+    const msg = { type: 'chat', id: `chat-${Date.now()}`, author: MOCK_USER, message: (_body as Record<string, unknown>)?.message as string ?? '', createdAt: new Date().toISOString() };
+    mockChatMessages.push(msg);
+    return msg;
+  }
+  if (path.match(/\/chat\/.+/) && method === 'DELETE') {
+    return { ok: true };
+  }
+  if (path === `/studios/${segments[1]}/chat` && method === 'DELETE') {
+    mockChatMessages.length = 0;
+    return { ok: true };
   }
   if (path.includes('/request-join')) return { status: 'REQUESTED' };
   if (path.includes('/follow')) {
