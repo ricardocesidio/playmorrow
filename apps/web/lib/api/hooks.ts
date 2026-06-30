@@ -996,3 +996,29 @@ export function useStudioAuditLogs(slug: string) {
     enabled: !!slug,
   });
 }
+
+export function useRequestJoin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (slug: string) => api.post(`/studios/${slug}/request-join`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['studio'] }); },
+  });
+}
+
+export function useApproveJoinRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; userId: string }) =>
+      api.post(`/studios/${data.slug}/join-requests/${data.userId}/approve`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['studioInvitations'] }); },
+  });
+}
+
+export function useRejectJoinRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; userId: string }) =>
+      api.post(`/studios/${data.slug}/join-requests/${data.userId}/reject`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['studioInvitations'] }); },
+  });
+}

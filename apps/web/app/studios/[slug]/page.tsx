@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Globe, Calendar, Users, Gamepad2, Heart, BadgeCheck } from 'lucide-react';
+import { ArrowLeft, MapPin, Globe, Calendar, Users, Gamepad2, Heart, BadgeCheck, UserPlus, Check } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
@@ -11,14 +12,18 @@ import { SignalLabel } from '@/components/signal-label';
 import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { ErrorState } from '@/components/error-state';
 import { useStudio, useStudioMembers, useStudioGames } from '@/lib/api/hooks';
+import { api } from '@/lib/api/client';
+import { useAuth } from '@/lib/api/auth-context';
 import { FollowButton } from '@/components/follow-button';
 import { ReportForm } from '@/components/report-form';
 
 export default function StudioDetailPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { user: authUser } = useAuth();
   const { data: studio, isLoading, error } = useStudio(slug);
   const { data: members } = useStudioMembers(slug);
   const { data: gamesData } = useStudioGames(slug);
+  const [requestSent, setRequestSent] = useState(false);
 
   if (isLoading) {
     return (
@@ -100,6 +105,17 @@ export default function StudioDetailPage() {
                     </span>
                   )}
                   <FollowButton targetType="studio" slug={slug} />
+                  {authUser && !requestSent && (
+                    <button onClick={async () => { try { await api.post(`/studios/${slug}/request-join`); setRequestSent(true); } catch { /* ignore */ } }}
+                      className="clip-corner flex cursor-pointer items-center gap-2 border border-cyan/60 bg-cyan/5 px-5 py-2.5 font-mono text-[0.55rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">
+                      <UserPlus className="size-4" /> Request to Join
+                    </button>
+                  )}
+                  {requestSent && (
+                    <span className="inline-flex items-center gap-2 font-mono text-[0.55rem] text-cyan">
+                      <Check className="size-4" /> Request sent!
+                    </span>
+                  )}
                   {studio && <ReportForm targetType="STUDIO" targetId={studio.id} />}
                   {studio.websiteUrl && (
                     <a href={studio.websiteUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-cyan underline-offset-2 hover:underline">
