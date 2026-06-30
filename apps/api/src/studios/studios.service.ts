@@ -175,7 +175,7 @@ export class StudiosService {
       throw new ForbiddenException('Admins can only modify Moderators');
     }
 
-    const data: any = {};
+    const data: { role?: StudioRole; title?: string | null } = {};
     if (dto.role) data.role = dto.role;
     if (dto.title !== undefined) data.title = dto.title;
 

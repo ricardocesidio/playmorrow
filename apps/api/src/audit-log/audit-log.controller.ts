@@ -18,15 +18,15 @@ export class AuditLogController {
   @ApiQuery({ name: 'limit', required: false })
   async findAll(
     @Param('slug') slug: string,
-    @Query('limit') limit = '50',
-  ): Promise<{ items: any[]; total: number }> {
+    @Query('limit') limit?: string,
+  ): Promise<{ items: unknown[]; total: number }> {
     const studio = await this.prisma.studio.findUnique({ where: { slug } });
     if (!studio) return { items: [], total: 0 };
 
     const logs = await this.prisma.auditLog.findMany({
       where: { studioId: studio.id },
       orderBy: { createdAt: 'desc' },
-      take: Math.min(parseInt(limit, 10) || 50, 100),
+      take: Math.min(parseInt(limit || '50', 10) || 50, 100),
       include: {
         actor: { select: { id: true, displayName: true, username: true, avatarUrl: true } },
       },
