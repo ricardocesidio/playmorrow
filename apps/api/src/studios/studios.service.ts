@@ -1,5 +1,7 @@
 import {
+  BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,6 +10,7 @@ import { StudioRole } from '@playmorrow/database';
 
 import { assertStudioAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditLogService } from '../audit-log/audit-log.service';
 import { StudioXpService } from './studio-xp.service';
 import type { CreateStudioDto } from './dto/create-studio.dto';
 import type { UpdateStudioDto } from './dto/update-studio.dto';
@@ -23,6 +26,7 @@ export class StudiosService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly studioXpService: StudioXpService,
+    private readonly auditLog: AuditLogService,
   ) {}
 
   async create(userId: string, dto: CreateStudioDto) {
@@ -147,6 +151,144 @@ export class StudiosService {
     await this.prisma.studio.delete({ where: { id: studio.id } });
 
     return { success: true };
+  }
+
+  async updateMemberRole(actorId: string, slug: string, targetUserId: string, dto: { role?: StudioRole; title?: string }) {
+    const studio = await this.prisma.studio.findUnique({
+      where: { slug: slug.toLowerCase() },
+      include: { members: true },
+    });
+    if (!studio) throw new NotFoundException('Studio not found');
+
+    const actorMembership = studio.members.find(m => m.userId === actorId);
+    if (!actorMembership) throw new ForbiddenException('Not a member');
+
+    const targetMember = studio.members.find(m => m.userId === targetUserId);
+    if (!targetMember) throw new NotFoundException('Member not found');
+    if (targetMember.role === 'OWNER') throw new ForbiddenException('Cannot modify the Owner');
+
+    if (dto.role === 'ADMIN' && actorMembership.role !== 'OWNER') {
+      throw new ForbiddenException('Only the Owner can promote to Admin');
+    }
+
+    if (actorMembership.role === 'ADMIN' && targetMember.role !== 'MODERATOR' && targetMember.role !== 'MEMBER') {
+      throw new ForbiddenException('Admins can only modify Moderators');
+    }
+
+    const data: any = {};
+    if (dto.role) data.role = dto.role;
+    if (dto.title !== undefined) data.title = dto.title;
+
+    const updated = await this.prisma.studioMember.update({
+      where: { id: targetMember.id },
+      data,
+      include: { user: { select: { id: true, displayName: true, avatarUrl: true } } },
+    });
+
+    if (dto.role) {
+      await this.auditLog.log({
+        studioId: studio.id,
+        actorId,
+        action: 'MEMBER_ROLE_CHANGED',
+        targetType: 'USER',
+        targetId: targetUserId,
+        metadata: { oldRole: targetMember.role, newRole: dto.role },
+      });
+    }
+    if (dto.title !== undefined && dto.title !== targetMember.title) {
+      await this.auditLog.log({
+        studioId: studio.id,
+        actorId,
+        action: 'MEMBER_TITLE_CHANGED',
+        targetType: 'USER',
+        targetId: targetUserId,
+        metadata: { oldTitle: targetMember.title, newTitle: dto.title },
+      });
+    }
+
+    return updated;
+  }
+
+  async removeMember(actorId: string, slug: string, targetUserId: string) {
+    const studio = await this.prisma.studio.findUnique({
+      where: { slug: slug.toLowerCase() },
+      include: { members: true },
+    });
+    if (!studio) throw new NotFoundException('Studio not found');
+
+    const actorMembership = studio.members.find(m => m.userId === actorId);
+    if (!actorMembership) throw new ForbiddenException('Not a member');
+
+    const targetMember = studio.members.find(m => m.userId === targetUserId);
+    if (!targetMember) throw new NotFoundException('Member not found');
+    if (targetMember.role === 'OWNER') throw new ForbiddenException('Cannot remove the Owner');
+
+    if (actorMembership.role === 'ADMIN' && targetMember.role !== 'MODERATOR' && targetMember.role !== 'MEMBER') {
+      throw new ForbiddenException('Admins can only remove Moderators');
+    }
+
+    await this.prisma.studioMember.delete({ where: { id: targetMember.id } });
+
+    await this.auditLog.log({
+      studioId: studio.id,
+      actorId,
+      action: 'MEMBER_REMOVED',
+      targetType: 'USER',
+      targetId: targetUserId,
+      metadata: { role: targetMember.role },
+    });
+  }
+
+  async leaveStudio(userId: string, slug: string) {
+    const studio = await this.prisma.studio.findUnique({
+      where: { slug: slug.toLowerCase() },
+      include: { members: true },
+    });
+    if (!studio) throw new NotFoundException('Studio not found');
+
+    const membership = studio.members.find(m => m.userId === userId);
+    if (!membership) throw new NotFoundException('Not a member of this studio');
+    if (membership.role === 'OWNER') throw new ForbiddenException('Owner cannot leave. Transfer ownership first.');
+
+    await this.prisma.studioMember.delete({ where: { id: membership.id } });
+
+    await this.auditLog.log({
+      studioId: studio.id,
+      actorId: userId,
+      action: 'MEMBER_LEFT',
+      targetType: 'USER',
+      targetId: userId,
+      metadata: { role: membership.role },
+    });
+  }
+
+  async transferOwnership(ownerId: string, slug: string, targetUserId: string) {
+    const studio = await this.prisma.studio.findUnique({
+      where: { slug: slug.toLowerCase() },
+      include: { members: true },
+    });
+    if (!studio) throw new NotFoundException('Studio not found');
+
+    const ownerMember = studio.members.find(m => m.userId === ownerId);
+    if (!ownerMember || ownerMember.role !== 'OWNER') throw new ForbiddenException('Only the Owner can transfer ownership');
+
+    const targetMember = studio.members.find(m => m.userId === targetUserId);
+    if (!targetMember) throw new NotFoundException('Target user is not a member');
+    if (targetMember.role !== 'ADMIN') throw new BadRequestException('Ownership can only be transferred to an Admin');
+
+    await this.prisma.$transaction([
+      this.prisma.studioMember.update({ where: { id: ownerMember.id }, data: { role: 'ADMIN' } }),
+      this.prisma.studioMember.update({ where: { id: targetMember.id }, data: { role: 'OWNER' } }),
+    ]);
+
+    await this.auditLog.log({
+      studioId: studio.id,
+      actorId: ownerId,
+      action: 'OWNERSHIP_TRANSFERRED',
+      targetType: 'USER',
+      targetId: targetUserId,
+      metadata: { fromUserId: ownerId, toUserId: targetUserId },
+    });
   }
 
   async findMyStudios(userId: string) {
