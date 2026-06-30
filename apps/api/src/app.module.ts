@@ -37,6 +37,7 @@ import { UsersModule } from './users/users.module';
     // `@Throttle()` overrides tighten abuse-prone endpoints (auth, comment/
     // reaction creates); `@SkipThrottle()` exempts the health probe.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
+    AuditLogModule,
     PrismaModule,
     HealthModule,
     NotificationsModule,
@@ -57,7 +58,6 @@ import { UsersModule } from './users/users.module';
     SearchModule,
     WishlistModule,
     InvitationsModule,
-    AuditLogModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
