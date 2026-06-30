@@ -12,6 +12,7 @@ import { DevlogsModule } from './devlogs/devlogs.module';
 import { ReactionsModule } from './reactions/reactions.module';
 import { ReportsModule } from './reports/reports.module';
 import { SearchModule } from './search/search.module';
+import { InvitationsModule } from './invitations/invitations.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { FeedModule } from './feed/feed.module';
 import { FollowsModule } from './follows/follows.module';
@@ -55,6 +56,7 @@ import { UsersModule } from './users/users.module';
     PressKitsModule,
     SearchModule,
     WishlistModule,
+    InvitationsModule,
     AuditLogModule,
   ],
   controllers: [AppController],
