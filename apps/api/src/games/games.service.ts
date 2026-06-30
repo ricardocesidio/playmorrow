@@ -51,6 +51,7 @@ export class GamesService {
         title: dto.title,
         slug,
         studioId: studio.id,
+        createdBy: userId,
         tagline: dto.tagline,
         description: dto.description,
         status: dto.status ?? 'IN_DEVELOPMENT',
@@ -216,7 +217,7 @@ export class GamesService {
 
     assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
-    const data: Prisma.GameUpdateInput = {};
+    const data: Prisma.GameUpdateInput = { updatedBy: userId };
     if (dto.title !== undefined) data.title = dto.title;
     if (dto.tagline !== undefined) data.tagline = dto.tagline;
     if (dto.description !== undefined) data.description = dto.description;
@@ -274,6 +275,11 @@ export class GamesService {
       data,
       include: GAME_INCLUDE,
     });
+
+    if (dto.status === 'RELEASED') {
+      data.publishedBy = userId;
+      data.publishedAt = new Date();
+    }
 
     if (dto.status && dto.status !== game.status) {
       if (dto.status === 'BETA') {
