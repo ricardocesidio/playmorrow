@@ -8,6 +8,8 @@ import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { assertStudioAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioRole } from '@playmorrow/database';
+import { StudioRolesGuard } from '../studios/guards/studio-roles.guard';
+import { StudioRoles } from '../studios/guards/studio-roles.decorator';
 import type { Request } from 'express';
 
 @ApiTags('Invitations')
@@ -113,5 +115,47 @@ export class InvitationsController {
   @ApiOkResponse({ description: "Current user's pending invitations." })
   async myInvitations(@CurrentUser() user: { id: string }) {
     return this.invitationsService.findMyInvitations(user.id);
+  }
+
+  @Post('studios/:slug/request-join')
+  @UseGuards(SessionAuthGuard)
+  @ApiOkResponse({ description: 'Join request created.' })
+  async requestJoin(
+    @Param('slug') slug: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.invitationsService.requestJoin(slug, user.id);
+  }
+
+  @Get('studios/:slug/join-requests')
+  @UseGuards(SessionAuthGuard, StudioRolesGuard)
+  @StudioRoles(StudioRole.OWNER, StudioRole.ADMIN)
+  @ApiOkResponse({ description: 'List of join requests.' })
+  async listJoinRequests(@Param('slug') slug: string) {
+    return this.invitationsService.findJoinRequests(slug);
+  }
+
+  @Post('studios/:slug/join-requests/:userId/approve')
+  @UseGuards(SessionAuthGuard, StudioRolesGuard)
+  @StudioRoles(StudioRole.OWNER, StudioRole.ADMIN)
+  @ApiOkResponse({ description: 'Join request approved.' })
+  async approveJoinRequest(
+    @Param('slug') slug: string,
+    @Param('userId') userId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.invitationsService.approveJoinRequest(slug, userId, user.id);
+  }
+
+  @Post('studios/:slug/join-requests/:userId/reject')
+  @UseGuards(SessionAuthGuard, StudioRolesGuard)
+  @StudioRoles(StudioRole.OWNER, StudioRole.ADMIN)
+  @ApiOkResponse({ description: 'Join request rejected.' })
+  async rejectJoinRequest(
+    @Param('slug') slug: string,
+    @Param('userId') userId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.invitationsService.rejectJoinRequest(slug, userId, user.id);
   }
 }

@@ -36,6 +36,7 @@ enum StudioRole {
 
 enum StudioInvitationStatus {
   PENDING
+  REQUESTED
   ACCEPTED
   REJECTED
   EXPIRED
