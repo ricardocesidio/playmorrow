@@ -45,8 +45,8 @@ function formatRelativeTime(dateStr: string): string {
 export default function TeamPage() {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
-  const { data: studio, isLoading: studioLoading } = useStudio(slug);
-  const { data: studioMembers, isLoading: membersLoading } = useStudioMembers(slug);
+  const { data: studio, isLoading: studioLoading, error: studioError } = useStudio(slug);
+  const { data: studioMembers, isLoading: membersLoading, error: membersError } = useStudioMembers(slug);
   const { data: invitations } = useStudioInvitations(slug);
   const { data: auditLogs } = useStudioAuditLogs(slug);
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -100,6 +100,21 @@ export default function TeamPage() {
         <SiteHeader />
         <div className="flex min-h-screen items-center justify-center bg-[#020609]">
           <div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
+        </div>
+      </>
+    );
+  }
+
+  if (studioError || membersError) {
+    return (
+      <>
+        <SiteHeader />
+        <div className="flex min-h-screen flex-col items-center justify-center bg-[#020609] px-4 text-center">
+          <p className="font-display text-2xl font-semibold text-coral">Failed to load</p>
+          <p className="mt-2 text-sm text-muted-foreground">Could not load team data. Please try again.</p>
+          <Link href={`/dashboard/studios/${slug}`} className="mt-6 font-mono text-xs uppercase tracking-widest text-cyan underline">
+            Back to settings
+          </Link>
         </div>
       </>
     );
@@ -176,6 +191,13 @@ export default function TeamPage() {
               );
             })}
           </div>
+
+          {Object.keys(grouped).length === 0 && !membersLoading && (
+            <div className="clip-corner border border-border/60 bg-[#050b0f]/50 px-6 py-12 text-center">
+              <Users className="mx-auto mb-3 size-8 text-muted-foreground" />
+              <p className="font-mono text-[0.65rem] text-muted-foreground">No members yet</p>
+            </div>
+          )}
 
           {/* Pending Invitations */}
           {(() => {
