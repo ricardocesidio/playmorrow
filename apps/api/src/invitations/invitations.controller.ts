@@ -108,7 +108,7 @@ export class InvitationsController {
     @Param('token') token: string,
     @CurrentUser() user: { id: string },
   ) {
-    return this.invitationsService.decline(token, user.id);
+    return this.invitationsService.decline(token);
   }
 
   @Get('me/invitations')

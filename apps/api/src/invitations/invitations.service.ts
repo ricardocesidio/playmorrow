@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
-import { StudioRole } from '@playmorrow/database';
+import { Prisma, StudioInvitationStatus, StudioRole } from '@playmorrow/database';
 
 const INVITATION_EXPIRY_DAYS = 7;
 const ROLE_LIMITS: Partial<Record<StudioRole, number>> = { ADMIN: 2, MODERATOR: 5 };
@@ -77,10 +77,10 @@ export class InvitationsService {
         await this.notifications.create({
           recipientId: dto.userId,
           actorId: inviterId,
-          type: 'STUDIO_INVITATION' as any,
+          type: 'STUDIO_INVITATION',
           title: `You've been invited to ${studio.name}`,
           body: `Role: ${dto.role}`,
-          targetType: 'STUDIO' as any,
+          targetType: 'STUDIO',
           targetId: studio.id,
         });
       }
@@ -129,7 +129,7 @@ export class InvitationsService {
     return member;
   }
 
-  async decline(rawToken: string, userId: string) {
+  async decline(rawToken: string) {
     const hashed = createHash('sha256').update(rawToken).digest('hex');
     const invitation = await this.prisma.studioInvitation.findUnique({ where: { token: hashed } });
     if (!invitation) throw new NotFoundException('Invitation not found');
@@ -162,8 +162,8 @@ export class InvitationsService {
   }
 
   async findByStudio(studioId: string, status?: string) {
-    const where: any = { studioId };
-    if (status) where.status = status;
+    const where: Prisma.StudioInvitationWhereInput = { studioId };
+    if (status) where.status = status as StudioInvitationStatus;
     return this.prisma.studioInvitation.findMany({
       where,
       include: { invitedBy: { select: { id: true, displayName: true, avatarUrl: true } } },
@@ -224,10 +224,10 @@ export class InvitationsService {
         this.notifications.create({
           recipientId: admin.user.id,
           actorId: userId,
-          type: 'STUDIO_JOIN_REQUEST' as any,
+          type: 'STUDIO_JOIN_REQUEST',
           title: `Join request for ${studio.name}`,
           body: `A user wants to join your studio`,
-          targetType: 'STUDIO' as any,
+          targetType: 'STUDIO',
           targetId: studio.id,
         }),
       ),
@@ -277,10 +277,10 @@ export class InvitationsService {
     await this.notifications.create({
       recipientId: requestUserId,
       actorId,
-      type: 'STUDIO_JOIN_APPROVED' as any,
+      type: 'STUDIO_JOIN_APPROVED',
       title: `You've been added to ${studio.name}`,
       body: 'Your join request was approved',
-      targetType: 'STUDIO' as any,
+      targetType: 'STUDIO',
       targetId: studio.id,
     });
 
