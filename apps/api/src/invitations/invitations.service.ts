@@ -188,6 +188,129 @@ export class InvitationsService {
     });
   }
 
+  async requestJoin(slug: string, userId: string) {
+    const studio = await this.prisma.studio.findUnique({ where: { slug } });
+    if (!studio) throw new NotFoundException('Studio not found');
+
+    const existingMember = await this.prisma.studioMember.findUnique({
+      where: { studioId_userId: { studioId: studio.id, userId } },
+    });
+    if (existingMember) throw new ConflictException('You are already a member of this studio');
+
+    const existingRequest = await this.prisma.studioInvitation.findFirst({
+      where: { studioId: studio.id, userId, status: 'REQUESTED' },
+    });
+    if (existingRequest) throw new ConflictException('You already have a pending join request');
+
+    const invitation = await this.prisma.studioInvitation.create({
+      data: {
+        studioId: studio.id,
+        invitedById: userId,
+        userId,
+        role: StudioRole.MEMBER,
+        token: randomUUID(),
+        status: 'REQUESTED',
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    const admins = await this.prisma.studioMember.findMany({
+      where: { studioId: studio.id, role: { in: [StudioRole.OWNER, StudioRole.ADMIN] } },
+      include: { user: { select: { id: true } } },
+    });
+
+    await Promise.all(
+      admins.map(admin =>
+        this.notifications.create({
+          recipientId: admin.user.id,
+          actorId: userId,
+          type: 'STUDIO_JOIN_REQUEST' as any,
+          title: `Join request for ${studio.name}`,
+          body: `A user wants to join your studio`,
+          targetType: 'STUDIO' as any,
+          targetId: studio.id,
+        }),
+      ),
+    );
+
+    return invitation;
+  }
+
+  async findJoinRequests(slug: string) {
+    const studio = await this.prisma.studio.findUnique({ where: { slug } });
+    if (!studio) throw new NotFoundException('Studio not found');
+
+    return this.prisma.studioInvitation.findMany({
+      where: { studioId: studio.id, status: 'REQUESTED' },
+      include: { user: { select: { id: true, username: true, displayName: true, avatarUrl: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async approveJoinRequest(slug: string, requestUserId: string, actorId: string) {
+    const studio = await this.prisma.studio.findUnique({ where: { slug } });
+    if (!studio) throw new NotFoundException('Studio not found');
+
+    const invitation = await this.prisma.studioInvitation.findFirst({
+      where: { studioId: studio.id, userId: requestUserId, status: 'REQUESTED' },
+    });
+    if (!invitation) throw new NotFoundException('Join request not found');
+
+    const member = await this.prisma.studioMember.create({
+      data: { studioId: studio.id, userId: requestUserId, role: StudioRole.MEMBER },
+    });
+
+    await this.prisma.studioInvitation.update({
+      where: { id: invitation.id },
+      data: { status: 'ACCEPTED', acceptedAt: new Date() },
+    });
+
+    await this.auditLog.log({
+      studioId: studio.id,
+      actorId,
+      action: 'JOIN_REQUEST_APPROVED',
+      targetType: 'USER',
+      targetId: requestUserId,
+      metadata: { invitationId: invitation.id },
+    });
+
+    await this.notifications.create({
+      recipientId: requestUserId,
+      actorId,
+      type: 'STUDIO_JOIN_APPROVED' as any,
+      title: `You've been added to ${studio.name}`,
+      body: 'Your join request was approved',
+      targetType: 'STUDIO' as any,
+      targetId: studio.id,
+    });
+
+    return member;
+  }
+
+  async rejectJoinRequest(slug: string, requestUserId: string, actorId: string) {
+    const studio = await this.prisma.studio.findUnique({ where: { slug } });
+    if (!studio) throw new NotFoundException('Studio not found');
+
+    const invitation = await this.prisma.studioInvitation.findFirst({
+      where: { studioId: studio.id, userId: requestUserId, status: 'REQUESTED' },
+    });
+    if (!invitation) throw new NotFoundException('Join request not found');
+
+    await this.prisma.studioInvitation.update({
+      where: { id: invitation.id },
+      data: { status: 'REJECTED', rejectedAt: new Date() },
+    });
+
+    await this.auditLog.log({
+      studioId: studio.id,
+      actorId,
+      action: 'JOIN_REQUEST_REJECTED',
+      targetType: 'USER',
+      targetId: requestUserId,
+      metadata: { invitationId: invitation.id },
+    });
+  }
+
   private async enforceRoleLimit(studioId: string, role: StudioRole) {
     const limit = ROLE_LIMITS[role];
     if (!limit) return;
