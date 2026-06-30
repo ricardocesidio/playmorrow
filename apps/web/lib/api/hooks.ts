@@ -894,3 +894,89 @@ export function useRemoveGameCommentReaction() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['gameComments'] }),
   });
 }
+
+// ── Team Management ──
+
+export interface Invitation {
+  id: string;
+  studioId: string;
+  studio: { id: string; name: string; slug: string };
+  inviterId: string;
+  inviter: { id: string; username: string; displayName: string; avatarUrl: string | null };
+  email: string | null;
+  userId: string | null;
+  user: { id: string; username: string; displayName: string; avatarUrl: string | null } | null;
+  role: string;
+  status: string;
+  message: string | null;
+  expiresAt: string;
+  createdAt: string;
+}
+
+export function useUpdateMemberRole() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; userId: string; role?: string; title?: string }) =>
+      api.patch(`/studios/${data.slug}/members/${data.userId}`, { role: data.role, title: data.title }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['studio'] }); },
+  });
+}
+
+export function useRemoveMember() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; userId: string }) =>
+      api.delete(`/studios/${data.slug}/members/${data.userId}`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['studio'] }); },
+  });
+}
+
+export function useLeaveStudio() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (slug: string) => api.post(`/studios/${slug}/members/leave`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['myStudios'] }); },
+  });
+}
+
+export function useTransferOwnership() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; targetUserId: string }) =>
+      api.post(`/studios/${data.slug}/transfer`, { targetUserId: data.targetUserId }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['studio'] }); },
+  });
+}
+
+export function useCreateInvitation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; email?: string; userId?: string; role: string; message?: string }) =>
+      api.post(`/studios/${data.slug}/invitations`, { email: data.email, userId: data.userId, role: data.role, message: data.message }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['studioInvitations'] }); },
+  });
+}
+
+export function useCancelInvitation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; invitationId: string }) =>
+      api.delete(`/studios/${data.slug}/invitations/${data.invitationId}`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['studioInvitations'] }); },
+  });
+}
+
+export function useStudioInvitations(slug: string) {
+  return useQuery({
+    queryKey: ['studioInvitations', slug],
+    queryFn: () => api.get<Invitation[]>(`/studios/${slug}/invitations?status=PENDING`),
+    enabled: !!slug,
+  });
+}
+
+export function useMyInvitations() {
+  return useQuery({
+    queryKey: ['myInvitations'],
+    queryFn: () => api.get<Invitation[]>('/me/invitations'),
+  });
+}
