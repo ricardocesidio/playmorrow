@@ -102,8 +102,6 @@ export default function TeamPage() {
     try { await api.delete(`/studios/${slug}/chat`); setFeed(prev => prev.filter(i => i.type !== 'chat')); } catch {}
   };
 
-  const isAdminOrOwner = currentUserRole === 'OWNER' || currentUserRole === 'ADMIN';
-
   const updateRole = useUpdateMemberRole();
   const removeMember = useRemoveMember();
   const transferOwnership = useTransferOwnership();
@@ -124,6 +122,7 @@ export default function TeamPage() {
   const pendingRequests = (invitations ?? []).filter((inv) => inv.status === 'REQUESTED');
   const currentMember = user ? members.find((m) => m.userId === user.id) : undefined;
   const currentUserRole = currentMember?.role;
+  const isAdminOrOwner = currentUserRole === 'OWNER' || currentUserRole === 'ADMIN';
   const grouped = members.reduce<Record<string, CardMember[]>>((acc, m) => {
     const group = acc[m.role];
     if (group) {
