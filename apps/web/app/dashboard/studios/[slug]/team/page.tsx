@@ -107,16 +107,25 @@ export default function TeamPage() {
   }, {});
 
   const actionLabels: Record<string, string> = {
-    MEMBER_INVITED: 'invited a',
+    MEMBER_INVITED: 'invited a new member',
     INVITATION_ACCEPTED: 'joined the studio',
     INVITATION_CANCELLED: 'cancelled an invitation',
     MEMBER_REMOVED: 'removed a',
     MEMBER_ROLE_CHANGED: 'changed role',
     MEMBER_LEFT: 'left the studio',
     OWNERSHIP_TRANSFERRED: 'transferred ownership',
-    GAME_CREATED: 'created a game',
+    GAME_CREATED: 'created a new game',
     GAME_DELETED: 'deleted a game',
+    GAME_UPDATED: 'updated a game',
     MEMBER_TITLE_CHANGED: 'changed title',
+    MEMBER_JOINED: 'joined the studio',
+    JOIN_REQUEST_REJECTED: 'rejected a join request',
+    STUDIO_LOGO_CHANGED: 'updated the studio logo',
+    STUDIO_BANNER_CHANGED: 'updated the studio banner',
+    STUDIO_NAME_CHANGED: 'changed the studio name',
+    MEMBER_INVITED: 'invited a new member',
+    DEVLOG_PUBLISHED: 'published a devlog',
+    ROADMAP_UPDATED: 'updated the roadmap',
   };
 
   if (studioLoading || membersLoading) {

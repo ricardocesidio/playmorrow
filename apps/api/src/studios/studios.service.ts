@@ -131,6 +131,16 @@ export class StudiosService {
       include: STUDIO_INCLUDE,
     });
 
+    if (dto.logoUrl !== undefined) {
+      await this.auditLog.log({ studioId: studio.id, actorId: userId, action: 'STUDIO_LOGO_CHANGED', targetType: 'STUDIO', targetId: studio.id });
+    }
+    if (dto.bannerUrl !== undefined) {
+      await this.auditLog.log({ studioId: studio.id, actorId: userId, action: 'STUDIO_BANNER_CHANGED', targetType: 'STUDIO', targetId: studio.id });
+    }
+    if (dto.name !== undefined && dto.name !== studio.name) {
+      await this.auditLog.log({ studioId: studio.id, actorId: userId, action: 'STUDIO_NAME_CHANGED', targetType: 'STUDIO', targetId: studio.id, metadata: { oldName: studio.name, newName: dto.name } });
+    }
+
     return this.toResponse(updated);
   }
 
