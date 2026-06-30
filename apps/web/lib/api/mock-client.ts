@@ -126,7 +126,16 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
   if (path.includes('/invitations')) return [];
   if (path.includes('/join-requests')) return [];
   if (path.includes('/audit-logs')) return { items: [], total: 0 };
-  if (path.includes('/members')) return { members: [] };
+  if (path.includes('/members')) return {
+    members: [{
+      id: 'member-1',
+      userId: MOCK_USER.id,
+      role: 'OWNER',
+      title: null,
+      joinedAt: '2025-01-01T00:00:00.000Z',
+      user: { id: MOCK_USER.id, username: MOCK_USER.username, displayName: MOCK_USER.displayName, avatarUrl: null },
+    }],
+  };
   if (path.includes('/games')) return paginated([MOCK_GAME]);
   if (path.includes('/follow-status')) return followStatus('STUDIO', 'studio-1', false, 5);
   if (path.includes('/request-join')) return { status: 'REQUESTED' };
