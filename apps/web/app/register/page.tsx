@@ -81,7 +81,7 @@ export default function RegisterPage() {
         const params = new URLSearchParams({ email: result.email, accountType });
         router.push(`/verify-email?${params.toString()}`);
       } else {
-        router.push(accountType === 'STUDIO' ? '/studios/new?from=register' : '/dashboard');
+        router.push(accountType === 'STUDIO' ? '/onboarding' : '/dashboard');
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Registration failed';

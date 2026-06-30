@@ -17,6 +17,12 @@ export default function DashboardPage() {
     }
   }, [isLoading, isAuthenticated, router]);
 
+  useEffect(() => {
+    if (user && !user.isOnboardingCompleted) {
+      router.replace('/onboarding');
+    }
+  }, [user, router]);
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
