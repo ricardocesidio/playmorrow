@@ -5,6 +5,7 @@ import type { Prisma } from '@playmorrow/database';
 import { assertStudioAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
 import type { UpsertPressKitDto } from './dto/upsert-press-kit.dto';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 export interface PressKitResponse {
   id: string;
@@ -44,7 +45,10 @@ const GAME_INCLUDE_FOR_PRESS_KIT = {
 
 @Injectable()
 export class PressKitsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLog: AuditLogService,
+  ) {}
 
   async upsert(userId: string, gameSlug: string, dto: UpsertPressKitDto): Promise<PressKitResponse> {
     const game = await this.prisma.game.findUnique({
@@ -74,6 +78,14 @@ export class PressKitsService {
       where: { gameId: game.id },
       create: { ...updateData, gameId: game.id } as Prisma.PressKitUncheckedCreateInput,
       update: updateData as Prisma.PressKitUncheckedUpdateInput,
+    });
+
+    await this.auditLog.log({
+      studioId: game.studioId,
+      actorId: userId,
+      action: 'PRESS_KIT_UPSERTED',
+      targetType: 'PRESS_KIT',
+      targetId: game.id,
     });
 
     // Re-fetch with full includes for the response

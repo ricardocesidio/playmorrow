@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateGameDto } from './dto/create-game.dto';
 import type { UpdateGameDto } from './dto/update-game.dto';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 const GAME_INCLUDE = {
   studio: { select: { id: true, name: true, slug: true } },
@@ -21,6 +22,7 @@ export class GamesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly studioXpService: StudioXpService,
+    private readonly auditLog: AuditLogService,
   ) {}
 
   async create(userId: string, studioSlug: string, dto: CreateGameDto) {
@@ -101,6 +103,15 @@ export class GamesService {
     });
 
     await this.studioXpService.award(studio.id, 'GAME_CREATE', undefined, game.id);
+
+    await this.auditLog.log({
+      studioId: studio.id,
+      actorId: userId,
+      action: 'GAME_CREATED',
+      targetType: 'GAME',
+      targetId: game.id,
+      metadata: { title: game.title },
+    });
 
     return this.toResponse(game);
   }
@@ -289,6 +300,14 @@ export class GamesService {
       }
     }
 
+    await this.auditLog.log({
+      studioId: game.studioId,
+      actorId: userId,
+      action: 'GAME_UPDATED',
+      targetType: 'GAME',
+      targetId: game.id,
+    });
+
     return this.toResponse(updated);
   }
 
@@ -308,6 +327,14 @@ export class GamesService {
     }
 
     assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN]);
+
+    await this.auditLog.log({
+      studioId: game.studioId,
+      actorId: userId,
+      action: 'GAME_DELETED',
+      targetType: 'GAME',
+      targetId: slug,
+    });
 
     // onDelete: Cascade removes devlogs, media, platform links, etc.
     await this.prisma.game.delete({ where: { id: game.id } });

@@ -363,6 +363,8 @@ export class StudiosService {
     location: string | null;
     foundedYear: number | null;
     isVerified: boolean;
+    level: number;
+    xp: number;
     createdAt: Date;
     updatedAt: Date;
     _count?: { members: number; games: number; followers: number };
@@ -379,6 +381,8 @@ export class StudiosService {
       location: studio.location,
       foundedYear: studio.foundedYear,
       isVerified: studio.isVerified,
+      level: studio.level,
+      xp: studio.xp,
       membersCount: studio._count?.members ?? 0,
       gamesCount: studio._count?.games ?? 0,
       followersCount: studio._count?.followers ?? 0,
