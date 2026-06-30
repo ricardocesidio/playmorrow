@@ -1,7 +1,8 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { StudioRole } from '@playmorrow/database';
 import type { Prisma } from '@playmorrow/database';
 
-import { assertStudioWriteAccess } from '../common/studio-permissions';
+import { assertStudioAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateDevlogDto } from './dto/create-devlog.dto';
@@ -33,7 +34,7 @@ export class DevlogsService {
       throw new NotFoundException('User not found');
     }
 
-    assertStudioWriteAccess({ id: userId, role: user.role }, game.studio.members);
+    assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
     const slug = dto.slug.toLowerCase();
     const existing = await this.prisma.devlog.findUnique({
@@ -199,7 +200,7 @@ export class DevlogsService {
       throw new NotFoundException('User not found');
     }
 
-    assertStudioWriteAccess({ id: userId, role: user.role }, devlog.game.studio.members);
+    assertStudioAccess({ id: userId, role: user.role }, devlog.game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
     const data: Prisma.DevlogUpdateInput = {};
     if (dto.title !== undefined) data.title = dto.title;
@@ -245,7 +246,7 @@ export class DevlogsService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    assertStudioWriteAccess({ id: userId, role: user.role }, devlog.game.studio.members);
+    assertStudioAccess({ id: userId, role: user.role }, devlog.game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
     // onDelete: Cascade removes comments and reactions.
     await this.prisma.devlog.delete({ where: { id } });

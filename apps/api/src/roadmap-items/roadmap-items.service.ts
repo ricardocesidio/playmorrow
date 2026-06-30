@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { StudioRole } from '@playmorrow/database';
 
-import { assertStudioWriteAccess } from '../common/studio-permissions';
+import { assertStudioAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateRoadmapItemDto } from './dto/create-roadmap-item.dto';
@@ -31,7 +32,7 @@ export class RoadmapItemsService {
       throw new NotFoundException('User not found');
     }
 
-    assertStudioWriteAccess({ id: userId, role: user.role }, game.studio.members);
+    assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
     const item = await this.prisma.roadmapItem.create({
       data: {
@@ -99,7 +100,7 @@ export class RoadmapItemsService {
       throw new NotFoundException('User not found');
     }
 
-    assertStudioWriteAccess({ id: userId, role: user.role }, item.game.studio.members);
+    assertStudioAccess({ id: userId, role: user.role }, item.game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
     const data: Record<string, unknown> = {};
     if (dto.title !== undefined) data.title = dto.title;
@@ -137,7 +138,7 @@ export class RoadmapItemsService {
       throw new NotFoundException('User not found');
     }
 
-    assertStudioWriteAccess({ id: userId, role: user.role }, item.game.studio.members);
+    assertStudioAccess({ id: userId, role: user.role }, item.game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
     await this.prisma.roadmapItem.delete({ where: { id } });
 
@@ -158,7 +159,7 @@ export class RoadmapItemsService {
       throw new NotFoundException('User not found');
     }
 
-    assertStudioWriteAccess({ id: userId, role: user.role }, game.studio.members);
+    assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
     await this.prisma.$transaction(
       items.map((item) =>

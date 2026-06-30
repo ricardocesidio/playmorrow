@@ -1,7 +1,8 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { StudioRole } from '@playmorrow/database';
 import type { Prisma } from '@playmorrow/database';
 
-import { assertStudioWriteAccess } from '../common/studio-permissions';
+import { assertStudioAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateGameDto } from './dto/create-game.dto';
@@ -38,7 +39,7 @@ export class GamesService {
       throw new NotFoundException('User not found');
     }
 
-    assertStudioWriteAccess({ id: userId, role: user.role }, studio.members);
+    assertStudioAccess({ id: userId, role: user.role }, studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
     const existing = await this.prisma.game.findUnique({ where: { slug } });
     if (existing) {
@@ -213,7 +214,7 @@ export class GamesService {
       throw new NotFoundException('User not found');
     }
 
-    assertStudioWriteAccess({ id: userId, role: user.role }, game.studio.members);
+    assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
     const data: Prisma.GameUpdateInput = {};
     if (dto.title !== undefined) data.title = dto.title;
@@ -300,7 +301,7 @@ export class GamesService {
       throw new NotFoundException('User not found');
     }
 
-    assertStudioWriteAccess({ id: userId, role: user.role }, game.studio.members);
+    assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN]);
 
     // onDelete: Cascade removes devlogs, media, platform links, etc.
     await this.prisma.game.delete({ where: { id: game.id } });

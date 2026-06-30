@@ -6,7 +6,7 @@ import {
 import type { Prisma } from '@playmorrow/database';
 import { StudioRole } from '@playmorrow/database';
 
-import { assertStudioWriteAccess } from '../common/studio-permissions';
+import { assertStudioAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from './studio-xp.service';
 import type { CreateStudioDto } from './dto/create-studio.dto';
@@ -111,7 +111,7 @@ export class StudiosService {
     }
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    assertStudioWriteAccess({ id: userId, role: user?.role }, studio.members);
+    assertStudioAccess({ id: userId, role: user?.role }, studio.members, [StudioRole.OWNER, StudioRole.ADMIN]);
 
     const updated = await this.prisma.studio.update({
       where: { id: studio.id },
@@ -141,7 +141,7 @@ export class StudiosService {
     }
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    assertStudioWriteAccess({ id: userId, role: user?.role }, studio.members);
+    assertStudioAccess({ id: userId, role: user?.role }, studio.members, [StudioRole.OWNER, StudioRole.ADMIN]);
 
     // Schema uses onDelete: Cascade, so games/devlogs/etc. are removed with it.
     await this.prisma.studio.delete({ where: { id: studio.id } });
