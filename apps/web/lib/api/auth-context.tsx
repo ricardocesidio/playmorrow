@@ -13,6 +13,7 @@ export interface AuthUser {
   location?: string;
   role: string;
   accountType: 'PLAYER' | 'STUDIO';
+  isOnboardingCompleted?: boolean;
   emailChangeCount?: number;
 }
 

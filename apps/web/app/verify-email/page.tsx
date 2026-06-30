@@ -62,7 +62,7 @@ function VerifyEmailInner() {
       await verifyEmail(email, code.trim());
       setSuccess(true);
       if (accountType === 'STUDIO') {
-        router.push('/studios/new?from=register');
+        router.push('/onboarding');
       } else {
         router.push('/dashboard');
       }
