@@ -171,8 +171,10 @@ model User {
   lockedUntil         DateTime?
   lastLoginAt         DateTime?
 
-  studioMemberships StudioMember[]
-  devlogs           Devlog[]
+  studioMemberships     StudioMember[]
+  studioInvitationsSent     StudioInvitation[] @relation("StudioInvitationsSent")
+  studioInvitationsReceived StudioInvitation[] @relation("StudioInvitationsReceived")
+  devlogs               Devlog[]
   comments          Comment[]
   reactions         Reaction[]
   follows           Follow[]
@@ -186,6 +188,7 @@ model User {
   emailVerificationCodes  EmailVerificationCode[]
   passwordResetTokens     PasswordResetToken[]
   wishlistItems         WishlistItem[]
+  auditLogs             AuditLog[]
 
   @@index([role])
   @@map("users")
@@ -214,10 +217,12 @@ model Studio {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  members   StudioMember[]
-  games     Game[]
-  followers Follow[]
-  xpEvents  StudioXpEvent[]
+  members      StudioMember[]
+  games        Game[]
+  followers    Follow[]
+  invitations  StudioInvitation[]
+  auditLogs    AuditLog[]
+  xpEvents     StudioXpEvent[]
 
   @@map("studios")
 }
@@ -273,8 +278,8 @@ model StudioInvitation {
   createdAt      DateTime                 @default(now())
 
   studio    Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
-  invitedBy User   @relation(fields: [invitedById], references: [id])
-  user      User?  @relation(fields: [userId], references: [id])
+  invitedBy User   @relation("StudioInvitationsSent", fields: [invitedById], references: [id])
+  user      User?  @relation("StudioInvitationsReceived", fields: [userId], references: [id])
 
   @@index([studioId, status])
   @@index([email])
