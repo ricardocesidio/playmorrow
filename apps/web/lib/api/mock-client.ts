@@ -123,9 +123,13 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
   }
 
   // Studio sub-routes
+  if (path.includes('/invitations')) return [];
+  if (path.includes('/join-requests')) return [];
+  if (path.includes('/audit-logs')) return { items: [], total: 0 };
   if (path.includes('/members')) return { members: [] };
   if (path.includes('/games')) return paginated([MOCK_GAME]);
   if (path.includes('/follow-status')) return followStatus('STUDIO', 'studio-1', false, 5);
+  if (path.includes('/request-join')) return { status: 'REQUESTED' };
   if (path.includes('/follow')) {
     if (method === 'POST') return followStatus('STUDIO', 'studio-1', true, 6);
     return followStatus('STUDIO', 'studio-1', false, 5);
@@ -174,6 +178,7 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
 
   // Follows
   if (path === '/me/follows') return { studios: [MOCK_STUDIO], games: [MOCK_GAME] };
+  if (path === '/me/invitations') return [];
 
   // Wishlist
   if (path === '/me/wishlist') return { items: [] };
