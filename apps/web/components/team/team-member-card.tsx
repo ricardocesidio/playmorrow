@@ -13,7 +13,7 @@ interface TeamMember {
   user: { id: string; displayName: string; username: string; avatarUrl?: string | null };
 }
 
-interface TeamMemberCardProps {
+export interface TeamMemberCardProps {
   member: TeamMember;
   currentUserId: string;
   currentUserRole: StudioRole;
