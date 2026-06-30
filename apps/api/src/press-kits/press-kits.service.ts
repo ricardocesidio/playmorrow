@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { StudioRole } from '@playmorrow/database';
 import type { Prisma } from '@playmorrow/database';
 
-import { assertStudioWriteAccess } from '../common/studio-permissions';
+import { assertStudioAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
 import type { UpsertPressKitDto } from './dto/upsert-press-kit.dto';
 
@@ -59,7 +60,7 @@ export class PressKitsService {
       throw new NotFoundException('User not found');
     }
 
-    assertStudioWriteAccess({ id: userId, role: user.role }, game.studio.members);
+    assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
     const updateData: Record<string, unknown> = {
       headline: dto.headline,
