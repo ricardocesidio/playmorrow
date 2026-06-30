@@ -1,19 +1,37 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, UserPlus, Users, Crown, Shield, Mail } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
-import { useStudio, useStudioMembers } from '@/lib/api/hooks';
-import { useUpdateMemberRole, useRemoveMember, useLeaveStudio, useTransferOwnership, useCreateInvitation, useCancelInvitation, useStudioInvitations } from '@/lib/api/hooks';
+import { useStudio, useStudioMembers, useUpdateMemberRole, useRemoveMember, useTransferOwnership, useCreateInvitation, useCancelInvitation, useStudioInvitations } from '@/lib/api/hooks';
+import type { StudioWithMembers } from '@/lib/api/client';
 import { TeamMemberCard } from '@/components/team/team-member-card';
 import { InviteModal } from '@/components/team/invite-modal';
+import { Invitation } from '@/lib/api/hooks';
+
+interface RawMember {
+  id: string;
+  role: string;
+  title: string | null;
+  user: { id: string; username: string; displayName: string; avatarUrl: string | null };
+}
+
+import type { StudioRole } from '@playmorrow/database';
+
+interface CardMember {
+  id: string;
+  userId: string;
+  role: StudioRole;
+  title: string | null;
+  joinedAt: string;
+  user: { id: string; displayName: string; username: string; avatarUrl?: string | null };
+}
 
 export default function TeamPage() {
   const { slug } = useParams<{ slug: string }>();
-  const router = useRouter();
   const { user } = useAuth();
   const { data: studio, isLoading: studioLoading } = useStudio(slug);
   const { data: studioMembers, isLoading: membersLoading } = useStudioMembers(slug);
@@ -22,15 +40,22 @@ export default function TeamPage() {
 
   const updateRole = useUpdateMemberRole();
   const removeMember = useRemoveMember();
-  const leaveStudio = useLeaveStudio();
   const transferOwnership = useTransferOwnership();
   const createInvitation = useCreateInvitation();
   const cancelInvitation = useCancelInvitation();
 
-  const members = (studioMembers as any)?.members ?? [];
-  const currentMember = members.find((m: any) => m.userId === user?.id || m.user?.id === user?.id);
+  const rawMembers = (studioMembers as StudioWithMembers)?.members as RawMember[] | undefined ?? [];
+  const members: CardMember[] = rawMembers.map(m => ({
+    id: m.id,
+    userId: m.user.id,
+    role: m.role as StudioRole,
+    title: m.title,
+    joinedAt: '',
+    user: { id: m.user.id, displayName: m.user.displayName, username: m.user.username, avatarUrl: m.user.avatarUrl },
+  }));
+  const currentMember = members.find((m) => m.userId === user?.id);
   const currentUserRole = currentMember?.role;
-  const grouped = members.reduce((acc: Record<string, any[]>, m: any) => {
+  const grouped = members.reduce<Record<string, CardMember[]>>((acc, m) => {
     const role = m.role === 'MEMBER' ? 'MODERATOR' : m.role;
     if (!acc[role]) acc[role] = [];
     acc[role].push(m);
@@ -103,12 +128,12 @@ export default function TeamPage() {
                     </h2>
                   </div>
                   <div className="space-y-2">
-                    {roleMembers.map((m: any) => (
+                    {roleMembers.map((m: CardMember) => (
                       <TeamMemberCard
                         key={m.id}
                         member={m}
                         currentUserId={user?.id ?? ''}
-                        currentUserRole={currentUserRole}
+                        currentUserRole={currentUserRole as StudioRole}
                         onRemove={(userId) => removeMember.mutate({ slug, userId })}
                         onPromoteToAdmin={(userId) => updateRole.mutate({ slug, userId, role: 'ADMIN' })}
                         onTransferOwnership={(userId) => transferOwnership.mutate({ slug, targetUserId: userId })}
@@ -127,7 +152,7 @@ export default function TeamPage() {
                 Pending Invitations ({invitations.length})
               </h2>
               <div className="space-y-2">
-                {invitations.map((inv: any) => (
+                {invitations.map((inv: Invitation) => (
                   <div key={inv.id} className="clip-corner flex items-center gap-3 border border-border/60 bg-[#050b0f]/50 px-4 py-3">
                     <Mail className="size-4 text-muted-foreground" />
                     <div className="flex-1 min-w-0">
@@ -152,7 +177,7 @@ export default function TeamPage() {
         open={inviteOpen}
         onClose={() => setInviteOpen(false)}
         onInvite={async (data) => {
-          await createInvitation.mutateAsync({ slug, ...data } as any);
+          await createInvitation.mutateAsync({ slug, ...data } as { slug: string; email?: string; userId?: string; role: string; message?: string });
         }}
       />
     </>
