@@ -14,6 +14,10 @@ import { InviteModal } from '@/components/team/invite-modal';
 import type { Invitation } from '@/lib/api/hooks';
 import { api } from '@/lib/api/client';
 
+interface FeedChatItem { type: 'chat'; id: string; author: { id: string; displayName: string; username: string; avatarUrl?: string | null }; message: string; createdAt: string }
+interface FeedSystemItem { type: 'system'; id: string; action: string; actor: { id: string; displayName: string; username: string; avatarUrl?: string | null } | null; createdAt: string }
+type FeedItem = FeedChatItem | FeedSystemItem;
+
 interface RawMember {
   id: string;
   role: string;
@@ -52,21 +56,23 @@ export default function TeamPage() {
   const { data: auditLogs } = useStudioAuditLogs(slug);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
-  const [feed, setFeed] = useState<any[]>([]);
+  const [feed, setFeed] = useState<FeedItem[]>([]);
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    api.get<any>(`/studios/${slug}/activities`).then(res => setFeed(res.items ?? [])).catch(() => {});
+    api.get<{ items: FeedItem[] }>(`/studios/${slug}/activities`).then(res => setFeed(res.items ?? [])).catch(() => {});
   }, [slug]);
 
   const sendMessage = async () => {
     if (!chatMessage.trim() || sending) return;
     setSending(true);
     try {
-      const msg = await api.post<any>(`/studios/${slug}/chat`, { message: chatMessage.trim() });
-      setFeed(prev => [{ type: 'chat', ...msg, author: msg.author }, ...prev]);
+      const msg = await api.post<FeedChatItem>(`/studios/${slug}/chat`, { message: chatMessage.trim() });
+      setFeed(prev => [{ type: 'chat', id: msg.id, author: msg.author, message: msg.message, createdAt: msg.createdAt }, ...prev]);
       setChatMessage('');
-    } catch {}
+    } catch {
+      // ignore
+    }
     setSending(false);
   };
 
@@ -320,7 +326,7 @@ export default function TeamPage() {
                 <div className="px-4 py-8 text-center font-mono text-[0.58rem] text-muted-foreground">No activity yet</div>
               ) : (
                 <div className="space-y-0">
-                  {feed.map((item: any, i: number) => (
+                  {feed.map((item, i) => (
                     <div key={item.id ?? i} className="flex items-start gap-3 border-b border-border/20 px-4 py-3">
                       {item.type === 'system' ? (
                         <div className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-cyan/10 text-[10px]">🤖</div>
