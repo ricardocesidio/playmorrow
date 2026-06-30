@@ -13,24 +13,6 @@ import { useAuth } from '@/lib/api/auth-context';
 import { useStudio, useUpdateStudio, useDeleteStudio } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
 
-const COUNTRIES = ['Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan',
-  'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan', 'Bolivia',
-  'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi',
-  'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo', 'Costa Rica', 'Croatia', 'Cuba', 'Cyprus', 'Czech Republic',
-  'Denmark', 'Djibouti', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia',
-  'Fiji', 'Finland', 'France', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Guatemala', 'Guinea', 'Guyana',
-  'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy',
-  'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kuwait', 'Kyrgyzstan',
-  'Laos', 'Latvia', 'Lebanon', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg',
-  'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Mauritania', 'Mauritius', 'Mexico', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar',
-  'Namibia', 'Nepal', 'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway',
-  'Oman', 'Pakistan', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal',
-  'Qatar', 'Romania', 'Russia', 'Rwanda', 'Saudi Arabia', 'Senegal', 'Serbia', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Somalia', 'South Africa', 'South Korea', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland', 'Syria',
-  'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Togo', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan',
-  'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan',
-  'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe',
-];
-
 export default function EditStudioPage() {
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
@@ -42,10 +24,8 @@ export default function EditStudioPage() {
   const [name, setName] = useState('');
   const [tagline, setTagline] = useState('');
   const [description, setDescription] = useState('');
-  const [country, setCountry] = useState('');
   const [location, setLocation] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
-  const [discord, setDiscord] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
   const [error, setError] = useState('');
@@ -67,14 +47,13 @@ export default function EditStudioPage() {
     if (studio && !initialized) {
       setName(studio.name ?? ''); setTagline(studio.tagline ?? '');
       setDescription(studio.description ?? '');
-      setCountry(((studio as unknown as Record<string, unknown>).country as string) ?? '');
       setLogoUrl(studio.logoUrl ?? ''); setBannerUrl(studio.bannerUrl ?? '');
       setLocation(studio.location ?? ''); setWebsiteUrl(studio.websiteUrl ?? '');
       setInitialized(true);
     }
   }, [studio, initialized]);
 
-  useEffect(() => { setHasChanges(true); }, [name, tagline, description, country, location, websiteUrl, logoUrl, bannerUrl]);
+  useEffect(() => { setHasChanges(true); }, [name, tagline, description, location, websiteUrl, logoUrl, bannerUrl]);
 
   const autoResize = useCallback(() => {
     const ta = descRef.current;
@@ -251,23 +230,12 @@ export default function EditStudioPage() {
             {/* Contact */}
             <Section title="Contact & Links" desc="How players and press can reach you.">
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Country">
-                  <select value={country} onChange={e => setCountry(e.target.value)}
-                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan cursor-pointer">
-                    <option value="">Select country</option>
-                    {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </Field>
                 <Field label="Location">
                   <input value={location} onChange={e => setLocation(e.target.value)}
                     className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
                 </Field>
                 <Field label="Website">
                   <input value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)} placeholder="https://..."
-                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
-                </Field>
-                <Field label="Discord (optional)">
-                  <input value={discord} onChange={e => setDiscord(e.target.value)} placeholder="discord.gg/..."
                     className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
                 </Field>
               </div>

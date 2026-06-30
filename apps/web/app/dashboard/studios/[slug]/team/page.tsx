@@ -60,7 +60,7 @@ export default function TeamPage() {
   const rejectJoin = useRejectJoinRequest();
 
   const rawMembers = (studioMembers as StudioWithMembers)?.members as RawMember[] | undefined ?? [];
-  const members: CardMember[] = rawMembers.map(m => ({
+  const members: CardMember[] = (rawMembers ?? []).map(m => ({
     id: m.id,
     userId: m.user.id,
     role: m.role as StudioRole,
@@ -69,12 +69,15 @@ export default function TeamPage() {
     user: { id: m.user.id, displayName: m.user.displayName, username: m.user.username, avatarUrl: m.user.avatarUrl },
   }));
   const pendingRequests = (invitations ?? []).filter((inv) => inv.status === 'REQUESTED');
-  const currentMember = members.find((m) => m.userId === user?.id);
+  const currentMember = user ? members.find((m) => m.userId === user.id) : undefined;
   const currentUserRole = currentMember?.role;
   const grouped = members.reduce<Record<string, CardMember[]>>((acc, m) => {
-    const role = m.role === 'MEMBER' ? 'MODERATOR' : m.role;
-    if (!acc[role]) acc[role] = [];
-    acc[role].push(m);
+    const group = acc[m.role];
+    if (group) {
+      group.push(m);
+    } else {
+      acc[m.role] = [m];
+    }
     return acc;
   }, {});
 
@@ -143,7 +146,7 @@ export default function TeamPage() {
 
           {/* Members grouped by role */}
           <div className="space-y-6">
-            {['OWNER', 'ADMIN', 'MODERATOR'].map(role => {
+            {['OWNER', 'ADMIN', 'MODERATOR', 'MEMBER'].map(role => {
               const roleMembers = grouped[role];
               if (!roleMembers?.length) return null;
               const icon = role === 'OWNER' ? <Crown className="size-4 text-orange" /> :
@@ -175,13 +178,16 @@ export default function TeamPage() {
           </div>
 
           {/* Pending Invitations */}
-          {(currentUserRole === 'OWNER' || currentUserRole === 'ADMIN') && invitations && invitations.length > 0 && (
+          {(() => {
+            const pendingInvites = (invitations ?? []).filter((inv) => inv.status === 'PENDING');
+            if (!((currentUserRole === 'OWNER' || currentUserRole === 'ADMIN') && pendingInvites.length > 0)) return null;
+            return (
             <div className="mt-10">
               <h2 className="mb-3 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
-                Pending Invitations ({invitations.length})
+                Pending Invitations ({pendingInvites.length})
               </h2>
               <div className="space-y-2">
-                {invitations.map((inv: Invitation) => (
+                {pendingInvites.map((inv: Invitation) => (
                   <div key={inv.id} className="clip-corner flex items-center gap-3 border border-border/60 bg-[#050b0f]/50 px-4 py-3">
                     <Mail className="size-4 text-muted-foreground" />
                     <div className="flex-1 min-w-0">
@@ -198,7 +204,8 @@ export default function TeamPage() {
                 ))}
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {/* Pending Requests */}
           {(currentUserRole === 'OWNER' || currentUserRole === 'ADMIN') && pendingRequests.length > 0 && (
