@@ -18,6 +18,10 @@ import { ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/sw
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { StudioRole } from '@playmorrow/database';
+
+import { StudioRoles } from './guards/studio-roles.decorator';
+import { StudioRolesGuard } from './guards/studio-roles.guard';
 import { CreateStudioDto } from './dto/create-studio.dto';
 import { UpdateStudioDto } from './dto/update-studio.dto';
 import { StudiosService } from './studios.service';
@@ -97,5 +101,53 @@ export class StudiosController {
   @ApiOkResponse({ description: 'Studio deleted (cascades to games, devlogs, etc.).' })
   async remove(@CurrentUser() user: { id: string }, @Param('slug') slug: string) {
     return this.studiosService.remove(user.id, slug);
+  }
+
+  @Patch(':slug/members/:userId')
+  @UseGuards(SessionAuthGuard, StudioRolesGuard)
+  @StudioRoles(StudioRole.OWNER, StudioRole.ADMIN)
+  @ApiOkResponse({ description: 'Member updated.' })
+  async updateMember(
+    @Param('slug') slug: string,
+    @Param('userId') userId: string,
+    @Body() dto: { role?: StudioRole; title?: string },
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.studiosService.updateMemberRole(user.id, slug, userId, dto);
+  }
+
+  @Delete(':slug/members/:userId')
+  @UseGuards(SessionAuthGuard, StudioRolesGuard)
+  @StudioRoles(StudioRole.OWNER, StudioRole.ADMIN)
+  @ApiOkResponse({ description: 'Member removed.' })
+  async removeMember(
+    @Param('slug') slug: string,
+    @Param('userId') userId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.studiosService.removeMember(user.id, slug, userId);
+  }
+
+  @Post(':slug/members/leave')
+  @UseGuards(SessionAuthGuard, StudioRolesGuard)
+  @StudioRoles(StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER)
+  @ApiOkResponse({ description: 'Left the studio.' })
+  async leaveStudio(
+    @Param('slug') slug: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.studiosService.leaveStudio(user.id, slug);
+  }
+
+  @Post(':slug/transfer')
+  @UseGuards(SessionAuthGuard, StudioRolesGuard)
+  @StudioRoles(StudioRole.OWNER)
+  @ApiOkResponse({ description: 'Ownership transferred.' })
+  async transferOwnership(
+    @Param('slug') slug: string,
+    @Body() dto: { targetUserId: string },
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.studiosService.transferOwnership(user.id, slug, dto.targetUserId);
   }
 }
