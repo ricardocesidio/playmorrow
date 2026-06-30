@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateDevlogDto } from './dto/create-devlog.dto';
 import type { UpdateDevlogDto } from './dto/update-devlog.dto';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 const DEVLOG_INCLUDE = {
   game: { select: { id: true, title: true, slug: true, studioId: true } },
@@ -18,6 +19,7 @@ export class DevlogsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly studioXpService: StudioXpService,
+    private readonly auditLog: AuditLogService,
   ) {}
 
   async create(userId: string, gameSlug: string, dto: CreateDevlogDto) {
@@ -64,6 +66,15 @@ export class DevlogsService {
     if (isPublished) {
       await this.studioXpService.award(game.studio.id, 'DEVLOG_PUBLISH', undefined, devlog.id);
     }
+
+    await this.auditLog.log({
+      studioId: game.studioId,
+      actorId: userId,
+      action: 'DEVLOG_CREATED',
+      targetType: 'DEVLOG',
+      targetId: devlog.id,
+      metadata: { title: devlog.title },
+    });
 
     return this.toResponse(devlog);
   }
@@ -233,6 +244,14 @@ export class DevlogsService {
       include: DEVLOG_INCLUDE,
     });
 
+    await this.auditLog.log({
+      studioId: devlog.game.studioId,
+      actorId: userId,
+      action: 'DEVLOG_UPDATED',
+      targetType: 'DEVLOG',
+      targetId: id,
+    });
+
     return this.toResponse(updated);
   }
 
@@ -247,6 +266,14 @@ export class DevlogsService {
     if (!user) throw new NotFoundException('User not found');
 
     assertStudioAccess({ id: userId, role: user.role }, devlog.game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
+
+    await this.auditLog.log({
+      studioId: devlog.game.studioId,
+      actorId: userId,
+      action: 'DEVLOG_DELETED',
+      targetType: 'DEVLOG',
+      targetId: id,
+    });
 
     // onDelete: Cascade removes comments and reactions.
     await this.prisma.devlog.delete({ where: { id } });

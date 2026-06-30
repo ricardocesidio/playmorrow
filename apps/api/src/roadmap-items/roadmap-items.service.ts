@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateRoadmapItemDto } from './dto/create-roadmap-item.dto';
 import type { UpdateRoadmapItemDto } from './dto/update-roadmap-item.dto';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 const ROADMAP_INCLUDE = {
   game: { select: { id: true, title: true, slug: true, studioId: true } },
@@ -16,6 +17,7 @@ export class RoadmapItemsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly studioXpService: StudioXpService,
+    private readonly auditLog: AuditLogService,
   ) {}
 
   async create(userId: string, gameSlug: string, dto: CreateRoadmapItemDto) {
@@ -47,6 +49,15 @@ export class RoadmapItemsService {
     });
 
     await this.studioXpService.award(game.studio.id, 'ROADMAP_UPDATE', undefined, item.id);
+
+    await this.auditLog.log({
+      studioId: game.studioId,
+      actorId: userId,
+      action: 'ROADMAP_ITEM_CREATED',
+      targetType: 'ROADMAP_ITEM',
+      targetId: item.id,
+      metadata: { title: item.title },
+    });
 
     return this.toResponse(item, game.studio);
   }
@@ -115,6 +126,14 @@ export class RoadmapItemsService {
       include: ROADMAP_INCLUDE,
     });
 
+    await this.auditLog.log({
+      studioId: item.game.studioId,
+      actorId: userId,
+      action: 'ROADMAP_ITEM_UPDATED',
+      targetType: 'ROADMAP_ITEM',
+      targetId: id,
+    });
+
     const studio = await this.prisma.studio.findUnique({
       where: { id: item.game.studioId },
       select: { id: true, name: true, slug: true },
@@ -139,6 +158,14 @@ export class RoadmapItemsService {
     }
 
     assertStudioAccess({ id: userId, role: user.role }, item.game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
+
+    await this.auditLog.log({
+      studioId: item.game.studioId,
+      actorId: userId,
+      action: 'ROADMAP_ITEM_DELETED',
+      targetType: 'ROADMAP_ITEM',
+      targetId: id,
+    });
 
     await this.prisma.roadmapItem.delete({ where: { id } });
 
