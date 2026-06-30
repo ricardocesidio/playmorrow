@@ -54,13 +54,30 @@ export default function TeamPage() {
   const { data: studioMembers, isLoading: membersLoading, error: membersError } = useStudioMembers(slug);
   const { data: invitations } = useStudioInvitations(slug);
   const { data: auditLogs } = useStudioAuditLogs(slug);
+  const feedKey = `team-feed-${slug}`;
   const [inviteOpen, setInviteOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
-  const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [feed, setFeed] = useState<FeedItem[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try { return JSON.parse(localStorage.getItem(feedKey) || '[]'); } catch { return []; }
+  });
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    api.get<{ items: FeedItem[] }>(`/studios/${slug}/activities`).then(res => setFeed(res.items ?? [])).catch(() => {});
+    localStorage.setItem(feedKey, JSON.stringify(feed));
+  }, [feed, feedKey]);
+
+  useEffect(() => {
+    api.get<{ items: FeedItem[] }>(`/studios/${slug}/activities`).then(res => {
+      if (res.items?.length) {
+        setFeed(prev => {
+          const existing = new Set(prev.map(i => i.id));
+          const news = res.items.filter(i => !existing.has(i.id));
+          if (!news.length) return prev;
+          return [...news, ...prev].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        });
+      }
+    }).catch(() => {});
   }, [slug]);
 
   const sendMessage = async () => {
@@ -68,7 +85,8 @@ export default function TeamPage() {
     setSending(true);
     try {
       const msg = await api.post<FeedChatItem>(`/studios/${slug}/chat`, { message: chatMessage.trim() });
-      setFeed(prev => [{ type: 'chat', id: msg.id, author: msg.author, message: msg.message, createdAt: msg.createdAt }, ...prev]);
+      const newItem: FeedChatItem = { type: 'chat', id: msg.id, author: msg.author, message: msg.message, createdAt: msg.createdAt };
+      setFeed(prev => [newItem, ...prev]);
       setChatMessage('');
     } catch {
       // ignore
