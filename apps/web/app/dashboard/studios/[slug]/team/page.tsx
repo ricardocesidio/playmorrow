@@ -74,7 +74,7 @@ export default function TeamPage() {
           const existing = new Set(prev.map(i => i.id));
           const news = res.items.filter(i => !existing.has(i.id));
           if (!news.length) return prev;
-          return [...news, ...prev].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          return [...prev, ...news].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
         });
       }
     }).catch(() => {});
@@ -86,7 +86,7 @@ export default function TeamPage() {
     try {
       const msg = await api.post<FeedChatItem>(`/studios/${slug}/chat`, { message: chatMessage.trim() });
       const newItem: FeedChatItem = { type: 'chat', id: msg.id, author: msg.author, message: msg.message, createdAt: msg.createdAt };
-      setFeed(prev => [newItem, ...prev]);
+      setFeed(prev => [...prev, newItem]);
       setChatMessage('');
     } catch {
       // ignore
