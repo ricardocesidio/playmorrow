@@ -174,7 +174,7 @@ export default function EditStudioPage() {
                 { href: '/dashboard/notifications', icon: <Radio className="size-4" />, label: 'Community' },
                 { href: '#', icon: <Library className="size-4" />, label: 'Media Library' },
                 { href: '/studios', icon: <Users className="size-4" />, label: 'Followers' },
-                { href: '#', icon: <ShieldCheck className="size-4" />, label: 'Team' },
+                { href: `/dashboard/studios/${slug}/team`, icon: <ShieldCheck className="size-4" />, label: 'Team' },
                 { href: '#', icon: <CircleDollarSign className="size-4" />, label: 'Payouts' },
                 { href: '/dashboard/studios/level', icon: <Award className="size-4" />, label: 'Level System' },
                 { href: '#', icon: <Settings className="size-4" />, label: 'Settings', active: true },
