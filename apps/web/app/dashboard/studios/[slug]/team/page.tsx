@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, UserPlus, Users, Crown, Shield, Mail } from 'lucide-react';
+import { ArrowLeft, UserPlus, Users, Crown, Shield, Mail, History } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
-import { useStudio, useStudioMembers, useUpdateMemberRole, useRemoveMember, useTransferOwnership, useCreateInvitation, useCancelInvitation, useStudioInvitations } from '@/lib/api/hooks';
+import { useStudio, useStudioMembers, useUpdateMemberRole, useRemoveMember, useTransferOwnership, useCreateInvitation, useCancelInvitation, useStudioInvitations, useStudioAuditLogs } from '@/lib/api/hooks';
+import type { AuditLogEntry } from '@/lib/api/hooks';
 import type { StudioWithMembers } from '@/lib/api/client';
 import { TeamMemberCard } from '@/components/team/team-member-card';
 import { InviteModal } from '@/components/team/invite-modal';
@@ -30,12 +31,24 @@ interface CardMember {
   user: { id: string; displayName: string; username: string; avatarUrl?: string | null };
 }
 
+function formatRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
 export default function TeamPage() {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
   const { data: studio, isLoading: studioLoading } = useStudio(slug);
   const { data: studioMembers, isLoading: membersLoading } = useStudioMembers(slug);
   const { data: invitations, refetch: refetchInvitations } = useStudioInvitations(slug);
+  const { data: auditLogs } = useStudioAuditLogs(slug);
   const [inviteOpen, setInviteOpen] = useState(false);
 
   const updateRole = useUpdateMemberRole();
@@ -61,6 +74,19 @@ export default function TeamPage() {
     acc[role].push(m);
     return acc;
   }, {});
+
+  const actionLabels: Record<string, string> = {
+    MEMBER_INVITED: 'invited a',
+    INVITATION_ACCEPTED: 'joined the studio',
+    INVITATION_CANCELLED: 'cancelled an invitation',
+    MEMBER_REMOVED: 'removed a',
+    MEMBER_ROLE_CHANGED: 'changed role',
+    MEMBER_LEFT: 'left the studio',
+    OWNERSHIP_TRANSFERRED: 'transferred ownership',
+    GAME_CREATED: 'created a game',
+    GAME_DELETED: 'deleted a game',
+    MEMBER_TITLE_CHANGED: 'changed title',
+  };
 
   if (studioLoading || membersLoading) {
     return (
@@ -165,6 +191,38 @@ export default function TeamPage() {
                       className="cursor-pointer font-mono text-[0.55rem] uppercase tracking-wider text-coral hover:text-coral/80">
                       Cancel
                     </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Activity */}
+          {(currentUserRole === 'OWNER' || currentUserRole === 'ADMIN') && auditLogs?.items && auditLogs.items.length > 0 && (
+            <div className="mt-10">
+              <h2 className="mb-3 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
+                <History className="mr-1 inline size-3.5" /> Activity
+              </h2>
+              <div className="space-y-1">
+                {auditLogs.items.map((log: AuditLogEntry) => (
+                  <div key={log.id} className="flex items-center gap-3 border-b border-border/30 px-2 py-2.5">
+                    <div className="grid size-7 shrink-0 place-items-center rounded-full border border-border bg-background/40 overflow-hidden">
+                      {log.actor?.avatarUrl ? (
+                        <img src={log.actor.avatarUrl} alt="" className="size-full object-cover" />
+                      ) : (
+                        <span className="text-[9px] font-bold text-muted-foreground">{log.actor?.displayName?.slice(0, 1) ?? '?'}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-mono text-[0.58rem] text-foreground">
+                        <span className="font-semibold text-cyan">{log.actor?.displayName ?? 'Someone'}</span>{' '}
+                        {actionLabels[log.action] ?? log.action.toLowerCase()}
+                        {log.metadata && typeof log.metadata.role === 'string' && <span className="text-muted-foreground"> {log.metadata.role}</span>}
+                      </p>
+                    </div>
+                    <p className="shrink-0 font-mono text-[0.5rem] text-muted-foreground/50">
+                      {formatRelativeTime(log.createdAt)}
+                    </p>
                   </div>
                 ))}
               </div>
