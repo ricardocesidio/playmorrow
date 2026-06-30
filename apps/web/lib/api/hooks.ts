@@ -980,3 +980,19 @@ export function useMyInvitations() {
     queryFn: () => api.get<Invitation[]>('/me/invitations'),
   });
 }
+
+export interface AuditLogEntry {
+  id: string;
+  action: string;
+  actor: { id: string; displayName: string; username: string; avatarUrl: string | null } | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+export function useStudioAuditLogs(slug: string) {
+  return useQuery({
+    queryKey: ['auditLogs', slug],
+    queryFn: () => api.get<{ items: AuditLogEntry[]; total: number }>(`/studios/${slug}/audit-logs`),
+    enabled: !!slug,
+  });
+}
