@@ -30,7 +30,16 @@ enum UserRole {
 enum StudioRole {
   OWNER
   ADMIN
+  MODERATOR
   MEMBER
+}
+
+enum StudioInvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CANCELLED
 }
 
 enum GameStatus {
@@ -235,6 +244,8 @@ model StudioMember {
   role      StudioRole @default(MEMBER)
   /// Free-text role label shown on the studio page, e.g. "Lead Artist".
   title     String?
+  joinedAt     DateTime @default(now())
+  lastActiveAt DateTime?
   createdAt DateTime   @default(now())
 
   studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
@@ -243,6 +254,49 @@ model StudioMember {
   @@unique([studioId, userId])
   @@index([userId])
   @@map("studio_members")
+}
+
+model StudioInvitation {
+  id             String                   @id @default(cuid())
+  studioId       String
+  invitedById    String
+  email          String?
+  userId         String?
+  role           StudioRole
+  token          String                   @unique
+  status         StudioInvitationStatus   @default(PENDING)
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  rejectedAt     DateTime?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime                 @default(now())
+
+  studio    Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  invitedBy User   @relation(fields: [invitedById], references: [id])
+  user      User?  @relation(fields: [userId], references: [id])
+
+  @@index([studioId, status])
+  @@index([email])
+  @@index([userId])
+  @@map("studio_invitations")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  studioId   String
+  actorId    String
+  action     String
+  targetType String
+  targetId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  actor  User   @relation(fields: [actorId], references: [id])
+
+  @@index([studioId, createdAt])
+  @@map("audit_logs")
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -282,6 +336,10 @@ model Game {
   featured            Boolean    @default(false)
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
+  createdBy   String?
+  updatedBy   String?
+  publishedBy String?
+  publishedAt DateTime?
 
   studio        Studio         @relation(fields: [studioId], references: [id], onDelete: Cascade)
   media         GameMedia[]
@@ -530,6 +588,13 @@ enum NotificationType {
   NEW_COMMENT
   NEW_REPLY
   NEW_REACTION
+  STUDIO_INVITATION
+  INVITATION_ACCEPTED
+  MEMBER_JOINED
+  MEMBER_LEFT
+  ROLE_CHANGED
+  MEMBER_REMOVED
+  JOIN_REQUEST
 }
 
 enum NotificationTargetType {
