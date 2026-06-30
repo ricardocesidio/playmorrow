@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
@@ -55,6 +55,7 @@ export class InvitationsController {
   @ApiOkResponse({ description: 'List of invitations.' })
   async list(
     @Param('slug') slug: string,
+    @Query('status') status: string | undefined,
     @CurrentUser() user: { id: string },
   ) {
     const studio = await this.prisma.studio.findUnique({
@@ -63,7 +64,7 @@ export class InvitationsController {
     });
     if (!studio) throw new NotFoundException('Studio not found');
     assertStudioAccess(user, studio.members, [StudioRole.OWNER, StudioRole.ADMIN]);
-    return this.invitationsService.findByStudio(studio.id);
+    return this.invitationsService.findByStudio(studio.id, status);
   }
 
   @Delete('studios/:slug/invitations/:id')
