@@ -26,6 +26,7 @@ import { RoadmapItemsModule } from './roadmap-items/roadmap-items.module';
 import { StudiosModule } from './studios/studios.module';
 import { UploadModule } from './upload/upload.module';
 import { UsersModule } from './users/users.module';
+import { StudioChatModule } from './studio-chat/studio-chat.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { UsersModule } from './users/users.module';
     SearchModule,
     WishlistModule,
     InvitationsModule,
+    StudioChatModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

@@ -282,7 +282,7 @@ async function main() {
       if (tag) {
         await prisma.gameTag.upsert({
           where: { gameId_tagId: { gameId: game.id, tagId: tag.id } },
-          update: {},
+    update: {},
           create: { gameId: game.id, tagId: tag.id },
         });
       }

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, UserPlus, Users, Crown, Shield, Mail, History, UserCheck, UserX } from 'lucide-react';
+import { ArrowLeft, UserPlus, Users, Crown, Shield, Mail, History, UserCheck, UserX, Send, MessageCircle } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
 import { useStudio, useStudioMembers, useUpdateMemberRole, useRemoveMember, useTransferOwnership, useCreateInvitation, useCancelInvitation, useStudioInvitations, useStudioAuditLogs, useApproveJoinRequest, useRejectJoinRequest } from '@/lib/api/hooks';
@@ -12,6 +12,7 @@ import type { StudioWithMembers } from '@/lib/api/client';
 import { TeamMemberCard } from '@/components/team/team-member-card';
 import { InviteModal } from '@/components/team/invite-modal';
 import type { Invitation } from '@/lib/api/hooks';
+import { api } from '@/lib/api/client';
 
 interface RawMember {
   id: string;
@@ -50,6 +51,24 @@ export default function TeamPage() {
   const { data: invitations } = useStudioInvitations(slug);
   const { data: auditLogs } = useStudioAuditLogs(slug);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
+  const [feed, setFeed] = useState<any[]>([]);
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    api.get<any>(`/studios/${slug}/activities`).then(res => setFeed(res.items ?? [])).catch(() => {});
+  }, [slug]);
+
+  const sendMessage = async () => {
+    if (!chatMessage.trim() || sending) return;
+    setSending(true);
+    try {
+      const msg = await api.post<any>(`/studios/${slug}/chat`, { message: chatMessage.trim() });
+      setFeed(prev => [{ type: 'chat', ...msg, author: msg.author }, ...prev]);
+      setChatMessage('');
+    } catch {}
+    setSending(false);
+  };
 
   const updateRole = useUpdateMemberRole();
   const removeMember = useRemoveMember();
@@ -290,6 +309,62 @@ export default function TeamPage() {
               </div>
             </div>
           )}
+
+          {/* Team Feed */}
+          <div className="mt-10">
+            <h2 className="mb-3 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
+              <MessageCircle className="mr-1 inline size-3.5" /> Team Feed
+            </h2>
+            <div className="clip-corner max-h-[400px] overflow-y-auto border border-border/60 bg-[#050b0f]/50">
+              {feed.length === 0 ? (
+                <div className="px-4 py-8 text-center font-mono text-[0.58rem] text-muted-foreground">No activity yet</div>
+              ) : (
+                <div className="space-y-0">
+                  {feed.map((item: any, i: number) => (
+                    <div key={item.id ?? i} className="flex items-start gap-3 border-b border-border/20 px-4 py-3">
+                      {item.type === 'system' ? (
+                        <div className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-cyan/10 text-[10px]">🤖</div>
+                      ) : (
+                        <div className="grid size-7 shrink-0 place-items-center rounded-full border border-border bg-background/40 overflow-hidden">
+                          {item.author?.avatarUrl ? (
+                            <img src={item.author.avatarUrl} alt="" className="size-full object-cover" />
+                          ) : (
+                            <span className="text-[9px] font-bold text-muted-foreground">{item.author?.displayName?.slice(0, 1) ?? '?'}</span>
+                          )}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        {item.type === 'system' ? (
+                          <p className="font-mono text-[0.55rem] text-muted-foreground">
+                            <span className="font-semibold text-cyan">{item.actor?.displayName ?? 'Someone'}</span>{' '}
+                            {actionLabels[item.action] ?? item.action?.toLowerCase()}
+                          </p>
+                        ) : (
+                          <>
+                            <p className="font-mono text-[0.55rem] text-muted-foreground">
+                              <span className="font-semibold text-cyan">{item.author?.displayName ?? 'Someone'}</span>
+                            </p>
+                            <p className="mt-0.5 font-mono text-[0.6rem] text-foreground">{item.message}</p>
+                          </>
+                        )}
+                      </div>
+                      <p className="shrink-0 font-mono text-[0.5rem] text-muted-foreground/50">{formatRelativeTime(item.createdAt)}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="mt-2 flex gap-2">
+              <input value={chatMessage} onChange={e => setChatMessage(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+                placeholder="Write a message..."
+                className="clip-corner h-10 flex-1 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
+              <button onClick={sendMessage} disabled={sending || !chatMessage.trim()}
+                className="clip-corner flex cursor-pointer items-center gap-1 border border-cyan bg-cyan/10 px-4 font-mono text-[0.6rem] uppercase tracking-wider text-cyan transition hover:bg-cyan hover:text-background disabled:opacity-40">
+                <Send className="size-3.5" /> Send
+              </button>
+            </div>
+          </div>
         </div>
       </main>
 

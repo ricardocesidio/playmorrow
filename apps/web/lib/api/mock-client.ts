@@ -138,6 +138,8 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
   };
   if (path.includes('/games')) return paginated([MOCK_GAME]);
   if (path.includes('/follow-status')) return followStatus('STUDIO', 'studio-1', false, 5);
+  if (path.includes('/activities')) return { items: [] };
+  if (path.includes('/chat')) return method === 'POST' ? { id: 'chat-1', message: _body, author: MOCK_USER, createdAt: new Date().toISOString() } : [];
   if (path.includes('/request-join')) return { status: 'REQUESTED' };
   if (path.includes('/follow')) {
     if (method === 'POST') return followStatus('STUDIO', 'studio-1', true, 6);

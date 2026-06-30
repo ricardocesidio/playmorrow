@@ -186,6 +186,7 @@ model User {
   refreshTokens         RefreshToken[]
   sessions              Session[]
   verificationTokens      VerificationToken[]
+  chatMessages          StudioChatMessage[]
   emailVerificationCodes  EmailVerificationCode[]
   passwordResetTokens     PasswordResetToken[]
   wishlistItems         WishlistItem[]
@@ -224,6 +225,7 @@ model Studio {
   invitations  StudioInvitation[]
   auditLogs    AuditLog[]
   xpEvents     StudioXpEvent[]
+  chatMessages StudioChatMessage[]
 
   @@map("studios")
 }
@@ -303,6 +305,20 @@ model AuditLog {
 
   @@index([studioId, createdAt])
   @@map("audit_logs")
+}
+
+model StudioChatMessage {
+  id        String   @id @default(cuid())
+  studioId  String
+  authorId  String
+  message   String   @db.VarChar(2000)
+  createdAt DateTime @default(now())
+
+  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id])
+
+  @@index([studioId, createdAt])
+  @@map("studio_chat_messages")
 }
 
 // ──────────────────────────────────────────────────────────────────────────
