@@ -321,6 +321,9 @@ export default function TeamPage() {
             <h2 className="mb-3 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
               <MessageCircle className="mr-1 inline size-3.5" /> Team Feed
             </h2>
+            <p className="mb-4 font-mono text-[0.55rem] leading-relaxed text-muted-foreground/60">
+              Team members can post updates here. Changes to the studio (logo, games, trailers, etc.) appear automatically with a 🤖 icon.
+            </p>
             <div className="clip-corner max-h-[400px] overflow-y-auto border border-border/60 bg-[#050b0f]/50">
               {feed.length === 0 ? (
                 <div className="px-4 py-8 text-center font-mono text-[0.58rem] text-muted-foreground">No activity yet</div>
