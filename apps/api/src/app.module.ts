@@ -19,6 +19,7 @@ import { GamesModule } from './games/games.module';
 import { PressKitsModule } from './press-kits/press-kits.module';
 import { HealthModule } from './health/health.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AuditLogModule } from './audit-log/audit-log.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RoadmapItemsModule } from './roadmap-items/roadmap-items.module';
 import { StudiosModule } from './studios/studios.module';
@@ -54,6 +55,7 @@ import { UsersModule } from './users/users.module';
     PressKitsModule,
     SearchModule,
     WishlistModule,
+    AuditLogModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
