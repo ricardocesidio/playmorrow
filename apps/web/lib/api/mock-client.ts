@@ -205,11 +205,27 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
       username: segments[1],
       displayName: segments[1] === 'testuser' ? 'Test User' : segments[1],
       avatarUrl: null,
-      bio: 'A test user profile.',
+      bio: 'Indie game enthusiast and narrative designer. Building worlds one line of dialogue at a time.',
       role: 'PLAYER',
       isVerified: false,
+      followersCount: 342,
+      followingCount: 128,
+      wishlistsCount: 47,
+      studiosFollowedCount: 15,
+      commentsCount: 89,
       createdAt: '2025-01-01T00:00:00.000Z',
-      studios: [MOCK_STUDIO],
+      studios: [
+        { id: 'studio-1', name: 'Obsidian Signal', slug: 'obsidian-signal', logoUrl: null, tagline: 'Tactical stealth redefined', role: 'MEMBER' },
+        { id: 'studio-2', name: 'Ironlight Studios', slug: 'ironlight-studios', logoUrl: null, tagline: 'Forging epic tales', role: 'MEMBER' },
+        { id: 'studio-3', name: 'Wildbriar', slug: 'wildbriar', logoUrl: null, tagline: 'Where nature meets code', role: 'OWNER' },
+      ],
+      recentActivity: [
+        { id: 'act-1', type: 'COMMENT', description: 'Commented on "Neon Warden" devlog', createdAt: '2025-06-28T14:30:00.000Z', target: { kind: 'devlog', title: 'Lighting Overhaul Pt. 2', slug: 'lighting-overhaul-2' } },
+        { id: 'act-2', type: 'WISHLIST', description: 'Added "Starfall Tactics" to wishlist', createdAt: '2025-06-27T09:15:00.000Z', target: { kind: 'game', title: 'Starfall Tactics', slug: 'starfall-tactics' } },
+        { id: 'act-3', type: 'FOLLOW_STUDIO', description: 'Followed "Lumen Garden" studio', createdAt: '2025-06-26T18:45:00.000Z', target: { kind: 'studio', title: 'Lumen Garden', slug: 'lumen-garden' } },
+        { id: 'act-4', type: 'COMMENT', description: 'Commented on "Mossbound" roadmap item', createdAt: '2025-06-25T11:20:00.000Z', target: { kind: 'roadmap', title: 'Mossbound Q3 Roadmap', slug: 'mossbound-q3' } },
+        { id: 'act-5', type: 'WISHLIST', description: 'Added "Paper Relics" to wishlist', createdAt: '2025-06-24T07:00:00.000Z', target: { kind: 'game', title: 'Paper Relics', slug: 'paper-relics' } },
+      ],
     };
   }
 
