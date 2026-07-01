@@ -224,7 +224,7 @@ export class InvitationsService {
         this.notifications.create({
           recipientId: admin.user.id,
           actorId: userId,
-          type: 'STUDIO_JOIN_REQUEST',
+          type: 'JOIN_REQUEST',
           title: `Join request for ${studio.name}`,
           body: `A user wants to join your studio`,
           targetType: 'STUDIO',
