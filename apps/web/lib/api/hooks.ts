@@ -1022,3 +1022,43 @@ export function useRejectJoinRequest() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['studioInvitations'] }); },
   });
 }
+
+// ── Player XP ──
+
+export function usePlayerXpHistory() {
+  return useQuery({
+    queryKey: ['playerXpHistory'],
+    queryFn: () => api.get<PlayerXpEvent[]>('/me/xp/history'),
+  });
+}
+
+export function usePlayerWeeklyXp() {
+  return useQuery({
+    queryKey: ['playerWeeklyXp'],
+    queryFn: () => api.get<{ weekly: number }>('/me/xp/weekly'),
+  });
+}
+
+export function usePlayerMonthlyXp() {
+  return useQuery({
+    queryKey: ['playerMonthlyXp'],
+    queryFn: () => api.get<{ monthly: number }>('/me/xp/monthly'),
+  });
+}
+
+export function useAchievements() {
+  return useQuery({
+    queryKey: ['achievements'],
+    queryFn: () => api.get<Achievement[]>('/me/achievements'),
+  });
+}
+
+// Types
+export interface PlayerXpEvent {
+  id: string; userId: string; reason: string; amount: number; reference: string | null; createdAt: string;
+}
+
+export interface Achievement {
+  id: string; name: string; desc: string; icon: string; xpReward: number; category: string;
+  unlocked: boolean; unlockedAt: string | null;
+}
