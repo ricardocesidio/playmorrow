@@ -15,6 +15,8 @@ export interface AuthUser {
   accountType: 'PLAYER' | 'STUDIO';
   isOnboardingCompleted?: boolean;
   emailChangeCount?: number;
+  level?: number;
+  xp?: number;
 }
 
 export interface RegisterResult {
