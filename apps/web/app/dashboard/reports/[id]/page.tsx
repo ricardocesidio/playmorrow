@@ -7,13 +7,12 @@ import { ArrowLeft, Check, X } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
-import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { useAdminReport, useUpdateReport } from '@/lib/api/hooks';
 
 const STATUS_STYLES: Record<string, string> = {
-  OPEN: 'border-amber/30 text-amber bg-amber/5',
-  RESOLVED: 'border-cyan/30 text-cyan bg-cyan/5',
-  DISMISSED: 'border-border text-muted-foreground bg-muted',
+  OPEN: 'border border-amber/30 text-amber bg-amber/5',
+  RESOLVED: 'border border-cyan/30 text-cyan bg-cyan/5',
+  DISMISSED: 'border border-border/40 text-muted-foreground bg-muted/20',
 };
 
 export default function ReportDetailPage() {
@@ -34,76 +33,113 @@ export default function ReportDetailPage() {
   };
 
   if (isLoading) {
-    return <><SiteHeader /><main className="mx-auto max-w-3xl px-4 py-8"><LoadingSkeleton count={5} /></main><SiteFooter /></>;
+    return (
+      <>
+        <SiteHeader />
+        <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+          <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+          <div className="relative mx-auto max-w-3xl">
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="clip-corner h-16 animate-pulse border border-border/40 bg-[#050b0f]/30" />
+              ))}
+            </div>
+          </div>
+        </main>
+        <SiteFooter />
+      </>
+    );
   }
 
   if (!report) {
-    return <><SiteHeader /><main className="mx-auto max-w-3xl px-4 py-8"><p className="text-sm text-muted-foreground">Report not found.</p></main><SiteFooter /></>;
+    return (
+      <>
+        <SiteHeader />
+        <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+          <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+          <div className="relative mx-auto max-w-3xl">
+            <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+              <p className="font-mono text-[0.6rem] text-muted-foreground">Report not found.</p>
+            </div>
+          </div>
+        </main>
+        <SiteFooter />
+      </>
+    );
   }
 
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-3xl flex-1 px-4 py-8 lg:px-6 lg:py-10">
-        <Link href="/dashboard/reports" className="mb-6 inline-flex items-center gap-1 font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="size-3" /> Back to reports
-        </Link>
+      <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+        {/* Grid overlay */}
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        {/* Top accent line */}
+        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
 
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="font-display text-2xl font-semibold">{report.reason}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {report.targetType} · reported by {report.reporter.displayName}
-            </p>
-          </div>
-          <span className={`border px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest ${STATUS_STYLES[report.status] ?? ''}`}>
-            {report.status}
-          </span>
-        </div>
+        <div className="relative mx-auto max-w-3xl">
+          <Link href="/dashboard/reports" className="mb-6 inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:text-cyan">
+            <ArrowLeft className="size-3" /> Back to reports
+          </Link>
 
-        {report.details && (
-          <div className="mt-6 border border-border bg-elevated p-4">
-            <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Details</p>
-            <p className="mt-2 text-sm whitespace-pre-wrap">{report.details}</p>
-          </div>
-        )}
-
-        <div className="mt-4 flex gap-4 font-mono text-xs text-muted-foreground/60">
-          <span>Reported: {new Date(report.createdAt).toLocaleString()}</span>
-          {report.resolvedAt && <span>Resolved: {new Date(report.resolvedAt).toLocaleString()}</span>}
-        </div>
-
-        {report.status === 'OPEN' && (
-          <div className="mt-8 border border-border bg-elevated p-4">
-            <p className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">Resolution note</p>
-            <textarea
-              value={resolutionNote}
-              onChange={(e) => setResolutionNote(e.target.value)}
-              placeholder="Add a note about this resolution (optional)"
-              rows={3}
-              className="w-full border border-input bg-background px-3 py-2 text-sm focus:border-cyan focus:outline-none"
-            />
-            <div className="mt-4 flex gap-3">
-              <button onClick={handleResolve} disabled={updateReport.isPending}
-                className="flex items-center gap-2 border border-cyan bg-cyan/10 px-4 py-2 font-mono text-xs uppercase tracking-widest text-cyan transition-colors hover:bg-cyan hover:text-cyan-foreground disabled:opacity-50">
-                <Check className="size-3" /> Resolve
-              </button>
-              <button onClick={handleDismiss} disabled={updateReport.isPending}
-                className="flex items-center gap-2 border border-border px-4 py-2 font-mono text-xs uppercase tracking-widest text-muted-foreground transition-colors hover:border-foreground hover:text-foreground disabled:opacity-50">
-                <X className="size-3" /> Dismiss
-              </button>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">{report.reason}</h1>
+              <p className="mt-1 font-mono text-[0.6rem] text-muted-foreground">
+                {report.targetType} · reported by {report.reporter.displayName}
+              </p>
             </div>
+            <span className={`clip-corner px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-wider ${STATUS_STYLES[report.status] ?? ''}`}>
+              {report.status}
+            </span>
           </div>
-        )}
 
-        {report.resolutionNote && (
-          <div className="mt-4 border border-border bg-elevated p-4">
-            <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-              {report.status === 'RESOLVED' ? 'Resolution' : 'Dismissal'} note
-            </p>
-            <p className="mt-2 text-sm">{report.resolutionNote}</p>
+          {report.details && (
+            <div className="clip-corner mt-6 border border-border/60 bg-[#050b0f]/50 p-4">
+              <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Details</p>
+              <p className="mt-2 font-mono text-[0.55rem] text-foreground whitespace-pre-wrap">{report.details}</p>
+            </div>
+          )}
+
+          <div className="mt-4 flex gap-4 font-mono text-[0.55rem] text-muted-foreground/60">
+            <span>Reported: {new Date(report.createdAt).toLocaleString()}</span>
+            {report.resolvedAt && <span>Resolved: {new Date(report.resolvedAt).toLocaleString()}</span>}
           </div>
-        )}
+
+          {report.status === 'OPEN' && (
+            <div className="clip-corner mt-8 border border-border/60 bg-[#050b0f]/50 p-4">
+              <p className="mb-3 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Resolution note</p>
+              <textarea
+                value={resolutionNote}
+                onChange={(e) => setResolutionNote(e.target.value)}
+                placeholder="Add a note about this resolution (optional)"
+                rows={3}
+                className="clip-corner w-full border border-border/60 bg-[#050b0f]/50 px-3 py-2 font-mono text-[0.55rem] text-foreground placeholder:text-muted-foreground/40 focus:border-cyan focus:outline-none"
+              />
+              <div className="mt-4 flex gap-3">
+                <button onClick={handleResolve} disabled={updateReport.isPending}
+                  className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+                  <Check className="mr-1 inline size-3" /> Resolve
+                </button>
+                <button onClick={handleDismiss} disabled={updateReport.isPending}
+                  className="clip-corner cursor-pointer border border-border/60 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-coral hover:text-coral disabled:cursor-not-allowed disabled:opacity-40">
+                  <X className="mr-1 inline size-3" /> Dismiss
+                </button>
+              </div>
+            </div>
+          )}
+
+          {report.resolutionNote && (
+            <div className="clip-corner mt-4 border border-border/60 bg-[#050b0f]/50 p-4">
+              <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
+                {report.status === 'RESOLVED' ? 'Resolution' : 'Dismissal'} note
+              </p>
+              <p className="mt-2 font-mono text-[0.55rem] text-foreground">{report.resolutionNote}</p>
+            </div>
+          )}
+        </div>
       </main>
       <SiteFooter />
     </>
