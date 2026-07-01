@@ -5,9 +5,8 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, MessageSquare, ThumbsUp, Heart, Zap, Lightbulb } from 'lucide-react';
 
-import { Nav } from '@/components/nav';
-import { Footer } from '@/components/footer';
-import { Button } from '@/components/ui/button';
+import { SiteHeader } from '@/components/site-header';
+import { SiteFooter } from '@/components/site-footer';
 import { useAuth } from '@/lib/api/auth-context';
 import {
   useDevlog,
@@ -47,11 +46,11 @@ function ReactionButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs transition-colors ${
+      className={`clip-corner inline-flex items-center gap-1 border px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors ${
         active
-          ? 'border-primary bg-primary/10 text-primary'
-          : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
-      } disabled:opacity-50`}
+          ? 'border-cyan bg-cyan/10 text-cyan'
+          : 'border-border/60 text-muted-foreground hover:border-cyan/40 hover:text-cyan'
+      } disabled:opacity-40`}
     >
       {REACTION_ICONS[type]}
       <span>{count}</span>
@@ -134,11 +133,11 @@ function CommentReactions({
           key={type}
           onClick={() => handleReact(type)}
           disabled={!isAuthenticated || reactMut.isPending || unreactMut.isPending}
-          className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] transition-colors ${
+          className={`clip-corner inline-flex items-center gap-0.5 border border-border/50 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest transition-colors ${
             viewerReactions.includes(type)
-              ? 'bg-primary/10 text-primary'
-              : 'text-muted-foreground hover:text-foreground'
-          } disabled:opacity-50`}
+              ? 'border-cyan bg-cyan/10 text-cyan'
+              : 'text-muted-foreground hover:border-cyan/40 hover:text-cyan'
+          } disabled:opacity-40`}
         >
           {REACTION_ICONS[type]}
           <span>{count}</span>
@@ -198,7 +197,7 @@ function CommentItem({
   };
 
   return (
-    <div className={`rounded-xl border border-border bg-card/20 p-4 ${depth > 0 ? 'ml-6' : ''}`}>
+    <div className={`clip-corner border border-border/70 bg-[#050b0f]/80 p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] ${depth > 0 ? 'ml-6' : ''}`}>
       {comment.isDeleted || comment.deletedAt ? (
         <p className="text-sm italic text-muted-foreground/60">[deleted]</p>
       ) : editing ? (
@@ -207,11 +206,11 @@ function CommentItem({
             value={editBody}
             onChange={(e) => setEditBody(e.target.value)}
             rows={3}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="clip-corner w-full border border-input bg-background/80 px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
           />
           <div className="flex gap-2">
-            <Button size="sm" onClick={handleEdit} disabled={updateComment.isPending}>Save</Button>
-            <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
+            <button onClick={handleEdit} disabled={updateComment.isPending} className="clip-corner border border-cyan bg-cyan/10 px-4 py-1.5 font-mono text-[0.6rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:opacity-40">Save</button>
+            <button onClick={() => setEditing(false)} className="clip-corner border border-border/60 px-4 py-1.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">Cancel</button>
           </div>
         </div>
       ) : (
@@ -254,13 +253,13 @@ function CommentItem({
                 onChange={(e) => setReplyBody(e.target.value)}
                 rows={2}
                 placeholder="Write a reply…"
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="clip-corner w-full border border-input bg-background/80 px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
               />
               <div className="flex gap-2">
-                <Button size="sm" onClick={handleReply} disabled={createComment.isPending}>
+                <button onClick={handleReply} disabled={createComment.isPending} className="clip-corner border border-cyan bg-cyan/10 px-4 py-1.5 font-mono text-[0.6rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:opacity-40">
                   {createComment.isPending ? 'Posting…' : 'Reply'}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setReplying(false)}>Cancel</Button>
+                </button>
+                <button onClick={() => setReplying(false)} className="clip-corner border border-border/60 px-4 py-1.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">Cancel</button>
               </div>
             </div>
           )}
@@ -294,15 +293,19 @@ export default function DevlogDetailPage() {
   if (isLoading) {
     return (
       <>
-        <Nav />
-        <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 w-64 rounded bg-muted" />
-            <div className="h-4 w-96 rounded bg-muted" />
-            <div className="h-48 rounded bg-muted" />
+        <SiteHeader />
+        <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+          <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+          <div className="relative mx-auto w-full max-w-3xl">
+            <div className="animate-pulse space-y-4">
+              <div className="clip-corner h-8 w-64 bg-[#050b0f]/30" />
+              <div className="clip-corner h-4 w-96 bg-[#050b0f]/30" />
+              <div className="clip-corner h-48 bg-[#050b0f]/30" />
+            </div>
           </div>
         </main>
-        <Footer />
+        <SiteFooter />
       </>
     );
   }
@@ -310,107 +313,118 @@ export default function DevlogDetailPage() {
   if (error || !devlog) {
     return (
       <>
-        <Nav />
-        <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-20 text-center">
-          <h1 className="text-2xl font-semibold">Devlog not found</h1>
-          <p className="mt-2 text-muted-foreground">This devlog doesn&apos;t exist or is private.</p>
-          <Link href="/games" className="mt-6 inline-flex items-center gap-2 text-sm text-primary underline">
-            <ArrowLeft className="size-4" /> Back to games
-          </Link>
+        <SiteHeader />
+        <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+          <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+          <div className="relative mx-auto w-full max-w-3xl py-20 text-center">
+            <h1 className="font-display text-2xl font-black uppercase tracking-tight text-white">Devlog not found</h1>
+            <p className="mt-2 font-mono text-[0.6rem] text-muted-foreground">This devlog doesn&apos;t exist or is private.</p>
+            <Link href="/games" className="mt-6 clip-corner inline-flex items-center gap-2 border border-cyan/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">
+              <ArrowLeft className="size-4" /> Back to games
+            </Link>
+          </div>
         </main>
-        <Footer />
+        <SiteFooter />
       </>
     );
   }
 
   return (
     <>
-      <Nav />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">
-        <Link
-          href={`/games/${devlog.game.slug}`}
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" /> {devlog.game.title}
-        </Link>
+      <SiteHeader />
+      <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+        
+        <div className="relative mx-auto w-full max-w-3xl">
+          <Link
+            href={`/games/${devlog.game.slug}`}
+            className="mb-6 clip-corner inline-flex items-center gap-1.5 border border-border/60 px-3 py-1.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan"
+          >
+            <ArrowLeft className="size-4" /> {devlog.game.title}
+          </Link>
 
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="rounded bg-primary/10 px-1.5 py-0.5 text-primary">Devlog</span>
-            {devlog.publishedAt && <span>{new Date(devlog.publishedAt).toLocaleDateString()}</span>}
+          {/* Header */}
+          <div className="clip-corner mb-8 border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] sm:p-7">
+            <div className="flex items-center gap-2 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
+              <span className="clip-corner border border-cyan/60 px-1.5 py-0.5 text-cyan">Devlog</span>
+              {devlog.publishedAt && <span className="normal-case">{new Date(devlog.publishedAt).toLocaleDateString()}</span>}
+            </div>
+
+            <h1 className="mt-3 font-display text-3xl font-black uppercase tracking-tight text-white">{devlog.title}</h1>
+
+            <div className="mt-3 flex items-center gap-3 font-mono text-[0.6rem] text-muted-foreground">
+              {devlog.author && <span>By {devlog.author.displayName}</span>}
+              <span>·</span>
+              <Link href={`/games/${devlog.game.slug}`} className="text-cyan underline-offset-2 hover:underline">
+                {devlog.game.title}
+              </Link>
+            </div>
           </div>
 
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight">{devlog.title}</h1>
+          {/* Reaction bar */}
+          <DevlogReactions devlogId={id} />
 
-          <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground">
-            {devlog.author && <span>By {devlog.author.displayName}</span>}
-            <span>·</span>
-            <Link href={`/games/${devlog.game.slug}`} className="underline-offset-2 hover:text-primary hover:underline">
-              {devlog.game.title}
-            </Link>
+          {/* Content */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] sm:p-7">
+            <div className="font-mono text-[0.6rem] text-foreground whitespace-pre-wrap leading-relaxed">
+              {devlog.body}
+            </div>
           </div>
+
+          {/* Comments */}
+          <section className="mt-16">
+            <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-black uppercase tracking-tight text-white">
+              <MessageSquare className="size-4 text-cyan" />
+              Comments {comments ? `(${comments.length})` : ''}
+            </h2>
+
+            {/* Add comment form */}
+            {isAuthenticated ? (
+              <div className="mb-6 space-y-2">
+                <textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  rows={3}
+                  placeholder="Write a comment…"
+                  className="clip-corner w-full border border-input bg-background/80 px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
+                />
+                <button onClick={handlePostComment} disabled={createComment.isPending || !newComment.trim()} className="clip-corner border border-cyan bg-cyan/10 px-5 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:opacity-40">
+                  {createComment.isPending ? 'Posting…' : 'Post comment'}
+                </button>
+              </div>
+            ) : (
+              <div className="clip-corner mb-6 border border-border/70 bg-[#050b0f]/80 p-4 text-center shadow-[0_0_20px_rgb(0_0_0_/_0.25)]">
+                <p className="font-mono text-[0.6rem] text-muted-foreground">
+                  <Link href="/login" className="text-cyan underline-offset-2 hover:underline">Sign in</Link> to leave a comment.
+                </p>
+              </div>
+            )}
+
+            {/* Comment list */}
+            {topLevelComments.length > 0 ? (
+              <div className="space-y-4">
+                {topLevelComments.map((comment) => (
+                  <div key={comment.id}>
+                    <CommentItem comment={comment} devlogId={id} currentUserId={user?.id} depth={0} token={token} reactionsByComment={commentReactions?.comments} />
+                    {replies
+                      .filter((r) => r.parentId === comment.id)
+                      .map((reply) => (
+                        <div key={reply.id} className="mt-2">
+                          <CommentItem comment={reply} devlogId={id} currentUserId={user?.id} depth={1} token={token} reactionsByComment={commentReactions?.comments} />
+                        </div>
+                      ))}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="font-mono text-[0.6rem] text-muted-foreground">No comments yet.</p>
+            )}
+          </section>
         </div>
-
-        {/* Reaction bar */}
-        <DevlogReactions devlogId={id} />
-
-        {/* Content */}
-        <div className="prose prose-sm prose-invert max-w-none whitespace-pre-wrap leading-relaxed">
-          {devlog.body}
-        </div>
-
-        {/* Comments */}
-        <section className="mt-16">
-          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-            <MessageSquare className="size-4" />
-            Comments {comments ? `(${comments.length})` : ''}
-          </h2>
-
-          {/* Add comment form */}
-          {isAuthenticated ? (
-            <div className="mb-6 space-y-2">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                rows={3}
-                placeholder="Write a comment…"
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-              <Button onClick={handlePostComment} disabled={createComment.isPending || !newComment.trim()}>
-                {createComment.isPending ? 'Posting…' : 'Post comment'}
-              </Button>
-            </div>
-          ) : (
-            <div className="mb-6 rounded-xl border border-border bg-card/20 p-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                <Link href="/login" className="text-primary underline-offset-2 hover:underline">Sign in</Link> to leave a comment.
-              </p>
-            </div>
-          )}
-
-          {/* Comment list */}
-          {topLevelComments.length > 0 ? (
-            <div className="space-y-4">
-              {topLevelComments.map((comment) => (
-                <div key={comment.id}>
-                  <CommentItem comment={comment} devlogId={id} currentUserId={user?.id} depth={0} token={token} reactionsByComment={commentReactions?.comments} />
-                  {replies
-                    .filter((r) => r.parentId === comment.id)
-                    .map((reply) => (
-                      <div key={reply.id} className="mt-2">
-                        <CommentItem comment={reply} devlogId={id} currentUserId={user?.id} depth={1} token={token} reactionsByComment={commentReactions?.comments} />
-                      </div>
-                    ))}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No comments yet.</p>
-          )}
-        </section>
       </main>
-      <Footer />
+      <SiteFooter />
     </>
   );
 }
