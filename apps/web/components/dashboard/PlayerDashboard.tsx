@@ -83,6 +83,7 @@ export function PlayerDashboard() {
   const rankTitle = level >= 46 ? 'Legend' : level >= 31 ? 'Veteran' : level >= 16 ? 'Supporter' : level >= 6 ? 'Regular' : 'Newcomer';
 
   const feedItems = (feedData?.items ?? []).map((item) => ({
+    id: item.id,
     studio: item.studio.name,
     body: item.summary || item.title,
     time: timeAgo(item.createdAt),
@@ -90,6 +91,7 @@ export function PlayerDashboard() {
   }));
 
   const notifItems = (recentNotifs?.items ?? []).map((item) => ({
+    id: item.id,
     title: item.title,
     time: timeAgo(item.createdAt),
     icon: Bell,

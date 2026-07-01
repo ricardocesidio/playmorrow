@@ -55,27 +55,10 @@ import {
   useUnfollowGame,
 } from '@/lib/api/hooks';
 
-const fallbackTags = ['Stealth', 'Cyberpunk', 'Tactical', 'Strategy', 'Sci-Fi', 'Singleplayer', 'Story Rich', 'Atmospheric'];
-const fallbackScreenshots = [
-  '/playmorrow/neon-warden.png',
-  '/playmorrow/mossbound.png',
-  '/playmorrow/voidrunner.png',
-  '/playmorrow/starfall-tactics.png',
-  '/playmorrow/paper-relics.png',
-];
-
-const fallbackRoadmap = [
-  ['Q2 2025', 'Prototype', 'Core stealth mechanics', 'Vertical slice & AI prototype', 'done'],
-  ['Q3 2025', 'Alpha', 'Mission systems & hubs', 'Combat & hacking v1', 'done'],
-  ['Q4 2025', 'Beta', 'Full missions & story', 'Optimization & feedback', 'active'],
-  ['Q4 2026', 'Release', 'Launch', 'Post-launch support', 'locked'],
-] as const;
-
-const fallbackDevlogs = [
-  ['AI Overhaul: Smarter Guards, Smarter City', 'May 19, 2025', '/playmorrow/voidrunner.png', 256, 32],
-  ['Lighting the Rain: Visual Upgrades in 0.7', 'May 5, 2025', '/playmorrow/neon-warden.png', 184, 21],
-  ['Designing the Neon Districts', 'Apr 21, 2025', '/playmorrow/starfall-tactics.png', 143, 18],
-] as const;
+const fallbackTags: string[] = [];
+const fallbackScreenshots: string[] = [];
+const fallbackRoadmap: never[][] = [];
+const fallbackDevlogs: never[][] = [];
 
 interface GameCommentItem {
   id: string;
@@ -161,9 +144,9 @@ function PremiumGameDetail({
   slug: string;
 }) {
   const [activeScreenshot, setActiveScreenshot] = useState(0);
-  const title = game.title || 'Neon Warden';
-  const heroImage = game.bannerUrl || game.coverUrl || '/playmorrow/neon-warden.png';
-  const tags = game.tags?.length && game.tags.length >= 6 ? game.tags : fallbackTags;
+  const title = game.title || '';
+  const heroImage = game.bannerUrl || game.coverUrl || '';
+  const tags = game.tags?.length ? game.tags : [];
   const screenshots = useMemo(() => {
     const mediaImages = game.media?.filter((item) => item.type !== 'VIDEO').map((item) => item.thumbnailUrl ?? item.url) ?? [];
     return mediaImages.length ? mediaImages.slice(0, 5) : fallbackScreenshots;
@@ -245,7 +228,7 @@ function GameHero({ game, title, heroImage, slug }: { game: Game; title: string;
             ))}
           </h1>
           <p className="pm-micro mb-[10px] mt-5 text-[0.78rem] text-muted-foreground">
-            {(game.tags?.slice(0, 2).join(' • ') || 'Tactical stealth • Cyberpunk')}
+            {(game.tags?.slice(0, 2).join(' • ') || '')}
           </p>
         </div>
 
@@ -255,13 +238,13 @@ function GameHero({ game, title, heroImage, slug }: { game: Game; title: string;
               <Shield className="size-7 text-foreground" />
             </div>
             <div>
-              <p className="pm-display text-[0.95rem] leading-none text-foreground">{game.studio?.name ?? 'Obsidian Signal'} <span className="text-cyan">●</span></p>
+              <p className="pm-display text-[0.95rem] leading-none text-foreground">{game.studio?.name ?? ''} <span className="text-cyan">●</span></p>
               <p className="mt-2 text-xs text-muted-foreground">Independent Studio</p>
             </div>
             <DetailFollowButton slug={slug} />
           </div>
           <div className="-mx-6 grid border-y border-border/55 bg-background/38 shadow-[inset_0_18px_34px_rgb(0_0_0_/_0.28)] sm:-mx-8 sm:grid-cols-[205px_205px_205px_205px_1fr] xl:-mx-12">
-            <HeroStat icon={<Heart className="size-[28px] stroke-[2]" />} value={formatFollowers(game.followersCount || 12400)} label="Followers" />
+            <HeroStat icon={<Heart className="size-[28px] stroke-[2]" />} value={formatFollowers(game.followersCount || 0)} label="Followers" />
             <HeroStat icon={<Flame className="size-[26px] fill-coral text-coral" />} value="312" label="Wishlists" />
             <HeroStat icon={<MessageCircle className="size-[29px] stroke-[1.9]" />} value="48" label="Comments" />
             <HeroStat icon={<ActivityIcon />} value="9.1K" label="Views" />
@@ -309,12 +292,12 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
 
       <DetailWishlistButton slug={slug} />
       <p className="mt-3 border-b border-border/60 pb-3 text-xs text-muted-foreground">
-        Expected release: <span className="text-foreground">{game.expectedReleaseText ?? 'Q4 2026'}</span>
+        Expected release: <span className="text-foreground">{game.expectedReleaseText ?? ''}</span>
       </p>
 
       <p className="pm-micro mt-3 text-muted-foreground">Platforms</p>
       <div className="mt-2 grid grid-cols-3 gap-2">
-        {(game.platformLinks?.length ? game.platformLinks.map((p) => p.platform) : ['PC', 'PS5', 'XBOX SERIES X|S']).slice(0, 3).map((platform) => (
+        {(game.platformLinks?.length ? game.platformLinks.map((p) => p.platform) : []).slice(0, 3).map((platform) => (
           <span key={platform} className="flex min-h-8 cursor-pointer items-center justify-center gap-2 border border-border bg-background/65 px-2 font-mono text-[11px] uppercase text-foreground transition hover:border-cyan">
             {platform.includes('PC') ? <Monitor className="size-4 text-cyan" /> : <Gamepad2 className="size-4" />}
             {platform}
@@ -556,7 +539,7 @@ function AboutPanel({ game, slug }: { game: Game; slug: string }) {
   return (
     <TechPanel title="About" className="h-full min-h-[284px] lg:h-[334px]">
       <p className="text-xs leading-6 text-muted-foreground">
-        {game.description || `${game.title.toUpperCase()} is a tactical stealth game set in a dystopian cyberpunk city where corporate control and surveillance dictate every move. You are the Warden, a ghost in the system. Infiltrate fortified districts, outthink elite security, and unravel the conspiracy behind the Neon Veil.`}
+        {game.description || ''}
       </p>
       <ul className="mt-4 grid gap-2 text-xs text-muted-foreground">
         {[
@@ -579,7 +562,7 @@ function RoadmapPanel({ roadmap }: { roadmap: RoadmapItem[] }) {
         item.targetDate ? new Date(item.targetDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : `Q${index + 2} 2025`,
         item.status,
         item.title,
-        item.description ?? 'Development milestone',
+        item.description ?? '',
         getRoadmapVisualState(item.status),
       ] as const)
     : fallbackRoadmap;
@@ -638,7 +621,7 @@ function RoadmapNode({ state }: { state: string }) {
 
 function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
   const rows = devlogs.length
-    ? devlogs.slice(0, 3).map((item) => [item.title, item.publishedAt ? new Date(item.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent', item.coverUrl ?? '/playmorrow/neon-warden.png', 184, 21, `/devlogs/${item.id}`] as const)
+    ? devlogs.slice(0, 3).map((item) => [item.title, item.publishedAt ? new Date(item.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '', item.coverUrl ?? '', 0, 0, `/devlogs/${item.id}`] as const)
     : fallbackDevlogs.map((item) => [...item, '/devlogs/devlog-1'] as const);
 
   return (
@@ -663,15 +646,10 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
     <HudPanel className="h-full p-4" accent="muted">
       <h2 className="pm-micro mb-[5px] text-foreground">Quick Info</h2>
       <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
-        <InfoField label="Developer" value="Independent Studio" />
+        <InfoField label="Developer" value={game.studio?.name ?? ''} />
         <InfoField label="Status" value={labelStatus(game.status)} />
-        <InfoField label="Publisher" value="Self-Published" />
-        <InfoField label="Release" value={game.expectedReleaseText ?? 'Q4 2026'} />
-        <InfoField label="Engine" value="Unreal Engine 5" />
-        <InfoField label="Price" value={game.priceCents == null ? '$19.99 USD' : game.isFree ? 'Free' : `$${(game.priceCents / 100).toFixed(2)} USD`} />
-        <InfoField label="Genres" value={game.tags?.[0] ?? 'Tactical Stealth'} />
-        <InfoField label="Languages" value="EN, FR, DE, JP, ZH" />
-        <InfoField label="Modes" value="Single Player" />
+        <InfoField label="Release" value={game.expectedReleaseText ?? ''} />
+        <InfoField label="Price" value={game.isFree ? 'Free' : game.priceCents != null ? `$${(game.priceCents / 100).toFixed(2)} USD` : ''} />
       </div>
       <Link href="#details" className="mt-3 inline-flex items-center gap-3 text-sm text-cyan">View all details <ArrowRight className="size-4" /></Link>
 
