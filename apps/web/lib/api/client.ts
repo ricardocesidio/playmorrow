@@ -245,8 +245,18 @@ export interface UserProfile {
   isVerified: boolean;
   followersCount: number;
   followingCount: number;
+  wishlistsCount: number;
+  studiosFollowedCount: number;
+  commentsCount: number;
   createdAt: string;
   studios: { id: string; name: string; slug: string; logoUrl: string | null; tagline: string | null; role: string }[];
+  recentActivity: {
+    id: string;
+    type: string;
+    description: string;
+    createdAt: string;
+    target?: { kind: string; title: string; slug: string };
+  }[];
 }
 
 export interface Report {
