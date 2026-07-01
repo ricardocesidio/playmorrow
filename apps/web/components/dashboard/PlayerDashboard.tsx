@@ -24,6 +24,7 @@ import {
   Zap,
 } from 'lucide-react';
 
+import Image from 'next/image';
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyFollows, useMyWishlist, useNotifications, useUnreadNotificationCount, usePublicFeed, usePlayerWeeklyXp, usePlayerMonthlyXp, usePlayerXpHistory, useAchievements, type Achievement } from '@/lib/api/hooks';
@@ -343,7 +344,7 @@ function DashboardHero({ name }: { name: string }) {
   return (
     <DashboardPanel className="overflow-hidden">
       <div className="relative min-h-[214px]">
-        <img src="/playmorrow/neon-warden.png" alt="" className="absolute inset-0 h-full w-full object-cover opacity-55" />
+        <Image src="/playmorrow/neon-warden.png" alt="" width={768} height={512} className="absolute inset-0 h-full w-full object-cover opacity-55" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_84%_28%,rgb(255_87_77_/_0.3),transparent_18rem),linear-gradient(90deg,#020609_0%,rgb(2_6_9_/_0.92)_34%,rgb(2_6_9_/_0.38)_100%)]" />
         <div className="absolute right-14 top-9 hidden text-coral drop-shadow-[0_0_20px_rgb(255_87_77_/_0.6)] lg:block">
           <Zap className="size-20 stroke-1" />
