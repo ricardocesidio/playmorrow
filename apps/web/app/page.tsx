@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   Activity, ArrowRight, Bookmark, Check, Flame, Gamepad2, Radio, SquarePlay, UserPlus, Users, Zap,
@@ -217,7 +218,7 @@ function FeaturedGameCard() {
   return (
     <Link href="/games/neon-warden" className="block cursor-pointer">
       <HudPanel className="relative min-h-[438px] overflow-hidden p-6 sm:p-7 transition hover:border-cyan/70" accent="muted">
-        <img src="/playmorrow/neon-warden.png" alt="Neon Warden key art" className="absolute inset-0 size-full object-cover" />
+        <Image src="/playmorrow/neon-warden.png" alt="Neon Warden key art" width={768} height={512} className="absolute inset-0 size-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/56 to-background/6" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/92 via-transparent to-background/20" />
         <div className="relative z-10 grid min-h-[386px] content-between">
