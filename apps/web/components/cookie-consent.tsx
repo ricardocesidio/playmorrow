@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, Cookie, Shield, BarChart3, Megaphone } from 'lucide-react';
 import Link from 'next/link';
+import { api } from '@/lib/api/client';
 
 interface ConsentSettings {
   essential: true;
@@ -22,7 +23,10 @@ function getConsent(): ConsentSettings | null {
 }
 
 function saveConsent(settings: Omit<ConsentSettings, 'acceptedAt'>) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...settings, acceptedAt: new Date().toISOString() }));
+  const data = { ...settings, acceptedAt: new Date().toISOString() };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  // Save to backend (fire-and-forget)
+  api.patch('/users/me/cookie-preferences', { analytics: settings.analytics, marketing: settings.marketing }).catch(() => {});
 }
 
 const cookieTypes = [
