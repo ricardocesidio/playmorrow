@@ -72,7 +72,7 @@ export function GameCard({ game }: { game: Game }) {
         </div>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {(game.platformLinks?.length ? game.platformLinks.map((p) => p.platform) : ['PC', 'PS5', 'XBOX']).slice(0, 4).map((platform) => (
+          {[...new Set(game.platformLinks?.length ? game.platformLinks.map((p) => p.platform) : ['PC', 'PS5', 'XBOX'])].slice(0, 4).map((platform) => (
             <span key={platform} className="border border-border px-2 py-1 font-mono text-[10px] uppercase text-muted-foreground">
               {platform}
             </span>
