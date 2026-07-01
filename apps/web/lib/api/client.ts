@@ -243,6 +243,8 @@ export interface UserProfile {
   bio: string | null;
   role: string;
   isVerified: boolean;
+  level: number;
+  xp: number;
   followersCount: number;
   followingCount: number;
   wishlistsCount: number;

@@ -28,6 +28,7 @@ import { UploadModule } from './upload/upload.module';
 import { UsersModule } from './users/users.module';
 import { StudioChatModule } from './studio-chat/studio-chat.module';
 import { PushNotificationsModule } from './push-notifications/push-notifications.module';
+import { AchievementModule } from './achievements/achievement.module';
 import { PlayerXpModule } from './player-xp/player-xp.module';
 
 @Module({
@@ -63,6 +64,7 @@ import { PlayerXpModule } from './player-xp/player-xp.module';
     InvitationsModule,
     StudioChatModule,
     PushNotificationsModule,
+    AchievementModule,
     PlayerXpModule,
   ],
   controllers: [AppController],
