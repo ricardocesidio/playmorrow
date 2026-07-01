@@ -390,6 +390,7 @@ export class GamesService {
       commentsCount: game.commentsCount ?? 0,
       viewsCount: game.viewsCount ?? 0,
       featured: game.featured ?? false,
+      trailerUrl: game.trailerUrl ?? null,
       readme: game.readme ?? null,
       demoStatus: game.demoStatus ?? null,
       demoUrl: game.demoUrl ?? null,
