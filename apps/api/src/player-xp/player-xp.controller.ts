@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PlayerXpService } from './player-xp.service';
@@ -21,5 +21,10 @@ export class PlayerXpController {
   @Get('monthly')
   async getMonthly(@CurrentUser() user: { id: string }) {
     return { monthly: await this.xpService.getMonthlyXp(user.id) };
+  }
+
+  @Post('daily-login')
+  async dailyLogin(@CurrentUser() user: { id: string }) {
+    return this.xpService.awardDailyLogin(user.id);
   }
 }
