@@ -13,63 +13,63 @@ interface AchievementDef {
 
 const ACHIEVEMENTS: AchievementDef[] = [
   {
-    id: 'first_follow', name: 'First Follow', desc: 'Follow your first studio', icon: '🎯', xpReward: 25,
+    id: 'first_follow', name: 'First Follow', desc: 'Follow your first studio', icon: 'crosshair', xpReward: 25,
     category: 'Social', check: async (userId, prisma) => {
       const count = await prisma.follow.count({ where: { userId } });
       return count >= 1;
     },
   },
   {
-    id: 'wishlister', name: 'Wishlister', desc: 'Add 5 games to your wishlist', icon: '⭐', xpReward: 50,
+    id: 'wishlister', name: 'Wishlister', desc: 'Add 5 games to your wishlist', icon: 'bookmark', xpReward: 50,
     category: 'Discovery', check: async (userId, prisma) => {
       const count = await prisma.wishlistItem.count({ where: { userId } });
       return count >= 5;
     },
   },
   {
-    id: 'commenter', name: 'Commenter', desc: 'Post your first comment', icon: '💬', xpReward: 25,
+    id: 'commenter', name: 'Commenter', desc: 'Post your first comment', icon: 'message-square', xpReward: 25,
     category: 'Community', check: async (userId, prisma) => {
       const count = await prisma.comment.count({ where: { authorId: userId } });
       return count >= 1;
     },
   },
   {
-    id: 'social', name: 'Social', desc: 'Follow 10 studios', icon: '👥', xpReward: 75,
+    id: 'social', name: 'Social', desc: 'Follow 10 studios', icon: 'users', xpReward: 75,
     category: 'Social', check: async (userId, prisma) => {
       const count = await prisma.follow.count({ where: { userId, targetType: 'STUDIO' } });
       return count >= 10;
     },
   },
   {
-    id: 'explorer', name: 'Explorer', desc: 'Follow 3 games', icon: '🗺️', xpReward: 30,
+    id: 'explorer', name: 'Explorer', desc: 'Follow 3 games', icon: 'compass', xpReward: 30,
     category: 'Discovery', check: async (userId, prisma) => {
       const count = await prisma.follow.count({ where: { userId, targetType: 'GAME' } });
       return count >= 3;
     },
   },
   {
-    id: 'profile_complete', name: 'Complete Profile', desc: 'Fill in your bio and upload an avatar', icon: '🎨', xpReward: 50,
+    id: 'profile_complete', name: 'Complete Profile', desc: 'Fill in your bio and upload an avatar', icon: 'user-check', xpReward: 50,
     category: 'Account', check: async (userId, prisma) => {
       const user = await prisma.user.findUnique({ where: { id: userId } });
       return !!(user?.bio && user?.avatarUrl);
     },
   },
   {
-    id: 'level_10', name: 'Rising Star', desc: 'Reach Level 10', icon: '🌟', xpReward: 100,
+    id: 'level_10', name: 'Rising Star', desc: 'Reach Level 10', icon: 'zap', xpReward: 100,
     category: 'Progression', check: async (userId, prisma) => {
       const user = await prisma.user.findUnique({ where: { id: userId } });
       return (user?.level ?? 0) >= 10;
     },
   },
   {
-    id: 'level_25', name: 'Dedicated', desc: 'Reach Level 25', icon: '💎', xpReward: 250,
+    id: 'level_25', name: 'Dedicated', desc: 'Reach Level 25', icon: 'shield', xpReward: 250,
     category: 'Progression', check: async (userId, prisma) => {
       const user = await prisma.user.findUnique({ where: { id: userId } });
       return (user?.level ?? 0) >= 25;
     },
   },
   {
-    id: 'level_50', name: 'Legend', desc: 'Reach Level 50', icon: '👑', xpReward: 500,
+    id: 'level_50', name: 'Legend', desc: 'Reach Level 50', icon: 'award', xpReward: 500,
     category: 'Progression', check: async (userId, prisma) => {
       const user = await prisma.user.findUnique({ where: { id: userId } });
       return (user?.level ?? 0) >= 50;
