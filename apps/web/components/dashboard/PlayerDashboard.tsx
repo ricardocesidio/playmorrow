@@ -167,10 +167,10 @@ export function PlayerDashboard() {
               <SidebarLink href="/dashboard" icon={<Users className="size-4" />} label="Overview" active />
               <SidebarLink href="/me/wishlist" icon={<Heart className="size-4" />} label="Wishlist" count={wishlistCount} />
               <SidebarLink href="/me/following" icon={<Users className="size-4" />} label="Following" count={followingCount} />
+              <SidebarLink href="/dashboard" icon={<Trophy className="size-4" />} label="Achievements" count={12} />
               <SidebarLink href="/feed" icon={<Gamepad2 className="size-4" />} label="Playtests" count={3} />
               <SidebarLink href="/games" icon={<History className="size-4" />} label="Recently Viewed" />
               <SidebarLink href="/games" icon={<Library className="size-4" />} label="Library" />
-              <SidebarLink href="/dashboard" icon={<Trophy className="size-4" />} label="Achievements" />
               <SidebarLink href="/dashboard/notifications" icon={<MessageSquare className="size-4" />} label="Messages" count={unreadCount} />
               <SidebarLink href="/settings/profile" icon={<Settings className="size-4" />} label="Settings" />
               <button

@@ -218,7 +218,7 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
   if (path === '/me/invitations') return [];
 
   // Wishlist
-  if (path === '/me/wishlist') return { items: [] };
+  if (path === '/me/wishlist') return { items: [{ id: 'wish-1', game: MOCK_GAME, createdAt: new Date().toISOString() }] };
   if (path.includes('/wishlist-status') || path.includes('/wishlist')) {
     if (method === 'POST') return { gameId: 'game-1', gameSlug: segments[1], isWishlisted: true };
     if (method === 'DELETE') return { gameId: 'game-1', gameSlug: segments[1], isWishlisted: false };
