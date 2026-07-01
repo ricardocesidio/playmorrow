@@ -28,6 +28,7 @@ import { UploadModule } from './upload/upload.module';
 import { UsersModule } from './users/users.module';
 import { StudioChatModule } from './studio-chat/studio-chat.module';
 import { PushNotificationsModule } from './push-notifications/push-notifications.module';
+import { PlayerXpModule } from './player-xp/player-xp.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { PushNotificationsModule } from './push-notifications/push-notifications
     InvitationsModule,
     StudioChatModule,
     PushNotificationsModule,
+    PlayerXpModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

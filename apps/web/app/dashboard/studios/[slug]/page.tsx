@@ -165,19 +165,6 @@ export default function EditStudioPage() {
                 </Link>
               ))}
             </nav>
-            {(() => {
-              const xpAtStart = (studio.level * (studio.level - 1) / 2) * 100;
-              const xpForNext = studio.level * 100;
-              const progress = Math.min(((studio.xp - xpAtStart) / xpForNext) * 100, 100);
-              return (
-                <div className="mt-5 border-t border-border/70 px-2 pt-4">
-                  <p className="font-mono text-[0.67rem] uppercase tracking-[0.22em] text-muted-foreground">Studio Level</p>
-                  <p className="mt-1 font-mono text-xs text-cyan">Level {studio.level}</p>
-                  <div className="mt-3 h-1.5 bg-border/40"><div className="h-full bg-cyan shadow-[0_0_12px_rgb(62_231_255_/_0.7)] transition-all" style={{ width: `${progress}%` }} /></div>
-                  <p className="mt-2 text-right font-mono text-[0.62rem] text-muted-foreground">{studio.xp.toLocaleString()} / {xpForNext.toLocaleString()} XP</p>
-                </div>
-              );
-            })()}
             <div className="mt-5 overflow-hidden border border-border/70 p-3">
               <div className="relative min-h-24">
                 <img src="/playmorrow/neon-warden.png" alt="" className="absolute inset-y-0 right-[-20px] h-full w-24 object-cover opacity-80" />
