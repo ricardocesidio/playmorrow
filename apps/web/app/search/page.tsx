@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Loader2, Gamepad2, Building2, FileText } from 'lucide-react';
 
-import { Nav } from '@/components/nav';
-import { Footer } from '@/components/footer';
+import { SiteHeader } from '@/components/site-header';
+import { SiteFooter } from '@/components/site-footer';
 import { api, type SearchResponse } from '@/lib/api/client';
 
 export default function SearchPage() {
@@ -35,131 +35,136 @@ export default function SearchPage() {
 
   return (
     <>
-      <Nav />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">
-        <h1 className="mb-2 text-3xl font-semibold tracking-tight">Search</h1>
-        <p className="mb-8 text-muted-foreground">Find games, studios, and devlogs.</p>
+      <SiteHeader />
+      <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+        
+        <div className="relative mx-auto w-full max-w-3xl">
+          <h1 className="mb-2 font-display text-3xl font-black uppercase tracking-tight text-white">Search</h1>
+          <p className="mb-8 font-mono text-[0.6rem] text-muted-foreground">Find games, studios, and devlogs.</p>
 
-        {/* Search input */}
-        <div className="relative mb-8">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            autoFocus
-            className="w-full rounded-lg border border-input bg-background py-3 pl-10 pr-4 text-base focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-          {isLoading && (
-            <Loader2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+          {/* Search input */}
+          <div className="relative mb-8">
+            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              autoFocus
+              className="clip-corner h-12 w-full border border-input bg-background/80 pl-11 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
+            />
+            {isLoading && (
+              <Loader2 className="absolute right-4 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+            )}
+          </div>
+
+          {/* Error */}
+          {error && (
+            <p className="clip-corner border border-coral/40 bg-coral/5 px-4 py-3 font-mono text-[0.6rem] text-coral">{error}</p>
+          )}
+
+          {/* No results */}
+          {noResults && (
+            <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+              <Search className="mx-auto mb-3 size-10 text-muted-foreground/30" />
+              <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">No results for &ldquo;{debounced}&rdquo;</p>
+            </div>
+          )}
+
+          {/* Results */}
+          {hasResults && (
+            <div className="space-y-10">
+              {data.games.total > 0 && (
+                <section>
+                  <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-black uppercase tracking-tight text-white">
+                    <Gamepad2 className="size-5 text-cyan" />
+                    Games ({data.games.total})
+                  </h2>
+                  <div className="space-y-2">
+                    {data.games.items.map((g) => (
+                      <Link
+                        key={g.id}
+                        href={`/games/${g.slug}`}
+                        className="clip-corner flex items-center gap-3 border border-border/70 bg-[#050b0f]/80 p-3 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-colors hover:border-cyan/30"
+                      >
+                        {g.coverUrl ? (
+                          <img src={g.coverUrl} alt="" className="size-12 border border-border/60 object-cover" />
+                        ) : (
+                          <div className="flex size-12 items-center justify-center border border-border/60 bg-[#050b0f]/50 font-mono text-[0.55rem] uppercase text-muted-foreground">No cover</div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-display font-semibold text-white">{g.title}</p>
+                          {g.tagline && <p className="truncate font-mono text-[0.6rem] text-muted-foreground">{g.tagline}</p>}
+                          <p className="font-mono text-[0.55rem] text-muted-foreground/60">{g.studio.name}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {data.studios.total > 0 && (
+                <section>
+                  <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-black uppercase tracking-tight text-white">
+                    <Building2 className="size-5 text-cyan" />
+                    Studios ({data.studios.total})
+                  </h2>
+                  <div className="space-y-2">
+                    {data.studios.items.map((s) => (
+                      <Link
+                        key={s.id}
+                        href={`/studios/${s.slug}`}
+                        className="clip-corner flex items-center gap-3 border border-border/70 bg-[#050b0f]/80 p-3 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-colors hover:border-cyan/30"
+                      >
+                        {s.logoUrl ? (
+                          <img src={s.logoUrl} alt="" className="size-12 border border-border/60 object-cover" />
+                        ) : (
+                          <div className="flex size-12 items-center justify-center border border-border/60 bg-[#050b0f]/50 font-mono text-[0.55rem] uppercase text-muted-foreground">No logo</div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-display font-semibold text-white">{s.name}</p>
+                          {s.tagline && <p className="truncate font-mono text-[0.6rem] text-muted-foreground">{s.tagline}</p>}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {data.devlogs.total > 0 && (
+                <section>
+                  <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-black uppercase tracking-tight text-white">
+                    <FileText className="size-5 text-cyan" />
+                    Devlogs ({data.devlogs.total})
+                  </h2>
+                  <div className="space-y-2">
+                    {data.devlogs.items.map((d) => (
+                      <Link
+                        key={d.id}
+                        href={`/devlogs/${d.id}`}
+                        className="clip-corner flex items-center gap-3 border border-border/70 bg-[#050b0f]/80 p-3 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-colors hover:border-cyan/30"
+                      >
+                        {d.coverUrl ? (
+                          <img src={d.coverUrl} alt="" className="size-12 border border-border/60 object-cover" />
+                        ) : (
+                          <div className="flex size-12 items-center justify-center border border-border/60 bg-[#050b0f]/50 font-mono text-[0.55rem] uppercase text-muted-foreground">No cover</div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-display font-semibold text-white">{d.title}</p>
+                          <p className="font-mono text-[0.55rem] text-muted-foreground/60">{d.game.title}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
           )}
         </div>
-
-        {/* Error */}
-        {error && (
-          <p className="text-sm text-destructive">{error}</p>
-        )}
-
-        {/* No results */}
-        {noResults && (
-          <div className="rounded-xl border border-border bg-card/20 py-16 text-center">
-            <Search className="mx-auto mb-3 size-10 text-muted-foreground/40" />
-            <p className="text-muted-foreground">No results for &ldquo;{debounced}&rdquo;</p>
-          </div>
-        )}
-
-        {/* Results */}
-        {hasResults && (
-          <div className="space-y-10">
-            {data.games.total > 0 && (
-              <section>
-                <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                  <Gamepad2 className="size-5 text-primary" />
-                  Games ({data.games.total})
-                </h2>
-                <div className="space-y-2">
-                  {data.games.items.map((g) => (
-                    <Link
-                      key={g.id}
-                      href={`/games/${g.slug}`}
-                      className="flex items-center gap-3 rounded-lg border border-border p-3 transition-colors hover:border-primary/40"
-                    >
-                      {g.coverUrl ? (
-                        <img src={g.coverUrl} alt="" className="size-12 rounded object-cover" />
-                      ) : (
-                        <div className="flex size-12 items-center justify-center rounded bg-muted text-muted-foreground/30 text-xs">No cover</div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">{g.title}</p>
-                        {g.tagline && <p className="truncate text-sm text-muted-foreground">{g.tagline}</p>}
-                        <p className="text-xs text-muted-foreground/60">{g.studio.name}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {data.studios.total > 0 && (
-              <section>
-                <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                  <Building2 className="size-5 text-primary" />
-                  Studios ({data.studios.total})
-                </h2>
-                <div className="space-y-2">
-                  {data.studios.items.map((s) => (
-                    <Link
-                      key={s.id}
-                      href={`/studios/${s.slug}`}
-                      className="flex items-center gap-3 rounded-lg border border-border p-3 transition-colors hover:border-primary/40"
-                    >
-                      {s.logoUrl ? (
-                        <img src={s.logoUrl} alt="" className="size-12 rounded object-cover" />
-                      ) : (
-                        <div className="flex size-12 items-center justify-center rounded bg-muted text-muted-foreground/30 text-xs">No logo</div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">{s.name}</p>
-                        {s.tagline && <p className="truncate text-sm text-muted-foreground">{s.tagline}</p>}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {data.devlogs.total > 0 && (
-              <section>
-                <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                  <FileText className="size-5 text-primary" />
-                  Devlogs ({data.devlogs.total})
-                </h2>
-                <div className="space-y-2">
-                  {data.devlogs.items.map((d) => (
-                    <Link
-                      key={d.id}
-                      href={`/devlogs/${d.id}`}
-                      className="flex items-center gap-3 rounded-lg border border-border p-3 transition-colors hover:border-primary/40"
-                    >
-                      {d.coverUrl ? (
-                        <img src={d.coverUrl} alt="" className="size-12 rounded object-cover" />
-                      ) : (
-                        <div className="flex size-12 items-center justify-center rounded bg-muted text-muted-foreground/30 text-xs">No cover</div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">{d.title}</p>
-                        <p className="text-xs text-muted-foreground/60">{d.game.title}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
-        )}
       </main>
-      <Footer />
+      <SiteFooter />
     </>
   );
 }
