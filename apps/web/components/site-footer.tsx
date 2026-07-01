@@ -27,8 +27,16 @@ export function SiteFooter() {
           <a href="https://x.com/playmorrow" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-foreground" aria-label="Follow PlayMorrow on X">X</a>
         </div>
 
+        {/* Legal links */}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground/50">
+          <Link href="/terms" className="transition-colors hover:text-foreground">Terms of Service</Link>
+          <Link href="/privacy" className="transition-colors hover:text-foreground">Privacy Policy</Link>
+          <Link href="/cookies" className="transition-colors hover:text-foreground">Cookie Policy</Link>
+          <Link href="/community-guidelines" className="transition-colors hover:text-foreground">Community Guidelines</Link>
+        </div>
+
         {/* Copyright */}
-        <div className="mt-4 border-t border-border pt-4 text-center font-mono text-xs uppercase tracking-widest text-muted-foreground/60">
+        <div className="mt-4 border-t border-border pt-4 text-center font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground/60">
           &copy; {new Date().getFullYear()} Playmorrow. All rights reserved.
         </div>
       </div>
