@@ -235,9 +235,9 @@ function FeaturedGameCard() {
             <div className="clip-corner border border-border bg-background/70 p-4 backdrop-blur-sm">
               <div className="mb-5 flex items-center justify-between gap-4">
                 <span className="pm-micro text-foreground">Roadmap</span>
-                <Link href="/games/neon-warden" className="pm-micro inline-flex items-center gap-2 text-cyan">
+                <span className="pm-micro inline-flex items-center gap-2 text-cyan">
                   View full roadmap <ArrowRight className="size-3" />
-                </Link>
+                </span>
               </div>
               <div className="relative h-2 rounded-none bg-border">
                 <div className="absolute inset-y-0 left-0 w-[67%] bg-cyan shadow-[0_0_18px_rgb(62_231_255_/_0.85)]" />
