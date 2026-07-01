@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, ExternalLink, FileText, Trash2 } from 'lucide-react';
 
+import { SiteHeader } from '@/components/site-header';
 import { ImageUpload } from '@/components/image-upload';
 import { MarkdownEditor } from '@/components/md-editor';
 
@@ -80,33 +81,41 @@ export default function EditDevlogPage() {
 
   if (authLoading || devlogLoading) {
     return (
-      <main className="relative min-h-screen bg-[#020609]">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
-        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
-        <div className="relative mx-auto max-w-3xl flex min-h-screen items-center justify-center">
-          <div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
-        </div>
-      </main>
+      <>
+        <SiteHeader />
+        <main className="relative min-h-screen bg-[#020609]">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+          <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+          <div className="relative mx-auto max-w-3xl flex min-h-screen items-center justify-center">
+            <div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
+          </div>
+        </main>
+      </>
     );
   }
 
   if (!devlog) {
     return (
-      <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
-        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
-        <div className="relative mx-auto max-w-3xl py-20 text-center">
-          <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Devlog not found</h1>
-          <Link href="/dashboard" className="mt-4 inline-flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-widest text-cyan underline underline-offset-4 transition hover:text-cyan/80">
-            <ArrowLeft className="size-3" /> Back to dashboard
-          </Link>
-        </div>
-      </main>
+      <>
+        <SiteHeader />
+        <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+          <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+          <div className="relative mx-auto max-w-3xl py-20 text-center">
+            <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Devlog not found</h1>
+            <Link href="/dashboard" className="mt-4 inline-flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-widest text-cyan underline underline-offset-4 transition hover:text-cyan/80">
+              <ArrowLeft className="size-3" /> Back to dashboard
+            </Link>
+          </div>
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+    <>
+      <SiteHeader />
+      <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
       {/* Grid overlay */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
       {/* Top accent line */}
@@ -207,5 +216,6 @@ export default function EditDevlogPage() {
         </form>
       </div>
     </main>
+    </>
   );
 }

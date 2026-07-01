@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, ExternalLink, Gamepad2, Milestone, FileText, ScrollText, Trash2 } from 'lucide-react';
 
+import { SiteHeader } from '@/components/site-header';
 import { ImageUpload } from '@/components/image-upload';
 
 import { useAuth } from '@/lib/api/auth-context';
@@ -101,27 +102,35 @@ export default function EditGamePage() {
 
   if (authLoading || gameLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#020609]">
-        <div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
-      </div>
+      <>
+        <SiteHeader />
+        <div className="flex min-h-screen items-center justify-center bg-[#020609]">
+          <div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
+        </div>
+      </>
     );
   }
 
   if (!game) {
     return (
-      <div className="relative mx-auto max-w-2xl px-6 py-20 text-center">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
-        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
-        <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Game not found</h1>
-        <Link href="/dashboard" className="mt-4 inline-flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground hover:text-cyan">
-          <ArrowLeft className="size-3" /> Back to dashboard
-        </Link>
-      </div>
+      <>
+        <SiteHeader />
+        <div className="relative mx-auto max-w-2xl px-6 py-20 text-center">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+          <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+          <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Game not found</h1>
+          <Link href="/dashboard" className="mt-4 inline-flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground hover:text-cyan">
+            <ArrowLeft className="size-3" /> Back to dashboard
+          </Link>
+        </div>
+      </>
     );
   }
 
   return (
-    <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+    <>
+      <SiteHeader />
+      <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
       {/* Grid overlay */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
       {/* Top accent line */}
@@ -285,5 +294,6 @@ export default function EditGamePage() {
         </div>
       </div>
     </main>
+    </>
   );
 }
