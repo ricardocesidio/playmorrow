@@ -296,7 +296,7 @@ function LiveTicker({ items, feedCount }: { items: any[]; feedCount: number }) {
           <div key={i} className="flex items-center gap-3 border-b border-border px-5 py-3 md:border-r xl:border-b-0">
             <span className="text-muted-foreground">{getFeedIcon(item.type)}</span>
             <span className="min-w-0">
-              <span className="pm-micro text-foreground">{item.game ?? item.title ?? 'Update'}</span>
+              <span className="pm-micro text-foreground">{typeof item.game === 'string' ? item.game : item.game?.title ?? item.title ?? 'Update'}</span>
               <span className="ml-2 text-xs text-muted-foreground">{item.type === 'DEVLOG' ? 'posted a devlog' : item.type === 'ROADMAP_ITEM' ? 'updated roadmap' : 'new activity'}</span>
               <span className="block text-[10px] text-muted-foreground">{formatRelativeTime(item.createdAt)}</span>
             </span>
