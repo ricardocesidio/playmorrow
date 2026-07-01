@@ -5,9 +5,12 @@ import Link from 'next/link';
 import {
   Activity,
   ArrowRight,
+  Award,
   BadgeCheck,
   Bell,
   Bookmark,
+  Compass,
+  Crosshair,
   Gamepad2,
   Gauge,
   Heart,
@@ -16,9 +19,12 @@ import {
   Lock,
   LogOut,
   MessageSquare,
+  MessageSquareText,
   Radio,
   Settings,
+  Shield,
   Trophy,
+  UserCheck,
   UserRound,
   Users,
   Zap,
@@ -216,20 +222,20 @@ export function PlayerDashboard() {
           </div>
 
           <DashboardPanel className="p-4">
-            <SectionHeader title="Achievements" href="/me/achievements" compact />
+            <SectionHeader title="Achievements" href="/dashboard" compact />
             <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
               {(achievementsData ?? []).slice(0, 6).map((a) => (
-                <Link key={a.id} href="/me/achievements" className={`group flex flex-col items-center gap-2 border p-3 text-center transition ${
+                <div key={a.id} className={`flex flex-col items-center gap-2 border p-3 text-center transition ${
                   a.unlocked
-                    ? 'border-cyan/40 bg-cyan/5 shadow-[0_0_12px_rgb(62_231_255_/_0.15)] hover:border-cyan/60 hover:shadow-[0_0_18px_rgb(62_231_255_/_0.3)]'
-                    : 'border-border/60 bg-background/40 opacity-50 hover:opacity-70'
+                    ? 'border-cyan/40 bg-cyan/5 shadow-[0_0_12px_rgb(62_231_255_/_0.15)]'
+                    : 'border-border/60 bg-background/40 opacity-50'
                 }`}>
-                  <span className="text-xl">{a.icon}</span>
+                  <AchievementIcon icon={a.icon} unlocked={a.unlocked} />
                   <div>
                     <p className={`font-mono text-[0.58rem] uppercase tracking-[0.12em] ${a.unlocked ? 'text-foreground' : 'text-muted-foreground'}`}>{a.name}</p>
                     <p className="mt-0.5 text-[0.55rem] text-muted-foreground">{a.desc}</p>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           </DashboardPanel>
@@ -488,6 +494,23 @@ function FeedRow({ item }: { item: { studio: string; body: string; time: string;
       <span className="font-mono text-[0.62rem] text-muted-foreground">{item.time}</span>
     </Link>
   );
+}
+
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  crosshair: Crosshair,
+  bookmark: Bookmark,
+  'message-square': MessageSquare,
+  users: Users,
+  compass: Compass,
+  'user-check': UserCheck,
+  zap: Zap,
+  shield: Shield,
+  award: Award,
+};
+
+function AchievementIcon({ icon, unlocked }: { icon: string; unlocked: boolean }) {
+  const Icon = ICON_MAP[icon] ?? Trophy;
+  return <Icon className={`size-5 ${unlocked ? 'text-cyan' : 'text-muted-foreground'}`} />;
 }
 
 function NotificationRow({ item }: { item: { title: string; time: string; icon: React.ComponentType<{ className?: string }>; tone: string } }) {
