@@ -37,6 +37,7 @@ export class GameCommentsController {
   }
 
   @Delete('game-comments/:commentId/reactions')
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Remove reaction from a game comment' })

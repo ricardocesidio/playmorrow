@@ -18,6 +18,7 @@ import { ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/sw
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { Throttle } from '@nestjs/throttler';
 import { StudioRole } from '@playmorrow/database';
 
 import { StudioRoles } from './guards/studio-roles.decorator';
@@ -32,6 +33,7 @@ export class StudiosController {
   constructor(private readonly studiosService: StudiosService) {}
 
   @Post()
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @UseGuards(SessionAuthGuard)
   @ApiCreatedResponse({ description: 'Studio created.' })
   async create(@CurrentUser() user: { id: string }, @Body() dto: CreateStudioDto) {
@@ -85,6 +87,7 @@ export class StudiosController {
   }
 
   @Patch(':slug')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Studio updated.' })
   async update(
@@ -96,6 +99,7 @@ export class StudiosController {
   }
 
   @Delete(':slug')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Studio deleted (cascades to games, devlogs, etc.).' })

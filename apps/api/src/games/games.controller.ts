@@ -18,6 +18,7 @@ import { ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/sw
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { Throttle } from '@nestjs/throttler';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GamesService } from './games.service';
@@ -28,6 +29,7 @@ export class GamesController {
   constructor(private readonly gamesService: GamesService) {}
 
   @Post('studios/:studioSlug/games')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @UseGuards(SessionAuthGuard)
   @ApiCreatedResponse({ description: 'Game created.' })
   async create(
@@ -80,6 +82,7 @@ export class GamesController {
   }
 
   @Patch('games/:slug')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Game updated.' })
   async update(
@@ -91,6 +94,7 @@ export class GamesController {
   }
 
   @Delete('games/:slug')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Game deleted (cascades to devlogs, media, etc.).' })

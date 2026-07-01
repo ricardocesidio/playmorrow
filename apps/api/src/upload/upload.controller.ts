@@ -23,7 +23,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR || join(__dirname, '..', '..', 'uploads');
 
-const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 // Magic bytes signatures for allowed image types
 const MAGIC_BYTES: Record<string, Uint8Array[]> = {
@@ -31,7 +31,6 @@ const MAGIC_BYTES: Record<string, Uint8Array[]> = {
   'image/png': [new Uint8Array([0x89, 0x50, 0x4E, 0x47])],
   'image/gif': [new Uint8Array([0x47, 0x49, 0x46])],
   'image/webp': [new Uint8Array([0x52, 0x49, 0x46, 0x46])], // RIFF header
-  'image/svg+xml': [new Uint8Array([0x3C, 0x73, 0x76, 0x67]), new Uint8Array([0x3C, 0x3F, 0x78, 0x6D])], // <svg or <?xm
 };
 
 function generateFilename(original: string): string {
@@ -82,7 +81,7 @@ export class UploadController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }),
-          new FileTypeValidator({ fileType: /\.(png|jpe?g|gif|webp|svg)$/i }),
+          new FileTypeValidator({ fileType: /\.(png|jpe?g|gif|webp)$/i }),
         ],
       }),
     )
