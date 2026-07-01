@@ -51,13 +51,7 @@ const referenceGames: Game[] = [
   makeReferenceGame('game-8', 'Northlight', 'northlight', 'PRE_ALPHA', '/playmorrow/northlight.png', 3800, 'Frostfire Games', 'frostfire-games', ['Survival', 'Open World']),
 ];
 
-const trendingGames = [
-  ['Neon Warden', 'Tactical Stealth'],
-  ['Starfall Tactics', 'Tactical RPG'],
-  ['Mossbound', 'Adventure'],
-  ['Voidrunner', 'Roguelite'],
-  ['Paper Relics', 'Card Battler'],
-] as const;
+
 
 export default function GamesPage() {
   const searchParams = useSearchParams();
@@ -182,8 +176,7 @@ export default function GamesPage() {
             </form>
           </HudPanel>
 
-          <div className="grid gap-3 xl:grid-cols-[1fr_190px]">
-            <div>
+          <div>
           {error && !isLoading && <ErrorState message="Failed to load games." />}
 
           {!isLoading && !error && items.length === 0 && (
@@ -209,30 +202,6 @@ export default function GamesPage() {
               isLoading={isLoading}
             />
           )}
-            </div>
-
-            <HudPanel className="hidden min-h-[462px] self-start p-4 xl:block" accent="muted">
-              <h2 className="pm-micro mb-5 flex items-center justify-between text-foreground">
-                Trending now <span className="text-cyan">~</span>
-              </h2>
-              <div className="space-y-0">
-                {trendingGames.map(([title, genre], index) => (
-                  <div key={title} className="grid grid-cols-[22px_1fr] gap-3 border-b border-border/45 py-4 first:pt-0 last:border-b-0">
-                    <span className="font-mono text-sm text-muted-foreground">{String(index + 1).padStart(2, '0')}</span>
-                    <span>
-                      <span className="block pm-micro text-foreground">{title}</span>
-                      <span className="mt-2 block text-xs text-muted-foreground">{genre}</span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <Link
-                href="/feed"
-                className="mt-6 inline-flex items-center gap-2 border border-coral/60 px-4 py-3 pm-micro text-coral transition hover:bg-coral hover:text-coral-foreground"
-              >
-                View all trending <ArrowRight className="size-3" />
-              </Link>
-            </HudPanel>
           </div>
         </div>
         <HudStatusRail />
@@ -581,12 +550,12 @@ function accentForGame(status: string, title: string) {
 
 function coverForGame(title: string) {
   const game = referenceGames.find((item) => item.title === title);
-  return game?.coverUrl ?? '/playmorrow/neon-warden.png';
+  return game?.coverUrl ?? '';
 }
 
 function fallbackPlatforms(title: string) {
   const game = referenceGames.find((item) => item.title === title);
-  return game?.platformLinks.map((platform) => platform.platform) ?? ['PC'];
+  return game?.platformLinks.map((platform) => platform.platform) ?? [];
 }
 
 function formatFollowers(count: number) {
