@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowRight, Check, Gamepad2, Building2, User, AtSign, Upload } from 'lucide-react';
+import { ArrowRight, Check, Gamepad2, Building2, Heart, User, AtSign, Upload } from 'lucide-react';
 import { HudButton, HudPanel } from '@/components/playmorrow/hud';
 import { api, API } from '@/lib/api/client';
 
-const STEPS = ['Account Type', 'Username', 'Profile', 'Review'];
+const PLAYER_STEPS = ['Account Type', 'Username', 'Profile', 'Review', 'Follow Studios', 'Wishlist Games'];
+const STUDIO_STEPS = ['Account Type', 'Username', 'Profile', 'Review'];
 
 const COUNTRIES = [
   'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan',
@@ -36,6 +37,22 @@ const COUNTRIES = [
   'Zambia', 'Zimbabwe',
 ];
 
+const suggestedStudios = [
+  { id: 's1', name: 'Obsidian Signal', slug: 'obsidian-signal', tagline: 'Crafting immersive cyberpunk experiences.', followersCount: 28400, logoUrl: null as string | null },
+  { id: 's2', name: 'Ironlight Studios', slug: 'ironlight-studios', tagline: 'Building tactical worlds for strategic minds.', followersCount: 15600, logoUrl: null as string | null },
+  { id: 's3', name: 'Wildbriar', slug: 'wildbriar', tagline: 'Creating atmospheric adventures from the wild.', followersCount: 9200, logoUrl: null as string | null },
+  { id: 's4', name: 'Second Story Games', slug: 'second-story-games', tagline: 'Telling stories through innovative gameplay.', followersCount: 7400, logoUrl: null as string | null },
+  { id: 's5', name: 'Voidrunner Dev', slug: 'voidrunner-dev', tagline: 'Fast-paced action games for thrill seekers.', followersCount: 11300, logoUrl: null as string | null },
+];
+
+const suggestedGames = [
+  { id: 'g1', title: 'Neon Warden', slug: 'neon-warden', studio: 'Obsidian Signal', cover: '/playmorrow/neon-warden.png', tags: ['Tactical', 'Cyberpunk'] },
+  { id: 'g2', title: 'Starfall Tactics', slug: 'starfall-tactics', studio: 'Ironlight Studios', cover: '/playmorrow/starfall-tactics.png', tags: ['Tactical RPG', 'Space'] },
+  { id: 'g3', title: 'Mossbound', slug: 'mossbound', studio: 'Wildbriar', cover: '/playmorrow/mossbound.png', tags: ['Adventure', 'Atmospheric'] },
+  { id: 'g4', title: 'Paper Relics', slug: 'paper-relics', studio: 'Second Story Games', cover: '/playmorrow/paper-relics.png', tags: ['Card Battler', 'Roguelike'] },
+  { id: 'g5', title: 'Voidrunner', slug: 'voidrunner', studio: 'Voidrunner Dev', cover: '/playmorrow/voidrunner.png', tags: ['Roguelite', 'Fast-paced'] },
+];
+
 export default function OnboardingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -61,6 +78,11 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [selectedStudioIds, setSelectedStudioIds] = useState<string[]>([]);
+  const [wishlistedGameIds, setWishlistedGameIds] = useState<string[]>([]);
+
+  const steps = accountType === 'PLAYER' ? PLAYER_STEPS : STUDIO_STEPS;
+  const lastStepIndex = accountType === 'PLAYER' ? 5 : 3;
 
   useEffect(() => {
     if (username.length < 3) { setUsernameAvailable(null); return; }
@@ -115,6 +137,10 @@ export default function OnboardingPage() {
         body.studioWebsite = studioWebsite || undefined;
         body.studioDiscord = studioDiscord || undefined;
       }
+      if (accountType === 'PLAYER') {
+        body.selectedStudioIds = selectedStudioIds;
+        body.wishlistedGameIds = wishlistedGameIds;
+      }
       // Use direct fetch instead of api client to ensure cookies are captured
       const res = await fetch(`${API}/auth/complete-onboarding`, {
         method: 'POST',
@@ -159,7 +185,7 @@ export default function OnboardingPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-xl">
         <div className="mb-8 flex items-center justify-between">
-          {STEPS.map((label, i) => (
+          {steps.map((label, i) => (
             <div key={label} className="flex flex-col items-center gap-1.5">
               <span className={`grid size-8 place-items-center rounded-full font-mono text-xs font-bold transition-colors ${
                 i <= step ? 'bg-cyan text-background' : 'border border-border text-muted-foreground'
@@ -309,13 +335,104 @@ export default function OnboardingPage() {
             </div>
           )}
 
+          {step === 4 && accountType === 'PLAYER' && (
+            <div className="space-y-5">
+              <h2 className="font-display text-xl font-bold text-foreground">Follow Studios</h2>
+              <p className="text-sm text-muted-foreground">Follow studios to stay updated on their latest games and playtests.</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {suggestedStudios.map(studio => {
+                  const isSelected = selectedStudioIds.includes(studio.id);
+                  return (
+                    <div key={studio.id} className="border border-border p-4 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="size-12 shrink-0 rounded-full border-2 border-border bg-background/60 flex items-center justify-center overflow-hidden">
+                          {studio.logoUrl ? (
+                            <img src={studio.logoUrl} alt="" className="size-full object-cover" />
+                          ) : (
+                            <Building2 className="size-6 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-display text-sm font-semibold text-foreground truncate">{studio.name}</p>
+                          <p className="text-xs text-muted-foreground">{studio.followersCount >= 1000 ? `${(studio.followersCount / 1000).toFixed(1)}K` : studio.followersCount} followers</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{studio.tagline}</p>
+                      <button onClick={() => {
+                        setSelectedStudioIds(prev =>
+                          isSelected ? prev.filter(id => id !== studio.id) : [...prev, studio.id]
+                        );
+                      }}
+                        className={`w-full cursor-pointer border py-2 font-mono text-xs uppercase tracking-widest transition ${
+                          isSelected
+                            ? 'border-cyan bg-cyan/10 text-cyan'
+                            : 'border-border bg-background/50 text-muted-foreground hover:border-cyan hover:text-cyan'
+                        }`}>
+                        {isSelected ? 'Following' : 'Follow'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {step === 5 && accountType === 'PLAYER' && (
+            <div className="space-y-5">
+              <h2 className="font-display text-xl font-bold text-foreground">Wishlist Games</h2>
+              <p className="text-sm text-muted-foreground">Add games to your wishlist to get notified when they launch.</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {suggestedGames.map(game => {
+                  const isWishlisted = wishlistedGameIds.includes(game.id);
+                  return (
+                    <div key={game.id} className="border border-border overflow-hidden">
+                      <div className="h-28 bg-background/60 flex items-center justify-center border-b border-border">
+                        {game.cover ? (
+                          <img src={game.cover} alt={game.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <Gamepad2 className="size-8 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="p-3 space-y-2">
+                        <div>
+                          <p className="font-display text-sm font-semibold text-foreground">{game.title}</p>
+                          <p className="text-xs text-muted-foreground">{game.studio}</p>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {game.tags.map(tag => (
+                            <span key={tag} className="px-2 py-0.5 border border-border text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <button onClick={() => {
+                          setWishlistedGameIds(prev =>
+                            isWishlisted ? prev.filter(id => id !== game.id) : [...prev, game.id]
+                          );
+                        }}
+                          className={`w-full cursor-pointer border py-2 font-mono text-xs uppercase tracking-widest transition ${
+                            isWishlisted
+                              ? 'border-cyan bg-cyan/10 text-cyan'
+                              : 'border-border bg-background/50 text-muted-foreground hover:border-cyan hover:text-cyan'
+                          }`}>
+                          <Heart className={`mr-1 inline size-3 ${isWishlisted ? 'text-cyan' : ''}`} />
+                          {isWishlisted ? 'Saved' : 'Wishlist'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Navigation */}
           <div className="mt-8 flex items-center justify-between gap-4">
             <button onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}
               className="cursor-pointer border border-border px-5 py-2 font-mono text-xs uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan disabled:opacity-30">
               Back
             </button>
-            {step < 3 ? (
+            {step < lastStepIndex ? (
               <button onClick={() => {
                 if (step === 0 && !accountType) { setError('Select an account type'); return; }
                 if (step === 1) {
@@ -336,7 +453,7 @@ export default function OnboardingPage() {
               </button>
             ) : (
               <HudButton onClick={handleFinish} disabled={loading}>
-                {loading ? 'Creating account...' : 'Finish Setup'}
+                {loading ? 'Completing setup...' : accountType === 'PLAYER' ? 'Complete Setup' : 'Finish Setup'}
               </HudButton>
             )}
           </div>
