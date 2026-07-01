@@ -25,81 +25,90 @@ export default function AdminReportsPage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-5xl flex-1 px-4 py-8 lg:px-6 lg:py-10">
-        <div className="mb-6 flex items-center gap-3">
-          <ShieldAlert className="size-6 text-coral" />
-          <h1 className="font-display text-2xl font-semibold">Moderation Reports</h1>
-        </div>
+      <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+        {/* Grid overlay */}
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        {/* Top accent line */}
+        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
 
-        {/* Tabs */}
-        <div className="mb-6 flex gap-1 border border-border bg-elevated p-1">
-          {TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => { setStatus(tab.key); setPage(1); }}
-              className={`flex-1 px-3 py-1.5 font-mono text-xs uppercase tracking-widest transition-colors ${
-                status === tab.key ? 'bg-coral/10 text-coral' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <div className="relative mx-auto max-w-5xl">
+          <div className="mb-6 flex items-center gap-3">
+            <ShieldAlert className="size-6 text-cyan" />
+            <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Moderation Reports</h1>
+          </div>
 
-        {isLoading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-16 animate-pulse border border-border bg-elevated" />
-            ))}
-          </div>
-        ) : data?.items.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 border border-border bg-elevated py-16">
-            <ShieldAlert className="size-10 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">No {status === 'all' ? '' : status.toLowerCase()} reports.</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {data?.items.map((report) => (
-              <Link
-                key={report.id}
-                href={`/dashboard/reports/${report.id}`}
-                className="flex items-center gap-4 border border-border bg-elevated p-4 transition-colors hover:border-border-bright"
+          {/* Tabs */}
+          <div className="mb-6 flex gap-4 border-b border-border/40">
+            {TABS.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => { setStatus(tab.key); setPage(1); }}
+                className={`pb-2 font-mono text-[0.6rem] uppercase tracking-widest transition-colors ${
+                  status === tab.key ? 'border-b-2 border-cyan text-cyan' : 'text-muted-foreground hover:text-foreground'
+                }`}
               >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-3">
-                    <span className="font-display font-semibold">{report.reason}</span>
-                    <span className={`font-mono text-[10px] uppercase tracking-widest ${
-                      report.status === 'OPEN' ? 'text-amber' : report.status === 'RESOLVED' ? 'text-cyan' : 'text-muted-foreground'
-                    }`}>
-                      {report.status}
-                    </span>
-                  </div>
-                  <p className="mt-0.5 text-sm text-muted-foreground">
-                    {report.targetType} · by {report.reporter.displayName}
-                  </p>
-                  {report.details && <p className="mt-1 text-xs text-muted-foreground/60 line-clamp-1">{report.details}</p>}
-                </div>
-                <span className="font-mono text-[10px] text-muted-foreground/60">
-                  {new Date(report.createdAt).toLocaleDateString()}
-                </span>
-              </Link>
+                {tab.label}
+              </button>
             ))}
           </div>
-        )}
 
-        {totalPages > 1 && (
-          <div className="mt-8 flex items-center justify-center gap-3">
-            <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
-              className="flex items-center gap-1 border border-border px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-muted-foreground disabled:opacity-30">
-              <ChevronLeft className="size-3" /> Previous
-            </button>
-            <span className="font-mono text-xs text-muted-foreground">{page} / {totalPages}</span>
-            <button disabled={!data?.hasMore} onClick={() => setPage((p) => p + 1)}
-              className="flex items-center gap-1 border border-border px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-muted-foreground disabled:opacity-30">
-              Next <ChevronRight className="size-3" />
-            </button>
-          </div>
-        )}
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="clip-corner h-16 animate-pulse border border-border/40 bg-[#050b0f]/30" />
+              ))}
+            </div>
+          ) : data?.items.length === 0 ? (
+            <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+              <ShieldAlert className="mx-auto mb-3 size-10 text-muted-foreground/30" />
+              <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
+                No {status === 'all' ? '' : status.toLowerCase()} reports.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {data?.items.map((report) => (
+                <Link
+                  key={report.id}
+                  href={`/dashboard/reports/${report.id}`}
+                  className="clip-corner flex items-center gap-4 border border-border/60 bg-[#050b0f]/50 p-4 transition-colors hover:border-cyan/30"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-3">
+                      <span className="font-display font-semibold text-foreground">{report.reason}</span>
+                      <span className={`clip-corner px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-wider ${
+                        report.status === 'OPEN' ? 'border border-amber/30 text-amber bg-amber/5' : report.status === 'RESOLVED' ? 'border border-cyan/30 text-cyan bg-cyan/5' : 'border border-border/40 text-muted-foreground bg-muted/20'
+                      }`}>
+                        {report.status}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 font-mono text-[0.6rem] text-muted-foreground">
+                      {report.targetType} · by {report.reporter.displayName}
+                    </p>
+                    {report.details && <p className="mt-1 font-mono text-[0.55rem] text-muted-foreground/60 line-clamp-1">{report.details}</p>}
+                  </div>
+                  <span className="font-mono text-[0.55rem] text-muted-foreground/60">
+                    {new Date(report.createdAt).toLocaleDateString()}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className="mt-8 flex items-center justify-center gap-3">
+              <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
+                className="clip-corner border border-border/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan disabled:opacity-40">
+                <ChevronLeft className="inline size-3" /> Previous
+              </button>
+              <span className="font-mono text-[0.55rem] text-muted-foreground/60">{page} / {totalPages}</span>
+              <button disabled={!data?.hasMore} onClick={() => setPage((p) => p + 1)}
+                className="clip-corner border border-border/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan disabled:opacity-40">
+                Next <ChevronRight className="inline size-3" />
+              </button>
+            </div>
+          )}
+        </div>
       </main>
       <SiteFooter />
     </>
