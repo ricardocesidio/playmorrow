@@ -206,7 +206,7 @@ export function PlayerDashboard() {
                       <p className="font-mono text-[0.6rem] text-muted-foreground">No notifications yet</p>
                     </div>
                   ) : notifItems.slice(0, 5).map((item) => (
-                    <NotificationRow key={`${item.title}-${item.time}`} item={item} />
+                    <NotificationRow key={item.id ?? `notif-${Math.random()}`} item={item} />
                   ))}
                 </div>
               </DashboardPanel>
@@ -267,7 +267,7 @@ export function PlayerDashboard() {
                     </Link>
                   </div>
                 ) : feedItems.slice(0, 3).map((item) => (
-                  <FeedRow key={`${item.studio}-${item.time}`} item={item} />
+                  <FeedRow key={item.id ?? `${item.studio}-${Math.random()}`} item={item} />
                 ))}
               </div>
             </DashboardPanel>
