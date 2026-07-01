@@ -11,7 +11,7 @@ export function FeedItemCard({ item }: { item: FeedItemType }) {
   return (
     <Link
       href={href}
-      className="block rounded-xl border border-border bg-card/30 p-4 transition-colors hover:border-primary/30"
+      className="clip-corner block border border-border/60 bg-[#050b0f]/50 p-4 transition-colors hover:border-cyan/30"
     >
       <div className="flex items-start gap-4">
         {item.game.coverUrl && (
@@ -20,15 +20,15 @@ export function FeedItemCard({ item }: { item: FeedItemType }) {
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="rounded bg-primary/10 px-1.5 py-0.5 text-primary">
+          <div className="flex items-center gap-2">
+            <span className="rounded border border-border/40 px-1.5 py-0.5 font-mono text-[0.5rem] uppercase tracking-wider text-muted-foreground/60">
               {item.type === 'DEVLOG' ? 'Devlog' : 'Roadmap'}
             </span>
-            <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+            <span className="font-mono text-[0.5rem] text-muted-foreground/50">{new Date(item.createdAt).toLocaleDateString()}</span>
           </div>
-          <h3 className="mt-1 font-medium leading-tight">{item.title}</h3>
-          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{item.summary}</p>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <h3 className="mt-1 font-display text-sm font-semibold text-white">{item.title}</h3>
+          <p className="mt-1 line-clamp-2 font-mono text-[0.55rem] text-muted-foreground">{item.summary}</p>
+          <p className="mt-1 font-mono text-[0.55rem] text-muted-foreground">
             {item.game.title} · {item.studio.name}
           </p>
         </div>
