@@ -148,10 +148,12 @@ function PremiumGameDetail({
   const title = game.title || '';
   const heroImage = game.bannerUrl || game.coverUrl || '';
   const tags = game.tags?.length ? game.tags : [];
-  const screenshots = useMemo(() => {
-    const mediaImages = game.media?.filter((item) => item.type !== 'VIDEO').map((item) => item.thumbnailUrl ?? item.url) ?? [];
-    return mediaImages.length ? mediaImages.slice(0, 5) : fallbackScreenshots;
+  const allScreenshots = useMemo(() => {
+    return game.media?.filter((item) => item.type !== 'VIDEO').map((item) => item.thumbnailUrl ?? item.url) ?? [];
   }, [game.media]);
+  const screenshots = useMemo(() => {
+    return allScreenshots.length ? allScreenshots.slice(0, 5) : fallbackScreenshots;
+  }, [allScreenshots]);
 
   return (
     <>
@@ -171,9 +173,10 @@ function PremiumGameDetail({
           <section className="mt-4 grid items-start gap-4 xl:grid-cols-[1fr_430px]">
             <div className="grid gap-4">
               <div className="grid items-start gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-                <TrailerPanel title={title} image={heroImage} />
+                <TrailerPanel title={title} image={heroImage} trailerUrl={game.trailerUrl} />
                 <ScreenshotsPanel
                   screenshots={screenshots}
+                  allScreenshots={allScreenshots}
                   active={activeScreenshot}
                   onSelect={setActiveScreenshot}
                   title={title}
@@ -417,14 +420,56 @@ function TagRow({ tags }: { tags: string[] }) {
   );
 }
 
-function TrailerPanel({ title, image }: { title: string; image: string }) {
+function extractYoutubeId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /^([a-zA-Z0-9_-]{11})$/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1]!;
+  }
+  return null;
+}
+
+function TrailerPanel({ title, image, trailerUrl }: { title: string; image: string; trailerUrl?: string | null }) {
+  const [playing, setPlaying] = useState(false);
+  const youtubeId = trailerUrl ? extractYoutubeId(trailerUrl) : null;
+  const embedUrl = youtubeId ? `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0` : null;
+
+  if (!trailerUrl || !embedUrl) {
+    return (
+      <TechPanel id="trailer" title="Trailer" className="min-h-[268px]">
+        <div className="relative grid min-h-[210px] place-items-center border border-border bg-muted">
+          <p className="text-xs text-muted-foreground">No trailer available</p>
+        </div>
+      </TechPanel>
+    );
+  }
+
+  if (playing) {
+    return (
+      <TechPanel id="trailer" title="Trailer" className="min-h-[268px]">
+        <div className="relative min-h-[210px] overflow-hidden border border-border bg-muted">
+          <iframe
+            src={embedUrl}
+            title={`${title} trailer`}
+            className="absolute inset-0 size-full"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+          />
+        </div>
+      </TechPanel>
+    );
+  }
+
   return (
     <TechPanel id="trailer" title="Trailer" className="min-h-[268px]">
       <div className="relative min-h-[210px] overflow-hidden border border-border bg-muted">
         <img src={image} alt={`${title} trailer thumbnail`} className="absolute inset-0 size-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/65 via-background/22 to-background/20" />
         <div className="absolute inset-0 grid place-items-center text-center">
-          <button type="button" aria-label="Play trailer" className="grid size-14 place-items-center rounded-full border border-foreground/45 bg-background/45 text-foreground backdrop-blur-sm">
+          <button type="button" onClick={() => setPlaying(true)} aria-label="Play trailer" className="grid size-14 cursor-pointer place-items-center rounded-full border border-foreground/45 bg-background/45 text-foreground backdrop-blur-sm hover:bg-cyan/20 hover:border-cyan">
             <Play className="ml-1 size-7 fill-current" />
           </button>
           <div className="pointer-events-none absolute right-8 top-10 font-display text-4xl font-black uppercase leading-none text-foreground">
@@ -446,17 +491,20 @@ function TrailerPanel({ title, image }: { title: string; image: string }) {
 
 function ScreenshotsPanel({
   screenshots,
+  allScreenshots,
   active,
   onSelect: _onSelect,
   title,
 }: {
   screenshots: string[];
+  allScreenshots: string[];
   active: number;
   onSelect: (index: number) => void;
   title: string;
 }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(active);
+  const totalScreenshots = allScreenshots.length;
 
   const openLightbox = (index: number) => {
     setLightboxIndex(index);
@@ -469,18 +517,28 @@ function ScreenshotsPanel({
     if (!lightboxOpen) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { closeLightbox(); return; }
-      if (e.key === 'ArrowRight') { setLightboxIndex((i) => (i + 1) % screenshots.length); }
-      if (e.key === 'ArrowLeft') { setLightboxIndex((i) => (i - 1 + screenshots.length) % screenshots.length); }
+      if (e.key === 'ArrowRight') { setLightboxIndex((i) => (i + 1) % totalScreenshots); }
+      if (e.key === 'ArrowLeft') { setLightboxIndex((i) => (i - 1 + totalScreenshots) % totalScreenshots); }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [lightboxOpen, screenshots.length]);
+  }, [lightboxOpen, totalScreenshots]);
+
+  if (!screenshots.length) {
+    return (
+      <TechPanel title="Screenshots" className="min-h-[268px]">
+        <div className="grid min-h-[210px] place-items-center border border-border bg-muted">
+          <p className="text-xs text-muted-foreground">No screenshots yet</p>
+        </div>
+      </TechPanel>
+    );
+  }
 
   return (
-    <TechPanel title="Screenshots" action="View all (18)" className="min-h-[268px]">
+    <TechPanel title={`Screenshots (${totalScreenshots})`} className="min-h-[268px]">
       <div className="grid gap-2">
-        <button type="button" onClick={() => openLightbox(active)} className="cursor-pointer">
-          <img src={screenshots[active]} alt={`${title} screenshot`} className="h-[142px] w-full border border-border object-cover" />
+        <button type="button" onClick={() => openLightbox(0)} className="cursor-pointer">
+          <img src={screenshots[0]} alt={`${title} screenshot`} className="h-[142px] w-full border border-border object-cover" />
         </button>
         <div className="grid grid-cols-4 gap-2">
           {screenshots.slice(1, 5).map((image, index) => (
@@ -498,14 +556,14 @@ function ScreenshotsPanel({
         >
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i - 1 + screenshots.length) % screenshots.length); }}
+            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i - 1 + totalScreenshots) % totalScreenshots); }}
             className="absolute left-4 top-1/2 z-10 -translate-y-1/2 grid size-12 cursor-pointer place-items-center rounded-full border border-cyan/60 bg-background/60 text-cyan hover:bg-cyan hover:text-cyan-foreground"
           >
             <ArrowLeft className="size-6" />
           </button>
 
           <img
-            src={screenshots[lightboxIndex]}
+            src={allScreenshots[lightboxIndex]}
             alt={`${title} screenshot ${lightboxIndex + 1}`}
             className="max-h-[85vh] max-w-[90vw] object-contain"
             onClick={(e) => e.stopPropagation()}
@@ -513,14 +571,14 @@ function ScreenshotsPanel({
 
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i + 1) % screenshots.length); }}
+            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i + 1) % totalScreenshots); }}
             className="absolute right-4 top-1/2 z-10 -translate-y-1/2 grid size-12 cursor-pointer place-items-center rounded-full border border-cyan/60 bg-background/60 text-cyan hover:bg-cyan hover:text-cyan-foreground"
           >
             <ArrowRight className="size-6" />
           </button>
 
           <span className="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-sm text-foreground/80">
-            {lightboxIndex + 1} / {screenshots.length}
+            {lightboxIndex + 1} / {totalScreenshots}
           </span>
 
           <button

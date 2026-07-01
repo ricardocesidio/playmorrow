@@ -103,6 +103,7 @@ export interface Game {
   viewsCount?: number;
   featured?: boolean;
   studio: StudioSummary;
+  trailerUrl?: string | null;
   media: { id: string; type: string; url: string; thumbnailUrl: string | null; caption: string | null; position: number }[];
   platformLinks: { id: string; platform: string; url: string; label: string | null }[];
   tags: string[];
