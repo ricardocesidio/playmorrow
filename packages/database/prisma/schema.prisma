@@ -540,6 +540,7 @@ model Follow {
   // target without blocking follows of the other kind.
   @@unique([userId, studioId])
   @@unique([userId, gameId])
+  @@index([userId, targetType])
   @@index([studioId])
   @@index([gameId])
   @@map("follows")
@@ -686,6 +687,7 @@ model Notification {
   recipient User  @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
   actor     User? @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
 
+  @@index([recipientId, createdAt])
   @@index([recipientId, readAt, createdAt])
   @@index([targetType, targetId])
   @@map("notifications")
@@ -794,6 +796,7 @@ model WishlistItem {
   game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
   @@unique([userId, gameId])
+  @@index([userId])
   @@index([userId, createdAt])
   @@index([gameId])
   @@map("wishlist_items")
@@ -806,6 +809,7 @@ model GameView {
 
   game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
+  @@index([gameId])
   @@index([gameId, createdAt])
   @@map("game_views")
 }
