@@ -107,7 +107,7 @@ export function PlayerDashboard() {
 
       <div className="relative mx-auto grid max-w-[1540px] gap-3 xl:grid-cols-[230px_minmax(0,1fr)]">
         <aside className="hidden xl:block">
-          <DashboardPanel className="sticky top-20 min-h-[690px] p-3">
+          <DashboardPanel className="sticky top-20 -mt-[30px] p-3">
             <div className="border-b border-border/70 px-2 pb-3">
               <p className="flex items-center gap-2 font-mono text-[0.68rem] uppercase tracking-[0.18em] text-cyan">
                 <Gauge className="size-3.5" /> Player Dashboard
