@@ -24,9 +24,11 @@ import type { ReactionStatus } from './client';
 /** Small helpers to simulate async delay (remove in production). */
 const delay = (ms = 80) => new Promise((r) => setTimeout(r, ms));
 let mockSessionUser: typeof MOCK_USER | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockChatMessages: any[] = [
   { type: 'chat', id: 'chat-welcome', author: MOCK_USER, message: 'Welcome to the team! 🎮', createdAt: new Date(Date.now() - 86400000).toISOString() },
 ];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockAuditEvents: any[] = [
   { type: 'system', id: 'audit-welcome', action: 'STUDIO_CREATED', actor: MOCK_USER, metadata: null, createdAt: new Date(Date.now() - 86400000 * 2).toISOString() },
 ];

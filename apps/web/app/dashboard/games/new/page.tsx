@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Plus, Trash2, Gamepad2 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyStudios, useCreateGame } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
@@ -19,7 +18,7 @@ interface PlatformRow { platform: string; url: string; label: string }
 
 export default function CreateGamePage() {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-3xl px-6 py-10"><div className="h-96 animate-pulse rounded-xl bg-muted" /></div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[#020609]"><div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" /></div>}>
       <CreateGameForm />
     </Suspense>
   );
@@ -133,236 +132,270 @@ function CreateGameForm() {
   if (authLoading) return null;
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
-      <Link href="/dashboard" className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
-        <ArrowLeft className="size-4" /> Back to dashboard
-      </Link>
+    <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+      {/* Grid overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+      {/* Top accent line */}
+      <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
 
-      <div className="mb-8 flex items-center gap-3">
-        <Gamepad2 className="size-6 text-primary" />
-        <h1 className="text-3xl font-semibold tracking-tight">Create game</h1>
-      </div>
+      <div className="relative mx-auto max-w-3xl">
+        <Link href="/dashboard" className="mb-6 inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:text-cyan">
+          <ArrowLeft className="size-3" /> Back to dashboard
+        </Link>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {error && <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</div>}
-
-        {/* Studio selector */}
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Studio *</label>
-          <select value={studioSlug} onChange={(e) => setStudioSlug(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
-            <option value="">Select a studio…</option>
-            {studios?.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
-          </select>
+        <div className="mb-8 flex items-center gap-3">
+          <Gamepad2 className="size-6 text-cyan" />
+          <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Create game</h1>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Title *</label>
-            <input type="text" value={title} onChange={(e) => handleTitleChange(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Slug *</label>
-            <input type="text" value={slug} onChange={(e) => { setSlug(e.target.value); setSlugAuto(false); }}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Tagline</label>
-          <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Description</label>
-          <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Full README</label>
-          <textarea id="readme" rows={10} value={readme} onChange={(e) => setReadme(e.target.value)} placeholder="Write the full game README here..."
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Demo status</label>
-            <select id="demoStatus" value={demoStatus} onChange={(e) => setDemoStatus(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
-              <option value="NO_DEMO">No demo</option>
-              <option value="DEMO_LOCKED">Demo locked</option>
-              <option value="DEMO_PLAYABLE">Demo playable</option>
-              <option value="PLAYTEST_AVAILABLE">Playtest available</option>
-            </select>
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Demo URL (if playable)</label>
-            <input type="url" id="demoUrl" value={demoUrl} onChange={(e) => setDemoUrl(e.target.value)} placeholder="https://..."
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Edition</label>
-            <input type="text" id="edition" value={edition} onChange={(e) => setEdition(e.target.value)} placeholder="Standard Edition"
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Engine</label>
-            <input type="text" id="engine" value={engine} onChange={(e) => setEngine(e.target.value)} placeholder="e.g. Unreal Engine 5"
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Languages (comma-separated)</label>
-            <input type="text" id="languages" value={languages} onChange={(e) => setLanguages(e.target.value)} placeholder="EN, FR, DE, JP, ZH"
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Genres (comma-separated)</label>
-            <input type="text" id="genres" value={genres} onChange={(e) => setGenres(e.target.value)} placeholder="Tactical, Stealth, Cyberpunk"
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Modes (comma-separated)</label>
-          <input type="text" id="modes" value={modes} onChange={(e) => setModes(e.target.value)} placeholder="Single Player, Multiplayer"
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Status</label>
-            <select value={status} onChange={(e) => setStatus(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
-              {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Tag</label>
-            <input type="text" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)}
-              placeholder="adventure, exploration (comma-separated)"
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Release date</label>
-            <input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Expected release text</label>
-            <input type="text" value={expectedReleaseText} onChange={(e) => setExpectedReleaseText(e.target.value)}
-              placeholder="Q4 2026"
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-        </div>
-
-        {/* Pricing */}
-        <div className="rounded-xl border border-border bg-card/20 p-4">
-          <h3 className="mb-3 text-sm font-semibold">Pricing</h3>
-          <div className="flex items-center gap-3 mb-3">
-            <input type="checkbox" id="isFree" checked={isFree} onChange={(e) => setIsFree(e.target.checked)}
-              className="rounded border-input" />
-            <label htmlFor="isFree" className="text-sm">Free</label>
-          </div>
-          {!isFree && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">Price (cents)</label>
-                <input type="number" value={priceCents} onChange={(e) => setPriceCents(e.target.value)}
-                  placeholder="1999"
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">Currency</label>
-                <input type="text" value={currency} onChange={(e) => setCurrency(e.target.value)}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {error && (
+            <div className="clip-corner border border-coral/40 bg-coral/5 px-4 py-3 font-mono text-[0.68rem] text-coral">
+              {error}
             </div>
           )}
-        </div>
 
-        {/* Media URLs */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Cover image URL</label>
-            <input type="url" value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Banner URL</label>
-            <input type="url" value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-        </div>
-
-        {/* Media rows */}
-        <div className="rounded-xl border border-border bg-card/20 p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold">Media</h3>
-            <Button type="button" variant="outline" size="sm" onClick={addMedia}>
-              <Plus className="size-3" /> Add
-            </Button>
-          </div>
-          {media.map((m, i) => (
-            <div key={i} className="mb-2 flex flex-wrap items-end gap-2">
-              <select value={m.type} onChange={(e) => updateMedia(i, 'type', e.target.value)}
-                className="rounded-lg border border-input bg-background px-2 py-2 text-xs focus:border-primary focus:outline-none">
-                {MEDIA_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+          {/* Studio selector */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Studio</h3>
+            <div>
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Studio *</label>
+              <select value={studioSlug} onChange={(e) => setStudioSlug(e.target.value)}
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                <option value="">Select a studio…</option>
+                {studios?.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
               </select>
-              <input type="url" value={m.url} onChange={(e) => updateMedia(i, 'url', e.target.value)}
-                placeholder="URL" className="min-w-[200px] flex-1 rounded-lg border border-input bg-background px-2 py-2 text-xs focus:border-primary focus:outline-none" />
-              <input type="text" value={m.caption} onChange={(e) => updateMedia(i, 'caption', e.target.value)}
-                placeholder="Caption" className="min-w-[120px] rounded-lg border border-input bg-background px-2 py-2 text-xs focus:border-primary focus:outline-none" />
-              <Button type="button" variant="ghost" size="sm" onClick={() => removeMedia(i)}>
-                <Trash2 className="size-3 text-destructive" />
-              </Button>
             </div>
-          ))}
-        </div>
-
-        {/* Platform links rows */}
-        <div className="rounded-xl border border-border bg-card/20 p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold">Platform links</h3>
-            <Button type="button" variant="outline" size="sm" onClick={addPlatform}>
-              <Plus className="size-3" /> Add
-            </Button>
           </div>
-          {platformLinks.map((p, i) => (
-            <div key={i} className="mb-2 flex flex-wrap items-end gap-2">
-              <select value={p.platform} onChange={(e) => updatePlatform(i, 'platform', e.target.value)}
-                className="rounded-lg border border-input bg-background px-2 py-2 text-xs focus:border-primary focus:outline-none">
-                {PLATFORM_KINDS.map((k) => <option key={k} value={k}>{k}</option>)}
-              </select>
-              <input type="url" value={p.url} onChange={(e) => updatePlatform(i, 'url', e.target.value)}
-                placeholder="URL" className="min-w-[200px] flex-1 rounded-lg border border-input bg-background px-2 py-2 text-xs focus:border-primary focus:outline-none" />
-              <input type="text" value={p.label} onChange={(e) => updatePlatform(i, 'label', e.target.value)}
-                placeholder="Label" className="min-w-[120px] rounded-lg border border-input bg-background px-2 py-2 text-xs focus:border-primary focus:outline-none" />
-              <Button type="button" variant="ghost" size="sm" onClick={() => removePlatform(i)}>
-                <Trash2 className="size-3 text-destructive" />
-              </Button>
-            </div>
-          ))}
-        </div>
 
-        <div className="flex gap-3 pt-2">
-          <Button type="submit" disabled={createGame.isPending}>
-            {createGame.isPending ? 'Creating…' : 'Create game'}
-          </Button>
-          <Button asChild variant="outline"><Link href="/dashboard">Cancel</Link></Button>
-        </div>
-      </form>
-    </div>
+          {/* Basic Info */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Basic Information</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Title *</label>
+                <input type="text" value={title} onChange={(e) => handleTitleChange(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Slug *</label>
+                <input type="text" value={slug} onChange={(e) => { setSlug(e.target.value); setSlugAuto(false); }}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Tagline</label>
+              <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)}
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            </div>
+
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Description</label>
+              <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
+                className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            </div>
+
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Full README</label>
+              <textarea id="readme" rows={10} value={readme} onChange={(e) => setReadme(e.target.value)} placeholder="Write the full game README here..."
+                className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            </div>
+          </div>
+
+          {/* Demo & Release */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Demo &amp; Release</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Demo status</label>
+                <select id="demoStatus" value={demoStatus} onChange={(e) => setDemoStatus(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                  <option value="NO_DEMO">No demo</option>
+                  <option value="DEMO_LOCKED">Demo locked</option>
+                  <option value="DEMO_PLAYABLE">Demo playable</option>
+                  <option value="PLAYTEST_AVAILABLE">Playtest available</option>
+                </select>
+              </div>
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Demo URL (if playable)</label>
+                <input type="url" id="demoUrl" value={demoUrl} onChange={(e) => setDemoUrl(e.target.value)} placeholder="https://..."
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Edition</label>
+                <input type="text" id="edition" value={edition} onChange={(e) => setEdition(e.target.value)} placeholder="Standard Edition"
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Engine</label>
+                <input type="text" id="engine" value={engine} onChange={(e) => setEngine(e.target.value)} placeholder="e.g. Unreal Engine 5"
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Languages (comma-separated)</label>
+                <input type="text" id="languages" value={languages} onChange={(e) => setLanguages(e.target.value)} placeholder="EN, FR, DE, JP, ZH"
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Genres (comma-separated)</label>
+                <input type="text" id="genres" value={genres} onChange={(e) => setGenres(e.target.value)} placeholder="Tactical, Stealth, Cyberpunk"
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Modes (comma-separated)</label>
+              <input type="text" id="modes" value={modes} onChange={(e) => setModes(e.target.value)} placeholder="Single Player, Multiplayer"
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Status</label>
+                <select value={status} onChange={(e) => setStatus(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                  {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Tags</label>
+                <input type="text" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)}
+                  placeholder="adventure, exploration (comma-separated)"
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Release date</label>
+                <input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Expected release text</label>
+                <input type="text" value={expectedReleaseText} onChange={(e) => setExpectedReleaseText(e.target.value)}
+                  placeholder="Q4 2026"
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            </div>
+          </div>
+
+          {/* Pricing */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Pricing</h3>
+            <div className="flex items-center gap-3 mb-3">
+              <input type="checkbox" id="isFree" checked={isFree} onChange={(e) => setIsFree(e.target.checked)}
+                className="rounded border-input" />
+              <label htmlFor="isFree" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Free</label>
+            </div>
+            {!isFree && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Price (cents)</label>
+                  <input type="number" value={priceCents} onChange={(e) => setPriceCents(e.target.value)}
+                    placeholder="1999"
+                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                </div>
+                <div>
+                  <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Currency</label>
+                  <input type="text" value={currency} onChange={(e) => setCurrency(e.target.value)}
+                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Media URLs */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Media</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Cover image URL</label>
+                <input type="url" value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Banner URL</label>
+                <input type="url" value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            </div>
+          </div>
+
+          {/* Media rows */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Media Items</h3>
+              <button type="button" onClick={addMedia}
+                className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">
+                <Plus className="mr-1 inline size-3" /> Add
+              </button>
+            </div>
+            {media.map((m, i) => (
+              <div key={i} className="clip-corner border border-border/50 bg-background/30 p-3 mb-2 flex flex-wrap items-end gap-2">
+                <select value={m.type} onChange={(e) => updateMedia(i, 'type', e.target.value)}
+                  className="clip-corner h-9 border border-input bg-background/80 px-3 text-xs text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                  {MEDIA_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+                <input type="url" value={m.url} onChange={(e) => updateMedia(i, 'url', e.target.value)}
+                  placeholder="URL" className="min-w-[200px] flex-1 clip-corner h-9 border border-input bg-background/80 px-3 text-xs text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                <input type="text" value={m.caption} onChange={(e) => updateMedia(i, 'caption', e.target.value)}
+                  placeholder="Caption" className="min-w-[120px] clip-corner h-9 border border-input bg-background/80 px-3 text-xs text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                <button type="button" onClick={() => removeMedia(i)}
+                  className="clip-corner cursor-pointer border border-coral/60 bg-coral/5 px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-widest text-coral hover:bg-coral/20">
+                  <Trash2 className="size-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Platform links rows */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Platform Links</h3>
+              <button type="button" onClick={addPlatform}
+                className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">
+                <Plus className="mr-1 inline size-3" /> Add
+              </button>
+            </div>
+            {platformLinks.map((p, i) => (
+              <div key={i} className="clip-corner border border-border/50 bg-background/30 p-3 mb-2 flex flex-wrap items-end gap-2">
+                <select value={p.platform} onChange={(e) => updatePlatform(i, 'platform', e.target.value)}
+                  className="clip-corner h-9 border border-input bg-background/80 px-3 text-xs text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                  {PLATFORM_KINDS.map((k) => <option key={k} value={k}>{k}</option>)}
+                </select>
+                <input type="url" value={p.url} onChange={(e) => updatePlatform(i, 'url', e.target.value)}
+                  placeholder="URL" className="min-w-[200px] flex-1 clip-corner h-9 border border-input bg-background/80 px-3 text-xs text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                <input type="text" value={p.label} onChange={(e) => updatePlatform(i, 'label', e.target.value)}
+                  placeholder="Label" className="min-w-[120px] clip-corner h-9 border border-input bg-background/80 px-3 text-xs text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                <button type="button" onClick={() => removePlatform(i)}
+                  className="clip-corner cursor-pointer border border-coral/60 bg-coral/5 px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-widest text-coral hover:bg-coral/20">
+                  <Trash2 className="size-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Submit */}
+          <div className="flex gap-3 pt-2">
+            <button type="submit" disabled={createGame.isPending}
+              className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+              {createGame.isPending ? 'Creating…' : 'Create game'}
+            </button>
+            <Link href="/dashboard"
+              className="clip-corner inline-flex items-center border border-border/60 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
+              Cancel
+            </Link>
+          </div>
+        </form>
+      </div>
+    </main>
   );
 }

@@ -95,11 +95,11 @@ export default function TeamPage() {
   };
 
   const deleteMessage = async (id: string) => {
-    try { await api.delete(`/studios/${slug}/chat/${id}`); setFeed(prev => prev.filter(i => i.id !== id)); } catch {}
+    try { await api.delete(`/studios/${slug}/chat/${id}`); setFeed(prev => prev.filter(i => i.id !== id)); } catch {/* empty */}
   };
 
   const clearMessages = async () => {
-    try { await api.delete(`/studios/${slug}/chat`); setFeed(prev => prev.filter(i => i.type !== 'chat')); } catch {}
+    try { await api.delete(`/studios/${slug}/chat`); setFeed(prev => prev.filter(i => i.type !== 'chat')); } catch {/* empty */}
   };
 
   const updateRole = useUpdateMemberRole();
