@@ -7,5 +7,6 @@ import { StudioChatService } from './studio-chat.service';
   imports: [PrismaModule],
   controllers: [StudioChatController],
   providers: [StudioChatService],
+  exports: [StudioChatService],
 })
 export class StudioChatModule {}

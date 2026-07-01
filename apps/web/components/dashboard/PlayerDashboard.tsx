@@ -143,7 +143,8 @@ export function PlayerDashboard() {
   if (!user) return null;
 
   const unreadCount = unreadData?.unreadCount ?? 2;
-  const wishlistCount = Math.max(wishlist?.items?.length ?? 0, 5);
+  const wishlistItems = wishlist?.items ?? [];
+  const wishlistCount = wishlistItems.length;
   const followingCount = Math.max((follows?.studios?.length ?? 0) + (follows?.games?.length ?? 0), 24);
   const displayName = user.displayName || 'Obsidian Signal';
 
@@ -236,11 +237,31 @@ export function PlayerDashboard() {
           <div className="grid gap-3 2xl:grid-cols-[minmax(0,1fr)_270px]">
             <DashboardPanel className="p-4">
               <SectionHeader title="Your Wishlist" meta="Private" locked href="/me/wishlist" />
+              {wishlistItems.length === 0 ? (
+                <div className="mt-3 text-center py-8">
+                  <Bookmark className="mx-auto mb-2 size-6 text-muted-foreground" />
+                  <p className="font-mono text-[0.6rem] text-muted-foreground">No games saved yet</p>
+                  <Link href="/games" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
+                    Browse games <ArrowRight className="size-3" />
+                  </Link>
+                </div>
+              ) : (
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
-                {games.map((game) => (
-                  <GameTile key={game.slug} game={game} />
+                {wishlistItems.slice(0, 5).map((item) => (
+                  <GameTile key={item.id} game={{
+                    title: item.game.title,
+                    slug: item.game.slug,
+                    studio: item.game.studio?.name ?? '',
+                    genre: item.game.tagline ?? '',
+                    image: item.game.coverUrl || '/playmorrow/neon-warden.png',
+                    score: 'Wishlisted',
+                    progress: 50,
+                    platforms: [],
+                    accent: 'cyan',
+                  }} />
                 ))}
               </div>
+              )}
             </DashboardPanel>
 
             <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-1">
