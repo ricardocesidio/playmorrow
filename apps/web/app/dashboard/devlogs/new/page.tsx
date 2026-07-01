@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, FileText } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyStudios, useCreateDevlog } from '@/lib/api/hooks';
 import type { Game } from '@/lib/api/client';
@@ -15,7 +14,7 @@ import { MarkdownEditor } from '@/components/md-editor';
 
 export default function CreateDevlogPage() {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-2xl px-6 py-10"><div className="h-96 animate-pulse rounded-xl bg-muted" /></div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[#020609]"><div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" /></div>}>
       <CreateDevlogForm />
     </Suspense>
   );
@@ -109,83 +108,107 @@ function CreateDevlogForm() {
   if (authLoading) return null;
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-10">
-      <Link href="/dashboard" className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
-        <ArrowLeft className="size-4" /> Back to dashboard
-      </Link>
+    <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+      {/* Grid overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+      {/* Top accent line */}
+      <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
 
-      <div className="mb-8 flex items-center gap-3">
-        <FileText className="size-6 text-primary" />
-        <h1 className="text-3xl font-semibold tracking-tight">Write devlog</h1>
-      </div>
+      <div className="relative mx-auto max-w-3xl">
+        <Link href="/dashboard" className="mb-6 inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:text-cyan">
+          <ArrowLeft className="size-3" /> Back to dashboard
+        </Link>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {error && <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</div>}
+        <div className="mb-8 flex items-center gap-3">
+          <FileText className="size-6 text-cyan" />
+          <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Write devlog</h1>
+        </div>
 
-        {!gameSlug && (
-          <>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium">Studio</label>
-              <select value={selectedStudio} onChange={(e) => setSelectedStudio(e.target.value)}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
-                <option value="">Select a studio…</option>
-                {studios?.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
-              </select>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {error && (
+            <div className="clip-corner border border-coral/40 bg-coral/5 px-4 py-3 font-mono text-[0.68rem] text-coral">
+              {error}
             </div>
-            {selectedStudio && (
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">Game *</label>
-                <select value={gameSlug} onChange={(e) => setGameSlug(e.target.value)}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
-                  <option value="">Select a game…</option>
-                  {games.map((g) => <option key={g.slug} value={g.slug}>{g.title}</option>)}
-                </select>
+          )}
+
+          {!gameSlug && (
+            <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+              <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Game</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Studio</label>
+                  <select value={selectedStudio} onChange={(e) => setSelectedStudio(e.target.value)}
+                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                    <option value="">Select a studio…</option>
+                    {studios?.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+                  </select>
+                </div>
+                {selectedStudio && (
+                  <div>
+                    <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Game *</label>
+                    <select value={gameSlug} onChange={(e) => setGameSlug(e.target.value)}
+                      className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                      <option value="">Select a game…</option>
+                      {games.map((g) => <option key={g.slug} value={g.slug}>{g.title}</option>)}
+                    </select>
+                  </div>
+                )}
               </div>
-            )}
-          </>
-        )}
+            </div>
+          )}
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Title *</label>
-            <input type="text" value={title} onChange={(e) => handleTitleChange(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Content</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Title *</label>
+                <input type="text" value={title} onChange={(e) => handleTitleChange(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Slug *</label>
+                <input type="text" value={slug} onChange={(e) => { setSlug(e.target.value); setSlugAuto(false); }}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Body *</label>
+              <MarkdownEditor value={body} onChange={setBody} />
+            </div>
+
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Cover image URL</label>
+              <input type="url" value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)}
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            </div>
           </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Slug *</label>
-            <input type="text" value={slug} onChange={(e) => { setSlug(e.target.value); setSlugAuto(false); }}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Publishing</h3>
+            <div className="flex items-center gap-3">
+              <input type="checkbox" id="isPublished" checked={isPublished}
+                onChange={(e) => setIsPublished(e.target.checked)}
+                className="rounded border-input" />
+              <label htmlFor="isPublished" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
+                Publish immediately
+              </label>
+              {isPublished && <span className="font-mono text-[0.55rem] text-muted-foreground">(publishedAt will be set to now)</span>}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Body *</label>
-          <MarkdownEditor value={body} onChange={setBody} />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Cover image URL</label>
-          <input type="url" value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-        </div>
-
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-card/20 p-4">
-          <input type="checkbox" id="isPublished" checked={isPublished}
-            onChange={(e) => setIsPublished(e.target.checked)}
-            className="rounded border-input" />
-          <label htmlFor="isPublished" className="text-sm font-medium">
-            Publish immediately
-          </label>
-          {isPublished && <span className="text-xs text-muted-foreground">(publishedAt will be set to now)</span>}
-        </div>
-
-        <div className="flex gap-3 pt-2">
-          <Button type="submit" disabled={createDevlog.isPending}>
-            {createDevlog.isPending ? 'Saving…' : isPublished ? 'Publish devlog' : 'Save draft'}
-          </Button>
-          <Button asChild variant="outline"><Link href="/dashboard">Cancel</Link></Button>
-        </div>
-      </form>
-    </div>
+          <div className="flex gap-3 pt-2">
+            <button type="submit" disabled={createDevlog.isPending}
+              className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+              {createDevlog.isPending ? 'Saving…' : isPublished ? 'Publish devlog' : 'Save draft'}
+            </button>
+            <Link href="/dashboard"
+              className="clip-corner inline-flex items-center border border-border/60 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
+              Cancel
+            </Link>
+          </div>
+        </form>
+      </div>
+    </main>
   );
 }
