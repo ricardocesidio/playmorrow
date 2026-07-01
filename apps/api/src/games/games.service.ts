@@ -64,6 +64,7 @@ export class GamesService {
         isFree: dto.isFree,
         coverUrl: dto.coverUrl,
         bannerUrl: dto.bannerUrl,
+        trailerUrl: dto.trailerUrl,
         media: dto.media
           ? {
               create: dto.media.map((m) => ({
@@ -251,6 +252,7 @@ export class GamesService {
     if (dto.isFree !== undefined) data.isFree = dto.isFree;
     if (dto.coverUrl !== undefined) data.coverUrl = dto.coverUrl;
     if (dto.bannerUrl !== undefined) data.bannerUrl = dto.bannerUrl;
+    if (dto.trailerUrl !== undefined) data.trailerUrl = dto.trailerUrl;
 
     if (dto.media !== undefined) {
       await this.prisma.gameMedia.deleteMany({ where: { gameId: game.id } });

@@ -106,6 +106,11 @@ export class CreateGameDto {
   @IsUrl({ require_tld: false })
   bannerUrl?: string;
 
+  @ApiPropertyOptional({ example: 'https://www.youtube.com/watch?v=...' })
+  @IsOptional()
+  @IsUrl({ require_tld: false })
+  trailerUrl?: string;
+
   @ApiPropertyOptional({ type: [CreatePlatformLinkDto] })
   @IsOptional()
   @IsArray()

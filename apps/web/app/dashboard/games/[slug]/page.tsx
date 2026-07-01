@@ -13,6 +13,7 @@ import { useGame, useUpdateGame, useDeleteGame } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
 
 const STATUSES = ['CONCEPT', 'IN_DEVELOPMENT', 'ALPHA', 'BETA', 'EARLY_ACCESS', 'RELEASED', 'CANCELLED', 'ON_HOLD'];
+const MEDIA_TYPES = ['SCREENSHOT', 'TRAILER', 'VIDEO', 'LOGO', 'BANNER', 'IMAGE'];
 
 export default function EditGamePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -33,6 +34,8 @@ export default function EditGamePage() {
   const [isFree, setIsFree] = useState(false);
   const [coverUrl, setCoverUrl] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
+  const [trailerUrl, setTrailerUrl] = useState('');
+  const [media, setMedia] = useState<{ id?: string; type: string; url: string; caption: string }[]>([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -54,16 +57,23 @@ export default function EditGamePage() {
       setIsFree(game.isFree ?? false);
       setCoverUrl(game.coverUrl ?? '');
       setBannerUrl(game.bannerUrl ?? '');
+      setTrailerUrl(game.trailerUrl ?? '');
+      setMedia((game.media ?? []).map((m: { id?: string; type: string; url: string; caption?: string | null }) => ({ id: m.id, type: m.type, url: m.url, caption: m.caption ?? '' })));
       setInitialized(true);
     }
   }, [game, initialized]);
+
+  const addMedia = () => setMedia([...media, { type: 'SCREENSHOT', url: '', caption: '' }]);
+  const removeMedia = (i: number) => setMedia(media.filter((_, idx) => idx !== i));
+  const updateMedia = (i: number, field: string, val: string) => {
+    setMedia(media.map((m, idx) => idx === i ? { ...m, [field]: val } : m));
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
     if (!title.trim()) { setError('Title is required'); return; }
-    if (!token) { setError('You must be signed in'); return; }
 
     try {
       await updateGame.mutateAsync({
@@ -81,6 +91,8 @@ export default function EditGamePage() {
           isFree,
           coverUrl: coverUrl.trim() || null,
           bannerUrl: bannerUrl.trim() || null,
+          trailerUrl: trailerUrl.trim() || null,
+          media: media.filter((m) => m.url).map((m) => ({ id: m.id, type: m.type, url: m.url, caption: m.caption || null })),
         },
       });
       setSuccess(true);
@@ -238,12 +250,58 @@ export default function EditGamePage() {
             )}
           </div>
 
-          {/* Media */}
+          {/* Trailer */}
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
-            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Media</h3>
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Trailer</h3>
+            <div>
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">YouTube trailer URL</label>
+              <input type="url" value={trailerUrl} onChange={(e) => setTrailerUrl(e.target.value)}
+                placeholder="https://www.youtube.com/watch?v=..."
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              <p className="mt-1 font-mono text-[0.55rem] text-muted-foreground">Link a YouTube video to appear as the game trailer.</p>
+            </div>
+          </div>
+
+          {/* Cover & Banner */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Cover & Banner</h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <ImageUpload value={coverUrl} onChange={setCoverUrl} label="Cover image" />
               <ImageUpload value={bannerUrl} onChange={setBannerUrl} label="Banner" />
+            </div>
+          </div>
+
+          {/* Screenshots */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Screenshots</h3>
+              <button type="button" onClick={addMedia} className="clip-corner cursor-pointer border border-cyan/60 px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-widest text-cyan transition hover:bg-cyan/10">
+                <Plus className="size-3 mr-1 inline" /> Add screenshot
+              </button>
+            </div>
+            <div className="space-y-3">
+              {media.map((m, i) => (
+                <div key={i} className="flex items-start gap-3 border border-border/60 bg-background/40 p-3">
+                  <div className="flex-1 space-y-2">
+                    <select value={m.type} onChange={(e) => updateMedia(i, 'type', e.target.value)}
+                      className="clip-corner h-9 w-full border border-input bg-background/80 px-3 text-xs text-foreground outline-none cursor-pointer">
+                      {MEDIA_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                    <input type="url" value={m.url} onChange={(e) => updateMedia(i, 'url', e.target.value)}
+                      placeholder="Image URL"
+                      className="clip-corner h-9 w-full border border-input bg-background/80 px-3 text-xs text-foreground outline-none focus:border-cyan" />
+                    <input type="text" value={m.caption} onChange={(e) => updateMedia(i, 'caption', e.target.value)}
+                      placeholder="Caption (optional)"
+                      className="clip-corner h-9 w-full border border-input bg-background/80 px-3 text-xs text-foreground outline-none focus:border-cyan" />
+                  </div>
+                  <button type="button" onClick={() => removeMedia(i)} className="mt-1 cursor-pointer text-coral hover:text-coral/80">
+                    <Trash2 className="size-4" />
+                  </button>
+                </div>
+              ))}
+              {media.length === 0 && (
+                <p className="py-4 text-center text-xs text-muted-foreground">No screenshots added yet. Click "Add screenshot" to add one.</p>
+              )}
             </div>
           </div>
 

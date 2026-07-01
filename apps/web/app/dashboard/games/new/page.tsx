@@ -54,6 +54,7 @@ function CreateGameForm() {
   const [isFree, setIsFree] = useState(false);
   const [coverUrl, setCoverUrl] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
+  const [trailerUrl, setTrailerUrl] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   const [media, setMedia] = useState<MediaRow[]>([]);
   const [platformLinks, setPlatformLinks] = useState<PlatformRow[]>([]);
@@ -122,6 +123,7 @@ function CreateGameForm() {
         isFree,
         coverUrl: coverUrl.trim() || undefined,
         bannerUrl: bannerUrl.trim() || undefined,
+        trailerUrl: trailerUrl.trim() || undefined,
         tags: tagsInput.split(',').map((t) => t.trim()).filter(Boolean),
         media: media.filter((m) => m.url).map((m) => ({ type: m.type, url: m.url, caption: m.caption || undefined, sortOrder: 0 })),
         platformLinks: platformLinks.filter((p) => p.url).map((p) => ({ platform: p.platform, url: p.url, label: p.label || undefined })),
@@ -339,9 +341,21 @@ function CreateGameForm() {
             )}
           </div>
 
+          {/* Trailer */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Trailer</h3>
+            <div>
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">YouTube trailer URL</label>
+              <input type="url" value={trailerUrl} onChange={(e) => setTrailerUrl(e.target.value)}
+                placeholder="https://www.youtube.com/watch?v=..."
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              <p className="mt-1 font-mono text-[0.55rem] text-muted-foreground">Link a YouTube video to appear as the game trailer.</p>
+            </div>
+          </div>
+
           {/* Media URLs */}
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
-            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Media</h3>
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Cover & Banner</h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Cover image URL</label>
