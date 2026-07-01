@@ -3,6 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { EmailService } from '../email/email.service';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { Prisma, StudioInvitationStatus, StudioRole } from '@playmorrow/database';
 
@@ -15,6 +16,7 @@ export class InvitationsService {
     private prisma: PrismaService,
     private auditLog: AuditLogService,
     private notifications: NotificationsService,
+    private emailService: EmailService,
   ) {}
 
   async create(studioId: string, inviterId: string, dto: CreateInvitationDto, ipAddress?: string, userAgent?: string) {
@@ -82,6 +84,21 @@ export class InvitationsService {
           body: `Role: ${dto.role}`,
           targetType: 'STUDIO',
           targetId: studio.id,
+        });
+      }
+    }
+
+    // Send email for Method A (by email)
+    if (dto.email) {
+      const studio = await this.prisma.studio.findUnique({ where: { id: studioId } });
+      const inviter = await this.prisma.user.findUnique({ where: { id: inviterId } });
+      if (studio && inviter) {
+        await this.emailService.sendInvitationEmail({
+          email: dto.email,
+          studioName: studio.name,
+          inviterName: inviter.displayName,
+          role: dto.role,
+          token: rawToken,
         });
       }
     }
