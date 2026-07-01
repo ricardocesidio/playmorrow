@@ -3,6 +3,7 @@ import { Space_Grotesk, JetBrains_Mono, Inter } from 'next/font/google';
 
 import './globals.css';
 import { Providers } from './providers';
+import { CookieConsent } from '@/components/cookie-consent';
 
 const display = Space_Grotesk({
   subsets: ['latin'],
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <div className="relative flex min-h-screen flex-col">
             {children}
+            <CookieConsent />
           </div>
         </Providers>
       </body>
