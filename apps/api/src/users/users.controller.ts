@@ -36,6 +36,8 @@ export class UsersController {
       bio: user.bio,
       role: user.role,
       isVerified: user.isVerified,
+      level: user.level ?? 0,
+      xp: user.xp ?? 0,
       createdAt: user.createdAt,
       followersCount: 0, // User-to-user follows not yet implemented
       followingCount: 0,

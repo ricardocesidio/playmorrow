@@ -208,6 +208,8 @@ async function handleRequest(method: string, path: string, _body?: unknown): Pro
       bio: 'Indie game enthusiast and narrative designer. Building worlds one line of dialogue at a time.',
       role: 'PLAYER',
       isVerified: false,
+      level: 12,
+      xp: 2450,
       followersCount: 342,
       followingCount: 128,
       wishlistsCount: 47,

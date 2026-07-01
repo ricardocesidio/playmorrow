@@ -14,6 +14,7 @@ import {
   User,
   Users,
   Clock,
+  Zap,
 } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
@@ -33,6 +34,14 @@ function ActivityIcon({ type }: { type: string }) {
     default:
       return <Activity className="size-3 text-muted-foreground" />;
   }
+}
+
+function xpProgress(xp: number) {
+  const level = Math.max(0, Math.floor((Math.sqrt(1 + (8 * xp) / 100) - 1) / 2));
+  const currentXp = (100 * level * (level + 1)) / 2;
+  const nextXp = (100 * (level + 1) * (level + 2)) / 2;
+  const progress = nextXp > currentXp ? (xp - currentXp) / (nextXp - currentXp) : 1;
+  return { level, currentXp, nextXp, progress };
 }
 
 function formatRelativeTime(dateStr: string) {
@@ -160,6 +169,35 @@ export default function UserProfilePage() {
               </div>
             ))}
           </div>
+
+          {/* ── Level & XP ── */}
+          {(() => {
+            const { level, currentXp, nextXp, progress } = xpProgress(data.xp);
+            return (
+              <div className="mt-6 clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-all duration-300 hover:border-cyan/30 hover:shadow-[0_0_25px_rgb(62_231_255_/_0.06)]">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-12 items-center justify-center border border-cyan/30 bg-cyan/5 font-display text-xl font-black text-cyan">
+                      {level}
+                    </div>
+                    <div>
+                      <p className="font-display text-sm font-black uppercase tracking-tight text-white">Level {level}</p>
+                      <p className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
+                        {data.xp.toLocaleString()} XP &middot; {nextXp.toLocaleString()} to next level
+                      </p>
+                    </div>
+                  </div>
+                  <Zap className="size-6 text-cyan/40" />
+                </div>
+                <div className="mt-3 h-1.5 w-full bg-[#0a1419]">
+                  <div
+                    className="h-full bg-gradient-to-r from-cyan/60 to-cyan transition-all duration-500"
+                    style={{ width: `${Math.min(100, Math.round(progress * 100))}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })()}
 
           {/* ── Studio Memberships ── */}
           {data.studios.length > 0 && (

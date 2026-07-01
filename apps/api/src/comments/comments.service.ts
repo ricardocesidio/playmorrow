@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { NotificationsService } from '../notifications/notifications.service';
+import { PlayerXpService } from '../player-xp/player-xp.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateCommentDto } from './dto/create-comment.dto';
@@ -10,6 +11,7 @@ export class CommentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly playerXpService: PlayerXpService,
     private readonly studioXpService: StudioXpService,
   ) {}
 
@@ -96,6 +98,12 @@ export class CommentsService {
     }
 
     await this.studioXpService.award(devlog.game.studio.id, 'COMMENT', undefined, comment.id);
+
+    // Player XP
+    const commentAuthor = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (commentAuthor?.accountType === 'PLAYER') {
+      await this.playerXpService.award(userId, 'COMMENT', comment.id).catch(() => {});
+    }
 
     return this.toResponse(comment);
   }
@@ -229,6 +237,12 @@ export class CommentsService {
     });
 
     await this.studioXpService.award(game.studioId, 'COMMENT', undefined, comment.id);
+
+    // Player XP
+    const commentAuthor = await this.prisma.user.findUnique({ where: { id: authorId } });
+    if (commentAuthor?.accountType === 'PLAYER') {
+      await this.playerXpService.award(authorId, 'COMMENT', comment.id).catch(() => {});
+    }
 
     return comment;
   }

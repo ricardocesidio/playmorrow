@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { NotificationsService } from '../notifications/notifications.service';
+import { PlayerXpService } from '../player-xp/player-xp.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
 
@@ -9,6 +10,7 @@ export class FollowsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly playerXpService: PlayerXpService,
     private readonly studioXpService: StudioXpService,
   ) {}
 
@@ -40,9 +42,14 @@ export class FollowsService {
       }
     }
 
+    // Player XP
+    const actor = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (actor && actor.accountType === 'PLAYER') {
+      await this.playerXpService.award(userId, 'FOLLOW_STUDIO', studio.id).catch(() => {});
+    }
+
     // Notify studio OWNER/ADMIN members
     const adminIds = await this.notificationsService.resolveStudioAdminIdsForStudio(studio.id, userId);
-    const actor = await this.prisma.user.findUnique({ where: { id: userId } });
     if (adminIds.length > 0 && actor) {
       await this.notificationsService.createManyDeduped(
         adminIds.map((recipientId) => ({
@@ -87,9 +94,14 @@ export class FollowsService {
 
     const followerCount = await this.prisma.follow.count({ where: { gameId: game.id } });
 
+    // Player XP
+    const actor = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (actor && actor.accountType === 'PLAYER') {
+      await this.playerXpService.award(userId, 'FOLLOW_GAME', game.id).catch(() => {});
+    }
+
     // Notify game studio OWNER/ADMIN members
     const adminIds = await this.notificationsService.resolveStudioAdminIds(game.id, userId);
-    const actor = await this.prisma.user.findUnique({ where: { id: userId } });
     if (adminIds.length > 0 && actor) {
       await this.notificationsService.createManyDeduped(
         adminIds.map((recipientId) => ({

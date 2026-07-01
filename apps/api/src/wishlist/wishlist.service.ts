@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { PlayerXpService } from '../player-xp/player-xp.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
 
@@ -6,6 +7,7 @@ import { StudioXpService } from '../studios/studio-xp.service';
 export class WishlistService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly playerXpService: PlayerXpService,
     private readonly studioXpService: StudioXpService,
   ) {}
 
@@ -37,6 +39,12 @@ export class WishlistService {
           }
         }
       }
+    }
+
+    // Player XP
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (user?.accountType === 'PLAYER') {
+      await this.playerXpService.award(userId, 'WISHLIST_GAME', gameSlug).catch(() => {});
     }
 
     return { gameId: game.id, gameSlug, isWishlisted: true };
