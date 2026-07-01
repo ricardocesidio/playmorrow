@@ -207,6 +207,7 @@ export class AuthService {
       bio: user.bio, location: user.location, country: user.country,
       isVerified: user.isVerified, accountType: user.accountType ?? 'PLAYER',
       isOnboardingCompleted: user.isOnboardingCompleted,
+      level: user.level ?? 0, xp: user.xp ?? 0,
     };
   }
 
