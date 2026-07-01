@@ -1,0 +1,75 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Bell, BellOff } from 'lucide-react';
+import { api } from '@/lib/api/client';
+
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  return Uint8Array.from(rawData, (c) => c.charCodeAt(0));
+}
+
+export function PushNotificationToggle() {
+  const [supported, setSupported] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      setSupported(true);
+      navigator.serviceWorker.register('/sw.js').then((reg) => {
+        reg.pushManager.getSubscription().then((sub) => setSubscribed(!!sub));
+      });
+    }
+  }, []);
+
+  const toggleSubscription = async () => {
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+
+      if (subscribed) {
+        const sub = await registration.pushManager.getSubscription();
+        if (sub) {
+          await api.delete('/me/push-subscriptions', { endpoint: sub.endpoint });
+          await sub.unsubscribe();
+        }
+        setSubscribed(false);
+      } else {
+        const publicKey = 'BPP0mLF9MwYi2YWivQfqAjGJbXFoX9YFQW4rsSEb-9ivFMoDxsQjzL8vWl7PJgv5D5jHNBgU6hVp8QBmm80k_LA';
+        const sub = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey) as unknown as BufferSource,
+        });
+
+        await api.post('/me/push-subscriptions', {
+          endpoint: sub.endpoint,
+          p256dh: btoa(String.fromCharCode(...new Uint8Array(sub.getKey('p256dh')!))),
+          auth: btoa(String.fromCharCode(...new Uint8Array(sub.getKey('auth')!))),
+        });
+
+        setSubscribed(true);
+      }
+    } catch {
+      // Permission denied or error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!supported) return null;
+
+  return (
+    <button onClick={toggleSubscription} disabled={loading} title={subscribed ? 'Disable push notifications' : 'Enable push notifications'}
+      className={`flex cursor-pointer items-center gap-2 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider transition ${
+        subscribed ? 'border border-cyan bg-cyan/10 text-cyan' : 'border border-border/60 text-muted-foreground hover:border-cyan hover:text-cyan'
+      }`}>
+      {subscribed ? <Bell className="size-3.5" /> : <BellOff className="size-3.5" />}
+      {loading ? '...' : subscribed ? 'Push On' : 'Push Off'}
+    </button>
+  );
+}

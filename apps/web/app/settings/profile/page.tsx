@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Bell } from 'lucide-react';
 
 import { useAuth } from '@/lib/api/auth-context';
+import { PushNotificationToggle } from '@/components/push-toggle';
 import { api, ApiError } from '@/lib/api/client';
 import { SiteHeader } from '@/components/site-header';
 
@@ -233,6 +234,20 @@ export default function ProfileSettingsPage() {
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </form>
+
+        {/* Push Notifications */}
+        <div className="mt-8">
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <div className="mb-3 flex items-center gap-3 border-b border-border/50 pb-3">
+              <Bell className="size-5 text-cyan" />
+              <h2 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Push Notifications</h2>
+            </div>
+            <p className="mb-4 font-mono text-[0.55rem] text-muted-foreground">
+              Receive browser notifications when someone follows you, comments on your content, or sends you an invitation.
+            </p>
+            <PushNotificationToggle />
+          </div>
+        </div>
       </div>
     </div>
   );
