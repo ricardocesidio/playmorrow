@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import {
   Activity,
@@ -17,7 +18,6 @@ import {
   MessageSquare,
   Radio,
   Settings,
-  Signal,
   Trophy,
   UserRound,
   Users,
@@ -26,7 +26,7 @@ import {
 
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
-import { useMyFollows, useMyWishlist, useNotifications, useUnreadNotificationCount, usePublicFeed, usePlayerWeeklyXp, usePlayerMonthlyXp, useAchievements, type Achievement } from '@/lib/api/hooks';
+import { useMyFollows, useMyWishlist, useNotifications, useUnreadNotificationCount, usePublicFeed, usePlayerWeeklyXp, usePlayerMonthlyXp, usePlayerXpHistory, useAchievements, type Achievement } from '@/lib/api/hooks';
 import { useRouter } from 'next/navigation';
 import type { FeedItem } from '@/lib/api/client';
 
@@ -55,6 +55,19 @@ export function PlayerDashboard() {
   const { data: weeklyXp } = usePlayerWeeklyXp();
   const { data: monthlyXp } = usePlayerMonthlyXp();
   const { data: achievementsData } = useAchievements();
+  const { data: xpHistory } = usePlayerXpHistory();
+
+  const prevLevel = typeof window !== 'undefined' ? parseInt(localStorage.getItem('player-level') || '0') : 0;
+  useEffect(() => {
+    if (user?.level && user.level > prevLevel && prevLevel > 0) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-20 right-4 z-50 clip-corner border border-cyan bg-[#050b0f] p-4 shadow-[0_0_30px_rgb(62_231_255_/_0.3)] animate-fadeIn';
+      toast.innerHTML = `<p class="font-mono text-[0.55rem] text-cyan">LEVEL UP!</p><p class="font-display text-lg font-bold text-white">Level ${user.level}</p>`;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.5s'; setTimeout(() => toast.remove(), 500); }, 4000);
+    }
+    if (user?.level) localStorage.setItem('player-level', String(user.level));
+  }, [user?.level]);
 
   const unreadCount = unreadData?.unreadCount ?? 0;
   const wishlistItems = wishlist?.items ?? [];
@@ -303,14 +316,17 @@ export function PlayerDashboard() {
             </DashboardPanel>
 
             <DashboardPanel className="hidden p-4 lg:block">
-              <p className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-foreground">Signal Relay</p>
-              <div className="mt-6 grid place-items-center">
-                <div className="relative grid size-32 place-items-center border border-cyan/30">
-                  <div className="absolute inset-3 border border-coral/30" />
-                  <Signal className="size-12 text-cyan" />
-                </div>
-              </div>
-              <p className="mt-5 text-center font-mono text-[0.62rem] uppercase tracking-[0.2em] text-muted-foreground">Connected</p>
+              <p className="mb-3 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-muted-foreground">Recent XP</p>
+              {(xpHistory?.length ?? 0) > 0 ? (
+                xpHistory!.slice(0, 4).map((event, i) => (
+                  <div key={i} className="mb-2 flex items-center justify-between font-mono text-[0.55rem]">
+                    <span className="text-muted-foreground">{event.reason.replace(/_/g, ' ').toLowerCase()}</span>
+                    <span className="text-cyan">+{event.amount} XP</span>
+                  </div>
+                ))
+              ) : (
+                <p className="font-mono text-[0.5rem] text-muted-foreground">No recent activity</p>
+              )}
             </DashboardPanel>
           </div>
         </section>
