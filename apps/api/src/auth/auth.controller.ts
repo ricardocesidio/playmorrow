@@ -13,6 +13,7 @@ import { SessionAuthGuard } from './guards/session-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { AuthService } from './auth.service';
 import { SessionService } from '../session/session.service';
+import { CsrfService } from '../common/csrf.service';
 
 const SESSION_COOKIE = 'playmorrow_session';
 
@@ -37,6 +38,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly sessionService: SessionService,
+    private readonly csrfService: CsrfService,
   ) {}
 
   // ── JWT endpoints (legacy) ───────────────────────────────────────────
@@ -102,7 +104,10 @@ export class AuthController {
     const { raw, expiresAt } = await this.sessionService.create(user.id, ip, ua);
     setSessionCookie(res, raw, expiresAt);
 
-    return { id: user.id, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER' };
+    const csrfToken = this.csrfService.generateToken(user.id);
+    res.setHeader('X-CSRF-Token', csrfToken);
+
+    return { id: user.id, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER', csrfToken };
   }
 
   @Post('session/logout')
