@@ -11,30 +11,22 @@ import {
   ParseIntPipe,
   Patch,
   Query,
-  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { filter, map } from 'rxjs';
-
-import { JwtService } from '@nestjs/jwt';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { NotificationsService } from './notifications.service';
-import { SessionService } from '../session/session.service';
-
-const SESSION_COOKIE = 'playmorrow_session';
 
 @ApiTags('notifications')
 @Controller()
 export class NotificationsController {
   constructor(
     private readonly notificationsService: NotificationsService,
-    private readonly jwtService: JwtService,
-    private readonly sessionService: SessionService,
   ) {}
 
   @Get('me/notifications')
@@ -91,44 +83,24 @@ export class NotificationsController {
   }
 
   @Get('me/notifications/stream')
+  @UseGuards(SessionAuthGuard)
   @Header('Content-Type', 'text/event-stream')
   @Header('Cache-Control', 'no-cache')
   @Header('Connection', 'keep-alive')
   @ApiOkResponse({ description: 'SSE stream for real-time notification updates (#21).' })
-  async stream(@Query('token') token: string, @Res() res: Response, @Req() req: Request) {
-    // Try session cookie first (preferred, no token in URL)
-    let userId: string | null = null;
-    const rawSession = req.cookies?.[SESSION_COOKIE];
-    if (rawSession) {
-      const result = await this.sessionService.validate(rawSession);
-      if (result) userId = result.user.id;
-    }
-
-    // Fallback to JWT query param (legacy)
-    if (!userId && token) {
-      try {
-        const payload = this.jwtService.verify(token) as { sub: string };
-        userId = payload.sub;
-      } catch { /* ignore */ }
-    }
-
-    if (!userId) {
-      res.status(401).end();
-      return;
-    }
-
+  async stream(@CurrentUser() user: { id: string }, @Res() res: Response) {
     res.flushHeaders();
 
-    const { unreadCount } = await this.notificationsService.getUnreadCount(userId);
+    const { unreadCount } = await this.notificationsService.getUnreadCount(user.id);
     res.write(`data: ${JSON.stringify({ unreadCount })}\n\n`);
 
     const subscription = this.notificationsService.events$
       .pipe(
-        filter((e) => e.recipientId === userId),
+        filter((e) => e.recipientId === user.id),
         map((e) => `data: ${JSON.stringify({ unreadCount: e.unreadCount })}\n\n`),
       )
       .subscribe((msg) => { res.write(msg); });
 
-    req.on('close', () => { subscription.unsubscribe(); });
+    res.on('close', () => { subscription.unsubscribe(); });
   }
 }

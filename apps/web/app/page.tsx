@@ -13,26 +13,7 @@ import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/h
 import { usePublicFeed, useGames, useStudios } from '@/lib/api/hooks';
 import type { Game } from '@/lib/api/client';
 
-const fallbackGames = [
-  {
-    id: 'home-starfall', title: 'Starfall Tactics', slug: 'starfall-tactics', status: 'IN_DEVELOPMENT',
-    coverUrl: '/playmorrow/starfall-tactics.png', followersCount: 8700,
-    studio: { name: 'Ironlight Studios', slug: 'ironlight-studios' },
-    tags: ['Tactical RPG', 'Space Opera'],
-  },
-  {
-    id: 'home-mossbound', title: 'Mossbound', slug: 'mossbound', status: 'ALPHA',
-    coverUrl: '/playmorrow/mossbound.png', followersCount: 5100,
-    studio: { name: 'Wildbriar', slug: 'wildbriar' },
-    tags: ['Adventure', 'Atmospheric'],
-  },
-  {
-    id: 'home-paper', title: 'Paper Relics', slug: 'paper-relics', status: 'PRE_ALPHA',
-    coverUrl: '/playmorrow/paper-relics.png', followersCount: 3200,
-    studio: { name: 'Second Story Games', slug: 'second-story-games' },
-    tags: ['Card Battler', 'Roguelike'],
-  },
-];
+
 
 function formatRelativeTime(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -55,7 +36,7 @@ export default function HomePage() {
   const games = normalizeLatestGames(gamesData?.items);
   const feedItems = feedData?.items?.slice(0, 4) ?? [];
   const feedCount = feedData?.items?.length ?? 0;
-  const studioCount = studiosData?.items?.length ?? 5;
+  const studioCount = studiosData?.items?.length ?? 0;
 
   return (
     <>
@@ -343,13 +324,13 @@ type HomeGame = {
 };
 
 function normalizeLatestGames(games?: Game[]): HomeGame[] {
-  const usable = games?.filter((g) => g.title !== 'Neon Warden').slice(0, 3).map((g) => ({
+  if (!games?.length) return [];
+  return games.filter((g) => g.title !== 'Neon Warden').slice(0, 3).map((g) => ({
     id: g.id, title: g.title, slug: g.slug, status: g.status,
     coverUrl: g.coverUrl ?? coverFor(g.title), followersCount: g.followersCount,
     studio: { name: g.studio?.name ?? 'Independent Studio', slug: g.studio?.slug ?? 'studio' },
     tags: g.tags?.length ? g.tags.slice(0, 2) : ['Indie', 'In Development'],
   }));
-  return usable?.length ? usable : [...fallbackGames];
 }
 
 function coverFor(title: string) {
