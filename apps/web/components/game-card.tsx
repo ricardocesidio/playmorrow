@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Bookmark, Users } from 'lucide-react';
+import { formatFollowers } from '@/lib/format';
 import type { Game } from '@/lib/api/client';
 import { StatusBadge } from './status-badge';
 
@@ -98,12 +99,6 @@ function progressForGame(slug: string) {
   const value = Array.from(slug).reduce((sum, char) => sum + char.charCodeAt(0), 0);
   return 18 + (value % 54);
 }
-
-function formatFollowers(count: number) {
-  if (count >= 1000) return `${(count / 1000).toFixed(count >= 10_000 ? 1 : 1)}K`;
-  return String(count);
-}
-
 function statusAccent(status: string) {
   if (status === 'ALPHA') return { bar: 'bg-violet text-violet' };
   if (status === 'PRE_ALPHA') return { bar: 'bg-amber text-amber' };

@@ -11,18 +11,9 @@ import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { StatusBadge } from '@/components/status-badge';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
+import { formatRelativeTime, formatFollowers } from '@/lib/format';
 import { usePublicFeed, useGames, useStudios } from '@/lib/api/hooks';
 import type { Game } from '@/lib/api/client';
-
-
-
-function formatRelativeTime(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  if (diff < 60000) return 'just now';
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-  return `${Math.floor(diff / 86400000)}d ago`;
-}
 
 function getFeedIcon(type: string) {
   if (type === 'ROADMAP_ITEM') return <Activity className="size-4" />;
@@ -347,6 +338,3 @@ function descriptionFor(title: string) {
   return 'Lead a crew through a dying galaxy where every choice leaves a scar.';
 }
 
-function formatFollowers(count: number) {
-  return count >= 1000 ? `${(count / 1000).toFixed(1)}K followers` : `${count} followers`;
-}

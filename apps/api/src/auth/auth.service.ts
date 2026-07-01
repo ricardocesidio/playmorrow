@@ -154,11 +154,11 @@ export class AuthService {
     if (!passwordValid) {
       // Increment failed attempts
       const attempts = user.failedLoginAttempts + 1;
-      const updateData: Record<string, unknown> = { failedLoginAttempts: attempts };
+      const updateData: Prisma.UserUpdateInput = { failedLoginAttempts: attempts };
       if (attempts >= LOCKOUT_THRESHOLD) {
         updateData.lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MS);
       }
-      await this.prisma.user.update({ where: { id: user.id }, data: updateData as Prisma.UserUpdateInput });
+      await this.prisma.user.update({ where: { id: user.id }, data: updateData });
       throw new UnauthorizedException('Invalid email/username or password');
     }
 
@@ -225,9 +225,9 @@ export class AuthService {
     const passwordValid = await argon2.verify(user.passwordHash, password);
     if (!passwordValid) {
       const attempts = user.failedLoginAttempts + 1;
-      const updateData: Record<string, unknown> = { failedLoginAttempts: attempts };
+      const updateData: Prisma.UserUpdateInput = { failedLoginAttempts: attempts };
       if (attempts >= LOCKOUT_THRESHOLD) updateData.lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MS);
-      await this.prisma.user.update({ where: { id: user.id }, data: updateData as Prisma.UserUpdateInput });
+      await this.prisma.user.update({ where: { id: user.id }, data: updateData });
       throw new UnauthorizedException('Invalid email/username or password');
     }
 

@@ -199,16 +199,27 @@ export class GamesService {
     }
 
     // Track view (increment async, don't block response)
-    this.prisma.game.update({
-      where: { id: game.id },
-      data: { viewsCount: { increment: 1 } },
-    }).catch(() => {});
-
     this.prisma.gameView.create({
       data: { gameId: game.id },
     }).catch(() => {});
 
+    // Sync all denormalized counters
+    this.syncGameCounters(game.id).catch(() => {});
+
     return this.toResponse(game);
+  }
+
+  async syncGameCounters(gameId: string) {
+    const [followers, wishlists, comments, views] = await Promise.all([
+      this.prisma.follow.count({ where: { gameId } }),
+      this.prisma.wishlistItem.count({ where: { gameId } }),
+      this.prisma.comment.count({ where: { gameId } }),
+      this.prisma.gameView.count({ where: { gameId } }),
+    ]);
+    await this.prisma.game.update({
+      where: { id: gameId },
+      data: { followersCount: followers, wishlistsCount: wishlists, commentsCount: comments, viewsCount: views },
+    });
   }
 
   async update(userId: string, slug: string, dto: UpdateGameDto) {
@@ -342,8 +353,23 @@ export class GamesService {
     return { success: true };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private toResponse(game: any) {
+  private toResponse(game: {
+    id: string; slug: string; studioId: string; title: string; tagline: string | null;
+    description: string | null; status: string; releaseDate: Date | null;
+    expectedReleaseText: string | null; priceCents: number | null; currency: string | null;
+    isFree: boolean; coverUrl: string | null; bannerUrl: string | null;
+    readme: string | null; trailerUrl: string | null; demoStatus: string | null;
+    demoUrl: string | null; edition: string | null; engine: string | null;
+    languages: string | null; genres: string | null; modes: string | null;
+    isPublished: boolean; followersCount: number; wishlistsCount: number;
+    commentsCount: number; viewsCount: number; featured: boolean;
+    createdBy: string | null; updatedBy: string | null; publishedBy: string | null;
+    publishedAt: Date | null;
+    createdAt: Date; updatedAt: Date;
+    studio?: { id: string; name: string; slug: string; };
+    media?: any[]; tags?: any[]; platformLinks?: any[];
+    _count?: { comments?: number; followers?: number; wishlistItems?: number; views?: number; };
+  }) {
     return {
       id: game.id,
       title: game.title,

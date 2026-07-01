@@ -27,7 +27,7 @@ async function bootstrap() {
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", 'data:', 'https:'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-        connectSrc: ["'self'", "*"],
+        connectSrc: ["'self'", "https://*.vercel.app", "https://*.onrender.com", "https://*.neon.tech", "http://localhost:*"],
         frameAncestors: ["'none'"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],

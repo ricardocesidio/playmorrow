@@ -11,6 +11,7 @@ import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
+import { formatFollowers } from '@/lib/format';
 import { useGames } from '@/lib/api/hooks';
 import type { Game } from '@/lib/api/client';
 
@@ -557,12 +558,6 @@ function fallbackPlatforms(title: string) {
   const game = referenceGames.find((item) => item.title === title);
   return game?.platformLinks.map((platform) => platform.platform) ?? [];
 }
-
-function formatFollowers(count: number) {
-  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
-  return String(count);
-}
-
 const GENRES = [
   'All', 'Action', 'Adventure', 'RPG', 'Strategy', 'Simulation', 'Puzzle',
   'Horror', 'Racing', 'Fighting', 'Sports',

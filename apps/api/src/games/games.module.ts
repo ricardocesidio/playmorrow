@@ -11,5 +11,6 @@ import { GamesService } from './games.service';
   imports: [PrismaModule, AuthModule, StudiosModule, AuditLogModule],
   controllers: [GamesController],
   providers: [GamesService],
+  exports: [GamesService],
 })
 export class GamesModule {}

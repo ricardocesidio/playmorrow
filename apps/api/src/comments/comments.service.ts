@@ -1,4 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { GamesService } from '../games/games.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PlayerXpService } from '../player-xp/player-xp.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -10,6 +11,7 @@ import type { UpdateCommentDto } from './dto/update-comment.dto';
 export class CommentsService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly gamesService: GamesService,
     private readonly notificationsService: NotificationsService,
     private readonly playerXpService: PlayerXpService,
     private readonly studioXpService: StudioXpService,
@@ -104,6 +106,9 @@ export class CommentsService {
     if (commentAuthor?.accountType === 'PLAYER') {
       await this.playerXpService.award(userId, 'COMMENT', comment.id).catch(() => {});
     }
+
+    // Sync game counters
+    this.gamesService.syncGameCounters(devlog.game.id).catch(() => {});
 
     return this.toResponse(comment);
   }
@@ -202,6 +207,12 @@ export class CommentsService {
       },
     });
 
+    // Sync game counters
+    const gameId = comment.gameId ?? comment.devlog?.game?.id;
+    if (gameId) {
+      this.gamesService.syncGameCounters(gameId).catch(() => {});
+    }
+
     return this.toResponse(updated);
   }
 
@@ -243,6 +254,9 @@ export class CommentsService {
     if (commentAuthor?.accountType === 'PLAYER') {
       await this.playerXpService.award(authorId, 'COMMENT', comment.id).catch(() => {});
     }
+
+    // Sync game counters
+    this.gamesService.syncGameCounters(game.id).catch(() => {});
 
     return comment;
   }
