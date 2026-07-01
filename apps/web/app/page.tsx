@@ -34,12 +34,18 @@ const fallbackGames = [
   },
 ];
 
-const liveItems = [
-  { icon: <SquarePlay className="size-4" />, title: 'Starfall Tactics', body: 'released a devlog', time: '2m ago' },
-  { icon: <Flame className="size-4 text-coral" />, title: 'Voidrunner', body: 'hit 10K wishlists!', time: '5m ago' },
-  { icon: <Activity className="size-4" />, title: 'Paper Relics', body: 'updated their roadmap', time: '12m ago' },
-  { icon: <UserPlus className="size-4" />, title: 'Mossbound', body: 'is now following you', time: '18m ago' },
-];
+function formatRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+  return `${Math.floor(diff / 86400000)}d ago`;
+}
+
+function getFeedIcon(type: string) {
+  if (type === 'ROADMAP_ITEM') return <Activity className="size-4" />;
+  return <SquarePlay className="size-4" />;
+}
 
 export default function HomePage() {
   const { data: feedData } = usePublicFeed();
@@ -47,6 +53,7 @@ export default function HomePage() {
   const { data: studiosData } = useStudios();
 
   const games = normalizeLatestGames(gamesData?.items);
+  const feedItems = feedData?.items?.slice(0, 4) ?? [];
   const feedCount = feedData?.items?.length ?? 0;
   const studioCount = studiosData?.items?.length ?? 5;
 
@@ -113,7 +120,7 @@ export default function HomePage() {
         {/* Live Feed Ticker */}
         <section className="relative px-5 sm:px-8 lg:px-10">
           <div className="mx-auto max-w-[1500px]">
-            <LiveTicker feedCount={feedCount} />
+            <LiveTicker items={feedItems} feedCount={feedCount} />
           </div>
         </section>
 
@@ -276,8 +283,7 @@ function FeaturedGameCard() {
   );
 }
 
-function LiveTicker({ feedCount }: { feedCount: number }) {
-  const items = feedCount > 0 ? liveItems : liveItems;
+function LiveTicker({ items, feedCount }: { items: any[]; feedCount: number }) {
   return (
     <div className="grid overflow-hidden border border-border bg-background/72 lg:grid-cols-[170px_1fr_170px]">
       <div className="flex items-center gap-3 border-b border-border px-6 py-3 lg:border-b-0 lg:border-r">
@@ -286,13 +292,13 @@ function LiveTicker({ feedCount }: { feedCount: number }) {
         <Activity className="size-4 text-coral" />
       </div>
       <div className="grid md:grid-cols-2 xl:grid-cols-4">
-        {items.map((item) => (
-          <div key={`${item.title}-${item.time}`} className="flex items-center gap-3 border-b border-border px-5 py-3 md:border-r xl:border-b-0">
-            <span className="text-muted-foreground">{item.icon}</span>
+        {(items.length > 0 ? items : []).map((item: any, i: number) => (
+          <div key={i} className="flex items-center gap-3 border-b border-border px-5 py-3 md:border-r xl:border-b-0">
+            <span className="text-muted-foreground">{getFeedIcon(item.type)}</span>
             <span className="min-w-0">
-              <span className="pm-micro text-foreground">{item.title}</span>
-              <span className="ml-2 text-xs text-muted-foreground">{item.body}</span>
-              <span className="block text-[10px] text-muted-foreground">{item.time}</span>
+              <span className="pm-micro text-foreground">{item.game ?? item.title ?? 'Update'}</span>
+              <span className="ml-2 text-xs text-muted-foreground">{item.type === 'DEVLOG' ? 'posted a devlog' : item.type === 'ROADMAP_ITEM' ? 'updated roadmap' : 'new activity'}</span>
+              <span className="block text-[10px] text-muted-foreground">{formatRelativeTime(item.createdAt)}</span>
             </span>
           </div>
         ))}
