@@ -22,14 +22,14 @@ const XP_TABLE = [
 
 const LEVEL_TABLE = [
   { level: 1, totalXp: 0, nextXp: 100, title: 'Newcomer' },
-  { level: 5, totalXp: 1000, nextXp: 500, title: 'Regular' },
-  { level: 10, totalXp: 4500, nextXp: 1000, title: 'Enthusiast' },
-  { level: 15, totalXp: 10500, nextXp: 1500, title: 'Supporter' },
-  { level: 20, totalXp: 19000, nextXp: 2000, title: 'Loyalist' },
-  { level: 25, totalXp: 30000, nextXp: 2500, title: 'Veteran' },
-  { level: 30, totalXp: 43500, nextXp: 3000, title: 'Elite' },
-  { level: 40, totalXp: 78000, nextXp: 4000, title: 'Master' },
-  { level: 50, totalXp: 122500, nextXp: 5000, title: 'Legend' },
+  { level: 5, totalXp: 1000, nextXp: 500, title: 'Newcomer' },
+  { level: 10, totalXp: 4500, nextXp: 1000, title: 'Regular' },
+  { level: 16, totalXp: 12000, nextXp: 1500, title: 'Supporter' },
+  { level: 20, totalXp: 19000, nextXp: 2000, title: 'Supporter' },
+  { level: 25, totalXp: 30000, nextXp: 2500, title: 'Supporter' },
+  { level: 31, totalXp: 46000, nextXp: 3000, title: 'Veteran' },
+  { level: 40, totalXp: 78000, nextXp: 4000, title: 'Veteran' },
+  { level: 46, totalXp: 103000, nextXp: 5000, title: 'Legend' },
 ];
 
 const TITLE_RANGES = [

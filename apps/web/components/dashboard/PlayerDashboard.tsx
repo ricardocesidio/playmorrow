@@ -26,7 +26,7 @@ import {
 
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
-import { useMyFollows, useMyWishlist, useNotifications, useUnreadNotificationCount, usePublicFeed } from '@/lib/api/hooks';
+import { useMyFollows, useMyWishlist, useNotifications, useUnreadNotificationCount, usePublicFeed, usePlayerWeeklyXp, usePlayerMonthlyXp, useAchievements, type Achievement } from '@/lib/api/hooks';
 import { useRouter } from 'next/navigation';
 import type { FeedItem } from '@/lib/api/client';
 
@@ -41,15 +41,6 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
-const achievements = [
-  { id: 'a1', name: 'First Follow', desc: 'Follow your first studio', icon: '🎯', unlocked: true },
-  { id: 'a2', name: 'Wishlister', desc: 'Add 5 games to your wishlist', icon: '⭐', unlocked: true },
-  { id: 'a3', name: 'Commenter', desc: 'Post your first comment', icon: '💬', unlocked: true },
-  { id: 'a4', name: 'Social', desc: 'Follow 10 studios', icon: '👥', unlocked: false },
-  { id: 'a5', name: 'Explorer', desc: 'Visit 20 game pages', icon: '🗺️', unlocked: false },
-  { id: 'a6', name: 'Supporter', desc: 'Wishlist 10 games', icon: '🏆', unlocked: false },
-];
-
 export function PlayerDashboard() {
   const router = useRouter();
   const { user, logout } = useAuth();
@@ -60,6 +51,10 @@ export function PlayerDashboard() {
   const { data: feedData } = usePublicFeed(1, 5);
 
   if (!user) return null;
+
+  const { data: weeklyXp } = usePlayerWeeklyXp();
+  const { data: monthlyXp } = usePlayerMonthlyXp();
+  const { data: achievementsData } = useAchievements();
 
   const unreadCount = unreadData?.unreadCount ?? 0;
   const wishlistItems = wishlist?.items ?? [];
@@ -72,6 +67,7 @@ export function PlayerDashboard() {
   const xpForNext = level * 100;
   const xpAtStart = (level * (level - 1) / 2) * 100;
   const xpProgress = Math.min(((xp - xpAtStart) / xpForNext) * 100, 100);
+  const rankTitle = level >= 46 ? 'Legend' : level >= 31 ? 'Veteran' : level >= 16 ? 'Supporter' : level >= 6 ? 'Regular' : 'Newcomer';
 
   const feedItems = (feedData?.items ?? []).map((item) => ({
     studio: item.studio.name,
@@ -125,49 +121,12 @@ export function PlayerDashboard() {
             <div className="mt-5 border-t border-border/70 px-2 pt-4">
               <p className="font-mono text-[0.67rem] uppercase tracking-[0.22em] text-muted-foreground">Level {user.level ?? '--'}</p>
               <p className="mt-1 flex items-center gap-2 font-mono text-[0.58rem] uppercase tracking-[0.18em] text-cyan">
-                <Trophy className="size-3" /> Explorer
+                <Trophy className="size-3" /> {rankTitle}
               </p>
               <ProgressBar value={xpProgress} className="mt-3" />
               <p className="mt-2 text-right font-mono text-[0.62rem] text-muted-foreground">{(user.xp ?? 0).toLocaleString()} / {xpForNext.toLocaleString()} XP</p>
             </div>
 
-            <div className="mt-5 border-t border-border/70 px-2 pt-4">
-              <div className="mb-3 flex items-center justify-between font-mono text-[0.62rem] uppercase tracking-[0.16em] text-muted-foreground">
-                <span>Signal Strength</span>
-                <span>87%</span>
-              </div>
-              <div className="flex gap-1">
-                {Array.from({ length: 24 }).map((_, index) => (
-                  <span key={index} className={`h-2 flex-1 ${index < 21 ? 'bg-cyan shadow-[0_0_8px_rgb(62_231_255_/_0.55)]' : 'bg-border'}`} />
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-5 border-t border-border/70 px-2 pt-4">
-              <p className="mb-3 font-mono text-[0.62rem] uppercase tracking-[0.18em] text-muted-foreground">Favorite Genres</p>
-              {['Tactical RPG', 'Atmospheric Adventure', 'Space Opera'].map((genre) => (
-                <p key={genre} className="mb-2 flex items-center gap-2 text-[0.74rem] text-muted-foreground">
-                  <span className="size-1 bg-cyan" /> {genre}
-                </p>
-              ))}
-              <button className="mt-2 flex w-full items-center justify-between border border-border/80 bg-background/70 px-3 py-2 text-left text-[0.72rem] text-foreground transition hover:border-cyan/60">
-                Update preferences <ArrowRight className="size-3 rotate-90" />
-              </button>
-            </div>
-          </DashboardPanel>
-
-          <DashboardPanel className="mt-3 overflow-hidden p-4">
-            <div className="relative min-h-[126px]">
-              <img src="/playmorrow/neon-warden.png" alt="" className="absolute inset-y-0 right-[-22px] h-full w-28 object-cover opacity-80" />
-              <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
-              <div className="relative">
-                <p className="font-mono text-sm font-semibold uppercase tracking-[0.18em] text-violet">Join More Playtests</p>
-                <p className="mt-4 max-w-[145px] text-xs leading-5 text-muted-foreground">Get early access to the games you love.</p>
-                <Link href="/feed" className="mt-4 inline-flex border border-border-bright px-3 py-2 text-xs text-foreground transition hover:border-cyan hover:text-cyan">
-                  View playtests
-                </Link>
-              </div>
-            </div>
           </DashboardPanel>
         </aside>
 
@@ -213,15 +172,15 @@ export function PlayerDashboard() {
                     <ProgressBar value={xpProgress} className="mt-3 w-28" />
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-muted-foreground">Explorer</p>
+                    <p className="text-xs text-muted-foreground">{rankTitle}</p>
                     <p className="mt-3 font-mono text-[0.68rem] text-muted-foreground">{(user.xp ?? 0).toLocaleString()} / {xpForNext.toLocaleString()} XP</p>
                   </div>
                 </div>
                 <div className="mt-5 grid grid-cols-2 gap-4 border-t border-border/70 pt-4">
-                  <MiniStat icon={<Trophy className="size-4" />} label="Badges" value="18 / 42" />
-                  <MiniStat icon={<Gamepad2 className="size-4" />} label="Playtests Joined" value="7" />
+                  <MiniStat icon={<Zap className="size-4" />} label="Weekly XP" value={(weeklyXp?.weekly ?? 0).toLocaleString()} />
+                  <MiniStat icon={<Trophy className="size-4" />} label="Monthly XP" value={(monthlyXp?.monthly ?? 0).toLocaleString()} />
                   <MiniStat icon={<MessageSquare className="size-4" />} label="Comments Made" value={unreadCount.toString()} />
-                  <MiniStat icon={<Users className="size-4" />} label="Devlogs Followed" value="31" />
+                  <MiniStat icon={<Trophy className="size-4" />} label="Level" value={level.toString()} />
                 </div>
               </DashboardPanel>
 
@@ -244,7 +203,7 @@ export function PlayerDashboard() {
           <DashboardPanel className="p-4">
             <SectionHeader title="Achievements" href="/me/achievements" compact />
             <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
-              {achievements.map((a) => (
+              {(achievementsData ?? []).slice(0, 6).map((a) => (
                 <Link key={a.id} href="/me/achievements" className={`group flex flex-col items-center gap-2 border p-3 text-center transition ${
                   a.unlocked
                     ? 'border-cyan/40 bg-cyan/5 shadow-[0_0_12px_rgb(62_231_255_/_0.15)] hover:border-cyan/60 hover:shadow-[0_0_18px_rgb(62_231_255_/_0.3)]'
@@ -357,11 +316,6 @@ export function PlayerDashboard() {
         </section>
       </div>
 
-      <div className="relative mx-auto mt-6 flex max-w-[1540px] items-center justify-between border border-border/70 bg-background/60 px-5 py-3 font-mono text-[0.58rem] uppercase tracking-[0.26em] text-muted-foreground clip-corner">
-        <span className="flex items-center gap-3">Signal Strength <span className="inline-flex gap-1">{Array.from({ length: 9 }).map((_, i) => <span key={i} className="h-2 w-1 bg-cyan" />)}</span></span>
-        <span className="hidden sm:inline">34.0522 N, 118.2437 W</span>
-        <span className="text-success">Connected</span>
-      </div>
     </main>
     </>
   );
