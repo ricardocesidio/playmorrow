@@ -46,6 +46,7 @@ export class CommentsController {
   }
 
   @Patch('comments/:id')
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Comment updated.' })
   async update(
@@ -57,6 +58,7 @@ export class CommentsController {
   }
 
   @Delete('comments/:id')
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Comment soft-deleted.' })
   async delete(@CurrentUser() user: { id: string }, @Param('id') id: string) {

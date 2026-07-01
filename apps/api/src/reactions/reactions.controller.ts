@@ -40,6 +40,7 @@ export class ReactionsController {
   }
 
   @Delete('devlogs/:devlogId/reactions')
+  @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Reaction removed from devlog.' })
@@ -77,6 +78,7 @@ export class ReactionsController {
   }
 
   @Delete('comments/:commentId/reactions')
+  @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Reaction removed from comment.' })
