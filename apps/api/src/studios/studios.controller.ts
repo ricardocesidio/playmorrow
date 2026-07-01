@@ -143,6 +143,17 @@ export class StudiosController {
     return this.studiosService.leaveStudio(user.id, slug);
   }
 
+  @Get(':slug/dashboard')
+  @UseGuards(SessionAuthGuard)
+  @ApiOkResponse({ description: 'Studio dashboard aggregated stats.' })
+  async getDashboard(@Param('slug') slug: string) {
+    const studio = await this.studiosService.findBySlug(slug);
+    if (!studio) {
+      throw new NotFoundException('Studio not found');
+    }
+    return this.studiosService.getDashboardStats(studio.id);
+  }
+
   @Post(':slug/transfer')
   @UseGuards(SessionAuthGuard, StudioRolesGuard)
   @StudioRoles(StudioRole.OWNER)

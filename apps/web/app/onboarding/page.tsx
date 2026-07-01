@@ -37,22 +37,6 @@ const COUNTRIES = [
   'Zambia', 'Zimbabwe',
 ];
 
-const suggestedStudios = [
-  { id: 's1', name: 'Obsidian Signal', slug: 'obsidian-signal', tagline: 'Crafting immersive cyberpunk experiences.', followersCount: 28400, logoUrl: null as string | null },
-  { id: 's2', name: 'Ironlight Studios', slug: 'ironlight-studios', tagline: 'Building tactical worlds for strategic minds.', followersCount: 15600, logoUrl: null as string | null },
-  { id: 's3', name: 'Wildbriar', slug: 'wildbriar', tagline: 'Creating atmospheric adventures from the wild.', followersCount: 9200, logoUrl: null as string | null },
-  { id: 's4', name: 'Second Story Games', slug: 'second-story-games', tagline: 'Telling stories through innovative gameplay.', followersCount: 7400, logoUrl: null as string | null },
-  { id: 's5', name: 'Voidrunner Dev', slug: 'voidrunner-dev', tagline: 'Fast-paced action games for thrill seekers.', followersCount: 11300, logoUrl: null as string | null },
-];
-
-const suggestedGames = [
-  { id: 'g1', title: 'Neon Warden', slug: 'neon-warden', studio: 'Obsidian Signal', cover: '/playmorrow/neon-warden.png', tags: ['Tactical', 'Cyberpunk'] },
-  { id: 'g2', title: 'Starfall Tactics', slug: 'starfall-tactics', studio: 'Ironlight Studios', cover: '/playmorrow/starfall-tactics.png', tags: ['Tactical RPG', 'Space'] },
-  { id: 'g3', title: 'Mossbound', slug: 'mossbound', studio: 'Wildbriar', cover: '/playmorrow/mossbound.png', tags: ['Adventure', 'Atmospheric'] },
-  { id: 'g4', title: 'Paper Relics', slug: 'paper-relics', studio: 'Second Story Games', cover: '/playmorrow/paper-relics.png', tags: ['Card Battler', 'Roguelike'] },
-  { id: 'g5', title: 'Voidrunner', slug: 'voidrunner', studio: 'Voidrunner Dev', cover: '/playmorrow/voidrunner.png', tags: ['Roguelite', 'Fast-paced'] },
-];
-
 export default function OnboardingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -78,8 +62,47 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [selectedStudioIds, setSelectedStudioIds] = useState<string[]>([]);
-  const [wishlistedGameIds, setWishlistedGameIds] = useState<string[]>([]);
+  const [selectedStudioSlugs, setSelectedStudioSlugs] = useState<string[]>([]);
+  const [wishlistedGameSlugs, setWishlistedGameSlugs] = useState<string[]>([]);
+  const [suggestedStudios, setSuggestedStudios] = useState<{ id: string; name: string; slug: string; tagline: string | null; followersCount: number; logoUrl: string | null }[]>([]);
+  const [suggestedGames, setSuggestedGames] = useState<{ id: string; title: string; slug: string; studio: string; cover: string | null; tags: string[] }[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+
+  useEffect(() => {
+    async function fetchSuggestions() {
+      setSuggestionsLoading(true);
+      try {
+        const [studiosRes, gamesRes] = await Promise.all([
+          fetch('/api/studios?page=1&pageSize=5'),
+          fetch('/api/games?page=1&pageSize=5'),
+        ]);
+        if (studiosRes.ok) {
+          const data = await studiosRes.json();
+          setSuggestedStudios((data.items ?? data).map((s: { id: string; name: string; slug: string; tagline: string | null; followersCount: number; logoUrl: string | null }) => ({
+            id: s.id,
+            name: s.name,
+            slug: s.slug,
+            tagline: s.tagline,
+            followersCount: s.followersCount,
+            logoUrl: s.logoUrl,
+          })));
+        }
+        if (gamesRes.ok) {
+          const data = await gamesRes.json();
+          setSuggestedGames((data.items ?? data).map((g: { id: string; title: string; slug: string; studio: { name: string }; coverUrl: string | null; tags: { name: string }[] }) => ({
+            id: g.id,
+            title: g.title,
+            slug: g.slug,
+            studio: g.studio?.name ?? '',
+            cover: g.coverUrl,
+            tags: (g.tags ?? []).map((t: { name: string }) => t.name),
+          })));
+        }
+      } catch { /* ignore */ }
+      setSuggestionsLoading(false);
+    }
+    fetchSuggestions();
+  }, []);
 
   const steps = accountType === 'PLAYER' ? PLAYER_STEPS : STUDIO_STEPS;
   const lastStepIndex = accountType === 'PLAYER' ? 5 : 3;
@@ -138,8 +161,8 @@ export default function OnboardingPage() {
         body.studioDiscord = studioDiscord || undefined;
       }
       if (accountType === 'PLAYER') {
-        body.selectedStudioIds = selectedStudioIds;
-        body.wishlistedGameIds = wishlistedGameIds;
+        body.followStudioSlugs = selectedStudioSlugs;
+        body.wishlistGameSlugs = wishlistedGameSlugs;
       }
       // Use direct fetch instead of api client to ensure cookies are captured
       const res = await fetch(`${API}/auth/complete-onboarding`, {
@@ -340,8 +363,12 @@ export default function OnboardingPage() {
               <h2 className="font-display text-xl font-bold text-foreground">Follow Studios</h2>
               <p className="text-sm text-muted-foreground">Follow studios to stay updated on their latest games and playtests.</p>
               <div className="grid gap-4 sm:grid-cols-2">
-                {suggestedStudios.map(studio => {
-                  const isSelected = selectedStudioIds.includes(studio.id);
+                {suggestionsLoading ? (
+                  <p className="col-span-full text-center text-sm text-muted-foreground py-8">Loading suggestions...</p>
+                ) : suggestedStudios.length === 0 ? (
+                  <p className="col-span-full text-center text-sm text-muted-foreground py-8">No studios available yet</p>
+                ) : suggestedStudios.map(studio => {
+                  const isSelected = selectedStudioSlugs.includes(studio.slug);
                   return (
                     <div key={studio.id} className="border border-border p-4 space-y-3">
                       <div className="flex items-center gap-3">
@@ -359,8 +386,8 @@ export default function OnboardingPage() {
                       </div>
                       <p className="text-xs text-muted-foreground leading-relaxed">{studio.tagline}</p>
                       <button onClick={() => {
-                        setSelectedStudioIds(prev =>
-                          isSelected ? prev.filter(id => id !== studio.id) : [...prev, studio.id]
+                        setSelectedStudioSlugs(prev =>
+                          isSelected ? prev.filter(slug => slug !== studio.slug) : [...prev, studio.slug]
                         );
                       }}
                         className={`w-full cursor-pointer border py-2 font-mono text-xs uppercase tracking-widest transition ${
@@ -382,8 +409,12 @@ export default function OnboardingPage() {
               <h2 className="font-display text-xl font-bold text-foreground">Wishlist Games</h2>
               <p className="text-sm text-muted-foreground">Add games to your wishlist to get notified when they launch.</p>
               <div className="grid gap-4 sm:grid-cols-2">
-                {suggestedGames.map(game => {
-                  const isWishlisted = wishlistedGameIds.includes(game.id);
+                {suggestionsLoading ? (
+                  <p className="col-span-full text-center text-sm text-muted-foreground py-8">Loading suggestions...</p>
+                ) : suggestedGames.length === 0 ? (
+                  <p className="col-span-full text-center text-sm text-muted-foreground py-8">No games available yet</p>
+                ) : suggestedGames.map(game => {
+                  const isWishlisted = wishlistedGameSlugs.includes(game.slug);
                   return (
                     <div key={game.id} className="border border-border overflow-hidden">
                       <div className="h-28 bg-background/60 flex items-center justify-center border-b border-border">
@@ -406,8 +437,8 @@ export default function OnboardingPage() {
                           ))}
                         </div>
                         <button onClick={() => {
-                          setWishlistedGameIds(prev =>
-                            isWishlisted ? prev.filter(id => id !== game.id) : [...prev, game.id]
+                          setWishlistedGameSlugs(prev =>
+                            isWishlisted ? prev.filter(slug => slug !== game.slug) : [...prev, game.slug]
                           );
                         }}
                           className={`w-full cursor-pointer border py-2 font-mono text-xs uppercase tracking-widest transition ${

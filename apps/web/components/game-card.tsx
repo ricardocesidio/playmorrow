@@ -8,7 +8,7 @@ import { StatusBadge } from './status-badge';
 
 export function GameCard({ game }: { game: Game }) {
   const cover = game.coverUrl ?? coverForGame(game.title);
-  const progress = progressForGame(game.slug);
+  const progress = statusProgress(game.status);
   const accent = statusAccent(game.status);
 
   return (
@@ -83,21 +83,17 @@ export function GameCard({ game }: { game: Game }) {
   );
 }
 
-function coverForGame(title: string) {
-  const key = title.toLowerCase();
-  if (key.includes('starfall')) return '/playmorrow/starfall-tactics.png';
-  if (key.includes('moss')) return '/playmorrow/mossbound.png';
-  if (key.includes('paper')) return '/playmorrow/paper-relics.png';
-  if (key.includes('void')) return '/playmorrow/voidrunner.png';
-  if (key.includes('little')) return '/playmorrow/little-giants.png';
-  if (key.includes('echo')) return '/playmorrow/echobloom.png';
-  if (key.includes('north')) return '/playmorrow/northlight.png';
+function coverForGame(_title: string) {
   return '/playmorrow/neon-warden.png';
 }
 
-function progressForGame(slug: string) {
-  const value = Array.from(slug).reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  return 18 + (value % 54);
+function statusProgress(status: string) {
+  const key = status.toUpperCase();
+  if (key.includes('PUBLISHED') || key.includes('RELEASE')) return 100;
+  if (key.includes('BETA')) return 85;
+  if (key.includes('ALPHA')) return 42;
+  if (key.includes('DEVELOP')) return 68;
+  return 31;
 }
 function statusAccent(status: string) {
   if (status === 'ALPHA') return { bar: 'bg-violet text-violet' };

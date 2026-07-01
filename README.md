@@ -30,9 +30,10 @@ and be part of the development journey before the game ships.
 - **Devlogs** — development journals with rich text and threaded comments
 - **Roadmaps** — visual timeline of planned, in-progress, and completed features
 - **Press kits** — structured fact sheets for journalists and publishers
-- **Team management** — role-based access control, invitations, audit logging
+- **Team management** — role-based access control (Owner, Admin, Moderator, Member), invitations, audit logging
 - **Team feed** — internal chat with automatic activity updates
 - **Level & XP system** — gamified studio progression based on engagement
+- **Studio Dashboard** — aggregated analytics (weekly deltas, views over time, follower growth), real-time stats cards, activity feed
 
 ### Community features
 - Follow/unfollow studios and games
@@ -40,16 +41,20 @@ and be part of the development journey before the game ships.
 - Comment on devlogs with threaded replies
 - React to devlogs and comments (multiple reaction types)
 - OAuth sign-in with Google and GitHub
-- Real-time notification badges
+- Real-time notification badges (SSE)
 - Email verification and password recovery
+- Email change with 2-change limit
 - Rate-limited endpoints and moderation reporting
+- Player dashboard with XP tracking, level-up toasts, achievements, and activity feed
 
 ### Account types
 
-| Type | Purpose |
-|---|---|
-| **Player** | Discover games, follow studios, comment, wishlist, build feed |
-| **Studio** | Publish games, devlogs, roadmaps, press kits, manage team |
+| Type | Role | Purpose |
+|---|---|---|---|
+| **Player** | `PLAYER` | Discover games, follow studios, comment, wishlist, build feed |
+| **Studio** | `PUBLISHER` | Publish games, devlogs, roadmaps, press kits, manage team |
+| **Moderator** | `MODERATOR` | Moderate content, review reports |
+| **Admin** | `ADMIN` | Full platform administration |
 
 Account type is selected during onboarding. A Player can later create a studio and become an Owner.
 

@@ -366,6 +366,89 @@ export class StudiosService {
     return this.isStudioMember(userId, studioSlug, ['OWNER']);
   }
 
+  async getDashboardStats(studioId: string) {
+    const games = await this.prisma.game.findMany({
+      where: { studioId },
+      select: { id: true, title: true, slug: true, viewsCount: true, wishlistsCount: true, followersCount: true, commentsCount: true },
+    });
+
+    const gameIds = games.map(g => g.id);
+
+    const now = new Date();
+    const startOfThisWeek = new Date(now);
+    startOfThisWeek.setDate(now.getDate() - now.getDay());
+    startOfThisWeek.setHours(0, 0, 0, 0);
+
+    const startOfLastWeek = new Date(startOfThisWeek);
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+
+    const [viewsThisWeek, viewsLastWeek, followsThisWeek, wishlistsThisWeek] = await Promise.all([
+      gameIds.length > 0
+        ? this.prisma.gameView.count({ where: { gameId: { in: gameIds }, createdAt: { gte: startOfThisWeek } } })
+        : 0,
+      gameIds.length > 0
+        ? this.prisma.gameView.count({ where: { gameId: { in: gameIds }, createdAt: { gte: startOfLastWeek, lt: startOfThisWeek } } })
+        : 0,
+      this.prisma.follow.count({ where: { studioId, createdAt: { gte: startOfThisWeek } } }),
+      gameIds.length > 0
+        ? this.prisma.wishlistItem.count({ where: { gameId: { in: gameIds }, createdAt: { gte: startOfThisWeek } } })
+        : 0,
+    ]);
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const commentsThisMonth = gameIds.length > 0
+      ? this.prisma.comment.count({ where: { gameId: { in: gameIds }, createdAt: { gte: startOfMonth } } })
+      : 0;
+
+    const totalViews = games.reduce((s, g) => s + g.viewsCount, 0);
+    const totalWishlists = games.reduce((s, g) => s + g.wishlistsCount, 0);
+    const totalFollowers = games.reduce((s, g) => s + g.followersCount, 0);
+    const totalComments = games.reduce((s, g) => s + g.commentsCount, 0);
+
+    const viewsByDay: { date: string; count: number }[] = [];
+    if (gameIds.length > 0) {
+      const thirtyDaysAgo = new Date(now);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const recentViews = await this.prisma.gameView.findMany({
+        where: { gameId: { in: gameIds }, createdAt: { gte: thirtyDaysAgo } },
+        select: { createdAt: true },
+        orderBy: { createdAt: 'asc' },
+      });
+      const dayMap = new Map<string, number>();
+      for (const v of recentViews) {
+        const day = v.createdAt.toISOString().slice(0, 10);
+        dayMap.set(day, (dayMap.get(day) ?? 0) + 1);
+      }
+      for (const [date, count] of dayMap) {
+        viewsByDay.push({ date, count });
+      }
+    }
+
+    const publishedGames = games.filter(g => g.slug && (g as any).isPublished !== false).length;
+    const inDevelopmentGames = games.length - publishedGames;
+
+    return {
+      games: {
+        total: games.length,
+        published: publishedGames,
+        inDevelopment: inDevelopmentGames,
+      },
+      stats: {
+        totalViews,
+        totalWishlists,
+        totalFollowers,
+        totalComments,
+        viewsThisWeek,
+        followsThisWeek,
+        wishlistsThisWeek,
+        commentsThisMonth,
+        viewsDelta: viewsLastWeek > 0 ? Math.round(((viewsThisWeek - viewsLastWeek) / viewsLastWeek) * 100) : 0,
+      },
+      viewsByDay,
+      studioGrowth: totalFollowers > 0 ? Math.min(100, Math.round((followsThisWeek / totalFollowers) * 100)) : 0,
+    };
+  }
+
   private toResponse(studio: {
     id: string;
     name: string;

@@ -52,6 +52,17 @@ export default function StudiosPage() {
   const [page, setPage] = useState(1);
   const { data, isLoading, error } = useStudios(page, 20, search || undefined);
 
+  if (!data && !isLoading) {
+    return (
+      <main className="relative min-h-screen bg-[#020609]">
+        <div className="mx-auto max-w-7xl px-5 py-10">
+          <p className="font-display text-2xl font-bold text-white">No studios found</p>
+          <p className="mt-2 text-muted-foreground">Check back later for new studios.</p>
+        </div>
+      </main>
+    );
+  }
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);

@@ -463,6 +463,33 @@ export function useDeleteNotification() {
   });
 }
 
+// ── Studio Dashboard ────────────────────────────────────────────────────
+
+export interface StudioDashboardStats {
+  games: { total: number; published: number; inDevelopment: number };
+  stats: {
+    totalViews: number;
+    totalWishlists: number;
+    totalFollowers: number;
+    totalComments: number;
+    viewsThisWeek: number;
+    followsThisWeek: number;
+    wishlistsThisWeek: number;
+    commentsThisMonth: number;
+    viewsDelta: number;
+  };
+  viewsByDay: { date: string; count: number }[];
+  studioGrowth: number;
+}
+
+export function useStudioDashboard(slug: string) {
+  return useQuery({
+    queryKey: ['studioDashboard', slug],
+    queryFn: () => api.get<StudioDashboardStats>(`/studios/${slug}/dashboard`),
+    enabled: !!slug,
+  });
+}
+
 // ── Follows ─────────────────────────────────────────────────────────────
 
 export interface FollowStatus {
