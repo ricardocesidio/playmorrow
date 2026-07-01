@@ -67,13 +67,13 @@ export default function GamesPage() {
 
   const [search, setSearch] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [freeOnly, setFreeOnly] = useState(false);
+  const [priceFilter, setPriceFilter] = useState('All');
   const [playtestOnly, setPlaytestOnly] = useState(false);
   const [statusFilter, setStatusFilter] = useState('All');
   const [genreFilter, setGenreFilter] = useState('All');
   const [platformFilter, setPlatformFilter] = useState('All');
   const [releaseFilter, setReleaseFilter] = useState('All time');
-  const [sortFilter, setSortFilter] = useState('Most active');
+  const [sortFilter, setSortFilter] = useState('Newest');
 
   const { data, isLoading, error } =
     useGames(page, pageSize, searchQuery || undefined);
@@ -87,13 +87,13 @@ export default function GamesPage() {
   const clearAll = () => {
     setSearchQuery('');
     setSearch('');
-    setFreeOnly(false);
+    setPriceFilter('All');
     setPlaytestOnly(false);
     setStatusFilter('All');
     setGenreFilter('All');
     setPlatformFilter('All');
     setReleaseFilter('All time');
-    setSortFilter('Most active');
+    setSortFilter('Newest');
     router.push('/games?page=1');
   };
 
@@ -107,7 +107,7 @@ export default function GamesPage() {
 
   const activeFilters = [
     statusFilter !== 'All' ? `Status: ${statusFilter}` : null,
-    freeOnly ? 'Free' : null,
+    priceFilter !== 'All' ? `Price: ${priceFilter}` : null,
     playtestOnly ? 'Playtest available' : null,
   ].filter(Boolean) as string[];
 
@@ -148,7 +148,6 @@ export default function GamesPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-start gap-5 xl:justify-end">
-                  <ToggleControl label="Free" active={freeOnly} onChange={setFreeOnly} />
                   <ToggleControl label="Playtest available" active={playtestOnly} onChange={setPlaytestOnly} />
                   <button type="button" onClick={clearAll} className="cursor-pointer pm-micro inline-flex items-center gap-3 text-coral transition-colors hover:text-coral/80">
                     Clear all <X className="size-4" />
@@ -156,12 +155,13 @@ export default function GamesPage() {
                 </div>
               </div>
 
-              <div className="grid gap-3 xl:grid-cols-[520px_1fr_1fr_1.1fr_1.2fr]">
-                <FilterGroup label="Status" options={['All', 'IN_DEVELOPMENT', 'ALPHA', 'PRE_ALPHA']} selected={statusFilter} onChange={setStatusFilter} />
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 <FilterSelect label="Genre" value={genreFilter} onChange={setGenreFilter} options={GENRES} />
+                <FilterSelect label="Status" value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
+                <FilterSelect label="Price" value={priceFilter} onChange={setPriceFilter} options={PRICE_OPTIONS} />
+                <FilterSelect label="Sort by" value={sortFilter} onChange={setSortFilter} options={SORT_OPTIONS} icon={<BarChart3 className="size-4" />} />
                 <FilterSelect label="Platform" value={platformFilter} onChange={setPlatformFilter} options={PLATFORMS} />
                 <FilterSelect label="Release window" value={releaseFilter} onChange={setReleaseFilter} options={RELEASE_WINDOWS} />
-                <FilterSelect label="Sort by" value={sortFilter} onChange={setSortFilter} options={SORT_OPTIONS} icon={<BarChart3 className="size-4" />} />
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
@@ -292,12 +292,12 @@ function FilterSelect({ label, value, onChange, options, icon }: { label: string
 
   return (
     <div>
-      <div className="pm-micro mb-1.5 text-muted-foreground">{label}</div>
+      <div className="mb-1.5 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">{label}</div>
       <button
         ref={buttonRef}
         type="button"
         onClick={() => setOpen(!open)}
-        className="clip-corner flex h-9 w-full items-center justify-between gap-3 border border-border-bright/60 bg-background/60 px-3 pm-micro text-cyan cursor-pointer"
+        className="clip-corner flex h-9 w-full items-center justify-between gap-3 border border-border-bright/60 bg-background/80 px-3 font-mono text-[0.55rem] uppercase tracking-widest text-cyan cursor-pointer outline-none focus:border-cyan focus:ring-1 focus:ring-cyan"
       >
         {value}
         <span className="flex items-center gap-2 text-muted-foreground">
@@ -596,11 +596,14 @@ function formatFollowers(count: number) {
 
 const GENRES = [
   'All', 'Action', 'Adventure', 'RPG', 'Strategy', 'Simulation', 'Puzzle',
-  'Platformer', 'Shooter', 'Fighting', 'Racing', 'Sports', 'Horror',
-  'Visual Novel', 'Roguelike', 'Roguelite', 'Metroidvania', 'Souls-like',
-  'Tactical', 'Card Battler', 'City Builder', 'Sandbox', 'Open World',
-  'Survival', 'Stealth', 'Rhythm', 'Party', 'Educational',
+  'Horror', 'Racing', 'Fighting', 'Sports',
 ];
+
+const STATUS_OPTIONS = [
+  'All', 'CONCEPT', 'PRE_ALPHA', 'ALPHA', 'BETA', 'EARLY_ACCESS', 'RELEASED',
+];
+
+const PRICE_OPTIONS = ['All', 'Free', 'Paid'];
 
 const PLATFORMS = [
   'All', 'PC', 'Mac', 'Linux', 'PS5', 'PS4', 'XBOX', 'Nintendo Switch',
@@ -611,6 +614,4 @@ const RELEASE_WINDOWS = [
   'All time', 'This year', 'Next year', 'Coming soon', 'Already released',
 ];
 
-const SORT_OPTIONS = [
-  'Most active', 'Newest', 'Most followed', 'Alphabetical', 'Recently updated',
-];
+const SORT_OPTIONS = ['Newest', 'Most Followed', 'Most Wishlisted', 'A-Z'];
