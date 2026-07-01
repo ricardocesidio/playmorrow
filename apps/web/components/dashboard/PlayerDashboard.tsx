@@ -132,6 +132,21 @@ const comments = [
   { title: 'You commented on Paper Relics Update', time: '1d ago', image: '/playmorrow/paper-relics.png' },
 ];
 
+const achievements = [
+  { id: 'a1', name: 'First Follow', desc: 'Follow your first studio', icon: '🎯', unlocked: true },
+  { id: 'a2', name: 'Wishlister', desc: 'Add 5 games to your wishlist', icon: '⭐', unlocked: true },
+  { id: 'a3', name: 'Commenter', desc: 'Post your first comment', icon: '💬', unlocked: true },
+  { id: 'a4', name: 'Social', desc: 'Follow 10 studios', icon: '👥', unlocked: false },
+  { id: 'a5', name: 'Explorer', desc: 'Visit 20 game pages', icon: '🗺️', unlocked: false },
+  { id: 'a6', name: 'Supporter', desc: 'Wishlist 10 games', icon: '🏆', unlocked: false },
+];
+
+const recentActivity = [
+  { icon: '🎯', text: 'You followed Obsidian Signal', time: '2h ago' },
+  { icon: '⭐', text: 'You wishlisted Neon Warden', time: '4h ago' },
+  { icon: '💬', text: 'You commented on Starfall Tactics devlog', time: '6h ago' },
+];
+
 export function PlayerDashboard() {
   const router = useRouter();
   const { user, logout } = useAuth();
@@ -301,6 +316,25 @@ export function PlayerDashboard() {
             </div>
           </div>
 
+          <DashboardPanel className="p-4">
+            <SectionHeader title="Achievements" href="/me/achievements" compact />
+            <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
+              {achievements.map((a) => (
+                <Link key={a.id} href="/me/achievements" className={`group flex flex-col items-center gap-2 border p-3 text-center transition ${
+                  a.unlocked
+                    ? 'border-cyan/40 bg-cyan/5 shadow-[0_0_12px_rgb(62_231_255_/_0.15)] hover:border-cyan/60 hover:shadow-[0_0_18px_rgb(62_231_255_/_0.3)]'
+                    : 'border-border/60 bg-background/40 opacity-50 hover:opacity-70'
+                }`}>
+                  <span className="text-xl">{a.icon}</span>
+                  <div>
+                    <p className={`font-mono text-[0.58rem] uppercase tracking-[0.12em] ${a.unlocked ? 'text-foreground' : 'text-muted-foreground'}`}>{a.name}</p>
+                    <p className="mt-0.5 text-[0.55rem] text-muted-foreground">{a.desc}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </DashboardPanel>
+
           <div className="grid gap-3 lg:grid-cols-[1fr_0.9fr_1.3fr_270px]">
             <DashboardPanel className="p-4">
               <SectionHeader title="Recently Viewed" href="/games" compact />
@@ -338,6 +372,21 @@ export function PlayerDashboard() {
               </div>
             </DashboardPanel>
           </div>
+
+          <DashboardPanel className="p-4">
+            <SectionHeader title="Recent Activity" compact />
+            <div className="mt-3 space-y-2">
+              {recentActivity.map((item, i) => (
+                <div key={i} className="flex items-center gap-3 border-b border-border/60 pb-2 last:border-0">
+                  <span className="text-base">{item.icon}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs leading-4 text-muted-foreground">{item.text}</p>
+                  </div>
+                  <span className="font-mono text-[0.58rem] text-muted-foreground">{item.time}</span>
+                </div>
+              ))}
+            </div>
+          </DashboardPanel>
 
           <div className="grid gap-3 lg:grid-cols-[1fr_1.45fr_270px]">
             <DashboardPanel className="p-4">
