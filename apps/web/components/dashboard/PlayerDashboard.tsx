@@ -67,8 +67,11 @@ export function PlayerDashboard() {
   const followingCount = (follows?.studios?.length ?? 0) + (follows?.games?.length ?? 0);
   const displayName = user.displayName || 'Obsidian Signal';
 
-  const xpForNext = user.level ? user.level * 100 : 100;
-  const xpProgress = user.level ? ((user.xp ?? 0) / xpForNext) * 100 : 0;
+  const level = user?.level ?? 1;
+  const xp = user?.xp ?? 0;
+  const xpForNext = level * 100;
+  const xpAtStart = (level * (level - 1) / 2) * 100;
+  const xpProgress = Math.min(((xp - xpAtStart) / xpForNext) * 100, 100);
 
   const feedItems = (feedData?.items ?? []).map((item) => ({
     studio: item.studio.name,
@@ -109,6 +112,7 @@ export function PlayerDashboard() {
               <SidebarLink href="/games" icon={<History className="size-4" />} label="Recently Viewed" />
               <SidebarLink href="/games" icon={<Library className="size-4" />} label="Library" />
               <SidebarLink href="/dashboard/notifications" icon={<MessageSquare className="size-4" />} label="Messages" count={unreadCount} />
+              <SidebarLink href="/dashboard/level" icon={<Trophy className="size-4" />} label="Level System" count={user.level ?? 1} />
               <SidebarLink href="/settings/profile" icon={<Settings className="size-4" />} label="Settings" />
               <button
                 onClick={() => { logout(); router.push('/'); }}
@@ -372,7 +376,7 @@ function DashboardHero({ name }: { name: string }) {
         <div className="absolute right-14 top-9 hidden text-coral drop-shadow-[0_0_20px_rgb(255_87_77_/_0.6)] lg:block">
           <Zap className="size-20 stroke-1" />
         </div>
-        <div className="relative z-10 flex min-h-[214px] flex-col justify-between p-5 sm:p-7">
+        <div className="relative z-10 flex min-h-[214px] flex-col justify-between px-6 py-5 sm:px-10 sm:py-7">
           <div>
             <p className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-cyan">Welcome Back, {name} /////////</p>
             <h1 className="mt-4 max-w-[960px] font-display text-[clamp(2.35rem,5vw,4.35rem)] font-black uppercase leading-[0.92] text-white">

@@ -119,7 +119,7 @@ export function StudioDashboard() {
         <div className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-coral/20 to-transparent" />
 
         <div className="relative mx-auto grid max-w-[1540px] xl:grid-cols-[220px_minmax(0,1fr)]">
-          <StudioSidebar unreadCount={unreadCount} studioLevel={studio?.level ?? 1} studioXp={studio?.xp ?? 0} studioSlug={studio.slug} />
+          <StudioSidebar unreadCount={unreadCount} studioSlug={studio.slug} />
 
           <section className="min-w-0">
             <StudioHero studio={studio} studioName={studioName} studioTagline={studioTagline} />
@@ -216,7 +216,7 @@ export function StudioDashboard() {
   );
 }
 
-function StudioSidebar({ unreadCount, studioLevel, studioXp, studioSlug }: { unreadCount: number; studioLevel: number; studioXp: number; studioSlug: string }) {
+function StudioSidebar({ unreadCount, studioSlug }: { unreadCount: number; studioSlug: string }) {
   return (
     <aside className="hidden xl:block">
       <DashboardPanel className="sticky top-20 min-h-full p-3">
@@ -240,19 +240,6 @@ function StudioSidebar({ unreadCount, studioLevel, studioXp, studioSlug }: { unr
           <SidebarLink href="/dashboard/studios/level" icon={<Award className="size-4" />} label="Level System" />
           <SidebarLink href={`/dashboard/studios/${studioSlug}`} icon={<Settings className="size-4" />} label="Settings" />
         </nav>
-        {(() => {
-          const xpAtStart = (studioLevel * (studioLevel - 1) / 2) * 100;
-          const xpForNext = studioLevel * 100;
-          const progress = Math.min(((studioXp - xpAtStart) / xpForNext) * 100, 100);
-          return (
-            <div className="mt-5 border-t border-border/70 px-2 pt-4">
-              <p className="font-mono text-[0.67rem] uppercase tracking-[0.22em] text-muted-foreground">Studio Level</p>
-              <p className="mt-1 font-mono text-xs text-cyan">Level {studioLevel}</p>
-              <ProgressBar value={progress} className="mt-3" />
-              <p className="mt-2 text-right font-mono text-[0.62rem] text-muted-foreground">{studioXp.toLocaleString()} / {xpForNext.toLocaleString()} XP</p>
-            </div>
-          );
-        })()}
         <div className="mt-5 overflow-hidden border border-border/70 p-3">
           <div className="relative min-h-24">
             <img src="/playmorrow/neon-warden.png" alt="" className="absolute inset-y-0 right-[-20px] h-full w-24 object-cover opacity-80" />
