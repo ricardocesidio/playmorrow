@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Space_Grotesk, JetBrains_Mono, Inter } from 'next/font/google';
 
 import './globals.css';
@@ -30,9 +30,14 @@ export const metadata: Metadata = {
   },
   description:
     'Playmorrow is a curated social platform where indie studios showcase their games, share devlogs, publish roadmaps, grow communities, and connect with players, press, and publishers.',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://playmorrow.example'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://playmorrow.vercel.app'),
   icons: {
     icon: '/favicon.svg',
+  },
+  manifest: '/manifest.json',
+  robots: {
+    index: true,
+    follow: true,
   },
   twitter: {
     card: 'summary_large_image',
@@ -44,6 +49,11 @@ export const metadata: Metadata = {
     description: 'The social discovery layer for indie games.',
     type: 'website',
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

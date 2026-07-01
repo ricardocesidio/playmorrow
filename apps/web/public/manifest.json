@@ -1,0 +1,14 @@
+{
+  "name": "Playmorrow",
+  "short_name": "Playmorrow",
+  "description": "Discover tomorrow's indie games today.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020609",
+  "theme_color": "#3ee7ff",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/favicon.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "/favicon.svg", "sizes": "512x512", "type": "image/svg+xml" }
+  ]
+}
