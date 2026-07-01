@@ -7,7 +7,6 @@ import { ArrowLeft, Save, ExternalLink, Gamepad2, Milestone, FileText, ScrollTex
 
 import { ImageUpload } from '@/components/image-upload';
 
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
 import { useGame, useUpdateGame, useDeleteGame } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
@@ -102,168 +101,189 @@ export default function EditGamePage() {
 
   if (authLoading || gameLoading) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-10">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 w-32 rounded bg-muted" />
-          <div className="h-8 w-48 rounded bg-muted" />
-          <div className="h-10 rounded bg-muted" />
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-[#020609]">
+        <div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
       </div>
     );
   }
 
   if (!game) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-20 text-center">
-        <h1 className="text-2xl font-semibold">Game not found</h1>
-        <Link href="/dashboard" className="mt-4 inline-flex items-center gap-2 text-sm text-primary underline">
-          <ArrowLeft className="size-4" /> Back to dashboard
+      <div className="relative mx-auto max-w-2xl px-6 py-20 text-center">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+        <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Game not found</h1>
+        <Link href="/dashboard" className="mt-4 inline-flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground hover:text-cyan">
+          <ArrowLeft className="size-3" /> Back to dashboard
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-10">
-      <Link href="/dashboard" className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
-        <ArrowLeft className="size-4" /> Back to dashboard
-      </Link>
+    <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+      {/* Grid overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+      {/* Top accent line */}
+      <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
 
-      <div className="mb-8 flex items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <Gamepad2 className="size-6 text-primary" />
-            <h1 className="text-3xl font-semibold tracking-tight">Edit game</h1>
-          </div>
-          <p className="mt-1 text-muted-foreground">{game.title}</p>
-        </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/games/${slug}`}><ExternalLink className="size-3" /> View public page</Link>
-        </Button>
-      </div>
+      <div className="relative mx-auto max-w-3xl">
+        <Link href="/dashboard" className="mb-6 inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:text-cyan">
+          <ArrowLeft className="size-3" /> Back to dashboard
+        </Link>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {error && <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</div>}
-        {success && <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary">Game updated successfully.</div>}
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Title</label>
-          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Slug (immutable)</label>
-          <input type="text" value={slug} disabled
-            className="w-full rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground" />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Tagline</label>
-          <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Description</label>
-          <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium">Status</label>
-            <select value={status} onChange={(e) => setStatus(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
-              {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <div className="flex items-center gap-3">
+              <Gamepad2 className="size-6 text-cyan" />
+              <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Edit game</h1>
+            </div>
+            <p className="mt-1 text-muted-foreground">{game.title}</p>
           </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Expected release text</label>
-            <input type="text" value={expectedReleaseText} onChange={(e) => setExpectedReleaseText(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
+          <Link href={`/games/${slug}`} className="clip-corner inline-flex items-center border border-border/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
+            <ExternalLink className="size-3 mr-1" /> View public page
+          </Link>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Release date</label>
-            <input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Currency</label>
-            <input type="text" value={currency} onChange={(e) => setCurrency(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card/20 p-4">
-          <h3 className="mb-3 text-sm font-semibold">Pricing</h3>
-          <div className="flex items-center gap-3 mb-3">
-            <input type="checkbox" id="isFree" checked={isFree} onChange={(e) => setIsFree(e.target.checked)} className="rounded border-input" />
-            <label htmlFor="isFree" className="text-sm">Free</label>
-          </div>
-          {!isFree && (
-            <div>
-              <label className="mb-1.5 block text-sm font-medium">Price (cents)</label>
-              <input type="number" value={priceCents} onChange={(e) => setPriceCents(e.target.value)}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {error && (
+            <div className="clip-corner border border-coral/40 bg-coral/5 px-4 py-3 font-mono text-[0.68rem] text-coral">
+              {error}
             </div>
           )}
-        </div>
+          {success && (
+            <div className="clip-corner border border-cyan/40 bg-cyan/5 px-4 py-3 font-mono text-[0.68rem] text-cyan">
+              Game updated successfully.
+            </div>
+          )}
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <ImageUpload value={coverUrl} onChange={setCoverUrl} label="Cover image" />
-          <ImageUpload value={bannerUrl} onChange={setBannerUrl} label="Banner" />
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <div className="flex gap-3">
-            <Button type="submit" disabled={updateGame.isPending}>
-              {updateGame.isPending ? 'Saving…' : 'Save changes'}
-              <Save className="size-4" />
-            </Button>
-            <Button asChild variant="outline"><Link href="/dashboard">Cancel</Link></Button>
+          {/* Basic Information */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Basic Information</h3>
+            <div>
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Title *</label>
+              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            </div>
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Slug (immutable)</label>
+              <input type="text" value={slug} disabled
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground/50 outline-none transition" />
+            </div>
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Tagline</label>
+              <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)}
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            </div>
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Description</label>
+              <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
+                className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            </div>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="border-destructive/30 text-destructive hover:bg-destructive/10"
-            onClick={async () => {
-              if (!token || !confirm(`Delete game "${game?.title}" permanently? This cannot be undone.`)) return;
-              try {
-                await deleteGame.mutateAsync({ slug, token });
-                router.push('/dashboard');
-              } catch { /* ignore */ }
-            }}
-            disabled={deleteGame.isPending}
-          >
-            <Trash2 className="size-4" />
-            {deleteGame.isPending ? 'Deleting…' : 'Delete game'}
-          </Button>
-        </div>
-      </form>
 
-      {/* Quick links */}
-      <div className="mt-10 flex flex-wrap gap-3">
-        <Button asChild variant="outline" size="sm">
-          <Link href={'/dashboard/devlogs/new?game=' + slug}>
-            <FileText className="size-3" /> New devlog
+          {/* Release Details */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Release Details</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Status</label>
+                <select value={status} onChange={(e) => setStatus(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                  {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Expected release text</label>
+                <input type="text" value={expectedReleaseText} onChange={(e) => setExpectedReleaseText(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Release date</label>
+                <input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Currency</label>
+                <input type="text" value={currency} onChange={(e) => setCurrency(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            </div>
+          </div>
+
+          {/* Pricing */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Pricing</h3>
+            <div className="flex items-center gap-3 mb-3">
+              <input type="checkbox" id="isFree" checked={isFree} onChange={(e) => setIsFree(e.target.checked)} className="rounded border-input" />
+              <label htmlFor="isFree" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Free</label>
+            </div>
+            {!isFree && (
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Price (cents)</label>
+                <input type="number" value={priceCents} onChange={(e) => setPriceCents(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            )}
+          </div>
+
+          {/* Media */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Media</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <ImageUpload value={coverUrl} onChange={setCoverUrl} label="Cover image" />
+              <ImageUpload value={bannerUrl} onChange={setBannerUrl} label="Banner" />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div className="flex gap-3">
+              <button type="submit" disabled={updateGame.isPending}
+                className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+                {updateGame.isPending ? 'Saving\u2026' : 'Save changes'}
+                <Save className="size-3 ml-1 inline" />
+              </button>
+              <Link href="/dashboard"
+                className="clip-corner inline-flex items-center border border-border/60 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
+                Cancel
+              </Link>
+            </div>
+            <button
+              type="button"
+              className="clip-corner cursor-pointer border border-coral/60 bg-coral/5 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-coral transition hover:bg-coral/20 disabled:cursor-not-allowed disabled:opacity-40"
+              onClick={async () => {
+                if (!token || !confirm(`Delete game "${game?.title}" permanently? This cannot be undone.`)) return;
+                try {
+                  await deleteGame.mutateAsync({ slug, token });
+                  router.push('/dashboard');
+                } catch { /* ignore */ }
+              }}
+              disabled={deleteGame.isPending}
+            >
+              <Trash2 className="size-3 mr-1 inline" />
+              {deleteGame.isPending ? 'Deleting\u2026' : 'Delete game'}
+            </button>
+          </div>
+        </form>
+
+        {/* Quick links */}
+        <div className="mt-10 flex flex-wrap gap-3">
+          <Link href={'/dashboard/devlogs/new?game=' + slug}
+            className="clip-corner inline-flex items-center border border-border/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
+            <FileText className="size-3 mr-1" /> New devlog
           </Link>
-        </Button>
-        <Button asChild variant="outline" size="sm">
-          <Link href={'/dashboard/roadmap?game=' + slug}>
-            <Milestone className="size-3" /> Manage roadmap
+          <Link href={'/dashboard/roadmap?game=' + slug}
+            className="clip-corner inline-flex items-center border border-border/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
+            <Milestone className="size-3 mr-1" /> Manage roadmap
           </Link>
-        </Button>
-        <Button asChild variant="outline" size="sm">
-          <Link href={'/dashboard/games/' + slug + '/press-kit'}>
-            <ScrollText className="size-3" /> Manage press kit
+          <Link href={'/dashboard/games/' + slug + '/press-kit'}
+            className="clip-corner inline-flex items-center border border-border/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
+            <ScrollText className="size-3 mr-1" /> Manage press kit
           </Link>
-        </Button>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
