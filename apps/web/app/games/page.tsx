@@ -386,7 +386,7 @@ function CatalogGameCard({ game }: { game: Game }) {
 
       <div className="flex items-center justify-between gap-2 border-t border-border/80 bg-background/60 px-3 py-2">
           <div className="flex flex-wrap gap-1.5">
-            {platforms.slice(0, 4).map((platform) => (
+            {[...new Set(platforms)].slice(0, 4).map((platform) => (
               <span key={platform} className="border border-border-bright/45 bg-background/50 px-2 py-1 font-mono text-[10px] uppercase leading-none text-muted-foreground">
                 {platform}
               </span>
