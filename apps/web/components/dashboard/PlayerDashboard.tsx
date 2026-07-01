@@ -64,7 +64,7 @@ export function PlayerDashboard() {
   const unreadCount = unreadData?.unreadCount ?? 0;
   const wishlistItems = wishlist?.items ?? [];
   const wishlistCount = wishlistItems.length;
-  const followingCount = Math.max((follows?.studios?.length ?? 0) + (follows?.games?.length ?? 0), 24);
+  const followingCount = (follows?.studios?.length ?? 0) + (follows?.games?.length ?? 0);
   const displayName = user.displayName || 'Obsidian Signal';
 
   const xpForNext = user.level ? user.level * 100 : 100;
@@ -104,8 +104,8 @@ export function PlayerDashboard() {
               <SidebarLink href="/dashboard" icon={<Users className="size-4" />} label="Overview" active />
               <SidebarLink href="/me/wishlist" icon={<Heart className="size-4" />} label="Wishlist" count={wishlistCount} />
               <SidebarLink href="/me/following" icon={<Users className="size-4" />} label="Following" count={followingCount} />
-              <SidebarLink href="/dashboard" icon={<Trophy className="size-4" />} label="Achievements" count={12} />
-              <SidebarLink href="/feed" icon={<Gamepad2 className="size-4" />} label="Playtests" count={3} />
+              <SidebarLink href="/dashboard" icon={<Trophy className="size-4" />} label="Achievements" />
+              <SidebarLink href="/feed" icon={<Gamepad2 className="size-4" />} label="Playtests" />
               <SidebarLink href="/games" icon={<History className="size-4" />} label="Recently Viewed" />
               <SidebarLink href="/games" icon={<Library className="size-4" />} label="Library" />
               <SidebarLink href="/dashboard/notifications" icon={<MessageSquare className="size-4" />} label="Messages" count={unreadCount} />
@@ -216,7 +216,7 @@ export function PlayerDashboard() {
                 <div className="mt-5 grid grid-cols-2 gap-4 border-t border-border/70 pt-4">
                   <MiniStat icon={<Trophy className="size-4" />} label="Badges" value="18 / 42" />
                   <MiniStat icon={<Gamepad2 className="size-4" />} label="Playtests Joined" value="7" />
-                  <MiniStat icon={<MessageSquare className="size-4" />} label="Comments Made" value="24" />
+                  <MiniStat icon={<MessageSquare className="size-4" />} label="Comments Made" value={unreadCount.toString()} />
                   <MiniStat icon={<Users className="size-4" />} label="Devlogs Followed" value="31" />
                 </div>
               </DashboardPanel>
