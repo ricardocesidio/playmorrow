@@ -36,4 +36,44 @@ export class EmailService {
       throw new Error('Email provider not configured. Set RESEND_API_KEY.');
     }
   }
+
+  async sendInvitationEmail(params: {
+    email: string;
+    studioName: string;
+    inviterName: string;
+    role: string;
+    token: string;
+  }): Promise<void> {
+    const acceptUrl = `${this.configService.get<string>('WEB_ORIGIN', 'http://localhost:3000')}/invite/${params.token}`;
+    const subject = `You've been invited to join ${params.studioName} on PlayMorrow`;
+    const text = [
+      `Hello,`,
+      ``,
+      `${params.inviterName} has invited you to join "${params.studioName}" on PlayMorrow as a ${params.role}.`,
+      ``,
+      `Click the link below to accept your invitation:`,
+      `${acceptUrl}`,
+      ``,
+      `This invitation expires in 7 days.`,
+      `If you don't have a PlayMorrow account yet, you'll be able to create one when you accept.`,
+      ``,
+      `— The PlayMorrow Team`,
+    ].join('\n');
+
+    if (this.resend) {
+      await this.resend.emails.send({
+        from: this.from,
+        to: params.email,
+        subject,
+        text,
+      });
+    } else if (!this.isProduction) {
+      this.logger.log(`[DEV] Invitation email for ${params.email}:`);
+      this.logger.log(`  To: ${params.email}`);
+      this.logger.log(`  Subject: ${subject}`);
+      this.logger.log(`  Link: ${acceptUrl}`);
+    } else {
+      throw new Error('Email provider not configured. Set RESEND_API_KEY.');
+    }
+  }
 }
