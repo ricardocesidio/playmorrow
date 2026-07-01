@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Bell, Check, CheckCheck, EyeOff, X } from 'lucide-react';
 
+import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
 import {
   useNotifications,
@@ -65,7 +66,9 @@ export default function NotificationsPage() {
   };
 
   return (
-    <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+    <>
+      <SiteHeader />
+      <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
       {/* Grid overlay */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
       {/* Top accent line */}
@@ -239,5 +242,6 @@ export default function NotificationsPage() {
       )}
     </div>
     </main>
+    </>
   );
 }
