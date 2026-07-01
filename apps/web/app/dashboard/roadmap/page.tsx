@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Plus, Pencil, Trash2, ArrowUp, ArrowDown, Milestone, GripVertical } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyStudios, useGameRoadmap, useCreateRoadmapItem, useUpdateRoadmapItem, useDeleteRoadmapItem, useReorderRoadmapItems } from '@/lib/api/hooks';
 import type { Game, RoadmapItem } from '@/lib/api/client';
@@ -14,15 +13,15 @@ import { ApiError } from '@/lib/api/client';
 const STATUSES = ['PLANNED', 'IN_PROGRESS', 'DONE', 'CANCELLED'] as const;
 
 const STATUS_COLORS: Record<string, string> = {
-  PLANNED: 'bg-blue-500/10 text-blue-400',
-  IN_PROGRESS: 'bg-amber-500/10 text-amber-400',
-  DONE: 'bg-green-500/10 text-green-400',
-  CANCELLED: 'bg-muted text-muted-foreground',
+  PLANNED: 'border-blue-500/40 text-blue-400',
+  IN_PROGRESS: 'border-amber-500/40 text-amber-400',
+  DONE: 'border-green-500/40 text-green-400',
+  CANCELLED: 'border-muted-foreground/40 text-muted-foreground',
 };
 
 export default function RoadmapDashboardPage() {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-4xl px-6 py-10"><div className="h-96 animate-pulse rounded-xl bg-muted" /></div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[#020609]"><div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" /></div>}>
       <RoadmapContent />
     </Suspense>
   );
@@ -147,148 +146,168 @@ function RoadmapContent() {
   if (authLoading) return null;
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
-      <Link href="/dashboard" className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
-        <ArrowLeft className="size-4" /> Back to dashboard
-      </Link>
+    <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+      {/* Grid overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+      {/* Top accent line */}
+      <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
 
-      <div className="mb-8 flex items-center gap-3">
-        <Milestone className="size-6 text-primary" />
-        <h1 className="text-3xl font-semibold tracking-tight">Roadmap</h1>
-      </div>
+      <div className="relative mx-auto max-w-4xl">
+        <Link href="/dashboard" className="mb-6 inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:text-cyan">
+          <ArrowLeft className="size-3" /> Back to dashboard
+        </Link>
 
-      {/* Game selector */}
-      {!gameSlug && (
-        <div className="mb-8 space-y-3">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Studio</label>
-            <select value={selectedStudio} onChange={(e) => setSelectedStudio(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
-              <option value="">Select a studio…</option>
-              {studios?.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
-            </select>
-          </div>
-          {selectedStudio && (
+        <div className="mb-8 flex items-center gap-3">
+          <Milestone className="size-6 text-cyan" />
+          <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Roadmap</h1>
+        </div>
+
+        {/* Game selector */}
+        {!gameSlug && (
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] space-y-3">
             <div>
-              <label className="mb-1.5 block text-sm font-medium">Game *</label>
-              <select value={gameSlug} onChange={(e) => setGameSlug(e.target.value)}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
-                <option value="">Select a game…</option>
-                {games.map((g) => <option key={g.slug} value={g.slug}>{g.title}</option>)}
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Studio</label>
+              <select value={selectedStudio} onChange={(e) => setSelectedStudio(e.target.value)}
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                <option value="">Select a studio…</option>
+                {studios?.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
               </select>
             </div>
-          )}
-        </div>
-      )}
-
-      {!gameSlug && !selectedStudio && (
-        <div className="rounded-xl border border-border bg-card/20 py-16 text-center">
-          <Milestone className="mx-auto mb-3 size-10 text-muted-foreground/40" />
-          <p className="text-muted-foreground">Select a game to manage its roadmap.</p>
-        </div>
-      )}
-
-      {gameSlug && (
-        <>
-          {error && <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</div>}
-
-          {/* Create form */}
-          <div className="mb-8 rounded-xl border border-border bg-card/20 p-5">
-            <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold"><Plus className="size-4" /> Add roadmap item</h3>
-            <form onSubmit={handleCreate} className="space-y-3">
-              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-                placeholder="Title" className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-              <textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)}
-                placeholder="Description (optional)" className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-              <div className="flex flex-wrap gap-3">
-                <select value={status} onChange={(e) => setStatus(e.target.value)}
-                  className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
-                  {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+            {selectedStudio && (
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Game *</label>
+                <select value={gameSlug} onChange={(e) => setGameSlug(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                  <option value="">Select a game…</option>
+                  {games.map((g) => <option key={g.slug} value={g.slug}>{g.title}</option>)}
                 </select>
-                <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)}
-                  className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-                <Button type="submit" disabled={createItem.isPending} size="sm">
-                  {createItem.isPending ? 'Adding…' : 'Add'}
-                </Button>
               </div>
-            </form>
+            )}
           </div>
+        )}
 
-          {/* Roadmap list */}
-          {roadmapLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-muted" />)}
+        {!gameSlug && !selectedStudio && (
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 py-16 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <Milestone className="mx-auto mb-3 size-10 text-muted-foreground/40" />
+            <p className="font-mono text-[0.68rem] uppercase tracking-widest text-muted-foreground">Select a game to manage its roadmap.</p>
+          </div>
+        )}
+
+        {gameSlug && (
+          <>
+            {error && (
+              <div className="clip-corner border border-coral/40 bg-coral/5 px-4 py-3 font-mono text-[0.68rem] text-coral mb-4">
+                {error}
+              </div>
+            )}
+
+            {/* Create form */}
+            <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] mb-8">
+              <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-4 flex items-center gap-2"><Plus className="size-3.5" /> Add roadmap item</h3>
+              <form onSubmit={handleCreate} className="space-y-3">
+                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Title"
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                <textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Description (optional)"
+                  className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                <div className="flex flex-wrap gap-3">
+                  <select value={status} onChange={(e) => setStatus(e.target.value)}
+                    className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                    {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                  <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)}
+                    className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                  <button type="submit" disabled={createItem.isPending}
+                    className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-5 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+                    {createItem.isPending ? 'Adding…' : 'Add'}
+                  </button>
+                </div>
+              </form>
             </div>
-          ) : roadmap && roadmap.length > 0 ? (
-            <div className="space-y-2">
-              {roadmap.map((item, index) => (
-                <div key={item.id} className="rounded-xl border border-border bg-card/30 p-4 transition-colors hover:border-primary/30">
-                  {editingId === item.id ? (
-                    <div className="space-y-3">
-                      <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)}
-                        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-                      <textarea rows={2} value={editDescription} onChange={(e) => setEditDescription(e.target.value)}
-                        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-                      <div className="flex flex-wrap gap-3">
-                        <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)}
-                          className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
-                          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                        <Button size="sm" onClick={saveEdit} disabled={updateItem.isPending}>
-                          {updateItem.isPending ? 'Saving…' : 'Save'}
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-3 min-w-0">
-                        <GripVertical className="mt-1 size-4 shrink-0 text-muted-foreground/30" />
-                        <div className="min-w-0">
-                          <h4 className="text-sm font-medium">{item.title}</h4>
-                          {item.description && <p className="mt-0.5 text-xs text-muted-foreground">{item.description}</p>}
-                          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
-                            <span className={'rounded px-1.5 py-0.5 ' + (STATUS_COLORS[item.status] ?? '')}>{item.status}</span>
-                            {item.targetDate && <span className="text-muted-foreground">{new Date(item.targetDate).toLocaleDateString()}</span>}
-                          </div>
+
+            {/* Roadmap list */}
+            {roadmapLoading ? (
+              <div className="space-y-2">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="clip-corner h-16 animate-pulse border border-border/50 bg-[#050b0f]/40 shadow-[0_0_20px_rgb(0_0_0_/_0.2)]" />
+                ))}
+              </div>
+            ) : roadmap && roadmap.length > 0 ? (
+              <div className="space-y-2">
+                {roadmap.map((item, index) => (
+                  <div key={item.id} className="clip-corner border border-border/70 bg-[#050b0f]/80 p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition hover:border-cyan/40">
+                    {editingId === item.id ? (
+                      <div className="space-y-3">
+                        <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)}
+                          className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                        <textarea rows={2} value={editDescription} onChange={(e) => setEditDescription(e.target.value)}
+                          className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                        <div className="flex flex-wrap gap-3">
+                          <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)}
+                            className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                            {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                          <button onClick={saveEdit} disabled={updateItem.isPending}
+                            className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-5 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+                            {updateItem.isPending ? 'Saving…' : 'Save'}
+                          </button>
+                          <button onClick={() => setEditingId(null)}
+                            className="clip-corner cursor-pointer border border-border/60 px-5 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
+                            Cancel
+                          </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <button onClick={() => moveItem(index, -1)} disabled={index === 0}
-                          className="rounded p-1 text-muted-foreground hover:text-foreground disabled:opacity-30" title="Move up">
-                          <ArrowUp className="size-3.5" />
-                        </button>
-                        <button onClick={() => moveItem(index, 1)} disabled={index === (roadmap.length - 1)}
-                          className="rounded p-1 text-muted-foreground hover:text-foreground disabled:opacity-30" title="Move down">
-                          <ArrowDown className="size-3.5" />
-                        </button>
-                        <button onClick={() => startEdit(item)}
-                          className="rounded p-1 text-muted-foreground hover:text-foreground" title="Edit">
-                          <Pencil className="size-3.5" />
-                        </button>
-                        <button
-                          onClick={async () => {
-                            if (!token || !confirm(`Delete roadmap item "${item.title}"?`)) return;
-                            try { await deleteItem.mutateAsync({ id: item.id, token }); } catch { /* ignore */ }
-                          }}
-                          disabled={deleteItem.isPending}
-                          className="rounded p-1 text-muted-foreground hover:text-destructive disabled:opacity-30" title="Delete">
-                          <Trash2 className="size-3.5" />
-                        </button>
+                    ) : (
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 min-w-0">
+                          <GripVertical className="mt-1 size-4 shrink-0 text-muted-foreground/30" />
+                          <div className="min-w-0">
+                            <h4 className="text-sm font-medium text-foreground">{item.title}</h4>
+                            {item.description && <p className="mt-0.5 text-xs text-muted-foreground">{item.description}</p>}
+                            <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
+                              <span className={'clip-corner-sm border px-1.5 py-0.5 font-mono text-[0.55rem] uppercase tracking-wider ' + (STATUS_COLORS[item.status] ?? '')}>{item.status}</span>
+                              {item.targetDate && <span className="font-mono text-[0.55rem] uppercase tracking-wider text-muted-foreground">{new Date(item.targetDate).toLocaleDateString()}</span>}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button onClick={() => moveItem(index, -1)} disabled={index === 0}
+                            className="clip-corner cursor-pointer border border-border/40 bg-background/30 p-1.5 text-muted-foreground transition hover:border-cyan/50 hover:text-cyan disabled:opacity-30 disabled:cursor-not-allowed" title="Move up">
+                            <ArrowUp className="size-3.5" />
+                          </button>
+                          <button onClick={() => moveItem(index, 1)} disabled={index === (roadmap.length - 1)}
+                            className="clip-corner cursor-pointer border border-border/40 bg-background/30 p-1.5 text-muted-foreground transition hover:border-cyan/50 hover:text-cyan disabled:opacity-30 disabled:cursor-not-allowed" title="Move down">
+                            <ArrowDown className="size-3.5" />
+                          </button>
+                          <button onClick={() => startEdit(item)}
+                            className="clip-corner cursor-pointer border border-border/40 bg-background/30 p-1.5 text-muted-foreground transition hover:border-cyan/50 hover:text-cyan" title="Edit">
+                            <Pencil className="size-3.5" />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (!token || !confirm(`Delete roadmap item "${item.title}"?`)) return;
+                              try { await deleteItem.mutateAsync({ id: item.id, token }); } catch { /* ignore */ }
+                            }}
+                            disabled={deleteItem.isPending}
+                            className="clip-corner cursor-pointer border border-border/40 bg-background/30 p-1.5 text-muted-foreground transition hover:border-coral/50 hover:text-coral disabled:opacity-30 disabled:cursor-not-allowed" title="Delete">
+                            <Trash2 className="size-3.5" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-border bg-card/20 py-12 text-center">
-              <Milestone className="mx-auto mb-3 size-8 text-muted-foreground/40" />
-              <p className="text-muted-foreground">No roadmap items yet.</p>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="clip-corner border border-border/70 bg-[#050b0f]/80 py-12 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+                <Milestone className="mx-auto mb-3 size-8 text-muted-foreground/40" />
+                <p className="font-mono text-[0.68rem] uppercase tracking-widest text-muted-foreground">No roadmap items yet.</p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </main>
   );
 }
