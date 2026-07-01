@@ -18,6 +18,8 @@ import {
   Clock,
 } from 'lucide-react';
 
+import { formatFollowers } from '@/lib/format';
+
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { StatusBadge } from '@/components/status-badge';
@@ -30,12 +32,6 @@ import type { Game } from '@/lib/api/client';
 import { useAuth } from '@/lib/api/auth-context';
 import { FollowButton } from '@/components/follow-button';
 import { ReportForm } from '@/components/report-form';
-
-function formatFollowers(count: number) {
-  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
-  if (count >= 1_000) return `${(count / 1_000).toFixed(1)}K`;
-  return String(count);
-}
 
 function timeAgo(dateStr: string): string {
   const now = Date.now();

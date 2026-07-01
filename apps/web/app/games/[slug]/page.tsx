@@ -38,6 +38,7 @@ import { ErrorState } from '@/components/error-state';
 import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { useAuth } from '@/lib/api/auth-context';
+import { formatFollowers } from '@/lib/format';
 import type { Devlog, Game, RoadmapItem } from '@/lib/api/client';
 import {
   useAddGameToWishlist,
@@ -871,11 +872,6 @@ function ActivityIcon() {
 
 function labelStatus(status: string) {
   return status.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function formatFollowers(count: number) {
-  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
-  return String(count);
 }
 
 function getRoadmapVisualState(status: string) {

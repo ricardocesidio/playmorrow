@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { GamesService } from '../games/games.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PlayerXpService } from '../player-xp/player-xp.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -9,6 +10,7 @@ import { StudioXpService } from '../studios/studio-xp.service';
 export class FollowsService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly gamesService: GamesService,
     private readonly notificationsService: NotificationsService,
     private readonly playerXpService: PlayerXpService,
     private readonly studioXpService: StudioXpService,
@@ -115,6 +117,9 @@ export class FollowsService {
       );
     }
 
+    // Sync game counters
+    this.gamesService.syncGameCounters(game.id).catch(() => {});
+
     return { targetType: 'GAME', targetId: game.id, isFollowing: true, followerCount };
   }
 
@@ -129,6 +134,10 @@ export class FollowsService {
     });
 
     const followerCount = await this.prisma.follow.count({ where: { gameId: game.id } });
+
+    // Sync game counters
+    this.gamesService.syncGameCounters(game.id).catch(() => {});
+
     return { targetType: 'GAME', targetId: game.id, isFollowing: false, followerCount };
   }
 

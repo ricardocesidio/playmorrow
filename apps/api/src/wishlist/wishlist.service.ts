@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { GamesService } from '../games/games.service';
 import { PlayerXpService } from '../player-xp/player-xp.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
@@ -7,6 +8,7 @@ import { StudioXpService } from '../studios/studio-xp.service';
 export class WishlistService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly gamesService: GamesService,
     private readonly playerXpService: PlayerXpService,
     private readonly studioXpService: StudioXpService,
   ) {}
@@ -47,6 +49,9 @@ export class WishlistService {
       await this.playerXpService.award(userId, 'WISHLIST_GAME', gameSlug).catch(() => {});
     }
 
+    // Sync game counters
+    this.gamesService.syncGameCounters(game.id).catch(() => {});
+
     return { gameId: game.id, gameSlug, isWishlisted: true };
   }
 
@@ -55,6 +60,9 @@ export class WishlistService {
     if (!game) throw new NotFoundException('Game not found');
 
     await this.prisma.wishlistItem.deleteMany({ where: { userId, gameId: game.id } });
+
+    // Sync game counters
+    this.gamesService.syncGameCounters(game.id).catch(() => {});
 
     return { gameId: game.id, gameSlug, isWishlisted: false };
   }
