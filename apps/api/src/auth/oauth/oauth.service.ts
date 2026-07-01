@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { createHash, randomBytes } from 'node:crypto';
 
 import { PrismaService } from '../../prisma/prisma.service';
+import type { User } from '@playmorrow/database';
 import type { OAuthProfile } from './strategies/google.strategy';
 
 const REFRESH_EXPIRES_DAYS = 30;
@@ -22,7 +23,7 @@ export class OAuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async findByEmail(email: string) {
+  async findByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { email } });
   }
 

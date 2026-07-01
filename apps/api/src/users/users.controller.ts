@@ -63,6 +63,20 @@ export class UsersController {
     return this.usersService.updateProfile(user.id, dto);
   }
 
+  @Patch('me/cookie-preferences')
+  @UseGuards(SessionAuthGuard)
+  @ApiOkResponse({ description: 'Cookie preferences saved.' })
+  async updateCookiePreferences(
+    @CurrentUser() user: { id: string },
+    @Body() body: { analytics: boolean; marketing: boolean },
+  ) {
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { cookiePreferences: { analytics: body.analytics, marketing: body.marketing, updatedAt: new Date().toISOString() } },
+    });
+    return { ok: true };
+  }
+
   @Delete('me')
   @UseGuards(SessionAuthGuard)
   @HttpCode(HttpStatus.OK)
