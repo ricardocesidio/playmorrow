@@ -1,7 +1,8 @@
-import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
+'use client';
 
-import { HudLinkLogo } from '@/components/playmorrow/hud';
+import Link from 'next/link';
+
+import { SiteHeader } from '@/components/site-header';
 
 export default function CommunityGuidelinesPage() {
   return (
@@ -9,24 +10,9 @@ export default function CommunityGuidelinesPage() {
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
       <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
 
+      <SiteHeader />
+
       <div className="relative px-5 sm:px-8 lg:px-10">
-        <header className="relative z-10 mx-auto flex h-20 max-w-[1500px] items-center justify-between">
-          <HudLinkLogo />
-          <nav className="hidden items-center gap-14 text-sm text-muted-foreground md:flex" aria-label="Main navigation">
-            <Link href="/games" className="hover:text-cyan">Games</Link>
-            <Link href="/studios" className="hover:text-cyan">Studios</Link>
-            <Link href="/feed" className="hover:text-cyan">Live Feed</Link>
-          </nav>
-          <div className="flex items-center gap-6">
-            <Link href="/login" className="text-sm text-muted-foreground hover:text-cyan">Sign in</Link>
-            <Link
-              href="/register"
-              className="clip-corner hidden border border-coral bg-coral px-6 py-3 pm-display text-xs text-coral-foreground shadow-[0_0_24px_rgb(255_87_77_/_0.25)] sm:inline-flex"
-            >
-              Share your game <ArrowUpRight className="size-4" />
-            </Link>
-          </div>
-        </header>
 
         <main className="relative z-10 mx-auto mt-8 max-w-3xl pb-16">
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-6 sm:p-8 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">

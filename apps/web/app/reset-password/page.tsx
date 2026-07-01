@@ -6,6 +6,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff } from 'lucide-react';
 import { api, ApiError } from '@/lib/api/client';
+import { SiteHeader } from '@/components/site-header';
 
 function ResetPasswordInner() {
   const searchParams = useSearchParams();
@@ -39,6 +40,7 @@ function ResetPasswordInner() {
       <div className="relative min-h-screen bg-[#020609]">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
         <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+        <SiteHeader />
         <div className="relative flex min-h-screen flex-col items-center justify-center px-4">
           <div className="clip-corner w-full max-w-sm border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h1 className="font-display font-black uppercase tracking-tight text-white">Password reset</h1>
@@ -54,6 +56,7 @@ function ResetPasswordInner() {
     <div className="relative min-h-screen bg-[#020609]">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
       <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+      <SiteHeader />
       <div className="relative flex min-h-screen flex-col items-center justify-center px-4">
         <div className="clip-corner w-full max-w-sm border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
           <h1 className="font-display font-black uppercase tracking-tight text-white">Set new password</h1>
