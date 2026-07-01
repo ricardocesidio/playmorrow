@@ -228,7 +228,7 @@ function StudioSidebar({ unreadCount, studioSlug }: { unreadCount: number; studi
         </div>
         <nav className="mt-3 space-y-1">
           <SidebarLink href="/dashboard" icon={<PanelLeft className="size-4" />} label="Overview" active />
-          <SidebarLink href="/dashboard/games/new" icon={<Gamepad2 className="size-4" />} label="My Games" />
+          <SidebarLink href="/dashboard/games" icon={<Gamepad2 className="size-4" />} label="My Games" />
           <SidebarLink href="/dashboard/devlogs/new" icon={<FileText className="size-4" />} label="Devlogs" />
           <SidebarLink href="/dashboard/roadmap" icon={<Workflow className="size-4" />} label="Roadmap" />
           <SidebarLink href="/dashboard/feed" icon={<LineChart className="size-4" />} label="Analytics" />
