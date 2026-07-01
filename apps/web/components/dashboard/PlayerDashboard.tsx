@@ -26,111 +26,20 @@ import {
 
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
-import { useMyFollows, useMyWishlist, useNotifications, useUnreadNotificationCount } from '@/lib/api/hooks';
+import { useMyFollows, useMyWishlist, useNotifications, useUnreadNotificationCount, usePublicFeed } from '@/lib/api/hooks';
 import { useRouter } from 'next/navigation';
+import type { FeedItem } from '@/lib/api/client';
 
-const games = [
-  {
-    title: 'Neon Warden',
-    slug: 'neon-warden',
-    studio: 'Obsidian Signal',
-    genre: 'Tactical Stealth',
-    image: '/playmorrow/neon-warden.png',
-    score: '12.6K',
-    progress: 68,
-    platforms: ['PS5', 'XBOX'],
-    accent: 'cyan',
-  },
-  {
-    title: 'Starfall Tactics',
-    slug: 'starfall-tactics',
-    studio: 'Lumen Garden',
-    genre: 'Tactical RPG',
-    image: '/playmorrow/starfall-tactics.png',
-    score: '5.9K',
-    progress: 52,
-    platforms: ['PC', 'XBOX'],
-    accent: 'cyan',
-  },
-  {
-    title: 'Mossbound',
-    slug: 'mossbound',
-    studio: 'Wildbriar',
-    genre: 'Adventure',
-    image: '/playmorrow/mossbound.png',
-    score: '5.1K',
-    progress: 32,
-    platforms: ['PC', 'SWITCH'],
-    accent: 'violet',
-  },
-  {
-    title: 'Paper Relics',
-    slug: 'paper-relics',
-    studio: 'Second Story Games',
-    genre: 'Card Battler',
-    image: '/playmorrow/paper-relics.png',
-    score: '3.2K',
-    progress: 32,
-    platforms: ['PC'],
-    accent: 'violet',
-  },
-  {
-    title: 'Voidrunner',
-    slug: 'voidrunner',
-    studio: 'Aster Forge',
-    genre: 'Roguelite',
-    image: '/playmorrow/voidrunner.png',
-    score: '6.3K',
-    progress: 45,
-    platforms: ['PC'],
-    accent: 'cyan',
-  },
-];
-
-const recentGames = [
-  { title: 'Little Giants', genre: 'City Builder', image: '/playmorrow/little-giants.png', time: '2h ago' },
-  { title: 'Northlight', genre: 'Survival', image: '/playmorrow/northlight.png', time: '1d ago' },
-  { title: 'Echo//Bloom', genre: 'Narrative Puzzle', image: '/playmorrow/echobloom.png', time: '2d ago' },
-];
-
-const releases = [
-  { date: 'JUN 04', title: 'Echo//Bloom', studio: 'Lumen Garden', image: '/playmorrow/echobloom.png' },
-  { date: 'JUN 11', title: 'Northlight', studio: 'Frostfire Games', image: '/playmorrow/northlight.png' },
-  { date: 'JUN 18', title: 'Little Giants', studio: 'Tiny Forge', image: '/playmorrow/little-giants.png' },
-];
-
-const feedItems = [
-  { studio: 'Ironlight Studios', body: 'released a new devlog for Starfall Tactics', time: '2h ago', icon: BadgeCheck },
-  { studio: 'Wildbriar', body: 'shared concept art for Mossbound', time: '5h ago', icon: Activity },
-  { studio: 'Second Story Games', body: 'announced a new update for Paper Relics', time: '1d ago', icon: Trophy },
-];
-
-const savedDevlogs = [
-  { title: "Shadows Don't Sleep: Infiltration in Neon Warden", studio: 'OBSIDIAN SIGNAL', image: '/playmorrow/neon-warden.png', time: '2h ago' },
-  { title: 'Combat Deep Dive: Paper Relics', studio: 'SECOND STORY GAMES', image: '/playmorrow/paper-relics.png', time: '3d ago' },
-  { title: 'The Glen Awaits: Mossbound', studio: 'WILDBRIAR', image: '/playmorrow/mossbound.png', time: '4d ago' },
-];
-
-const recommendations = [
-  { title: 'Voidrunner', genre: 'Roguelite', image: '/playmorrow/voidrunner.png', match: '91% Match' },
-  { title: 'Northlight', genre: 'Survival', image: '/playmorrow/northlight.png', match: '87% Match' },
-  { title: 'Starfall Tactics', genre: 'Tactical', image: '/playmorrow/starfall-tactics.png', match: '85% Match' },
-  { title: 'Echo//Bloom', genre: 'Puzzle', image: '/playmorrow/echobloom.png', match: '84% Match' },
-];
-
-const notifications = [
-  { title: 'New devlog from Ironlight Studios', time: '1h ago', icon: BadgeCheck, tone: 'violet' },
-  { title: 'Starfall Tactics released new roadmap', time: '3h ago', icon: Radio, tone: 'coral' },
-  { title: 'Your comment got a reply on Mossbound devlog', time: '5h ago', icon: MessageSquare, tone: 'amber' },
-  { title: 'Playtest invite Little Giants', time: '1d ago', icon: Gamepad2, tone: 'success' },
-  { title: 'Voidrunner update released', time: '2d ago', icon: Zap, tone: 'coral' },
-];
-
-const comments = [
-  { title: 'You commented on Starfall Tactics Roadmap', time: '2h ago', image: '/playmorrow/starfall-tactics.png' },
-  { title: 'You replied to Mossbound Devlog #3', time: '5h ago', image: '/playmorrow/mossbound.png' },
-  { title: 'You commented on Paper Relics Update', time: '1d ago', image: '/playmorrow/paper-relics.png' },
-];
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return `${Math.floor(days / 30)}mo ago`;
+}
 
 const achievements = [
   { id: 'a1', name: 'First Follow', desc: 'Follow your first studio', icon: '🎯', unlocked: true },
@@ -141,12 +50,6 @@ const achievements = [
   { id: 'a6', name: 'Supporter', desc: 'Wishlist 10 games', icon: '🏆', unlocked: false },
 ];
 
-const recentActivity = [
-  { icon: '🎯', text: 'You followed Obsidian Signal', time: '2h ago' },
-  { icon: '⭐', text: 'You wishlisted Neon Warden', time: '4h ago' },
-  { icon: '💬', text: 'You commented on Starfall Tactics devlog', time: '6h ago' },
-];
-
 export function PlayerDashboard() {
   const router = useRouter();
   const { user, logout } = useAuth();
@@ -154,14 +57,32 @@ export function PlayerDashboard() {
   const { data: follows } = useMyFollows();
   const { data: unreadData } = useUnreadNotificationCount();
   const { data: recentNotifs } = useNotifications('all', 1, 5);
+  const { data: feedData } = usePublicFeed(1, 5);
 
   if (!user) return null;
 
-  const unreadCount = unreadData?.unreadCount ?? 2;
+  const unreadCount = unreadData?.unreadCount ?? 0;
   const wishlistItems = wishlist?.items ?? [];
   const wishlistCount = wishlistItems.length;
   const followingCount = Math.max((follows?.studios?.length ?? 0) + (follows?.games?.length ?? 0), 24);
   const displayName = user.displayName || 'Obsidian Signal';
+
+  const xpForNext = user.level ? user.level * 100 : 100;
+  const xpProgress = user.level ? ((user.xp ?? 0) / xpForNext) * 100 : 0;
+
+  const feedItems = (feedData?.items ?? []).map((item) => ({
+    studio: item.studio.name,
+    body: item.summary || item.title,
+    time: timeAgo(item.createdAt),
+    icon: item.type === 'DEVLOG' ? BadgeCheck : Activity,
+  }));
+
+  const notifItems = (recentNotifs?.items ?? []).map((item) => ({
+    title: item.title,
+    time: timeAgo(item.createdAt),
+    icon: Bell,
+    tone: 'violet' as const,
+  }));
 
   return (
     <>
@@ -198,12 +119,12 @@ export function PlayerDashboard() {
             </nav>
 
             <div className="mt-5 border-t border-border/70 px-2 pt-4">
-              <p className="font-mono text-[0.67rem] uppercase tracking-[0.22em] text-muted-foreground">Level 12</p>
+              <p className="font-mono text-[0.67rem] uppercase tracking-[0.22em] text-muted-foreground">Level {user.level ?? '--'}</p>
               <p className="mt-1 flex items-center gap-2 font-mono text-[0.58rem] uppercase tracking-[0.18em] text-cyan">
                 <Trophy className="size-3" /> Explorer
               </p>
-              <ProgressBar value={68} className="mt-3" />
-              <p className="mt-2 text-right font-mono text-[0.62rem] text-muted-foreground">2,680 / 4,000 XP</p>
+              <ProgressBar value={xpProgress} className="mt-3" />
+              <p className="mt-2 text-right font-mono text-[0.62rem] text-muted-foreground">{(user.xp ?? 0).toLocaleString()} / {xpForNext.toLocaleString()} XP</p>
             </div>
 
             <div className="mt-5 border-t border-border/70 px-2 pt-4">
@@ -284,12 +205,12 @@ export function PlayerDashboard() {
                 <p className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-foreground">Account Progress</p>
                 <div className="mt-5 flex items-end justify-between">
                   <div>
-                    <p className="font-mono text-xs text-cyan">Level 12</p>
-                    <ProgressBar value={68} className="mt-3 w-28" />
+                    <p className="font-mono text-xs text-cyan">Level {user.level ?? '--'}</p>
+                    <ProgressBar value={xpProgress} className="mt-3 w-28" />
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-muted-foreground">Explorer</p>
-                    <p className="mt-3 font-mono text-[0.68rem] text-muted-foreground">2,680 / 4,000 XP</p>
+                    <p className="mt-3 font-mono text-[0.68rem] text-muted-foreground">{(user.xp ?? 0).toLocaleString()} / {xpForNext.toLocaleString()} XP</p>
                   </div>
                 </div>
                 <div className="mt-5 grid grid-cols-2 gap-4 border-t border-border/70 pt-4">
@@ -303,12 +224,12 @@ export function PlayerDashboard() {
               <DashboardPanel className="p-4">
                 <SectionHeader title="Notifications" href="/dashboard/notifications" compact />
                 <div className="mt-3 space-y-2">
-                  {(recentNotifs?.items?.length ? recentNotifs.items.map((item, index) => ({
-                    title: item.title,
-                    time: index === 0 ? '1h ago' : `${index + 2}h ago`,
-                    icon: Bell,
-                    tone: index % 2 === 0 ? 'violet' : 'coral',
-                  })) : notifications).slice(0, 5).map((item) => (
+                  {notifItems.length === 0 ? (
+                    <div className="py-6 text-center">
+                      <Bell className="mx-auto mb-2 size-5 text-muted-foreground" />
+                      <p className="font-mono text-[0.6rem] text-muted-foreground">No notifications yet</p>
+                    </div>
+                  ) : notifItems.slice(0, 5).map((item) => (
                     <NotificationRow key={`${item.title}-${item.time}`} item={item} />
                   ))}
                 </div>
@@ -338,72 +259,83 @@ export function PlayerDashboard() {
           <div className="grid gap-3 lg:grid-cols-[1fr_0.9fr_1.3fr_270px]">
             <DashboardPanel className="p-4">
               <SectionHeader title="Recently Viewed" href="/games" compact />
-              <div className="mt-3 space-y-3">
-                {recentGames.map((game) => (
-                  <MediaRow key={game.title} {...game} />
-                ))}
+              <div className="mt-3 py-8 text-center">
+                <History className="mx-auto mb-2 size-6 text-muted-foreground" />
+                <p className="font-mono text-[0.6rem] text-muted-foreground">No recently viewed games</p>
+                <Link href="/games" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
+                  Browse games <ArrowRight className="size-3" />
+                </Link>
               </div>
             </DashboardPanel>
 
             <DashboardPanel className="p-4">
               <SectionHeader title="Upcoming Releases" href="/games" compact />
-              <div className="mt-3 space-y-2">
-                {releases.map((release) => (
-                  <ReleaseRow key={release.title} {...release} />
-                ))}
+              <div className="mt-3 py-8 text-center">
+                <Radio className="mx-auto mb-2 size-6 text-muted-foreground" />
+                <p className="font-mono text-[0.6rem] text-muted-foreground">No upcoming releases</p>
+                <Link href="/games" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
+                  Browse games <ArrowRight className="size-3" />
+                </Link>
               </div>
             </DashboardPanel>
 
             <DashboardPanel className="p-4">
               <SectionHeader title="Feed From Followed Studios" href="/feed" compact />
               <div className="mt-3 space-y-3">
-                {feedItems.map((item) => (
-                  <FeedRow key={item.studio} item={item} />
+                {feedItems.length === 0 ? (
+                  <div className="py-8 text-center">
+                    <Activity className="mx-auto mb-2 size-6 text-muted-foreground" />
+                    <p className="font-mono text-[0.6rem] text-muted-foreground">No feed items yet</p>
+                    <Link href="/games" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
+                      Follow studios <ArrowRight className="size-3" />
+                    </Link>
+                  </div>
+                ) : feedItems.slice(0, 3).map((item) => (
+                  <FeedRow key={`${item.studio}-${item.time}`} item={item} />
                 ))}
               </div>
             </DashboardPanel>
 
             <DashboardPanel className="p-4">
               <SectionHeader title="Recent Comments" href="/feed" compact />
-              <div className="mt-3 space-y-3">
-                {comments.map((comment) => (
-                  <CommentRow key={comment.title} {...comment} />
-                ))}
+              <div className="mt-3 py-8 text-center">
+                <MessageSquare className="mx-auto mb-2 size-6 text-muted-foreground" />
+                <p className="font-mono text-[0.6rem] text-muted-foreground">No comments yet</p>
+                <Link href="/feed" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
+                  Browse feed <ArrowRight className="size-3" />
+                </Link>
               </div>
             </DashboardPanel>
           </div>
 
           <DashboardPanel className="p-4">
             <SectionHeader title="Recent Activity" compact />
-            <div className="mt-3 space-y-2">
-              {recentActivity.map((item, i) => (
-                <div key={i} className="flex items-center gap-3 border-b border-border/60 pb-2 last:border-0">
-                  <span className="text-base">{item.icon}</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs leading-4 text-muted-foreground">{item.text}</p>
-                  </div>
-                  <span className="font-mono text-[0.58rem] text-muted-foreground">{item.time}</span>
-                </div>
-              ))}
+            <div className="mt-3 py-8 text-center">
+              <Activity className="mx-auto mb-2 size-6 text-muted-foreground" />
+              <p className="font-mono text-[0.6rem] text-muted-foreground">No recent activity</p>
             </div>
           </DashboardPanel>
 
           <div className="grid gap-3 lg:grid-cols-[1fr_1.45fr_270px]">
             <DashboardPanel className="p-4">
               <SectionHeader title="Saved Devlogs" href="/feed" compact />
-              <div className="mt-3 space-y-3">
-                {savedDevlogs.map((item) => (
-                  <DevlogRow key={item.title} {...item} />
-                ))}
+              <div className="mt-3 py-8 text-center">
+                <Bookmark className="mx-auto mb-2 size-6 text-muted-foreground" />
+                <p className="font-mono text-[0.6rem] text-muted-foreground">No saved devlogs</p>
+                <Link href="/feed" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
+                  Browse devlogs <ArrowRight className="size-3" />
+                </Link>
               </div>
             </DashboardPanel>
 
             <DashboardPanel className="p-4">
               <SectionHeader title="Recommended For You" href="/games" compact />
-              <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
-                {recommendations.map((game) => (
-                  <RecommendationTile key={game.title} {...game} />
-                ))}
+              <div className="mt-3 py-8 text-center">
+                <Heart className="mx-auto mb-2 size-6 text-muted-foreground" />
+                <p className="font-mono text-[0.6rem] text-muted-foreground">No recommendations yet</p>
+                <Link href="/games" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
+                  Browse games <ArrowRight className="size-3" />
+                </Link>
               </div>
             </DashboardPanel>
 
@@ -516,7 +448,7 @@ function SectionHeader({ title, href, meta, locked, compact }: { title: string; 
   );
 }
 
-function GameTile({ game }: { game: (typeof games)[number] }) {
+function GameTile({ game }: { game: { title: string; slug: string; studio: string; genre: string; image: string; score: string; progress: number; platforms: string[]; accent: string } }) {
   return (
     <Link href={`/games/${game.slug}`} className="group overflow-hidden border border-border/90 bg-background/70 transition hover:-translate-y-0.5 hover:border-cyan/70">
       <div className="relative aspect-[1.15/1] overflow-hidden">
@@ -566,37 +498,7 @@ function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string
   );
 }
 
-function MediaRow({ title, genre, image, time }: { title: string; genre: string; image: string; time: string }) {
-  return (
-    <Link href="/games" className="flex items-center gap-3 border-b border-border/60 pb-2 last:border-0">
-      <img src={image} alt="" className="size-12 object-cover" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm text-foreground">{title}</p>
-        <p className="truncate text-xs text-muted-foreground">{genre}</p>
-      </div>
-      <span className="font-mono text-[0.62rem] text-muted-foreground">{time}</span>
-    </Link>
-  );
-}
-
-function ReleaseRow({ date, title, studio, image }: { date: string; title: string; studio: string; image: string }) {
-  const [month, day] = date.split(' ');
-  return (
-    <Link href="/games" className="flex items-center gap-3 border-b border-border/60 pb-2 last:border-0">
-      <div className="grid size-11 place-items-center border border-border bg-background font-mono text-[0.62rem] text-muted-foreground">
-        <span>{month}</span>
-        <span className="-mt-3 text-sm text-foreground">{day}</span>
-      </div>
-      <img src={image} alt="" className="size-11 object-cover" />
-      <div className="min-w-0">
-        <p className="truncate text-sm text-foreground">{title}</p>
-        <p className="truncate text-xs text-muted-foreground">{studio}</p>
-      </div>
-    </Link>
-  );
-}
-
-function FeedRow({ item }: { item: (typeof feedItems)[number] }) {
+function FeedRow({ item }: { item: { studio: string; body: string; time: string; icon: React.ComponentType<{ className?: string }> } }) {
   const Icon = item.icon;
   return (
     <Link href="/feed" className="flex items-center gap-3 border-b border-border/60 pb-3 last:border-0">
@@ -622,44 +524,6 @@ function NotificationRow({ item }: { item: { title: string; time: string; icon: 
       </span>
       <p className="min-w-0 flex-1 text-xs leading-4 text-muted-foreground">{item.title}</p>
       <span className="font-mono text-[0.58rem] text-muted-foreground">{item.time}</span>
-    </Link>
-  );
-}
-
-function DevlogRow({ title, studio, image, time }: { title: string; studio: string; image: string; time: string }) {
-  return (
-    <Link href="/feed" className="flex items-center gap-3 border-b border-border/60 pb-2 last:border-0">
-      <img src={image} alt="" className="size-12 object-cover" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-xs text-muted-foreground">{title}</p>
-        <p className="mt-1 truncate font-mono text-[0.58rem] text-foreground">{studio}</p>
-      </div>
-      <span className="font-mono text-[0.58rem] text-muted-foreground">{time}</span>
-    </Link>
-  );
-}
-
-function RecommendationTile({ title, genre, image, match }: { title: string; genre: string; image: string; match: string }) {
-  return (
-    <Link href="/games" className="group overflow-hidden border border-border/90 bg-background/70 transition hover:border-cyan/70">
-      <div className="aspect-[0.85/1] overflow-hidden">
-        <img src={image} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-      </div>
-      <div className="p-2">
-        <p className="truncate font-mono text-[0.65rem] uppercase tracking-[0.12em] text-foreground">{title}</p>
-        <p className="truncate text-[0.62rem] text-muted-foreground">{genre}</p>
-        <p className="mt-1 font-mono text-[0.65rem] text-success">{match}</p>
-      </div>
-    </Link>
-  );
-}
-
-function CommentRow({ title, image, time }: { title: string; image: string; time: string }) {
-  return (
-    <Link href="/feed" className="flex items-center gap-3 border-b border-border/60 pb-3 last:border-0">
-      <img src={image} alt="" className="size-9 rounded-full border border-border object-cover" />
-      <p className="min-w-0 flex-1 text-xs leading-4 text-muted-foreground">{title}</p>
-      <span className="font-mono text-[0.58rem] text-muted-foreground">{time}</span>
     </Link>
   );
 }
