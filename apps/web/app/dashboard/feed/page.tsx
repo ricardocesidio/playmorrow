@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Rss, RefreshCw, Loader2 } from 'lucide-react';
 
-import { Nav } from '@/components/nav';
-import { Footer } from '@/components/footer';
 import { FeedItemCard } from '@/components/feed-item';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
@@ -45,8 +43,8 @@ export default function PersonalFeedPage() {
 
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-[#020609]">
+        <div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
       </div>
     );
   }
@@ -54,29 +52,27 @@ export default function PersonalFeedPage() {
   if (!isAuthenticated) return null;
 
   return (
-    <>
-      <Nav />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">
-        <div className="mb-8">
-          <div className="flex items-center gap-3">
-            <Rss className="size-6 text-primary" />
-            <h1 className="text-3xl font-semibold tracking-tight">Your Feed</h1>
-          </div>
-          <p className="mt-2 text-muted-foreground">
-            Updates from games and studios you follow.
-          </p>
+    <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+      {/* Grid overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+      {/* Top accent line */}
+      <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+
+      <div className="relative mx-auto max-w-3xl">
+        <div className="mb-8 flex items-center gap-3">
+          <Rss className="size-6 text-cyan" />
+          <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Your Feed</h1>
         </div>
 
         {/* Filter tabs */}
-        <div className="mb-6 flex gap-1 rounded-lg border border-border bg-card/20 p-1">
+        <div className="mb-6 flex gap-4 border-b border-border/40">
           {TABS.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setType(tab.key)}
-              aria-pressed={type === tab.key}
-              className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              className={`pb-2 font-mono text-[0.6rem] uppercase tracking-widest transition-colors ${
                 type === tab.key
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'border-b-2 border-cyan text-cyan'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -89,15 +85,15 @@ export default function PersonalFeedPage() {
         {isLoading && (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-24 animate-pulse rounded-xl bg-muted" />
+              <div key={i} className="clip-corner h-24 animate-pulse border border-border/40 bg-[#050b0f]/30" />
             ))}
           </div>
         )}
 
         {/* Error state */}
         {error && !isLoading && (
-          <div className="rounded-xl border border-destructive/30 bg-destructive/5 py-12 text-center">
-            <p className="text-destructive">Could not load your feed.</p>
+          <div className="clip-corner border border-coral/40 bg-coral/5 py-12 text-center">
+            <p className="font-mono text-[0.65rem] text-coral">Could not load your feed.</p>
             <Button
               variant="outline"
               size="sm"
@@ -112,9 +108,9 @@ export default function PersonalFeedPage() {
 
         {/* Empty: no follows */}
         {!isLoading && !error && items.length === 0 && type === 'all' && (
-          <div className="rounded-xl border border-border bg-card/20 py-16 text-center">
-            <Rss className="mx-auto mb-3 size-10 text-muted-foreground/40" />
-            <p className="text-muted-foreground">
+          <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+            <Rss className="mx-auto mb-3 size-10 text-muted-foreground/30" />
+            <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
               Follow games and studios to see their latest updates here.
             </p>
             <Button asChild className="mt-4">
@@ -125,8 +121,8 @@ export default function PersonalFeedPage() {
 
         {/* Empty: filter has no results */}
         {!isLoading && !error && items.length === 0 && type !== 'all' && (
-          <div className="rounded-xl border border-border bg-card/20 py-16 text-center">
-            <p className="text-muted-foreground">
+          <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+            <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
               No {type} updates found.
             </p>
             <Button variant="outline" className="mt-4" onClick={() => setType('all')}>
@@ -153,10 +149,9 @@ export default function PersonalFeedPage() {
 
         {/* End of list */}
         {!hasNextPage && items.length > 0 && (
-          <p className="mt-8 text-center text-sm text-muted-foreground">You've reached the end.</p>
+          <p className="mt-8 text-center font-mono text-[0.55rem] text-muted-foreground">You've reached the end.</p>
         )}
-      </main>
-      <Footer />
-    </>
+      </div>
+    </main>
   );
 }
