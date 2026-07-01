@@ -193,6 +193,8 @@ model User {
   passwordResetTokens     PasswordResetToken[]
   wishlistItems         WishlistItem[]
   auditLogs             AuditLog[]
+  xpEvents              PlayerXpEvent[]
+  achievements          Achievement[]
 
   @@index([role])
   @@map("users")
@@ -245,6 +247,33 @@ model StudioXpEvent {
   @@index([studioId])
   @@index([studioId, createdAt])
   @@map("studio_xp_events")
+}
+
+model PlayerXpEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  reason    String
+  amount    Int
+  reference String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("player_xp_events")
+}
+
+model Achievement {
+  userId        String
+  achievementId String
+  name          String
+  unlockedAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, achievementId])
+  @@index([userId])
+  @@map("achievements")
 }
 
 model StudioMember {
