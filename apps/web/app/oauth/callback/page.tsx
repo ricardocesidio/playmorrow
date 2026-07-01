@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Suspense } from 'react';
+import { SiteHeader } from '@/components/site-header';
 
 function OAuthCallbackInner() {
   const router = useRouter();
@@ -23,8 +24,11 @@ function OAuthCallbackInner() {
 
 export default function OAuthCallbackPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-background"><div className="size-6 animate-spin border border-cyan border-t-transparent" /></div>}>
-      <OAuthCallbackInner />
-    </Suspense>
+    <>
+      <SiteHeader />
+      <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-background"><div className="size-6 animate-spin border border-cyan border-t-transparent" /></div>}>
+        <OAuthCallbackInner />
+      </Suspense>
+    </>
   );
 }
