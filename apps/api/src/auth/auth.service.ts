@@ -404,7 +404,7 @@ export class AuthService {
         bio: (dto.bio as string) || null,
         country: (dto.country as string) || null,
         accountType: accountType as 'PLAYER' | 'STUDIO',
-        role: 'PLAYER' as const,
+        role: accountType === 'STUDIO' ? 'PUBLISHER' as const : 'PLAYER' as const,
         emailVerifiedAt: now,
         isVerified: true,
         isOnboardingCompleted: true,
@@ -434,6 +434,31 @@ export class AuthService {
             members: { create: { userId: completedUser.id, role: 'OWNER' } },
           },
         });
+      }
+
+      if (accountType === 'PLAYER') {
+        const followSlugs = (dto.followStudioSlugs as string[]) ?? [];
+        const wishlistSlugs = (dto.wishlistGameSlugs as string[]) ?? [];
+
+        if (followSlugs.length > 0) {
+          const studios = await tx.studio.findMany({ where: { slug: { in: followSlugs } }, select: { id: true } });
+          if (studios.length > 0) {
+            await tx.follow.createMany({
+              data: studios.map((s) => ({ userId: completedUser.id, targetType: 'STUDIO', studioId: s.id })),
+              skipDuplicates: true,
+            });
+          }
+        }
+
+        if (wishlistSlugs.length > 0) {
+          const games = await tx.game.findMany({ where: { slug: { in: wishlistSlugs } }, select: { id: true } });
+          if (games.length > 0) {
+            await tx.wishlistItem.createMany({
+              data: games.map((g) => ({ userId: completedUser.id, gameId: g.id })),
+              skipDuplicates: true,
+            });
+          }
+        }
       }
 
       return completedUser;

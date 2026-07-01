@@ -34,26 +34,12 @@ import {
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
 import { type Game, type Studio } from '@/lib/api/client';
-import { useMyDevlogs, useMyGames, useMyStudios, useNotifications, useUnreadNotificationCount } from '@/lib/api/hooks';
+import { useMyDevlogs, useMyGames, useMyStudios, useNotifications, useUnreadNotificationCount, useStudioDashboard, useGameRoadmap, useStudioAuditLogs } from '@/lib/api/hooks';
+import type { RoadmapItem } from '@/lib/api/client';
 
 type StudioGame = Game & {
   studio: Studio;
 };
-
-const fallbackCovers = [
-  '/playmorrow/voidrunner.png',
-  '/playmorrow/neon-warden.png',
-  '/playmorrow/mossbound.png',
-  '/playmorrow/paper-relics.png',
-];
-
-const roadmapColumns = [
-  { title: 'Planning', count: 3, items: ['New Enemy Factions', 'World Expansion', 'Photo Mode'] },
-  { title: 'In Development', count: 4, items: ['Co-op Multiplayer', 'New Weapons', 'Boss Rush Mode'] },
-  { title: 'Testing', count: 2, items: ['Performance Optimization', 'UI/UX Overhaul'] },
-  { title: 'In Beta', count: 1, items: ['Beta Release'] },
-  { title: 'Released', count: 2, items: ['Early Access Launch', 'Patch 1.1'] },
-];
 
 export function StudioDashboard() {
   const { user, token } = useAuth();
@@ -67,12 +53,19 @@ export function StudioDashboard() {
 
   const studio = studios?.[0];
   const studioGames = (games ?? []) as StudioGame[];
-  const publishedGames = studioGames.filter((game) => game.isPublished || game.status === 'PUBLISHED').length;
-  const inDevelopmentGames = studioGames.filter((game) => !game.isPublished || game.status !== 'PUBLISHED').length;
+  const firstGame = studioGames[0];
+
+  const { data: dashboard } = useStudioDashboard(studio?.slug ?? '');
+  const { data: roadmapItems } = useGameRoadmap(firstGame?.slug ?? '');
+  const { data: auditLogs } = useStudioAuditLogs(studio?.slug ?? '');
+
+  const ds = dashboard;
+  const publishedGames = ds?.games.published ?? studioGames.filter((game) => game.isPublished || game.status === 'PUBLISHED').length;
+  const inDevelopmentGames = ds?.games.inDevelopment ?? studioGames.filter((game) => !game.isPublished || game.status !== 'PUBLISHED').length;
   const followers = studio?.followersCount ?? studioGames.reduce((sum, game) => sum + game.followersCount, 0);
-  const wishlists = studioGames.reduce((sum, game) => sum + (game.wishlistsCount ?? 0), 0);
-  const views = studioGames.reduce((sum, game) => sum + (game.viewsCount ?? 0), 0);
-  const comments = studioGames.reduce((sum, game) => sum + (game.commentsCount ?? 0), 0);
+  const wishlists = ds?.stats.totalWishlists ?? studioGames.reduce((sum, game) => sum + (game.wishlistsCount ?? 0), 0);
+  const views = ds?.stats.totalViews ?? studioGames.reduce((sum, game) => sum + (game.viewsCount ?? 0), 0);
+  const comments = ds?.stats.totalComments ?? studioGames.reduce((sum, game) => sum + (game.commentsCount ?? 0), 0);
   const unreadCount = unreadData?.unreadCount ?? 0;
   const studioName = studio?.name ?? user.displayName;
   const studioTagline = studio?.tagline ?? 'Build. Create. Impact the future of gaming.';
@@ -126,11 +119,11 @@ export function StudioDashboard() {
             <div className="grid grid-cols-2 gap-3 p-3 md:grid-cols-4 2xl:grid-cols-8">
               <StatCard icon={<Gamepad2 className="size-5" />} label="Games Published" value={publishedGames} tone="violet" />
               <StatCard icon={<Boxes className="size-5" />} label="In Development" value={inDevelopmentGames} tone="amber" />
-              <StatCard icon={<Heart className="size-5" />} label="Followers" value={formatNumber(followers)} delta="+1.2K this week" tone="coral" />
-              <StatCard icon={<Target className="size-5" />} label="Total Wishlists" value={formatNumber(wishlists)} delta="+3.4K this week" tone="cyan" />
-              <StatCard icon={<MonitorPlay className="size-5" />} label="Total Views" value={formatNumber(views)} delta="+4.5K this week" tone="violet" />
-              <StatCard icon={<MessageSquare className="size-5" />} label="Comments" value={formatNumber(comments)} delta="+420 this week" tone="cyan" />
-              <StatCard icon={<Users className="size-5" />} label="Playtests Active" value={3} tone="cyan" />
+              <StatCard icon={<Heart className="size-5" />} label="Followers" value={formatNumber(followers)} delta={ds ? formatDelta(ds.stats.followsThisWeek) : undefined} tone="coral" />
+              <StatCard icon={<Target className="size-5" />} label="Total Wishlists" value={formatNumber(wishlists)} delta={ds ? formatDelta(ds.stats.wishlistsThisWeek) : undefined} tone="cyan" />
+              <StatCard icon={<MonitorPlay className="size-5" />} label="Total Views" value={formatNumber(views)} delta={ds ? formatDelta(ds.stats.viewsThisWeek) : undefined} tone="violet" />
+              <StatCard icon={<MessageSquare className="size-5" />} label="Comments" value={formatNumber(comments)} delta={ds ? formatDelta(ds.stats.commentsThisMonth) : undefined} tone="cyan" />
+              <StatCard icon={<Users className="size-5" />} label="Playtests Active" value={0} tone="muted" />
               <StatCard icon={<CalendarDays className="size-5" />} label="Since Joined" value={formatMonthYear(studio.createdAt)} tone="muted" />
             </div>
 
@@ -143,7 +136,7 @@ export function StudioDashboard() {
                 <ActionCard href="/dashboard/roadmap" icon={<Workflow className="size-5" />} title="Update Roadmap" body="Plan your progress" />
                 <ActionCard href={studioSlug ? `/dashboard/studios/${studioSlug}` : '/studios/new'} icon={<Users className="size-5" />} title="Invite Members" body="Add to your team" />
                 <ActionCard href="/dashboard/feed" icon={<BarChart3 className="size-5" />} title="Studio Analytics" body="View performance" />
-                <ActionCard href="/dashboard/roadmap" icon={<Radio className="size-5" />} title="Playtests" body="Manage playtests" />
+                <ActionCard href="/dashboard/roadmap" icon={<Radio className="size-5" />} title="Playtests" body="Coming soon" />
                 <ActionCard href={studioSlug ? `/dashboard/studios/${studioSlug}` : '/studios/new'} icon={<Settings className="size-5" />} title="Studio Settings" body="Manage studio" />
               </div>
             </DashboardPanel>
@@ -157,8 +150,8 @@ export function StudioDashboard() {
                   </div>
                 ) : (
                   <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    {(studioGames.length ? studioGames : []).slice(0, 4).map((game, index) => (
-                      <StudioGameCard key={game.id} game={game} fallbackCover={fallbackCovers[index % fallbackCovers.length]!} />
+                    {(studioGames.length ? studioGames : []).slice(0, 4).map((game) => (
+                      <StudioGameCard key={game.id} game={game} />
                     ))}
                     {studioGames.length === 0 && (
                       <Link href="/dashboard/games/new" className="col-span-full grid min-h-44 place-items-center border border-dashed border-border text-sm text-muted-foreground hover:border-cyan hover:text-cyan">
@@ -172,35 +165,44 @@ export function StudioDashboard() {
               <DashboardPanel className="p-4">
                 <SectionHeader title="Studio Activity" href="/dashboard/notifications" />
                 <div className="mt-4 space-y-3">
-                  {(notifications?.items?.length ? notifications.items : buildActivity(studioGames, devlogs ?? [])).slice(0, 5).map((item, index) => (
-                    <ActivityRow key={`${item.title}-${index}`} title={item.title} body={item.body ?? 'Workspace update'} time={index === 0 ? '2m ago' : `${index * 7 + 5}m ago`} />
+                  {(notifications?.items?.length
+                    ? notifications.items.map((n) => ({
+                        title: n.title,
+                        body: n.body ?? 'Notification',
+                        time: relativeDays(n.createdAt),
+                      }))
+                    : buildActivity(studioGames, devlogs ?? [], auditLogs?.items ?? [])
+                  ).slice(0, 5).map((item, index) => (
+                    <ActivityRow key={`${item.title}-${index}`} title={item.title} body={item.body} time={item.time} />
                   ))}
                 </div>
               </DashboardPanel>
 
               <DashboardPanel className="p-4">
                 <SectionHeader title="Studio Progress" href="/dashboard/feed" linkLabel="Full analytics" />
-                <div className="mt-5 grid place-items-center">
-                  <div className="relative grid size-32 place-items-center rounded-full border-8 border-cyan/20">
-                    <div className="absolute inset-[-8px] rounded-full border-8 border-transparent border-l-cyan border-t-cyan shadow-[0_0_24px_rgb(62_231_255_/_0.35)]" />
-                    <div className="text-center">
-                      <p className="font-display text-3xl">75%</p>
-                      <p className="font-mono text-[0.58rem] text-muted-foreground">Studio Growth</p>
+                {ds && (
+                  <div className="mt-5 grid place-items-center">
+                    <div className="relative grid size-32 place-items-center rounded-full border-8 border-cyan/20">
+                      <div className="absolute inset-[-8px] rounded-full border-8 border-transparent border-l-cyan border-t-cyan shadow-[0_0_24px_rgb(62_231_255_/_0.35)]" />
+                      <div className="text-center">
+                        <p className="font-display text-3xl">{ds.studioGrowth}%</p>
+                        <p className="font-mono text-[0.58rem] text-muted-foreground">Studio Growth</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
                 <div className="mt-5 space-y-3">
                   <ProgressItem label="Profile Complete" value={100} />
                   <ProgressItem label="Games Published" value={Math.min(100, (publishedGames / 20) * 100)} meta={`${publishedGames} / 20`} />
                   <ProgressItem label="Followers" value={Math.min(100, (followers / 50000) * 100)} meta={`${formatNumber(followers)} / 50K`} />
-                  <ProgressItem label="Monthly Goal" value={Math.min(100, (views / 250000) * 100)} meta={`${formatNumber(views)} / 250K`} />
+                  <ProgressItem label="Views This Month" value={ds ? Math.min(100, (ds.stats.viewsThisWeek / Math.max(1000, ds.stats.totalViews)) * 100) : 0} meta={ds ? `${formatNumber(ds.stats.viewsThisWeek)} / ${formatNumber(Math.max(1000, ds.stats.totalViews))}` : undefined} />
                 </div>
               </DashboardPanel>
             </div>
 
             <div className="grid gap-3 xl:grid-cols-[1fr_1fr]">
-              <AnalyticsPanel games={studioGames} />
-              <RoadmapPanel />
+              <AnalyticsPanel viewsByDay={ds?.viewsByDay} totalViews={views} />
+              <RoadmapPanel items={roadmapItems ?? []} />
             </div>
           </section>
         </div>
@@ -339,8 +341,8 @@ function SectionHeader({ title, href, linkLabel = 'View all' }: { title: string;
   );
 }
 
-function StudioGameCard({ game, fallbackCover }: { game: StudioGame; fallbackCover: string }) {
-  const cover = game.coverUrl || game.bannerUrl || fallbackCover;
+function StudioGameCard({ game }: { game: StudioGame }) {
+  const cover = game.coverUrl || game.bannerUrl || '/playmorrow/neon-warden.png';
   const progress = statusProgress(game.status);
   return (
     <Link href={`/dashboard/games/${game.slug}`} className="group overflow-hidden border border-border/90 bg-background/70 transition hover:-translate-y-0.5 hover:border-cyan/70">
@@ -361,7 +363,7 @@ function StudioGameCard({ game, fallbackCover }: { game: StudioGame; fallbackCov
         </div>
         <ProgressBar value={progress} />
         <p className="truncate text-[0.68rem] text-muted-foreground">
-          v1.3.2 + Updated {relativeDays(game.updatedAt)}
+          Updated {relativeDays(game.updatedAt)}
         </p>
       </div>
     </Link>
@@ -381,43 +383,76 @@ function ActivityRow({ title, body, time }: { title: string; body: string; time:
   );
 }
 
-function AnalyticsPanel({ games }: { games: StudioGame[] }) {
-  const totalViews = games.reduce((sum, game) => sum + (game.viewsCount ?? 0), 0);
+function AnalyticsPanel({ viewsByDay, totalViews }: { viewsByDay?: { date: string; count: number }[]; totalViews: number }) {
+  const chartData = viewsByDay?.length ? viewsByDay : [];
+  const maxCount = Math.max(...chartData.map(d => d.count), 1);
   return (
     <DashboardPanel className="p-4">
       <SectionHeader title="Game Analytics" href="/dashboard/feed" linkLabel="Open analytics" />
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <MiniMetric icon={<MonitorPlay className="size-4" />} label="Views" value={formatNumber(totalViews)} />
-        <MiniMetric icon={<Heart className="size-4" />} label="Wishlists" value={formatNumber(games.reduce((s, g) => s + (g.wishlistsCount ?? 0), 0))} />
+        <MiniMetric icon={<Heart className="size-4" />} label="Wishlists" value={formatNumber(0)} />
         <MiniMetric icon={<Download className="size-4" />} label="Export Ready" value="CSV" />
       </div>
       <div className="mt-5 h-48 border border-border/80 bg-background/50 p-4">
-        <div className="flex h-full items-end gap-2">
-          {[28, 42, 55, 48, 66, 78, 53, 44, 62, 71, 68, 82].map((height, index) => (
-            <span key={index} className="flex-1 bg-cyan/70 shadow-[0_0_12px_rgb(62_231_255_/_0.28)]" style={{ height: `${height}%` }} />
-          ))}
-        </div>
+        {chartData.length > 0 ? (
+          <div className="flex h-full items-end gap-[3px]">
+            {chartData.map((d) => (
+              <span key={d.date} className="flex-1 bg-cyan/70 shadow-[0_0_12px_rgb(62_231_255_/_0.28)]" style={{ height: `${(d.count / maxCount) * 100}%` }} title={`${d.date}: ${d.count} views`} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid h-full place-items-center text-[0.68rem] text-muted-foreground">No view data available</div>
+        )}
       </div>
     </DashboardPanel>
   );
 }
 
-function RoadmapPanel() {
+function RoadmapPanel({ items }: { items: RoadmapItem[] }) {
+  const columns = [
+    { status: 'PLANNED', title: 'Planning' },
+    { status: 'IN_PROGRESS', title: 'In Development' },
+    { status: 'DONE', title: 'Released' },
+    { status: 'CANCELLED', title: 'Cancelled' },
+  ] as const;
+
+  if (!items.length) {
+    return (
+      <DashboardPanel className="p-4">
+        <SectionHeader title="Game Roadmap" href="/dashboard/roadmap" linkLabel="Open roadmap" />
+        <div className="mt-4 grid place-items-center py-12 text-[0.68rem] text-muted-foreground">
+          No roadmap items yet. <Link href="/dashboard/roadmap" className="text-cyan hover:underline">Create one</Link>
+        </div>
+      </DashboardPanel>
+    );
+  }
+
+  const knownStatuses = new Set<string>(columns.map(c => c.status));
+  const otherItems = items.filter(i => !knownStatuses.has(i.status));
+  const grouped = [
+    ...columns.map((col) => ({
+      ...col,
+      items: items.filter((i) => i.status === col.status),
+    })),
+    ...(otherItems.length ? [{ status: 'OTHER', title: 'Other', items: otherItems }] : []),
+  ];
+
   return (
     <DashboardPanel className="p-4">
-      <SectionHeader title="Voidrunner Roadmap" href="/dashboard/roadmap" linkLabel="Open roadmap" />
-      <div className="mt-4 grid gap-3 md:grid-cols-5">
-        {roadmapColumns.map((column) => (
-          <div key={column.title} className="min-h-52 border border-border/80 bg-background/45 p-3">
+      <SectionHeader title="Game Roadmap" href="/dashboard/roadmap" linkLabel="Open roadmap" />
+      <div className="mt-4 grid gap-3" style={{ gridTemplateColumns: `repeat(${Math.min(grouped.length, 5)}, minmax(0, 1fr))` }}>
+        {grouped.map((column) => (
+          <div key={column.status} className="min-h-36 border border-border/80 bg-background/45 p-3">
             <div className="mb-3 flex items-center justify-between">
               <p className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-foreground">{column.title}</p>
-              <span className="text-[0.62rem] text-muted-foreground">{column.count}</span>
+              <span className="text-[0.62rem] text-muted-foreground">{column.items.length}</span>
             </div>
             <div className="space-y-2">
-              {column.items.map((item, index) => (
-                <Link key={item} href="/dashboard/roadmap" className="block border border-border/70 bg-muted/20 p-2 text-[0.68rem] text-muted-foreground transition hover:border-cyan hover:text-foreground">
-                  <span className="block truncate text-foreground">{item}</span>
-                  <span>Q{(index % 4) + 1} 2026</span>
+              {column.items.map((item) => (
+                <Link key={item.id} href="/dashboard/roadmap" className="block border border-border/70 bg-muted/20 p-2 text-[0.68rem] text-muted-foreground transition hover:border-cyan hover:text-foreground">
+                  <span className="block truncate text-foreground">{item.title}</span>
+                  {item.targetDate && <span>{new Date(item.targetDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>}
                 </Link>
               ))}
             </div>
@@ -457,14 +492,26 @@ function Badge({ icon, label }: { icon: React.ReactNode; label: string }) {
   return <span className="inline-flex items-center gap-2 border border-border-bright bg-background/60 px-3 py-1.5 font-mono text-[0.62rem] text-foreground">{icon}{label}</span>;
 }
 
-function buildActivity(games: StudioGame[], devlogs: { title: string }[]) {
-  return [
-    { title: 'New follower', body: 'A player followed your studio' },
-    { title: games[0] ? `${games[0].title} was wishlisted` : 'Wishlist update', body: 'A player added your game to wishlist' },
-    { title: devlogs[0] ? `Devlog published: ${devlogs[0].title}` : 'Devlog activity', body: 'Development update is ready' },
-    { title: 'Playtest joined', body: '12 players joined your latest playtest' },
-    { title: 'Roadmap updated', body: 'Milestone progress changed' },
-  ];
+function buildActivity(games: StudioGame[], devlogs: { title: string }[], auditLogs: { action: string; createdAt: string }[]) {
+  const items: { title: string; body: string; time: string }[] = [];
+  if (games[0]) {
+    items.push({ title: `${games[0].title}`, body: `${formatNumber(games[0].followersCount)} followers`, time: relativeDays(games[0].createdAt) });
+  }
+  if (devlogs[0]) {
+    items.push({ title: `Devlog: ${devlogs[0].title}`, body: 'Development update published', time: 'Recently' });
+  }
+  for (const log of auditLogs.slice(0, 3)) {
+    items.push({ title: log.action.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()), body: 'Studio activity', time: relativeDays(log.createdAt) });
+  }
+  if (!items.length) {
+    items.push({ title: 'Welcome to your studio', body: 'Start creating games and sharing devlogs', time: '' });
+  }
+  return items;
+}
+
+function formatDelta(value: number): string {
+  if (value <= 0) return '';
+  return `+${formatNumber(value)} this week`;
 }
 
 function statusProgress(status: string) {

@@ -73,6 +73,17 @@ export default function GamesPage() {
   const { data, isLoading, error } =
     useGames(page, pageSize, searchQuery || undefined);
 
+  if (!data && !isLoading) {
+    return (
+      <main className="relative min-h-screen bg-[#020609] px-5 pb-28 pt-4">
+        <div className="mx-auto max-w-7xl">
+          <p className="font-display text-2xl font-bold text-white">No games found</p>
+          <p className="mt-2 text-muted-foreground">Check back later for new games.</p>
+        </div>
+      </main>
+    );
+  }
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setSearchQuery(search);
@@ -317,7 +328,7 @@ function ToggleControl({ label, active, onChange }: { label: string; active: boo
 
 function CatalogGameCard({ game }: { game: Game }) {
   const title = game.title;
-  const progress = progressForGame(title);
+  const progress = statusProgress(game.status);
   const accent = accentForGame(game.status, title);
   const cover = game.coverUrl ?? coverForGame(title);
   const platforms = game.platformLinks?.length
@@ -343,11 +354,6 @@ function CatalogGameCard({ game }: { game: Game }) {
             <span className={`clip-corner-sm border bg-background/65 px-2 py-1 pm-micro ${accent.badge}`}>
               {badgeForGame(game.status, title)}
             </span>
-            {title === 'Voidrunner' && (
-              <span className="clip-corner-sm border border-coral/70 bg-coral/85 px-3 py-1.5 pm-micro text-coral-foreground shadow-[0_0_18px_rgb(255_87_77_/_0.35)]">
-                (-) Live Playtest
-              </span>
-            )}
           </div>
 
           <div className="mt-auto">
@@ -521,27 +527,21 @@ function makeReferenceGame(
   };
 }
 
-function badgeForGame(status: string, title: string) {
-  if (title === 'Neon Warden') return 'Featured';
+function badgeForGame(status: string, _title: string) {
   return status.replace(/_/g, ' ');
 }
 
-function progressForGame(title: string) {
-  const progress: Record<string, number> = {
-    'Neon Warden': 68,
-    'Starfall Tactics': 54,
-    Mossbound: 32,
-    'Paper Relics': 18,
-    Voidrunner: 45,
-    'Little Giants': 41,
-    Echobloom: 37,
-    Northlight: 22,
-  };
-  return progress[title] ?? 37;
+function statusProgress(status: string) {
+  const key = status.toUpperCase();
+  if (key.includes('PUBLISHED') || key.includes('RELEASE')) return 100;
+  if (key.includes('BETA')) return 85;
+  if (key.includes('ALPHA')) return 42;
+  if (key.includes('DEVELOP')) return 68;
+  return 31;
 }
 
-function accentForGame(status: string, title: string) {
-  if (title === 'Neon Warden' || status === 'BETA' || status === 'IN_DEVELOPMENT') {
+function accentForGame(status: string, _title: string) {
+  if (status === 'BETA' || status === 'IN_DEVELOPMENT') {
     return { badge: 'border-cyan/70 text-cyan', bar: 'bg-cyan text-cyan', text: 'text-cyan' };
   }
   if (status === 'ALPHA') return { badge: 'border-violet/70 text-violet', bar: 'bg-violet text-violet', text: 'text-violet' };
@@ -549,14 +549,12 @@ function accentForGame(status: string, title: string) {
   return { badge: 'border-cyan/70 text-cyan', bar: 'bg-cyan text-cyan', text: 'text-cyan' };
 }
 
-function coverForGame(title: string) {
-  const game = referenceGames.find((item) => item.title === title);
-  return game?.coverUrl ?? '';
+function coverForGame(_title: string) {
+  return '/playmorrow/neon-warden.png';
 }
 
-function fallbackPlatforms(title: string) {
-  const game = referenceGames.find((item) => item.title === title);
-  return game?.platformLinks.map((platform) => platform.platform) ?? [];
+function fallbackPlatforms(_title: string) {
+  return ['PC', 'PS5', 'XBOX'];
 }
 const GENRES = [
   'All', 'Action', 'Adventure', 'RPG', 'Strategy', 'Simulation', 'Puzzle',

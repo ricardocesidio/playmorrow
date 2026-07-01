@@ -10,13 +10,6 @@ import { useGame, useGameRoadmap } from '@/lib/api/hooks';
 import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { ErrorState } from '@/components/error-state';
 
-const fallbackFeatures = [
-  'Plan your approach with deep tactical tools.',
-  'Use gadgets, hacking, and the environment to stay unseen.',
-  'Dynamic AI that adapts to your every move.',
-  'A living cyberpunk world with reactive systems.',
-];
-
 export default function GameReadmePage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: game, isLoading, error } = useGame(slug);
@@ -113,12 +106,10 @@ export default function GameReadmePage() {
               <HudPanel className="p-6" accent="muted">
                 <h2 className="pm-micro text-foreground mb-4">Features</h2>
                 <ul className="grid gap-2 text-xs text-muted-foreground">
-                  {fallbackFeatures.map((item) => (
-                    <li key={item} className="flex gap-2">
-                      <span className="mt-2 size-1.5 shrink-0 rounded-full bg-cyan shadow-[0_0_8px_rgb(62_231_255_/_0.8)]" />
-                      {item}
-                    </li>
-                  ))}
+                  <li className="flex gap-2">
+                    <span className="mt-2 size-1.5 shrink-0 rounded-full bg-cyan shadow-[0_0_8px_rgb(62_231_255_/_0.8)]" />
+                    No features listed yet.
+                  </li>
                 </ul>
               </HudPanel>
 

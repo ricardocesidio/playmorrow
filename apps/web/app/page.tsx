@@ -295,7 +295,7 @@ function LatestGameCard({ game }: { game: HomeGame }) {
           <StatusBadge status={game.status} />
           <h3 className="mt-6 font-display text-4xl font-black uppercase leading-none text-foreground">{game.title}</h3>
           <p className="mt-4 text-xs text-muted-foreground">{game.tags.join(' • ')}</p>
-          <p className="mt-4 max-w-[250px] text-sm leading-6 text-muted-foreground">{descriptionFor(game.title)}</p>
+          <p className="mt-4 max-w-[250px] text-sm leading-6 text-muted-foreground">{game.tagline ?? 'No description available'}</p>
         </div>
       </div>
       <div className="border-t border-border bg-background/50 p-4">
@@ -313,28 +313,17 @@ function LatestGameCard({ game }: { game: HomeGame }) {
 type HomeGame = {
   id: string; title: string; slug: string; status: string; coverUrl: string;
   followersCount: number; studio: { name: string; slug: string }; tags: string[];
+  tagline: string | null;
 };
 
 function normalizeLatestGames(games?: Game[]): HomeGame[] {
   if (!games?.length) return [];
-  return games.filter((g) => g.title !== 'Neon Warden').slice(0, 3).map((g) => ({
+  return games.slice(0, 3).map((g) => ({
     id: g.id, title: g.title, slug: g.slug, status: g.status,
-    coverUrl: g.coverUrl ?? coverFor(g.title), followersCount: g.followersCount,
+    coverUrl: g.coverUrl ?? '/playmorrow/neon-warden.png', followersCount: g.followersCount,
     studio: { name: g.studio?.name ?? 'Independent Studio', slug: g.studio?.slug ?? 'studio' },
     tags: g.tags?.length ? g.tags.slice(0, 2) : ['Indie', 'In Development'],
+    tagline: g.tagline,
   }));
-}
-
-function coverFor(title: string) {
-  if (title.includes('Moss')) return '/playmorrow/mossbound.png';
-  if (title.includes('Paper')) return '/playmorrow/paper-relics.png';
-  if (title.includes('Void')) return '/playmorrow/voidrunner.png';
-  return '/playmorrow/starfall-tactics.png';
-}
-
-function descriptionFor(title: string) {
-  if (title.includes('Moss')) return 'A tiny traveler. An ancient forest. Secrets grow in the dark.';
-  if (title.includes('Paper')) return 'Fold the past. Play the present. Rewrite your fate.';
-  return 'Lead a crew through a dying galaxy where every choice leaves a scar.';
 }
 
