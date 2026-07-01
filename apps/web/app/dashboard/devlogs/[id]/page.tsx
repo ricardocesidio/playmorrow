@@ -8,7 +8,6 @@ import { ArrowLeft, Save, ExternalLink, FileText, Trash2 } from 'lucide-react';
 import { ImageUpload } from '@/components/image-upload';
 import { MarkdownEditor } from '@/components/md-editor';
 
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
 import { useDevlog, useUpdateDevlog, useDeleteDevlog } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
@@ -81,105 +80,132 @@ export default function EditDevlogPage() {
 
   if (authLoading || devlogLoading) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-10">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 w-32 rounded bg-muted" />
-          <div className="h-8 w-48 rounded bg-muted" />
-          <div className="h-48 rounded bg-muted" />
+      <main className="relative min-h-screen bg-[#020609]">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+        <div className="relative mx-auto max-w-3xl flex min-h-screen items-center justify-center">
+          <div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
         </div>
-      </div>
+      </main>
     );
   }
 
   if (!devlog) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-20 text-center">
-        <h1 className="text-2xl font-semibold">Devlog not found</h1>
-        <Link href="/dashboard" className="mt-4 inline-flex items-center gap-2 text-sm text-primary underline">
-          <ArrowLeft className="size-4" /> Back to dashboard
-        </Link>
-      </div>
+      <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+        <div className="relative mx-auto max-w-3xl py-20 text-center">
+          <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Devlog not found</h1>
+          <Link href="/dashboard" className="mt-4 inline-flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-widest text-cyan underline underline-offset-4 transition hover:text-cyan/80">
+            <ArrowLeft className="size-3" /> Back to dashboard
+          </Link>
+        </div>
+      </main>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-10">
-      <Link href="/dashboard" className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
-        <ArrowLeft className="size-4" /> Back to dashboard
-      </Link>
+    <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+      {/* Grid overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+      {/* Top accent line */}
+      <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
 
-      <div className="mb-8 flex items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <FileText className="size-6 text-primary" />
-            <h1 className="text-3xl font-semibold tracking-tight">Edit devlog</h1>
+      <div className="relative mx-auto max-w-3xl">
+        <Link href="/dashboard" className="mb-6 inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:text-cyan">
+          <ArrowLeft className="size-3" /> Back to dashboard
+        </Link>
+
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3">
+              <FileText className="size-6 text-cyan" />
+              <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Edit devlog</h1>
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <span className="font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground">{devlog.title}</span>
+              <span className={`clip-corner px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-widest ${devlog.isPublished ? 'border border-cyan/40 bg-cyan/5 text-cyan' : 'border border-border/50 bg-background/30 text-muted-foreground'}`}>
+                {devlog.isPublished ? 'Published' : 'Draft'}
+              </span>
+            </div>
           </div>
-          <div className="mt-1 flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">{devlog.title}</span>
-            <span className={`rounded px-1.5 py-0.5 text-xs ${devlog.isPublished ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
-              {devlog.isPublished ? 'Published' : 'Draft'}
-            </span>
-          </div>
+          <Link href={`/devlogs/${id}`} className="clip-corner inline-flex items-center gap-1.5 border border-cyan/40 bg-cyan/5 px-4 py-1.5 font-mono text-[0.55rem] uppercase tracking-widest text-cyan transition hover:bg-cyan/20">
+            <ExternalLink className="size-3" /> View
+          </Link>
         </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/devlogs/${id}`}><ExternalLink className="size-3" /> View</Link>
-        </Button>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {error && (
+            <div className="clip-corner border border-coral/40 bg-coral/5 px-4 py-3 font-mono text-[0.68rem] text-coral">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="clip-corner border border-cyan/40 bg-cyan/5 px-4 py-3 font-mono text-[0.68rem] text-cyan">
+              Devlog updated successfully.
+            </div>
+          )}
+
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Content</h3>
+            <div className="mb-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Title</label>
+              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            </div>
+            <div className="mb-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Body</label>
+              <MarkdownEditor value={body} onChange={setBody} />
+            </div>
+          </div>
+
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Cover Image</h3>
+            <ImageUpload value={coverUrl} onChange={setCoverUrl} label="Cover image" />
+          </div>
+
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Publishing</h3>
+            <div className="flex items-center gap-3">
+              <input type="checkbox" id="isPublished" checked={isPublished}
+                onChange={(e) => setIsPublished(e.target.checked)}
+                className="rounded border-input" />
+              <label htmlFor="isPublished" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Published</label>
+              {isPublished
+                ? <span className="font-mono text-[0.55rem] text-muted-foreground">(publishedAt will be set to now)</span>
+                : <span className="font-mono text-[0.55rem] text-muted-foreground">(publishedAt will be cleared)</span>}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div className="flex gap-3">
+              <button type="submit" disabled={updateDevlog.isPending}
+                className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+                {updateDevlog.isPending ? 'Saving…' : 'Save changes'}
+                <Save className="ml-1.5 inline size-4" />
+              </button>
+              <Link href="/dashboard"
+                className="clip-corner inline-flex items-center border border-border/60 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
+                Cancel
+              </Link>
+            </div>
+            <button type="button"
+              onClick={async () => {
+                if (!token || !confirm(`Delete devlog "${devlog?.title}" permanently? This cannot be undone.`)) return;
+                try {
+                  await deleteDevlog.mutateAsync({ id, token });
+                  router.push('/dashboard');
+                } catch { /* ignore */ }
+              }}
+              disabled={deleteDevlog.isPending}
+              className="clip-corner cursor-pointer border border-coral/60 bg-coral/5 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-widest text-coral transition hover:bg-coral/20 disabled:cursor-not-allowed disabled:opacity-40">
+              <Trash2 className="mr-1.5 inline size-4" />
+              {deleteDevlog.isPending ? 'Deleting…' : 'Delete devlog'}
+            </button>
+          </div>
+        </form>
       </div>
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {error && <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</div>}
-        {success && <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary">Devlog updated successfully.</div>}
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Title</label>
-          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Body</label>
-          <MarkdownEditor value={body} onChange={setBody} />
-        </div>
-
-        <ImageUpload value={coverUrl} onChange={setCoverUrl} label="Cover image" />
-
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-card/20 p-4">
-          <input type="checkbox" id="isPublished" checked={isPublished}
-            onChange={(e) => setIsPublished(e.target.checked)}
-            className="rounded border-input" />
-          <label htmlFor="isPublished" className="text-sm font-medium">Published</label>
-          {isPublished
-            ? <span className="text-xs text-muted-foreground">(publishedAt will be set to now)</span>
-            : <span className="text-xs text-muted-foreground">(publishedAt will be cleared)</span>}
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <div className="flex gap-3">
-            <Button type="submit" disabled={updateDevlog.isPending}>
-              {updateDevlog.isPending ? 'Saving…' : 'Save changes'}
-              <Save className="size-4" />
-            </Button>
-            <Button asChild variant="outline"><Link href="/dashboard">Cancel</Link></Button>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="border-destructive/30 text-destructive hover:bg-destructive/10"
-            onClick={async () => {
-              if (!token || !confirm(`Delete devlog "${devlog?.title}" permanently? This cannot be undone.`)) return;
-              try {
-                await deleteDevlog.mutateAsync({ id, token });
-                router.push('/dashboard');
-              } catch { /* ignore */ }
-            }}
-            disabled={deleteDevlog.isPending}
-          >
-            <Trash2 className="size-4" />
-            {deleteDevlog.isPending ? 'Deleting…' : 'Delete devlog'}
-          </Button>
-        </div>
-      </form>
-    </div>
+    </main>
   );
 }
