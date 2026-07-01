@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Bell, Check, CheckCheck, EyeOff, X } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
 import {
   useNotifications,
@@ -66,38 +65,43 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+      {/* Grid overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+      {/* Top accent line */}
+      <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+
+      <div className="relative mx-auto max-w-3xl">
       <Link
         href="/dashboard"
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="mb-6 inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:text-cyan"
       >
-        <ArrowLeft className="size-4" /> Back to dashboard
+        <ArrowLeft className="size-3" /> Back to dashboard
       </Link>
 
       <div className="mb-8 flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Bell className="size-6 text-primary" />
-          <h1 className="text-3xl font-semibold tracking-tight">Notifications</h1>
+          <Bell className="size-6 text-cyan" />
+          <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Notifications</h1>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
+        <button
           onClick={handleMarkAllRead}
           disabled={markAllRead.isPending}
+          className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <CheckCheck className="size-3" /> Mark all read
-        </Button>
+          <CheckCheck className="mr-1 inline size-3" /> Mark all read
+        </button>
       </div>
 
       {/* Status tabs */}
-      <div className="mb-6 flex gap-1 rounded-lg border border-border bg-card/20 p-1">
+      <div className="mb-6 flex gap-4 border-b border-border/40">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => { setStatus(tab.key); setPage(1); }}
-            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`pb-2 font-mono text-[0.6rem] uppercase tracking-widest transition-colors ${
               status === tab.key
-                ? 'bg-primary text-primary-foreground'
+                ? 'border-b-2 border-cyan text-cyan'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -110,23 +114,23 @@ export default function NotificationsPage() {
       {isLoading && (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-20 animate-pulse rounded-xl bg-muted" />
+            <div key={i} className="clip-corner h-20 animate-pulse border border-border/40 bg-[#050b0f]/30" />
           ))}
         </div>
       )}
 
       {/* Error */}
       {error && !isLoading && (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/5 py-12 text-center">
-          <p className="text-destructive">Failed to load notifications.</p>
+        <div className="clip-corner border border-coral/40 bg-coral/5 py-12 text-center">
+          <p className="font-mono text-[0.65rem] text-coral">Failed to load notifications.</p>
         </div>
       )}
 
       {/* Empty */}
       {!isLoading && !error && data?.items.length === 0 && (
-        <div className="rounded-xl border border-border bg-card/20 py-16 text-center">
-          <Bell className="mx-auto mb-3 size-10 text-muted-foreground/40" />
-          <p className="text-muted-foreground">
+        <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+          <Bell className="mx-auto mb-3 size-10 text-muted-foreground/30" />
+          <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
             {status === 'all'
               ? 'No notifications yet.'
               : status === 'unread'
@@ -142,38 +146,39 @@ export default function NotificationsPage() {
           {data.items.map((n) => (
             <div
               key={n.id}
-              className={`rounded-xl border p-4 transition-colors ${
+              className={`clip-corner border p-4 transition-colors ${
                 n.readAt
-                  ? 'border-border bg-card/20'
-                  : 'border-primary/30 bg-card/40'
+                  ? 'border-border/60 bg-[#050b0f]/50'
+                  : 'border-cyan/30 bg-[#050b0f]/70'
               }`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-primary">
+                  <div className="flex items-center gap-2">
+                    {!n.readAt && <span className="bg-cyan size-2 rounded-full shrink-0" />}
+                    <span className="font-mono text-[0.5rem] uppercase tracking-wider text-muted-foreground/60 border border-border/40 px-1.5 py-0.5">
                       {n.type}
                     </span>
-                    <span>{formatDate(n.createdAt)}</span>
+                    <span className="font-mono text-[0.5rem] text-muted-foreground/50">{formatDate(n.createdAt)}</span>
                   </div>
                   {n.targetUrl ? (
                     <Link
                       href={n.targetUrl}
                       onClick={() => { if (!n.readAt) handleMarkRead(n.id); }}
-                      className={`mt-1 block text-sm hover:underline ${n.readAt ? 'text-muted-foreground' : 'font-medium text-foreground'}`}
+                      className={`mt-1.5 block font-mono text-[0.6rem] font-semibold hover:underline ${n.readAt ? 'text-muted-foreground' : 'text-foreground'}`}
                     >
                       {n.title}
                     </Link>
                   ) : (
-                    <p className={`mt-1 text-sm ${n.readAt ? 'text-muted-foreground' : 'font-medium text-foreground'}`}>
+                    <p className={`mt-1.5 font-mono text-[0.6rem] font-semibold ${n.readAt ? 'text-muted-foreground' : 'text-foreground'}`}>
                       {n.title}
                     </p>
                   )}
                   {n.body && (
-                    <p className="mt-0.5 text-xs text-muted-foreground">{n.body}</p>
+                    <p className="mt-1 font-mono text-[0.55rem] text-muted-foreground">{n.body}</p>
                   )}
                   {n.actor && (
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="mt-1 font-mono text-[0.5rem] text-muted-foreground/50">
                       by {n.actor.displayName}
                     </p>
                   )}
@@ -184,24 +189,24 @@ export default function NotificationsPage() {
                     <button
                       onClick={() => handleMarkRead(n.id)}
                       disabled={markRead.isPending}
-                      className="rounded p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                      className="rounded p-1.5 text-muted-foreground hover:text-cyan transition-colors"
                       title="Mark as read"
                     >
-                      <Check className="size-4" />
+                      <Check className="size-3.5" />
                     </button>
                   )}
                   {n.readAt && (
-                    <span className="rounded p-1.5 text-muted-foreground/40" title="Read">
-                      <EyeOff className="size-4" />
+                    <span className="rounded p-1.5 text-muted-foreground/30" title="Read">
+                      <EyeOff className="size-3.5" />
                     </span>
                   )}
                   <button
                     onClick={() => handleDismiss(n.id)}
                     disabled={dismiss.isPending}
-                    className="rounded p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                    className="rounded p-1.5 text-muted-foreground hover:text-coral transition-colors"
                     title="Dismiss"
                   >
-                    <X className="size-4" />
+                    <X className="size-3.5" />
                   </button>
                 </div>
               </div>
@@ -214,17 +219,17 @@ export default function NotificationsPage() {
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}
-                className="rounded-lg border border-input px-3 py-1.5 text-sm transition-colors hover:bg-accent disabled:opacity-40"
+                className="clip-corner border border-border/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan disabled:opacity-40"
               >
                 Previous
               </button>
-              <span className="text-sm text-muted-foreground">
+              <span className="font-mono text-[0.55rem] text-muted-foreground/60">
                 Page {data.page}
               </span>
               <button
                 disabled={page * data.pageSize >= data.total}
                 onClick={() => setPage((p) => p + 1)}
-                className="rounded-lg border border-input px-3 py-1.5 text-sm transition-colors hover:bg-accent disabled:opacity-40"
+                className="clip-corner border border-border/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan disabled:opacity-40"
               >
                 Next
               </button>
@@ -233,5 +238,6 @@ export default function NotificationsPage() {
         </div>
       )}
     </div>
+    </main>
   );
 }
