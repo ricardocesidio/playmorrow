@@ -58,6 +58,15 @@ function CreateGameForm() {
   const [media, setMedia] = useState<MediaRow[]>([]);
   const [platformLinks, setPlatformLinks] = useState<PlatformRow[]>([]);
   const [error, setError] = useState('');
+  const [previewMode, setPreviewMode] = useState(false);
+  const renderMarkdown = (text: string) => {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`(.*?)`/g, '<code class="bg-muted px-1">$1</code>')
+      .replace(/^- (.*)/gm, '<li class="ml-4 list-disc">$1</li>')
+      .replace(/\n/g, '<br/>');
+  };
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.replace('/login');
@@ -194,9 +203,24 @@ function CreateGameForm() {
             </div>
 
             <div className="mt-4">
-              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Description</label>
-              <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
-                className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Description</label>
+                <button type="button" onClick={() => setPreviewMode(!previewMode)}
+                  className={`clip-corner cursor-pointer border px-3 py-1 font-mono text-[0.55rem] uppercase tracking-widest transition ${
+                    previewMode
+                      ? 'border-cyan text-cyan bg-cyan/10'
+                      : 'border-border/60 text-muted-foreground hover:border-cyan hover:text-cyan'
+                  }`}>
+                  {previewMode ? 'Edit' : 'Preview'}
+                </button>
+              </div>
+              {previewMode ? (
+                <div className="clip-corner min-h-[6rem] w-full border border-input bg-background/80 px-4 py-3 text-sm text-foreground [&_strong]:text-white [&_code]:bg-muted [&_code]:px-1"
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(description) }} />
+              ) : (
+                <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
+                  className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              )}
             </div>
 
             <div className="mt-4">
@@ -323,11 +347,23 @@ function CreateGameForm() {
                 <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Cover image URL</label>
                 <input type="url" value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)}
                   className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              {coverUrl && (
+                <div className="mt-2">
+                  <img src={coverUrl} alt="Cover preview" className="clip-corner h-20 w-full max-w-[160px] object-cover border border-border/50"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                </div>
+              )}
               </div>
               <div>
                 <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Banner URL</label>
                 <input type="url" value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)}
                   className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              {bannerUrl && (
+                <div className="mt-2">
+                  <img src={bannerUrl} alt="Banner preview" className="clip-corner h-20 w-full max-w-[160px] object-cover border border-border/50"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                </div>
+              )}
               </div>
             </div>
           </div>
