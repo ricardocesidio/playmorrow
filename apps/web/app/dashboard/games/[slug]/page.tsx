@@ -76,11 +76,12 @@ export default function EditGamePage() {
       const form = new FormData();
       form.append('file', file);
       try {
-        const res = await fetch('/api/upload', { method: 'POST', body: form });
+        const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
         if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
         const data = await res.json();
         setMedia((prev) => [...prev, { type: 'SCREENSHOT', url: data.url, caption: '' }]);
-      } catch {
+      } catch (err) {
+        console.error('Upload error:', err);
         setError('Upload failed.');
       }
     }

@@ -7,11 +7,12 @@ export async function uploadScreenshot(formData: FormData) {
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.toString();
 
-  const res = await fetch(`${url}/upload`, {
-    method: 'POST',
-    headers: { Cookie: cookieHeader },
-    body: formData,
-  });
+    const res = await fetch(`${url}/upload`, {
+      method: 'POST',
+      headers: { Cookie: cookieHeader },
+      body: formData,
+      signal: AbortSignal.timeout(15000),
+    });
 
   if (!res.ok) {
     const err = await res.text();
