@@ -15,45 +15,6 @@ import { formatFollowers } from '@/lib/format';
 import { useGames } from '@/lib/api/hooks';
 import type { Game } from '@/lib/api/client';
 
-const referenceGames: Game[] = [
-  {
-    id: 'game-1',
-    title: 'Neon Warden',
-    slug: 'test-game',
-    tagline: 'Tactical stealth in a rain-slick cyberpunk city.',
-    description: null,
-    status: 'BETA',
-    releaseDate: null,
-    expectedReleaseText: 'Q4 2026',
-    priceCents: 1999,
-    currency: 'USD',
-    isFree: false,
-    coverUrl: '/playmorrow/neon-warden.png',
-    bannerUrl: '/playmorrow/neon-warden.png',
-    isPublished: true,
-    followersCount: 12400,
-    studio: { id: 'studio-1', name: 'Obsidian Signal', slug: 'test-studio', logoUrl: null },
-    media: [],
-    platformLinks: [
-      { id: 'pc', platform: 'PC', url: '#', label: 'PC' },
-      { id: 'ps5', platform: 'PS5', url: '#', label: 'PS5' },
-      { id: 'xbox', platform: 'XBOX', url: '#', label: 'XBOX' },
-    ],
-    tags: ['Tactical Stealth', 'Cyberpunk'],
-    createdAt: '',
-    updatedAt: '',
-  },
-  makeReferenceGame('game-2', 'Starfall Tactics', 'starfall-tactics', 'IN_DEVELOPMENT', '/playmorrow/starfall-tactics.png', 8700, 'Ironlight Studios', 'ironlight-studios', ['Tactical RPG', 'Space Opera']),
-  makeReferenceGame('game-3', 'Mossbound', 'mossbound', 'ALPHA', '/playmorrow/mossbound.png', 5100, 'Wildbriar', 'wildbriar', ['Adventure', 'Atmospheric'], ['PC', 'SWITCH']),
-  makeReferenceGame('game-4', 'Paper Relics', 'paper-relics', 'PRE_ALPHA', '/playmorrow/paper-relics.png', 3200, 'Second Story Games', 'second-story-games', ['Card Battler', 'Roguelike'], ['PC']),
-  makeReferenceGame('game-5', 'Voidrunner', 'voidrunner', 'ALPHA', '/playmorrow/voidrunner.png', 6300, 'Voidrunner', 'voidrunner-studio', ['Roguelite', 'Twin Stick Shooter'], ['PC']),
-  makeReferenceGame('game-6', 'Little Giants', 'little-giants', 'IN_DEVELOPMENT', '/playmorrow/little-giants.png', 4200, 'Tiny Forge', 'tiny-forge', ['City Builder', 'Sandbox'], ['PC', 'PS5', 'XBOX', 'SWITCH']),
-  makeReferenceGame('game-7', 'Echobloom', 'echobloom', 'ALPHA', '/playmorrow/echobloom.png', 2900, 'Lumen Garden', 'lumen-garden', ['Narrative', 'Puzzle'], ['PC']),
-  makeReferenceGame('game-8', 'Northlight', 'northlight', 'PRE_ALPHA', '/playmorrow/northlight.png', 3800, 'Frostfire Games', 'frostfire-games', ['Survival', 'Open World']),
-];
-
-
-
 export default function GamesPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -328,12 +289,12 @@ function ToggleControl({ label, active, onChange }: { label: string; active: boo
 
 function CatalogGameCard({ game }: { game: Game }) {
   const title = game.title;
-  const progress = statusProgress(game.status);
+  const progress = game.progressPercent ?? null;
   const accent = accentForGame(game.status, title);
-  const cover = game.coverUrl ?? coverForGame(title);
+  const cover = game.coverUrl ?? '';
   const platforms = game.platformLinks?.length
     ? game.platformLinks.map((platform) => platform.platform)
-    : fallbackPlatforms(title);
+    : [];
 
   return (
     <Link
@@ -361,25 +322,27 @@ function CatalogGameCard({ game }: { game: Game }) {
               {title}
             </h2>
             <p className="pm-micro mt-3 text-muted-foreground">
-              {game.studio?.name ?? 'Independent Studio'} <span className={accent.text}>●</span>
+              {game.studio?.name ?? ''} <span className={accent.text}>●</span>
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
-              {(game.tags?.length ? game.tags : ['Indie']).slice(0, 2).map((tag, index) => (
+              {(game.tags ?? []).slice(0, 2).map((tag, index) => (
                 <span key={tag}>{index > 0 ? ' • ' : ''}{tag}</span>
               ))}
             </p>
             <p className="mt-2 flex items-center gap-2 text-xs text-cyan">
               <Users className="size-3.5" /> {formatFollowers(game.followersCount)} <span className="text-muted-foreground">followers</span>
             </p>
-            <div className="mt-3">
-              <div className="mb-1.5 flex justify-between pm-micro text-muted-foreground">
-                <span>Progress</span>
-                <span>{progress}%</span>
+            {progress !== null && (
+              <div className="mt-3">
+                <div className="mb-1.5 flex justify-between pm-micro text-muted-foreground">
+                  <span>Progress</span>
+                  <span>{progress}%</span>
+                </div>
+                <div className="h-1 bg-border">
+                  <div className={`h-full ${accent.bar} shadow-[0_0_12px_currentColor]`} style={{ width: `${progress}%` }} />
+                </div>
               </div>
-              <div className="h-1 bg-border">
-                <div className={`h-full ${accent.bar} shadow-[0_0_12px_currentColor]`} style={{ width: `${progress}%` }} />
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -490,54 +453,8 @@ function PaginationControl({
   );
 }
 
-function makeReferenceGame(
-  id: string,
-  title: string,
-  slug: string,
-  status: string,
-  coverUrl: string,
-  followersCount: number,
-  studioName: string,
-  studioSlug: string,
-  tags: string[],
-  platforms = ['PC', 'PS5', 'XBOX'],
-): Game {
-  return {
-    id,
-    title,
-    slug,
-    tagline: null,
-    description: null,
-    status,
-    releaseDate: null,
-    expectedReleaseText: null,
-    priceCents: null,
-    currency: 'USD',
-    isFree: false,
-    coverUrl,
-    bannerUrl: coverUrl,
-    isPublished: true,
-    followersCount,
-    studio: { id: `${id}-studio`, name: studioName, slug: studioSlug, logoUrl: null },
-    media: [],
-    platformLinks: platforms.map((platform) => ({ id: `${slug}-${platform}`, platform, url: '#', label: platform })),
-    tags,
-    createdAt: '',
-    updatedAt: '',
-  };
-}
-
 function badgeForGame(status: string, _title: string) {
   return status.replace(/_/g, ' ');
-}
-
-function statusProgress(status: string) {
-  const key = status.toUpperCase();
-  if (key.includes('PUBLISHED') || key.includes('RELEASE')) return 100;
-  if (key.includes('BETA')) return 85;
-  if (key.includes('ALPHA')) return 42;
-  if (key.includes('DEVELOP')) return 68;
-  return 31;
 }
 
 function accentForGame(status: string, _title: string) {
@@ -547,14 +464,6 @@ function accentForGame(status: string, _title: string) {
   if (status === 'ALPHA') return { badge: 'border-violet/70 text-violet', bar: 'bg-violet text-violet', text: 'text-violet' };
   if (status === 'PRE_ALPHA') return { badge: 'border-amber/70 text-amber', bar: 'bg-amber text-amber', text: 'text-amber' };
   return { badge: 'border-cyan/70 text-cyan', bar: 'bg-cyan text-cyan', text: 'text-cyan' };
-}
-
-function coverForGame(_title: string) {
-  return '/playmorrow/neon-warden.png';
-}
-
-function fallbackPlatforms(_title: string) {
-  return ['PC', 'PS5', 'XBOX'];
 }
 const GENRES = [
   'All', 'Action', 'Adventure', 'RPG', 'Strategy', 'Simulation', 'Puzzle',

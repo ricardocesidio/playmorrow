@@ -432,7 +432,7 @@ function coverForGame(title: string) {
   if (key.includes('little')) return '/playmorrow/little-giants.png';
   if (key.includes('echo')) return '/playmorrow/echobloom.png';
   if (key.includes('north')) return '/playmorrow/northlight.png';
-  return '/playmorrow/neon-warden.png';
+  return '';
 }
 
 function formatAction(action: string) {

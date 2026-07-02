@@ -45,7 +45,7 @@ export default function GameReadmePage() {
   }
 
   const title = game.title;
-  const heroImage = game.bannerUrl || game.coverUrl || '/playmorrow/neon-warden.png';
+  const heroImage = game.bannerUrl || game.coverUrl || '';
   const readmeLines = game.readme
     ? game.readme.split('\n')
     : (game.description
