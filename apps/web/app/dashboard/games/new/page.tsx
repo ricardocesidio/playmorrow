@@ -1,9 +1,9 @@
 'use client';
 
-import { Suspense, useState, type FormEvent, useEffect } from 'react';
+import { Suspense, useState, type FormEvent, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Trash2, Gamepad2 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Gamepad2, Upload, Loader2 } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
@@ -11,7 +11,7 @@ import { useMyStudios, useCreateGame } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
 
 const STATUSES = ['CONCEPT', 'IN_DEVELOPMENT', 'ALPHA', 'BETA', 'EARLY_ACCESS', 'RELEASED', 'CANCELLED', 'ON_HOLD'];
-const MEDIA_TYPES = ['SCREENSHOT', 'TRAILER', 'VIDEO', 'LOGO', 'BANNER', 'IMAGE'];
+const MAX_SCREENSHOTS = 10;
 const PLATFORM_KINDS = ['STEAM', 'ITCH', 'EPIC', 'GOG', 'PLAYSTATION', 'XBOX', 'NINTENDO', 'WEB', 'ANDROID', 'IOS', 'DEMO', 'DISCORD', 'WEBSITE', 'OTHER'];
 
 interface MediaRow { type: string; url: string; caption: string }
@@ -57,6 +57,8 @@ function CreateGameForm() {
   const [trailerUrl, setTrailerUrl] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   const [media, setMedia] = useState<MediaRow[]>([]);
+  const [uploadingShot, setUploadingShot] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [platformLinks, setPlatformLinks] = useState<PlatformRow[]>([]);
   const [error, setError] = useState('');
   const [previewMode, setPreviewMode] = useState(false);
@@ -78,7 +80,32 @@ function CreateGameForm() {
     if (slugAuto) setSlug(val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
   };
 
-  const addMedia = () => setMedia([...media, { type: 'SCREENSHOT', url: '', caption: '' }]);
+  const handleShotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploadingShot(true);
+    for (const file of Array.from(files)) {
+      if (media.length >= MAX_SCREENSHOTS) { setError(`Max ${MAX_SCREENSHOTS} screenshots.`); break; }
+      if (!['image/png', 'image/jpeg'].includes(file.type)) { setError('Only PNG and JPG allowed.'); continue; }
+      const form = new FormData();
+      form.append('file', file);
+      try {
+        const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
+        if (!res.ok) throw new Error('Upload failed');
+        const data = await res.json();
+        setMedia((prev) => [...prev, { type: 'SCREENSHOT', url: data.url, caption: '', position: prev.length + 1 }]);
+      } catch {
+        setError('Upload failed.');
+      }
+    }
+    setUploadingShot(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const addMedia = () => {
+    if (media.length >= MAX_SCREENSHOTS) { setError(`Max ${MAX_SCREENSHOTS} screenshots.`); return; }
+    fileInputRef.current?.click();
+  };
   const removeMedia = (i: number) => setMedia(media.filter((_, idx) => idx !== i));
   const updateMedia = (i: number, field: keyof MediaRow, val: string) => {
     setMedia(media.map((m, idx) => idx === i ? { ...m, [field]: val } : m));
@@ -395,31 +422,37 @@ function CreateGameForm() {
             </div>
           </div>
 
-          {/* Media rows */}
+          {/* Screenshots */}
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Media Items</h3>
-              <button type="button" onClick={addMedia}
-                className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">
-                <Plus className="mr-1 inline size-3" /> Add
+              <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Screenshots ({media.length}/{MAX_SCREENSHOTS})</h3>
+              <button type="button" onClick={addMedia} disabled={uploadingShot || media.length >= MAX_SCREENSHOTS}
+                className="clip-corner cursor-pointer border border-cyan/60 px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-widest text-cyan transition hover:bg-cyan/10 disabled:opacity-40 disabled:cursor-not-allowed">
+                {uploadingShot ? <Loader2 className="size-3 mr-1 inline animate-spin" /> : <Upload className="size-3 mr-1 inline" />}
+                Add screenshot
               </button>
+              <input ref={fileInputRef} type="file" accept="image/png,image/jpeg" multiple onChange={handleShotUpload} className="hidden" />
             </div>
-            {media.map((m, i) => (
-              <div key={i} className="clip-corner border border-border/50 bg-background/30 p-3 mb-2 flex flex-wrap items-end gap-2">
-                <select value={m.type} onChange={(e) => updateMedia(i, 'type', e.target.value)}
-                  className="clip-corner h-9 border border-input bg-background/80 px-3 text-xs text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
-                  {MEDIA_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-                </select>
-                <input type="url" value={m.url} onChange={(e) => updateMedia(i, 'url', e.target.value)}
-                  placeholder="URL" className="min-w-[200px] flex-1 clip-corner h-9 border border-input bg-background/80 px-3 text-xs text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
-                <input type="text" value={m.caption} onChange={(e) => updateMedia(i, 'caption', e.target.value)}
-                  placeholder="Caption" className="min-w-[120px] clip-corner h-9 border border-input bg-background/80 px-3 text-xs text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
-                <button type="button" onClick={() => removeMedia(i)}
-                  className="clip-corner cursor-pointer border border-coral/60 bg-coral/5 px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-widest text-coral hover:bg-coral/20">
-                  <Trash2 className="size-3" />
-                </button>
-              </div>
-            ))}
+            <div className="space-y-3">
+              {media.map((m, i) => (
+                <div key={i} className="flex items-start gap-3 border border-border/60 bg-background/40 p-3">
+                  <div className="size-16 shrink-0 overflow-hidden border border-border bg-muted">
+                    <img src={m.url} alt="" className="size-full object-cover" />
+                  </div>
+                  <div className="flex-1">
+                    <input type="text" value={m.caption} onChange={(e) => updateMedia(i, 'caption', e.target.value)}
+                      placeholder="Caption (optional)"
+                      className="clip-corner h-9 w-full border border-input bg-background/80 px-3 text-xs text-foreground outline-none focus:border-cyan" />
+                  </div>
+                  <button type="button" onClick={() => removeMedia(i)} className="mt-1 cursor-pointer text-coral hover:text-coral/80">
+                    <Trash2 className="size-4" />
+                  </button>
+                </div>
+              ))}
+              {media.length === 0 && (
+                <p className="py-4 text-center text-xs text-muted-foreground">No screenshots yet. Click "Add screenshot" to upload PNG/JPG images (max 10).</p>
+              )}
+            </div>
           </div>
 
           {/* Platform links rows */}

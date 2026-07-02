@@ -83,7 +83,7 @@ export default function HomePage() {
 
               <div className="hidden lg:block">
                 {games.length > 0 && (
-                  <FeaturedGameCard game={games[0]} />
+                  <FeaturedGameCard game={games[0]!} />
                 )}
               </div>
             </div>

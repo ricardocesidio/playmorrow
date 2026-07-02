@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, type FormEvent, useEffect } from 'react';
+import { useState, type FormEvent, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Save, ExternalLink, Gamepad2, Milestone, FileText, ScrollText, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Save, ExternalLink, Gamepad2, Milestone, FileText, ScrollText, Trash2, Upload, Loader2 } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { ImageUpload } from '@/components/image-upload';
@@ -13,7 +13,7 @@ import { useGame, useUpdateGame, useDeleteGame } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
 
 const STATUSES = ['CONCEPT', 'IN_DEVELOPMENT', 'ALPHA', 'BETA', 'EARLY_ACCESS', 'RELEASED', 'CANCELLED', 'ON_HOLD'];
-const MEDIA_TYPES = ['SCREENSHOT', 'TRAILER', 'VIDEO', 'LOGO', 'BANNER', 'IMAGE'];
+const MAX_SCREENSHOTS = 10;
 
 export default function EditGamePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -36,6 +36,8 @@ export default function EditGamePage() {
   const [bannerUrl, setBannerUrl] = useState('');
   const [trailerUrl, setTrailerUrl] = useState('');
   const [media, setMedia] = useState<{ id?: string; type: string; url: string; caption: string }[]>([]);
+  const [uploadingShot, setUploadingShot] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -63,7 +65,32 @@ export default function EditGamePage() {
     }
   }, [game, initialized]);
 
-  const addMedia = () => setMedia([...media, { type: 'SCREENSHOT', url: '', caption: '' }]);
+  const handleShotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploadingShot(true);
+    for (const file of Array.from(files)) {
+      if (media.length >= MAX_SCREENSHOTS) { setError(`Max ${MAX_SCREENSHOTS} screenshots.`); break; }
+      if (!['image/png', 'image/jpeg'].includes(file.type)) { setError('Only PNG and JPG allowed.'); continue; }
+      const form = new FormData();
+      form.append('file', file);
+      try {
+        const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
+        if (!res.ok) throw new Error('Upload failed');
+        const data = await res.json();
+        setMedia((prev) => [...prev, { type: 'SCREENSHOT', url: data.url, caption: '' }]);
+      } catch {
+        setError('Upload failed.');
+      }
+    }
+    setUploadingShot(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const addMedia = () => {
+    if (media.length >= MAX_SCREENSHOTS) { setError(`Max ${MAX_SCREENSHOTS} screenshots.`); return; }
+    fileInputRef.current?.click();
+  };
   const removeMedia = (i: number) => setMedia(media.filter((_, idx) => idx !== i));
   const updateMedia = (i: number, field: string, val: string) => {
     setMedia(media.map((m, idx) => idx === i ? { ...m, [field]: val } : m));
@@ -287,22 +314,21 @@ export default function EditGamePage() {
           {/* Screenshots */}
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Screenshots</h3>
-              <button type="button" onClick={addMedia} className="clip-corner cursor-pointer border border-cyan/60 px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-widest text-cyan transition hover:bg-cyan/10">
-                <Plus className="size-3 mr-1 inline" /> Add screenshot
+              <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Screenshots ({media.length}/{MAX_SCREENSHOTS})</h3>
+              <button type="button" onClick={addMedia} disabled={uploadingShot || media.length >= MAX_SCREENSHOTS}
+                className="clip-corner cursor-pointer border border-cyan/60 px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-widest text-cyan transition hover:bg-cyan/10 disabled:opacity-40 disabled:cursor-not-allowed">
+                {uploadingShot ? <Loader2 className="size-3 mr-1 inline animate-spin" /> : <Upload className="size-3 mr-1 inline" />}
+                Add screenshot
               </button>
+              <input ref={fileInputRef} type="file" accept="image/png,image/jpeg" multiple onChange={handleShotUpload} className="hidden" />
             </div>
             <div className="space-y-3">
               {media.map((m, i) => (
                 <div key={i} className="flex items-start gap-3 border border-border/60 bg-background/40 p-3">
-                  <div className="flex-1 space-y-2">
-                    <select value={m.type} onChange={(e) => updateMedia(i, 'type', e.target.value)}
-                      className="clip-corner h-9 w-full border border-input bg-background/80 px-3 text-xs text-foreground outline-none cursor-pointer">
-                      {MEDIA_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-                    </select>
-                    <input type="url" value={m.url} onChange={(e) => updateMedia(i, 'url', e.target.value)}
-                      placeholder="Image URL"
-                      className="clip-corner h-9 w-full border border-input bg-background/80 px-3 text-xs text-foreground outline-none focus:border-cyan" />
+                  <div className="size-16 shrink-0 overflow-hidden border border-border bg-muted">
+                    <img src={m.url} alt="" className="size-full object-cover" />
+                  </div>
+                  <div className="flex-1">
                     <input type="text" value={m.caption} onChange={(e) => updateMedia(i, 'caption', e.target.value)}
                       placeholder="Caption (optional)"
                       className="clip-corner h-9 w-full border border-input bg-background/80 px-3 text-xs text-foreground outline-none focus:border-cyan" />
@@ -313,7 +339,7 @@ export default function EditGamePage() {
                 </div>
               ))}
               {media.length === 0 && (
-                <p className="py-4 text-center text-xs text-muted-foreground">No screenshots added yet. Click "Add screenshot" to add one.</p>
+                <p className="py-4 text-center text-xs text-muted-foreground">No screenshots yet. Click "Add screenshot" to upload PNG/JPG images (max 10).</p>
               )}
             </div>
           </div>
