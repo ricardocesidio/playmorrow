@@ -265,7 +265,6 @@ function GameHero({ game, title, heroImage, slug }: { game: Game; title: string;
 
 function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title: string }) {
   const price = game.priceCents == null ? '' : game.isFree ? 'Free' : `${formatPrice(game.priceCents, game.currency)}`;
-  const currencySymbol = getCurrencySymbol(game.currency ?? 'USD');
   const demoHref = getDemoHref(game) ?? undefined;
   const hasDemo = Boolean(demoHref);
 
@@ -275,7 +274,7 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
       <div className="mt-3 flex items-start justify-between gap-4">
         <p className="font-display text-2xl font-black text-foreground">{price}</p>
         <button type="button" className="clip-corner inline-flex items-center gap-1 border border-border px-2 py-1 font-mono text-[10px] uppercase text-muted-foreground">
-          USD <ChevronDown className="size-3" />
+          {(game.currency ?? 'USD').toUpperCase()} <ChevronDown className="size-3" />
         </button>
       </div>
       <p className={`mt-2 text-xs ${hasDemo ? 'text-cyan' : 'text-muted-foreground'}`}>
