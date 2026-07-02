@@ -6,15 +6,26 @@ export async function POST(request: Request) {
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.toString();
 
-  const formData = await request.formData();
+  const body = await request.arrayBuffer();
 
-  const res = await fetch(`${apiUrl}/upload`, {
-    method: 'POST',
-    headers: cookieHeader ? { Cookie: cookieHeader } : {},
-    body: formData,
-  });
+  try {
+    const res = await fetch(`${apiUrl}/upload`, {
+      method: 'POST',
+      headers: {
+        ...(cookieHeader ? { Cookie: cookieHeader } : {}),
+        'Content-Type': request.headers.get('content-type') || 'application/octet-stream',
+      },
+      body: Buffer.from(body),
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  return NextResponse.json(data, { status: res.status });
+    if (!res.ok) {
+      return NextResponse.json(data, { status: res.status });
+    }
+
+    return NextResponse.json(data);
+  } catch (err) {
+    return NextResponse.json({ message: String(err) }, { status: 500 });
+  }
 }
