@@ -260,7 +260,7 @@ function StudioHero({ studio, studioName, studioTagline }: { studio: Studio; stu
   return (
     <div className="clip-corner border-b border-border/90 bg-[#050b0f]/88 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)] overflow-hidden">
       <div className="relative min-h-[160px]">
-        <img               src={studio.bannerUrl || ''} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
+        <img src={studio.bannerUrl || '/playmorrow/neon-warden.png'} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_86%_24%,rgb(255_87_77_/_0.06),transparent_18rem),linear-gradient(90deg,#020609_0%,rgb(2_6_9_/_0.35)_34%,rgb(2_6_9_/_0.08)_100%)]" />
         <div className="pointer-events-none absolute right-0 top-0 size-64 translate-x-32 -translate-y-32 rounded-full border border-cyan/10" />
         <div className="pointer-events-none absolute bottom-0 left-1/3 size-32 rounded-full border border-coral/5" />
@@ -343,7 +343,7 @@ function SectionHeader({ title, href, linkLabel = 'View all' }: { title: string;
 
 function StudioGameCard({ game }: { game: StudioGame }) {
   const cover = game.coverUrl || game.bannerUrl || '/playmorrow/neon-warden.png';
-  const progress = game.progressPercent ?? null;
+  const progress = statusProgress(game.status);
   return (
     <Link href={`/dashboard/games/${game.slug}`} className="group overflow-hidden border border-border/90 bg-background/70 transition hover:-translate-y-0.5 hover:border-cyan/70">
       <div className="relative aspect-[1.2/1] overflow-hidden">
@@ -359,9 +359,9 @@ function StudioGameCard({ game }: { game: StudioGame }) {
         <div className="grid grid-cols-3 gap-2 font-mono text-[0.58rem] text-muted-foreground">
           <span>{formatNumber(game.followersCount)} followers</span>
           <span>{formatNumber(game.viewsCount ?? 0)} views</span>
-          {progress !== null && <span>{progress}%</span>}
+          <span>{progress}%</span>
         </div>
-        {progress !== null && <ProgressBar value={progress} />}
+        <ProgressBar value={progress} />
         <p className="truncate text-[0.68rem] text-muted-foreground">
           Updated {relativeDays(game.updatedAt)}
         </p>
@@ -512,6 +512,15 @@ function buildActivity(games: StudioGame[], devlogs: { title: string }[], auditL
 function formatDelta(value: number): string {
   if (value <= 0) return '';
   return `+${formatNumber(value)} this week`;
+}
+
+function statusProgress(status: string) {
+  const key = status.toUpperCase();
+  if (key.includes('PUBLISHED') || key.includes('RELEASE')) return 100;
+  if (key.includes('BETA')) return 85;
+  if (key.includes('ALPHA')) return 42;
+  if (key.includes('DEVELOP')) return 68;
+  return 31;
 }
 
 function statusLabel(status: string) {

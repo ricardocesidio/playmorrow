@@ -243,15 +243,15 @@ function GameHero({ game, title, heroImage, slug }: { game: Game; title: string;
             </div>
             <div>
               <p className="pm-display text-[0.95rem] leading-none text-foreground">{game.studio?.name ?? ''} <span className="text-cyan">●</span></p>
-              <p className="mt-2 text-xs text-muted-foreground"></p>
+              <p className="mt-2 text-xs text-muted-foreground">Independent Studio</p>
             </div>
             <DetailFollowButton slug={slug} />
           </div>
           <div className="-mx-6 grid border-y border-border/55 bg-background/38 shadow-[inset_0_18px_34px_rgb(0_0_0_/_0.28)] sm:-mx-8 sm:grid-cols-[205px_205px_205px_205px_1fr] xl:-mx-12">
             <HeroStat icon={<Heart className="size-[28px] stroke-[2]" />} value={formatFollowers(game.followersCount || 0)} label="Followers" />
-            <HeroStat icon={<Flame className="size-[26px] fill-coral text-coral" />} value={String(game.wishlistsCount ?? 0)} label="Wishlists" />
-            <HeroStat icon={<MessageCircle className="size-[29px] stroke-[1.9]" />} value={String(game.commentsCount ?? 0)} label="Comments" />
-            <HeroStat icon={<ActivityIcon />} value={String(game.viewsCount ?? 0)} label="Views" />
+            <HeroStat icon={<Flame className="size-[26px] fill-coral text-coral" />} value="312" label="Wishlists" />
+            <HeroStat icon={<MessageCircle className="size-[29px] stroke-[1.9]" />} value="48" label="Comments" />
+            <HeroStat icon={<ActivityIcon />} value="9.1K" label="Views" />
           </div>
         </div>
       </div>
