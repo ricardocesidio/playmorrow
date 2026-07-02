@@ -242,7 +242,7 @@ function StudioSidebar({ unreadCount, studioSlug }: { unreadCount: number; studi
         </nav>
         <div className="mt-5 overflow-hidden border border-border/70 p-3">
           <div className="relative min-h-24">
-            <img src="/playmorrow/neon-warden.png" alt="" className="absolute inset-y-0 right-[-20px] h-full w-24 object-cover opacity-80" />
+            <img src="/demo/games/neon-warden/hero.svg" alt="" className="absolute inset-y-0 right-[-20px] h-full w-24 object-cover opacity-80" />
             <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
             <div className="relative">
               <p className="font-mono text-xs font-semibold text-violet">Need more power?</p>
@@ -260,7 +260,7 @@ function StudioHero({ studio, studioName, studioTagline }: { studio: Studio; stu
   return (
     <div className="clip-corner border-b border-border/90 bg-[#050b0f]/88 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)] overflow-hidden">
       <div className="relative min-h-[160px]">
-        <img src={studio.bannerUrl || '/playmorrow/neon-warden.png'} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
+        <img src={studio.bannerUrl || '/demo/games/neon-warden/hero.svg'} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_86%_24%,rgb(255_87_77_/_0.06),transparent_18rem),linear-gradient(90deg,#020609_0%,rgb(2_6_9_/_0.35)_34%,rgb(2_6_9_/_0.08)_100%)]" />
         <div className="pointer-events-none absolute right-0 top-0 size-64 translate-x-32 -translate-y-32 rounded-full border border-cyan/10" />
         <div className="pointer-events-none absolute bottom-0 left-1/3 size-32 rounded-full border border-coral/5" />
@@ -342,7 +342,7 @@ function SectionHeader({ title, href, linkLabel = 'View all' }: { title: string;
 }
 
 function StudioGameCard({ game }: { game: StudioGame }) {
-  const cover = game.coverUrl || game.bannerUrl || '/playmorrow/neon-warden.png';
+  const cover = game.coverUrl || game.bannerUrl || '/demo/games/neon-warden/hero.svg';
   const progress = statusProgress(game.status);
   return (
     <Link href={`/dashboard/games/${game.slug}`} className="group overflow-hidden border border-border/90 bg-background/70 transition hover:-translate-y-0.5 hover:border-cyan/70">

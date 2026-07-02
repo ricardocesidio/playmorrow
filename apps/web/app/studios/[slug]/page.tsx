@@ -425,14 +425,14 @@ function StudioGameCard({ game }: { game: Game }) {
 
 function coverForGame(title: string) {
   const key = title.toLowerCase();
-  if (key.includes('starfall')) return '/playmorrow/starfall-tactics.png';
-  if (key.includes('moss')) return '/playmorrow/mossbound.png';
-  if (key.includes('paper')) return '/playmorrow/paper-relics.png';
-  if (key.includes('void')) return '/playmorrow/voidrunner.png';
-  if (key.includes('little')) return '/playmorrow/little-giants.png';
-  if (key.includes('echo')) return '/playmorrow/echobloom.png';
-  if (key.includes('north')) return '/playmorrow/northlight.png';
-  return '/playmorrow/neon-warden.png';
+  if (key.includes('starfall')) return '/demo/games/starfall-tactics/hero.svg';
+  if (key.includes('moss')) return '/demo/games/mossbound/hero.svg';
+  if (key.includes('paper')) return '/demo/games/paper-relics/hero.svg';
+  if (key.includes('void')) return '/demo/games/voidrunner/hero.svg';
+  if (key.includes('little')) return '/demo/games/neon-warden/hero.svg';
+  if (key.includes('echo')) return '/demo/games/neon-warden/hero.svg';
+  if (key.includes('north')) return '/demo/games/neon-warden/hero.svg';
+  return '/demo/games/neon-warden/hero.svg';
 }
 
 function formatAction(action: string) {

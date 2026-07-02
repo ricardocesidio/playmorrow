@@ -7,8 +7,8 @@ import type { Game } from '@/lib/api/client';
 import { StatusBadge } from './status-badge';
 
 export function GameCard({ game }: { game: Game }) {
-  const cover = game.coverUrl ?? coverForGame(game.title);
-  const progress = statusProgress(game.status);
+  const cover = game.coverUrl || '/demo/games/neon-warden/hero.svg';
+  const progress = game.progressPercent ?? null;
   const accent = statusAccent(game.status);
 
   return (
@@ -82,19 +82,6 @@ export function GameCard({ game }: { game: Game }) {
       </div>
     </Link>
   );
-}
-
-function coverForGame(_title: string) {
-  return '/playmorrow/neon-warden.png';
-}
-
-function statusProgress(status: string) {
-  const key = status.toUpperCase();
-  if (key.includes('PUBLISHED') || key.includes('RELEASE')) return 100;
-  if (key.includes('BETA')) return 85;
-  if (key.includes('ALPHA')) return 42;
-  if (key.includes('DEVELOP')) return 68;
-  return 31;
 }
 function statusAccent(status: string) {
   if (status === 'ALPHA') return { bar: 'bg-violet text-violet' };

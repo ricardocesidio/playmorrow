@@ -168,10 +168,10 @@ export function HudButton({
 }
 
 const collageTiles = [
-  { src: '/playmorrow/neon-warden.png', alt: 'Neon city key art', className: 'left-0 top-0 h-[35%] w-[47%]' },
-  { src: '/playmorrow/starfall-tactics.png', alt: 'Starship key art', className: 'right-0 top-[5%] h-[36%] w-[56%]' },
-  { src: '/playmorrow/mossbound.png', alt: 'Forest guardian key art', className: 'bottom-[4%] left-[22%] h-[34%] w-[44%]' },
-  { src: '/playmorrow/paper-relics.png', alt: 'Paper relics key art', className: 'bottom-[8%] right-[2%] h-[37%] w-[42%]' },
+  { src: '/demo/games/neon-warden/hero.svg', alt: 'Neon city key art', className: 'left-0 top-0 h-[35%] w-[47%]' },
+  { src: '/demo/games/starfall-tactics/hero.svg', alt: 'Starship key art', className: 'right-0 top-[5%] h-[36%] w-[56%]' },
+  { src: '/demo/games/mossbound/hero.svg', alt: 'Forest guardian key art', className: 'bottom-[4%] left-[22%] h-[34%] w-[44%]' },
+  { src: '/demo/games/paper-relics/hero.svg', alt: 'Paper relics key art', className: 'bottom-[8%] right-[2%] h-[37%] w-[42%]' },
 ] as const;
 
 export function AuthArtCollage() {

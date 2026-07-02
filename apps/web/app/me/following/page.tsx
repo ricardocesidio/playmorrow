@@ -100,7 +100,7 @@ export default function FollowingPage() {
                 <Link key={g.id} href={`/games/${g.slug}`}
                   className="group overflow-hidden border border-border/80 bg-[#050b0f]/70 transition hover:border-cyan/70">
                   <div className="relative aspect-[1.15/1] overflow-hidden">
-                    <img src={g.coverUrl || '/playmorrow/neon-warden.png'} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                    <img src={g.coverUrl || '/demo/games/neon-warden/hero.svg'} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/15 to-transparent" />
                     <div className="absolute inset-x-3 bottom-3">
                       <h3 className="font-display text-[1.2rem] uppercase leading-none text-white drop-shadow-lg">{g.title}</h3>

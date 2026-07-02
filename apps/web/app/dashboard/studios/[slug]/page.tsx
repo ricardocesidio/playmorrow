@@ -166,7 +166,7 @@ export default function EditStudioPage() {
             </nav>
             <div className="mt-5 overflow-hidden border border-border/70 p-3">
               <div className="relative min-h-24">
-                <img src="/playmorrow/neon-warden.png" alt="" className="absolute inset-y-0 right-[-20px] h-full w-24 object-cover opacity-80" />
+                <img src="/demo/games/neon-warden/hero.svg" alt="" className="absolute inset-y-0 right-[-20px] h-full w-24 object-cover opacity-80" />
                 <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
                 <div className="relative">
                   <p className="font-mono text-xs font-semibold text-violet">Need more power?</p>

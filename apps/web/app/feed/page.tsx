@@ -50,7 +50,7 @@ const referenceTransmissions: Transmission[] = [
     game: 'Neon Warden',
     title: "Shadows Don't Sleep: Infiltration in Neon Warden",
     summary: 'A deep dive into stealth systems, enemy perception, and the city that never rests.',
-    image: '/playmorrow/neon-warden.png',
+    image: '/demo/games/neon-warden/hero.svg',
     accent: 'cyan',
     stats: [64, 256, 412, 189],
   },
@@ -63,7 +63,7 @@ const referenceTransmissions: Transmission[] = [
     game: 'Starfall Tactics',
     title: 'Beta phase is now live. Tactical commanders, we need your feedback.',
     summary: '',
-    image: '/playmorrow/starfall-tactics.png',
+    image: '/demo/games/starfall-tactics/hero.svg',
     accent: 'cyan',
     stats: [38, 142, 231, 97],
   },
@@ -76,7 +76,7 @@ const referenceTransmissions: Transmission[] = [
     game: 'Mossbound',
     title: '5,000 followers',
     summary: 'Thank you to our growing community of explorers.',
-    image: '/playmorrow/mossbound.png',
+    image: '/demo/games/mossbound/hero.svg',
     accent: 'violet',
     metric: '5,000 followers',
     stats: [27, 98, 154, 63],
@@ -90,7 +90,7 @@ const referenceTransmissions: Transmission[] = [
     game: 'Paper Relics',
     title: 'Paper Relics - Combat & Cards in Action',
     summary: 'A look at card battles, relic synergies, and the risks behind every draw.',
-    image: '/playmorrow/paper-relics.png',
+    image: '/demo/games/paper-relics/hero.svg',
     accent: 'amber',
     video: true,
     stats: [53, 187, 268, 121],
@@ -104,24 +104,24 @@ const referenceTransmissions: Transmission[] = [
     game: 'Voidrunner',
     title: 'Join the Voidrunner Playtest',
     summary: 'Sign up now and help shape the void.',
-    image: '/playmorrow/voidrunner.png',
+    image: '/demo/games/voidrunner/hero.svg',
     accent: 'coral',
     stats: [72, 201, 317, 146],
   },
 ];
 
 const trending = [
-  ['Neon Warden', 'Obsidian Signal', '/playmorrow/neon-warden.png', '12.4K'],
-  ['Starfall Tactics', 'Ironlight Studios', '/playmorrow/starfall-tactics.png', '8.7K'],
-  ['Mossbound', 'Wildbriar', '/playmorrow/mossbound.png', '5.1K'],
-  ['Paper Relics', 'Second Story Games', '/playmorrow/paper-relics.png', '3.2K'],
-  ['Voidrunner', 'Voidrunner', '/playmorrow/voidrunner.png', '2.8K'],
+  ['Neon Warden', 'Obsidian Signal', '/demo/games/neon-warden/hero.svg', '12.4K'],
+  ['Starfall Tactics', 'Ironlight Studios', '/demo/games/starfall-tactics/hero.svg', '8.7K'],
+  ['Mossbound', 'Wildbriar', '/demo/games/mossbound/hero.svg', '5.1K'],
+  ['Paper Relics', 'Second Story Games', '/demo/games/paper-relics/hero.svg', '3.2K'],
+  ['Voidrunner', 'Voidrunner', '/demo/games/voidrunner/hero.svg', '2.8K'],
 ] as const;
 
 const playtests = [
-  ['Starfall Tactics', 'Beta Playtest', '/playmorrow/starfall-tactics.png', '1,842'],
-  ['Neon Warden', 'Stealth Prototype', '/playmorrow/neon-warden.png', '932'],
-  ['Mossbound', 'Alpha Playtest', '/playmorrow/mossbound.png', '512'],
+  ['Starfall Tactics', 'Beta Playtest', '/demo/games/starfall-tactics/hero.svg', '1,842'],
+  ['Neon Warden', 'Stealth Prototype', '/demo/games/neon-warden/hero.svg', '932'],
+  ['Mossbound', 'Alpha Playtest', '/demo/games/mossbound/hero.svg', '512'],
 ] as const;
 
 export default function FeedPage() {
@@ -421,11 +421,11 @@ function relativeTime(value: string) {
 
 function coverForGame(title: string) {
   const key = title.toLowerCase();
-  if (key.includes('starfall')) return '/playmorrow/starfall-tactics.png';
-  if (key.includes('moss')) return '/playmorrow/mossbound.png';
-  if (key.includes('paper')) return '/playmorrow/paper-relics.png';
-  if (key.includes('void')) return '/playmorrow/voidrunner.png';
-  return '/playmorrow/neon-warden.png';
+  if (key.includes('starfall')) return '/demo/games/starfall-tactics/hero.svg';
+  if (key.includes('moss')) return '/demo/games/mossbound/hero.svg';
+  if (key.includes('paper')) return '/demo/games/paper-relics/hero.svg';
+  if (key.includes('void')) return '/demo/games/voidrunner/hero.svg';
+  return '/demo/games/neon-warden/hero.svg';
 }
 
 function verbForType(type: Transmission['type']) {

@@ -58,7 +58,7 @@ export default function MyGamesPage() {
                 >
                   <div className="relative aspect-[1.6/1] overflow-hidden">
                     <img
-                      src={game.coverUrl || '/playmorrow/neon-warden.png'}
+                      src={game.coverUrl || '/demo/games/neon-warden/hero.svg'}
                       alt={game.title}
                       className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                     />

@@ -28,8 +28,8 @@ const referenceGames: Game[] = [
     priceCents: 1999,
     currency: 'USD',
     isFree: false,
-    coverUrl: '/playmorrow/neon-warden.png',
-    bannerUrl: '/playmorrow/neon-warden.png',
+    coverUrl: '/demo/games/neon-warden/hero.svg',
+    bannerUrl: '/demo/games/neon-warden/hero.svg',
     isPublished: true,
     followersCount: 12400,
     studio: { id: 'studio-1', name: 'Obsidian Signal', slug: 'test-studio', logoUrl: null },
@@ -43,13 +43,13 @@ const referenceGames: Game[] = [
     createdAt: '',
     updatedAt: '',
   },
-  makeReferenceGame('game-2', 'Starfall Tactics', 'starfall-tactics', 'IN_DEVELOPMENT', '/playmorrow/starfall-tactics.png', 8700, 'Ironlight Studios', 'ironlight-studios', ['Tactical RPG', 'Space Opera']),
-  makeReferenceGame('game-3', 'Mossbound', 'mossbound', 'ALPHA', '/playmorrow/mossbound.png', 5100, 'Wildbriar', 'wildbriar', ['Adventure', 'Atmospheric'], ['PC', 'SWITCH']),
-  makeReferenceGame('game-4', 'Paper Relics', 'paper-relics', 'PRE_ALPHA', '/playmorrow/paper-relics.png', 3200, 'Second Story Games', 'second-story-games', ['Card Battler', 'Roguelike'], ['PC']),
-  makeReferenceGame('game-5', 'Voidrunner', 'voidrunner', 'ALPHA', '/playmorrow/voidrunner.png', 6300, 'Voidrunner', 'voidrunner-studio', ['Roguelite', 'Twin Stick Shooter'], ['PC']),
-  makeReferenceGame('game-6', 'Little Giants', 'little-giants', 'IN_DEVELOPMENT', '/playmorrow/little-giants.png', 4200, 'Tiny Forge', 'tiny-forge', ['City Builder', 'Sandbox'], ['PC', 'PS5', 'XBOX', 'SWITCH']),
-  makeReferenceGame('game-7', 'Echobloom', 'echobloom', 'ALPHA', '/playmorrow/echobloom.png', 2900, 'Lumen Garden', 'lumen-garden', ['Narrative', 'Puzzle'], ['PC']),
-  makeReferenceGame('game-8', 'Northlight', 'northlight', 'PRE_ALPHA', '/playmorrow/northlight.png', 3800, 'Frostfire Games', 'frostfire-games', ['Survival', 'Open World']),
+  makeReferenceGame('game-2', 'Starfall Tactics', 'starfall-tactics', 'IN_DEVELOPMENT', '/demo/games/starfall-tactics/hero.svg', 8700, 'Ironlight Studios', 'ironlight-studios', ['Tactical RPG', 'Space Opera']),
+  makeReferenceGame('game-3', 'Mossbound', 'mossbound', 'ALPHA', '/demo/games/mossbound/hero.svg', 5100, 'Wildbriar', 'wildbriar', ['Adventure', 'Atmospheric'], ['PC', 'SWITCH']),
+  makeReferenceGame('game-4', 'Paper Relics', 'paper-relics', 'PRE_ALPHA', '/demo/games/paper-relics/hero.svg', 3200, 'Second Story Games', 'second-story-games', ['Card Battler', 'Roguelike'], ['PC']),
+  makeReferenceGame('game-5', 'Voidrunner', 'voidrunner', 'ALPHA', '/demo/games/voidrunner/hero.svg', 6300, 'Voidrunner', 'voidrunner-studio', ['Roguelite', 'Twin Stick Shooter'], ['PC']),
+  makeReferenceGame('game-6', 'Little Giants', 'little-giants', 'IN_DEVELOPMENT', '/demo/games/neon-warden/hero.svg', 4200, 'Tiny Forge', 'tiny-forge', ['City Builder', 'Sandbox'], ['PC', 'PS5', 'XBOX', 'SWITCH']),
+  makeReferenceGame('game-7', 'Echobloom', 'echobloom', 'ALPHA', '/demo/games/neon-warden/hero.svg', 2900, 'Lumen Garden', 'lumen-garden', ['Narrative', 'Puzzle'], ['PC']),
+  makeReferenceGame('game-8', 'Northlight', 'northlight', 'PRE_ALPHA', '/demo/games/neon-warden/hero.svg', 3800, 'Frostfire Games', 'frostfire-games', ['Survival', 'Open World']),
 ];
 
 
@@ -550,7 +550,7 @@ function accentForGame(status: string, _title: string) {
 }
 
 function coverForGame(_title: string) {
-  return '/playmorrow/neon-warden.png';
+  return '/demo/games/neon-warden/hero.svg';
 }
 
 function fallbackPlatforms(_title: string) {
