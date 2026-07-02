@@ -11,7 +11,7 @@ export function useScrollReveal() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           el.classList.add('animate-fadeIn');
           observer.unobserve(el);
         }

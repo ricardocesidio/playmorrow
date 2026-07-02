@@ -95,6 +95,7 @@ export function HudHoloPanel({
     </div>
   );
 }
+export function CircuitFrame({ className }: { className?: string }) {
   return (
     <div aria-hidden className={cn('pointer-events-none absolute inset-0 overflow-hidden opacity-70', className)}>
       <svg viewBox="0 0 1200 760" preserveAspectRatio="none" className="size-full">

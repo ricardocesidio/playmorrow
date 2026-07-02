@@ -33,6 +33,7 @@ export function DataStream() {
     );
 
     const draw = () => {
+      if (!ctx || !canvas) return;
       const scrollDelta = window.scrollY - lastScroll;
       lastScroll = window.scrollY;
       const speedMult = 1 + Math.abs(scrollDelta) * 0.04;
@@ -42,17 +43,20 @@ export function DataStream() {
       ctx.font = `${FONT_SIZE}px monospace`;
 
       for (let i = 0; i < drops.length; i += 2) {
-        const char = CHARS[Math.floor(Math.random() * CHARS.length)];
+        const char = CHARS[Math.floor(Math.random() * CHARS.length)] ?? '0';
         const x = i * (FONT_SIZE + COLUMNS_GAP);
-        const y = drops[i] * FONT_SIZE;
+        const drop = drops[i];
+        if (drop === undefined) continue;
+        const y = drop * FONT_SIZE;
 
         ctx.fillStyle = 'rgba(62, 231, 255, 0.08)';
         ctx.fillText(char, x, y);
 
         if (y > canvas.height && Math.random() > 0.98) {
           drops[i] = 0;
+        } else {
+          drops[i] = drop + speedMult * 0.5;
         }
-        drops[i] += speedMult * 0.5;
       }
 
       animId = requestAnimationFrame(draw);
