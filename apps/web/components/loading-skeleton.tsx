@@ -7,7 +7,7 @@ export function LoadingSkeleton({ count = 4, height = 'h-24' }: LoadingSkeletonP
   return (
     <div className="space-y-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className={`animate-pulse border border-border bg-elevated ${height}`} />
+        <div key={i} className={`shimmer border border-border/60 bg-elevated ${height}`} />
       ))}
     </div>
   );

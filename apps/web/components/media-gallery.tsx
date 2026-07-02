@@ -44,9 +44,9 @@ export function MediaGallery({ media }: MediaGalleryProps) {
           {trailers.map((m) => (
             <div key={m.id} className="group relative overflow-hidden rounded-lg border border-border bg-black">
               {m.thumbnailUrl ? (
-                <img src={m.thumbnailUrl} alt={m.caption ?? ''} className="aspect-video w-full object-cover" />
+                <img src={m.thumbnailUrl} alt={m.caption ?? ''} className="img-glitch-hover aspect-video w-full object-cover" />
               ) : (
-                <img src={m.url} alt={m.caption ?? ''} className="aspect-video w-full object-cover opacity-80" />
+                <img src={m.url} alt={m.caption ?? ''} className="img-glitch-hover aspect-video w-full object-cover opacity-80" />
               )}
               <div className="absolute inset-0 flex items-center justify-center">
                 <a
@@ -73,7 +73,7 @@ export function MediaGallery({ media }: MediaGalleryProps) {
               onClick={() => openLightbox(i)}
               className="group relative overflow-hidden rounded-lg border border-border text-left transition-colors hover:border-primary/40"
             >
-              <img src={m.thumbnailUrl ?? m.url} alt={m.caption ?? ''} className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+              <img src={m.thumbnailUrl ?? m.url} alt={m.caption ?? ''} className="img-glitch-hover aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105" />
               {m.caption && (
                 <p className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">{m.caption}</p>
               )}
