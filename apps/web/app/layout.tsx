@@ -4,7 +4,7 @@ import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { CookieConsent } from '@/components/cookie-consent';
-import { DataStream } from '@/components/data-stream';
+import { CursorGlow } from '@/components/cursor-glow';
 
 const display = Space_Grotesk({
   subsets: ['latin'],
@@ -54,8 +54,8 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className={`${display.variable} ${body.variable}`}>
-      <body className="min-h-screen bg-background font-body text-foreground antialiased">
-        <DataStream />
+      <body className="min-h-screen bg-black font-body text-foreground antialiased">
+        <CursorGlow />
         <Providers>
           <div className="relative flex min-h-screen flex-col z-10">
             {children}

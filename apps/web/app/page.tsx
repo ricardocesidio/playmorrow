@@ -10,7 +10,7 @@ import {
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { StatusBadge } from '@/components/status-badge';
-import { CircuitFrame, HudPanel, HudStatusRail, HexGrid } from '@/components/playmorrow/hud';
+import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { formatRelativeTime, formatFollowers } from '@/lib/format';
 import { usePublicFeed, useGames, useStudios } from '@/lib/api/hooks';
 import type { Game } from '@/lib/api/client';
@@ -34,8 +34,6 @@ export default function HomePage() {
     <>
       <SiteHeader />
       <main className="relative overflow-hidden bg-[#020609]">
-        <div className="pointer-events-none absolute inset-0" />
-        <HexGrid className="opacity-70" />
         <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
         <CircuitFrame className="opacity-30" />
 

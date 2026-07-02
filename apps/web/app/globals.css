@@ -276,35 +276,7 @@
     @apply bg-background text-foreground font-body;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     letter-spacing: 0.02em;
-    background:
-      radial-gradient(circle at 18% 10%, rgb(62 231 255 / 0.06), transparent 28rem),
-      radial-gradient(circle at 88% 2%, rgb(255 87 77 / 0.05), transparent 26rem),
-      radial-gradient(circle at 50% 80%, rgb(166 92 255 / 0.04), transparent 32rem),
-      conic-gradient(from 30deg at 24px 0, transparent 60deg, rgb(62 231 255 / 0.025) 60deg 120deg, transparent 120deg 180deg, rgb(62 231 255 / 0.025) 180deg 240deg, transparent 240deg 300deg, rgb(62 231 255 / 0.025) 300deg 360deg),
-      conic-gradient(from 90deg at 0 24px, transparent 60deg, rgb(62 231 255 / 0.025) 60deg 120deg, transparent 120deg 180deg, rgb(62 231 255 / 0.025) 180deg 240deg, transparent 240deg 300deg, rgb(62 231 255 / 0.025) 300deg 360deg),
-      linear-gradient(180deg, #02070b 0%, #03090d 52%, #010507 100%);
-    background-size:
-      100% 100%,
-      100% 100%,
-      100% 100%,
-      48px 48px,
-      48px 48px,
-      100% 100%;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 9999;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgb(255 255 255 / 0.03) 2px,
-      rgb(255 255 255 / 0.03) 3px
-    );
+    background: #000;
   }
 
   h1, h2, h3, h4, h5, h6 {
