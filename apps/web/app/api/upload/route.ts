@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+  const apiUrl = 'http://localhost:4000/api';
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.toString();
 
