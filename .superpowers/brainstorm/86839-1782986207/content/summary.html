@@ -1,0 +1,82 @@
+<h2>Design Summary — Deepened Cyberpunk v2</h2>
+<p class="subtitle">Everything we selected across all sections. Ready to spec?</p>
+
+<div class="section">
+  <h3>Global Atmosphere</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:monospace;font-size:10px">
+    <span style="color:rgba(140,150,155,0.7)">Background grid:</span><span style="color:#3ee7ff">Hexagonal pattern</span>
+    <span style="color:rgba(140,150,155,0.7)">Scanline intensity:</span><span style="color:#3ee7ff">Medium (3px, 3-4% opacity)</span>
+    <span style="color:rgba(140,150,155,0.7)">Noise grain:</span><span style="color:#3ee7ff">SVG turbulence overlay</span>
+    <span style="color:rgba(140,150,155,0.7)">Ambient glows:</span><span style="color:#3ee7ff">Cyan + coral + violet radial gradients</span>
+    <span style="color:rgba(140,150,155,0.7)">Layer order:</span><span style="color:#3ee7ff">Gradients → Grid → Scanlines → Noise → Content</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Typography &amp; Glitch</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:monospace;font-size:10px">
+    <span style="color:rgba(140,150,155,0.7)">Heading glitch:</span><span style="color:#3ee7ff">RGB split on hover + random glitch + enhanced glow</span>
+    <span style="color:rgba(140,150,155,0.7)">Terminal effects:</span><span style="color:#3ee7ff">Scanning highlight on headings</span>
+    <span style="color:rgba(140,150,155,0.7)">Body font:</span><span style="color:#3ee7ff">JetBrains Mono everywhere</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Panels, Cards &amp; Borders</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:monospace;font-size:10px">
+    <span style="color:rgba(140,150,155,0.7)">Border effects:</span><span style="color:#3ee7ff">Scanning bars + circuit trace + corner brackets</span>
+    <span style="color:rgba(140,150,155,0.7)">Card depth:</span><span style="color:#3ee7ff">Holographic (multi-shadow + gradient + signal dots)</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Interactive Elements</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:monospace;font-size:10px">
+    <span style="color:rgba(140,150,155,0.7)">Button style:</span><span style="color:#3ee7ff">Keep clipped corners + stronger glows</span>
+    <span style="color:rgba(140,150,155,0.7)">Hover effects:</span><span style="color:#3ee7ff">Border glow pulse + image glitch on hover</span>
+    <span style="color:rgba(140,150,155,0.7)">Cursor:</span><span style="color:#3ee7ff">Default browser cursor</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Transitions &amp; Scroll</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:monospace;font-size:10px">
+    <span style="color:rgba(140,150,155,0.7)">Page entrance:</span><span style="color:#3ee7ff">Enhanced fadeIn with child stagger</span>
+    <span style="color:rgba(140,150,155,0.7)">Scroll effects:</span><span style="color:#3ee7ff">Parallax + scroll reveal + data-stream bg</span>
+    <span style="color:rgba(140,150,155,0.7)">Nav transitions:</span><span style="color:#3ee7ff">Glitch exit on page navigation</span>
+  </div>
+</div>
+
+<div class="section" style="margin-top:32px;padding:24px;background:rgba(62,231,255,0.05);border:1px solid rgba(62,231,255,0.2)">
+  <h3>Component Map (all affected)</h3>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;font-family:monospace;font-size:9px;color:rgba(140,150,155,0.8);margin-top:12px">
+    <span><span style="color:#3ee7ff">Site header</span> → glass + scan</span>
+    <span><span style="color:#3ee7ff">Nav links</span> → glitch + glow</span>
+    <span><span style="color:#3ee7ff">Search field</span> → cursor blink</span>
+    <span><span style="color:#3ee7ff">Hero section</span> → all layers</span>
+    <span><span style="color:#3ee7ff">Game cards</span> → holo + img glitch</span>
+    <span><span style="color:#3ee7ff">Feed items</span> → scan + stagger</span>
+    <span><span style="color:#3ee7ff">Status badges</span> → flicker</span>
+    <span><span style="color:#3ee7ff">Progress bars</span> → multi-glow</span>
+    <span><span style="color:#3ee7ff">PAGE</span> panels → circuit trace</span>
+    <span><span style="color:#3ee7ff">Footer</span> → data-stream</span>
+    <span><span style="color:#3ee7ff">Forms/inputs</span> → focus glow</span>
+    <span><span style="color:#3ee7ff">Buttons</span> → stronger glow</span>
+    <span><span style="color:#3ee7ff">Modals</span> → glass + scan</span>
+    <span><span style="color:#3ee7ff">Dropdowns</span> → glass</span>
+    <span><span style="color:#3ee7ff">Media gallery</span> → img glitch</span>
+    <span><span style="color:#3ee7ff">Dashboard</span> → all panel effects</span>
+    <span><span style="color:#3ee7ff">Auth pages</span> → collage + scan</span>
+    <span><span style="color:#3ee7ff">Devlogs</span> → stagger + holo</span>
+    <span><span style="color:#3ee7ff">Roadmap view</span> → progress glow</span>
+    <span><span style="color:#3ee7ff">Leaderboard</span> → data-stream</span>
+    <span><span style="color:#3ee7ff">Settings</span> → lighter touch</span>
+    <span><span style="color:#3ee7ff">Empty states</span> → terminal frame</span>
+    <span><span style="color:#3ee7ff">Error states</span> → glitch frame</span>
+    <span><span style="color:#3ee7ff">Loading states</span> → scan shimmer</span>
+  </div>
+</div>
+
+<div style="margin-top:24px;text-align:center">
+  <p style="color:rgba(62,231,255,0.8);font-family:monospace;font-size:11px;text-transform:uppercase">DESIGN APPROVED? LET ME KNOW AND I'LL WRITE THE SPEC.</p>
+</div>

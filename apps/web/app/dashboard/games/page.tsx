@@ -56,14 +56,12 @@ export default function MyGamesPage() {
                   href={`/dashboard/games/${game.slug}`}
                   className="group overflow-hidden border border-border/90 bg-background/60 transition hover:-translate-y-0.5 hover:border-cyan/70"
                 >
-                  <div className="relative aspect-[1.6/1] overflow-hidden bg-muted">
-                    {game.coverUrl ? (
-                      <img
-                        src={game.coverUrl}
-                        alt={game.title}
-                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                      />
-                    ) : null}
+                  <div className="relative aspect-[1.6/1] overflow-hidden">
+                    <img
+                      src={game.coverUrl || '/playmorrow/neon-warden.png'}
+                      alt={game.title}
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
                     <span className="absolute right-2 top-2 border border-coral/60 bg-coral/15 px-2 py-1 font-mono text-[0.55rem] uppercase text-coral">
                       {game.status.replace(/_/g, ' ')}

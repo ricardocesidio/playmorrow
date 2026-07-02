@@ -1,0 +1,59 @@
+<h2>Section 4 — Interactive Elements</h2>
+<p class="subtitle">Buttons, inputs, hover states, transitions, and cursor effects.</p>
+
+<div class="section">
+  <h3>Button styles</h3>
+  <div style="background:#010507;padding:24px;border:1px solid rgba(62,231,255,0.15);margin-bottom:16px">
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+      <button style="border:1px solid #3ee7ff;background:rgba(62,231,255,0.1);padding:10px 24px;font-family:monospace;font-size:10px;text-transform:uppercase;color:#3ee7ff;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);box-shadow:0 0 20px rgba(62,231,255,0.15);cursor:pointer">PRIMARY</button>
+      <button style="border:1px solid #ff574d;background:rgba(255,87,77,0.12);padding:10px 24px;font-family:monospace;font-size:10px;text-transform:uppercase;color:#ff574d;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);box-shadow:0 0 20px rgba(255,87,77,0.15);cursor:pointer">DANGER</button>
+      <button style="border:1px solid #1b3038;padding:10px 24px;font-family:monospace;font-size:10px;text-transform:uppercase;color:rgba(140,150,155,0.8);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);background:transparent;cursor:pointer">GHOST</button>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="btn-clip" onclick="toggleSelect(this)">
+    <div class="letter">A</div><div class="content"><h3>Keep clipped corners (current)</h3><p>Already working well. Just add stronger glows and hover transitions.</p></div>
+  </div>
+  <div class="option" data-choice="btn-diagonal" onclick="toggleSelect(this)"><div class="letter">B</div><div class="content"><h3>Diagonal cut buttons</h3><p>More aggressive skew/clip. Feels sharper and more industrial.</p></div></div>
+  <div class="option" data-choice="btn-hex" onclick="toggleSelect(this)"><div class="letter">C</div><div class="content"><h3>Hexagonal buttons</h3><p>Six-sided polygon buttons for primary CTAs. Very sci-fi, less practical.</p></div></div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>Hover &amp; focus effects</h3>
+  <div style="background:#010507;padding:24px;border:1px solid rgba(62,231,255,0.15);margin-bottom:16px">
+    <div style="margin-bottom:16px">
+      <span style="font-family:monospace;font-size:9px;color:rgba(62,231,255,0.7);margin-bottom:8px;display:block">CARD HOVER</span>
+      <div style="background:rgba(7,17,23,0.9);padding:16px;border:1px solid rgba(27,48,56,0.6);width:240px;transition:all 0.3s;cursor:pointer;position:relative;overflow:hidden">
+        <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(62,231,255,0.08),transparent);opacity:0;transition:opacity 0.3s"></div>
+        <div style="font-size:14px;font-weight:700;color:#f2f5f4;margin-bottom:4px">Game Title</div>
+        <div style="font-family:monospace;font-size:9px;color:rgba(140,150,155,0.7)">Hover me — gradient + border glow + scale</div>
+      </div>
+    </div>
+    <div>
+      <span style="font-family:monospace;font-size:9px;color:rgba(62,231,255,0.7);margin-bottom:8px;display:block">INPUT FOCUS</span>
+      <input placeholder="Search games..." style="background:rgba(2,7,11,0.8);border:1px solid #263940;padding:8px 12px;font-family:monospace;font-size:9px;text-transform:uppercase;color:#f2f5f4;width:240px;transition:border-color 0.2s,box-shadow 0.2s;outline:none" />
+    </div>
+  </div>
+</div>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="hover-glow" onclick="toggleSelect(this)">
+    <div class="letter">A</div><div class="content"><h3>Border glow pulse on hover</h3><p>Card borders animate from border → cyan glow on mouseover. Subtle but effective.</p></div>
+  </div>
+  <div class="option" data-choice="hover-lift" onclick="toggleSelect(this)"><div class="letter">B</div><div class="content"><h3>3D lift + shadow</h3><p>Cards translate up 2-4px with deeper shadow on hover. Physical depth feel.</p></div></div>
+  <div class="option" data-choice="hover-img-glitch" onclick="toggleSelect(this)"><div class="letter">C</div><div class="content"><h3>Image glitch on hover</h3><p>Cover images do subtle RGB split/chromatic aberration on mouseover.</p></div></div>
+  <div class="option" data-choice="hover-ripple" onclick="toggleSelect(this)"><div class="letter">D</div><div class="content"><h3>Scan ripple</h3><p>Horizontal light band sweeps across card from top to bottom on hover.</p></div></div>
+  <div class="option" data-choice="focus-glow" onclick="toggleSelect(this)"><div class="letter">E</div><div class="content"><h3>Input focus glow</h3><p>Inputs glow cyan on focus with expanding ring effect. Terminal-style.</p></div></div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>Cursor effects</h3>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="cursor-default" onclick="toggleSelect(this)"><div class="letter">A</div><div class="content"><h3>Default cursor</h3><p>Browser default. Clean, performant, accessible.</p></div></div>
+  <div class="option" data-choice="cursor-crosshair" onclick="toggleSelect(this)"><div class="letter">B</div><div class="content"><h3>Custom crosshair</h3><p>Terminal/aiming reticle cursor everywhere. Strong cyberpunk identity.</p></div></div>
+  <div class="option" data-choice="cursor-glow" onclick="toggleSelect(this)"><div class="letter">C</div><div class="content"><h3>Custom cursor + glow trail</h3><p>CSS cursor replacement with a glow dot that follows the mouse. Dramatic, heavy.</p></div></div>
+</div>

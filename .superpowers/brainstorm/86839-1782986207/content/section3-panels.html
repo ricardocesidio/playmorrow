@@ -1,0 +1,62 @@
+<h2>Section 3 — Panels, Cards &amp; Borders</h2>
+<p class="subtitle">The visual language of surfaces, containers, and their animated boundaries.</p>
+
+<div class="section">
+  <h3>Border animations</h3>
+  <div style="background:#010507;padding:20px;border:1px solid rgba(62,231,255,0.15);margin-bottom:16px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-around">
+    <div style="position:relative;background:#071117;padding:24px;width:200px;overflow:hidden;border:1px solid rgba(62,231,255,0.2)">
+      <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(62,231,255,0.6),transparent);animation:scanTop 3s ease-in-out infinite"></div>
+      <div style="font-size:16px;font-weight:700;color:#f2f5f4;margin-bottom:8px">Panel</div>
+      <div style="font-family:monospace;font-size:9px;color:rgba(140,150,155,0.7)">scanning border</div>
+    </div>
+    <div style="position:relative;background:#071117;padding:24px;width:200px;overflow:hidden;border:1px solid rgba(62,231,255,0.2)">
+      <div style="position:absolute;top:0;left:0;bottom:0;width:1px;background:linear-gradient(0deg,transparent,rgba(255,87,77,0.6),transparent);animation:scanSide 2.5s ease-in-out infinite"></div>
+      <div style="font-size:16px;font-weight:700;color:#f2f5f4;margin-bottom:8px">Panel</div>
+      <div style="font-family:monospace;font-size:9px;color:rgba(140,150,155,0.7)">vertical scan</div>
+    </div>
+    <div style="position:relative;background:#071117;padding:24px;width:200px;overflow:hidden;border:1px solid rgba(62,231,255,0.2)">
+      <div style="position:absolute;inset:0;border:1px solid transparent;animation:borderDash 4s linear infinite;background:conic-gradient(from 0deg at 50% 50%, transparent, rgba(166,92,255,0.15), transparent, rgba(62,231,255,0.15), transparent) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);mask-composite:exclude;-webkit-mask-composite:xor"></div>
+      <div style="font-size:16px;font-weight:700;color:#f2f5f4;margin-bottom:8px">Panel</div>
+      <div style="font-family:monospace;font-size:9px;color:rgba(140,150,155,0.7)">circuit trace</div>
+    </div>
+  </div>
+  <style>
+    @keyframes scanTop{0%,100%{transform:translateX(-100%)}50%{transform:translateX(100%)}}
+    @keyframes scanSide{0%,100%{transform:translateY(-100%)}50%{transform:translateY(100%)}}
+    @keyframes borderDash{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+  </style>
+</div>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="border-scan" onclick="toggleSelect(this)">
+    <div class="letter">A</div><div class="content"><h3>Scanning borders</h3><p>Light bar sweeps across card tops/edges. Already started, extend to all panels.</p></div>
+  </div>
+  <div class="option" data-choice="border-circuit" onclick="toggleSelect(this)">
+    <div class="letter">B</div><div class="content"><h3>Circuit trace border</h3><p>Animated gradient around panel perimeter simulating electricity/circuit traces.</p></div>
+  </div>
+  <div class="option" data-choice="border-corner" onclick="toggleSelect(this)"><div class="letter">C</div><div class="content"><h3>Corner brackets</h3><p>Angular corner accents on cards (like targeting brackets). Subtle but sharp.</p></div></div>
+  <div class="option" data-choice="border-diagonal" onclick="toggleSelect(this)"><div class="letter">D</div><div class="content"><h3>Diagonal cut panels</h3><p>More aggressive clip-paths — 45-degree cuts on card corners. Industrial feel.</p></div></div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>Card depth &amp; holographic effect</h3>
+  <div style="background:#010507;padding:20px;border:1px solid rgba(62,231,255,0.15);margin-bottom:16px;display:flex;flex-wrap:wrap;gap:24px;justify-content:space-around">
+    <div style="background:#071117;padding:24px;width:180px;border:1px solid rgba(62,231,255,0.15);box-shadow:0 4px 32px rgba(0,0,0,0.6),0 0 20px rgba(62,231,255,0.04)">
+      <div style="font-size:14px;font-weight:700;color:#f2f5f4;margin-bottom:8px">Current</div>
+      <div style="font-family:monospace;font-size:9px;color:rgba(140,150,155,0.7)">flat shadow</div>
+    </div>
+    <div style="position:relative;background:linear-gradient(135deg,rgba(62,231,255,0.06),rgba(166,92,255,0.04),rgba(255,87,77,0.03));padding:24px;width:180px;border:1px solid rgba(62,231,255,0.2);box-shadow:0 8px 48px rgba(0,0,0,0.7),0 0 30px rgba(62,231,255,0.06),inset 0 1px 0 rgba(255,255,255,0.02)">
+      <div style="font-size:14px;font-weight:700;color:#f2f5f4;margin-bottom:8px;text-shadow:0 0 12px rgba(62,231,255,0.2)">Holographic</div>
+      <div style="font-family:monospace;font-size:9px;color:rgba(62,231,255,0.5)">multi-shadow depth</div>
+      <div style="position:absolute;top:8px;right:8px;width:6px;height:6px;background:#3ee7ff;box-shadow:0 0 10px rgba(62,231,255,0.6)"></div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="depth-holographic" onclick="toggleSelect(this)">
+    <div class="letter">A</div><div class="content"><h3>Holographic depth</h3><p>Multi-layer box-shadows + subtle gradient overlay + corner signal dots on every panel.</p></div>
+  </div>
+  <div class="option" data-choice="depth-glass" onclick="toggleSelect(this)"><div class="letter">B</div><div class="content"><h3>Frosted glass</h3><p>Semi-transparent panels with backdrop-blur. Sleeker, more modern. Less punk.</p></div></div>
+  <div class="option" data-choice="depth-both" onclick="toggleSelect(this)"><div class="letter">C</div><div class="content"><h3>Both: glass nav, holo cards</h3><p>Glass for header/nav/dropdowns. Holographic for content cards and panels.</p></div></div>
+</div>

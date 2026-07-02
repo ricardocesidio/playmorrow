@@ -1,0 +1,83 @@
+<h2>Section 1 — Global Atmosphere</h2>
+<p class="subtitle">The foundational visual layers that sit behind everything. Select your preference for each.</p>
+
+<div class="section">
+  <h3>Layer stack (bottom to top)</h3>
+  <div style="background:#010507;padding:24px;border:1px solid rgba(62,231,255,0.15);position:relative;margin-bottom:24px">
+    <div style="position:absolute;inset:0;background:radial-gradient(circle at 20% 15%,rgba(62,231,255,0.06),transparent 40%),radial-gradient(circle at 85% 5%,rgba(255,87,77,0.04),transparent 35%),radial-gradient(circle at 50% 80%,rgba(166,92,255,0.03),transparent 45%);pointer-events:none;z-index:1"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(rgba(62,231,255,0.025) 1px, transparent 1px),linear-gradient(90deg,rgba(62,231,255,0.015) 1px, transparent 1px);background-size:48px 48px;pointer-events:none;z-index:2"></div>
+    <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg, rgba(255,255,255,0.022) 0px, rgba(255,255,255,0.022) 1px, transparent 1px, transparent 3px);pointer-events:none;z-index:3"></div>
+    <div style="position:absolute;inset:0;opacity:0.45;pointer-events:none;z-index:4;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22/><feColorMatrix type=%22matrix%22 values=%220 0 0 0 0.01 0 0 0 0 0.02 0 0 0 0 0.03 0 0 0 0.08 0%22/></filter><rect width=%22256%22 height=%22256%22 filter=%22url(%23n)%22/></svg>')"></div>
+    <div style="position:relative;z-index:10;color:rgba(62,231,255,0.7);font-family:monospace;font-size:11px;line-height:2.2;padding:20px">
+      <span style="color:rgba(62,231,255,0.3)">Layer 1:</span> Ambient glow gradients (cyan/coral/violet)<br/>
+      <span style="color:rgba(62,231,255,0.3)">Layer 2:</span> Circuit grid (48px)<br/>
+      <span style="color:rgba(62,231,255,0.3)">Layer 3:</span> CRT scanlines (every 3px)<br/>
+      <span style="color:rgba(62,231,255,0.3)">Layer 4:</span> Film grain noise (SVG turbulence)<br/>
+      <span style="color:rgba(62,231,255,0.3)">Layer 5+:</span> Content surfaces (panels, cards, text)
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Background pattern</h3>
+  <p class="subtitle">The repeating grid behind content</p>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">A: Current (44px grid)</div>
+    <div class="mockup-body">
+      <div style="height:160px;background:linear-gradient(rgba(62,231,255,0.035) 1px, transparent 1px),linear-gradient(90deg,rgba(62,231,255,0.025) 1px, transparent 1px);background-size:44px 44px;display:flex;align-items:center;justify-content:center">
+        <span style="font-family:monospace;font-size:10px;color:rgba(62,231,255,0.5)">44px grid</span>
+      </div>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">B: Dense hexagonal</div>
+    <div class="mockup-body">
+      <div style="height:160px;background:conic-gradient(from 30deg at 24px 0, transparent 60deg, rgba(62,231,255,0.04) 60deg 120deg, transparent 120deg 180deg, rgba(62,231,255,0.04) 180deg 240deg, transparent 240deg 300deg, rgba(62,231,255,0.04) 300deg 360deg),conic-gradient(from 90deg at 0 24px, transparent 60deg, rgba(62,231,255,0.04) 60deg 120deg, transparent 120deg 180deg, rgba(62,231,255,0.04) 180deg 240deg, transparent 240deg 300deg, rgba(62,231,255,0.04) 300deg 360deg);background-size:48px 48px;display:flex;align-items:center;justify-content:center">
+        <span style="font-family:monospace;font-size:10px;color:rgba(62,231,255,0.5)">hex grid</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="grid-square" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Keep square grid</h3>
+      <p>Current 44px rectilinear grid, just tighten + more visible. Familiar, readable.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="grid-hex" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Hexagonal grid</h3>
+      <p>Sci-fi hex pattern. More cyberpunk feel, slightly busier visually.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="grid-both" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Square on most pages, hex on hero/feature sections</h3>
+      <p>Best of both: clean readability where needed, full cyberpunk for impact moments.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>Scanline intensity</h3>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="scanline-subtle" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Subtle (4px spacing, 2% opacity)</h3>
+      <p>Barely visible except on dark surfaces. Won't affect text readability.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="scanline-medium" onclick="toggleSelect(this)"><div class="letter">B</div><div class="content"><h3>Medium (3px spacing, 3-4% opacity)</h3><p>Noticeable CRT feel everywhere. Visible on most backgrounds.</p></div></div>
+  <div class="option" data-choice="scanline-heavy" onclick="toggleSelect(this)"><div class="letter">C</div><div class="content"><h3>Aggressive (2px spacing, 5% opacity)</h3><p>Strong retro-terminal vibe. May affect readability on light text.</p></div></div>
+</div>

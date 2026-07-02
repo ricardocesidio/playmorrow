@@ -234,7 +234,7 @@ function LatestGameCard({ game }: { game: HomeGame }) {
         {game.coverUrl ? (
           <img src={game.coverUrl} alt={game.title} className="img-glitch-hover absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-[1.035]" />
         ) : (
-          <div className="absolute inset-0 bg-muted" />
+          <img src="/playmorrow/neon-warden.png" alt={game.title} className="img-glitch-hover absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-[1.035]" />
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-background/86 via-background/42 to-transparent" />
         <div className="relative z-10">
@@ -270,7 +270,7 @@ function normalizeLatestGames(games?: Game[]): HomeGame[] {
   if (!games?.length) return [];
   return games.slice(0, 3).map((g) => ({
     id: g.id, title: g.title, slug: g.slug, status: g.status,
-    coverUrl: g.coverUrl ?? '', followersCount: g.followersCount,
+    coverUrl: g.coverUrl ?? '/playmorrow/neon-warden.png', followersCount: g.followersCount,
     studio: { name: g.studio?.name ?? '', slug: g.studio?.slug ?? '' },
     tags: g.tags ?? [],
     tagline: g.tagline,

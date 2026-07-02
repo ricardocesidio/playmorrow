@@ -1,0 +1,49 @@
+<h2>Section 5 — Page Transitions &amp; Scroll Effects</h2>
+<p class="subtitle">How the page feels in motion — entrances, exits, and scroll-triggered animations.</p>
+
+<div class="section">
+  <h3>Page entrance</h3>
+  <div style="background:#010507;padding:24px;border:1px solid rgba(62,231,255,0.15);margin-bottom:16px">
+    <div style="font-family:monospace;font-size:9px;color:rgba(62,231,255,0.7);margin-bottom:12px">CURRENT: simple fadeIn (opacity + translateY 8px)</div>
+    <div style="font-family:monospace;font-size:9px;color:rgba(140,150,155,0.7);margin-bottom:8px">PROPOSED OPTIONS:</div>
+    <div style="display:flex;flex-direction:column;gap:8px;font-family:monospace;font-size:9px">
+      <span><span style="color:#3ee7ff">A:</span> Enhanced fadeIn — longer duration, deeper translateY, staggered children</span>
+      <span><span style="color:#ff574d">B:</span> Glitch entrance — content flickers/garbles briefly then resolves into place</span>
+      <span><span style="color:#a65cff">C:</span> Scan reveal — horizontal wipe reveals content from bottom to top</span>
+      <span><span style="color:#e4a83b">D:</span> Terminal boot — content "loads" line by line with a boot sequence feel</span>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="entrance-fade" onclick="toggleSelect(this)">
+    <div class="letter">A</div><div class="content"><h3>Enhanced fadeIn with stagger</h3><p>Smooth, elegant. Cards/sections appear one after another. Best balance.</p></div>
+  </div>
+  <div class="option" data-choice="entrance-glitch" onclick="toggleSelect(this)"><div class="letter">B</div><div class="content"><h3>Glitch entrance</h3><p>Content appears garbled for 200ms then snaps clean. High impact, could annoy.</p></div></div>
+  <div class="option" data-choice="entrance-scan" onclick="toggleSelect(this)"><div class="letter">C</div><div class="content"><h3>Scanline reveal</h3><p>Horizontal bar sweeps up revealing content. Feels like a scanner booting up.</p></div></div>
+  <div class="option" data-choice="entrance-terminal" onclick="toggleSelect(this)"><div class="letter">D</div><div class="content"><h3>Terminal boot sequence</h3><p>Content types out row by row. Maximum cyberpunk, slowest to load.</p></div></div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>Scroll effects</h3>
+</div>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="scroll-parallax" onclick="toggleSelect(this)">
+    <div class="letter">A</div><div class="content"><h3>Parallax layers</h3><p>Background circuit patterns move slower than content on scroll. Depth illusion.</p></div>
+  </div>
+  <div class="option" data-choice="scroll-appear" onclick="toggleSelect(this)"><div class="letter">B</div><div class="content"><h3>Scroll-triggered reveal</h3><p>Elements fade/slide in as they enter viewport. Already partially done.</p></div></div>
+  <div class="option" data-choice="scroll-progress" onclick="toggleSelect(this)"><div class="letter">C</div><div class="content"><h3>Reading progress bar</h3><p>A thin glowing bar at page top tracks scroll depth. Cyberpunk signal meter.</p></div></div>
+  <div class="option" data-choice="scroll-distort" onclick="toggleSelect(this)"><div class="letter">D</div><div class="content"><h3>Image reveal on scroll</h3><p>Cover images "develop" from noise/static as you scroll down. Glitch-to-clear.</p></div></div>
+  <div class="option" data-choice="scroll-data" onclick="toggleSelect(this)"><div class="letter">E</div><div class="content"><h3>Data-stream scroll background</h3><p>Subtle matrix-like characters flowing in background, speed varies with scroll.</p></div></div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>Navigation transitions</h3>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="nav-instant" onclick="toggleSelect(this)"><div class="letter">A</div><div class="content"><h3>Instant (current)</h3><p>Standard Next.js client-side routing. Fast, reliable.</p></div></div>
+  <div class="option" data-choice="nav-fade" onclick="toggleSelect(this)"><div class="letter">B</div><div class="content"><h3>Fade transition</h3><p>Brief 150ms crossfade between pages. Smooth upgrade.</p></div></div>
+  <div class="option" data-choice="nav-glitch" onclick="toggleSelect(this)"><div class="letter">C</div><div class="content"><h3>Glitch exit</h3><p>Page briefly distorts/flickers on exit before next page loads. Punk feel.</p></div></div>
+</div>

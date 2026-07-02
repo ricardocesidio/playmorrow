@@ -1,0 +1,91 @@
+<h2>Section 2 — Typography &amp; Glitch Effects</h2>
+<p class="subtitle">How text behaves, animates, and distorts. Core to the cyberpunk feel.</p>
+
+<div class="section">
+  <h3>Heading glitch</h3>
+  <div style="background:#010507;padding:32px;border:1px solid rgba(62,231,255,0.15);margin-bottom:20px">
+    <div style="display:flex;justify-content:space-around;flex-wrap:wrap;gap:24px">
+      <div style="text-align:center">
+        <div style="font-size:32px;font-weight:900;text-transform:uppercase;color:#f2f5f4;margin-bottom:8px;position:relative">
+          NEON WARDEN
+          <div style="position:absolute;inset:0;color:#3ee7ff;opacity:0;clip-path:inset(0 0 50% 0);animation:glitchSkew 0.3s infinite">NEON WARDEN</div>
+          <div style="position:absolute;inset:0;color:#ff574d;opacity:0;clip-path:inset(50% 0 0 0);animation:glitchSkew2 0.3s infinite">NEON WARDEN</div>
+          <style>.glitch-hover:hover div{opacity:0.5!important;animation-duration:0.2s!important}@keyframes glitchSkew{0%{transform:translate(0)}20%{transform:translate(-3px,0)}40%{transform:translate(3px,0)}60%{transform:translate(-1px,0)}80%{transform:translate(2px,0)}100%{transform:translate(0)}}</style>
+        </div>
+        <span style="font-family:monospace;font-size:9px;color:rgba(255,87,77,0.6)">RGB split on hover</span>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:32px;font-weight:900;text-transform:uppercase;color:#f2f5f4;margin-bottom:8px;position:relative;text-shadow:0 0 20px rgba(62,231,255,0.15)">
+          NEON WARDEN
+        </div>
+        <span style="font-family:monospace;font-size:9px;color:rgba(62,231,255,0.6)">Static glow (current)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="glitch-rgb" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>RGB split on hover</h3>
+      <p>Headings split into cyan/magenta offset layers on mouseover. Very cyberpunk, eye-catching.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="glitch-random" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Random glitch (sparingly)</h3>
+      <p>Occasional random glitch keyframes on hero text. Unpredictable, feels like a real terminal.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="glitch-none" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Enhanced glow only</h3>
+      <p>Keep text stable, just add stronger text-shadow glows and animated gradient effects. Cleaner but less punk.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>Terminal / status elements</h3>
+  <div style="background:#010507;padding:24px;border:1px solid rgba(62,231,255,0.15);margin-bottom:20px">
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+      <div style="font-family:monospace;font-size:10px;color:#3ee7ff;text-transform:uppercase">
+        <span style="width:8px;height:14px;display:inline-block;background:#3ee7ff;animation:blink 1s step-end infinite;vertical-align:middle;margin-right:6px;box-shadow:0 0 8px rgba(62,231,255,0.6)"></span>
+        SYSTEM:ONLINE
+      </div>
+      <div style="font-family:monospace;font-size:9px;color:rgba(140,150,155,0.7);text-transform:uppercase">
+        <span style="display:inline-block;width:6px;height:6px;background:#70ff9b;margin-right:6px;box-shadow:0 0 8px rgba(112,255,155,0.6)"></span>
+        SIGNAL_STRENGTH 97%
+      </div>
+      <div style="font-family:monospace;font-size:9px;color:rgba(255,87,77,0.8);text-transform:uppercase">
+        <span style="display:inline-block;width:6px;height:6px;background:#ff574d;margin-right:6px;box-shadow:0 0 8px rgba(255,87,77,0.6)"></span>
+        LIVE
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="cursor-blink" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content"><h3>Blinking cursor</h3><p>Terminal-style blinking block cursor on status labels and input fields.</p></div>
+  </div>
+  <div class="option" data-choice="flicker-text" onclick="toggleSelect(this)"><div class="letter">B</div><div class="content"><h3>Text flicker</h3><p>Subtle random flicker on status indicators (LIVE, ONLINE, CONNECTED).</p></div></div>
+  <div class="option" data-choice="typewriter" onclick="toggleSelect(this)"><div class="letter">C</div><div class="content"><h3>Typewriter reveal</h3><p>Hero taglines type out letter-by-letter on page load.</p></div></div>
+  <div class="option" data-choice="scanning-text" onclick="toggleSelect(this)"><div class="letter">D</div><div class="content"><h3>Scanning highlight</h3><p>A horizontal bar sweeps across section headings, highlighting them like a scanner.</p></div></div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>Mono typography (everywhere or selective?)</h3>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="mono-headings" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content"><h3>Display font for headings, mono for UI</h3><p>Keep Space Grotesk for headings (readable), JetBrains for labels/badges/status.</p></div>
+  </div>
+  <div class="option" data-choice="mono-everywhere" onclick="toggleSelect(this)"><div class="letter">B</div><div class="content"><h3>Mono everywhere</h3><p>Use JetBrains Mono for everything. Maximum terminal authenticity. Harder to read at scale.</p></div></div>
+</div>

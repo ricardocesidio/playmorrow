@@ -209,9 +209,7 @@ function TransmissionRow({ item }: { item: Transmission }) {
         </div>
 
         <div className="relative min-h-[120px] overflow-hidden border border-border-bright/65 bg-muted md:h-full md:min-h-0">
-          {item.image ? (
-            <img src={item.image} alt={`${item.game} key art`} className="absolute inset-0 size-full object-cover transition duration-300 group-hover:scale-[1.03]" />
-          ) : null}
+          <img src={item.image} alt={`${item.game} key art`} className="absolute inset-0 size-full object-cover transition duration-300 group-hover:scale-[1.03]" />
           <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background/10" />{item.video && (
             <span className="absolute left-1/2 top-1/2 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-foreground/30 bg-background/55 text-foreground backdrop-blur-sm">
               <Play className="ml-1 size-6 fill-current" />
@@ -242,7 +240,7 @@ function feedItemToTransmission(item: FeedItem): Transmission {
     game: item.game.title,
     title: item.title,
     summary: item.summary,
-    image: item.game.coverUrl ?? '',
+    image: item.game.coverUrl ?? '/playmorrow/neon-warden.png',
     accent: item.type === 'DEVLOG' ? 'cyan' : 'amber',
     stats: null,
   };
