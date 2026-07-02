@@ -301,12 +301,14 @@ function CatalogGameCard({ game }: { game: Game }) {
       href={`/games/${game.slug}`}
       className="panel group grid h-[232px] grid-rows-[193px_39px] overflow-hidden border-border/95 bg-card transition hover:border-cyan/70 hover:shadow-[0_0_24px_rgb(62_231_255_/_0.12)]"
     >
-      <div className="relative min-h-0 overflow-hidden p-3">
-        <img
-          src={cover}
-          alt={title}
-          className="absolute inset-0 size-full object-cover transition duration-300 group-hover:scale-[1.035]"
-        />
+      <div className="relative min-h-0 overflow-hidden p-3 bg-muted">
+        {cover ? (
+          <img
+            src={cover}
+            alt={title}
+            className="absolute inset-0 size-full object-cover transition duration-300 group-hover:scale-[1.035]"
+          />
+        ) : null}
         <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/30 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/82 via-transparent to-background/12" />
 

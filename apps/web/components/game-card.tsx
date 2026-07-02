@@ -17,11 +17,13 @@ export function GameCard({ game }: { game: Game }) {
       className="group panel relative flex min-h-[228px] flex-col overflow-hidden border-border/90 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.06),rgb(166_92_255_/_0.04),rgb(255_87_77_/_0.03))] shadow-[0_20px_80px_rgb(0_0_0_/_0.6),0_0_30px_rgb(62_231_255_/_0.05),inset_0_1px_0_rgb(255_255_255_/_0.02)] transition duration-200 hover:border-cyan/70 hover:shadow-[0_0_32px_rgb(62_231_255_/_0.14),0_20px_80px_rgb(0_0_0_/_0.7)] animate-scan-top"
     >
       <div className="relative aspect-[1.82] overflow-hidden bg-muted">
-        <img
-          src={cover}
-          alt={game.title}
-          className="img-glitch-hover size-full object-cover transition duration-300 group-hover:scale-[1.035]"
-        />
+        {cover ? (
+          <img
+            src={cover}
+            alt={game.title}
+            className="img-glitch-hover size-full object-cover transition duration-300 group-hover:scale-[1.035]"
+          />
+        ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/28 to-transparent" />
         <div className="absolute left-3 top-3">
           <StatusBadge status={game.status} />

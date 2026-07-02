@@ -231,7 +231,11 @@ function LatestGameCard({ game }: { game: HomeGame }) {
   return (
     <Link href={`/games/${game.slug}`} className="group grid min-h-[260px] overflow-hidden border border-border bg-card transition hover:border-cyan/70">
       <div className="relative min-h-[180px] p-4">
-        <img src={game.coverUrl} alt={game.title} className="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-[1.035]" />
+        {game.coverUrl ? (
+          <img src={game.coverUrl} alt={game.title} className="img-glitch-hover absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-[1.035]" />
+        ) : (
+          <div className="absolute inset-0 bg-muted" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-r from-background/86 via-background/42 to-transparent" />
         <div className="relative z-10">
           <StatusBadge status={game.status} />

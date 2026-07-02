@@ -346,8 +346,10 @@ function StudioGameCard({ game }: { game: StudioGame }) {
   const progress = game.progressPercent ?? null;
   return (
     <Link href={`/dashboard/games/${game.slug}`} className="group overflow-hidden border border-border/90 bg-background/70 transition hover:-translate-y-0.5 hover:border-cyan/70">
-      <div className="relative aspect-[1.2/1] overflow-hidden">
-        <img src={cover} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+      <div className="relative aspect-[1.2/1] overflow-hidden bg-muted">
+        {cover ? (
+          <img src={cover} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+        ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" />
         <span className="absolute right-2 top-2 border border-coral/60 bg-coral/15 px-2 py-1 font-mono text-[0.55rem] uppercase text-coral">{statusLabel(game.status)}</span>
         <div className="absolute inset-x-3 bottom-3">
