@@ -87,16 +87,14 @@ function CreateGameForm() {
     for (const file of Array.from(files)) {
       if (media.length >= MAX_SCREENSHOTS) { setError(`Max ${MAX_SCREENSHOTS} screenshots.`); break; }
       if (!['image/png', 'image/jpeg'].includes(file.type)) { setError('Only PNG and JPG allowed.'); continue; }
-      const form = new FormData();
-      form.append('file', file);
-      try {
-        const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
-        if (!res.ok) throw new Error('Upload failed');
-        const data = await res.json();
-        setMedia((prev) => [...prev, { type: 'SCREENSHOT', url: data.url, caption: '', position: prev.length + 1 }]);
-      } catch {
-        setError('Upload failed.');
-      }
+      if (file.size > 10 * 1024 * 1024) { setError('Image too large (max 10MB).'); continue; }
+      const reader = new FileReader();
+      const url = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('Read failed'));
+        reader.readAsDataURL(file);
+      });
+      setMedia((prev) => [...prev, { type: 'SCREENSHOT', url, caption: '', position: prev.length + 1 }]);
     }
     setUploadingShot(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
