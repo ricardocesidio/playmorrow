@@ -7,6 +7,7 @@ import { ArrowLeft, Plus, Save, ExternalLink, Gamepad2, Milestone, FileText, Scr
 
 import { SiteHeader } from '@/components/site-header';
 import { ImageUpload } from '@/components/image-upload';
+import { uploadScreenshot } from '@/app/actions/upload';
 
 import { useAuth } from '@/lib/api/auth-context';
 import { useGame, useUpdateGame, useDeleteGame } from '@/lib/api/hooks';
@@ -73,13 +74,14 @@ export default function EditGamePage() {
       if (media.length >= MAX_SCREENSHOTS) { setError(`Max ${MAX_SCREENSHOTS} screenshots.`); break; }
       if (!['image/png', 'image/jpeg'].includes(file.type)) { setError('Only PNG and JPG allowed.'); continue; }
       if (file.size > 10 * 1024 * 1024) { setError('Image too large (max 10MB).'); continue; }
-      const reader = new FileReader();
-      const url = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = () => reject(new Error('Read failed'));
-        reader.readAsDataURL(file);
-      });
-      setMedia((prev) => [...prev, { type: 'SCREENSHOT', url, caption: '' }]);
+      const form = new FormData();
+      form.append('file', file);
+      try {
+        const data = await uploadScreenshot(form);
+        setMedia((prev) => [...prev, { type: 'SCREENSHOT', url: data.url, caption: '' }]);
+      } catch {
+        setError('Upload failed.');
+      }
     }
     setUploadingShot(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
