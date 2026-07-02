@@ -25,9 +25,10 @@ export default function HomePage() {
   const { data: studiosData } = useStudios();
 
   const games = normalizeLatestGames(gamesData?.items);
+  const gamesCount = gamesData?.total ?? 0;
   const feedItems = feedData?.items?.slice(0, 4) ?? [];
-  const feedCount = feedData?.items?.length ?? 0;
-  const studioCount = studiosData?.items?.length ?? 0;
+  const feedCount = feedData?.total ?? 0;
+  const studioCount = studiosData?.total ?? 0;
 
   return (
     <>
@@ -42,7 +43,7 @@ export default function HomePage() {
             <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.1fr] xl:gap-16">
               <div>
                 <div className="inline-flex items-center gap-2 border border-cyan/30 bg-cyan/5 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-widest text-cyan">
-                  <Radio className="size-3" /> Live now — {feedCount} active signals
+                  <Radio className="size-3" /> Live now — {feedCount} updates
                 </div>
                 <h1 className="mt-6 font-display text-[clamp(2.5rem,6vw,5rem)] font-black uppercase leading-[0.9] text-white">
                   Discover tomorrow's<br />
@@ -66,7 +67,7 @@ export default function HomePage() {
                 {/* Stats row */}
                 <div className="mt-10 grid grid-cols-3 gap-6 border-t border-border/60 pt-6">
                   <div>
-                    <p className="font-display text-2xl font-black text-white">{games.length}+</p>
+                    <p className="font-display text-2xl font-black text-white">{gamesCount}+</p>
                     <p className="mt-1 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Games in development</p>
                   </div>
                   <div>
@@ -74,8 +75,8 @@ export default function HomePage() {
                     <p className="mt-1 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Active studios</p>
                   </div>
                   <div>
-                    <p className="font-display text-2xl font-black text-white">{feedCount * 4}+</p>
-                    <p className="mt-1 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Devlogs published</p>
+                    <p className="font-display text-2xl font-black text-white">{feedCount}+</p>
+                    <p className="mt-1 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Feed updates</p>
                   </div>
                 </div>
               </div>
