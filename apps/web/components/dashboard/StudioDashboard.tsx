@@ -449,7 +449,7 @@ function RoadmapPanel({ items }: { items: RoadmapItem[] }) {
               <span className="text-[0.62rem] text-muted-foreground">{column.items.length}</span>
             </div>
             <div className="space-y-2">
-              {column.items.map((item) => (
+              {column.items.slice(0, 5).map((item) => (
                 <Link key={item.id} href="/dashboard/roadmap" className="block border border-border/70 bg-muted/20 p-2 text-[0.68rem] text-muted-foreground transition hover:border-cyan hover:text-foreground">
                   <span className="block truncate text-foreground">{item.title}</span>
                   {item.targetDate && <span>{new Date(item.targetDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>}
