@@ -264,7 +264,8 @@ function GameHero({ game, title, heroImage, slug }: { game: Game; title: string;
 }
 
 function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title: string }) {
-  const price = game.priceCents == null ? '$19.99' : game.isFree ? 'Free' : `$${(game.priceCents / 100).toFixed(2)}`;
+  const price = game.priceCents == null ? '' : game.isFree ? 'Free' : `${formatPrice(game.priceCents, game.currency)}`;
+  const currencySymbol = getCurrencySymbol(game.currency ?? 'USD');
   const demoHref = getDemoHref(game) ?? undefined;
   const hasDemo = Boolean(demoHref);
 
@@ -713,7 +714,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
         <InfoField label="Developer" value={game.studio?.name ?? ''} />
         <InfoField label="Status" value={labelStatus(game.status)} />
         <InfoField label="Release" value={game.expectedReleaseText ?? ''} />
-        <InfoField label="Price" value={game.isFree ? 'Free' : game.priceCents != null ? `$${(game.priceCents / 100).toFixed(2)} USD` : ''} />
+        <InfoField label="Price" value={game.isFree ? 'Free' : game.priceCents != null ? `${formatPrice(game.priceCents, game.currency)}` : ''} />
       </div>
       <Link href="#details" className="mt-3 inline-flex items-center gap-3 text-sm text-cyan">View all details <ArrowRight className="size-4" /></Link>
 
@@ -957,4 +958,18 @@ function getDemoHref(game: Game) {
   });
 
   return platformDemo?.url ?? null;
+}
+
+function formatPrice(cents: number, currency?: string | null): string {
+  const symbol = getCurrencySymbol(currency ?? 'USD');
+  return `${symbol}${(cents / 100).toFixed(2)}`;
+}
+
+function getCurrencySymbol(code: string): string {
+  const symbols: Record<string, string> = {
+    USD: '$', EUR: '€', GBP: '£', JPY: '¥', BRL: 'R$',
+    CAD: 'C$', AUD: 'A$', CHF: 'Fr', CNY: '¥', INR: '₹',
+    KRW: '₩', MXN: 'Mex$',
+  };
+  return symbols[code] ?? '$';
 }
