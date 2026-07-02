@@ -432,8 +432,11 @@
 
 .pm-scanline::after {
   content: "";
-  position: absolute;
-  inset: 0;
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    height: 4px;
+    transform: translateY(-50%);
   pointer-events: none;
   z-index: 1;
   background-image: linear-gradient(rgb(255 255 255 / 0.025) 1px, transparent 1px);
