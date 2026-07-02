@@ -240,7 +240,7 @@ function feedItemToTransmission(item: FeedItem): Transmission {
     game: item.game.title,
     title: item.title,
     summary: item.summary,
-    image: item.game.coverUrl ?? '/playmorrow/neon-warden.png',
+    image: item.game.coverUrl || '/playmorrow/neon-warden.png',
     accent: item.type === 'DEVLOG' ? 'cyan' : 'amber',
     stats: null,
   };

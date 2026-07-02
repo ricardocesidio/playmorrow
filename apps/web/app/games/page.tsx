@@ -291,7 +291,7 @@ function CatalogGameCard({ game }: { game: Game }) {
   const title = game.title;
   const progress = game.progressPercent ?? null;
   const accent = accentForGame(game.status, title);
-  const cover = game.coverUrl ?? '/playmorrow/neon-warden.png';
+  const cover = game.coverUrl || '/playmorrow/neon-warden.png';
   const platforms = game.platformLinks?.length
     ? game.platformLinks.map((platform) => platform.platform)
     : [];

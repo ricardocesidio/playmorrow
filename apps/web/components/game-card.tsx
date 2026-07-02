@@ -7,7 +7,7 @@ import type { Game } from '@/lib/api/client';
 import { StatusBadge } from './status-badge';
 
 export function GameCard({ game }: { game: Game }) {
-  const cover = game.coverUrl ?? '/playmorrow/neon-warden.png';
+  const cover = game.coverUrl || '/playmorrow/neon-warden.png';
   const progress = game.progressPercent ?? null;
   const accent = statusAccent(game.status);
 

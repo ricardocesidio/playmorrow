@@ -270,7 +270,7 @@ function normalizeLatestGames(games?: Game[]): HomeGame[] {
   if (!games?.length) return [];
   return games.slice(0, 3).map((g) => ({
     id: g.id, title: g.title, slug: g.slug, status: g.status,
-    coverUrl: g.coverUrl ?? '/playmorrow/neon-warden.png', followersCount: g.followersCount,
+    coverUrl: g.coverUrl || '/playmorrow/neon-warden.png', followersCount: g.followersCount,
     studio: { name: g.studio?.name ?? '', slug: g.studio?.slug ?? '' },
     tags: g.tags ?? [],
     tagline: g.tagline,
