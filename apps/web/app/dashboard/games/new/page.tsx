@@ -94,7 +94,8 @@ function CreateGameForm() {
         const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
         if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
         const data = await res.json();
-        setMedia((prev) => [...prev, { type: 'SCREENSHOT', url: data.url, caption: '', position: prev.length + 1 }]);
+        const fullUrl = `http://localhost:4000${data.url}`;
+        setMedia((prev) => [...prev, { type: 'SCREENSHOT', url: fullUrl, caption: '', position: prev.length + 1 }]);
       } catch {
         setError('Upload failed.');
       }
