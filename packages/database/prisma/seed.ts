@@ -146,7 +146,7 @@ const GAMES_DATA = [
 ];
 
 const STUDIOS_DATA = [
-  { name: 'Obsidian Signal', slug: 'obsidian-signal', tagline: 'Independent Studio', description: 'Crafting immersive cyberpunk experiences.', isVerified: true, followersCount: 28400, gamesCount: 2 },
+  { name: 'Obsidian Signal', slug: 'obsidian-signal', tagline: 'Independent Studio', description: 'Crafting immersive cyberpunk experiences.', isVerified: true, followersCount: 28400, gamesCount: 1 },
   { name: 'Ironlight Studios', slug: 'ironlight-studios', tagline: 'Independent Studio', description: 'Building tactical worlds for strategic minds.', isVerified: true, followersCount: 15600, gamesCount: 1 },
   { name: 'Wildbriar', slug: 'wildbriar', tagline: 'Independent Studio', description: 'Creating atmospheric adventures from the wild.', isVerified: true, followersCount: 9200, gamesCount: 1 },
   { name: 'Second Story Games', slug: 'second-story-games', tagline: 'Independent Studio', description: 'Telling stories through innovative gameplay.', isVerified: true, followersCount: 7400, gamesCount: 1 },
