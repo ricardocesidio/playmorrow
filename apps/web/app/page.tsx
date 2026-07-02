@@ -76,15 +76,16 @@ export default function HomePage() {
                   <div>
                     <p className="font-display text-2xl font-black text-white">{feedCount * 4}+</p>
                     <p className="mt-1 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Devlogs published</p>
+                </div>
               </div>
 
+              {/* Featured Game Card */}
               <div className="hidden lg:block">
                 {games.length > 0 && (
                   <FeaturedGameCard game={games[0]} />
                 )}
               </div>
             </div>
-              </div>
             </div>
           </div>
         </section>
