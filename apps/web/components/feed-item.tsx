@@ -11,7 +11,7 @@ export function FeedItemCard({ item }: { item: FeedItemType }) {
   return (
     <Link
       href={href}
-      className="clip-corner block border border-border/60 bg-[#050b0f]/50 p-4 transition-colors hover:border-cyan/30 animate-scan-top relative overflow-hidden"
+      className="clip-corner block border border-border/60 bg-[#050b0f]/50 p-4 transition-colors hover:border-cyan/30 relative overflow-hidden"
     >
       <span className="signal-dot absolute right-3 top-3" aria-hidden />
       <div className="flex items-start gap-4">

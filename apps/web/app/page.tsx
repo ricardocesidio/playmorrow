@@ -124,7 +124,7 @@ export default function HomePage() {
             <h2 className="mb-3 text-center font-display text-2xl font-black uppercase tracking-tight text-white">How it works</h2>
             <p className="mb-10 text-center font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">For players and studios</p>
             <div className="grid gap-6 sm:grid-cols-3">
-              <div className="clip-corner border border-border/70 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.05),rgb(166_92_255_/_0.03),rgb(255_87_77_/_0.02))] p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3),0_0_16px_rgb(62_231_255_/_0.04)] hover:border-cyan/40 hover:shadow-[0_0_40px_rgb(0_0_0_/_0.4),0_0_24px_rgb(62_231_255_/_0.08)] transition-all duration-300 animate-scan-top relative overflow-hidden">
+              <div className="clip-corner border border-border/70 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.05),rgb(166_92_255_/_0.03),rgb(255_87_77_/_0.02))] p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3),0_0_16px_rgb(62_231_255_/_0.04)] hover:border-cyan/40 hover:shadow-[0_0_40px_rgb(0_0_0_/_0.4),0_0_24px_rgb(62_231_255_/_0.08)] transition-all duration-300 relative overflow-hidden">
                 <div className="mx-auto grid size-14 place-items-center rounded-full border border-cyan/30 bg-cyan/5">
                   <SearchIcon className="size-6 text-cyan" />
                 </div>
@@ -133,7 +133,7 @@ export default function HomePage() {
                   Browse games in development, follow studios, and get real-time updates on progress.
                 </p>
               </div>
-              <div className="clip-corner border border-border/70 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.05),rgb(166_92_255_/_0.03),rgb(255_87_77_/_0.02))] p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3),0_0_16px_rgb(62_231_255_/_0.04)] hover:border-cyan/40 hover:shadow-[0_0_40px_rgb(0_0_0_/_0.4),0_0_24px_rgb(62_231_255_/_0.08)] transition-all duration-300 animate-scan-top relative overflow-hidden">
+              <div className="clip-corner border border-border/70 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.05),rgb(166_92_255_/_0.03),rgb(255_87_77_/_0.02))] p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3),0_0_16px_rgb(62_231_255_/_0.04)] hover:border-cyan/40 hover:shadow-[0_0_40px_rgb(0_0_0_/_0.4),0_0_24px_rgb(62_231_255_/_0.08)] transition-all duration-300 relative overflow-hidden">
                 <div className="mx-auto grid size-14 place-items-center rounded-full border border-coral/30 bg-coral/5">
                   <FollowingIcon className="size-6 text-coral" />
                 </div>
@@ -142,7 +142,7 @@ export default function HomePage() {
                   Get notified of devlogs, roadmaps, milestones, and releases from studios you follow.
                 </p>
               </div>
-              <div className="clip-corner border border-border/70 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.05),rgb(166_92_255_/_0.03),rgb(255_87_77_/_0.02))] p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3),0_0_16px_rgb(62_231_255_/_0.04)] hover:border-cyan/40 hover:shadow-[0_0_40px_rgb(0_0_0_/_0.4),0_0_24px_rgb(62_231_255_/_0.08)] transition-all duration-300 animate-scan-top relative overflow-hidden">
+              <div className="clip-corner border border-border/70 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.05),rgb(166_92_255_/_0.03),rgb(255_87_77_/_0.02))] p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3),0_0_16px_rgb(62_231_255_/_0.04)] hover:border-cyan/40 hover:shadow-[0_0_40px_rgb(0_0_0_/_0.4),0_0_24px_rgb(62_231_255_/_0.08)] transition-all duration-300 relative overflow-hidden">
                 <div className="mx-auto grid size-14 place-items-center rounded-full border border-amber/30 bg-amber/5">
                   <EngageIcon className="size-6 text-amber" />
                 </div>

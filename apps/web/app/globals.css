@@ -78,8 +78,8 @@
   &::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--cyan) 30%, transparent) 40%, color-mix(in srgb, var(--cyan) 30%, transparent) 60%, transparent 100%);
+    top: 0; left: 0; right: 0; height: 0.5px;
+    background: linear-gradient(90deg, transparent 0%, var(--cyan) 40%, var(--cyan) 60%, transparent 100%);
     animation: scanTop 3s ease-in-out infinite;
     pointer-events: none;
     z-index: 5;

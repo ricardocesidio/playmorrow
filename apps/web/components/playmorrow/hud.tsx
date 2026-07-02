@@ -49,7 +49,6 @@ export function HudPanel({
         'panel relative border-border/90 overflow-hidden',
         'before:pointer-events-none before:absolute before:left-3 before:top-3 before:size-8 before:border-l before:border-t before:z-10',
         'after:pointer-events-none after:absolute after:bottom-3 after:right-3 after:size-8 after:border-b after:border-r after:z-10',
-        'animate-scan-top',
         accentClass,
         className,
       )}
@@ -85,7 +84,6 @@ export function HudHoloPanel({
         'panel relative border border-border/80 overflow-hidden',
         'bg-[linear-gradient(135deg,rgb(62_231_255_/_0.06),rgb(166_92_255_/_0.04),rgb(255_87_77_/_0.03))]',
         'shadow-[0_20px_80px_rgb(0_0_0_/_0.6),0_0_30px_rgb(62_231_255_/_0.05),inset_0_1px_0_rgb(255_255_255_/_0.02)]',
-        'animate-scan-top',
         className,
       )}
       {...props}

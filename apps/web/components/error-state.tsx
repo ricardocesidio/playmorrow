@@ -5,7 +5,7 @@ interface ErrorStateProps {
 
 export function ErrorState({ message = 'Something went wrong.', onRetry }: ErrorStateProps) {
   return (
-    <div className="flex flex-col items-center gap-4 border border-coral/40 bg-coral/[0.03] py-16 relative overflow-hidden animate-scan-top">
+    <div className="flex flex-col items-center gap-4 border border-coral/40 bg-coral/[0.03] py-16 relative overflow-hidden">
       <p className="font-mono text-xs uppercase tracking-widest text-coral animate-glitch-sparse">
         <span className="inline-block size-1.5 bg-coral mr-2 shadow-[0_0_8px_rgb(255_87_77_/_0.6)]" aria-hidden />
         SIGNAL CORRUPTED
