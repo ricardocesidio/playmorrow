@@ -173,9 +173,9 @@ export function PlayerDashboard() {
                     slug: item.game.slug,
                     studio: item.game.studio?.name ?? '',
                     genre: item.game.tagline ?? '',
-                    image: item.game.coverUrl || '/placeholder.svg',
+                    image: item.game.coverUrl || '',
                     score: 'Wishlisted',
-                    progress: 50,
+                    progress: 0,
                     platforms: [],
                     accent: 'cyan',
                   }} />

@@ -101,6 +101,7 @@ export interface Game {
   wishlistsCount?: number;
   commentsCount?: number;
   viewsCount?: number;
+  progressPercent?: number | null;
   featured?: boolean;
   studio: StudioSummary;
   trailerUrl?: string | null;

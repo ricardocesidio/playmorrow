@@ -243,7 +243,7 @@ function GameHero({ game, title, heroImage, slug }: { game: Game; title: string;
             </div>
             <div>
               <p className="pm-display text-[0.95rem] leading-none text-foreground">{game.studio?.name ?? ''} <span className="text-cyan">●</span></p>
-              <p className="mt-2 text-xs text-muted-foreground">{game.studio?.tagline ?? ''}</p>
+              <p className="mt-2 text-xs text-muted-foreground"></p>
             </div>
             <DetailFollowButton slug={slug} />
           </div>
