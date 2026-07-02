@@ -238,7 +238,7 @@ function RoadmapContent() {
               </div>
             ) : roadmap && roadmap.length > 0 ? (
               <div className="space-y-2">
-                {roadmap.map((item, index) => (
+                {roadmap.slice(0, 5).map((item, index) => (
                   <div key={item.id} className="clip-corner border border-border/70 bg-[#050b0f]/80 p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition hover:border-cyan/40">
                     {editingId === item.id ? (
                       <div className="space-y-3">
