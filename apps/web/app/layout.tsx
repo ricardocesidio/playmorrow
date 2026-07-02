@@ -4,6 +4,7 @@ import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { CookieConsent } from '@/components/cookie-consent';
+import { DataStream } from '@/components/data-stream';
 
 const display = Space_Grotesk({
   subsets: ['latin'],
@@ -54,8 +55,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning className={`${display.variable} ${body.variable}`}>
       <body className="min-h-screen bg-background font-body text-foreground antialiased">
+        <DataStream />
         <Providers>
-          <div className="relative flex min-h-screen flex-col">
+          <div className="relative flex min-h-screen flex-col z-10">
             {children}
             <CookieConsent />
           </div>

@@ -10,7 +10,7 @@ import {
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { StatusBadge } from '@/components/status-badge';
-import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
+import { CircuitFrame, HudPanel, HudStatusRail, HexGrid } from '@/components/playmorrow/hud';
 import { formatRelativeTime, formatFollowers } from '@/lib/format';
 import { usePublicFeed, useGames, useStudios } from '@/lib/api/hooks';
 import type { Game } from '@/lib/api/client';
@@ -34,7 +34,8 @@ export default function HomePage() {
     <>
       <SiteHeader />
       <main className="relative overflow-hidden bg-[#020609]">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        <div className="pointer-events-none absolute inset-0" />
+        <HexGrid className="opacity-70" />
         <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
         <CircuitFrame className="opacity-30" />
 
@@ -56,7 +57,7 @@ export default function HomePage() {
                 </p>
                 <div className="mt-8 flex flex-wrap gap-4">
                   <Link href="/games"
-                    className="clip-corner flex items-center gap-2 border border-cyan bg-cyan/10 px-8 py-3.5 font-mono text-[0.65rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">
+                className="clip-corner flex items-center gap-2 border border-cyan bg-cyan/10 px-8 py-3.5 font-mono text-[0.65rem] uppercase tracking-widest text-cyan shadow-[0_0_24px_rgb(62_231_255_/_0.15)] transition hover:bg-cyan hover:text-background hover:shadow-[0_0_36px_rgb(62_231_255_/_0.25)]">
                     <Gamepad2 className="size-5" /> Browse games
                   </Link>
                   <Link href="/register"
@@ -124,7 +125,7 @@ export default function HomePage() {
             <h2 className="mb-3 text-center font-display text-2xl font-black uppercase tracking-tight text-white">How it works</h2>
             <p className="mb-10 text-center font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">For players and studios</p>
             <div className="grid gap-6 sm:grid-cols-3">
-              <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+              <div className="clip-corner border border-border/70 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.05),rgb(166_92_255_/_0.03),rgb(255_87_77_/_0.02))] p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3),0_0_16px_rgb(62_231_255_/_0.04)] hover:border-cyan/40 hover:shadow-[0_0_40px_rgb(0_0_0_/_0.4),0_0_24px_rgb(62_231_255_/_0.08)] transition-all duration-300 animate-scan-top relative overflow-hidden">
                 <div className="mx-auto grid size-14 place-items-center rounded-full border border-cyan/30 bg-cyan/5">
                   <SearchIcon className="size-6 text-cyan" />
                 </div>
@@ -133,7 +134,7 @@ export default function HomePage() {
                   Browse games in development, follow studios, and get real-time updates on progress.
                 </p>
               </div>
-              <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+              <div className="clip-corner border border-border/70 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.05),rgb(166_92_255_/_0.03),rgb(255_87_77_/_0.02))] p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3),0_0_16px_rgb(62_231_255_/_0.04)] hover:border-cyan/40 hover:shadow-[0_0_40px_rgb(0_0_0_/_0.4),0_0_24px_rgb(62_231_255_/_0.08)] transition-all duration-300 animate-scan-top relative overflow-hidden">
                 <div className="mx-auto grid size-14 place-items-center rounded-full border border-coral/30 bg-coral/5">
                   <FollowingIcon className="size-6 text-coral" />
                 </div>
@@ -142,7 +143,7 @@ export default function HomePage() {
                   Get notified of devlogs, roadmaps, milestones, and releases from studios you follow.
                 </p>
               </div>
-              <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+              <div className="clip-corner border border-border/70 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.05),rgb(166_92_255_/_0.03),rgb(255_87_77_/_0.02))] p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3),0_0_16px_rgb(62_231_255_/_0.04)] hover:border-cyan/40 hover:shadow-[0_0_40px_rgb(0_0_0_/_0.4),0_0_24px_rgb(62_231_255_/_0.08)] transition-all duration-300 animate-scan-top relative overflow-hidden">
                 <div className="mx-auto grid size-14 place-items-center rounded-full border border-amber/30 bg-amber/5">
                   <EngageIcon className="size-6 text-amber" />
                 </div>
