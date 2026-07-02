@@ -22,7 +22,7 @@ function setSessionCookie(res: Response, raw: string, expiresAt: Date) {
   res.cookie(SESSION_COOKIE, raw, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'none',
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/',
     expires: expiresAt,
   });
