@@ -440,6 +440,7 @@ function TrailerPanel({ title, image, trailerUrl }: { title: string; image: stri
   const [playing, setPlaying] = useState(false);
   const youtubeId = trailerUrl ? extractYoutubeId(trailerUrl) : null;
   const embedUrl = youtubeId ? `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0` : null;
+  const thumbUrl = youtubeId ? `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg` : image;
 
   if (!trailerUrl || !embedUrl) {
     return (
@@ -470,7 +471,7 @@ function TrailerPanel({ title, image, trailerUrl }: { title: string; image: stri
   return (
     <TechPanel id="trailer" title="Trailer" className="min-h-[268px]">
       <div className="relative min-h-[210px] overflow-hidden border border-border bg-muted">
-        <img src={image} alt={`${title} trailer thumbnail`} className="absolute inset-0 size-full object-cover" />
+        <img src={thumbUrl} alt={`${title} trailer thumbnail`} className="absolute inset-0 size-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/65 via-background/22 to-background/20" />
         <div className="absolute inset-0 grid place-items-center text-center">
           <button type="button" onClick={() => setPlaying(true)} aria-label="Play trailer" className="grid size-14 cursor-pointer place-items-center rounded-full border border-foreground/45 bg-background/45 text-foreground backdrop-blur-sm hover:bg-cyan/20 hover:border-cyan">
