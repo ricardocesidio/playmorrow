@@ -56,7 +56,7 @@ export function SiteHeader() {
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/45 bg-background/88 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-border/45 glass">
       <div className="mx-auto grid h-16 max-w-[1500px] grid-cols-[auto_1fr_auto] items-center gap-4 px-5 sm:px-8 lg:px-10">
         <HudLinkLogo />
 

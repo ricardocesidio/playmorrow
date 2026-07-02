@@ -17,7 +17,7 @@ export function SearchField({ value, onChange, onSubmit, placeholder = 'Search..
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="w-full border border-input bg-elevated py-2.5 pl-10 pr-4 font-mono text-xs uppercase tracking-widest text-foreground placeholder:text-muted-foreground/40 focus:border-cyan focus:outline-none"
+        className="w-full border border-input bg-elevated py-2.5 pl-10 pr-4 font-mono text-xs uppercase tracking-widest text-foreground placeholder:text-muted-foreground/40 focus:border-cyan focus:shadow-[0_0_16px_rgb(62_231_255_/_0.2)] focus:outline-none caret-cyan"
       />
     </form>
   );

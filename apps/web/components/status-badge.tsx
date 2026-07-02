@@ -15,8 +15,9 @@ const statusStyles: Record<string, string> = {
 
 export function StatusBadge({ status }: StatusBadgeProps) {
   const style = statusStyles[status] ?? 'border-border text-muted-foreground';
+  const shouldFlicker = status === 'FEATURED' || status === 'BETA';
   return (
-    <span className={`inline-block rounded-none border bg-background/70 px-2 py-1 font-mono text-[10px] uppercase tracking-widest backdrop-blur-sm ${style}`}>
+    <span className={`inline-block rounded-none border bg-background/70 px-2 py-1 font-mono text-[10px] uppercase tracking-widest backdrop-blur-sm ${style} ${shouldFlicker ? 'animate-flicker' : ''}`}>
       {status.replace(/_/g, ' ')}
     </span>
   );

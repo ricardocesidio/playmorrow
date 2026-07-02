@@ -8,7 +8,7 @@ interface SectionHeadingProps {
 
 export function SectionHeading({ children, tag, as: Tag = 'h2' }: SectionHeadingProps) {
   return (
-    <div className="mb-6">
+    <div className="mb-6 animate-scan-highlight relative overflow-hidden">
       {tag && (
         <p className="mb-1 font-mono text-xs uppercase tracking-widest text-cyan">{tag}</p>
       )}

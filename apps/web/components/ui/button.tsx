@@ -5,24 +5,27 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-mono uppercase tracking-widest transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 cursor-pointer",
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+        default:
+          'border border-cyan bg-cyan/10 text-cyan shadow-[0_0_20px_rgb(62_231_255_/_0.15)] hover:bg-cyan hover:text-cyan-foreground hover:shadow-[0_0_30px_rgb(62_231_255_/_0.25)]',
         destructive:
-          'bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/40',
+          'border border-coral bg-coral/10 text-coral shadow-[0_0_20px_rgb(255_87_77_/_0.15)] hover:bg-coral hover:text-coral-foreground hover:shadow-[0_0_30px_rgb(255_87_77_/_0.25)]',
         outline:
-          'border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground',
-        secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
-        link: 'text-primary underline-offset-4 hover:underline',
+          'border border-border bg-transparent text-muted-foreground hover:border-cyan hover:text-cyan hover:shadow-[0_0_16px_rgb(62_231_255_/_0.1)]',
+        secondary:
+          'border border-violet/30 bg-violet/5 text-violet hover:bg-violet hover:text-violet-foreground',
+        ghost:
+          'text-muted-foreground hover:bg-cyan/5 hover:text-cyan',
+        link: 'text-cyan underline-offset-4 hover:underline',
       },
       size: {
-        default: 'h-9 px-4 py-2 has-[>svg]:px-3',
-        sm: 'h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
-        lg: 'h-11 rounded-md px-6 text-base has-[>svg]:px-4',
-        icon: 'size-9',
+        default: 'h-10 px-5 py-2 has-[>svg]:px-4',
+        sm: 'h-8 px-3 has-[>svg]:px-2.5 text-xs',
+        lg: 'h-12 px-8 text-sm has-[>svg]:px-6',
+        icon: 'size-10',
       },
     },
     defaultVariants: {
