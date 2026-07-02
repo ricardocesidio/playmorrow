@@ -345,7 +345,7 @@ function StudioGameCard({ game }: { game: StudioGame }) {
   const cover = game.coverUrl || game.bannerUrl || '/demo/games/neon-warden/hero.svg';
   const progress = statusProgress(game.status);
   return (
-    <Link href={`/dashboard/games/${game.slug}`} className="group overflow-hidden border border-border/90 bg-background/70 transition hover:-translate-y-0.5 hover:border-cyan/70">
+    <Link href={`/games/${game.slug}`} className="group overflow-hidden border border-border/90 bg-background/70 transition hover:-translate-y-0.5 hover:border-cyan/70">
       <div className="relative aspect-[1.2/1] overflow-hidden">
         <img src={cover} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" />

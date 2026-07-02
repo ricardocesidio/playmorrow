@@ -53,7 +53,7 @@ export default function MyGamesPage() {
               {studioGames.map((game) => (
                 <Link
                   key={game.id}
-                  href={`/dashboard/games/${game.slug}`}
+                  href={`/games/${game.slug}`}
                   className="group overflow-hidden border border-border/90 bg-background/60 transition hover:-translate-y-0.5 hover:border-cyan/70"
                 >
                   <div className="relative aspect-[1.6/1] overflow-hidden">

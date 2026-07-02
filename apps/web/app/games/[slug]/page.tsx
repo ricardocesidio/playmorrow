@@ -21,6 +21,7 @@ import {
   Lock,
   MessageCircle,
   Monitor,
+  Pencil,
   Play,
   Plus,
   Radio,
@@ -226,6 +227,9 @@ function GameHero({ game, title, heroImage, slug }: { game: Game; title: string;
       <div className="relative z-10 grid min-h-[420px] content-between p-6 pb-0 sm:p-8 sm:pb-0 xl:h-full xl:min-h-0 xl:px-12 xl:pb-0 xl:pt-8">
         <div>
           <span className="clip-corner-sm border border-cyan/70 bg-background/70 px-3.5 py-1.5 pm-micro text-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.18)]">Featured</span>
+          <Link href={`/dashboard/games/${slug}`} className="clip-corner-sm inline-flex items-center gap-2 border border-coral/50 bg-coral/10 px-3 py-1.5 pm-micro text-coral hover:bg-coral hover:text-coral-foreground transition">
+            <Pencil className="size-3" /> Manage
+          </Link>
           <h1 className="mt-5 font-display text-[4rem] font-black uppercase leading-[0.86] text-foreground drop-shadow-[0_6px_18px_rgb(0_0_0_/_0.85)] sm:text-[5.05rem] xl:text-[5.25rem]">
             {title.split(' ').map((word) => (
               <span key={word} className="block">{word}</span>
