@@ -7,7 +7,6 @@ const statusStyles: Record<string, string> = {
   ALPHA: 'border-violet/50 text-violet',
   PRE_ALPHA: 'border-amber/50 text-amber',
   BETA: 'border-cyan/50 text-cyan',
-  FEATURED: 'border-cyan/50 text-cyan',
   RELEASED: 'border-cyan/30 text-cyan',
   CANCELLED: 'border-coral/30 text-coral',
   HIDDEN: 'border-border text-muted-foreground',

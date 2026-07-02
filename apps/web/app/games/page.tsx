@@ -15,45 +15,6 @@ import { formatFollowers } from '@/lib/format';
 import { useGames } from '@/lib/api/hooks';
 import type { Game } from '@/lib/api/client';
 
-const referenceGames: Game[] = [
-  {
-    id: 'game-1',
-    title: 'Neon Warden',
-    slug: 'test-game',
-    tagline: 'Tactical stealth in a rain-slick cyberpunk city.',
-    description: null,
-    status: 'BETA',
-    releaseDate: null,
-    expectedReleaseText: 'Q4 2026',
-    priceCents: 1999,
-    currency: 'USD',
-    isFree: false,
-    coverUrl: '/demo/games/neon-warden/hero.svg',
-    bannerUrl: '/demo/games/neon-warden/hero.svg',
-    isPublished: true,
-    followersCount: 12400,
-    studio: { id: 'studio-1', name: 'Obsidian Signal', slug: 'test-studio', logoUrl: null },
-    media: [],
-    platformLinks: [
-      { id: 'pc', platform: 'PC', url: '#', label: 'PC' },
-      { id: 'ps5', platform: 'PS5', url: '#', label: 'PS5' },
-      { id: 'xbox', platform: 'XBOX', url: '#', label: 'XBOX' },
-    ],
-    tags: ['Tactical Stealth', 'Cyberpunk'],
-    createdAt: '',
-    updatedAt: '',
-  },
-  makeReferenceGame('game-2', 'Starfall Tactics', 'starfall-tactics', 'IN_DEVELOPMENT', '/demo/games/starfall-tactics/hero.svg', 8700, 'Ironlight Studios', 'ironlight-studios', ['Tactical RPG', 'Space Opera']),
-  makeReferenceGame('game-3', 'Mossbound', 'mossbound', 'ALPHA', '/demo/games/mossbound/hero.svg', 5100, 'Wildbriar', 'wildbriar', ['Adventure', 'Atmospheric'], ['PC', 'SWITCH']),
-  makeReferenceGame('game-4', 'Paper Relics', 'paper-relics', 'PRE_ALPHA', '/demo/games/paper-relics/hero.svg', 3200, 'Second Story Games', 'second-story-games', ['Card Battler', 'Roguelike'], ['PC']),
-  makeReferenceGame('game-5', 'Voidrunner', 'voidrunner', 'ALPHA', '/demo/games/voidrunner/hero.svg', 6300, 'Voidrunner', 'voidrunner-studio', ['Roguelite', 'Twin Stick Shooter'], ['PC']),
-  makeReferenceGame('game-6', 'Little Giants', 'little-giants', 'IN_DEVELOPMENT', '/demo/games/neon-warden/hero.svg', 4200, 'Tiny Forge', 'tiny-forge', ['City Builder', 'Sandbox'], ['PC', 'PS5', 'XBOX', 'SWITCH']),
-  makeReferenceGame('game-7', 'Echobloom', 'echobloom', 'ALPHA', '/demo/games/neon-warden/hero.svg', 2900, 'Lumen Garden', 'lumen-garden', ['Narrative', 'Puzzle'], ['PC']),
-  makeReferenceGame('game-8', 'Northlight', 'northlight', 'PRE_ALPHA', '/demo/games/neon-warden/hero.svg', 3800, 'Frostfire Games', 'frostfire-games', ['Survival', 'Open World']),
-];
-
-
-
 export default function GamesPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -328,12 +289,12 @@ function ToggleControl({ label, active, onChange }: { label: string; active: boo
 
 function CatalogGameCard({ game }: { game: Game }) {
   const title = game.title;
-  const progress = statusProgress(game.status);
+  const progress = game.progressPercent ?? null;
   const accent = accentForGame(game.status, title);
-  const cover = game.coverUrl ?? coverForGame(title);
+  const cover = game.coverUrl || '/demo/games/neon-warden/hero.svg';
   const platforms = game.platformLinks?.length
     ? game.platformLinks.map((platform) => platform.platform)
-    : fallbackPlatforms(title);
+    : [];
 
   return (
     <Link
@@ -371,15 +332,17 @@ function CatalogGameCard({ game }: { game: Game }) {
             <p className="mt-2 flex items-center gap-2 text-xs text-cyan">
               <Users className="size-3.5" /> {formatFollowers(game.followersCount)} <span className="text-muted-foreground">followers</span>
             </p>
-            <div className="mt-3">
-              <div className="mb-1.5 flex justify-between pm-micro text-muted-foreground">
-                <span>Progress</span>
-                <span>{progress}%</span>
+            {progress !== null && (
+              <div className="mt-3">
+                <div className="mb-1.5 flex justify-between pm-micro text-muted-foreground">
+                  <span>Progress</span>
+                  <span>{progress}%</span>
+                </div>
+                <div className="h-1 bg-border">
+                  <div className={`h-full ${accent.bar} shadow-[0_0_12px_currentColor]`} style={{ width: `${progress}%` }} />
+                </div>
               </div>
-              <div className="h-1 bg-border">
-                <div className={`h-full ${accent.bar} shadow-[0_0_12px_currentColor]`} style={{ width: `${progress}%` }} />
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -489,55 +452,8 @@ function PaginationControl({
     </div>
   );
 }
-
-function makeReferenceGame(
-  id: string,
-  title: string,
-  slug: string,
-  status: string,
-  coverUrl: string,
-  followersCount: number,
-  studioName: string,
-  studioSlug: string,
-  tags: string[],
-  platforms = ['PC', 'PS5', 'XBOX'],
-): Game {
-  return {
-    id,
-    title,
-    slug,
-    tagline: null,
-    description: null,
-    status,
-    releaseDate: null,
-    expectedReleaseText: null,
-    priceCents: null,
-    currency: 'USD',
-    isFree: false,
-    coverUrl,
-    bannerUrl: coverUrl,
-    isPublished: true,
-    followersCount,
-    studio: { id: `${id}-studio`, name: studioName, slug: studioSlug, logoUrl: null },
-    media: [],
-    platformLinks: platforms.map((platform) => ({ id: `${slug}-${platform}`, platform, url: '#', label: platform })),
-    tags,
-    createdAt: '',
-    updatedAt: '',
-  };
-}
-
 function badgeForGame(status: string, _title: string) {
   return status.replace(/_/g, ' ');
-}
-
-function statusProgress(status: string) {
-  const key = status.toUpperCase();
-  if (key.includes('PUBLISHED') || key.includes('RELEASE')) return 100;
-  if (key.includes('BETA')) return 85;
-  if (key.includes('ALPHA')) return 42;
-  if (key.includes('DEVELOP')) return 68;
-  return 31;
 }
 
 function accentForGame(status: string, _title: string) {
@@ -547,14 +463,6 @@ function accentForGame(status: string, _title: string) {
   if (status === 'ALPHA') return { badge: 'border-violet/70 text-violet', bar: 'bg-violet text-violet', text: 'text-violet' };
   if (status === 'PRE_ALPHA') return { badge: 'border-amber/70 text-amber', bar: 'bg-amber text-amber', text: 'text-amber' };
   return { badge: 'border-cyan/70 text-cyan', bar: 'bg-cyan text-cyan', text: 'text-cyan' };
-}
-
-function coverForGame(_title: string) {
-  return '/demo/games/neon-warden/hero.svg';
-}
-
-function fallbackPlatforms(_title: string) {
-  return ['PC', 'PS5', 'XBOX'];
 }
 const GENRES = [
   'All', 'Action', 'Adventure', 'RPG', 'Strategy', 'Simulation', 'Puzzle',

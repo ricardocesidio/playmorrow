@@ -40,95 +40,11 @@ type Transmission = {
   stats: [number, number, number, number];
 };
 
-const referenceTransmissions: Transmission[] = [
-  {
-    id: 'signal-neon',
-    href: '/devlogs/devlog-1',
-    time: '2m ago',
-    type: 'DEVLOG',
-    studio: 'Obsidian Signal',
-    game: 'Neon Warden',
-    title: "Shadows Don't Sleep: Infiltration in Neon Warden",
-    summary: 'A deep dive into stealth systems, enemy perception, and the city that never rests.',
-    image: '/demo/games/neon-warden/hero.svg',
-    accent: 'cyan',
-    stats: [64, 256, 412, 189],
-  },
-  {
-    id: 'signal-starfall',
-    href: '/games/starfall-tactics',
-    time: '1h ago',
-    type: 'ROADMAP',
-    studio: 'Ironlight Studios',
-    game: 'Starfall Tactics',
-    title: 'Beta phase is now live. Tactical commanders, we need your feedback.',
-    summary: '',
-    image: '/demo/games/starfall-tactics/hero.svg',
-    accent: 'cyan',
-    stats: [38, 142, 231, 97],
-  },
-  {
-    id: 'signal-mossbound',
-    href: '/games/mossbound',
-    time: '3h ago',
-    type: 'MILESTONE',
-    studio: 'Wildbriar',
-    game: 'Mossbound',
-    title: '5,000 followers',
-    summary: 'Thank you to our growing community of explorers.',
-    image: '/demo/games/mossbound/hero.svg',
-    accent: 'violet',
-    metric: '5,000 followers',
-    stats: [27, 98, 154, 63],
-  },
-  {
-    id: 'signal-paper',
-    href: '/devlogs/devlog-1',
-    time: '5h ago',
-    type: 'DEVLOG',
-    studio: 'Second Story Games',
-    game: 'Paper Relics',
-    title: 'Paper Relics - Combat & Cards in Action',
-    summary: 'A look at card battles, relic synergies, and the risks behind every draw.',
-    image: '/demo/games/paper-relics/hero.svg',
-    accent: 'amber',
-    video: true,
-    stats: [53, 187, 268, 121],
-  },
-  {
-    id: 'signal-void',
-    href: '/games/voidrunner',
-    time: '7h ago',
-    type: 'RELEASE',
-    studio: 'Voidrunner',
-    game: 'Voidrunner',
-    title: 'Join the Voidrunner Playtest',
-    summary: 'Sign up now and help shape the void.',
-    image: '/demo/games/voidrunner/hero.svg',
-    accent: 'coral',
-    stats: [72, 201, 317, 146],
-  },
-];
-
-const trending = [
-  ['Neon Warden', 'Obsidian Signal', '/demo/games/neon-warden/hero.svg', '12.4K'],
-  ['Starfall Tactics', 'Ironlight Studios', '/demo/games/starfall-tactics/hero.svg', '8.7K'],
-  ['Mossbound', 'Wildbriar', '/demo/games/mossbound/hero.svg', '5.1K'],
-  ['Paper Relics', 'Second Story Games', '/demo/games/paper-relics/hero.svg', '3.2K'],
-  ['Voidrunner', 'Voidrunner', '/demo/games/voidrunner/hero.svg', '2.8K'],
-] as const;
-
-const playtests = [
-  ['Starfall Tactics', 'Beta Playtest', '/demo/games/starfall-tactics/hero.svg', '1,842'],
-  ['Neon Warden', 'Stealth Prototype', '/demo/games/neon-warden/hero.svg', '932'],
-  ['Mossbound', 'Alpha Playtest', '/demo/games/mossbound/hero.svg', '512'],
-] as const;
-
 export default function FeedPage() {
   const { data, isLoading, error } = usePublicFeed(1, 20);
   const rawItems = Array.isArray(data?.items) ? data.items : undefined;
   const isExplicitEmpty = !!rawItems && rawItems.length === 0 && data?.total === 0;
-  const transmissions = rawItems && rawItems.length >= 5 ? rawItems.slice(0, 5).map(feedItemToTransmission) : referenceTransmissions;
+  const transmissions = rawItems ? rawItems.map(feedItemToTransmission) : [];
 
   return (
     <>
@@ -193,8 +109,6 @@ export default function FeedPage() {
             </section>
 
             <aside className="grid gap-5">
-              <TrendingPanel />
-              <PlaytestsPanel />
               <YourSignalPanel />
             </aside>
           </div>
@@ -309,57 +223,6 @@ function TransmissionRow({ item }: { item: Transmission }) {
   );
 }
 
-function TrendingPanel() {
-  return (
-    <HudPanel className="p-5" accent="muted">
-      <h2 className="pm-micro mb-5 flex items-center gap-4 text-foreground">
-        Trending now <span className="h-px flex-1 bg-gradient-to-r from-border-bright to-transparent" />
-      </h2>
-      <div className="grid gap-2">
-        {trending.map(([title, studio, image, followers], index) => (
-          <Link key={title} href="/games/test-game" className="grid grid-cols-[28px_64px_1fr_auto] items-center gap-3 border border-border/45 bg-background/35 p-2 transition hover:border-cyan/60">
-            <span className="grid size-7 place-items-center border border-border-bright font-mono text-sm text-foreground">{index + 1}</span>
-            <img src={image} alt="" className="h-12 w-16 object-cover" />
-            <span className="min-w-0">
-              <span className="block truncate pm-display text-xs text-foreground">{title}</span>
-              <span className="mt-1 block truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{studio}</span>
-            </span>
-            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-              <Users className="size-3 text-cyan" /> {followers}
-            </span>
-          </Link>
-        ))}
-      </div>
-      <PanelLink href="/games">View all trending</PanelLink>
-    </HudPanel>
-  );
-}
-
-function PlaytestsPanel() {
-  return (
-    <HudPanel className="p-5" accent="muted">
-      <h2 className="pm-micro mb-5 flex items-center gap-4 text-foreground">
-        Live playtests <span className="h-px flex-1 bg-gradient-to-r from-cyan/70 to-transparent" />
-      </h2>
-      <div className="grid gap-2">
-        {playtests.map(([title, subtitle, image, players]) => (
-          <Link key={title} href="/games/test-game" className="grid grid-cols-[72px_1fr_auto] items-center gap-3 border border-border/40 bg-background/30 p-2 transition hover:border-cyan/60">
-            <img src={image} alt="" className="h-12 w-[72px] object-cover" />
-            <span>
-              <span className="block pm-display text-xs text-foreground">{title}</span>
-              <span className="mt-1 block font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{subtitle}</span>
-            </span>
-            <span className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-muted-foreground">
-              <span className="size-2 rounded-full bg-cyan shadow-[0_0_10px_rgb(62_231_255_/_0.8)]" /> {players} players
-            </span>
-          </Link>
-        ))}
-      </div>
-      <PanelLink href="/games">View all playtests</PanelLink>
-    </HudPanel>
-  );
-}
-
 function YourSignalPanel() {
   return (
     <HudPanel className="p-7" accent="muted">
@@ -372,7 +235,7 @@ function YourSignalPanel() {
         </div>
         <div>
           <p className="text-sm text-muted-foreground">You're following</p>
-          <p className="mt-2 font-display text-3xl font-black uppercase tracking-[0.18em] text-foreground">24 studios</p>
+          <p className="mt-2 font-display text-xl font-black uppercase tracking-[0.18em] text-foreground">Stay tuned</p>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">Get updates from the games you care about.</p>
         </div>
       </div>
@@ -407,7 +270,7 @@ function feedItemToTransmission(item: FeedItem): Transmission {
     game: item.game.title,
     title: item.title,
     summary: item.summary,
-    image: item.game.coverUrl ?? coverForGame(item.game.title),
+    image: item.game.coverUrl || '/demo/games/neon-warden/hero.svg',
     accent: item.type === 'DEVLOG' ? 'cyan' : 'amber',
     stats: [38, 142, 231, 97],
   };
@@ -417,15 +280,6 @@ function relativeTime(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'now';
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
-
-function coverForGame(title: string) {
-  const key = title.toLowerCase();
-  if (key.includes('starfall')) return '/demo/games/starfall-tactics/hero.svg';
-  if (key.includes('moss')) return '/demo/games/mossbound/hero.svg';
-  if (key.includes('paper')) return '/demo/games/paper-relics/hero.svg';
-  if (key.includes('void')) return '/demo/games/voidrunner/hero.svg';
-  return '/demo/games/neon-warden/hero.svg';
 }
 
 function verbForType(type: Transmission['type']) {
