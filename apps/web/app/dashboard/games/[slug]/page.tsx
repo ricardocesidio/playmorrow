@@ -228,8 +228,21 @@ export default function EditGamePage() {
               </div>
               <div>
                 <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Currency</label>
-                <input type="text" value={currency} onChange={(e) => setCurrency(e.target.value)}
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                <select value={currency} onChange={(e) => setCurrency(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                  <option value="JPY">JPY (¥)</option>
+                  <option value="BRL">BRL (R$)</option>
+                  <option value="CAD">CAD (C$)</option>
+                  <option value="AUD">AUD (A$)</option>
+                  <option value="CHF">CHF (Fr)</option>
+                  <option value="CNY">CNY (¥)</option>
+                  <option value="INR">INR (₹)</option>
+                  <option value="KRW">KRW (₩)</option>
+                  <option value="MXN">MXN (Mex$)</option>
+                </select>
               </div>
             </div>
           </div>
