@@ -46,20 +46,55 @@ export function HudPanel({
   return (
     <div
       className={cn(
-        'panel relative border-border/90',
-        'before:pointer-events-none before:absolute before:left-3 before:top-3 before:size-8 before:border-l before:border-t',
-        'after:pointer-events-none after:absolute after:bottom-3 after:right-3 after:size-8 after:border-b after:border-r',
+        'panel relative border-border/90 overflow-hidden',
+        'before:pointer-events-none before:absolute before:left-3 before:top-3 before:size-8 before:border-l before:border-t before:z-10',
+        'after:pointer-events-none after:absolute after:bottom-3 after:right-3 after:size-8 after:border-b after:border-r after:z-10',
+        'animate-scan-top',
         accentClass,
         className,
       )}
       {...props}
     >
-      {children}
+      <div className="relative z-10">{children}</div>
     </div>
   );
 }
 
-export function CircuitFrame({ className }: { className?: string }) {
+export function HexGrid({ className }: { className?: string }) {
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        'pointer-events-none absolute inset-0',
+        'bg-[conic-gradient(from_30deg_at_24px_0,transparent_60deg,rgb(62_231_255_/_0.03)_60deg_120deg,transparent_120deg_180deg,rgb(62_231_255_/_0.03)_180deg_240deg,transparent_240deg_300deg,rgb(62_231_255_/_0.03)_300deg_360deg),conic-gradient(from_90deg_at_0_24px,transparent_60deg,rgb(62_231_255_/_0.03)_60deg_120deg,transparent_120deg_180deg,rgb(62_231_255_/_0.03)_180deg_240deg,transparent_240deg_300deg,rgb(62_231_255_/_0.03)_300deg_360deg)]',
+        'bg-[length:48px_48px]',
+        className,
+      )}
+    />
+  );
+}
+
+export function HudHoloPanel({
+  children,
+  className,
+  ...props
+}: ComponentProps<'div'>) {
+  return (
+    <div
+      className={cn(
+        'panel relative border border-border/80 overflow-hidden',
+        'bg-[linear-gradient(135deg,rgb(62_231_255_/_0.06),rgb(166_92_255_/_0.04),rgb(255_87_77_/_0.03))]',
+        'shadow-[0_20px_80px_rgb(0_0_0_/_0.6),0_0_30px_rgb(62_231_255_/_0.05),inset_0_1px_0_rgb(255_255_255_/_0.02)]',
+        'animate-scan-top',
+        className,
+      )}
+      {...props}
+    >
+      <span className="signal-dot absolute right-3 top-3 z-20" aria-hidden />
+      <div className="relative z-10">{children}</div>
+    </div>
+  );
+}
   return (
     <div aria-hidden className={cn('pointer-events-none absolute inset-0 overflow-hidden opacity-70', className)}>
       <svg viewBox="0 0 1200 760" preserveAspectRatio="none" className="size-full">
