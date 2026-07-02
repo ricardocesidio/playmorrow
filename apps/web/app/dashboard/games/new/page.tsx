@@ -8,7 +8,6 @@ import { ArrowLeft, Plus, Trash2, Gamepad2, Upload, Loader2 } from 'lucide-react
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyStudios, useCreateGame } from '@/lib/api/hooks';
-import { uploadScreenshot } from '@/app/actions/upload';
 import { ApiError } from '@/lib/api/client';
 
 const STATUSES = ['CONCEPT', 'IN_DEVELOPMENT', 'ALPHA', 'BETA', 'EARLY_ACCESS', 'RELEASED', 'CANCELLED', 'ON_HOLD'];
@@ -92,7 +91,9 @@ function CreateGameForm() {
       const form = new FormData();
       form.append('file', file);
       try {
-        const data = await uploadScreenshot(form);
+        const res = await fetch('http://localhost:4000/api/upload', { method: 'POST', body: form, credentials: 'include' });
+        if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+        const data = await res.json();
         setMedia((prev) => [...prev, { type: 'SCREENSHOT', url: data.url, caption: '', position: prev.length + 1 }]);
       } catch {
         setError('Upload failed.');

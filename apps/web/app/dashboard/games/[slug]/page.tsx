@@ -7,7 +7,6 @@ import { ArrowLeft, Plus, Save, ExternalLink, Gamepad2, Milestone, FileText, Scr
 
 import { SiteHeader } from '@/components/site-header';
 import { ImageUpload } from '@/components/image-upload';
-import { uploadScreenshot } from '@/app/actions/upload';
 
 import { useAuth } from '@/lib/api/auth-context';
 import { useGame, useUpdateGame, useDeleteGame } from '@/lib/api/hooks';
@@ -77,7 +76,9 @@ export default function EditGamePage() {
       const form = new FormData();
       form.append('file', file);
       try {
-        const data = await uploadScreenshot(form);
+        const res = await fetch('http://localhost:4000/api/upload', { method: 'POST', body: form, credentials: 'include' });
+        if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+        const data = await res.json();
         setMedia((prev) => [...prev, { type: 'SCREENSHOT', url: data.url, caption: '' }]);
       } catch {
         setError('Upload failed.');
