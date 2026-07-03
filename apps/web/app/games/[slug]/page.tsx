@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -554,7 +555,7 @@ function ScreenshotsPanel({
         </div>
       </div>
 
-      {lightboxOpen && (
+      {lightboxOpen && createPortal(
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
           onClick={closeLightbox}
@@ -593,7 +594,8 @@ function ScreenshotsPanel({
           >
             <X className="size-5" />
           </button>
-        </div>
+        </div>,
+        document.body
       )}
     </TechPanel>
   );
