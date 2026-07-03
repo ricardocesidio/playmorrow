@@ -81,7 +81,6 @@ export class UploadController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }),
-          new FileTypeValidator({ fileType: /\.(png|jpe?g|gif|webp)$/i }),
         ],
       }),
     )
