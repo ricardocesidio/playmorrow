@@ -94,11 +94,6 @@ export default function EditGamePage() {
     setUploadingShot(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
-      }
-    }
-    setUploadingShot(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
 
   const addMedia = () => {
     if (media.length >= MAX_SCREENSHOTS) { setError(`Max ${MAX_SCREENSHOTS} screenshots.`); return; }
