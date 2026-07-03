@@ -308,15 +308,6 @@ export default function EditGamePage() {
             </div>
           </div>
 
-          {/* Cover & Banner */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
-            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Cover & Banner</h3>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <FileUploadField label="Cover image" value={coverUrl} onChange={setCoverUrl} />
-              <FileUploadField label="Banner" value={bannerUrl} onChange={setBannerUrl} />
-            </div>
-          </div>
-
           {/* Screenshots */}
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <div className="mb-3 flex items-center justify-between">
@@ -398,47 +389,5 @@ export default function EditGamePage() {
       </div>
     </main>
     </>
-  );
-}
-
-function FileUploadField({ label, value, onChange }: { label: string; value: string; onChange: (url: string) => void }) {
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) return;
-    setUploading(true);
-    const form = new FormData();
-    form.append('file', file);
-    try {
-      const res = await fetch('http://localhost:4000/api/upload', { method: 'POST', body: form, credentials: 'include' });
-      if (!res.ok) throw new Error('Upload failed');
-      const data = await res.json();
-      onChange(`http://localhost:4000${data.url}`);
-    } catch { /* ignore */ }
-    setUploading(false);
-  };
-
-  return (
-    <div className="space-y-2">
-      <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground block">{label}</label>
-      {value ? (
-        <div className="relative overflow-hidden border border-border bg-muted">
-          <img src={value} alt="" className="h-20 w-full object-cover" />
-          <button type="button" onClick={() => onChange('')} className="absolute right-1 top-1 cursor-pointer bg-background/80 p-1 text-coral hover:text-coral/80">
-            <X className="size-3.5" />
-          </button>
-        </div>
-      ) : (
-        <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
-          className="clip-corner inline-flex items-center gap-2 border border-cyan/60 bg-cyan/5 px-4 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-cyan transition hover:bg-cyan/10 cursor-pointer disabled:opacity-50">
-          {uploading ? <Loader2 className="size-3.5 mr-1 inline animate-spin" /> : <Upload className="size-3.5 mr-1 inline" />}
-          {uploading ? 'Uploading...' : `Upload ${label.toLowerCase()}`}
-        </button>
-      )}
-      <input ref={fileRef} type="file" accept="image/png,image/jpeg" onChange={handleUpload} className="hidden" />
-    </div>
   );
 }
