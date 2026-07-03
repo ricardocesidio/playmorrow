@@ -9,9 +9,10 @@ interface ImageUploadProps {
   onChange: (url: string) => void;
   label?: string;
   accept?: string;
+  fileOnly?: boolean;
 }
 
-export function ImageUpload({ value, onChange, label = 'Image', accept = 'image/png,image/jpeg,image/gif,image/webp,image/svg+xml' }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, label = 'Image', accept = 'image/png,image/jpeg,image/gif,image/webp,image/svg+xml', fileOnly = false }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -37,21 +38,25 @@ export function ImageUpload({ value, onChange, label = 'Image', accept = 'image/
       <label className="mb-1.5 block text-sm font-medium">{label}</label>
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1">
-          <input
-            type="url"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder="URL or upload a file"
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 pr-10 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          />
+          {!fileOnly && (
+            <input
+              type="url"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="URL or upload a file"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 pr-10 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          )}
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
+            className={fileOnly
+              ? 'clip-corner inline-flex items-center gap-2 border border-cyan/60 bg-cyan/5 px-4 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-cyan transition hover:bg-cyan/10 cursor-pointer disabled:opacity-50'
+              : 'absolute right-1 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50'}
             title="Upload file"
           >
-            {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+            {uploading ? <Loader2 className="size-4 animate-spin" /> : fileOnly ? <><Upload className="size-3.5 mr-1 inline" /> Upload</> : <Upload className="size-4" />}
           </button>
           <input
             ref={inputRef}
