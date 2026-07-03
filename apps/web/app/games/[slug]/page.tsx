@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -228,9 +228,7 @@ function GameHero({ game, title, heroImage, slug }: { game: Game; title: string;
       <div className="relative z-10 grid min-h-[420px] content-between p-6 pb-0 sm:p-8 sm:pb-0 xl:h-full xl:min-h-0 xl:px-12 xl:pb-0 xl:pt-8">
         <div>
           <span className="clip-corner-sm border border-cyan/70 bg-background/70 px-3.5 py-1.5 pm-micro text-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.18)]">Featured</span>
-          <Link href={`/dashboard/games/${slug}`} className="clip-corner-sm inline-flex items-center gap-2 border border-coral/50 bg-coral/10 px-3 py-1.5 pm-micro text-coral hover:bg-coral hover:text-coral-foreground transition">
-            <Pencil className="size-3" /> Manage
-          </Link>
+          <ManageDropdown slug={slug} />
           <h1 className="mt-5 font-display text-[4rem] font-black uppercase leading-[0.86] text-foreground drop-shadow-[0_6px_18px_rgb(0_0_0_/_0.85)] sm:text-[5.05rem] xl:text-[5.25rem]">
             {title.split(' ').map((word) => (
               <span key={word} className="block">{word}</span>
@@ -973,4 +971,67 @@ function getCurrencySymbol(code: string): string {
     KRW: '₩', MXN: 'Mex$',
   };
   return symbols[code] ?? '$';
+}
+
+function ManageDropdown({ slug }: { slug: string }) {
+  const [open, setOpen] = useState(false);
+  const [changingCover, setChangingCover] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setChangingCover(true);
+    const form = new FormData();
+    form.append('file', file);
+    try {
+      const res = await fetch('http://localhost:4000/api/upload', { method: 'POST', body: form, credentials: 'include' });
+      if (!res.ok) throw new Error('Upload failed');
+      const data = await res.json();
+      const fullUrl = `http://localhost:4000${data.url}`;
+      await fetch(`http://localhost:4000/api/games/${slug}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ coverUrl: fullUrl }),
+      });
+      window.location.reload();
+    } catch {
+      alert('Cover change failed.');
+    }
+    setChangingCover(false);
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative inline-flex">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        className="clip-corner-sm inline-flex items-center gap-2 border border-coral/50 bg-coral/10 px-3 py-1.5 pm-micro text-coral hover:bg-coral hover:text-coral-foreground transition cursor-pointer"
+      >
+        <Pencil className="size-3" /> Manage
+      </button>
+      <input ref={fileRef} type="file" accept="image/png,image/jpeg" onChange={handleCoverUpload} className="hidden" />
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-1 min-w-[180px] border border-border/80 bg-background shadow-xl">
+          <Link
+            href={`/dashboard/games/${slug}`}
+            className="block px-4 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan transition"
+          >
+            Edit game
+          </Link>
+          <button
+            type="button"
+            disabled={changingCover}
+            onClick={() => { fileRef.current?.click(); setOpen(false); }}
+            className="block w-full cursor-pointer px-4 py-2.5 text-left font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan transition disabled:opacity-50"
+          >
+            {changingCover ? 'Uploading...' : 'Change game cover'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
