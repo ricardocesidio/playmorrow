@@ -23,6 +23,7 @@ function setSessionCookie(res: Response, raw: string, expiresAt: Date) {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
+    domain: isProduction ? undefined : 'localhost',
     path: '/',
     expires: expiresAt,
   });

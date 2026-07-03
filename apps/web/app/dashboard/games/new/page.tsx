@@ -84,6 +84,7 @@ function CreateGameForm() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     setUploadingShot(true);
+    setError('');
     for (const file of Array.from(files)) {
       if (media.length >= MAX_SCREENSHOTS) { setError(`Max ${MAX_SCREENSHOTS} screenshots.`); break; }
       if (!['image/png', 'image/jpeg'].includes(file.type)) { setError('Only PNG and JPG allowed.'); continue; }
@@ -91,13 +92,18 @@ function CreateGameForm() {
       const form = new FormData();
       form.append('file', file);
       try {
-        const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
-        if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+        const res = await fetch('http://localhost:4000/api/upload', { method: 'POST', body: form, credentials: 'include' });
+        if (!res.ok) {
+          const errBody = await res.text();
+          setError(`Upload failed: ${res.status} ${errBody}`);
+          break;
+        }
         const data = await res.json();
         const fullUrl = `http://localhost:4000${data.url}`;
         setMedia((prev) => [...prev, { type: 'SCREENSHOT', url: fullUrl, caption: '', position: prev.length + 1 }]);
       } catch {
-        setError('Upload failed.');
+        setError('Upload failed. Please try again.');
+        break;
       }
     }
     setUploadingShot(false);

@@ -74,6 +74,7 @@ export class OAuthController {
           httpOnly: true,
           secure: isProduction,
           sameSite: isProduction ? 'none' : 'lax',
+          domain: isProduction ? undefined : 'localhost',
           path: '/',
           expires: expiresAt,
         });
