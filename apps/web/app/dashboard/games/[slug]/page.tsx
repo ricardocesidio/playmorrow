@@ -127,7 +127,7 @@ export default function EditGamePage() {
           coverUrl: coverUrl.trim() || null,
           bannerUrl: bannerUrl.trim() || null,
           trailerUrl: trailerUrl.trim() || null,
-          media: media.filter((m) => m.url).map((m) => ({ id: m.id, type: m.type, url: m.url, caption: m.caption || null })),
+          media: media.filter((m) => m.url).map((m) => ({ type: m.type, url: m.url, caption: m.caption || null })),
         },
       });
       setSuccess(true);
