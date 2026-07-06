@@ -11,13 +11,13 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
 
-  // Proxy API requests in dev to avoid cross-origin cookie issues
+  // Proxy API requests to backend (keeps cookies same-origin)
   async rewrites() {
-    if (process.env.NODE_ENV !== 'development') return [];
+    const apiUrl = process.env.API_URL || 'http://localhost:4000/api';
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:4000/api/:path*',
+        destination: `${apiUrl}/:path*`,
       },
     ];
   },

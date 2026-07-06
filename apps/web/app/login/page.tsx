@@ -17,7 +17,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading, login } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,14 +30,20 @@ export default function LoginPage() {
     const emailOrUsername = form.get('emailOrUsername') as string;
     const password = form.get('password') as string;
     try {
-      await login(emailOrUsername, password);
-      router.replace('/dashboard');
-    } catch (err) {
-      if (err instanceof EmailNotVerifiedError) {
-        router.push(`/verify-email?email=${encodeURIComponent(err.email)}&from=login`);
-        return;
+      const res = await fetch('/api/auth/form-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ emailOrUsername, password }),
+        redirect: 'manual',
+      });
+      const location = res.headers.get('location');
+      if (location) {
+        window.location.assign(location);
+      } else {
+        setError('Login failed.');
       }
-      setError(err instanceof Error ? err.message : 'Invalid email/username or password');
+    } catch {
+      setError('Connection error.');
     }
     setLoading(false);
   };
@@ -95,7 +101,7 @@ export default function LoginPage() {
                 <div className="mx-auto mt-5 h-0.5 w-12 bg-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.7)]" />
               </div>
 
-              <form onSubmit={handleSubmit} className="mt-12 space-y-8" autoComplete="on">
+              <form action="/api/auth/form-login" method="POST" className="mt-12 space-y-8" autoComplete="on">
                 <div>
                   <label htmlFor="email" className="pm-micro mb-4 block text-muted-foreground">Email or username</label>
                   <div className="relative">
