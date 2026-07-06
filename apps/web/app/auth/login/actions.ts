@@ -12,28 +12,21 @@ export async function loginAction(formData: FormData) {
   }
 
   const API = process.env.API_URL || 'https://playmorrow-api-production.up.railway.app/api';
+  const res = await fetch(`${API}/auth/session/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ emailOrUsername, password }),
+  });
 
-  let loginRes: Response;
-  try {
-    loginRes = await fetch(`${API}/auth/session/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ emailOrUsername, password }),
-    });
-  } catch {
-    redirect('/login?error=Connection+error');
-  }
-
-  if (!loginRes.ok) {
-    const body = await loginRes.json().catch(() => ({ message: 'Invalid email/username or password' }));
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ message: 'Invalid email/username or password' }));
     if (body.code === 'EMAIL_NOT_VERIFIED' && body.email) {
       redirect(`/verify-email?email=${encodeURIComponent(body.email)}&from=login`);
     }
-    const msg = encodeURIComponent(body.message || 'Invalid email/username or password');
-    redirect(`/login?error=${msg}`);
+    redirect(`/login?error=${encodeURIComponent(body.message || 'Invalid email/username or password')}`);
   }
 
-  const setCookie = loginRes.headers.get('set-cookie');
+  const setCookie = res.headers.get('set-cookie');
   if (setCookie) {
     const match = setCookie.match(/^([^=]+)=([^;]+)/);
     const name = match?.[1];
