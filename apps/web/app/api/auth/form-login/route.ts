@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Server-side API URL — separate from NEXT_PUBLIC_ (which may be /api for client-side proxy)
-    const API = process.env.API_URL || 'http://localhost:4000/api';
+    const API = process.env.API_URL || 'https://playmorrow-api-production.up.railway.app/api';
     const res = await fetch(`${API}/auth/session/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
