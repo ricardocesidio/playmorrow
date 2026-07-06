@@ -111,7 +111,7 @@ export default function EditGamePage() {
     try {
       await updateGame.mutateAsync({
         slug,
-        token,
+        token: token!,
         body: {
           title: title.trim(),
           tagline: tagline.trim() || null,

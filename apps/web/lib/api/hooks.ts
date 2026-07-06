@@ -739,8 +739,9 @@ export function useCreateGame() {
       isFree?: boolean;
       coverUrl?: string;
       bannerUrl?: string;
+      trailerUrl?: string | null;
       platformLinks?: { platform: string; url: string; label?: string }[];
-      media?: { type: string; url: string; caption?: string; sortOrder?: number }[];
+      media?: { type: string; url: string; caption?: string; position?: number }[];
       tags?: string[];
       token: string;
     }) => {
