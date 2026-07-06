@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window === 'undefined' ? 'http://localhost:4000/api' : '/api');
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 const USE_MOCKS = process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
 
 export const API = BASE_URL;
