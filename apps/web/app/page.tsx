@@ -93,7 +93,7 @@ export default function HomePage() {
         {/* Live Feed Ticker */}
         <section className="relative px-5 sm:px-8 lg:px-10">
           <div className="mx-auto max-w-[1500px]">
-            <LiveTicker items={feedItems} feedCount={feedCount} />
+            <LiveTicker items={feedItems} />
           </div>
         </section>
 
