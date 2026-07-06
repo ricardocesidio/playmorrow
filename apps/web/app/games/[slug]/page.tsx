@@ -246,15 +246,15 @@ function GameHero({ game, title, heroImage, slug }: { game: Game; title: string;
             </div>
             <div>
               <p className="pm-display text-[0.95rem] leading-none text-foreground">{game.studio?.name ?? ''} <span className="text-cyan">●</span></p>
-              <p className="mt-2 text-xs text-muted-foreground">Independent Studio</p>
+              <p className="mt-2 text-xs text-muted-foreground">{game.studio?.name || ''}</p>
             </div>
             <DetailFollowButton slug={slug} />
           </div>
           <div className="-mx-6 grid border-y border-border/55 bg-background/38 shadow-[inset_0_18px_34px_rgb(0_0_0_/_0.28)] sm:-mx-8 sm:grid-cols-[205px_205px_205px_205px_1fr] xl:-mx-12">
             <HeroStat icon={<Heart className="size-[28px] stroke-[2]" />} value={formatFollowers(game.followersCount || 0)} label="Followers" />
-            <HeroStat icon={<Flame className="size-[26px] fill-coral text-coral" />} value="312" label="Wishlists" />
-            <HeroStat icon={<MessageCircle className="size-[29px] stroke-[1.9]" />} value="48" label="Comments" />
-            <HeroStat icon={<ActivityIcon />} value="9.1K" label="Views" />
+            <HeroStat icon={<Flame className="size-[26px] fill-coral text-coral" />} value={String(game.wishlistsCount ?? 0)} label="Wishlists" />
+            <HeroStat icon={<MessageCircle className="size-[29px] stroke-[1.9]" />} value={String(game.commentsCount ?? 0)} label="Comments" />
+            <HeroStat icon={<ActivityIcon />} value={String(game.viewsCount ?? 0)} label="Views" />
           </div>
         </div>
       </div>
@@ -304,7 +304,7 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
 
       <p className="pm-micro mt-3 text-muted-foreground">Platforms</p>
       <div className="mt-2 grid grid-cols-3 gap-2">
-        {(game.platformLinks?.length ? game.platformLinks.map((p) => p.platform) : []).slice(0, 3).map((platform) => (
+        {[...new Set(game.platformLinks?.length ? game.platformLinks.map((p) => p.platform) : [])].slice(0, 4).map((platform) => (
           <span key={platform} className="flex min-h-8 cursor-pointer items-center justify-center gap-2 border border-border bg-background/65 px-2 font-mono text-[11px] uppercase text-foreground transition hover:border-cyan">
             {platform.includes('PC') ? <Monitor className="size-4 text-cyan" /> : <Gamepad2 className="size-4" />}
             {platform}
@@ -373,7 +373,7 @@ function DetailWishlistButton({ slug }: { slug: string }) {
       >
         <Plus className="size-3" /> {isWishlisted ? 'Wishlisted' : 'Add to wishlist'}
       </button>
-      <span className="clip-corner grid place-items-center border border-border-bright/55 bg-background/55 font-mono text-xs text-muted-foreground">312</span>
+      <span className="clip-corner grid place-items-center border border-border-bright/55 bg-background/55 font-mono text-xs text-muted-foreground">{isWishlisted ? '✓' : '+'}</span>
     </div>
   );
 }
@@ -621,8 +621,9 @@ function AboutPanel({ game, slug }: { game: Game; slug: string }) {
 }
 
 function RoadmapPanel({ roadmap }: { roadmap: RoadmapItem[] }) {
-  const rows = roadmap.length
-    ? roadmap.slice(0, 4).map((item, index) => [
+  const unique = [...new Map(roadmap.map((item) => [item.title, item])).values()];
+  const rows = unique.length
+    ? unique.slice(0, 4).map((item, index) => [
         item.targetDate ? new Date(item.targetDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : `Q${index + 2} 2025`,
         item.status,
         item.title,

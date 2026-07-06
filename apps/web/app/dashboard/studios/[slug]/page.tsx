@@ -151,11 +151,10 @@ export default function EditStudioPage() {
                 { href: '/dashboard/roadmap', icon: <Workflow className="size-4" />, label: 'Roadmaps' },
                 { href: '/dashboard/feed', icon: <LineChart className="size-4" />, label: 'Analytics' },
                 { href: '/dashboard/notifications', icon: <Radio className="size-4" />, label: 'Community' },
-                { href: '#', icon: <Library className="size-4" />, label: 'Media Library' },
+                { href: `/dashboard/studios/${slug}`, icon: <Library className="size-4" />, label: 'Media Library' },
                 { href: '/studios', icon: <Users className="size-4" />, label: 'Followers' },
                 { href: `/dashboard/studios/${slug}/team`, icon: <ShieldCheck className="size-4" />, label: 'Team' },
-                { href: '#', icon: <CircleDollarSign className="size-4" />, label: 'Payouts' },
-                { href: '#', icon: <Settings className="size-4" />, label: 'Settings', active: true },
+                { href: `/dashboard/studios/${slug}`, icon: <Settings className="size-4" />, label: 'Settings', active: true },
               ].map((item) => (
                 <Link key={item.label} href={item.href}
                   className={`group flex items-center gap-3 px-3 py-2.5 text-sm transition ${item.active ? 'border-r-2 border-cyan bg-cyan/10 text-foreground' : 'text-muted-foreground hover:bg-cyan/5 hover:text-foreground'}`}>
