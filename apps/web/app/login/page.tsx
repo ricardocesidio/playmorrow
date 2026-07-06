@@ -21,32 +21,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    const form = new FormData(e.currentTarget);
-    const emailOrUsername = form.get('emailOrUsername') as string;
-    const password = form.get('password') as string;
-    try {
-      const res = await fetch('/api/auth/form-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ emailOrUsername, password }),
-        redirect: 'manual',
-      });
-      const location = res.headers.get('location');
-      if (location) {
-        window.location.assign(location);
-      } else {
-        setError('Login failed.');
-      }
-    } catch {
-      setError('Connection error.');
-    }
-    setLoading(false);
-  };
   const searchParams = useSearchParams();
 
   // Show error from form-login redirect

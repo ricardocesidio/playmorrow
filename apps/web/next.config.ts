@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
 
   // Proxy API requests to backend (keeps cookies same-origin)
   async rewrites() {
-    const apiUrl = process.env.API_URL || 'http://localhost:4000/api';
+    const apiUrl = process.env.API_URL || 'https://playmorrow-api-production.up.railway.app/api';
     return [
       {
         source: '/api/:path*',
