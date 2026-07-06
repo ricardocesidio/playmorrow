@@ -166,11 +166,11 @@ export function HudButton({
 }
 
 const collageTiles = [
-  { src: '/demo/games/neon-warden/hero.svg', alt: 'Neon Warden cyberpunk key art', className: 'left-0 top-0 h-[35%] w-[47%]' },
-  { src: '/demo/games/starfall-tactics/hero.svg', alt: 'Starfall Tactics space key art', className: 'right-0 top-[5%] h-[36%] w-[56%]' },
-  { src: '/demo/games/mossbound/hero.svg', alt: 'Mossbound forest key art', className: 'bottom-[4%] left-[22%] h-[34%] w-[44%]' },
-  { src: '/demo/games/paper-relics/hero.svg', alt: 'Paper Relics card game key art', className: 'bottom-[8%] right-[2%] h-[37%] w-[42%]' },
-  { src: '/demo/games/voidrunner/hero.svg', alt: 'Voidrunner speed key art', className: 'left-[5%] bottom-[30%] h-[28%] w-[25%]' },
+  { src: '/playmorrow/neon-warden.png', alt: 'Neon Warden cyberpunk key art', className: 'left-0 top-0 h-[35%] w-[47%]' },
+  { src: '/playmorrow/starfall-tactics.png', alt: 'Starfall Tactics space key art', className: 'right-0 top-[5%] h-[36%] w-[56%]' },
+  { src: '/playmorrow/mossbound.png', alt: 'Mossbound forest key art', className: 'bottom-[4%] left-[22%] h-[34%] w-[44%]' },
+  { src: '/playmorrow/paper-relics.png', alt: 'Paper Relics card game key art', className: 'bottom-[8%] right-[2%] h-[37%] w-[42%]' },
+  { src: '/playmorrow/voidrunner.png', alt: 'Voidrunner speed key art', className: 'left-[5%] bottom-[30%] h-[28%] w-[25%]' },
 ] as const;
 
 export function AuthArtCollage() {
