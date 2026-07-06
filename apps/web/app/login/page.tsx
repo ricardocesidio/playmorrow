@@ -20,7 +20,27 @@ export default function LoginPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const form = new FormData(e.currentTarget);
+    const emailOrUsername = form.get('emailOrUsername') as string;
+    const password = form.get('password') as string;
+    try {
+      const res = await fetch('/api/auth/form-login', { method: 'POST', body: new URLSearchParams({ emailOrUsername, password }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, credentials: 'include' });
+      if (res.redirected) {
+        window.location.href = res.url;
+      } else {
+        setError('Login failed. Please try again.');
+      }
+    } catch {
+      setError('Connection error. Please try again.');
+    }
+    setLoading(false);
+  };
   const searchParams = useSearchParams();
 
   // Show error from form-login redirect
@@ -75,7 +95,7 @@ export default function LoginPage() {
                 <div className="mx-auto mt-5 h-0.5 w-12 bg-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.7)]" />
               </div>
 
-              <form action="/api/auth/form-login" method="POST" className="mt-12 space-y-8" autoComplete="on">
+              <form onSubmit={handleSubmit} className="mt-12 space-y-8" autoComplete="on">
                 <div>
                   <label htmlFor="email" className="pm-micro mb-4 block text-muted-foreground">Email or username</label>
                   <div className="relative">
