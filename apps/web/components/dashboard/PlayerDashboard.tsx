@@ -9,6 +9,7 @@ import {
   BadgeCheck,
   Bell,
   Bookmark,
+  Building2,
   Compass,
   Crosshair,
   Gamepad2,
@@ -241,24 +242,47 @@ export function PlayerDashboard() {
 
           <div className="grid gap-3 lg:grid-cols-[1fr_0.9fr_1.3fr_270px]">
             <DashboardPanel className="p-4">
-              <SectionHeader title="Recently Viewed" href="/games" compact />
-              <div className="mt-3 py-8 text-center">
-                <History className="mx-auto mb-2 size-6 text-muted-foreground" />
-                <p className="font-mono text-[0.6rem] text-muted-foreground">No recently viewed games</p>
-                <Link href="/games" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
-                  Browse games <ArrowRight className="size-3" />
-                </Link>
+              <SectionHeader title="Your Wishlist" href="/me/wishlist" compact />
+              <div className="mt-3">
+                {wishlist?.items && wishlist.items.length > 0 ? (
+                  wishlist.items.slice(0, 3).map((item: { id: string; game: { slug: string; title: string } }) => (
+                    <Link key={item.id} href={`/games/${item.game.slug}`} className="mb-2 flex items-center gap-3 border border-border/40 bg-muted/30 p-2 transition hover:border-cyan/60">
+                      <span className="truncate font-mono text-[0.6rem] text-foreground">{item.game.title}</span>
+                      <span className="ml-auto shrink-0 text-[0.5rem] text-muted-foreground">View</span>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="py-8 text-center">
+                    <Heart className="mx-auto mb-2 size-6 text-muted-foreground" />
+                    <p className="font-mono text-[0.6rem] text-muted-foreground">No wishlisted games</p>
+                    <Link href="/games" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
+                      Browse games <ArrowRight className="size-3" />
+                    </Link>
+                  </div>
+                )}
               </div>
             </DashboardPanel>
 
             <DashboardPanel className="p-4">
               <SectionHeader title="Upcoming Releases" href="/games" compact />
-              <div className="mt-3 py-8 text-center">
-                <Radio className="mx-auto mb-2 size-6 text-muted-foreground" />
-                <p className="font-mono text-[0.6rem] text-muted-foreground">No upcoming releases</p>
-                <Link href="/games" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
-                  Browse games <ArrowRight className="size-3" />
-                </Link>
+              <div className="mt-3">
+                {feedData?.items && feedData.items.length > 0 ? (
+                  feedData.items.slice(0, 3).map((item) => (
+                    <Link key={item.id} href={`/games/${item.game.slug}`} className="mb-2 flex items-center gap-3 border border-border/40 bg-muted/30 p-2 transition hover:border-cyan/60">
+                      <Radio className="size-3 text-cyan shrink-0" />
+                      <span className="truncate font-mono text-[0.6rem] text-foreground">{item.game.title}</span>
+                      <span className="ml-auto shrink-0 font-mono text-[0.5rem] text-cyan">{item.type}</span>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="py-8 text-center">
+                    <Radio className="mx-auto mb-2 size-6 text-muted-foreground" />
+                    <p className="font-mono text-[0.6rem] text-muted-foreground">No upcoming releases</p>
+                    <Link href="/games" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
+                      Browse games <ArrowRight className="size-3" />
+                    </Link>
+                  </div>
+                )}
               </div>
             </DashboardPanel>
 
@@ -280,45 +304,97 @@ export function PlayerDashboard() {
             </DashboardPanel>
 
             <DashboardPanel className="p-4">
-              <SectionHeader title="Recent Comments" href="/feed" compact />
-              <div className="mt-3 py-8 text-center">
-                <MessageSquare className="mx-auto mb-2 size-6 text-muted-foreground" />
-                <p className="font-mono text-[0.6rem] text-muted-foreground">No comments yet</p>
-                <Link href="/feed" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
-                  Browse feed <ArrowRight className="size-3" />
-                </Link>
+              <SectionHeader title="Recent Notifications" href="/dashboard/notifications" compact />
+              <div className="mt-3">
+                {(recentNotifs?.items ?? []).length > 0 ? (
+                  (recentNotifs?.items ?? []).slice(0, 3).map((n: { id: string; title: string; createdAt: string }) => (
+                    <div key={n.id} className="mb-2 border border-border/40 bg-muted/30 p-2">
+                      <p className="font-mono text-[0.6rem] text-foreground truncate">{n.title}</p>
+                      <p className="text-[0.5rem] text-muted-foreground">{new Date(n.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-8 text-center">
+                    <Bell className="mx-auto mb-2 size-6 text-muted-foreground" />
+                    <p className="font-mono text-[0.6rem] text-muted-foreground">No notifications</p>
+                  </div>
+                )}
               </div>
             </DashboardPanel>
           </div>
 
           <DashboardPanel className="p-4">
-            <SectionHeader title="Recent Activity" compact />
-            <div className="mt-3 py-8 text-center">
-              <Activity className="mx-auto mb-2 size-6 text-muted-foreground" />
-              <p className="font-mono text-[0.6rem] text-muted-foreground">No recent activity</p>
-            </div>
-          </DashboardPanel>
+              <SectionHeader title="XP Progress" compact />
+              <div className="mt-3">
+                <div className="flex items-center gap-2 font-mono text-[0.65rem] text-foreground mb-3">
+                  <span>Level {user?.level ?? 1}</span>
+                  <span className="text-muted-foreground">•</span>
+                  <span className="text-cyan">{user?.xp ?? 0} XP</span>
+                </div>
+                <div className="mt-3">
+                  {(xpHistory ?? []).slice(0, 4).map((event, i) => (
+                    <div key={i} className="mb-1 flex items-center justify-between font-mono text-[0.55rem]">
+                      <span className="text-muted-foreground">{event.reason.replace(/_/g, ' ').toLowerCase()}</span>
+                      <span className="text-cyan">+{event.amount} XP</span>
+                    </div>
+                  ))}
+                  {(!xpHistory || xpHistory.length === 0) && (
+                    <p className="font-mono text-[0.5rem] text-muted-foreground">No XP activity yet</p>
+                  )}
+                </div>
+              </div>
+            </DashboardPanel>
 
           <div className="grid gap-3 lg:grid-cols-[1fr_1.45fr_270px]">
             <DashboardPanel className="p-4">
-              <SectionHeader title="Saved Devlogs" href="/feed" compact />
-              <div className="mt-3 py-8 text-center">
-                <Bookmark className="mx-auto mb-2 size-6 text-muted-foreground" />
-                <p className="font-mono text-[0.6rem] text-muted-foreground">No saved devlogs</p>
-                <Link href="/feed" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
-                  Browse devlogs <ArrowRight className="size-3" />
-                </Link>
+              <SectionHeader title="Following" href="/me/following" compact />
+              <div className="mt-3">
+                {follows && (follows.studios?.length > 0 || follows.games?.length > 0) ? (
+                  <div className="space-y-1">
+                    {follows.studios?.slice(0, 2).map((s) => (
+                      <Link key={s.id} href={`/studios/${s.slug}`} className="flex items-center gap-2 border border-border/40 bg-muted/30 p-2 transition hover:border-cyan/60">
+                        <Building2 className="size-3 text-muted-foreground" />
+                        <span className="truncate font-mono text-[0.6rem] text-foreground">{s.name}</span>
+                      </Link>
+                    ))}
+                    {follows.games?.slice(0, 2).map((g) => (
+                      <Link key={g.id} href={`/games/${g.slug}`} className="flex items-center gap-2 border border-border/40 bg-muted/30 p-2 transition hover:border-cyan/60">
+                        <Gamepad2 className="size-3 text-muted-foreground" />
+                        <span className="truncate font-mono text-[0.6rem] text-foreground">{g.title}</span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-8 text-center">
+                    <Users className="mx-auto mb-2 size-6 text-muted-foreground" />
+                    <p className="font-mono text-[0.6rem] text-muted-foreground">Not following anyone</p>
+                    <Link href="/games" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
+                      Discover <ArrowRight className="size-3" />
+                    </Link>
+                  </div>
+                )}
               </div>
             </DashboardPanel>
 
             <DashboardPanel className="p-4">
-              <SectionHeader title="Recommended For You" href="/games" compact />
-              <div className="mt-3 py-8 text-center">
-                <Heart className="mx-auto mb-2 size-6 text-muted-foreground" />
-                <p className="font-mono text-[0.6rem] text-muted-foreground">No recommendations yet</p>
-                <Link href="/games" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
-                  Browse games <ArrowRight className="size-3" />
-                </Link>
+              <SectionHeader title="Achievements" href="/dashboard/level" compact />
+              <div className="mt-3">
+                {(achievementsData ?? []).length > 0 ? (
+                  achievementsData!.slice(0, 3).map((a, i) => (
+                    <div key={i} className="mb-2 flex items-center gap-2 border border-border/40 bg-muted/30 p-2">
+                      <Trophy className="size-3 text-amber shrink-0" />
+                      <span className="truncate font-mono text-[0.6rem] text-foreground">{a.name ?? 'Achievement'}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-8 text-center">
+                    <Trophy className="mx-auto mb-2 size-6 text-muted-foreground" />
+                    <p className="font-mono text-[0.6rem] text-muted-foreground">No achievements yet</p>
+                    <Link href="/dashboard/level" className="mt-3 inline-flex items-center gap-1 border border-cyan/60 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan/10">
+                      View levels <ArrowRight className="size-3" />
+                    </Link>
+                  </div>
+                )}
               </div>
             </DashboardPanel>
 
