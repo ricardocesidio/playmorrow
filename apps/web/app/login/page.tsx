@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowUpRight, Chrome, Eye, EyeOff, Github, Lock, User } from 'lucide-react';
 
-import { useAuth } from '@/lib/api/auth-context';
+import { useAuth, EmailNotVerifiedError } from '@/lib/api/auth-context';
 import { API } from '@/lib/api/client';
 import {
   AuthArtCollage,
@@ -17,7 +17,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,15 +30,14 @@ export default function LoginPage() {
     const emailOrUsername = form.get('emailOrUsername') as string;
     const password = form.get('password') as string;
     try {
-      const res = await fetch('/api/auth/form-login', { method: 'POST', body: new URLSearchParams({ emailOrUsername, password }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, redirect: 'manual' });
-      if (res.type === 'opaqueredirect' || res.status === 307 || res.headers.get('location')) {
-        window.location.href = res.headers.get('location') || '/games';
-      } else {
-        const body = await res.text();
-        setError(body || 'Login failed. Please try again.');
+      await login(emailOrUsername, password);
+      router.replace('/dashboard');
+    } catch (err) {
+      if (err instanceof EmailNotVerifiedError) {
+        router.push(`/verify-email?email=${encodeURIComponent(err.email)}&from=login`);
+        return;
       }
-    } catch {
-      setError('Connection error. Please try again.');
+      setError(err instanceof Error ? err.message : 'Invalid email/username or password');
     }
     setLoading(false);
   };
