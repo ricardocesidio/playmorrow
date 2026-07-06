@@ -1,0 +1,50 @@
+'use server';
+
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+
+export async function loginAction(formData: FormData) {
+  const emailOrUsername = formData.get('emailOrUsername') as string;
+  const password = formData.get('password') as string;
+
+  if (!emailOrUsername || !password) {
+    redirect('/login?error=All+fields+required');
+  }
+
+  const API = process.env.API_URL || 'https://playmorrow-api-production.up.railway.app/api';
+
+  try {
+    const res = await fetch(`${API}/auth/session/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emailOrUsername, password }),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ message: 'Invalid email/username or password' }));
+      if (body.code === 'EMAIL_NOT_VERIFIED' && body.email) {
+        redirect(`/verify-email?email=${encodeURIComponent(body.email)}&from=login`);
+      }
+      const msg = encodeURIComponent(body.message || 'Invalid email/username or password');
+      redirect(`/login?error=${msg}`);
+    }
+
+    const setCookie = res.headers.get('set-cookie');
+    if (setCookie) {
+      const cookieStore = await cookies();
+      const match = setCookie.match(/^([^=]+)=([^;]+)/);
+      if (match) {
+        cookieStore.set(match[1], match[2], {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'lax',
+          path: '/',
+        });
+      }
+    }
+  } catch {
+    redirect('/login?error=Connection+error');
+  }
+
+  redirect('/games');
+}
