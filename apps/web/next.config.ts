@@ -11,15 +11,10 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
 
-  // Proxy API requests to backend (keeps cookies same-origin)
+  // Proxy all /api/* to backend so cookies stay same-origin
   async rewrites() {
     const apiUrl = process.env.API_URL || 'https://playmorrow-api-production.up.railway.app/api';
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${apiUrl}/:path*`,
-      },
-    ];
+    return [{ source: '/api/:path*', destination: `${apiUrl}/:path*` }];
   },
 };
 
