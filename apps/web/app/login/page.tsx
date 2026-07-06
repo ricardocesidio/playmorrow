@@ -30,11 +30,12 @@ export default function LoginPage() {
     const emailOrUsername = form.get('emailOrUsername') as string;
     const password = form.get('password') as string;
     try {
-      const res = await fetch('/api/auth/form-login', { method: 'POST', body: new URLSearchParams({ emailOrUsername, password }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, credentials: 'include' });
-      if (res.redirected) {
-        window.location.href = res.url;
+      const res = await fetch('/api/auth/form-login', { method: 'POST', body: new URLSearchParams({ emailOrUsername, password }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, redirect: 'manual' });
+      if (res.type === 'opaqueredirect' || res.status === 307 || res.headers.get('location')) {
+        window.location.href = res.headers.get('location') || '/games';
       } else {
-        setError('Login failed. Please try again.');
+        const body = await res.text();
+        setError(body || 'Login failed. Please try again.');
       }
     } catch {
       setError('Connection error. Please try again.');
