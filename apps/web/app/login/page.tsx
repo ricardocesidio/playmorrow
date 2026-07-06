@@ -7,6 +7,7 @@ import { ArrowUpRight, Chrome, Eye, EyeOff, Github, Lock, User } from 'lucide-re
 
 import { useAuth, EmailNotVerifiedError } from '@/lib/api/auth-context';
 import { loginAction } from '@/app/auth/login/actions';
+import { API } from '@/lib/api/client';
 import {
   AuthArtCollage,
   CircuitFrame,
