@@ -13,39 +13,40 @@ export async function loginAction(formData: FormData) {
 
   const API = process.env.API_URL || 'https://playmorrow-api-production.up.railway.app/api';
 
+  let loginRes: Response;
   try {
-    const res = await fetch(`${API}/auth/session/login`, {
+    loginRes = await fetch(`${API}/auth/session/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ emailOrUsername, password }),
     });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({ message: 'Invalid email/username or password' }));
-      if (body.code === 'EMAIL_NOT_VERIFIED' && body.email) {
-        redirect(`/verify-email?email=${encodeURIComponent(body.email)}&from=login`);
-      }
-      const msg = encodeURIComponent(body.message || 'Invalid email/username or password');
-      redirect(`/login?error=${msg}`);
-    }
-
-    const setCookie = res.headers.get('set-cookie');
-    if (setCookie) {
-      const match = setCookie.match(/^([^=]+)=([^;]+)/);
-      const name = match?.[1];
-      const value = match?.[2];
-      if (name && value) {
-        const cookieStore = await cookies();
-        cookieStore.set(name, value, {
-          httpOnly: true,
-          secure: true,
-          sameSite: 'lax',
-          path: '/',
-        });
-      }
-    }
   } catch {
     redirect('/login?error=Connection+error');
+  }
+
+  if (!loginRes.ok) {
+    const body = await loginRes.json().catch(() => ({ message: 'Invalid email/username or password' }));
+    if (body.code === 'EMAIL_NOT_VERIFIED' && body.email) {
+      redirect(`/verify-email?email=${encodeURIComponent(body.email)}&from=login`);
+    }
+    const msg = encodeURIComponent(body.message || 'Invalid email/username or password');
+    redirect(`/login?error=${msg}`);
+  }
+
+  const setCookie = loginRes.headers.get('set-cookie');
+  if (setCookie) {
+    const match = setCookie.match(/^([^=]+)=([^;]+)/);
+    const name = match?.[1];
+    const value = match?.[2];
+    if (name && value) {
+      const cookieStore = await cookies();
+      cookieStore.set(name, value, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/',
+      });
+    }
   }
 
   redirect('/games');
