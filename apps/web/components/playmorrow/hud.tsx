@@ -192,7 +192,7 @@ export function AuthArtCollage() {
         <h1 className="font-display text-[3.4rem] font-black uppercase leading-[1.08] text-foreground drop-shadow-[0_8px_28px_rgb(0_0_0_/_0.8)] xl:text-[4.4rem]">
           Your next<br />signal is<br />waiting.
         </h1>
-        <p className="mt-3 max-w-md text-lg leading-8 text-muted-foreground">
+        <p className="mt-3 inline-block max-w-md text-lg leading-8 text-muted-foreground bg-background/20 backdrop-blur-sm rounded-lg px-4 py-2">
           Sign in to follow studios, track roadmaps, and join the conversation.
         </p>
       </div>
