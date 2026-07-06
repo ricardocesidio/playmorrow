@@ -31,10 +31,12 @@ export async function loginAction(formData: FormData) {
 
     const setCookie = res.headers.get('set-cookie');
     if (setCookie) {
-      const cookieStore = await cookies();
       const match = setCookie.match(/^([^=]+)=([^;]+)/);
-      if (match) {
-        cookieStore.set(match[1], match[2], {
+      const name = match?.[1];
+      const value = match?.[2];
+      if (name && value) {
+        const cookieStore = await cookies();
+        cookieStore.set(name, value, {
           httpOnly: true,
           secure: true,
           sameSite: 'lax',
