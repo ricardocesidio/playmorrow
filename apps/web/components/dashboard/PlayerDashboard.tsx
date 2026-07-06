@@ -55,13 +55,12 @@ export function PlayerDashboard() {
   const { data: unreadData } = useUnreadNotificationCount();
   const { data: recentNotifs } = useNotifications('all', 1, 5);
   const { data: feedData } = usePublicFeed(1, 5);
-
-  if (!user) return null;
-
   const { data: weeklyXp } = usePlayerWeeklyXp();
   const { data: monthlyXp } = usePlayerMonthlyXp();
   const { data: achievementsData } = useAchievements();
   const { data: xpHistory } = usePlayerXpHistory();
+
+  if (!user) return null;
 
   const prevLevel = typeof window !== 'undefined' ? parseInt(localStorage.getItem('player-level') || '0') : 0;
   useEffect(() => {

@@ -49,8 +49,6 @@ export function StudioDashboard() {
   const { data: notifications } = useNotifications('all', 1, 5, token ?? undefined);
   const { data: unreadData } = useUnreadNotificationCount();
 
-  if (!user) return null;
-
   const studio = studios?.[0];
   const studioGames = (games ?? []) as StudioGame[];
   const firstGame = studioGames[0];
@@ -58,6 +56,8 @@ export function StudioDashboard() {
   const { data: dashboard } = useStudioDashboard(studio?.slug ?? '');
   const { data: roadmapItems } = useGameRoadmap(firstGame?.slug ?? '');
   const { data: auditLogs } = useStudioAuditLogs(studio?.slug ?? '');
+
+  if (!user) return null;
 
   const ds = dashboard;
   const publishedGames = ds?.games.published ?? studioGames.filter((game) => game.isPublished || game.status === 'PUBLISHED').length;
