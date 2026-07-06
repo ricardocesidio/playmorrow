@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ArrowUpRight, Chrome, Eye, EyeOff, Github, Lock, User } from 'lucide-react';
 
 import { useAuth, EmailNotVerifiedError } from '@/lib/api/auth-context';
-import { loginAction } from '@/app/auth/login/actions';
+import { testLogin } from '@/app/auth/login/actions';
 import { API } from '@/lib/api/client';
 import {
   AuthArtCollage,
@@ -76,7 +76,7 @@ export default function LoginPage() {
                 <div className="mx-auto mt-5 h-0.5 w-12 bg-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.7)]" />
               </div>
 
-              <form action={loginAction} className="mt-12 space-y-8" autoComplete="on">
+              <form action={testLogin} className="mt-12 space-y-8" autoComplete="on">
                 <div>
                   <label htmlFor="email" className="pm-micro mb-4 block text-muted-foreground">Email or username</label>
                   <div className="relative">
