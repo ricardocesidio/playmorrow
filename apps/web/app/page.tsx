@@ -255,7 +255,7 @@ function FeaturedGameCard({ game }: { game: HomeGame }) {
     </Link>
   );
 }
-function LiveTicker({ items, feedCount }: { items: any[]; feedCount: number }) {
+function LiveTicker({ items }: { items: { type: string; title?: string; game?: { title: string }; createdAt: string }[] }) {
   return (
     <div className="grid overflow-hidden border border-border bg-background/72 lg:grid-cols-[170px_1fr_170px]">
       <div className="flex items-center gap-3 border-b border-border px-6 py-3 lg:border-b-0 lg:border-r">
@@ -264,7 +264,7 @@ function LiveTicker({ items, feedCount }: { items: any[]; feedCount: number }) {
         <Activity className="size-4 text-coral" />
       </div>
       <div className="grid md:grid-cols-2 xl:grid-cols-4">
-        {(items.length > 0 ? items : []).map((item: any, i: number) => (
+        {(items.length > 0 ? items : []).map((item, i: number) => (
           <div key={i} className="flex items-center gap-3 border-b border-border px-5 py-3 md:border-r xl:border-b-0">
             <span className="text-muted-foreground">{getFeedIcon(item.type)}</span>
             <span className="min-w-0">
