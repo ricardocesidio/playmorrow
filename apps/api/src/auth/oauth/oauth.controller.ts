@@ -74,7 +74,7 @@ export class OAuthController {
           httpOnly: true,
           secure: isProduction,
           sameSite: isProduction ? 'none' : 'lax',
-          domain: isProduction ? undefined : 'localhost',
+          domain: isProduction ? process.env.COOKIE_DOMAIN || undefined : 'localhost',
           path: '/',
           expires: expiresAt,
         });
