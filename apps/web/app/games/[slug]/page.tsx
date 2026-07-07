@@ -268,7 +268,7 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
   const hasDemo = Boolean(demoHref);
 
   return (
-    <HudPanel className="p-4" accent="muted">
+    <HudPanel className="p-4 h-full min-h-[284px] lg:h-[334px]" accent="muted">
       <p className="pm-micro text-foreground">Standard Edition</p>
       <div className="mt-3 flex items-start justify-between gap-4">
         <p className="font-display text-2xl font-black text-foreground">{price}</p>
