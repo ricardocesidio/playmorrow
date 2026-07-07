@@ -25,9 +25,8 @@ import { SiteFooter } from '@/components/site-footer';
 import { StatusBadge } from '@/components/status-badge';
 import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { ErrorState } from '@/components/error-state';
-import { useStudio, useStudioMembers, useStudioGames, useStudioAuditLogs } from '@/lib/api/hooks';
+import { useStudio, useStudioMembers, useStudioGames, useStudioAuditLogs, useRequestJoin } from '@/lib/api/hooks';
 import type { AuditLogEntry } from '@/lib/api/hooks';
-import { api } from '@/lib/api/client';
 import type { Game } from '@/lib/api/client';
 import { useAuth } from '@/lib/api/auth-context';
 import { FollowButton } from '@/components/follow-button';
@@ -56,6 +55,7 @@ export default function StudioDetailPage() {
   const { data: membersData } = useStudioMembers(slug);
   const { data: gamesData } = useStudioGames(slug);
   const { data: auditData } = useStudioAuditLogs(slug);
+  const requestJoin = useRequestJoin();
   const [requestSent, setRequestSent] = useState(false);
 
   if (isLoading) {
@@ -190,17 +190,15 @@ export default function StudioDetailPage() {
 
               {authUser && !requestSent && (
                 <button
-                  onClick={async () => {
-                    try {
-                      await api.post(`/studios/${slug}/request-join`);
-                      setRequestSent(true);
-                    } catch {
-                      /* ignore */
-                    }
+                  onClick={() => {
+                    requestJoin.mutate(slug, {
+                      onSuccess: () => setRequestSent(true),
+                    });
                   }}
-                  className="clip-corner inline-flex cursor-pointer items-center gap-2 border border-cyan/60 bg-cyan/5 px-5 py-2.5 font-mono text-[0.55rem] uppercase tracking-widest text-cyan shadow-[0_0_16px_rgb(62_231_255_/_0.1)] transition hover:bg-cyan hover:text-background"
+                  disabled={requestJoin.isPending}
+                  className="clip-corner inline-flex cursor-pointer items-center gap-2 border border-cyan/60 bg-cyan/5 px-5 py-2.5 font-mono text-[0.55rem] uppercase tracking-widest text-cyan shadow-[0_0_16px_rgb(62_231_255_/_0.1)] transition hover:bg-cyan hover:text-background disabled:opacity-50"
                 >
-                  <UserPlus className="size-4" /> Request to Join
+                  {requestJoin.isPending ? 'Sending...' : <><UserPlus className="size-4" /> Request to Join</>}
                 </button>
               )}
               {requestSent && (

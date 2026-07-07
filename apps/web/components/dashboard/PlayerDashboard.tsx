@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Activity,
@@ -152,7 +152,7 @@ export function PlayerDashboard() {
         </aside>
 
         <section className="min-w-0 space-y-3">
-          <DashboardHero name={displayName} />
+          <DashboardHero name={displayName} onLogout={() => { logout(); router.push('/'); }} />
 
           <div className="grid gap-3 2xl:grid-cols-[minmax(0,1fr)_270px]">
             <DashboardPanel className="p-4">
@@ -200,7 +200,7 @@ export function PlayerDashboard() {
                 <div className="mt-5 grid grid-cols-2 gap-4 border-t border-border/70 pt-4">
                   <MiniStat icon={<Zap className="size-4" />} label="Weekly XP" value={(weeklyXp?.weekly ?? 0).toLocaleString()} />
                   <MiniStat icon={<Trophy className="size-4" />} label="Monthly XP" value={(monthlyXp?.monthly ?? 0).toLocaleString()} />
-                  <MiniStat icon={<MessageSquare className="size-4" />} label="Comments Made" value={unreadCount.toString()} />
+                  <MiniStat icon={<MessageSquare className="size-4" />} label="Notification Count" value={String(unreadCount)} />
                   <MiniStat icon={<Trophy className="size-4" />} label="Level" value={level.toString()} />
                 </div>
               </DashboardPanel>
@@ -420,7 +420,8 @@ export function PlayerDashboard() {
   );
 }
 
-function DashboardHero({ name }: { name: string }) {
+function DashboardHero({ name, onLogout }: { name: string; onLogout: () => void }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <DashboardPanel className="overflow-hidden">
       <div className="relative min-h-[214px]">
@@ -431,7 +432,23 @@ function DashboardHero({ name }: { name: string }) {
         </div>
         <div className="relative z-10 flex min-h-[214px] flex-col justify-between px-6 py-5 sm:px-10 sm:py-7">
           <div>
-            <p className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-cyan">Welcome Back, {name} /////////</p>
+            <div className="flex items-center justify-between">
+              <p className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-cyan">Welcome Back, {name} /////////</p>
+              <div className="relative xl:hidden">
+                <button onClick={() => setMenuOpen(!menuOpen)} className="clip-corner flex items-center gap-2 border border-border/60 bg-background/50 px-3 py-1.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground hover:text-cyan cursor-pointer">
+                  <UserRound className="size-3.5" /> Menu
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 top-full z-50 mt-1 min-w-[160px] border border-border/80 bg-background shadow-xl">
+                    <Link href="/me/wishlist" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan">Wishlist</Link>
+                    <Link href="/me/following" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan">Following</Link>
+                    <Link href="/settings/profile" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan">Settings</Link>
+                    <Link href="/dashboard/level" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan">Level System</Link>
+                    <button onClick={() => { setMenuOpen(false); onLogout(); }} className="block w-full cursor-pointer px-4 py-2.5 text-left font-mono text-[0.6rem] uppercase tracking-widest text-coral hover:bg-coral/10">Sign out</button>
+                  </div>
+                )}
+              </div>
+            </div>
             <h1 className="mt-4 max-w-[960px] font-display text-[clamp(2.35rem,5vw,4.35rem)] font-black uppercase leading-[0.92] text-white">
               Your Player Dashboard
             </h1>
