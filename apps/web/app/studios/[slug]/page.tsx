@@ -304,7 +304,14 @@ export default function StudioDetailPage() {
         {/* ── GAMES ──────────────────────────────────────────────────── */}
         <section className="relative z-10 mx-auto mt-6 max-w-6xl px-5 sm:px-8 lg:px-10">
           <div className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
-            <h2 className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">Games ({studio.gamesCount})</h2>
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">Games ({studio.gamesCount})</h2>
+              {authUser && (
+                <Link href={`/dashboard/games/new?studio=${studio.slug}`} className="font-mono text-[0.55rem] uppercase tracking-widest text-coral hover:text-cyan transition">
+                  + Add game
+                </Link>
+              )}
+            </div>
             {games.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {games.map((game: Game) => (
@@ -391,6 +398,7 @@ function StudioGameCard({ game }: { game: Game }) {
         <div className="absolute left-3 top-3">
           <StatusBadge status={game.status} />
         </div>
+        <span className="signal-dot absolute right-3 top-3" aria-hidden />
       </div>
       <div className="flex flex-1 flex-col border-t border-border/60 p-4">
         <h3 className="font-display text-lg font-black uppercase leading-tight text-white transition-colors group-hover:text-cyan">
