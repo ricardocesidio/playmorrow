@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Award, TrendingUp, Heart, Star, MessageSquare, Zap } from 'lucide-react';
+import { ArrowLeft, Award, TrendingUp, Heart, Star, MessageSquare, Zap, Trophy } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
+import { useAuth } from '@/lib/api/auth-context';
+import { usePlayerWeeklyXp, usePlayerMonthlyXp } from '@/lib/api/hooks';
 
 const XP_TABLE = [
   { category: 'Engagement', icon: <Heart className="size-4" />, actions: [
@@ -41,6 +43,15 @@ const TITLE_RANGES = [
 ];
 
 export default function PlayerLevelPage() {
+  const { user } = useAuth();
+  const { data: weeklyXp } = usePlayerWeeklyXp();
+  const { data: monthlyXp } = usePlayerMonthlyXp();
+  const level = user?.level ?? 1;
+  const xp = user?.xp ?? 0;
+  const xpForNext = level < 5 ? 100 : level < 10 ? 500 : level < 15 ? 1000 : level < 20 ? 1500 : level < 30 ? 2500 : 5000;
+  const progress = Math.min(100, Math.round((xp / xpForNext) * 100));
+  const rankTitle = level <= 5 ? 'Newcomer' : level <= 15 ? 'Regular' : level <= 30 ? 'Supporter' : level <= 45 ? 'Veteran' : 'Legend';
+
   return (
     <>
       <SiteHeader />
@@ -50,12 +61,24 @@ export default function PlayerLevelPage() {
             <ArrowLeft className="size-3" /> Back to dashboard
           </Link>
 
-          <div className="mb-10">
-            <h1 className="font-display text-4xl font-black uppercase tracking-tight text-white">Player Level System</h1>
-            <p className="mt-3 max-w-2xl font-mono text-[0.72rem] leading-relaxed text-muted-foreground">
-              Level up your player profile by following studios and games, wishlisting titles,
-              commenting, and staying active. Higher levels unlock prestige and recognition across the platform.
-            </p>
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] mb-10">
+            <div className="flex items-center gap-6">
+              <div className="grid size-20 place-items-center border border-cyan/50 bg-cyan/5 text-cyan">
+                <Trophy className="size-10" />
+              </div>
+              <div>
+                <p className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground">Your Progress</p>
+                <p className="font-display text-3xl font-black text-white">Level {level} · <span className="text-cyan">{rankTitle}</span></p>
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="h-2 w-48 bg-border"><div className="h-full bg-cyan shadow-[0_0_10px_rgb(62_231_255_/_0.6)]" style={{ width: `${progress}%` }} /></div>
+                  <span className="font-mono text-[0.6rem] text-muted-foreground">{xp.toLocaleString()} / {xpForNext.toLocaleString()} XP</span>
+                </div>
+                <div className="mt-3 flex gap-6">
+                  <span className="font-mono text-[0.6rem] text-muted-foreground"><span className="text-cyan">Weekly:</span> {weeklyXp?.weekly ?? 0} XP</span>
+                  <span className="font-mono text-[0.6rem] text-muted-foreground"><span className="text-cyan">Monthly:</span> {monthlyXp?.monthly ?? 0} XP</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Title Tiers */}
