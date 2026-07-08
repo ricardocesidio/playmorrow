@@ -708,7 +708,7 @@ function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
 function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
   return (
     <HudPanel className="h-full p-4 min-h-[294px] lg:h-[344px]" accent="muted">
-      <h2 className="pm-micro mb-[5px] text-foreground">Quick Info</h2>
+      <h2 className="pm-micro mb-4 text-foreground">Quick Info</h2>
       <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
         <InfoField label="Developer" value={game.studio?.name ?? ''} />
         <InfoField label="Status" value={labelStatus(game.status)} />
@@ -718,7 +718,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
       <Link href="#details" className="mt-3 inline-flex items-center gap-3 text-sm text-cyan">View all details <ArrowRight className="size-4" /></Link>
 
       <div className="mt-4 border-t border-border pt-3">
-        <h2 className="pm-micro mb-2 text-foreground">External Links</h2>
+        <h2 className="pm-micro mb-3 text-foreground">External Links</h2>
         <div className="grid grid-cols-2 gap-2">
           {(game.platformLinks ?? []).slice(0, 6).map((p) => (
             <a key={p.id} href={p.url} target="_blank" rel="noopener noreferrer" className="clip-corner flex h-7 cursor-pointer items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
@@ -735,7 +735,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
       </div>
 
       <div className="mt-4 border-t border-border pt-3">
-        <h2 className="pm-micro mb-2 text-foreground">Widget</h2>
+        <h2 className="pm-micro mb-3 text-foreground">Widget</h2>
         <button onClick={() => {
           const code = `<iframe src="https://playmorrow.vercel.app/embed/${slug}" width="400" height="140" style="border:none;border-radius:4px" title="${game.title}"></iframe>`;
           navigator.clipboard.writeText(code);
