@@ -404,7 +404,7 @@ function ShareButtons({ title }: { title: string }) {
 
 function TagRow({ tags }: { tags: string[] }) {
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-3 sm:gap-4 overflow-hidden">
+    <div className="flex flex-wrap items-center gap-3 sm:gap-4 overflow-hidden">
       <span className="pm-micro mr-1 shrink-0 text-muted-foreground">Tags</span>
       {tags.slice(0, 6).map((tag, index) => (
         <span key={tag} className={`clip-corner-sm border bg-background/52 px-4 py-1.5 font-mono text-xs font-semibold truncate max-w-[150px] shadow-[inset_0_0_12px_rgb(62_231_255_/_0.04)] ${index === 3 || index === 4 ? 'border-violet/55 text-violet' : 'border-cyan/35 text-cyan'}`}>
