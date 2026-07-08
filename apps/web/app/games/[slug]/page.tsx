@@ -172,15 +172,13 @@ function PremiumGameDetail({
                 <TrailerPanel title={title} image={heroImage} trailerUrl={game.trailerUrl} />
                 <ScreenshotsPanel screenshots={screenshots} allScreenshots={allScreenshots} active={activeScreenshot} onSelect={setActiveScreenshot} title={title} />
               </div>
-              <div className="grid items-stretch gap-5 lg:grid-cols-[1fr_1fr]">
-                <RoadmapPanel roadmap={roadmap} />
-                <DevlogsPanel devlogs={devlogs} slug={slug} />
-              </div>
+              <DevlogsPanel devlogs={devlogs} slug={slug} />
             </div>
             <aside className="grid gap-5">
               <PurchasePanel game={game} slug={slug} title={title} />
               <AboutPanel game={game} slug={slug} />
               <InfoLinksPanel game={game} slug={slug} />
+              <RoadmapPanel roadmap={roadmap} />
               <CommunityPanel slug={slug} />
             </aside>
           </section>
