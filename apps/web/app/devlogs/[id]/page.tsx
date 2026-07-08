@@ -356,13 +356,21 @@ export default function DevlogDetailPage() {
             </div>
 
             <h1 className="mt-3 font-display text-3xl font-black uppercase tracking-tight text-white">{devlog.title}</h1>
+            {devlog.subtitle && (
+              <p className="mt-1 font-mono text-sm text-muted-foreground">{devlog.subtitle}</p>
+            )}
 
-            <div className="mt-3 flex items-center gap-3 font-mono text-[0.6rem] text-muted-foreground">
-              {devlog.author && <span>By {devlog.author.displayName}</span>}
+            <div className="mt-3 flex flex-wrap items-center gap-3 font-mono text-[0.6rem] text-muted-foreground">
+              {devlog.author?.avatarUrl && (
+                <img src={devlog.author.avatarUrl} alt="" className="size-6 rounded-full border border-border/50" />
+              )}
+              {devlog.author && <span className="font-semibold text-foreground">{devlog.author.displayName}</span>}
               <span>·</span>
               <Link href={`/games/${devlog.game.slug}`} className="text-cyan underline-offset-2 hover:underline">
                 {devlog.game.title}
               </Link>
+              {devlog.readingTimeMin && <span className="text-muted-foreground/60">· {devlog.readingTimeMin} min read</span>}
+              {devlog.editedAt && <span className="text-muted-foreground/60">· edited {new Date(devlog.editedAt).toLocaleDateString()}</span>}
             </div>
           </div>
 

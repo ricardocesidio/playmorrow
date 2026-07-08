@@ -37,6 +37,7 @@ function CreateDevlogForm() {
   const [body, setBody] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
   const [isPublished, setIsPublished] = useState(false);
+  const [status, setStatus] = useState<string>('DRAFT');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -90,8 +91,9 @@ function CreateDevlogForm() {
         slug: slug.trim().toLowerCase(),
         body: body.trim(),
         coverUrl: coverUrl.trim() || undefined,
-        isPublished,
-        publishedAt: isPublished ? new Date().toISOString() : undefined,
+        isPublished: status === 'PUBLISHED',
+        status,
+        publishedAt: status === 'PUBLISHED' ? new Date().toISOString() : undefined,
       });
       router.push(`/devlogs/${result.id}`);
     } catch (err) {
@@ -188,22 +190,24 @@ function CreateDevlogForm() {
           </div>
 
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
-            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Publishing</h3>
-            <div className="flex items-center gap-3">
-              <input type="checkbox" id="isPublished" checked={isPublished}
-                onChange={(e) => setIsPublished(e.target.checked)}
-                className="rounded border-input" />
-              <label htmlFor="isPublished" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
-                Publish immediately
-              </label>
-              {isPublished && <span className="font-mono text-[0.55rem] text-muted-foreground">(publishedAt will be set to now)</span>}
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Status</h3>
+            <div className="flex items-center gap-4">
+              {(['DRAFT', 'PUBLISHED', 'SCHEDULED'] as const).map((s) => (
+                <label key={s} className={`flex items-center gap-2 cursor-pointer font-mono text-[0.6rem] uppercase tracking-widest px-3 py-2 border transition ${
+                  status === s ? 'border-cyan bg-cyan/10 text-cyan' : 'border-border text-muted-foreground hover:border-cyan/50'
+                }`}>
+                  <input type="radio" name="status" value={s} checked={status === s}
+                    onChange={() => setStatus(s)} className="hidden" />
+                  {s === 'DRAFT' ? 'Draft' : s === 'PUBLISHED' ? 'Publish' : 'Schedule'}
+                </label>
+              ))}
             </div>
           </div>
 
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={createDevlog.isPending}
               className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
-              {createDevlog.isPending ? 'Saving…' : isPublished ? 'Publish devlog' : 'Save draft'}
+              {createDevlog.isPending ? 'Saving…' : status === 'PUBLISHED' ? 'Publish devlog' : status === 'SCHEDULED' ? 'Schedule devlog' : 'Save draft'}
             </button>
             <Link href="/dashboard"
               className="clip-corner inline-flex items-center border border-border/60 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
