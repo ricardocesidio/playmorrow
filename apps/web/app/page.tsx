@@ -21,11 +21,11 @@ function getFeedIcon(type: string) {
 
 export default function HomePage() {
   const { data: feedData } = usePublicFeed();
-  const { data: gamesData } = useGames();
+  const { data: gamesData } = useGames(1, 9);
   const { data: studiosData } = useStudios();
 
   const games = normalizeLatestGames(gamesData?.items);
-  const gamesCount = Math.min(gamesData?.total ?? 0, 5);
+  const gamesCount = gamesData?.total ?? 0;
   const feedItems = feedData?.items?.slice(0, 4) ?? [];
   const feedCount = feedData?.total ?? 0;
   const studioCount = Math.min(studiosData?.total ?? 0, 5);
@@ -318,7 +318,7 @@ type HomeGame = {
 
 function normalizeLatestGames(games?: Game[]): HomeGame[] {
   if (!games?.length) return [];
-  return games.slice(0, 3).map((g) => ({
+  return games.slice(0, 9).map((g) => ({
     id: g.id, title: g.title, slug: g.slug, status: g.status,
     coverUrl: g.coverUrl || '/demo/games/neon-warden/hero.svg', followersCount: g.followersCount,
     studio: { name: g.studio?.name ?? 'Independent Studio', slug: g.studio?.slug ?? 'studio' },
