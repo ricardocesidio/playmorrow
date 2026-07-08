@@ -8,7 +8,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
-  ChevronDown,
   CircleDollarSign,
   Clipboard,
   Disc3,
@@ -254,9 +253,9 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
       <p className="text-sm mb-3 text-foreground">Standard Edition</p>
       <div className="mt-3 flex items-start justify-between gap-4">
         <p className="font-display text-2xl font-black text-foreground">{price}</p>
-        <button type="button" className="clip-corner inline-flex items-center gap-1 border border-border px-2 py-1 font-mono text-[10px] uppercase text-muted-foreground">
-          {(game.currency ?? 'USD').toUpperCase()} <ChevronDown className="size-3" />
-        </button>
+        <span className="clip-corner inline-flex items-center gap-1 border border-border px-2 py-1 font-mono text-[10px] uppercase text-muted-foreground">
+          {(game.currency ?? 'USD').toUpperCase()}
+        </span>
       </div>
       <p className={`mt-2 text-xs ${hasDemo ? 'text-cyan' : 'text-muted-foreground'}`}>
         {hasDemo ? 'Demo available' : 'Demo locked'} <span className={`inline-block size-2 rounded-full border ${hasDemo ? 'border-cyan' : 'border-muted-foreground/60'}`} />
@@ -459,7 +458,7 @@ function TrailerPanel({ title, image, trailerUrl }: { title: string; image: stri
             <Play className="ml-1 size-7 fill-current" />
           </button>
           <div className="pointer-events-none absolute right-8 top-10 font-display text-4xl font-black uppercase leading-none text-foreground">
-            {title}<br /><span className="text-lg tracking-[0.3em]">Gameplay Trailer</span>
+            {title}
           </div>
         </div>
       </div>
