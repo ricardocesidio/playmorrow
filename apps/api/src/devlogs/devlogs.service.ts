@@ -12,7 +12,7 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 
 const DEVLOG_INCLUDE = {
   game: { select: { id: true, title: true, slug: true, studioId: true } },
-  author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+  author: { select: { id: true, username: true, displayName: true, avatarUrl: true, role: true } },
 } satisfies Prisma.DevlogInclude;
 
 @Injectable()
@@ -339,7 +339,7 @@ export class DevlogsService {
     createdAt: Date;
     updatedAt: Date;
     game: { id: string; title: string; slug: string; studioId: string };
-    author: { id: string; username: string; displayName: string; avatarUrl: string | null };
+    author: { id: string; username: string; displayName: string; avatarUrl: string | null; role: string };
     screenshots?: { id: string; url: string; order: number; caption: string | null }[];
   }) {
     return {

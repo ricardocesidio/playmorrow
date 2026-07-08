@@ -133,7 +133,7 @@ export interface Devlog {
   updatedAt: string;
   game: { id: string; title: string; slug: string };
   studio: { id: string };
-  author: { id: string; username: string; displayName: string; avatarUrl: string | null };
+  author: { id: string; username: string; displayName: string; avatarUrl: string | null; role?: string };
 }
 
 export interface RoadmapItem {
@@ -180,7 +180,7 @@ export interface Comment {
   parentId: string | null;
   isDeleted?: boolean;
   deletedAt: string | null;
-  author: { id: string; username: string; displayName: string; avatarUrl: string | null };
+  author: { id: string; username: string; displayName: string; avatarUrl: string | null; role?: string };
   createdAt: string;
   updatedAt: string;
 }

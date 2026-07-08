@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile, type Report, type CreateReportDto } from './client';
+import { revalidateFeed, revalidateHomepage } from '@/actions/revalidate';
 
 // ── Infinite scroll helpers ─────────────────────────────────────────────
 
@@ -670,6 +671,8 @@ export function useCreateDevlog() {
       qc.invalidateQueries({ queryKey: ['myDevlogs'] });
       qc.invalidateQueries({ queryKey: ['gameDevlogs'] });
       qc.invalidateQueries({ queryKey: ['devlogs'] });
+      revalidateFeed();
+      revalidateHomepage();
     },
   });
 }
@@ -684,6 +687,8 @@ export function useUpdateDevlog() {
       qc.invalidateQueries({ queryKey: ['myDevlogs'] });
       qc.invalidateQueries({ queryKey: ['gameDevlogs'] });
       qc.invalidateQueries({ queryKey: ['devlog'] });
+      revalidateFeed();
+      revalidateHomepage();
     },
   });
 }
@@ -758,6 +763,8 @@ export function useCreateGame() {
       qc.invalidateQueries({ queryKey: ['myGames'] });
       qc.invalidateQueries({ queryKey: ['games'] });
       qc.invalidateQueries({ queryKey: ['studioGames'] });
+      revalidateFeed();
+      revalidateHomepage();
     },
   });
 }
@@ -772,6 +779,8 @@ export function useUpdateGame() {
       qc.invalidateQueries({ queryKey: ['myGames'] });
       qc.invalidateQueries({ queryKey: ['games'] });
       qc.invalidateQueries({ queryKey: ['game'] });
+      revalidateFeed();
+      revalidateHomepage();
     },
   });
 }

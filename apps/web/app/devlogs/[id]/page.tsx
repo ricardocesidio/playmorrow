@@ -388,6 +388,9 @@ export default function DevlogDetailPage() {
                 <img src={devlog.author.avatarUrl} alt="" className="size-6 rounded-full border border-border/50" />
               )}
               {devlog.author && <span className="font-semibold text-foreground">{devlog.author.displayName}</span>}
+              {devlog.author?.role && devlog.author.role !== 'PLAYER' && (
+                <span className="clip-corner border border-cyan/30 bg-cyan/5 px-1.5 py-0.5 font-mono text-[0.5rem] uppercase tracking-widest text-cyan">{devlog.author.role.toLowerCase()}</span>
+              )}
               <span>·</span>
               <Link href={`/games/${devlog.game.slug}`} className="text-cyan underline-offset-2 hover:underline">
                 {devlog.game.title}
