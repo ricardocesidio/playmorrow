@@ -3,7 +3,7 @@
 import { useState, type FormEvent, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, ExternalLink, ScrollText } from 'lucide-react';
+import { ArrowLeft, Save, ExternalLink, ScrollText, Download } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
@@ -251,11 +251,39 @@ export default function PressKitPage() {
             </div>
           </div>
 
+  const handleDownload = () => {
+    let md = `# ${game?.title || 'Game'} — Press Kit\n\n`;
+    if (headline) md += `## Headline\n${headline}\n\n`;
+    if (game?.description) md += `## About\n${game.description}\n\n`;
+    md += `## Fact Sheet\n`;
+    try {
+      const facts = JSON.parse(factSheetText);
+      for (const [key, value] of Object.entries(facts)) {
+        md += `- **${key}**: ${Array.isArray(value) ? value.join(', ') : value}\n`;
+      }
+    } catch { md += '_(Invalid JSON)_\n'; }
+    if (game?.tags?.length) md += `\n## Tags\n${game.tags.join(', ')}\n`;
+    if (game?.platformLinks?.length) md += `\n## Platforms\n${game.platformLinks.map((p: { platform: string; url: string }) => `- [${p.platform}](${p.url})`).join('\n')}\n`;
+    if (contactEmail) md += `\n## Contact\n${contactEmail}\n`;
+    if (downloadUrl) md += `\n## Download Assets\n${downloadUrl}\n`;
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${game?.slug || 'game'}-press-kit.md`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // ... component continues
+
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={upsert.isPending}
               className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
               {upsert.isPending ? 'Saving…' : 'Save press kit'}
               <Save className="ml-1.5 inline size-3" />
+            </button>
+            <button type="button" onClick={handleDownload}
+              className="clip-corner cursor-pointer border border-coral bg-coral/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-coral transition hover:bg-coral hover:text-coral-foreground">
+              Download <Download className="ml-1.5 inline size-3" />
             </button>
             <Link href={'/dashboard/games/' + slug}
               className="clip-corner inline-flex items-center border border-border/60 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
