@@ -269,7 +269,7 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
 
   return (
     <HudPanel className="p-4" accent="muted">
-      <p className="pm-micro mb-3 text-foreground">Standard Edition</p>
+      <p className="text-sm mb-3 text-foreground">Standard Edition</p>
       <div className="mt-3 flex items-start justify-between gap-4">
         <p className="font-display text-2xl font-black text-foreground">{price}</p>
         <button type="button" className="clip-corner inline-flex items-center gap-1 border border-border px-2 py-1 font-mono text-[10px] uppercase text-muted-foreground">
@@ -707,8 +707,8 @@ function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
 
 function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
   return (
-    <HudPanel className="h-full p-4 min-h-[299px] lg:h-[349px]" accent="muted">
-      <h2 className="pm-micro mb-4 text-foreground">Quick Info</h2>
+    <HudPanel className="h-full p-4 min-h-[304px] lg:h-[354px]" accent="muted">
+      <h2 className="text-sm mb-4 text-foreground">Quick Info</h2>
       <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
         <InfoField label="Developer" value={game.studio?.name ?? ''} />
         <InfoField label="Status" value={labelStatus(game.status)} />
@@ -718,7 +718,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
       <Link href="#details" className="mt-3 inline-flex items-center gap-3 text-sm text-cyan">View all details <ArrowRight className="size-4" /></Link>
 
       <div className="mt-4 border-t border-border pt-3">
-        <h2 className="pm-micro mb-3 text-foreground">External Links</h2>
+        <h2 className="text-sm mb-3 text-foreground">External Links</h2>
         <div className="grid grid-cols-2 gap-2">
           {(game.platformLinks ?? []).slice(0, 6).map((p) => (
             <a key={p.id} href={p.url} target="_blank" rel="noopener noreferrer" className="clip-corner flex h-7 cursor-pointer items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
@@ -735,7 +735,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
       </div>
 
       <div className="mt-4 border-t border-border pt-3">
-        <h2 className="pm-micro mb-3 text-foreground">Widget</h2>
+        <h2 className="text-sm mb-3 text-foreground">Widget</h2>
         <button onClick={() => {
           const code = `<iframe src="https://playmorrow.vercel.app/embed/${slug}" width="400" height="140" style="border:none;border-radius:4px" title="${game.title}"></iframe>`;
           navigator.clipboard.writeText(code);
@@ -788,7 +788,7 @@ function CommunityPanel({ slug }: { slug: string }) {
   return (
     <HudPanel className="p-4" accent="muted">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="pm-micro mb-3 text-foreground">Community Discussion</h2>
+        <h2 className="text-sm mb-3 text-foreground">Community Discussion</h2>
         {total > 0 && (
           <Link href={`/games/${slug}/comments`} className="pm-micro text-coral">View all <ArrowRight className="inline size-3" /></Link>
         )}
@@ -892,7 +892,7 @@ function TechPanel({
   return (
     <HudPanel id={id} className={`p-4 ${className ?? ''}`} accent="muted">
       <div className="mb-3 flex items-center justify-between gap-4">
-        <h2 className="pm-micro text-foreground">{title}</h2>
+        <h2 className="text-sm text-foreground">{title}</h2>
         {action && (
           actionHref ? (
             <Link href={actionHref} className="pm-micro cursor-pointer text-coral">{action} <ArrowRight className="inline size-3" /></Link>
