@@ -52,7 +52,7 @@ export class FeedController {
   async getFeedEvents(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(20), ParseIntPipe) pageSize: number,
-  ) {
+  ): Promise<{ items: unknown[]; total: number; page: number; pageSize: number; hasMore: boolean }> {
     return this.feedService.getFeedEvents(page, pageSize);
   }
 }

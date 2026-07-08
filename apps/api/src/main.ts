@@ -1,4 +1,7 @@
 import 'reflect-metadata';
+import { loadEnvFile } from 'node:process';
+
+loadEnvFile('.env');
 
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
