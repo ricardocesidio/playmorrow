@@ -74,7 +74,7 @@ export default function EditGamePage() {
       setStatus(game.status ?? '');
       setReleaseDate(game.releaseDate ? game.releaseDate.slice(0, 10) : '');
       setExpectedReleaseText(game.expectedReleaseText ?? '');
-      setPriceCents(game.priceCents != null ? String(game.priceCents) : '');
+      setPriceCents(game.priceCents != null ? (game.priceCents / 100).toFixed(2) : '');
       setCurrency(game.currency ?? 'USD');
       setIsFree(game.isFree ?? false);
       setCoverUrl(game.coverUrl ?? '');
@@ -141,7 +141,7 @@ export default function EditGamePage() {
           status,
           releaseDate: releaseDate ? `${releaseDate}T00:00:00.000Z` : null,
           expectedReleaseText: expectedReleaseText.trim() || null,
-          priceCents: priceCents ? Math.round(parseFloat(priceCents)) : null,
+          priceCents: priceCents ? Math.round(parseFloat(priceCents) * 100) : null,
           currency,
           isFree,
           coverUrl: coverUrl.trim() || null,
@@ -243,8 +243,9 @@ export default function EditGamePage() {
             </div>
             {!isFree && (
               <div className="mb-4">
-                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Price (cents)</label>
-                <input type="number" value={priceCents} onChange={(e) => setPriceCents(e.target.value)}
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Price (e.g. 19.99)</label>
+                <input type="text" value={priceCents} onChange={(e) => setPriceCents(e.target.value)}
+                  placeholder="19.99"
                   className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
             )}
