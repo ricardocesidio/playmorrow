@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile, type Report, type CreateReportDto } from './client';
-import { revalidateFeed, revalidateHomepage } from '@/actions/revalidate';
+import { revalidateFeed, revalidateHomepage, revalidateGame } from '@/actions/revalidate';
 
 // ── Infinite scroll helpers ─────────────────────────────────────────────
 
@@ -667,12 +667,13 @@ export function useCreateDevlog() {
       const { gameSlug, token, ...body } = data;
       return api.post<Devlog>(`/games/${gameSlug}/devlogs`, body, token);
     },
-    onSuccess: () => {
+    onSuccess: (result: Devlog) => {
       qc.invalidateQueries({ queryKey: ['myDevlogs'] });
       qc.invalidateQueries({ queryKey: ['gameDevlogs'] });
       qc.invalidateQueries({ queryKey: ['devlogs'] });
       revalidateFeed();
       revalidateHomepage();
+      revalidateGame(result.game.slug);
     },
   });
 }
@@ -683,12 +684,13 @@ export function useUpdateDevlog() {
     mutationFn: (data: { id: string; body: Record<string, unknown>; token: string }) => {
       return api.patch<Devlog>(`/devlogs/${data.id}`, data.body, data.token);
     },
-    onSuccess: () => {
+    onSuccess: (result: Devlog) => {
       qc.invalidateQueries({ queryKey: ['myDevlogs'] });
       qc.invalidateQueries({ queryKey: ['gameDevlogs'] });
       qc.invalidateQueries({ queryKey: ['devlog'] });
       revalidateFeed();
       revalidateHomepage();
+      revalidateGame(result.game.slug);
     },
   });
 }

@@ -35,3 +35,19 @@ export function assertSeatLimit(
     throw new ConflictException(`SEAT_LIMIT_REACHED: Maximum ${limit} ${newRole}(s) per studio`);
   }
 }
+
+/**
+ * Single unified permission helper per PRD Section 5.
+ * Combines access check + seat limit enforcement in one call.
+ */
+export function assertPermission(
+  user: { id: string; role?: string },
+  members: { userId: string; role: string }[],
+  allowedRoles: StudioRole[],
+  newRole?: string,
+): void {
+  assertStudioAccess(user, members, allowedRoles);
+  if (newRole) {
+    assertSeatLimit(members, newRole);
+  }
+}
