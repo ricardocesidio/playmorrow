@@ -121,7 +121,6 @@ export interface Devlog {
   slug: string;
   excerpt: string;
   body: string;
-  coverUrl: string | null;
   status: string;
   isPublished: boolean;
   publishedAt: string | null;

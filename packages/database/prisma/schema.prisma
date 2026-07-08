@@ -511,7 +511,6 @@ model Devlog {
   editedAt       DateTime?
   category       String?
   tags           String[]
-  coverUrl       String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

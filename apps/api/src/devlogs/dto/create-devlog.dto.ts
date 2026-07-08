@@ -29,11 +29,6 @@ export class CreateDevlogDto {
   @MaxLength(100000)
   body!: string;
 
-  @ApiPropertyOptional({ example: 'https://example.com/devlog-cover.jpg' })
-  @IsOptional()
-  @IsUrl({ require_tld: false, require_protocol: false })
-  coverUrl?: string;
-
   @ApiPropertyOptional({ example: 'DRAFT' })
   @IsOptional()
   @IsString()

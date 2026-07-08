@@ -60,7 +60,6 @@ export class DevlogsService {
         subtitle: dto.subtitle,
         slug,
         body: dto.body,
-        coverUrl: dto.coverUrl,
         status: (dto.status ?? (isPublished ? 'PUBLISHED' : 'DRAFT')) as 'DRAFT' | 'PUBLISHED' | 'SCHEDULED',
         isPublished,
         publishedAt,
@@ -240,7 +239,6 @@ export class DevlogsService {
       data.body = dto.body;
       data.readingTimeMin = Math.ceil(dto.body.split(/\s+/).length / 200);
     }
-    if (dto.coverUrl !== undefined) data.coverUrl = dto.coverUrl;
 
     if (dto.isPublished !== undefined) {
       data.isPublished = dto.isPublished;
@@ -335,7 +333,6 @@ export class DevlogsService {
     subtitle: string | null;
     slug: string;
     body: string;
-    coverUrl: string | null;
     status: string;
     isPublished: boolean;
     publishedAt: Date | null;
@@ -358,7 +355,6 @@ export class DevlogsService {
       slug: devlog.slug,
       excerpt: devlog.body.length > 200 ? `${devlog.body.slice(0, 200)}...` : devlog.body,
       body: devlog.body,
-      coverUrl: devlog.coverUrl,
       status: devlog.status,
       isPublished: devlog.isPublished,
       publishedAt: devlog.publishedAt?.toISOString() ?? null,

@@ -35,7 +35,6 @@ function CreateDevlogForm() {
   const [slug, setSlug] = useState('');
   const [slugAuto, setSlugAuto] = useState(true);
   const [body, setBody] = useState('');
-  const [coverUrl, setCoverUrl] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -95,7 +94,6 @@ function CreateDevlogForm() {
         title: title.trim(),
         slug: slug.trim().toLowerCase(),
         body: body.trim(),
-        coverUrl: coverUrl.trim() || undefined,
         isPublished: status === 'PUBLISHED',
         status,
         publishedAt: status === 'PUBLISHED' ? new Date().toISOString() : undefined,
@@ -199,12 +197,6 @@ function CreateDevlogForm() {
             <div className="mt-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Body *</label>
               <MarkdownEditor value={body} onChange={setBody} />
-            </div>
-
-            <div className="mt-4">
-              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Cover image URL</label>
-              <input type="url" value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)}
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
 
             <div className="mt-4">

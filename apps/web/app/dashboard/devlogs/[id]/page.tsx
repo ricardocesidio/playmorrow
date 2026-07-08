@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { ArrowLeft, ExternalLink, FileText, Trash2, X, Upload, Calendar } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { ImageUpload } from '@/components/image-upload';
 import { MarkdownEditor } from '@/components/md-editor';
 
 import { useAuth } from '@/lib/api/auth-context';
@@ -23,7 +22,6 @@ export default function EditDevlogPage() {
 
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [coverUrl, setCoverUrl] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [status, setStatus] = useState('DRAFT');
   const [scheduledDate, setScheduledDate] = useState('');
@@ -43,7 +41,6 @@ export default function EditDevlogPage() {
     if (devlog && !initialized) {
       setTitle(devlog.title ?? '');
       setBody(devlog.body ?? '');
-      setCoverUrl(devlog.coverUrl ?? '');
       setSubtitle(devlog.subtitle ?? '');
       setStatus(devlog.status ?? (devlog.isPublished ? 'PUBLISHED' : 'DRAFT'));
       setCategory(devlog.category ?? '');
@@ -67,7 +64,6 @@ export default function EditDevlogPage() {
         body: {
           title: title.trim(),
           body: body.trim(),
-          coverUrl: coverUrl.trim() || null,
           subtitle: subtitle.trim() || null,
           status,
           isPublished: status === 'PUBLISHED',
@@ -184,11 +180,6 @@ export default function EditDevlogPage() {
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Body</label>
               <MarkdownEditor value={body} onChange={setBody} />
             </div>
-          </div>
-
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
-            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Cover Image</h3>
-            <ImageUpload value={coverUrl} onChange={setCoverUrl} label="Cover image" />
           </div>
 
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
