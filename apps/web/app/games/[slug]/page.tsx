@@ -165,15 +165,8 @@ function PremiumGameDetail({
           <Breadcrumbs title={title} />
 
           <section className="grid items-start gap-5 xl:grid-cols-[1fr_430px]">
-            <GameHero game={game} title={title} heroImage={heroImage} slug={slug} />
             <div className="grid gap-5">
-              <PurchasePanel game={game} slug={slug} title={title} />
-              <AboutPanel game={game} slug={slug} />
-            </div>
-          </section>
-
-          <section className="mt-5 grid items-start gap-5 xl:grid-cols-[1fr_430px]">
-            <div className="grid gap-5">
+              <GameHero game={game} title={title} heroImage={heroImage} slug={slug} />
               <TagRow tags={tags} />
               <div className="grid items-start gap-5 lg:grid-cols-[0.95fr_1.05fr]">
                 <TrailerPanel title={title} image={heroImage} trailerUrl={game.trailerUrl} />
@@ -185,6 +178,8 @@ function PremiumGameDetail({
               </div>
             </div>
             <aside className="grid gap-5">
+              <PurchasePanel game={game} slug={slug} title={title} />
+              <AboutPanel game={game} slug={slug} />
               <InfoLinksPanel game={game} slug={slug} />
               <CommunityPanel slug={slug} />
             </aside>
