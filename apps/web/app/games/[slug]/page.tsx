@@ -164,7 +164,7 @@ function PremiumGameDetail({
         <div className="relative z-10 mx-auto max-w-[1500px]">
           <Breadcrumbs title={title} />
 
-          <section className="grid items-start gap-5 xl:grid-cols-[1fr_430px]">
+          <section className="relative z-10 grid items-start gap-5 xl:grid-cols-[1fr_430px]">
             <GameHero game={game} title={title} heroImage={heroImage} slug={slug} />
             <div className="grid gap-5">
               <PurchasePanel game={game} slug={slug} title={title} />
@@ -172,7 +172,7 @@ function PremiumGameDetail({
             </div>
           </section>
 
-          <section className="mt-5 grid items-start gap-5 xl:grid-cols-[1fr_430px]">
+          <section className="mt-5 grid items-start gap-5 xl:grid-cols-[1fr_430px] -mt-[235px]">
             <div className="grid gap-5">
               <TagRow tags={tags} />
               <div className="grid items-start gap-5 lg:grid-cols-[0.95fr_1.05fr]">
