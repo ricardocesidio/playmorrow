@@ -76,12 +76,15 @@ export class DevlogsService {
       include: { ...DEVLOG_INCLUDE, screenshots: true },
     });
 
+    let feedEventId: string | undefined;
+
     if (isPublished) {
       await this.xp.award(game.studio.id, 'DEVLOG_PUBLISH', undefined, devlog.id);
-      await this.feedEngine.onDevlogPublished({
+      const feedEvent = await this.feedEngine.onDevlogPublished({
         devlog: { id: devlog.id, title: devlog.title, slug: devlog.slug, gameId: devlog.gameId, studioId: game.studioId, authorId: userId },
         gameTitle: game.title,
       });
+      feedEventId = (feedEvent as { id: string }).id;
     }
 
     await this.audit.log({
@@ -93,7 +96,7 @@ export class DevlogsService {
       metadata: { title: devlog.title },
     });
 
-    return this.toResponse(devlog);
+    return { ...this.toResponse(devlog), feedEventId };
   }
 
   async findByGameSlug(gameSlug: string, page = 1, pageSize = 20, includeDrafts = false, userId?: string) {

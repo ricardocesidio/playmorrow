@@ -19,8 +19,8 @@ function getFeedIcon(type: string) {
 }
 
 export default function HomePage() {
-  const { data: feedData } = usePublicFeed();
-  const { data: gamesData } = useGames(1, 9);
+  const { data: feedData, isLoading: feedLoading } = usePublicFeed();
+  const { data: gamesData, isLoading: gamesLoading } = useGames(1, 9);
   const { data: studiosData } = useStudios();
 
   const games = normalizeLatestGames(gamesData?.items);
@@ -28,6 +28,7 @@ export default function HomePage() {
   const feedItems = feedData?.items?.slice(0, 4) ?? [];
   const feedCount = feedData?.total ?? 0;
   const studioCount = Math.min(studiosData?.total ?? 0, 5);
+  const isLoading = feedLoading || gamesLoading;
 
   return (
     <>
@@ -110,9 +111,22 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {games.map((game) => (
-                <LatestGameCard key={game.id} game={game} />
-              ))}
+              {isLoading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="animate-pulse border border-border/40 bg-card min-h-[260px]">
+                    <div className="h-[180px] bg-border/10" />
+                    <div className="p-4 space-y-3">
+                      <div className="h-4 w-1/3 rounded bg-border/20" />
+                      <div className="h-3 w-2/3 rounded bg-border/20" />
+                      <div className="h-3 w-1/2 rounded bg-border/20" />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                games.map((game) => (
+                  <LatestGameCard key={game.id} game={game} />
+                ))
+              )}
             </div>
           </div>
         </section>

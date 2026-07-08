@@ -220,6 +220,12 @@ export class StudiosService {
         targetId: targetUserId,
         metadata: { oldRole: targetMember.role, newRole: dto.role },
       });
+
+      this.feedEngine.emit('ROLE_CHANGED', {
+        studioId: studio.id,
+        actorId,
+        payload: { userId: targetUserId, oldRole: targetMember.role, newRole: dto.role },
+      }).catch(() => {});
     }
     if (dto.title !== undefined && dto.title !== targetMember.title) {
       await this.auditLog.log({

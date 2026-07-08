@@ -82,6 +82,21 @@ export default function FeedPage() {
 
                 {error && !isLoading && <div className="p-6"><ErrorState message="Could not load feed." /></div>}
 
+                {isLoading && (
+                  <div className="p-8 space-y-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="animate-pulse flex gap-4">
+                        <div className="size-9 rounded bg-border/30" />
+                        <div className="flex-1 space-y-3">
+                          <div className="h-3 w-1/3 rounded bg-border/30" />
+                          <div className="h-4 w-2/3 rounded bg-border/20" />
+                          <div className="h-3 w-1/2 rounded bg-border/20" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {!isLoading && !error && isExplicitEmpty && (
                   <div className="p-6">
                     <EmptyState icon={<Radio className="size-10" />} title="No activity yet" />

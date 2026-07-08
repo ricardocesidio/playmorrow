@@ -40,7 +40,7 @@ export class FeedEngineService {
     const { devlog, gameTitle } = params;
 
     // 1. Emit feed event
-    await this.emit('DEVLOG_PUBLISHED', {
+    const feedEvent = await this.emit('DEVLOG_PUBLISHED', {
       studioId: devlog.studioId,
       gameId: devlog.gameId,
       actorId: devlog.authorId,
@@ -65,5 +65,7 @@ export class FeedEngineService {
     } catch {
       // Don't fail the publish if community post creation fails
     }
+
+    return feedEvent;
   }
 }

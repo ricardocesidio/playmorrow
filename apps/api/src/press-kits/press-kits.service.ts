@@ -6,6 +6,7 @@ import { assertStudioAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
 import type { UpsertPressKitDto } from './dto/upsert-press-kit.dto';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { FeedEngineService } from '../feed/feed-events.service';
 
 export interface PressKitResponse {
   id: string;
@@ -48,6 +49,7 @@ export class PressKitsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLog: AuditLogService,
+    private readonly feedEngine: FeedEngineService,
   ) {}
 
   async upsert(userId: string, gameSlug: string, dto: UpsertPressKitDto): Promise<PressKitResponse> {
@@ -88,7 +90,13 @@ export class PressKitsService {
       targetId: game.id,
     });
 
-    // Re-fetch with full includes for the response
+    this.feedEngine.emit('PRESS_KIT_UPDATED', {
+      studioId: game.studioId,
+      gameId: game.id,
+      actorId: userId,
+      payload: { title: game.title },
+    }).catch(() => {});
+
     return this.findByGameSlug(gameSlug);
   }
 

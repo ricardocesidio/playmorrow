@@ -322,6 +322,12 @@ export class GamesService {
       } else if (dto.status === 'RELEASED') {
         await this.studioXpService.award(game.studio.id, 'GAME_RELEASE', undefined, game.id);
       }
+      this.feedEngine.emit('GAME_STATUS_CHANGED', {
+        studioId: game.studioId,
+        gameId: game.id,
+        actorId: userId,
+        payload: { title: game.title, status: dto.status, previousStatus: game.status },
+      }).catch(() => {});
     }
 
     await this.auditLog.log({

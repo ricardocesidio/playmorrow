@@ -269,12 +269,12 @@ function CreateDevlogForm() {
                   <input type="file" accept="image/png,image/jpeg,image/webp" multiple
                     onChange={(e) => {
                       const files = Array.from(e.target.files ?? []);
-                      setScreenshots([...screenshots, ...files].slice(0, 15));
+                      setScreenshots([...screenshots, ...files].slice(0, 10));
                     }}
                     className="hidden" />
                 </label>
               </div>
-              <p className="mt-1.5 font-mono text-[0.5rem] text-muted-foreground">{screenshots.length}/15 screenshots</p>
+              <p className="mt-1.5 font-mono text-[0.5rem] text-muted-foreground">{screenshots.length}/10 screenshots</p>
             </div>
           </div>
 

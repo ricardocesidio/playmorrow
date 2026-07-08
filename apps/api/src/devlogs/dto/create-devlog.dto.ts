@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsInt, IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength } from 'class-validator';
+import { ArrayMaxSize, IsBoolean, IsDateString, IsInt, IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class CreateDevlogDto {
   @ApiProperty({ example: 'Combat prototype update' })
@@ -71,5 +71,6 @@ export class CreateDevlogDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @ArrayMaxSize(10, { message: 'Maximum 10 screenshots allowed' })
   screenshots?: { url: string; order: number; caption?: string }[];
 }
