@@ -22,6 +22,8 @@ export function MarkdownEditor({ value, onChange, minHeight = 300 }: MarkdownEdi
             key={m}
             type="button"
             onClick={() => setMode(m)}
+            aria-label={`${m === 'live' ? 'Split view' : m === 'edit' ? 'Edit mode' : 'Preview mode'}`}
+            aria-pressed={mode === m}
             className={`cursor-pointer px-3 py-1 font-mono text-[0.6rem] uppercase tracking-widest border-b-2 transition ${
               mode === m ? 'border-cyan text-cyan' : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}

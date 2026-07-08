@@ -13,6 +13,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { StudioXpService } from './studio-xp.service';
 import { StudioChatService } from '../studio-chat/studio-chat.service';
+import { FeedEngineService } from '../feed/feed-events.service';
 import type { CreateStudioDto } from './dto/create-studio.dto';
 import type { UpdateStudioDto } from './dto/update-studio.dto';
 
@@ -29,6 +30,7 @@ export class StudiosService {
     private readonly studioXpService: StudioXpService,
     private readonly auditLog: AuditLogService,
     private readonly studioChatService: StudioChatService,
+    private readonly feedEngine: FeedEngineService,
   ) {}
 
   async create(userId: string, dto: CreateStudioDto) {
@@ -63,6 +65,12 @@ export class StudiosService {
 
     const displayName = (await this.prisma.user.findUnique({ where: { id: userId }, select: { displayName: true } }))?.displayName ?? 'Someone';
     await this.studioChatService.postMessage(studio.id, userId, `Welcome to the team! 🎮 ${displayName} created this studio.`);
+
+    this.feedEngine.emit('STUDIO_CREATED', {
+      studioId: studio.id,
+      actorId: userId,
+      payload: { name: studio.name, slug: studio.slug },
+    }).catch(() => {});
 
     return this.toResponse(studio);
   }

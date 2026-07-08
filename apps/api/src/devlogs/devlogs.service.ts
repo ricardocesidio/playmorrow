@@ -232,7 +232,10 @@ export class DevlogsService {
 
     const data: Prisma.DevlogUpdateInput = {};
     if (dto.title !== undefined) data.title = dto.title;
-    if (dto.body !== undefined) data.body = dto.body;
+    if (dto.body !== undefined) {
+      data.body = dto.body;
+      data.readingTimeMin = Math.ceil(dto.body.split(/\s+/).length / 200);
+    }
     if (dto.coverUrl !== undefined) data.coverUrl = dto.coverUrl;
 
     if (dto.isPublished !== undefined) {
@@ -257,7 +260,7 @@ export class DevlogsService {
 
     const updated = await this.prisma.devlog.update({
       where: { id },
-      data,
+      data: { ...data, editedAt: new Date() },
       include: DEVLOG_INCLUDE,
     });
 

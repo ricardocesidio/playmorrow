@@ -8,6 +8,7 @@ import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateGameDto } from './dto/create-game.dto';
 import type { UpdateGameDto } from './dto/update-game.dto';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { FeedEngineService } from '../feed/feed-events.service';
 
 const GAME_INCLUDE = {
   studio: { select: { id: true, name: true, slug: true } },
@@ -25,6 +26,7 @@ export class GamesService {
     private readonly prisma: PrismaService,
     private readonly studioXpService: StudioXpService,
     private readonly auditLog: AuditLogService,
+    private readonly feedEngine: FeedEngineService,
   ) {}
 
   async create(userId: string, studioSlug: string, dto: CreateGameDto) {
@@ -115,6 +117,13 @@ export class GamesService {
       targetId: game.id,
       metadata: { title: game.title },
     });
+
+    this.feedEngine.emit('GAME_CREATED', {
+      studioId: studio.id,
+      gameId: game.id,
+      actorId: userId,
+      payload: { title: game.title, slug: game.slug },
+    }).catch(() => {});
 
     return this.toResponse(game);
   }
