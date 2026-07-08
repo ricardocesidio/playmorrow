@@ -707,7 +707,7 @@ function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
 
 function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
   return (
-    <HudPanel className="h-full p-4 min-h-[294px] lg:h-[344px]" accent="muted">
+    <HudPanel className="h-full p-4 min-h-[299px] lg:h-[349px]" accent="muted">
       <h2 className="pm-micro mb-4 text-foreground">Quick Info</h2>
       <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
         <InfoField label="Developer" value={game.studio?.name ?? ''} />
