@@ -8,7 +8,7 @@ class CreateMediaDto {
   type!: 'SCREENSHOT' | 'TRAILER' | 'VIDEO' | 'LOGO' | 'BANNER' | 'IMAGE';
 
   @ApiProperty({ example: 'https://example.com/screen1.jpg' })
-  @IsUrl({ require_tld: false })
+  @IsUrl({ require_tld: false, require_protocol: false })
   url!: string;
 
   @ApiPropertyOptional({ example: 'Ruins biome' })
@@ -28,7 +28,7 @@ class CreatePlatformLinkDto {
   platform!: 'STEAM' | 'ITCH' | 'EPIC' | 'GOG' | 'PLAYSTATION' | 'XBOX' | 'NINTENDO' | 'WEB' | 'ANDROID' | 'IOS' | 'DEMO' | 'DISCORD' | 'WEBSITE' | 'OTHER';
 
   @ApiProperty({ example: 'https://store.steampowered.com/app/example' })
-  @IsUrl({ require_tld: false })
+  @IsUrl({ require_tld: false, require_protocol: false })
   url!: string;
 
   @ApiPropertyOptional({ example: 'Wishlist on Steam' })
@@ -98,17 +98,17 @@ export class CreateGameDto {
 
   @ApiPropertyOptional({ example: 'https://example.com/cover.jpg' })
   @IsOptional()
-  @IsUrl({ require_tld: false })
+  @IsUrl({ require_tld: false, require_protocol: false })
   coverUrl?: string;
 
   @ApiPropertyOptional({ example: 'https://example.com/banner.png' })
   @IsOptional()
-  @IsUrl({ require_tld: false })
+  @IsUrl({ require_tld: false, require_protocol: false })
   bannerUrl?: string;
 
   @ApiPropertyOptional({ example: 'https://www.youtube.com/watch?v=...' })
   @IsOptional()
-  @IsUrl({ require_tld: false })
+  @IsUrl({ require_tld: false, require_protocol: false })
   trailerUrl?: string;
 
   @ApiPropertyOptional({ type: [CreatePlatformLinkDto] })
