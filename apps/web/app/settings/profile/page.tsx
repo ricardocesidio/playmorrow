@@ -178,15 +178,26 @@ export default function ProfileSettingsPage() {
               </div>
 
               <div>
-                <label htmlFor="avatarUrl" className="mb-1.5 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Avatar URL</label>
-                <input
-                  id="avatarUrl"
-                  type="text"
-                  value={form.avatarUrl}
-                  onChange={(e) => handleChange('avatarUrl', e.target.value)}
-                  className={inputClass}
-                  placeholder="https://example.com/avatar.jpg"
-                />
+                <label className="mb-1.5 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Avatar</label>
+                <div className="flex items-center gap-3">
+                  {form.avatarUrl ? (
+                    <div className="relative">
+                      <img src={form.avatarUrl} alt="" className="size-16 border border-border object-cover" />
+                      <button type="button" onClick={() => handleChange('avatarUrl', '')} className="absolute -right-1 -top-1 cursor-pointer bg-coral p-0.5 text-white text-xs">x</button>
+                    </div>
+                  ) : null}
+                  <label className="clip-corner cursor-pointer border border-cyan/60 bg-cyan/5 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-widest text-cyan hover:bg-cyan/10">
+                    Upload
+                    <input type="file" accept="image/png,image/jpeg" className="hidden" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 5 * 1024 * 1024) return;
+                      const reader = new FileReader();
+                      reader.onload = () => handleChange('avatarUrl', reader.result as string);
+                      reader.readAsDataURL(file);
+                    }} />
+                  </label>
+                </div>
               </div>
 
               <div>

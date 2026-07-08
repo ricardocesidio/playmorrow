@@ -37,7 +37,7 @@ type Transmission = {
   accent: 'cyan' | 'violet' | 'amber' | 'coral';
   metric?: string;
   video?: boolean;
-  stats: [number, number, number, number];
+  stats: [number, number, number, number] | null;
 };
 
 export default function FeedPage() {
@@ -197,10 +197,12 @@ function TransmissionRow({ item }: { item: Transmission }) {
           {item.summary && <p className="mt-2 line-clamp-2 max-w-[520px] leading-5 text-muted-foreground md:line-clamp-1">{item.summary}</p>}
 
           <div className="mt-3 flex flex-wrap items-center gap-5 border-t border-border/50 pt-2 text-xs text-muted-foreground md:absolute md:bottom-3 md:left-4 md:right-[calc(46%+1rem)] md:mt-0 md:bg-elevated/70 md:pt-2">
-            <Stat icon={<MessageCircle className="size-4" />} value={item.stats[0]} />
-            <Stat icon={<Flame className="size-4 text-coral" />} value={item.stats[1]} />
-            <Stat icon={<Activity className="size-4 text-cyan" />} value={item.stats[2]} />
-            <Stat icon={<Bookmark className="size-4" />} value={item.stats[3]} />
+            {item.stats && (
+              <Stat icon={<MessageCircle className="size-4" />} value={item.stats[0]} />
+            )}
+            {item.stats && <Stat icon={<Flame className="size-4 text-coral" />} value={item.stats[1]} />}
+            {item.stats && <Stat icon={<Activity className="size-4 text-cyan" />} value={item.stats[2]} />}
+            {item.stats && <Stat icon={<Bookmark className="size-4" />} value={item.stats[3]} />}
           </div>
         </div>
 
@@ -272,7 +274,7 @@ function feedItemToTransmission(item: FeedItem): Transmission {
     summary: item.summary,
     image: item.game.coverUrl || '/demo/games/neon-warden/hero.svg',
     accent: item.type === 'DEVLOG' ? 'cyan' : 'amber',
-    stats: [38, 142, 231, 97],
+    stats: null,
   };
 }
 

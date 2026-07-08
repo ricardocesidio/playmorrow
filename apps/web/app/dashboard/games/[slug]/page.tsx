@@ -75,15 +75,14 @@ export default function EditGamePage() {
       const form = new FormData();
       form.append('file', file);
       try {
-        const res = await fetch('http://localhost:4000/api/upload', { method: 'POST', body: form, credentials: 'include' });
+        const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
         if (!res.ok) {
           const errBody = await res.text();
           setError(`Upload failed: ${res.status} ${errBody}`);
           break;
         }
         const data = await res.json();
-        const fullUrl = `http://localhost:4000${data.url}`;
-        setMedia((prev) => [...prev, { type: 'SCREENSHOT', url: fullUrl, caption: '' }]);
+        setMedia((prev) => [...prev, { type: 'SCREENSHOT', url: data.url, caption: '' }]);
       } catch {
         setError('Upload failed. Please try again.');
         break;

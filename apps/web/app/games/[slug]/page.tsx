@@ -301,7 +301,7 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
 
       <DetailWishlistButton slug={slug} />
       <p className="mt-3 border-b border-border/60 pb-3 text-xs text-muted-foreground">
-        Expected release: <span className="text-foreground">{game.expectedReleaseText ?? ''}</span>
+        Expected release: <span className="text-foreground">{game.expectedReleaseText || 'TBA'}</span>
       </p>
 
       <p className="pm-micro mt-3 text-muted-foreground">Platforms</p>
@@ -605,19 +605,18 @@ function AboutPanel({ game, slug }: { game: Game; slug: string }) {
   return (
     <TechPanel title="About" className="h-full min-h-[284px] lg:h-[334px]">
       <p className="text-xs leading-6 text-muted-foreground">
-        {game.description || ''}
+        {game.description || 'No description available yet.'}
       </p>
-      <ul className="mt-4 grid gap-2 text-xs text-muted-foreground">
-        {[
-          'Plan your approach with deep tactical tools.',
-          'Use gadgets, hacking, and the environment to stay unseen.',
-          'Dynamic AI that adapts to your every move.',
-          'A living cyberpunk world with reactive systems.',
-        ].map((item) => (
-          <li key={item} className="flex gap-2"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-cyan shadow-[0_0_8px_rgb(62_231_255_/_0.8)]" />{item}</li>
-        ))}
-      </ul>
-      <Link href={`/games/${slug}/readme`} className="mt-5 inline-flex items-center gap-3 pm-micro text-cyan">Read full readme <ArrowRight className="size-4" /></Link>
+      {game.genres && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {game.genres.split(',').map((g) => (
+            <span key={g} className="border border-border/50 px-2 py-0.5 font-mono text-[0.55rem] uppercase text-cyan">{g.trim()}</span>
+          ))}
+        </div>
+      )}
+      {game.readme && (
+        <Link href={`/games/${slug}/readme`} className="mt-4 inline-flex items-center gap-3 pm-micro text-cyan">Read full readme <ArrowRight className="size-4" /></Link>
+      )}
     </TechPanel>
   );
 }
@@ -723,18 +722,17 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
       <div className="mt-4 border-t border-border pt-3">
         <h2 className="pm-micro mb-2 text-foreground">External Links</h2>
         <div className="grid grid-cols-2 gap-2">
-          {[
-            { label: 'Steam', href: '#', Icon: Store },
-            { label: 'Epic Games Store', href: '#', Icon: Store },
-            { label: 'Official Website', href: '#', Icon: Globe },
-            { label: 'Discord', href: '#', Icon: Radio },
-            { label: 'Press Kit', href: `/games/${slug}/press-kit`, Icon: Clipboard },
-            { label: 'Contact Studio', href: '/login', Icon: CircleDollarSign },
-          ].map(({ label, href, Icon }) => (
-            <Link key={label} href={href} className="clip-corner flex h-7 cursor-pointer items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
-              <Icon className="size-3.5" /> {label}
-            </Link>
+          {(game.platformLinks ?? []).map((p) => (
+            <a key={p.id} href={p.url} target="_blank" rel="noopener noreferrer" className="clip-corner flex h-7 cursor-pointer items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
+              <Globe className="size-3.5" /> {p.label || p.platform}
+            </a>
           ))}
+          <Link href={`/games/${slug}/press-kit`} className="clip-corner flex h-7 cursor-pointer items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
+            <Clipboard className="size-3.5" /> Press Kit
+          </Link>
+          <Link href="/login" className="clip-corner flex h-7 cursor-pointer items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
+            <CircleDollarSign className="size-3.5" /> Contact Studio
+          </Link>
         </div>
       </div>
     </HudPanel>
@@ -988,15 +986,14 @@ function ManageDropdown({ slug }: { slug: string }) {
     const form = new FormData();
     form.append('file', file);
     try {
-      const res = await fetch('http://localhost:4000/api/upload', { method: 'POST', body: form, credentials: 'include' });
+      const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
-      const fullUrl = `http://localhost:4000${data.url}`;
-      await fetch(`http://localhost:4000/api/games/${slug}`, {
+      await fetch(`/api/games/${slug}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ coverUrl: fullUrl }),
+        body: JSON.stringify({ coverUrl: data.url }),
       });
       window.location.reload();
     } catch {
