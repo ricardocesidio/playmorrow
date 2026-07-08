@@ -5,6 +5,7 @@ import type { Prisma } from '@playmorrow/database';
 import { assertStudioAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
+import { FeedEngineService } from '../feed/feed-events.service';
 import type { CreateDevlogDto } from './dto/create-devlog.dto';
 import type { UpdateDevlogDto } from './dto/update-devlog.dto';
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -18,8 +19,9 @@ const DEVLOG_INCLUDE = {
 export class DevlogsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly studioXpService: StudioXpService,
-    private readonly auditLog: AuditLogService,
+    private readonly xp: StudioXpService,
+    private readonly audit: AuditLogService,
+    private readonly feedEngine: FeedEngineService,
   ) {}
 
   async create(userId: string, gameSlug: string, dto: CreateDevlogDto) {
@@ -46,25 +48,39 @@ export class DevlogsService {
       throw new ConflictException('A devlog with this slug already exists for this game');
     }
 
-    const isPublished = dto.isPublished ?? false;
+    const isPublished = dto.isPublished ?? (dto.status === 'PUBLISHED');
     const publishedAt = isPublished ? (dto.publishedAt ? new Date(dto.publishedAt) : new Date()) : null;
+    const readingTimeMin = dto.readingTimeMin ?? Math.ceil(dto.body.split(/\s+/).length / 200);
 
     const devlog = await this.prisma.devlog.create({
       data: {
         title: dto.title,
+        subtitle: dto.subtitle,
         slug,
         body: dto.body,
         coverUrl: dto.coverUrl,
+        status: dto.status ?? (isPublished ? 'PUBLISHED' : 'DRAFT'),
         isPublished,
         publishedAt,
+        scheduledFor: dto.scheduledFor ? new Date(dto.scheduledFor) : null,
+        readingTimeMin,
+        category: dto.category,
+        tags: dto.tags ?? [],
         gameId: game.id,
         authorId: userId,
+        screenshots: dto.screenshots?.length
+          ? { create: dto.screenshots.map((s) => ({ url: s.url, order: s.order, caption: s.caption })) }
+          : undefined,
       },
-      include: DEVLOG_INCLUDE,
+      include: { ...DEVLOG_INCLUDE, screenshots: true },
     });
 
     if (isPublished) {
       await this.studioXpService.award(game.studio.id, 'DEVLOG_PUBLISH', undefined, devlog.id);
+      await this.feedEngine.onDevlogPublished({
+        devlog: { id: devlog.id, title: devlog.title, slug: devlog.slug, gameId: devlog.gameId, studioId: game.studioId, authorId: userId },
+        gameTitle: game.title,
+      });
     }
 
     await this.auditLog.log({
@@ -296,25 +312,40 @@ export class DevlogsService {
   private toResponse(devlog: {
     id: string;
     title: string;
+    subtitle: string | null;
     slug: string;
     body: string;
     coverUrl: string | null;
+    status: string;
     isPublished: boolean;
     publishedAt: Date | null;
+    scheduledFor: Date | null;
+    editedAt: Date | null;
+    readingTimeMin: number | null;
+    category: string | null;
+    tags: string[];
     createdAt: Date;
     updatedAt: Date;
     game: { id: string; title: string; slug: string; studioId: string };
     author: { id: string; username: string; displayName: string; avatarUrl: string | null };
+    screenshots?: { id: string; url: string; order: number; caption: string | null }[];
   }) {
     return {
       id: devlog.id,
       title: devlog.title,
+      subtitle: devlog.subtitle,
       slug: devlog.slug,
       excerpt: devlog.body.length > 200 ? `${devlog.body.slice(0, 200)}...` : devlog.body,
       body: devlog.body,
       coverUrl: devlog.coverUrl,
+      status: devlog.status,
       isPublished: devlog.isPublished,
       publishedAt: devlog.publishedAt?.toISOString() ?? null,
+      scheduledFor: devlog.scheduledFor?.toISOString() ?? null,
+      editedAt: devlog.editedAt?.toISOString() ?? null,
+      readingTimeMin: devlog.readingTimeMin,
+      category: devlog.category,
+      tags: devlog.tags,
       game: {
         id: devlog.game.id,
         title: devlog.game.title,
@@ -322,6 +353,7 @@ export class DevlogsService {
       },
       studio: { id: devlog.game.studioId },
       author: devlog.author,
+      screenshots: devlog.screenshots ?? [],
       createdAt: devlog.createdAt.toISOString(),
       updatedAt: devlog.updatedAt.toISOString(),
     };

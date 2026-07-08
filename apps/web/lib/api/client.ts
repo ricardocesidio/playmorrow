@@ -115,15 +115,24 @@ export interface Game {
 export interface Devlog {
   id: string;
   title: string;
+  subtitle: string | null;
   slug: string;
   excerpt: string;
   body: string;
   coverUrl: string | null;
+  status: string;
   isPublished: boolean;
   publishedAt: string | null;
+  scheduledFor: string | null;
+  editedAt: string | null;
+  readingTimeMin: number | null;
+  category: string | null;
+  tags: string[];
+  screenshots: { id: string; url: string; order: number; caption: string | null }[];
   createdAt: string;
   updatedAt: string;
   game: { id: string; title: string; slug: string };
+  studio: { id: string };
   author: { id: string; username: string; displayName: string; avatarUrl: string | null };
 }
 

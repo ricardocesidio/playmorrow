@@ -1,5 +1,6 @@
+import { DevlogStatus } from '@prisma/client';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsBoolean, IsDateString, IsEnum, IsInt, IsOptional, IsString, IsUrl, Matches, Max, MaxLength, MinLength } from 'class-validator';
 
 export class CreateDevlogDto {
   @ApiProperty({ example: 'Combat prototype update' })
@@ -7,6 +8,12 @@ export class CreateDevlogDto {
   @MinLength(1)
   @MaxLength(200)
   title!: string;
+
+  @ApiPropertyOptional({ example: 'A deep dive into the new combat mechanics' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  subtitle?: string;
 
   @ApiProperty({ example: 'combat-prototype-update' })
   @IsString()
@@ -25,8 +32,13 @@ export class CreateDevlogDto {
 
   @ApiPropertyOptional({ example: 'https://example.com/devlog-cover.jpg' })
   @IsOptional()
-  @IsUrl({ require_tld: false })
+  @IsUrl({ require_tld: false, require_protocol: false })
   coverUrl?: string;
+
+  @ApiPropertyOptional({ enum: DevlogStatus, example: 'DRAFT' })
+  @IsOptional()
+  @IsEnum(DevlogStatus)
+  status?: DevlogStatus;
 
   @ApiPropertyOptional({ example: false })
   @IsOptional()
@@ -37,4 +49,28 @@ export class CreateDevlogDto {
   @IsOptional()
   @IsDateString()
   publishedAt?: string;
+
+  @ApiPropertyOptional({ example: '2026-12-01T00:00:00.000Z' })
+  @IsOptional()
+  @IsDateString()
+  scheduledFor?: string;
+
+  @ApiPropertyOptional({ example: 5 })
+  @IsOptional()
+  @IsInt()
+  readingTimeMin?: number;
+
+  @ApiPropertyOptional({ example: 'Combat' })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @ApiPropertyOptional({ example: ['update', 'combat', 'prototype'] })
+  @IsOptional()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  screenshots?: { url: string; order: number; caption?: string }[];
 }
