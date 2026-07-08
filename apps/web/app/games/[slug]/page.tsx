@@ -189,13 +189,6 @@ function PremiumGameDetail({
               <CommunityPanel slug={slug} />
             </aside>
           </section>
-            </div>
-
-            <aside className="grid gap-4">
-              <InfoLinksPanel game={game} slug={slug} />
-              <CommunityPanel slug={slug} />
-            </aside>
-          </section>
         </div>
         <HudStatusRail />
       </main>
