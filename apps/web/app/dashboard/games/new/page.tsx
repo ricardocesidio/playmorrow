@@ -12,6 +12,7 @@ import { ApiError } from '@/lib/api/client';
 
 const STATUSES = ['CONCEPT', 'IN_DEVELOPMENT', 'ALPHA', 'BETA', 'EARLY_ACCESS', 'RELEASED', 'CANCELLED', 'ON_HOLD'];
 const MAX_SCREENSHOTS = 10;
+const MAX_PLATFORM_LINKS = 6;
 const PLATFORM_KINDS = ['STEAM', 'ITCH', 'EPIC', 'GOG', 'PLAYSTATION', 'XBOX', 'NINTENDO', 'WEB', 'ANDROID', 'IOS', 'DEMO', 'DISCORD', 'WEBSITE', 'OTHER'];
 
 interface MediaRow { type: string; url: string; caption: string }
@@ -118,7 +119,10 @@ function CreateGameForm() {
     setMedia(media.map((m, idx) => idx === i ? { ...m, [field]: val } : m));
   };
 
-  const addPlatform = () => setPlatformLinks([...platformLinks, { platform: 'STEAM', url: '', label: '' }]);
+  const addPlatform = () => {
+    if (platformLinks.length >= MAX_PLATFORM_LINKS) { setError(`Max ${MAX_PLATFORM_LINKS} platform links.`); return; }
+    setPlatformLinks([...platformLinks, { platform: 'STEAM', url: '', label: '' }]);
+  };
   const removePlatform = (i: number) => setPlatformLinks(platformLinks.filter((_, idx) => idx !== i));
   const updatePlatform = (i: number, field: keyof PlatformRow, val: string) => {
     setPlatformLinks(platformLinks.map((p, idx) => idx === i ? { ...p, [field]: val } : p));
@@ -465,7 +469,7 @@ function CreateGameForm() {
           {/* Platform links rows */}
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Platform Links</h3>
+              <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Platform Links ({platformLinks.length}/{MAX_PLATFORM_LINKS})</h3>
               <button type="button" onClick={addPlatform}
                 className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">
                 <Plus className="mr-1 inline size-3" /> Add

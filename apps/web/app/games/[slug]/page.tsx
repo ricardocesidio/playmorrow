@@ -720,7 +720,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
       <div className="mt-4 border-t border-border pt-3">
         <h2 className="pm-micro mb-2 text-foreground">External Links</h2>
         <div className="grid grid-cols-2 gap-2">
-          {(game.platformLinks ?? []).map((p) => (
+          {(game.platformLinks ?? []).slice(0, 6).map((p) => (
             <a key={p.id} href={p.url} target="_blank" rel="noopener noreferrer" className="clip-corner flex h-7 cursor-pointer items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
               <Globe className="size-3.5" /> {p.label || p.platform}
             </a>
