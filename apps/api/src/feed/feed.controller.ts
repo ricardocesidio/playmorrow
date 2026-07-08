@@ -44,4 +44,15 @@ export class FeedController {
   ): Promise<FeedResult> {
     return this.feedService.getPublicFeed(page, pageSize, type);
   }
+
+  @Get('feed/events')
+  @ApiOkResponse({ description: 'Paginated feed events.' })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'pageSize', required: false })
+  async getFeedEvents(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pageSize', new DefaultValuePipe(20), ParseIntPipe) pageSize: number,
+  ) {
+    return this.feedService.getFeedEvents(page, pageSize);
+  }
 }

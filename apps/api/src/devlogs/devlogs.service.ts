@@ -271,6 +271,18 @@ export class DevlogsService {
     return this.toResponse(updated);
   }
 
+  async toggleLike(userId: string, devlogId: string) {
+    const existing = await this.prisma.devlogLike.findUnique({
+      where: { devlogId_userId: { devlogId, userId } },
+    });
+    if (existing) {
+      await this.prisma.devlogLike.delete({ where: { id: existing.id } });
+      return { liked: false };
+    }
+    await this.prisma.devlogLike.create({ data: { devlogId, userId } });
+    return { liked: true };
+  }
+
   async remove(userId: string, id: string) {
     const devlog = await this.prisma.devlog.findUnique({
       where: { id },

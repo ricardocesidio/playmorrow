@@ -105,4 +105,11 @@ export class DevlogsController {
   async findMyDevlogs(@CurrentUser() user: { id: string }) {
     return this.devlogsService.findAllByAuthorId(user.id);
   }
+
+  @Post('devlogs/:id/like')
+  @UseGuards(SessionAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async toggleLike(@CurrentUser() user: { id: string }, @Param('id') id: string) {
+    return this.devlogsService.toggleLike(user.id, id);
+  }
 }

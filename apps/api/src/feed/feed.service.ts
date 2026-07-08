@@ -255,4 +255,17 @@ export class FeedService {
       hasMore: start + cappedSize < total,
     };
   }
+
+  async getFeedEvents(page = 1, pageSize = 20) {
+    const skip = (page - 1) * pageSize;
+    const [items, total] = await Promise.all([
+      this.prisma.feedEvent.findMany({
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: pageSize,
+      }),
+      this.prisma.feedEvent.count(),
+    ]);
+    return { items, total, page, pageSize, hasMore: skip + pageSize < total };
+  }
 }
