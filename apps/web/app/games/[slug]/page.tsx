@@ -172,7 +172,7 @@ function PremiumGameDetail({
             </div>
           </section>
 
-          <section className="mt-5 grid items-start gap-5 xl:grid-cols-[1fr_430px] -mt-[235px]">
+          <section className="grid items-start gap-5 xl:grid-cols-[1fr_430px] -mt-[235px]">
             <div className="grid gap-5">
               <TagRow tags={tags} />
               <div className="grid items-start gap-5 lg:grid-cols-[0.95fr_1.05fr]">
