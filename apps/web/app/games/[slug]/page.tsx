@@ -304,7 +304,7 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
 
       <p className="pm-micro mt-3 text-muted-foreground">Platforms</p>
       <div className="mt-2 grid grid-cols-3 gap-2">
-        {[...new Set(game.platformLinks?.length ? game.platformLinks.map((p) => p.platform) : [])].slice(0, 4).map((platform) => (
+        {[...new Set(game.platformLinks?.length ? game.platformLinks.map((p) => p.platform) : [])].slice(0, 6).map((platform) => (
           <span key={platform} className="flex min-h-8 cursor-pointer items-center justify-center gap-2 border border-border bg-background/65 px-2 font-mono text-[11px] uppercase text-foreground transition hover:border-cyan">
             {platform.includes('PC') ? <Monitor className="size-4 text-cyan" /> : <Gamepad2 className="size-4" />}
             {platform}
