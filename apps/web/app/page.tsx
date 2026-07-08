@@ -43,7 +43,7 @@ export default function HomePage() {
             <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.1fr] xl:gap-16">
               <div>
                 <div className="inline-flex items-center gap-2 border border-cyan/30 bg-cyan/5 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-widest text-cyan">
-                  <Radio className="size-3" /> Live now — {feedCount} updates
+                  <Radio className="size-3" /> {feedCount > 0 ? `${feedCount} active signals` : 'Live now'}
                 </div>
                 <h1 className="mt-6 font-display text-[clamp(2.5rem,6vw,5rem)] font-black uppercase leading-[0.9] text-white">
                   Discover tomorrow's<br />

@@ -58,7 +58,6 @@ import {
   useUnfollowGame,
 } from '@/lib/api/hooks';
 
-const fallbackTags: string[] = [];
 const fallbackScreenshots: string[] = [];
 const fallbackRoadmap: never[][] = [];
 const fallbackDevlogs: never[][] = [];

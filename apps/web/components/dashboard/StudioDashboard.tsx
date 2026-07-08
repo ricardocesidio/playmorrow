@@ -136,7 +136,6 @@ export function StudioDashboard() {
                 <ActionCard href="/dashboard/roadmap" icon={<Workflow className="size-5" />} title="Update Roadmap" body="Plan your progress" />
                 <ActionCard href={studioSlug ? `/dashboard/studios/${studioSlug}` : '/studios/new'} icon={<Users className="size-5" />} title="Invite Members" body="Add to your team" />
                 <ActionCard href="/dashboard/feed" icon={<BarChart3 className="size-5" />} title="Studio Analytics" body="View performance" />
-                <ActionCard href="/dashboard/roadmap" icon={<Radio className="size-5" />} title="Playtests" body="Coming soon" />
                 <ActionCard href={studioSlug ? `/dashboard/studios/${studioSlug}` : '/studios/new'} icon={<Settings className="size-5" />} title="Studio Settings" body="Manage studio" />
               </div>
             </DashboardPanel>
@@ -233,7 +232,7 @@ function StudioSidebar({ unreadCount, studioSlug }: { unreadCount: number; studi
           <SidebarLink href="/dashboard/roadmap" icon={<Workflow className="size-4" />} label="Roadmap" />
           <SidebarLink href="/dashboard/feed" icon={<LineChart className="size-4" />} label="Analytics" />
           <SidebarLink href="/dashboard/notifications" icon={<MessageSquare className="size-4" />} label="Community" count={unreadCount} />
-          <SidebarLink href="/dashboard/roadmap" icon={<Radio className="size-4" />} label="Playtests" />
+          <SidebarLink href={`/dashboard/studios/${studioSlug}/team`} icon={<ShieldCheck className="size-4" />} label="Team" />
           <SidebarLink href={`/dashboard/studios/${studioSlug}`} icon={<Library className="size-4" />} label="Media Library" />
           <SidebarLink href="/studios" icon={<Users className="size-4" />} label="Followers" />
           <SidebarLink href={`/dashboard/studios/${studioSlug}/team`} icon={<ShieldCheck className="size-4" />} label="Team" />

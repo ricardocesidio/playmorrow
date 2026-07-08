@@ -25,6 +25,8 @@ export function SiteFooter() {
           <Link href="/search" className="transition-colors hover:text-foreground">Search</Link>
           <a href="https://instagram.com/playmorrow" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-foreground">Instagram</a>
           <a href="https://x.com/playmorrow" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-foreground" aria-label="Follow PlayMorrow on X">X</a>
+          <a href="https://discord.gg/playmorrow" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-foreground">Discord</a>
+          <a href="https://github.com/ricardocesidio/playmorrow" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-foreground">GitHub</a>
         </div>
 
         {/* Legal links */}

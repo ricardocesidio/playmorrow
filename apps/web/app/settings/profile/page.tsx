@@ -246,6 +246,9 @@ export default function ProfileSettingsPage() {
           </button>
         </form>
 
+        {/* Change Password */}
+        <ChangePasswordSection />
+
         {/* Push Notifications */}
         <div className="mt-8">
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
@@ -261,5 +264,43 @@ export default function ProfileSettingsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function ChangePasswordSection() {
+  const [current, setCurrent] = useState('');
+  const [newPass, setNewPass] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [msg, setMsg] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMsg('');
+    if (!current || !newPass || !confirm) { setMsg('All fields are required.'); return; }
+    if (newPass !== confirm) { setMsg('Passwords do not match.'); return; }
+    if (newPass.length < 8) { setMsg('Password must be at least 8 characters.'); return; }
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/reset-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ currentPassword: current, newPassword: newPass }), credentials: 'include' });
+      if (!res.ok) { const b = await res.json().catch(() => ({})); setMsg(b.message || 'Failed to change password.'); }
+      else { setMsg('Password changed successfully.'); setCurrent(''); setNewPass(''); setConfirm(''); }
+    } catch { setMsg('Connection error.'); }
+    setLoading(false);
+  };
+
+  return (
+    <form onSubmit={handleChange} className="mt-6 clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-6">
+      <h2 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-4">Change Password</h2>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} placeholder="Current password" className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
+        <input type="password" value={newPass} onChange={(e) => setNewPass(e.target.value)} placeholder="New password" className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
+        <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Confirm new password" className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
+      </div>
+      {msg && <p className={`mt-3 font-mono text-xs ${msg.includes('success') ? 'text-cyan' : 'text-coral'}`}>{msg}</p>}
+      <button type="submit" disabled={loading} className="clip-corner mt-4 inline-flex cursor-pointer items-center gap-2 border border-coral/50 bg-coral/5 px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-coral hover:bg-coral hover:text-coral-foreground disabled:opacity-50">
+        {loading ? 'Changing...' : 'Change Password'}
+      </button>
+    </form>
   );
 }
