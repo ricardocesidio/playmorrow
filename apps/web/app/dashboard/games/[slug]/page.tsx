@@ -12,6 +12,11 @@ import { ApiError } from '@/lib/api/client';
 
 const STATUSES = ['CONCEPT', 'IN_DEVELOPMENT', 'ALPHA', 'BETA', 'EARLY_ACCESS', 'RELEASED', 'CANCELLED', 'ON_HOLD'];
 const MAX_SCREENSHOTS = 10;
+const AVAILABLE_TAGS = [
+  'Stealth', 'Cyberpunk', 'Tactical', 'Strategy', 'Sci-Fi', 'Singleplayer',
+  'Story Rich', 'Atmospheric', 'RPG', 'Space', 'Adventure', 'Exploration',
+  'Fantasy', 'Card Game', 'Roguelike', 'Action', 'Runner', 'Fast-Paced', 'Deckbuilding',
+];
 
 export default function EditGamePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -33,7 +38,7 @@ export default function EditGamePage() {
   const [coverUrl, setCoverUrl] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
   const [trailerUrl, setTrailerUrl] = useState('');
-  const [tagsInput, setTagsInput] = useState('');
+  const [tagsInput, setTagsInput] = useState<string[]>([]);
   const [media, setMedia] = useState<{ id?: string; type: string; url: string; caption: string }[]>([]);
   const [uploadingShot, setUploadingShot] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -59,7 +64,7 @@ export default function EditGamePage() {
       setCoverUrl(game.coverUrl ?? '');
       setBannerUrl(game.bannerUrl ?? '');
       setTrailerUrl(game.trailerUrl ?? '');
-      setTagsInput((game.tags ?? []).join(', '));
+      setTagsInput(game.tags ?? []);
       setMedia((game.media ?? []).map((m: { id?: string; type: string; url: string; caption?: string | null }) => ({ id: m.id, type: m.type, url: m.url, caption: m.caption ?? '' })));
       setInitialized(true);
     }
@@ -126,7 +131,7 @@ export default function EditGamePage() {
           coverUrl: coverUrl.trim() || null,
           bannerUrl: bannerUrl.trim() || null,
           trailerUrl: trailerUrl.trim() || null,
-          tags: tagsInput.split(',').map((t) => t.trim()).filter(Boolean),
+          tags: tagsInput,
           media: media.filter((m) => m.url).map((m) => ({ type: m.type, url: m.url, caption: m.caption || null })),
         },
       });
@@ -293,10 +298,23 @@ export default function EditGamePage() {
                 className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
             <div className="mt-4">
-              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Tags (comma-separated)</label>
-              <input type="text" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)}
-                placeholder="stealth, cyberpunk, tactical"
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-2 block">Tags ({tagsInput.length} selected)</label>
+              <div className="flex flex-wrap gap-2">
+                {AVAILABLE_TAGS.map((tag) => {
+                  const isSelected = tagsInput.includes(tag);
+                  return (
+                    <button key={tag} type="button" onClick={() => {
+                      setTagsInput(isSelected ? tagsInput.filter((t) => t !== tag) : [...tagsInput, tag]);
+                    }}
+                    className={`clip-corner-sm border px-3 py-1.5 font-mono text-[0.6rem] uppercase tracking-wider transition cursor-pointer ${
+                      isSelected ? 'border-cyan bg-cyan/10 text-cyan' : 'border-border text-muted-foreground hover:border-cyan/50'
+                    }`}
+                    >
+                      {tag}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
