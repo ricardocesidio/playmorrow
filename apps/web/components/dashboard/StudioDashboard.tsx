@@ -391,7 +391,7 @@ function AnalyticsPanel({ viewsByDay, totalViews }: { viewsByDay?: { date: strin
       <SectionHeader title="Game Analytics" href="/dashboard/feed" linkLabel="Open analytics" />
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <MiniMetric icon={<MonitorPlay className="size-4" />} label="Views" value={formatNumber(totalViews)} />
-        <MiniMetric icon={<Heart className="size-4" />} label="Wishlists" value={formatNumber(0)} />
+        <MiniMetric icon={<Heart className="size-4" />} label="Wishlists" value={formatNumber(wishlists)} />
         <MiniMetric icon={<Download className="size-4" />} label="Export Ready" value="CSV" />
       </div>
       <div className="mt-5 h-48 border border-border/80 bg-background/50 p-4">
