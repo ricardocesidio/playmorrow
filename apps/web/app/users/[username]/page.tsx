@@ -10,7 +10,6 @@ import {
   MessageCircle,
   Settings,
   ShieldCheck,
-  Gamepad2,
   User,
   Users,
   Clock,
@@ -159,7 +158,7 @@ export default function UserProfilePage() {
 
           {/* ── Level & XP ── */}
           {(() => {
-            const { level, currentXp, nextXp, progress } = xpProgress(data.xp);
+            const { level, nextXp, progress } = xpProgress(data.xp);
             return (
               <div className="mt-6 clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-all duration-300 hover:border-cyan/30 hover:shadow-[0_0_25px_rgb(62_231_255_/_0.06)]">
                 <div className="flex items-center justify-between gap-4">

@@ -250,15 +250,15 @@ function FeaturedGameCard({ game }: { game: HomeGame }) {
                   <p className="font-display text-lg font-black text-cyan">{formatFollowers(game.followersCount)}</p>
                   <p className="font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground">Followers</p>
                 </div>
-                {(game as any).wishlistsCount != null && (
+                {game.wishlistsCount != null && (
                   <div className="border border-border/50 px-2 py-2">
-                    <p className="font-display text-lg font-black text-coral">{(game as any).wishlistsCount}</p>
+                    <p className="font-display text-lg font-black text-coral">{game.wishlistsCount}</p>
                     <p className="font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground">Wishlists</p>
                   </div>
                 )}
-                {(game as any).commentsCount != null && (
+                {game.commentsCount != null && (
                   <div className="border border-border/50 px-2 py-2">
-                    <p className="font-display text-lg font-black text-violet">{(game as any).commentsCount}</p>
+                    <p className="font-display text-lg font-black text-violet">{game.commentsCount}</p>
                     <p className="font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground">Comments</p>
                   </div>
                 )}
@@ -329,7 +329,8 @@ function LatestGameCard({ game }: { game: HomeGame }) {
 
 type HomeGame = {
   id: string; title: string; slug: string; status: string; coverUrl: string;
-  followersCount: number; wishlistsCount: number | null; studio: { name: string; slug: string }; tags: string[];
+  followersCount: number; wishlistsCount: number | null; commentsCount: number | null;
+  studio: { name: string; slug: string }; tags: string[];
   tagline: string | null; expectedReleaseText: string | null;
 };
 
@@ -339,7 +340,8 @@ function normalizeLatestGames(games?: Game[]): HomeGame[] {
     id: g.id, title: g.title, slug: g.slug, status: g.status,
     coverUrl: g.coverUrl || '/demo/games/neon-warden/hero.svg',
     followersCount: g.followersCount,
-    wishlistsCount: (g as any).wishlistsCount ?? null,
+    wishlistsCount: g.wishlistsCount ?? null,
+    commentsCount: g.commentsCount ?? null,
     studio: { name: g.studio?.name ?? 'Independent Studio', slug: g.studio?.slug ?? 'studio' },
     tags: g.tags?.length ? g.tags.slice(0, 2) : ['Indie', 'In Development'],
     tagline: g.tagline,

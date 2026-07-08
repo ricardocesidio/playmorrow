@@ -37,10 +37,10 @@ export function useUserProfile(username: string) {
 
 // ── Feed ────────────────────────────────────────────────────────────────
 
-export function usePublicFeed(page = 1, pageSize = 10) {
+export function usePublicFeed(page = 1, pageSize = 10, type?: string) {
   return useQuery({
-    queryKey: ['publicFeed', page, pageSize],
-    queryFn: () => api.get<Paginated<FeedItem>>(`/feed/public?page=${page}&pageSize=${pageSize}`),
+    queryKey: ['publicFeed', page, pageSize, type],
+    queryFn: () => api.get<Paginated<FeedItem>>(`/feed/public?page=${page}&pageSize=${pageSize}${type ? `&type=${type}` : ''}`),
   });
 }
 

@@ -20,7 +20,6 @@ import {
   Lock,
   LogOut,
   MessageSquare,
-  MessageSquareText,
   Radio,
   Settings,
   Shield,
@@ -33,9 +32,8 @@ import {
 
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
-import { useMyFollows, useMyWishlist, useNotifications, useUnreadNotificationCount, usePublicFeed, usePlayerWeeklyXp, usePlayerMonthlyXp, usePlayerXpHistory, useAchievements, type Achievement } from '@/lib/api/hooks';
+import { useMyFollows, useMyWishlist, useNotifications, useUnreadNotificationCount, usePublicFeed, usePlayerWeeklyXp, usePlayerMonthlyXp, usePlayerXpHistory, useAchievements } from '@/lib/api/hooks';
 import { useRouter } from 'next/navigation';
-import type { FeedItem } from '@/lib/api/client';
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();

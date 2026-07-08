@@ -19,7 +19,6 @@ import {
   MessageSquare,
   MonitorPlay,
   PanelLeft,
-  Radio,
   Rocket,
   Settings,
   ShieldCheck,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Check, X, Loader2, Server, Activity, Database, Globe } from 'lucide-react';
+import { Check, X, Loader2, Server, Database, Globe } from 'lucide-react';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/site-header';
 

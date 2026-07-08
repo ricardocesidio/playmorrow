@@ -41,10 +41,13 @@ type Transmission = {
 };
 
 export default function FeedPage() {
-  const { data, isLoading, error } = usePublicFeed(1, 20);
+  const [page, setPage] = useState(1);
+  const [activeType, setActiveType] = useState<string>('all');
+  const { data, isLoading, error } = usePublicFeed(page, 20, activeType !== 'all' ? activeType : undefined);
   const rawItems = Array.isArray(data?.items) ? data.items : undefined;
   const isExplicitEmpty = !!rawItems && rawItems.length === 0 && data?.total === 0;
   const transmissions = rawItems ? rawItems.map(feedItemToTransmission) : [];
+  const hasMore = data?.hasMore ?? false;
 
   return (
     <>
@@ -74,7 +77,7 @@ export default function FeedPage() {
           <div className="grid gap-5 xl:grid-cols-[1fr_430px]">
             <section>
               <HudPanel className="overflow-hidden p-0" accent="muted">
-                <SignalTabs />
+                <SignalTabs activeTab={activeType} onTabChange={setActiveType} onPageReset={() => setPage(1)} />
 
                 {error && !isLoading && <div className="p-6"><ErrorState message="Could not load feed." /></div>}
 
@@ -96,13 +99,15 @@ export default function FeedPage() {
                 )}
               </HudPanel>
 
-              {!error && !isExplicitEmpty && (
+              {!error && !isExplicitEmpty && hasMore && (
                 <div className="mt-5 flex justify-center">
                   <button
                     type="button"
-                    className="clip-corner inline-flex h-10 min-w-[320px] items-center justify-center gap-3 border border-cyan/70 bg-cyan/5 px-8 pm-display text-xs text-cyan transition hover:bg-cyan hover:text-cyan-foreground"
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={isLoading}
+                    className="clip-corner inline-flex h-10 min-w-[320px] items-center justify-center gap-3 border border-cyan/70 bg-cyan/5 px-8 pm-display text-xs text-cyan transition hover:bg-cyan hover:text-cyan-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Load more transmissions <ArrowDown className="size-4" />
+                    {isLoading ? 'Loading…' : 'Load more transmissions'} <ArrowDown className="size-4" />
                   </button>
                 </div>
               )}
@@ -119,19 +124,17 @@ export default function FeedPage() {
   );
 }
 
-function SignalTabs() {
-  const [activeTab, setActiveTab] = useState('All signals');
-  const [followingOnly, setFollowingOnly] = useState(false);
-
+function SignalTabs({ activeTab, onTabChange, onPageReset }: { activeTab: string; onTabChange: (tab: string) => void; onPageReset: () => void }) {
   return (
     <div className="grid border-b border-border/80 bg-background/55 text-muted-foreground md:grid-cols-[150px_1fr_1fr_1fr_1fr_190px]">
       {['All signals', 'Devlogs', 'Roadmap', 'Releases', 'Milestones'].map((tab) => {
         const isActive = activeTab === tab;
+        const typeKey = tab === 'All signals' ? 'all' : tab === 'Devlogs' ? 'devlogs' : tab === 'Roadmap' ? 'roadmap' : tab === 'Releases' ? 'releases' : 'milestones';
         return (
           <button
             key={tab}
             type="button"
-            onClick={() => setActiveTab(tab)}
+            onClick={() => { onPageReset(); onTabChange(typeKey); }}
             className={`relative h-12 cursor-pointer border-b border-r border-border/55 px-4 pm-micro transition md:border-b-0 ${
               isActive
                 ? 'bg-cyan/8 text-cyan after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-cyan after:shadow-[0_0_12px_rgb(62_231_255_/_0.85)]'
@@ -144,19 +147,10 @@ function SignalTabs() {
       })}
       <button
         type="button"
-        onClick={() => setFollowingOnly(!followingOnly)}
         className="flex h-12 cursor-pointer items-center justify-center gap-3 px-4 pm-micro hover:text-foreground"
       >
-        <span className={`relative h-4 w-8 rounded-full border transition-colors ${
-          followingOnly
-            ? 'border-cyan bg-cyan/20'
-            : 'border-border-bright bg-background'
-        }`}>
-          <span className={`absolute top-1/2 size-2.5 -translate-y-1/2 rounded-full transition-all ${
-            followingOnly
-              ? 'left-[18px] bg-cyan shadow-[0_0_6px_rgb(62_231_255_/_0.8)]'
-              : 'left-1 bg-muted-foreground'
-          }`} />
+        <span className={`relative h-4 w-8 rounded-full border transition-colors border-border-bright bg-background`}>
+          <span className="absolute top-1/2 size-2.5 -translate-y-1/2 rounded-full transition-all left-1 bg-muted-foreground" />
         </span>
         Following only
       </button>
@@ -209,11 +203,6 @@ function TransmissionRow({ item }: { item: Transmission }) {
         <div className="relative min-h-[120px] overflow-hidden border border-border-bright/65 bg-muted md:h-full md:min-h-0">
           <img src={item.image} alt={`${item.game} key art`} className="absolute inset-0 size-full object-cover transition duration-300 group-hover:scale-[1.03]" />
           <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background/10" />
-          {item.game === 'Neon Warden' && (
-            <div className="absolute left-5 top-5 font-display text-4xl font-black uppercase leading-none text-foreground drop-shadow-[0_4px_16px_rgb(0_0_0_/_0.9)]">
-              Neon<br />Warden
-            </div>
-          )}
           {item.video && (
             <span className="absolute left-1/2 top-1/2 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-foreground/30 bg-background/55 text-foreground backdrop-blur-sm">
               <Play className="ml-1 size-6 fill-current" />
