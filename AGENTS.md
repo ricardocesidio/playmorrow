@@ -1,6 +1,6 @@
 # Playmorrow — Project Handoff
 
-**Last updated:** 2026-07-08 (final PRD audit pass)
+**Last updated:** 2026-07-08 (30 commits — final PRD delivery)
 
 ## Tech Stack
 
@@ -131,3 +131,38 @@ cd packages/database && DATABASE_URL="..." npx prisma db push
 - Homepage: fake progress bars → real stats (followers/wishlists/comments)
 - Leaderboard populated with real XP data
 - Implementation Report delivered (PRD Section 10)
+
+**Session 5 — Security + Gaps:**
+- XSS sanitization via DOMPurify on all Markdown rendering
+- Image upload: dimension validation (4096px max)
+- readingTimeMin recomputed on devlog update
+- FeedEngine wired to game status, roadmap, press kit, role change events
+- Devlog publish returns feedEventId for optimistic UI
+- Editor defaults to Edit mode (no split panes per PRD)
+
+**Session 6 — Performance + SEO:**
+- Removed 2 redundant API calls on game page (devlogs+roadmap now from embedded `useGame`)
+- Screenshots included in ALL devlog queries (not just create)
+- Devlog SEO layout fixed: `/me/devlogs/` → `/devlogs/` (public endpoint)
+- Game Devlogs listing page created (`/games/[slug]/devlogs`)
+- Game Comments listing page created (`/games/[slug]/comments`)
+- Press-kit link fixed (→ dashboard), dead anchor links fixed
+- Homepage skeleton loading states added
+
+**Session 7 — QA + Documentation:**
+- Full page scan: all 14 public pages + 30+ auth pages verified
+- README rewritten with project status, known issues, and roadmap
+- AGENTS.md updated with full development history
+
+## Known Issues
+
+| # | Issue | Severity |
+|---|---|---|
+| 1 | `coverUrl` on Devlog — PRD says remove, needs migration | Low |
+| 2 | Devlog author = User not StudioMember (works correctly) | Low |
+| 3 | Nested comments 1 level only in UI | Low |
+| 4 | TRAILER_UPDATED + STUDIO_VERIFIED FeedEngine not wired | Low |
+| 5 | `notFound()` hangs in client components (reverted to error state) | Low |
+| 6 | 10-15 pre-existing ESLint warnings | Low |
+| 7 | 15/17 API tests fail (pre-existing, env config needed) | Medium |
+| 8 | Production login broken (Vercel→Railway env vars) | High |

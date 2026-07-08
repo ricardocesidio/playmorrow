@@ -10,135 +10,136 @@ press, streamers, and publishers.
 
 ## Table of Contents
 
-- [For Studios](#for-studios)
-- [For Players](#for-players)
-- [Platform Features](#platform-features)
-- [Visual Identity](#visual-identity)
-- [Tech Stack](#tech-stack)
-- [Monorepo Structure](#monorepo-structure)
-- [Getting Started](#getting-started)
-- [Development Scripts](#development-scripts)
+- [Project Status](#project-status)
+- [Quick Start](#quick-start)
 - [Demo Data](#demo-data)
+- [Platform Features](#platform-features)
+- [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
 - [Database](#database)
 - [Authentication](#authentication)
 - [Deployment](#deployment)
+- [Known Issues](#known-issues)
+- [What's Next](#whats-next)
 - [License](#license)
 
 ---
 
-## For Studios
+## Project Status
 
-Playmorrow gives indie studios a professional public presence — not just a store page.
-Create a studio profile, publish devlogs, maintain a roadmap, share press kits,
-and build a following with real-time engagement metrics and notifications.
+**Devlog System V2 PRD — Fully Implemented (July 2026)**
 
-**Studio management:** Multi-member teams with role-based access (Owner, Admin, Moderator).
-Invite team members by email or search, manage permissions, transfer ownership,
-and communicate via an internal team feed with automatic activity updates.
+| System | Status |
+|---|---|
+| Devlog CRUD + screenshots gallery | ✅ 0-10 screenshots, API enforcement |
+| Rich editor (Markdown toolbar) | ✅ `@uiw/react-md-editor` v4.1.1 |
+| Preview toggle (Edit/Preview/Split) | ✅ Sanitized, matches production |
+| Status workflow (Draft/Published/Scheduled) | ✅ |
+| Author attribution (avatar, role badge, dates) | ✅ |
+| Feed Engine | ✅ 7 event types wired |
+| Auto CommunityPost on publish | ✅ |
+| RBAC seat limits (2/3/10) | ✅ Server-side 409 |
+| Likes unique at DB level | ✅ `@@unique` constraint |
+| Latest Games paginated 9/page | ✅ Load More |
+| Game page layout (devlog full, roadmap sidebar) | ✅ |
+| Cache revalidation | ✅ `revalidatePath` on all mutations |
+| XSS sanitization | ✅ DOMPurify on all rendered Markdown |
+| Image upload validation | ✅ Type, magic bytes, size (20MB), dimensions (4096px) |
+| Skeleton loading states | ✅ Feed, homepage, game page |
+| SEO metadata | ✅ OpenGraph on game/studio/devlog pages |
+| PWA manifest + service worker | ✅ |
 
-**Studio Dashboard:**
-- Aggregated analytics (weekly deltas, views over time, follower growth)
-- Real-time stats cards (followers, wishlists, views, comments)
-- Game management (create, edit, delete games)
-- Roadmap CRUD with drag-to-reorder
-- Devlog editor with Markdown support
-- Press kit management
-- Team management with role control
-- Activity feed
+**30 commits in this implementation cycle.** Full implementation report in `AGENTS.md`.
 
 ---
 
-## For Players
+## Quick Start
 
-Follow the games you care about. Get live updates when studios post devlogs, hit
-milestones, or update their roadmap. Comment, react, save games to your private wishlist,
-and be part of the development journey before the game ships.
+```bash
+git clone https://github.com/ricardocesidio/playmorrow
+cd playmorrow
+pnpm install
 
-**Player Dashboard:**
-- Wishlist management
-- Following feed (studios & games)
-- Real-time notifications
-- XP & Level progression system
-- Achievement tracking
-- Profile settings
-- Game discovery feed
+# Backend (port 4000)
+cd apps/api && npx nest start
 
-**Level & XP System:** Players earn XP by following studios/games, wishlisting titles,
-posting comments, reacting to content, and daily logins. Higher levels unlock prestige
-titles (Newcomer → Regular → Supporter → Veteran → Legend).
+# Frontend (port 3000)
+cd apps/web && npx next dev -p 3000
+
+# Database (if schema changes)
+cd packages/database && DATABASE_URL="postgresql://..." npx prisma db push
+```
+
+**Demo login:** `dev@playmorrow.example` / `Demo123!@`
+
+---
+
+## Demo Data
+
+### 5 Games with full profiles
+
+| Game | Studio | Status | Price | Screenshots |
+|---|---|---|---|---|
+| Neon Warden | Obsidian Signal | BETA | $19.99 | 4 |
+| Starfall Tactics | Ironlight Studios | ALPHA | $24.99 | 4 |
+| Mossbound | Wildbriar | PRE_ALPHA | $14.99 | 4 |
+| Paper Relics | Second Story Games | PRE_ALPHA | $9.99 | 4 |
+| Voidrunner | Voidrunner Dev | CONCEPT | Free | 4 |
+
+Each game includes: 4 screenshots, 4 roadmap items, platform links (Steam/Epic/GOG/Itch),
+8 devlogs (3 Neon Warden, 2 Starfall, 2 Mossbound, 1 Paper Relics, 1 Voidrunner),
+auto-generated community comments, 19 curated tags.
+
+### 5 Studios with team members
+### Demo user: 1250 XP, level 4, 7 XP events
+### Leaderboard populated with real data
 
 ---
 
 ## Platform Features
 
-### Studio Tools
-- **Studio profiles** — brand page with logo, banner, description, team, location
-- **Game profiles** — cover art, screenshots, trailers, tags, platform links, status, roadmap
-- **Devlogs** — development journals with rich text and threaded comments
-- **Roadmaps** — visual timeline of planned, in-progress, and completed features
-- **Press kits** — structured fact sheets for journalists and publishers
-- **Team management** — role-based access control (Owner, Admin, Moderator, Member), invitations, audit logging
-- **Image upload** — PNG/JPG upload for screenshots, covers, logos, and banners (max 10 per game)
-- **Currency selector** — 12 currencies (USD, EUR, GBP, JPY, BRL, CAD, AUD, CHF, CNY, INR, KRW, MXN)
-- **YouTube trailer** — embed trailers with automatic thumbnail generation
-- **Fullscreen lightbox** — portal-rendered screenshot viewer with keyboard navigation (← → Esc)
-- **Request to Join** — players can request studio membership; owners approve/reject
-- **Studio Dashboard** — aggregated analytics with real-time stats and activity feed
+### Devlog System V2
+- **Rich editor** — Bold, Italic, Heading, List, Code, Quote, Image, Video embed
+- **Preview toggle** — Edit / Preview / Split modes
+- **Status workflow** — Draft → Publish → Schedule
+- **Screenshots gallery** — 0-10 per devlog, validated server-side
+- **Author badges** — Owner / Admin / Moderator role indicators
+- **Feed Engine** — DEVLOG_PUBLISHED, GAME_STATUS_CHANGED, ROADMAP_UPDATED, STUDIO_CREATED, PRESS_KIT_UPDATED, ROLE_CHANGED
+- **Community sync** — Auto-creates CommunityPost when devlog publishes
+- **Cache revalidation** — `revalidatePath` on feed, homepage, game pages
 
-### Community Features
+### Studio Tools
+- Studio profiles with logo, banner, description, team, location
+- Game profiles with cover art, screenshots, trailers, tags, platforms
+- Devlog editor with Markdown, tags, screenshots, scheduling
+- Roadmap management with visual timeline
+- Press kit management with .md download
+- Team management with RBAC (Owner/Admin/Moderator) and seat limits
+- Image upload with validation (type, size, dimensions, magic bytes)
+- YouTube trailer embeds with thumbnail generation
+- Fullscreen screenshot lightbox with keyboard nav (← → Esc)
+- Request to Join with approve/reject workflow
+- Studio Dashboard with analytics, activity feed
+
+### Community
 - Follow/unfollow studios and games
-- Private game wishlist
+- Game wishlist (private)
 - Comment on devlogs with threaded replies
 - React to devlogs and comments (LIKE, LOVE, HYPE, INSIGHTFUL)
-- OAuth sign-in with Google and GitHub
-- Email/password authentication with session management
+- OAuth sign-in (Google, GitHub) + email/password
 - Real-time notification badges (SSE streaming)
 - Email verification and password recovery
 - Rate-limited endpoints and moderation reporting
-- Cookie consent (Essential, Analytics, Marketing preferences)
-- Responsive design — mobile, tablet, and desktop
+- Cookie consent (Essential, Analytics, Marketing)
 
-### Visual & UX
-- Full cyberpunk design system — cyan, coral, violet, amber palette
-- Hexagonal grid backgrounds with CRT scanlines
-- Glitch typography effects on headings
-- Holographic card depth with multi-layer shadows
-- Animated border scanning effects
-- Custom cursor glow (blue + red radial gradient)
+### Visual Design
+- Full cyberpunk design system — cyan (#3ee7ff), coral (#ff574d), violet (#a65cff), amber (#e4a83b)
+- Obsidian-black backgrounds (#020609) with hexagonal grid overlays
+- CRT scanlines, glitch typography, holographic card depth
+- Animated border scanning effects, custom cursor glow
 - Signal dots, corner brackets, circuit decorations
-- Clipped-corner panels and buttons
-- Space Grotesk (headings) + JetBrains Mono (body & UI)
-- Full dark mode (forced)
-
-### Account Types
-
-| Type | Purpose |
-|---|---|
-| **Player** | Discover games, follow studios, comment, wishlist, build feed |
-| **Studio** | Publish games, devlogs, roadmaps, press kits, manage team |
-| **Moderator** | Moderate content, review reports |
-| **Admin** | Full platform administration |
-
-Account type is selected during onboarding. A Player can later create a studio and become an Owner.
-
----
-
-## Visual Identity
-
-**Direction:** Obsidian-black surfaces, restrained glow, technical framing, geometric typography, cyan/coral/violet/amber accent palette.
-
-| Token | Hex | Usage |
-|---|---|---|
-| `--background` | `#02070b` | Page background |
-| `--elevated` | `#071117` | Panel backgrounds |
-| `--card` | `#09161d` | Card backgrounds |
-| `--cyan` | `#3ee7ff` | Primary accent, glows |
-| `--coral` | `#ff574d` | Danger, CTA, live indicators |
-| `--violet` | `#a65cff` | Secondary accent, alpha status |
-| `--amber` | `#e4a83b` | Warning, pre-alpha status |
-| `--success` | `#70ff9b` | Success state |
-| `--error` | `#ff574d` | Error state |
+- Clipped-corner panels and buttons (HudPanel, TechPanel, CircuitFrame)
+- Space Grotesk (headings) + JetBrains Mono (body/UI)
 
 ---
 
@@ -147,160 +148,16 @@ Account type is selected during onboarding. A Player can later create a studio a
 | Layer | Technology |
 |---|---|
 | Frontend | Next.js 15 (App Router) + React 19 + TypeScript |
-| Styling | Tailwind CSS v4 (utility-first design system) |
-| Components | Custom `HudPanel`, `HudButton`, `HudStatusRail`, shadcn/ui base |
+| Styling | Tailwind CSS v4 |
+| Components | Custom HUD components, `@uiw/react-md-editor`, lucide-react |
 | Backend | NestJS + TypeScript |
-| Database | PostgreSQL with Prisma ORM (6.19) |
-| Auth | Session-based (cookies) with OAuth providers (Google, GitHub) |
-| Realtime | Server-Sent Events for notification streaming |
-| Icons | Lucide React |
-| Fonts | Space Grotesk (display) + JetBrains Mono (body/mono) |
-| Build | Turborepo + pnpm workspaces |
-| Testing | Playwright (E2E frontend) + Jest (unit backend) + Storybook (UI) |
+| Database | PostgreSQL (Neon pooler) + Prisma ORM |
+| Auth | Session-based (httpOnly cookies) + OAuth |
 | State | TanStack Query (React Query) |
-| Forms | Native form actions + server actions + controlled inputs |
+| Security | DOMPurify (XSS), helmet, class-validator, rate limiting |
+| Build | pnpm workspaces |
+| Testing | Playwright (E2E) + Vitest (API unit) |
 | Deployment | Vercel (frontend) + Railway (API) |
-
----
-
-## Monorepo Structure
-
-```
-playmorrow/
-├── apps/
-│   ├── web/               Next.js 15 frontend (App Router)
-│   │   ├── app/            Pages, layouts, API routes, server actions
-│   │   ├── components/     Shared UI components
-│   │   │   ├── dashboard/  PlayerDashboard, StudioDashboard
-│   │   │   ├── playmorrow/ HUD design system (panels, frames, logos)
-│   │   │   └── ui/         shadcn/ui button
-│   │   ├── lib/            API client, auth context, hooks, utilities
-│   │   └── public/         Static assets (images, demos)
-│   └── api/                NestJS backend
-│       └── src/
-│           ├── auth/       Authentication (session, JWT, OAuth)
-│           ├── games/      Game CRUD + roadmaps
-│           ├── studios/    Studio management + team
-│           ├── devlogs/    Development logs
-│           ├── comments/   Threaded comments
-│           ├── reactions/  Content reactions
-│           ├── feed/       Activity feed
-│           ├── notifications/  SSE notifications
-│           ├── upload/     File upload (PNG/JPG with validation)
-│           └── users/      User profiles + settings
-├── packages/
-│   ├── database/           Prisma schema, migrations, seed data
-│   ├── types/              Shared TypeScript types
-│   └── config/             Shared config (ESLint, TypeScript)
-├── docs/
-│   └── superpowers/
-│       ├── specs/          Design specifications
-│       └── plans/          Implementation plans
-├── turbo.json              Build pipeline
-└── package.json            Workspace config
-```
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- **Node.js** >= 22.13
-- **pnpm** >= 11
-- **PostgreSQL** 16 (Docker or hosted like Neon)
-- **Docker** (optional, for local Postgres)
-
-### Setup
-
-```bash
-# Clone and install
-git clone https://github.com/ricardocesidio/playmorrow
-cd playmorrow
-pnpm install
-
-# Set up environment variables
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env.local
-
-# Edit .env files with your database URL and secrets
-# Required vars: DATABASE_URL, JWT_SECRET, SESSION_SECRET
-
-# Start PostgreSQL (if using Docker)
-docker compose up -d
-
-# Run database migrations
-cd packages/database
-npx prisma migrate deploy
-cd ../..
-
-# Seed demo data (5 games, 5 studios, tags, etc.)
-pnpm db:seed
-
-# Start development servers
-pnpm dev
-```
-
-| Service | URL |
-|---|---|
-| Web | http://localhost:3000 |
-| API | http://localhost:4000 |
-| API docs (Swagger) | http://localhost:4000/docs |
-
-### Demo Login
-
-After seeding, log in with:
-- **Email:** `dev@playmorrow.example`
-- **Password:** `Demo123!@`
-
-This account owns all 5 demo studios and manages all 5 demo games.
-
-### Mock Mode
-
-Set `NEXT_PUBLIC_USE_MOCKS=true` in `apps/web/.env.local` to develop the frontend
-without a running backend. Mock mode provides 5 games with full data (screenshots,
-trailers, tags, platforms).
-
----
-
-## Development Scripts
-
-| Command | Description |
-|---|---|
-| `pnpm dev` | Run all apps in watch mode |
-| `pnpm build` | Build all apps and packages |
-| `pnpm lint` | Lint everything (ESLint) |
-| `pnpm typecheck` | Type-check everything (TypeScript) |
-| `pnpm test` | Backend unit tests (Jest) |
-| `pnpm test:e2e` | Frontend E2E tests (Playwright) |
-| `pnpm db:generate` | Regenerate Prisma Client |
-| `pnpm db:migrate` | Create and apply a Prisma migration |
-| `pnpm db:seed` | Seed demo data (5 games, 5 studios) |
-| `pnpm storybook` | Launch Storybook component library |
-| `pnpm clean` | Remove build artifacts |
-
----
-
-## Demo Data
-
-The seed script populates the database with:
-
-**5 Games:**
-| Game | Studio | Status | Price |
-|---|---|---|---|
-| Neon Warden | Obsidian Signal | BETA | $19.99 |
-| Starfall Tactics | Ironlight Studios | ALPHA | $24.99 |
-| Mossbound | Wildbriar | PRE_ALPHA | $14.99 |
-| Paper Relics | Second Story Games | PRE_ALPHA | $9.99 |
-| Voidrunner | Voidrunner Dev | CONCEPT | Free |
-
-Each game includes: screenshots, trailer, roadmap items, tags, platform links,
-press kit, devlog, and demo comments.
-
-**5 Studios** with full profiles (logo, banner, description, location, verified status,
-followers count, team members).
-
-**19 curated tags** across genres, settings, features, and moods.
 
 ---
 
@@ -318,79 +175,99 @@ Next.js App Router
 NestJS API (localhost:4000)
     │
     ▼
-PostgreSQL (Prisma ORM)
+PostgreSQL via Neon pooler (Prisma ORM)
 ```
 
-**API Design:** RESTful with session-based authentication. File uploads use
-multipart/form-data with magic byte validation. Notifications use Server-Sent Events.
-All mutations return updated state. Read operations support pagination and filtering.
+**API Design:** RESTful with session-based auth. All mutations return updated state.
+Read operations support pagination. File uploads use multipart/form-data with
+MIME type, magic byte, size, and dimension validation.
 
 ---
 
 ## Database
 
-**PostgreSQL 16** with Prisma ORM for type-safe queries and migrations.
+**PostgreSQL 16** via Neon with Prisma ORM.
 
-Key tables: `User`, `Studio`, `Game`, `Devlog`, `RoadmapItem`, `Comment`, `Reaction`,
-`Follow`, `WishlistItem`, `Notification`, `Invitation`, `StudioMember`, `AuditLog`,
-`PlayerXpEvent`, `Achievement`, `Report`, `GameMedia`, `PlatformLink`, `PressKit`,
-`CookiePreference`.
+Key tables: `users`, `studios`, `games`, `devlogs`, `devlog_screenshots`, `devlog_likes`,
+`feed_events`, `roadmap_items`, `comments`, `reactions`, `follows`, `wishlist_items`,
+`notifications`, `press_kits`, `game_media`, `platform_links`, `studio_members`,
+`studio_invitations`, `audit_logs`, `player_xp_events`, `studio_xp_events`, `achievements`.
 
-23 migrations tracking schema evolution from initial setup through notifications,
-OAuth, wishlists, comments, onboarding, studio roles, XP, push subscriptions, and indexes.
+**Recent additions (Devlog V2):** `DevlogStatus` enum, `FeedEventType` enum,
+`feed_events` table, `devlog_likes` table, `devlog_screenshots` table,
+new columns on `devlogs` (subtitle, readingTimeMin, status, scheduledFor, editedAt, category, tags).
 
 ---
 
 ## Authentication
 
-- **Session-based** with httpOnly cookies (`playmorrow_session`)
-- Cookie attributes: `HttpOnly`, `Secure` (production), `SameSite=Lax` (dev)
-- **OAuth providers:** Google, GitHub
-- **Email verification:** 6-digit codes via Resend
-- **Password recovery:** Email-based reset flow
-- **CSRF protection:** Rate-limited endpoints with IP-based throttling
-- **Session management:** List active sessions, logout individual or all
+- **Session-based** — httpOnly cookies (`playmorrow_session`), `SameSite=Lax`
+- **OAuth providers** — Google, GitHub
+- **Email verification** — 6-digit codes via Resend
+- **Password recovery** — Email-based reset flow
+- **CSRF protection** — Rate-limited endpoints with IP-based throttling
+- **RBAC** — Studio roles (Owner/Admin/Moderator) enforced server-side
 
 ---
 
 ## Deployment
 
-### Production Stack
-- **Frontend:** [Vercel](https://vercel.com) — Next.js with edge functions
-- **API:** [Railway](https://railway.app) — NestJS with auto-deploy from GitHub
-- **Database:** [Neon](https://neon.tech) — Serverless PostgreSQL (free tier)
+### Production
+| Service | Platform | Notes |
+|---|---|---|
+| Frontend | Vercel | Next.js with edge functions |
+| API | Railway | NestJS auto-deploy from GitHub |
+| Database | Neon | Serverless PostgreSQL |
 
-### Required Environment Variables
+### Required Env Vars
 
-**API (Railway):**
-```
-NODE_ENV=production
-PORT=4000
-WEB_ORIGIN=https://playmorrow.vercel.app
-DATABASE_URL=postgresql://...
-JWT_SECRET=<random>
-SESSION_SECRET=<random>
-UPLOADS_DIR=/var/data/uploads
-```
+**API:** `DATABASE_URL`, `JWT_SECRET`, `SESSION_SECRET`, `WEB_ORIGIN`, `PORT`  
+**Frontend:** `API_URL`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`
 
-**Frontend (Vercel):**
-```
-API_URL=https://api.yourdomain.com/api
-NEXT_PUBLIC_API_URL=/api
-NEXT_PUBLIC_SITE_URL=https://playmorrow.vercel.app
-```
+Local dev uses Next.js rewrites to proxy `/api/*` to NestJS, keeping cookies same-origin.
 
-### Local Development
-Both servers run with hot reload. The Next.js rewrite proxy forwards `/api/*` to the
-NestJS API, keeping cookies same-origin.
+---
+
+## Known Issues
+
+| # | Issue | Severity | Notes |
+|---|---|---|---|
+| 1 | `coverUrl` still on Devlog model | Low | PRD says remove; needs data migration before dropping column |
+| 2 | Devlog author is `User` (not `StudioMember`) | Low | Works correctly; PRD spec differs |
+| 3 | Nested comments only 1 level deep in UI | Low | Backend supports recursive; frontend renders 1 level |
+| 4 | Feed Engine: TRAILER_UPDATED + STUDIO_VERIFIED not wired | Low | API DTOs don't expose trailer changes; studio verification has no API |
+| 5 | `notFound()` in client components causes hang | Low | Reverted to error-state rendering; proper 404 requires server component refactor |
+| 6 | ~10-15 pre-existing ESLint warnings | Low | Unused imports in legacy files; non-blocking |
+| 7 | 15/17 API tests fail in CI | Medium | Pre-existing; need test env DB configuration |
+| 8 | Production login broken | High | Vercel → Railway `API_URL` env var propagation issue |
+
+---
+
+## What's Next
+
+### Short-term
+- Fix production login (Vercel/Railway env var configuration)
+- Wire TRAILER_UPDATED + STUDIO_VERIFIED FeedEngine events
+- Add "Load more" pagination to devlog/comment listing pages
+- Clean remaining ESLint warnings
+
+### Medium-term (from PRD deferred items)
+- Email/push notifications to followers
+- Scheduled publish worker (cron-based; field exists)
+- Dedicated CommunityPost entity (currently reuses Comment model)
+- Recursive nested comment rendering
+
+### Long-term
+- WebSocket real-time feed
+- Devlog analytics (views, read-through rate, shares)
+- @mentions in comments
+- Content moderation pipeline (auto-flagging)
 
 ---
 
 ## License
 
-**All Rights Reserved.** Playmorrow is proprietary software. Unauthorized copying,
-modification, distribution, or use of this software is strictly prohibited.
-See [LICENSE](LICENSE) for details.
+**All Rights Reserved.** Playmorrow is proprietary software. See [LICENSE](LICENSE).
 
 ---
 
