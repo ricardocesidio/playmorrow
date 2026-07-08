@@ -166,25 +166,25 @@ function PremiumGameDetail({
 
           <section className="grid items-start gap-5 xl:grid-cols-[1fr_430px]">
             <GameHero game={game} title={title} heroImage={heroImage} slug={slug} />
-            <div className="grid gap-4">
+            <div className="grid gap-5">
               <PurchasePanel game={game} slug={slug} title={title} />
               <AboutPanel game={game} slug={slug} />
             </div>
           </section>
 
-          <section className="grid items-start gap-4 xl:grid-cols-[1fr_430px]">
-            <div className="grid gap-4">
+          <section className="grid items-start gap-5 xl:grid-cols-[1fr_430px]">
+            <div className="grid gap-5">
               <TagRow tags={tags} />
-              <div className="grid items-start gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+              <div className="grid items-start gap-5 lg:grid-cols-[0.95fr_1.05fr]">
                 <TrailerPanel title={title} image={heroImage} trailerUrl={game.trailerUrl} />
                 <ScreenshotsPanel screenshots={screenshots} allScreenshots={allScreenshots} active={activeScreenshot} onSelect={setActiveScreenshot} title={title} />
               </div>
-              <div className="grid items-stretch gap-4 lg:grid-cols-[1fr_1fr]">
+              <div className="grid items-stretch gap-5 lg:grid-cols-[1fr_1fr]">
                 <RoadmapPanel roadmap={roadmap} />
                 <DevlogsPanel devlogs={devlogs} slug={slug} />
               </div>
             </div>
-            <aside className="grid gap-4">
+            <aside className="grid gap-5">
               <InfoLinksPanel game={game} slug={slug} />
               <CommunityPanel slug={slug} />
             </aside>
