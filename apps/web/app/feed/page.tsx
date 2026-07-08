@@ -21,7 +21,8 @@ import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
-import { usePublicFeed } from '@/lib/api/hooks';
+import { usePublicFeed, useMyFollows } from '@/lib/api/hooks';
+import { useAuth } from '@/lib/api/auth-context';
 import type { FeedItem } from '@/lib/api/client';
 
 type Transmission = {
@@ -215,6 +216,11 @@ function TransmissionRow({ item }: { item: Transmission }) {
 }
 
 function YourSignalPanel() {
+  const { token, isAuthenticated } = useAuth();
+  const { data: follows } = useMyFollows(token ?? undefined);
+  const studioCount = follows?.studios?.length ?? 0;
+  const gameCount = follows?.games?.length ?? 0;
+
   return (
     <HudPanel className="p-7" accent="muted">
       <h2 className="pm-micro mb-6 flex items-center gap-4 text-foreground">
@@ -225,12 +231,31 @@ function YourSignalPanel() {
           <Hexagon className="size-11" />
         </div>
         <div>
-          <p className="text-sm text-muted-foreground">You're following</p>
-          <p className="mt-2 font-display text-xl font-black uppercase tracking-[0.18em] text-foreground">Stay tuned</p>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">Get updates from the games you care about.</p>
+          {isAuthenticated ? (
+            <>
+              <p className="text-sm text-muted-foreground">You're following</p>
+              <p className="mt-1 font-display text-xl font-black uppercase tracking-[0.18em] text-foreground">
+                {studioCount} studios
+              </p>
+              <p className="text-sm text-muted-foreground">and</p>
+              <p className="font-display text-xl font-black uppercase tracking-[0.18em] text-foreground">
+                {gameCount} games
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">You're following</p>
+              <p className="mt-2 font-display text-xl font-black uppercase tracking-[0.18em] text-foreground">Stay tuned</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Sign in to follow studios and games for personalized updates.</p>
+            </>
+          )}
         </div>
       </div>
-      <PanelLink href="/dashboard/feed">Manage following</PanelLink>
+      {isAuthenticated ? (
+        <PanelLink href="/dashboard">Manage following</PanelLink>
+      ) : (
+        <PanelLink href="/login">Sign in</PanelLink>
+      )}
     </HudPanel>
   );
 }
