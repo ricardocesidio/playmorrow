@@ -59,7 +59,7 @@ export class DevlogsService {
         slug,
         body: dto.body,
         coverUrl: dto.coverUrl,
-        status: dto.status ?? (isPublished ? 'PUBLISHED' : 'DRAFT'),
+        status: (dto.status ?? (isPublished ? 'PUBLISHED' : 'DRAFT')) as 'DRAFT' | 'PUBLISHED' | 'SCHEDULED',
         isPublished,
         publishedAt,
         scheduledFor: dto.scheduledFor ? new Date(dto.scheduledFor) : null,
@@ -76,14 +76,14 @@ export class DevlogsService {
     });
 
     if (isPublished) {
-      await this.studioXpService.award(game.studio.id, 'DEVLOG_PUBLISH', undefined, devlog.id);
+      await this.xp.award(game.studio.id, 'DEVLOG_PUBLISH', undefined, devlog.id);
       await this.feedEngine.onDevlogPublished({
         devlog: { id: devlog.id, title: devlog.title, slug: devlog.slug, gameId: devlog.gameId, studioId: game.studioId, authorId: userId },
         gameTitle: game.title,
       });
     }
 
-    await this.auditLog.log({
+    await this.audit.log({
       studioId: game.studioId,
       actorId: userId,
       action: 'DEVLOG_CREATED',
@@ -260,7 +260,7 @@ export class DevlogsService {
       include: DEVLOG_INCLUDE,
     });
 
-    await this.auditLog.log({
+    await this.audit.log({
       studioId: devlog.game.studioId,
       actorId: userId,
       action: 'DEVLOG_UPDATED',
@@ -283,7 +283,7 @@ export class DevlogsService {
 
     assertStudioAccess({ id: userId, role: user.role }, devlog.game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
-    await this.auditLog.log({
+    await this.audit.log({
       studioId: devlog.game.studioId,
       actorId: userId,
       action: 'DEVLOG_DELETED',

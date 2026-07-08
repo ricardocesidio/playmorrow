@@ -9,18 +9,18 @@ export class FeedEngineService {
     type: string,
     data: {
       studioId: string;
-      gameId?: string;
-      actorId?: string;
-      payload: Record<string, unknown>;
+      gameId?: string | null;
+      actorId?: string | null;
+      payload: unknown;
     },
-  ) {
+  ): Promise<unknown> {
     return this.prisma.feedEvent.create({
       data: {
-        type,
+        type: type as never,
         studioId: data.studioId,
         gameId: data.gameId ?? null,
         actorId: data.actorId ?? null,
-        payload: data.payload,
+        payload: data.payload as never,
       },
     });
   }
