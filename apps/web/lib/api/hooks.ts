@@ -655,6 +655,7 @@ export function useCreateDevlog() {
       coverUrl?: string;
       isPublished?: boolean;
       publishedAt?: string;
+      status?: string;
       token: string;
     }) => {
       const { gameSlug, token, ...body } = data;
