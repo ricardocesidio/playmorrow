@@ -174,7 +174,7 @@ function PremiumGameDetail({
 
           <TagRow tags={tags} />
 
-          <section className="mt-4 grid items-start gap-4 xl:grid-cols-[1fr_430px]">
+          <section className="mt-2 grid items-start gap-4 xl:grid-cols-[1fr_430px]">
             <div className="grid gap-4">
               <div className="grid items-start gap-4 lg:grid-cols-[0.95fr_1.05fr]">
                 <TrailerPanel title={title} image={heroImage} trailerUrl={game.trailerUrl} />
@@ -413,7 +413,7 @@ function ShareButtons({ title }: { title: string }) {
 
 function TagRow({ tags }: { tags: string[] }) {
   return (
-    <div className="mt-5 flex flex-wrap items-center gap-3 sm:gap-4">
+    <div className="mt-2 flex flex-wrap items-center gap-3 sm:gap-4">
       <span className="pm-micro mr-1 text-muted-foreground">Tags</span>
       {tags.slice(0, 8).map((tag, index) => (
         <span key={tag} className={`clip-corner-sm border bg-background/52 px-4 py-1.5 font-mono text-xs font-semibold shadow-[inset_0_0_12px_rgb(62_231_255_/_0.04)] ${index === 3 || index === 4 ? 'border-violet/55 text-violet' : 'border-cyan/35 text-cyan'}`}>
