@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import type { FeedEventType } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class FeedEngineService {
   constructor(private readonly prisma: PrismaService) {}
 
   async emit(
-    type: FeedEventType,
+    type: string,
     data: {
       studioId: string;
       gameId?: string;

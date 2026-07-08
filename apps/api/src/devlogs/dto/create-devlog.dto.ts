@@ -1,6 +1,5 @@
-import { DevlogStatus } from '@prisma/client';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsEnum, IsInt, IsOptional, IsString, IsUrl, Matches, Max, MaxLength, MinLength } from 'class-validator';
+import { IsBoolean, IsDateString, IsInt, IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class CreateDevlogDto {
   @ApiProperty({ example: 'Combat prototype update' })
@@ -35,10 +34,10 @@ export class CreateDevlogDto {
   @IsUrl({ require_tld: false, require_protocol: false })
   coverUrl?: string;
 
-  @ApiPropertyOptional({ enum: DevlogStatus, example: 'DRAFT' })
+  @ApiPropertyOptional({ example: 'DRAFT' })
   @IsOptional()
-  @IsEnum(DevlogStatus)
-  status?: DevlogStatus;
+  @IsString()
+  status?: string;
 
   @ApiPropertyOptional({ example: false })
   @IsOptional()
