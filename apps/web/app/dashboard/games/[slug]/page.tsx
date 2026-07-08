@@ -11,7 +11,7 @@ import { useGame, useUpdateGame, useDeleteGame } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
 
 const STATUSES = ['CONCEPT', 'IN_DEVELOPMENT', 'ALPHA', 'BETA', 'EARLY_ACCESS', 'RELEASED', 'CANCELLED', 'ON_HOLD'];
-const MAX_SCREENSHOTS = 10;
+const MAX_SCREENSHOTS = 15;
 const AVAILABLE_TAGS = [
   { slug: 'stealth', name: 'Stealth' },
   { slug: 'cyberpunk', name: 'Cyberpunk' },
