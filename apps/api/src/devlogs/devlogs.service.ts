@@ -13,6 +13,7 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 const DEVLOG_INCLUDE = {
   game: { select: { id: true, title: true, slug: true, studioId: true } },
   author: { select: { id: true, username: true, displayName: true, avatarUrl: true, role: true } },
+  _count: { select: { reactions: true, comments: true, likes: true } },
 } satisfies Prisma.DevlogInclude;
 
 @Injectable()
@@ -341,6 +342,7 @@ export class DevlogsService {
     game: { id: string; title: string; slug: string; studioId: string };
     author: { id: string; username: string; displayName: string; avatarUrl: string | null; role?: string };
     screenshots?: { id: string; url: string; order: number; caption: string | null }[];
+    _count?: { reactions?: number; comments?: number; likes?: number };
   }) {
     return {
       id: devlog.id,
@@ -366,6 +368,9 @@ export class DevlogsService {
       studio: { id: devlog.game.studioId },
       author: devlog.author,
       screenshots: devlog.screenshots ?? [],
+      reactionsCount: devlog._count?.reactions ?? 0,
+      commentsCount: devlog._count?.comments ?? 0,
+      likesCount: devlog._count?.likes ?? 0,
       createdAt: devlog.createdAt.toISOString(),
       updatedAt: devlog.updatedAt.toISOString(),
     };

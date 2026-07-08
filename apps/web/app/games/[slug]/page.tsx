@@ -663,7 +663,7 @@ function RoadmapNode({ state }: { state: string }) {
 
 function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
   const rows = devlogs.length
-    ? devlogs.slice(0, 3).map((item) => [item.title, item.publishedAt ? new Date(item.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '', item.coverUrl ?? '', 0, 0, `/devlogs/${item.id}`] as const)
+    ? devlogs.slice(0, 3).map((item) => [item.title, item.publishedAt ? new Date(item.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '', item.coverUrl ?? '', item.reactionsCount ?? 0, item.commentsCount ?? 0, `/devlogs/${item.id}`] as const)
     : fallbackDevlogs.map((item) => [...item, '/devlogs/devlog-1'] as const);
 
   return (

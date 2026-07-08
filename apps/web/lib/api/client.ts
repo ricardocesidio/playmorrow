@@ -129,6 +129,9 @@ export interface Devlog {
   category: string | null;
   tags: string[];
   screenshots: { id: string; url: string; order: number; caption: string | null }[];
+  reactionsCount?: number;
+  commentsCount?: number;
+  likesCount?: number;
   createdAt: string;
   updatedAt: string;
   game: { id: string; title: string; slug: string };
