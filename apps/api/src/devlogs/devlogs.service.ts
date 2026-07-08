@@ -13,6 +13,7 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 const DEVLOG_INCLUDE = {
   game: { select: { id: true, title: true, slug: true, studioId: true } },
   author: { select: { id: true, username: true, displayName: true, avatarUrl: true, role: true } },
+  screenshots: { orderBy: { order: 'asc' as const } },
   _count: { select: { reactions: true, comments: true, likes: true } },
 } satisfies Prisma.DevlogInclude;
 

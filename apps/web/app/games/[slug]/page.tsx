@@ -47,9 +47,7 @@ import {
   useFollowGame,
   useGame,
   useGameComments,
-  useGameDevlogs,
   useGameFollowStatus,
-  useGameRoadmap,
   useGameWishlistStatus,
   useReactToGameComment,
   useRemoveGameCommentReaction,
@@ -98,8 +96,6 @@ type GameWithDemoSettings = Game & {
 export default function GameDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: game, isLoading, error } = useGame(slug);
-  const { data: devlogs } = useGameDevlogs(slug);
-  const { data: roadmap } = useGameRoadmap(slug);
 
   if (isLoading) {
     return (
@@ -130,7 +126,7 @@ export default function GameDetailPage() {
     );
   }
 
-  return <PremiumGameDetail game={game} devlogs={devlogs?.items ?? []} roadmap={roadmap ?? []} slug={slug} />;
+  return <PremiumGameDetail game={game} devlogs={game.devlogs ?? []} roadmap={game.roadmapItems ?? []} slug={slug} />;
 }
 
 function PremiumGameDetail({

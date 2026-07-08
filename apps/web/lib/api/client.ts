@@ -108,6 +108,8 @@ export interface Game {
   media: { id: string; type: string; url: string; thumbnailUrl: string | null; caption: string | null; position: number }[];
   platformLinks: { id: string; platform: string; url: string; label: string | null }[];
   tags: string[];
+  devlogs?: Devlog[];
+  roadmapItems?: RoadmapItem[];
   createdAt: string;
   updatedAt: string;
 }
