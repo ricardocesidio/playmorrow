@@ -1,0 +1,125 @@
+# Playmorrow — Project Handoff
+
+**Last updated:** 2026-07-08
+
+## Tech Stack
+
+- **Frontend:** Next.js 15 (app router) + React 19 + Tailwind CSS v4 + TanStack Query
+- **Backend:** NestJS (REST API on port 4000)
+- **Database:** PostgreSQL via Neon (pooler) + Prisma ORM
+- **Monorepo:** `apps/web` (frontend), `apps/api` (backend), `packages/database` (Prisma)
+- **Auth:** Session-based (`playmorrow_session` cookie, `SameSite=Lax`)
+- **Package manager:** pnpm
+
+## Environment
+
+- **Neon DB:** `postgresql://neondb_owner:REDACTED@ep-orange-bird-abpuzipk-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require`
+- **Demo login:** `dev@playmorrow.example` / `Demo123!@`
+- **API URL:** `http://localhost:4000/api` (proxied via Next.js rewrites)
+- **Frontend:** `http://localhost:3000`
+- **`loadEnvFile('.env')`** called in `apps/api/src/main.ts` to ensure DATABASE_URL is loaded
+
+## Design System (Cyberpunk)
+
+- Accents: cyan (#3ee7ff), coral (#ff574d), violet (#a65cff), amber (#e4a83b)
+- Background: obsidian-black (#020609)
+- Components: `HudPanel`, `TechPanel`, `CircuitFrame`, `StatusBadge` in `apps/web/components/playmorrow/hud.tsx`
+- 19 curated tags: stealth, cyberpunk, tactical, strategy, sci-fi, singleplayer, story-rich, atmospheric, rpg, space, adventure, exploration, fantasy, card-game, roguelike, action, runner, fast-paced, deckbuilding
+
+## Database State
+
+- **5 games:** Neon Warden, Starfall Tactics, Mossbound, Paper Relics, Voidrunner
+- **5 studios:** Obsidian Signal, Ironlight Studios, Wildbriar, Second Story Games, Voidrunner Dev
+- **8 devlogs:** 3 Neon Warden, 2 Starfall, 2 Mossbound, 1 Paper Relics, 1 Voidrunner
+- **20 roadmap items:** 4 per game
+- **Platform links:** 4 per game (cleaned from 20 duplicates)
+- **Demo user XP:** 1250xp, level 4, with 7 player XP events + 3 studio XP events
+- **Community comments:** Auto-generated when devlogs published via Feed Engine
+- **Remaining warnings:** 10-15 pre-existing unused imports (non-blocking, ESLint only)
+
+## Devlog System V2 PRD — Complete
+
+### Implemented
+- **Schema:** `DevlogStatus` (DRAFT/PUBLISHED/SCHEDULED), `FeedEventType`, `FeedEvent`, `DevlogLike` (unique constraint), `DevlogScreenshot` models. Devlog fields: subtitle, readingTimeMin, status, scheduledFor, editedAt, category, tags, screenshots, likes
+- **Feed Engine:** `apps/api/src/feed/feed-events.service.ts` — centralized `emit()` + `onDevlogPublished()` with auto CommunityPost creation
+- **API:** `POST /devlogs/:id/like` (toggle), `GET /feed/events` (paginated), expanded CRUD with all new fields
+- **RBAC seat limits:** `assertSeatLimit()` in `apps/api/src/common/studio-permissions.ts` (Owner:2, Admin:3, Moderator:10)
+- **Game page:** Devlogs full width in main content, Roadmap in right sidebar below QuickInfo. `toResponse` includes devlogs + roadmapItems
+- **Devlog editor:** Status radio (Draft/Publish/Schedule), subtitle, tags chip input, screenshots upload (max 15), category, scheduled date picker, preview toggle (Edit/Preview/Split)
+- **Devlog detail:** Status badge, category chip, tags, screenshots gallery, author role badge
+- **Editor toolbar:** `@uiw/react-md-editor` v4.1.1 with full formatting toolbar
+- **Cache revalidation:** Server actions in `apps/web/actions/revalidate.ts` — called on devlog publish, game update, studio mutations
+- **Implementation Report:** Delivered (Section 10 of PRD)
+
+### Intentionally Deferred (PRD Section 3 — Out of Scope)
+- Email/push notifications to followers
+- Real-time WebSocket updates (cache revalidation covers this)
+- @mentions in comments
+- Scheduled publishing worker (field exists, cron TBD)
+- CoverUrl → screenshots migration (needs data migration plan)
+- Recursive nested replies beyond 1 level (backend supports it, frontend renders 1 level)
+
+## Key Files Reference
+
+| Purpose | Path |
+|---|---|
+| Prisma schema | `packages/database/prisma/schema.prisma` |
+| API main entry | `apps/api/src/main.ts` |
+| Feed Engine | `apps/api/src/feed/feed-events.service.ts` |
+| RBAC/permissions | `apps/api/src/common/studio-permissions.ts` |
+| Game detail service | `apps/api/src/games/games.service.ts` |
+| Devlog service | `apps/api/src/devlogs/devlogs.service.ts` |
+| Game page | `apps/web/app/games/[slug]/page.tsx` |
+| Homepage | `apps/web/app/page.tsx` |
+| Feed page | `apps/web/app/feed/page.tsx` |
+| Devlog editor (new) | `apps/web/app/dashboard/devlogs/new/page.tsx` |
+| Devlog editor (edit) | `apps/web/app/dashboard/devlogs/[id]/page.tsx` |
+| Devlog detail | `apps/web/app/devlogs/[id]/page.tsx` |
+| API hooks | `apps/web/lib/api/hooks.ts` |
+| API client types | `apps/web/lib/api/client.ts` |
+| Markdown editor | `apps/web/components/md-editor.tsx` |
+| Cache revalidation | `apps/web/actions/revalidate.ts` |
+| Player dashboard | `apps/web/components/dashboard/PlayerDashboard.tsx` |
+| Studio dashboard | `apps/web/components/dashboard/StudioDashboard.tsx` |
+
+## Running the Project
+
+```bash
+# Backend (port 4000)
+cd apps/api && npx nest start
+
+# Frontend (port 3000)
+cd apps/web && npx next dev -p 3000
+
+# Database push
+cd packages/database && DATABASE_URL="..." npx prisma db push
+```
+
+## Recent Work (2026-07-08)
+
+**Session 1 — Infrastructure:**
+- Cleaned database: 72 games → 5, 73 studios → 5
+- Fixed `loadEnvFile('.env')` in main.ts for Neon connection
+- Added 8 demo devlogs via API, 4 roadmap items per game
+- Platform links deduplicated (20→4 per game)
+- Game detail API now includes devlogs + roadmapItems
+
+**Session 2 — Game page (9 fixes):**
+- Tagline in hero (replaced tags-as-subtitle), featured badge conditional
+- Studio name deduplicated, platform chips now links
+- Removed fake trailer progress bar, roadmap dates → TBA
+- Screenshots without 5-cap, Contact Studio → Visit Studio link
+- Manage button gated by authentication
+
+**Session 3 — Devlog system enhanced:**
+- Editor (new+edit): status radio, subtitle, tags chip, screenshots upload, category, scheduled date
+- Detail page: status badge, category chip, tags, screenshots gallery, author role badge
+- Preview toggle: Edit/Preview/Split modes
+- Cache revalidation on all mutations
+
+**Session 4 — Feed + Homepage:**
+- Feed page: Load more button with pagination, type filter tabs (All/Devlogs/Roadmap)
+- "Your Signal" sidebar shows real following counts from API
+- Homepage: fake progress bars → real stats (followers/wishlists/comments)
+- Leaderboard populated with real XP data
+- Implementation Report delivered (PRD Section 10)
