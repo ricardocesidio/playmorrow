@@ -164,32 +164,31 @@ function PremiumGameDetail({
         <div className="relative z-10 mx-auto max-w-[1500px]">
           <Breadcrumbs title={title} />
 
-          <section className="relative z-10 grid items-start gap-5 xl:grid-cols-[1fr_430px]">
+          <section className="grid items-start gap-5 xl:grid-cols-[1fr_430px]">
             <GameHero game={game} title={title} heroImage={heroImage} slug={slug} />
             <div className="grid gap-4">
               <PurchasePanel game={game} slug={slug} title={title} />
-              <AboutPanel game={game} slug={slug} />
             </div>
           </section>
 
-          <section className="grid items-start gap-4 xl:grid-cols-[1fr_430px] -mt-[350px]">
+          <section className="grid items-start gap-4 xl:grid-cols-[1fr_430px]">
             <div className="grid gap-4">
               <TagRow tags={tags} />
               <div className="grid items-start gap-4 lg:grid-cols-[0.95fr_1.05fr]">
                 <TrailerPanel title={title} image={heroImage} trailerUrl={game.trailerUrl} />
-                <ScreenshotsPanel
-                  screenshots={screenshots}
-                  allScreenshots={allScreenshots}
-                  active={activeScreenshot}
-                  onSelect={setActiveScreenshot}
-                  title={title}
-                />
+                <ScreenshotsPanel screenshots={screenshots} allScreenshots={allScreenshots} active={activeScreenshot} onSelect={setActiveScreenshot} title={title} />
               </div>
-
-              <div className="grid items-stretch gap-4 lg:grid-cols-[1fr_1fr]">
+              <div className="grid items-stretch gap-4 lg:grid-cols-[1fr_1fr_1fr]">
+                <AboutPanel game={game} slug={slug} />
                 <RoadmapPanel roadmap={roadmap} />
                 <DevlogsPanel devlogs={devlogs} slug={slug} />
               </div>
+            </div>
+            <aside className="grid gap-4">
+              <InfoLinksPanel game={game} slug={slug} />
+              <CommunityPanel slug={slug} />
+            </aside>
+          </section>
             </div>
 
             <aside className="grid gap-4">
