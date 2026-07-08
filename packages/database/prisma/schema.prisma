@@ -478,28 +478,95 @@ model PressKit {
 // Progress: devlogs & roadmap
 // ──────────────────────────────────────────────────────────────────────────
 
-model Devlog {
-  id          String    @id @default(cuid())
-  gameId      String
-  authorId    String
-  title       String
-  slug        String
-  body        String
-  coverUrl    String?
-  isPublished Boolean   @default(false)
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+enum DevlogStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+}
 
-  game      Game       @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  comments  Comment[]
-  reactions Reaction[]
+enum FeedEventType {
+  DEVLOG_PUBLISHED
+  GAME_PUBLISHED
+  ROADMAP_UPDATED
+  TRAILER_UPDATED
+  PRESS_KIT_UPDATED
+  STUDIO_CREATED
+  STUDIO_VERIFIED
+  ROLE_CHANGED
+}
+
+model Devlog {
+  id             String        @id @default(cuid())
+  gameId         String
+  authorId       String
+  title          String
+  subtitle       String?
+  slug           String
+  body           String        @db.Text
+  readingTimeMin Int?
+  status         DevlogStatus  @default(DRAFT)
+  isPublished    Boolean       @default(false)
+  publishedAt    DateTime?
+  scheduledFor   DateTime?
+  editedAt       DateTime?
+  category       String?
+  tags           String[]
+  coverUrl       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  game        Game               @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  author      User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments    Comment[]
+  reactions   Reaction[]
+  screenshots DevlogScreenshot[]
+  likes       DevlogLike[]
 
   @@unique([gameId, slug])
   @@index([authorId])
   @@index([publishedAt])
+  @@index([gameId, status, publishedAt])
   @@map("devlogs")
+}
+
+model DevlogScreenshot {
+  id       String @id @default(cuid())
+  devlogId String
+  url      String
+  order    Int    @default(0)
+  caption  String?
+
+  devlog Devlog @relation(fields: [devlogId], references: [id], onDelete: Cascade)
+
+  @@map("devlog_screenshots")
+}
+
+model DevlogLike {
+  id        String   @id @default(cuid())
+  devlogId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  devlog Devlog @relation(fields: [devlogId], references: [id], onDelete: Cascade)
+
+  @@unique([devlogId, userId])
+  @@map("devlog_likes")
+}
+
+model FeedEvent {
+  id        String        @id @default(cuid())
+  type      FeedEventType
+  studioId  String
+  gameId    String?
+  actorId   String?
+  payload   Json
+  createdAt DateTime      @default(now())
+
+  @@index([createdAt])
+  @@index([studioId])
+  @@index([gameId])
+  @@map("feed_events")
 }
 
 model RoadmapItem {

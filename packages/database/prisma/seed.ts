@@ -314,7 +314,8 @@ async function main() {
           title: "Shadows Don't Sleep: Infiltration in Neon Warden",
           slug: 'shadows-dont-sleep',
           body: 'A deep dive into stealth systems, enemy perception, and the city that never rests.',
-          isPublished: true,
+        isPublished: true,
+        status: 'PUBLISHED',
           publishedAt: new Date('2025-06-01'),
         },
       });
