@@ -172,8 +172,6 @@ function PremiumGameDetail({
             </div>
           </section>
 
-          <TagRow tags={tags} />
-
           <section className="mt-2 grid items-start gap-4 xl:grid-cols-[1fr_430px]">
             <div className="grid gap-4">
               <div className="grid items-start gap-4 lg:grid-cols-[0.95fr_1.05fr]">
@@ -198,6 +196,8 @@ function PremiumGameDetail({
               <CommunityPanel slug={slug} />
             </aside>
           </section>
+
+          <TagRow tags={tags} />
         </div>
         <HudStatusRail />
       </main>
