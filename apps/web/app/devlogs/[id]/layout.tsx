@@ -5,7 +5,7 @@ const API = process.env.API_URL || 'http://localhost:4000/api';
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   try {
-    const res = await fetch(`${API}/me/devlogs/${id}`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API}/devlogs/${id}`, { next: { revalidate: 3600 } });
     if (!res.ok) return { title: 'Devlog Not Found · Playmorrow' };
     const devlog = await res.json();
     return {
