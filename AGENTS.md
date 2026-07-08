@@ -1,6 +1,6 @@
 # Playmorrow — Project Handoff
 
-**Last updated:** 2026-07-08
+**Last updated:** 2026-07-08 (final PRD audit pass)
 
 ## Tech Stack
 
@@ -26,6 +26,14 @@
 - Components: `HudPanel`, `TechPanel`, `CircuitFrame`, `StatusBadge` in `apps/web/components/playmorrow/hud.tsx`
 - 19 curated tags: stealth, cyberpunk, tactical, strategy, sci-fi, singleplayer, story-rich, atmospheric, rpg, space, adventure, exploration, fantasy, card-game, roguelike, action, runner, fast-paced, deckbuilding
 
+## Security
+
+- **XSS:** `DOMPurify` sanitizes all rendered Markdown (devlog body, game description preview)
+- **Upload validation:** MIME type whitelist, magic byte header check, file size (20MB max), image dimensions (4096px max)
+- **Screenshots:** Max 10 enforced at API layer via `@ArrayMaxSize(10)` DTO validation
+- **Likes:** Unique per user enforced at DB level (`@@unique([devlogId, userId])`)
+- **Seat limits:** Server-side enforcement with HTTP 409 error codes
+
 ## Database State
 
 - **5 games:** Neon Warden, Starfall Tactics, Mossbound, Paper Relics, Voidrunner
@@ -41,11 +49,11 @@
 
 ### Implemented
 - **Schema:** `DevlogStatus` (DRAFT/PUBLISHED/SCHEDULED), `FeedEventType`, `FeedEvent`, `DevlogLike` (unique constraint), `DevlogScreenshot` models. Devlog fields: subtitle, readingTimeMin, status, scheduledFor, editedAt, category, tags, screenshots, likes
-- **Feed Engine:** `apps/api/src/feed/feed-events.service.ts` — centralized `emit()` + `onDevlogPublished()` with auto CommunityPost creation
+- **Feed Engine:** `apps/api/src/feed/feed-events.service.ts` — centralized `emit()` + `onDevlogPublished()` with auto CommunityPost creation. Events wired: DEVLOG_PUBLISHED, GAME_CREATED, GAME_STATUS_CHANGED, ROADMAP_UPDATED, STUDIO_CREATED, PRESS_KIT_UPDATED, ROLE_CHANGED
 - **API:** `POST /devlogs/:id/like` (toggle), `GET /feed/events` (paginated), expanded CRUD with all new fields
 - **RBAC seat limits:** `assertSeatLimit()` in `apps/api/src/common/studio-permissions.ts` (Owner:2, Admin:3, Moderator:10)
 - **Game page:** Devlogs full width in main content, Roadmap in right sidebar below QuickInfo. `toResponse` includes devlogs + roadmapItems
-- **Devlog editor:** Status radio (Draft/Publish/Schedule), subtitle, tags chip input, screenshots upload (max 15), category, scheduled date picker, preview toggle (Edit/Preview/Split)
+- **Devlog editor:** Status radio (Draft/Publish/Schedule), subtitle, tags chip input, screenshots upload (max 10), category, scheduled date picker, preview toggle (Edit/Preview/Split)
 - **Devlog detail:** Status badge, category chip, tags, screenshots gallery, author role badge
 - **Editor toolbar:** `@uiw/react-md-editor` v4.1.1 with full formatting toolbar
 - **Cache revalidation:** Server actions in `apps/web/actions/revalidate.ts` — called on devlog publish, game update, studio mutations
