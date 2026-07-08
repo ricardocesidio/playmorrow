@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Trophy, ArrowLeft, Loader2 } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { api } from '@/lib/api/client';
 
 interface LeaderboardEntry {
@@ -75,7 +74,6 @@ export default function LeaderboardPage() {
           )}
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }

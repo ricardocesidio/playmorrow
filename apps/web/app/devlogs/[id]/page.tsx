@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { ArrowLeft, MessageSquare, ThumbsUp, Heart, Zap, Lightbulb } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { useAuth } from '@/lib/api/auth-context';
 import {
   useDevlog,
@@ -305,7 +304,6 @@ export default function DevlogDetailPage() {
             </div>
           </div>
         </main>
-        <SiteFooter />
       </>
     );
   }
@@ -325,7 +323,6 @@ export default function DevlogDetailPage() {
             </Link>
           </div>
         </main>
-        <SiteFooter />
       </>
     );
   }
@@ -443,7 +440,6 @@ export default function DevlogDetailPage() {
           </section>
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }

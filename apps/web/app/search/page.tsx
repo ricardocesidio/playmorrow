@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Search, Loader2, Gamepad2, Building2, FileText } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { api, type SearchResponse } from '@/lib/api/client';
 
 export default function SearchPage() {
@@ -164,7 +163,6 @@ export default function SearchPage() {
           )}
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }

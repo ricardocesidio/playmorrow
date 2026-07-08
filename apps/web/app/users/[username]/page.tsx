@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { useAuth } from '@/lib/api/auth-context';
 import { useUserProfile } from '@/lib/api/hooks';
 import { formatRelativeTime } from '@/lib/format';
@@ -62,7 +61,6 @@ export default function UserProfilePage() {
             <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           </div>
         </main>
-        <SiteFooter />
       </>
     );
   }
@@ -81,7 +79,6 @@ export default function UserProfilePage() {
             <Link href="/" className="mt-4 clip-corner border border-cyan/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">Go home</Link>
           </div>
         </main>
-        <SiteFooter />
       </>
     );
   }
@@ -268,7 +265,6 @@ export default function UserProfilePage() {
           )}
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }

@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { ArrowLeft, Shield, Cookie, BarChart3, Megaphone, Lock } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 
 export default function CookiePolicyPage() {
   return (
@@ -76,7 +75,6 @@ export default function CookiePolicyPage() {
           </div>
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }

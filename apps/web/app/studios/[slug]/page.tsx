@@ -21,7 +21,6 @@ import {
 import { formatFollowers } from '@/lib/format';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { StatusBadge } from '@/components/status-badge';
 import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { ErrorState } from '@/components/error-state';
@@ -65,7 +64,6 @@ export default function StudioDetailPage() {
         <main className="relative min-h-screen overflow-hidden bg-[#020609] px-5 pb-24 pt-4 sm:px-8 lg:px-10">
           <LoadingSkeleton count={6} height="h-16" />
         </main>
-        <SiteFooter />
       </>
     );
   }
@@ -80,7 +78,6 @@ export default function StudioDetailPage() {
             <Link href="/studios" className="font-mono text-xs uppercase tracking-widest text-cyan underline">Back to studios</Link>
           </div>
         </main>
-        <SiteFooter />
       </>
     );
   }
@@ -363,7 +360,6 @@ export default function StudioDetailPage() {
         {/* Similar Studios */}
         <SimilarStudios currentSlug={slug} />
       </main>
-      <SiteFooter />
     </>
   );
 }

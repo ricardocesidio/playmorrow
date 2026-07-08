@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Building2, Search, BadgeCheck, Users, Gamepad2, Heart } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { SignalLabel } from '@/components/signal-label';
 import { useStudios } from '@/lib/api/hooks';
 import { cn } from '@/lib/utils';
@@ -315,7 +314,6 @@ export default function StudiosPage() {
           )}
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }
