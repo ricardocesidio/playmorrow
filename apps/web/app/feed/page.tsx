@@ -142,7 +142,7 @@ export default function FeedPage() {
 
 function SignalTabs({ activeTab, onTabChange, onPageReset }: { activeTab: string; onTabChange: (tab: string) => void; onPageReset: () => void }) {
   return (
-    <div className="grid border-b border-border/80 bg-background/55 text-muted-foreground md:grid-cols-[150px_1fr_1fr_1fr_1fr_190px]">
+    <div className="grid border-b border-border/80 bg-background/55 text-muted-foreground md:grid-cols-[150px_1fr_1fr_1fr_1fr]">
       {['All signals', 'Devlogs', 'Roadmap', 'Releases', 'Milestones'].map((tab) => {
         const isActive = activeTab === tab;
         const typeKey = tab === 'All signals' ? 'all' : tab === 'Devlogs' ? 'devlogs' : tab === 'Roadmap' ? 'roadmap' : tab === 'Releases' ? 'releases' : 'milestones';
@@ -161,15 +161,6 @@ function SignalTabs({ activeTab, onTabChange, onPageReset }: { activeTab: string
           </button>
         );
       })}
-      <button
-        type="button"
-        className="flex h-12 cursor-pointer items-center justify-center gap-3 px-4 pm-micro hover:text-foreground"
-      >
-        <span className={`relative h-4 w-8 rounded-full border transition-colors border-border-bright bg-background`}>
-          <span className="absolute top-1/2 size-2.5 -translate-y-1/2 rounded-full transition-all left-1 bg-muted-foreground" />
-        </span>
-        Following only
-      </button>
     </div>
   );
 }
