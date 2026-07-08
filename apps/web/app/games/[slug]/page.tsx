@@ -964,6 +964,8 @@ function formatReleaseDate(dateStr: string | null | undefined): string {
   if (isNaN(d.getTime()) || d.getFullYear() < 2020) return 'TBA';
   return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
+
+function getCurrencySymbol(code: string): string {
   const symbols: Record<string, string> = {
     USD: '$', EUR: '€', GBP: '£', JPY: '¥', BRL: 'R$',
     CAD: 'C$', AUD: 'A$', CHF: 'Fr', CNY: '¥', INR: '₹',
