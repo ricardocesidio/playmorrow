@@ -707,7 +707,7 @@ function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
 
 function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
   return (
-    <HudPanel className="h-full p-4 min-h-[284px] lg:h-[334px]" accent="muted">
+    <HudPanel className="h-full p-4" accent="muted">
       <h2 className="text-sm mb-4 text-foreground">Quick Info</h2>
       <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
         <InfoField label="Developer" value={game.studio?.name ?? ''} />
@@ -830,11 +830,7 @@ function CommunityPanel({ slug }: { slug: string }) {
                 <span className="ml-2">{timeAgo(comment.createdAt)}</span>
                 <span className="block leading-5">{comment.body}</span>
               </span>
-              <button
-                type="button"
-                onClick={() => handleLike(comment)}
-                className="flex cursor-pointer items-start gap-1 text-xs text-muted-foreground hover:text-coral shrink-0 pt-0.5"
-              >
+              <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(comment); }} style={{ pointerEvents: 'auto', zIndex: 10, position: 'relative' }} className="flex cursor-pointer items-start gap-1 text-xs text-muted-foreground hover:text-coral shrink-0 pt-0.5">
                 <Heart className={`size-3.5 ${comment.viewerReactions?.includes('LIKE') ? 'fill-coral text-coral' : ''}`} />
                 {comment.reactions?.LIKE ?? 0}
               </button>
