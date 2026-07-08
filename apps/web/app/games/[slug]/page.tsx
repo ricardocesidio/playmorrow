@@ -830,16 +830,14 @@ function CommunityPanel({ slug }: { slug: string }) {
                 <span className="ml-2">{timeAgo(comment.createdAt)}</span>
                 <span className="block leading-5">{comment.body}</span>
               </span>
-              <span className="flex items-start gap-4 text-xs text-muted-foreground">
-                <button
-                  type="button"
-                  onClick={() => handleLike(comment)}
-                  className="inline-flex cursor-pointer items-center gap-1 hover:text-coral"
-                >
-                  <Heart className="size-3.5" />
-                  {comment.reactions?.LIKE ?? 0}
-                </button>
-              </span>
+              <button
+                type="button"
+                onClick={() => handleLike(comment)}
+                className="flex cursor-pointer items-start gap-1 text-xs text-muted-foreground hover:text-coral shrink-0 pt-0.5"
+              >
+                <Heart className={`size-3.5 ${comment.viewerReactions?.includes('LIKE') ? 'fill-coral text-coral' : ''}`} />
+                {comment.reactions?.LIKE ?? 0}
+              </button>
             </div>
           );
           })}
