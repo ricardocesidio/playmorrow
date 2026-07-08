@@ -25,10 +25,10 @@ export default function HomePage() {
   const { data: studiosData } = useStudios();
 
   const games = normalizeLatestGames(gamesData?.items);
-  const gamesCount = gamesData?.total ?? 0;
+  const gamesCount = Math.min(gamesData?.total ?? 0, 5);
   const feedItems = feedData?.items?.slice(0, 4) ?? [];
   const feedCount = feedData?.total ?? 0;
-  const studioCount = studiosData?.total ?? 0;
+  const studioCount = Math.min(studiosData?.total ?? 0, 5);
 
   return (
     <>
