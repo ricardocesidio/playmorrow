@@ -33,6 +33,7 @@ export default function EditGamePage() {
   const [coverUrl, setCoverUrl] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
   const [trailerUrl, setTrailerUrl] = useState('');
+  const [tagsInput, setTagsInput] = useState('');
   const [media, setMedia] = useState<{ id?: string; type: string; url: string; caption: string }[]>([]);
   const [uploadingShot, setUploadingShot] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -58,6 +59,7 @@ export default function EditGamePage() {
       setCoverUrl(game.coverUrl ?? '');
       setBannerUrl(game.bannerUrl ?? '');
       setTrailerUrl(game.trailerUrl ?? '');
+      setTagsInput((game.tags ?? []).join(', '));
       setMedia((game.media ?? []).map((m: { id?: string; type: string; url: string; caption?: string | null }) => ({ id: m.id, type: m.type, url: m.url, caption: m.caption ?? '' })));
       setInitialized(true);
     }
@@ -124,6 +126,7 @@ export default function EditGamePage() {
           coverUrl: coverUrl.trim() || null,
           bannerUrl: bannerUrl.trim() || null,
           trailerUrl: trailerUrl.trim() || null,
+          tags: tagsInput.split(',').map((t) => t.trim()).filter(Boolean),
           media: media.filter((m) => m.url).map((m) => ({ type: m.type, url: m.url, caption: m.caption || null })),
         },
       });
@@ -287,6 +290,12 @@ export default function EditGamePage() {
             <div className="mt-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Tagline</label>
               <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)}
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            </div>
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Tags (comma-separated)</label>
+              <input type="text" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)}
+                placeholder="stealth, cyberpunk, tactical"
                 className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
           </div>
