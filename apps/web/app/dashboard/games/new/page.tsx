@@ -4,7 +4,7 @@ import { Suspense, useState, type FormEvent, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Plus, Trash2, Gamepad2, Upload, Loader2 } from 'lucide-react';
-
+import DOMPurify from 'dompurify';
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyStudios, useCreateGame } from '@/lib/api/hooks';
@@ -277,7 +277,7 @@ function CreateGameForm() {
               </div>
               {previewMode ? (
                 <div className="clip-corner min-h-[6rem] w-full border border-input bg-background/80 px-4 py-3 text-sm text-foreground [&_strong]:text-white [&_code]:bg-muted [&_code]:px-1"
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(description) }} />
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderMarkdown(description)) }} />
               ) : (
                 <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
                   className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />

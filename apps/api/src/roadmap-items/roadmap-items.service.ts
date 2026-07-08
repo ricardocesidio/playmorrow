@@ -7,6 +7,7 @@ import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateRoadmapItemDto } from './dto/create-roadmap-item.dto';
 import type { UpdateRoadmapItemDto } from './dto/update-roadmap-item.dto';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { FeedEngineService } from '../feed/feed-events.service';
 
 const ROADMAP_INCLUDE = {
   game: { select: { id: true, title: true, slug: true, studioId: true } },
@@ -18,6 +19,7 @@ export class RoadmapItemsService {
     private readonly prisma: PrismaService,
     private readonly studioXpService: StudioXpService,
     private readonly auditLog: AuditLogService,
+    private readonly feedEngine: FeedEngineService,
   ) {}
 
   async create(userId: string, gameSlug: string, dto: CreateRoadmapItemDto) {
@@ -58,6 +60,13 @@ export class RoadmapItemsService {
       targetId: item.id,
       metadata: { title: item.title },
     });
+
+    this.feedEngine.emit('ROADMAP_UPDATED', {
+      studioId: game.studioId,
+      gameId: game.id,
+      actorId: userId,
+      payload: { title: item.title, status: item.status },
+    }).catch(() => {});
 
     return this.toResponse(item, game.studio);
   }
@@ -133,6 +142,13 @@ export class RoadmapItemsService {
       targetType: 'ROADMAP_ITEM',
       targetId: id,
     });
+
+    this.feedEngine.emit('ROADMAP_UPDATED', {
+      studioId: item.game.studioId,
+      gameId: item.gameId,
+      actorId: userId,
+      payload: { title: updated.title, status: updated.status },
+    }).catch(() => {});
 
     const studio = await this.prisma.studio.findUnique({
       where: { id: item.game.studioId },
