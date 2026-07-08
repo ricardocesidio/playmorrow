@@ -3,7 +3,6 @@
 import { useState, type FormEvent, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, FileText, Trash2, X, Upload, Calendar } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { MarkdownEditor } from '@/components/md-editor';

@@ -3,7 +3,7 @@
 import { useState, type FormEvent, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Save, ExternalLink, Gamepad2, Milestone, FileText, ScrollText, Trash2, Upload, Loader2, X } from 'lucide-react';
+import { ArrowLeft, Save, ExternalLink, Gamepad2, Milestone, FileText, ScrollText, Trash2, Upload, Loader2, } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';

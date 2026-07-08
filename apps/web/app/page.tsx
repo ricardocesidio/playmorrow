@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import {
   Activity, ArrowRight, Gamepad2, Heart, Radio, SquarePlay, UserPlus, Users, Zap,
-  Building2, MessageCircle, Star, TrendingUp, Crown,
 } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';

@@ -5,8 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft, Save, Trash2, Upload, X, Loader2, Check, Camera, AlertTriangle,
-  PanelLeft, FileText, Workflow, LineChart, Radio, Library, Users, ShieldCheck, Settings,
-  CircleDollarSign, Gauge, ExternalLink, Gamepad2
+  Gauge, ExternalLink, Gamepad2
 } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';

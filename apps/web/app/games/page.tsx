@@ -5,7 +5,6 @@ import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, BarChart3, Bookmark, ChevronDown, Search, Users, X } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';

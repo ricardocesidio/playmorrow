@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Gamepad2, Plus, ExternalLink } from 'lucide-react';
+import { Gamepad2, Plus, ExternalLink } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyGames } from '@/lib/api/hooks';

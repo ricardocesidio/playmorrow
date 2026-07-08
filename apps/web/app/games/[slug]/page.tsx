@@ -19,7 +19,6 @@ import {
   Heart,
   Link as LinkIcon,
   Lock,
-  MessageCircle,
   Monitor,
   Pencil,
   Play,
@@ -595,7 +594,7 @@ function AboutPanel({ game, slug }: { game: Game; slug: string }) {
 function RoadmapPanel({ roadmap }: { roadmap: RoadmapItem[] }) {
   const unique = [...new Map(roadmap.map((item) => [item.title, item])).values()];
   const rows = unique.length
-    ? unique.slice(0, 4).map((item, index) => [
+    ? unique.slice(0, 4).map((item, _index) => [
         item.targetDate ? new Date(item.targetDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'TBA',
         item.status,
         item.title,

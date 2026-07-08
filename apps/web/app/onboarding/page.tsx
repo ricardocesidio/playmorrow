@@ -52,7 +52,6 @@ export default function OnboardingPage() {
   const [bio, setBio] = useState('');
   const [country, setCountry] = useState('');
   const [avatarDataUrl, setAvatarDataUrl] = useState<string | null>(null);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [studioName, setStudioName] = useState('');
   const [studioSlug, setStudioSlug] = useState('');
