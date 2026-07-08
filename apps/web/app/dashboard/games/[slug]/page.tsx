@@ -210,54 +210,21 @@ export default function EditGamePage() {
             </div>
           )}
 
-          {/* Basic Information */}
+          {/* Standard Edition (Pricing + Release) */}
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
-            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Basic Information</h3>
-            <div>
-              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Title *</label>
-              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Standard Edition</h3>
+            <div className="flex items-center gap-3 mb-4">
+              <input type="checkbox" id="isFree" checked={isFree} onChange={(e) => setIsFree(e.target.checked)} className="rounded border-input" />
+              <label htmlFor="isFree" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Free</label>
             </div>
-            <div className="mt-4">
-              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Slug (immutable)</label>
-              <input type="text" value={slug} disabled
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground/50 outline-none transition" />
-            </div>
-            <div className="mt-4">
-              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Tagline</label>
-              <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)}
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
-            </div>
-            <div className="mt-4">
-              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Description</label>
-              <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
-                className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
-            </div>
-          </div>
-
-          {/* Release Details */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
-            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Release Details</h3>
+            {!isFree && (
+              <div className="mb-4">
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Price (cents)</label>
+                <input type="number" value={priceCents} onChange={(e) => setPriceCents(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            )}
             <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Status</label>
-                <select value={status} onChange={(e) => setStatus(e.target.value)}
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
-                  {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Expected release text</label>
-                <input type="text" value={expectedReleaseText} onChange={(e) => setExpectedReleaseText(e.target.value)}
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
-              </div>
-            </div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Release date</label>
-                <input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)}
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
-              </div>
               <div>
                 <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Currency</label>
                 <select value={currency} onChange={(e) => setCurrency(e.target.value)}
@@ -276,23 +243,52 @@ export default function EditGamePage() {
                   <option value="MXN">MXN (Mex$)</option>
                 </select>
               </div>
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Expected release</label>
+                <input type="text" value={expectedReleaseText} onChange={(e) => setExpectedReleaseText(e.target.value)}
+                  placeholder="e.g. Q4 2026"
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Release date</label>
+              <input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)}
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
           </div>
 
-          {/* Pricing */}
+          {/* About */}
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
-            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Pricing</h3>
-            <div className="flex items-center gap-3 mb-3">
-              <input type="checkbox" id="isFree" checked={isFree} onChange={(e) => setIsFree(e.target.checked)} className="rounded border-input" />
-              <label htmlFor="isFree" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Free</label>
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">About</h3>
+            <div>
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Description</label>
+              <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
+                className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
-            {!isFree && (
+          </div>
+
+          {/* Quick Info */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Quick Info</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Price (cents)</label>
-                <input type="number" value={priceCents} onChange={(e) => setPriceCents(e.target.value)}
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Status</label>
+                <select value={status} onChange={(e) => setStatus(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
+                  {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Title</label>
+                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
                   className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
-            )}
+            </div>
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Tagline</label>
+              <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)}
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            </div>
           </div>
 
           {/* Trailer */}
