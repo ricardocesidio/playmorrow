@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   Activity, ArrowRight, Gamepad2, Heart, Radio, SquarePlay, UserPlus, Users, Zap,
@@ -20,11 +21,13 @@ function getFeedIcon(type: string) {
 
 export default function HomePage() {
   const { data: feedData, isLoading: feedLoading } = usePublicFeed();
-  const { data: gamesData, isLoading: gamesLoading } = useGames(1, 9);
+  const [gamePage, setGamePage] = useState(1);
+  const { data: gamesData, isLoading: gamesLoading } = useGames(gamePage, 9);
   const { data: studiosData } = useStudios();
 
   const games = normalizeLatestGames(gamesData?.items);
   const gamesCount = gamesData?.total ?? 0;
+  const gamesHasMore = (gamesData?.hasMore) ?? false;
   const feedItems = feedData?.items?.slice(0, 4) ?? [];
   const feedCount = feedData?.total ?? 0;
   const studioCount = Math.min(studiosData?.total ?? 0, 5);
@@ -77,8 +80,20 @@ export default function HomePage() {
                   <div>
                     <p className="font-display text-2xl font-black text-white">{feedCount}+</p>
                     <p className="mt-1 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Feed updates</p>
-                  </div>
-                </div>
+            </div>
+            {gamesHasMore && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setGamePage((p) => p + 1)}
+                  disabled={gamesLoading}
+                  className="clip-corner inline-flex h-10 items-center gap-2 border border-cyan/50 bg-cyan/5 px-6 font-mono text-xs text-cyan hover:bg-cyan/10 transition disabled:opacity-50"
+                >
+                  {gamesLoading ? 'Loading...' : 'Load more games'} <ArrowRight className="size-4" />
+                </button>
+              </div>
+            )}
+          </div>
               </div>
 
               <div className="hidden lg:block">

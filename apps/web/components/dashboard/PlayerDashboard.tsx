@@ -20,10 +20,13 @@ import {
   Lock,
   LogOut,
   MessageSquare,
+  Radio,
+  Settings,
   Shield,
   Trophy,
   UserCheck,
   UserRound,
+  Users,
   Zap,
 } from 'lucide-react';
 

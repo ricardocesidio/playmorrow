@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { ArrowLeft, MessageSquare, ThumbsUp, Heart, Zap, Lightbulb } from 'lucide-react';
-import DOMPurify from 'dompurify';
+
+const MDMarkdown = dynamic(() => import('@uiw/react-md-editor').then((m) => m.default.Markdown), { ssr: false });
 
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
@@ -406,16 +408,9 @@ export default function DevlogDetailPage() {
 
           {/* Content */}
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] sm:p-7">
-            <div className="font-mono text-[0.6rem] text-foreground leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(devlog.body
-                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/`(.*?)`/g, '<code class="bg-muted px-1 text-cyan">$1</code>')
-                .replace(/^### (.*)/gm, '<h3 class="text-base font-bold text-white mt-4 mb-2">$1</h3>')
-                .replace(/^## (.*)/gm, '<h2 class="text-lg font-bold text-white mt-5 mb-2">$1</h2>')
-                .replace(/^# (.*)/gm, '<h1 class="text-xl font-bold text-cyan mt-5 mb-3">$1</h1>')
-                .replace(/^- (.*)/gm, '<li class="ml-4 text-muted-foreground">$1</li>')
-                .replace(/\n/g, '<br/>')) }} />
+            <div data-color-mode="dark" className="prose prose-invert max-w-none font-mono text-[0.6rem]">
+              <MDMarkdown source={devlog.body} />
+            </div>
           </div>
 
           {/* Comments */}

@@ -12,7 +12,7 @@ interface MarkdownEditorProps {
 }
 
 export function MarkdownEditor({ value, onChange, minHeight = 300 }: MarkdownEditorProps) {
-  const [mode, setMode] = useState<'edit' | 'preview' | 'live'>('live');
+  const [mode, setMode] = useState<'edit' | 'preview' | 'live'>('edit');
 
   return (
     <div data-color-mode="dark">
