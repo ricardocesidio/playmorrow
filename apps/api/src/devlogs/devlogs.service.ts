@@ -339,7 +339,7 @@ export class DevlogsService {
     createdAt: Date;
     updatedAt: Date;
     game: { id: string; title: string; slug: string; studioId: string };
-    author: { id: string; username: string; displayName: string; avatarUrl: string | null; role: string };
+    author: { id: string; username: string; displayName: string; avatarUrl: string | null; role?: string };
     screenshots?: { id: string; url: string; order: number; caption: string | null }[];
   }) {
     return {
