@@ -450,3 +450,26 @@
     linear-gradient(rgb(62 231 255 / 0.035) 1px, transparent 1px);
   background-size: 72px 72px;
 }
+
+/* ── Polish utilities ────────────────────────────────────────────────── */
+
+@utility card-hover {
+  transition: all 0.3s ease;
+  &:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--cyan) 50%, transparent);
+    box-shadow: 0 0 30px color-mix(in srgb, var(--cyan) 8%, transparent), 0 8px 32px rgb(0 0 0 / 0.4);
+  }
+}
+
+@utility transition-smooth {
+  transition: all 0.25s ease;
+}
+
+@utility glow-text-cyan {
+  text-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 30%, transparent);
+}
+
+@utility glow-border {
+  box-shadow: 0 0 16px color-mix(in srgb, var(--cyan) 10%, transparent);
+}
