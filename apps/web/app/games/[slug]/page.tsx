@@ -269,7 +269,7 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
 
   return (
     <HudPanel className="p-4" accent="muted">
-      <p className="pm-micro text-foreground">Standard Edition</p>
+      <p className="pm-micro mb-3 text-foreground">Standard Edition</p>
       <div className="mt-3 flex items-start justify-between gap-4">
         <p className="font-display text-2xl font-black text-foreground">{price}</p>
         <button type="button" className="clip-corner inline-flex items-center gap-1 border border-border px-2 py-1 font-mono text-[10px] uppercase text-muted-foreground">
@@ -788,7 +788,7 @@ function CommunityPanel({ slug }: { slug: string }) {
   return (
     <HudPanel className="p-4" accent="muted">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="pm-micro text-foreground">Community Discussion</h2>
+        <h2 className="pm-micro mb-3 text-foreground">Community Discussion</h2>
         {total > 0 && (
           <Link href={`/games/${slug}/comments`} className="pm-micro text-coral">View all <ArrowRight className="inline size-3" /></Link>
         )}
