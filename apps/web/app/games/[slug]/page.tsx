@@ -172,7 +172,7 @@ function PremiumGameDetail({
             </div>
           </section>
 
-          <section className="mt-2 grid items-start gap-4 xl:grid-cols-[1fr_430px]">
+          <section className="grid items-start gap-4 xl:grid-cols-[1fr_430px]">
             <div className="grid gap-4">
               <div className="grid items-start gap-4 lg:grid-cols-[0.95fr_1.05fr]">
                 <TrailerPanel title={title} image={heroImage} trailerUrl={game.trailerUrl} />
