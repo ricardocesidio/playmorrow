@@ -5,6 +5,7 @@ import './globals.css';
 import { Providers } from './providers';
 import { CookieConsent } from '@/components/cookie-consent';
 import { BackToTop } from '@/components/back-to-top';
+import { SiteFooter } from '@/components/site-footer';
 import { CursorGlow } from '@/components/cursor-glow';
 
 const display = Space_Grotesk({
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <div className="relative flex min-h-screen flex-col z-10">
             {children}
+            <SiteFooter />
             <CookieConsent />
             <BackToTop />
           </div>
