@@ -13,9 +13,25 @@ import { ApiError } from '@/lib/api/client';
 const STATUSES = ['CONCEPT', 'IN_DEVELOPMENT', 'ALPHA', 'BETA', 'EARLY_ACCESS', 'RELEASED', 'CANCELLED', 'ON_HOLD'];
 const MAX_SCREENSHOTS = 10;
 const AVAILABLE_TAGS = [
-  'Stealth', 'Cyberpunk', 'Tactical', 'Strategy', 'Sci-Fi', 'Singleplayer',
-  'Story Rich', 'Atmospheric', 'RPG', 'Space', 'Adventure', 'Exploration',
-  'Fantasy', 'Card Game', 'Roguelike', 'Action', 'Runner', 'Fast-Paced', 'Deckbuilding',
+  { slug: 'stealth', name: 'Stealth' },
+  { slug: 'cyberpunk', name: 'Cyberpunk' },
+  { slug: 'tactical', name: 'Tactical' },
+  { slug: 'strategy', name: 'Strategy' },
+  { slug: 'sci-fi', name: 'Sci-Fi' },
+  { slug: 'singleplayer', name: 'Singleplayer' },
+  { slug: 'story-rich', name: 'Story Rich' },
+  { slug: 'atmospheric', name: 'Atmospheric' },
+  { slug: 'rpg', name: 'RPG' },
+  { slug: 'space', name: 'Space' },
+  { slug: 'adventure', name: 'Adventure' },
+  { slug: 'exploration', name: 'Exploration' },
+  { slug: 'fantasy', name: 'Fantasy' },
+  { slug: 'card-game', name: 'Card Game' },
+  { slug: 'roguelike', name: 'Roguelike' },
+  { slug: 'action', name: 'Action' },
+  { slug: 'runner', name: 'Runner' },
+  { slug: 'fast-paced', name: 'Fast-Paced' },
+  { slug: 'deckbuilding', name: 'Deckbuilding' },
 ];
 
 export default function EditGamePage() {
@@ -64,7 +80,7 @@ export default function EditGamePage() {
       setCoverUrl(game.coverUrl ?? '');
       setBannerUrl(game.bannerUrl ?? '');
       setTrailerUrl(game.trailerUrl ?? '');
-      setTagsInput(game.tags ?? []);
+      setTagsInput((game.tags ?? []).map((t: string) => t.toLowerCase()));
       setMedia((game.media ?? []).map((m: { id?: string; type: string; url: string; caption?: string | null }) => ({ id: m.id, type: m.type, url: m.url, caption: m.caption ?? '' })));
       setInitialized(true);
     }
@@ -300,17 +316,17 @@ export default function EditGamePage() {
             <div className="mt-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-2 block">Tags ({tagsInput.length} selected)</label>
               <div className="flex flex-wrap gap-2">
-                {AVAILABLE_TAGS.map((tag) => {
-                  const isSelected = tagsInput.includes(tag);
+                {AVAILABLE_TAGS.map(({ slug, name }) => {
+                  const isSelected = tagsInput.includes(slug);
                   return (
-                    <button key={tag} type="button" onClick={() => {
-                      setTagsInput(isSelected ? tagsInput.filter((t) => t !== tag) : [...tagsInput, tag]);
+                    <button key={slug} type="button" onClick={() => {
+                      setTagsInput(isSelected ? tagsInput.filter((t) => t !== slug) : [...tagsInput, slug]);
                     }}
                     className={`clip-corner-sm border px-3 py-1.5 font-mono text-[0.6rem] uppercase tracking-wider transition cursor-pointer ${
                       isSelected ? 'border-cyan bg-cyan/10 text-cyan' : 'border-border text-muted-foreground hover:border-cyan/50'
                     }`}
                     >
-                      {tag}
+                      {name}
                     </button>
                   );
                 })}
