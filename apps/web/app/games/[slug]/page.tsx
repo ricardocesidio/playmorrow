@@ -164,7 +164,7 @@ function PremiumGameDetail({
         <div className="relative z-10 mx-auto max-w-[1500px]">
           <Breadcrumbs title={title} />
 
-          <section className="grid items-start gap-5 xl:grid-cols-[1fr_430px]">
+          <section className="relative z-10 grid items-start gap-5 xl:grid-cols-[1fr_430px]">
             <GameHero game={game} title={title} heroImage={heroImage} slug={slug} />
             <div className="grid gap-4">
               <PurchasePanel game={game} slug={slug} title={title} />
