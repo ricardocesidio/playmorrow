@@ -8,7 +8,7 @@ import {
 import type { Prisma } from '@playmorrow/database';
 import { StudioRole } from '@playmorrow/database';
 
-import { assertStudioAccess } from '../common/studio-permissions';
+import { assertStudioAccess, assertSeatLimit } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { StudioXpService } from './studio-xp.service';
@@ -191,7 +191,10 @@ export class StudiosService {
     }
 
     const data: { role?: StudioRole; title?: string | null } = {};
-    if (dto.role) data.role = dto.role;
+    if (dto.role) {
+      assertSeatLimit(studio.members.map(m => ({ role: m.role })), dto.role);
+      data.role = dto.role;
+    }
     if (dto.title !== undefined) data.title = dto.title;
 
     const updated = await this.prisma.studioMember.update({

@@ -1,5 +1,12 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ConflictException, ForbiddenException } from '@nestjs/common';
 import { StudioRole } from '@playmorrow/database';
+
+const ROLE_SEAT_LIMITS: Record<string, number> = {
+  OWNER: 2,
+  ADMIN: 3,
+  MODERATOR: 10,
+  MEMBER: Infinity,
+};
 
 export function assertStudioAccess(
   user: { id: string; role?: string },
@@ -14,5 +21,17 @@ export function assertStudioAccess(
   }
   if (!allowedRoles.includes(membership.role as StudioRole)) {
     throw new ForbiddenException('Insufficient permissions');
+  }
+}
+
+export function assertSeatLimit(
+  members: { role: string }[],
+  newRole: string,
+): void {
+  const limit = ROLE_SEAT_LIMITS[newRole];
+  if (limit === undefined || limit === Infinity) return;
+  const currentCount = members.filter((m) => m.role === newRole).length;
+  if (currentCount >= limit) {
+    throw new ConflictException(`SEAT_LIMIT_REACHED: Maximum ${limit} ${newRole}(s) per studio`);
   }
 }
