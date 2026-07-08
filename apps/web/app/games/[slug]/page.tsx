@@ -601,7 +601,7 @@ function ScreenshotsPanel({
 
 function AboutPanel({ game, slug }: { game: Game; slug: string }) {
   return (
-    <TechPanel title="About" className="h-full min-h-[284px] lg:h-[334px]">
+    <TechPanel title="About" className="h-full">
       <p className="text-xs leading-6 text-muted-foreground">
         {game.description || 'No description available yet.'}
       </p>
@@ -632,7 +632,7 @@ function RoadmapPanel({ roadmap }: { roadmap: RoadmapItem[] }) {
     : fallbackRoadmap;
 
   return (
-    <TechPanel title="Roadmap" className="h-full min-h-[284px] px-4 pb-5 pt-4 lg:h-[334px]">
+    <TechPanel title="Roadmap" className="h-full px-4 pb-5 pt-4">
       <div className="mt-1 border-t border-border/42 pt-3">
         <div className="relative pl-[30px] before:absolute before:bottom-[42px] before:left-[11px] before:top-[17px] before:w-px before:bg-cyan before:shadow-[0_0_12px_rgb(62_231_255_/_0.75)]">
         {rows.map(([date, phase, title, body, state]) => (
@@ -689,7 +689,7 @@ function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
     : fallbackDevlogs.map((item) => [...item, '/devlogs/devlog-1'] as const);
 
   return (
-    <TechPanel title="Latest Devlogs" action="View all" actionHref={`/games/${slug}/devlogs`} className="h-full min-h-[284px] lg:h-[334px]">
+    <TechPanel title="Latest Devlogs" action="View all" actionHref={`/games/${slug}/devlogs`} className="h-full">
       <div className="grid gap-3">
         {rows.map(([title, date, image, reactions, comments, href]) => (
           <Link href={href} key={title} className="grid cursor-pointer grid-cols-[92px_1fr] gap-3 border-b border-border/45 pb-3 last:border-b-0 transition hover:border-cyan">
