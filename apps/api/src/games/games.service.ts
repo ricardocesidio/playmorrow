@@ -14,6 +14,8 @@ const GAME_INCLUDE = {
   media: { orderBy: { position: 'asc' as const } },
   platformLinks: { orderBy: { position: 'asc' as const } },
   tags: { include: { tag: true } },
+  devlogs: { where: { status: { not: 'DRAFT' } }, orderBy: { createdAt: 'desc' as const }, take: 10 },
+  roadmapItems: { orderBy: { position: 'asc' as const } },
   _count: { select: { followers: true } },
 } as const;
 
@@ -370,6 +372,7 @@ export class GamesService {
     createdAt: Date; updatedAt: Date;
     studio?: { id: string; name: string; slug: string; };
     media?: any[]; tags?: any[]; platformLinks?: any[];
+    devlogs?: any[]; roadmapItems?: any[];
     _count?: { comments?: number; followers?: number; wishlistItems?: number; views?: number; };
   }) {
     return {
@@ -410,6 +413,8 @@ export class GamesService {
         label: pl.label,
       })),
       tags: ((game.tags ?? []) as Array<{ tag: { slug: string } }>).map((gt) => gt.tag.slug),
+      devlogs: game.devlogs ?? [],
+      roadmapItems: game.roadmapItems ?? [],
       createdAt: game.createdAt.toISOString(),
       updatedAt: game.updatedAt.toISOString(),
     };
