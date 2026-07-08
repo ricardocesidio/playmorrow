@@ -20,13 +20,10 @@ import {
   Lock,
   LogOut,
   MessageSquare,
-  Radio,
-  Settings,
   Shield,
   Trophy,
   UserCheck,
   UserRound,
-  Users,
   Zap,
 } from 'lucide-react';
 
@@ -590,7 +587,6 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   crosshair: Crosshair,
   bookmark: Bookmark,
   'message-square': MessageSquare,
-  users: Users,
   compass: Compass,
   'user-check': UserCheck,
   zap: Zap,
