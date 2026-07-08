@@ -286,7 +286,7 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
 
       <DetailWishlistButton slug={slug} />
       <p className="mt-3 border-b border-border/60 pb-3 text-xs text-muted-foreground">
-        Expected release: <span className="text-foreground">{game.releaseDate ? new Date(game.releaseDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : game.expectedReleaseText || 'TBA'}</span>
+        Expected release: <span className="text-foreground">{formatReleaseDate(game.releaseDate) || game.expectedReleaseText || 'TBA'}</span>
       </p>
 
       <p className="pm-micro mt-3 text-muted-foreground">Platforms</p>
@@ -699,7 +699,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
       <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
         <InfoField label="Developer" value={game.studio?.name ?? ''} />
         <InfoField label="Status" value={labelStatus(game.status)} />
-        <InfoField label="Release" value={game.releaseDate ? new Date(game.releaseDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : game.expectedReleaseText ?? 'TBA'} />
+        <InfoField label="Release" value={formatReleaseDate(game.releaseDate) || game.expectedReleaseText || 'TBA'} />
         <InfoField label="Price" value={game.isFree ? 'Free' : game.priceCents != null ? `${formatPrice(game.priceCents, game.currency)}` : ''} />
       </div>
       <Link href="#details" className="mt-3 inline-flex items-center gap-3 text-sm text-cyan">View all details <ArrowRight className="size-4" /></Link>
@@ -773,6 +773,7 @@ function CommunityPanel({ slug }: { slug: string }) {
     } else {
       reactToComment.mutate({ commentId: comment.id, type: 'LIKE' });
     }
+    console.log('Like toggled for comment:', comment.id);
   };
 
   return (
@@ -957,7 +958,12 @@ function formatPrice(cents: number, currency?: string | null): string {
   return `${symbol}${(cents / 100).toFixed(2)}`;
 }
 
-function getCurrencySymbol(code: string): string {
+function formatReleaseDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return 'TBA';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime()) || d.getFullYear() < 2020) return 'TBA';
+  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
   const symbols: Record<string, string> = {
     USD: '$', EUR: '€', GBP: '£', JPY: '¥', BRL: 'R$',
     CAD: 'C$', AUD: 'A$', CHF: 'Fr', CNY: '¥', INR: '₹',
