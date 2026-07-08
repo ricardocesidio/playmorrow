@@ -736,9 +736,12 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
 
       <div className="mt-4 border-t border-border pt-3">
         <h2 className="text-sm mb-3 text-foreground">Widget</h2>
-        <button onClick={() => {
+        <button type="button" onClick={() => {
           const code = `<iframe src="https://playmorrow.vercel.app/embed/${slug}" width="400" height="140" style="border:none;border-radius:4px" title="${game.title}"></iframe>`;
-          navigator.clipboard.writeText(code);
+          navigator.clipboard.writeText(code).then(() => {
+            const btn = document.activeElement as HTMLElement;
+            if (btn) { const orig = btn.innerText; btn.innerText = 'Copied!'; setTimeout(() => btn.innerText = orig, 1500); }
+          }).catch(() => alert('Copy failed'));
         }} className="clip-corner flex h-7 w-full cursor-pointer items-center justify-center gap-2 border border-cyan/40 bg-cyan/5 px-3 text-xs text-cyan hover:bg-cyan/10 transition font-mono">
           <Clipboard className="size-3" /> Copy Embed Code
         </button>
