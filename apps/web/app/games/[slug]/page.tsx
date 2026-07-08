@@ -299,7 +299,7 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
 
       <DetailWishlistButton slug={slug} />
       <p className="mt-3 border-b border-border/60 pb-3 text-xs text-muted-foreground">
-        Expected release: <span className="text-foreground">{game.expectedReleaseText || 'TBA'}</span>
+        Expected release: <span className="text-foreground">{game.releaseDate ? new Date(game.releaseDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : game.expectedReleaseText || 'TBA'}</span>
       </p>
 
       <p className="pm-micro mt-3 text-muted-foreground">Platforms</p>
@@ -712,7 +712,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
       <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
         <InfoField label="Developer" value={game.studio?.name ?? ''} />
         <InfoField label="Status" value={labelStatus(game.status)} />
-        <InfoField label="Release" value={game.expectedReleaseText ?? ''} />
+        <InfoField label="Release" value={game.releaseDate ? new Date(game.releaseDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : game.expectedReleaseText ?? 'TBA'} />
         <InfoField label="Price" value={game.isFree ? 'Free' : game.priceCents != null ? `${formatPrice(game.priceCents, game.currency)}` : ''} />
       </div>
       <Link href="#details" className="mt-3 inline-flex items-center gap-3 text-sm text-cyan">View all details <ArrowRight className="size-4" /></Link>
