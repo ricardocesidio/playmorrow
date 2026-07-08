@@ -153,7 +153,7 @@ function PremiumGameDetail({
     return game.media?.filter((item) => item.type !== 'VIDEO').map((item) => item.thumbnailUrl ?? item.url) ?? [];
   }, [game.media]);
   const screenshots = useMemo(() => {
-    return allScreenshots.length ? allScreenshots.slice(0, 5) : fallbackScreenshots;
+    return allScreenshots.length ? allScreenshots : fallbackScreenshots;
   }, [allScreenshots]);
 
   return (
@@ -212,16 +212,14 @@ function GameHero({ game, title, heroImage, slug }: { game: Game; title: string;
 
       <div className="relative z-10 grid min-h-[420px] content-between p-6 pb-0 sm:p-8 sm:pb-0 xl:h-full xl:min-h-0 xl:px-12 xl:pb-0 xl:pt-8">
         <div>
-          <span className="clip-corner-sm border border-cyan/70 bg-background/70 px-3.5 py-1.5 pm-micro text-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.18)]">Featured</span>
+          {game.featured && <span className="clip-corner-sm border border-cyan/70 bg-background/70 px-3.5 py-1.5 pm-micro text-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.18)]">Featured</span>}
           <ManageDropdown slug={slug} />
           <h1 className="mt-5 font-display text-[4rem] font-black uppercase leading-[0.86] text-foreground drop-shadow-[0_6px_18px_rgb(0_0_0_/_0.85)] sm:text-[5.05rem] xl:text-[5.25rem]">
             {title.split(' ').map((word) => (
               <span key={word} className="block">{word}</span>
             ))}
           </h1>
-          <p className="pm-micro mb-[10px] mt-5 text-[0.78rem] text-muted-foreground">
-            {(game.tags?.slice(0, 2).join(' • ') || '')}
-          </p>
+          {game.tagline && <p className="pm-micro mb-[10px] mt-5 text-[0.78rem] text-muted-foreground">{game.tagline}</p>}
         </div>
 
         <div>
@@ -231,7 +229,6 @@ function GameHero({ game, title, heroImage, slug }: { game: Game; title: string;
             </div>
             <div>
               <p className="pm-display text-[0.95rem] leading-none text-foreground">{game.studio?.name ?? ''} <span className="text-cyan">●</span></p>
-              <p className="mt-2 text-xs text-muted-foreground">{game.studio?.name || ''}</p>
             </div>
             <DetailFollowButton slug={slug} />
           </div>
@@ -289,11 +286,11 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
 
       <p className="pm-micro mt-3 text-muted-foreground">Platforms</p>
       <div className="mt-2 grid grid-cols-3 gap-2">
-        {[...new Set(game.platformLinks?.length ? game.platformLinks.map((p) => p.platform) : [])].slice(0, 6).map((platform) => (
-          <span key={platform} className="flex min-h-8 cursor-pointer items-center justify-center gap-2 border border-border bg-background/65 px-2 font-mono text-[11px] uppercase text-foreground transition hover:border-cyan">
-            {platform.includes('PC') ? <Monitor className="size-4 text-cyan" /> : <Gamepad2 className="size-4" />}
-            {platform}
-          </span>
+        {(game.platformLinks ?? []).slice(0, 6).map((p) => (
+          <a key={p.id} href={p.url} target="_blank" rel="noopener noreferrer" className="flex min-h-8 cursor-pointer items-center justify-center gap-2 border border-border bg-background/65 px-2 font-mono text-[11px] uppercase text-foreground transition hover:border-cyan">
+            {p.platform.includes('PC') || p.platform.includes('STEAM') ? <Monitor className="size-4 text-cyan" /> : <Gamepad2 className="size-4" />}
+            {p.platform}
+          </a>
         ))}
       </div>
 
@@ -465,14 +462,6 @@ function TrailerPanel({ title, image, trailerUrl }: { title: string; image: stri
             {title}<br /><span className="text-lg tracking-[0.3em]">Gameplay Trailer</span>
           </div>
         </div>
-        <div className="absolute inset-x-5 bottom-4">
-          <div className="h-1 bg-border"><div className="h-full w-[43%] bg-cyan shadow-[0_0_12px_rgb(62_231_255_/_0.8)]" /></div>
-          <div className="mt-3 flex items-center gap-4 text-xs text-foreground">
-            <Play className="size-4 fill-current" />
-            <span>0:00 / 1:42</span>
-            <span className="ml-auto flex gap-4"><Volume2 className="size-4" /><Settings className="size-4" /><Fullscreen className="size-4" /></span>
-          </div>
-        </div>
       </div>
     </TechPanel>
   );
@@ -526,16 +515,20 @@ function ScreenshotsPanel({
   return (
     <TechPanel title={`Screenshots (${totalScreenshots})`} className="min-h-[268px]">
       <div className="grid gap-2">
-        <button type="button" onClick={() => openLightbox(0)} className="cursor-pointer">
-          <img src={screenshots[0]} alt={`${title} screenshot`} className="h-[142px] w-full border border-border object-cover" />
-        </button>
-        <div className="grid grid-cols-4 gap-2">
-          {screenshots.slice(1, 5).map((image, index) => (
-            <button key={image} type="button" onClick={() => openLightbox(index + 1)} className="cursor-pointer border border-border transition hover:border-cyan">
-              <img src={image} alt={`${title} thumbnail ${index + 1}`} className="h-14 w-full object-cover" />
-            </button>
-          ))}
-        </div>
+        {screenshots[0] && (
+          <button type="button" onClick={() => openLightbox(0)} className="cursor-pointer">
+            <img src={screenshots[0]} alt={`${title} screenshot`} className="h-[142px] w-full border border-border object-cover" />
+          </button>
+        )}
+        {screenshots.length > 1 && (
+          <div className="grid grid-cols-4 gap-2">
+            {screenshots.slice(1).map((image, index) => (
+              <button key={image} type="button" onClick={() => openLightbox(index + 1)} className="cursor-pointer border border-border transition hover:border-cyan">
+                <img src={image} alt={`${title} thumbnail ${index + 1}`} className="h-14 w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {lightboxOpen && createPortal(
@@ -608,7 +601,7 @@ function RoadmapPanel({ roadmap }: { roadmap: RoadmapItem[] }) {
   const unique = [...new Map(roadmap.map((item) => [item.title, item])).values()];
   const rows = unique.length
     ? unique.slice(0, 4).map((item, index) => [
-        item.targetDate ? new Date(item.targetDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : `Q${index + 2} 2025`,
+        item.targetDate ? new Date(item.targetDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'TBA',
         item.status,
         item.title,
         item.description ?? '',
@@ -713,9 +706,11 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
           <Link href={`/games/${slug}/press-kit`} className="clip-corner flex h-7 cursor-pointer items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
             <Clipboard className="size-3.5" /> Press Kit
           </Link>
-          <Link href="/login" className="clip-corner flex h-7 cursor-pointer items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
-            <CircleDollarSign className="size-3.5" /> Contact Studio
-          </Link>
+          {game.studio?.slug && (
+            <Link href={`/studios/${game.studio.slug}`} className="clip-corner flex h-7 cursor-pointer items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
+              <CircleDollarSign className="size-3.5" /> Visit Studio
+            </Link>
+          )}
         </div>
       </div>
 
@@ -973,6 +968,7 @@ function getCurrencySymbol(code: string): string {
 }
 
 function ManageDropdown({ slug }: { slug: string }) {
+  const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
   const [changingCover, setChangingCover] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -1000,6 +996,8 @@ function ManageDropdown({ slug }: { slug: string }) {
     setChangingCover(false);
     setOpen(false);
   };
+
+  if (!isAuthenticated) return null;
 
   return (
     <div className="relative inline-flex">
