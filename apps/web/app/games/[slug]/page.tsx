@@ -693,7 +693,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
         <InfoField label="Release" value={formatReleaseDate(game.releaseDate) || game.expectedReleaseText || 'TBA'} />
         <InfoField label="Price" value={game.isFree ? 'Free' : game.priceCents != null ? `${formatPrice(game.priceCents, game.currency)}` : ''} />
       </div>
-      <Link href="#details" className="mt-3 inline-flex items-center gap-3 text-sm text-cyan">View all details <ArrowRight className="size-4" /></Link>
+      <Link href={`/games/${slug}`} className="mt-3 inline-flex items-center gap-3 text-sm text-cyan">View all details <ArrowRight className="size-4" /></Link>
 
       <div className="mt-4 border-t border-border pt-3">
         <h2 className="text-sm mb-3 text-foreground">External Links</h2>
@@ -703,7 +703,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
               <Globe className="size-3.5" /> {p.label || p.platform}
             </a>
           ))}
-          <Link href={`/games/${slug}/press-kit`} className="clip-corner flex h-7 cursor-pointer items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
+          <Link href={`/dashboard/games/${slug}/press-kit`} className="clip-corner flex h-7 cursor-pointer items-center gap-2 border border-border bg-background/55 px-3 text-xs text-muted-foreground transition hover:border-cyan hover:text-cyan">
             <Clipboard className="size-3.5" /> Press Kit
           </Link>
           {game.studio?.slug && (
