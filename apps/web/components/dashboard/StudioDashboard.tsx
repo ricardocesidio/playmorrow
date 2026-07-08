@@ -201,15 +201,15 @@ export function StudioDashboard() {
             </div>
 
             <div className="grid gap-3 xl:grid-cols-[1fr_1fr]">
-              <AnalyticsPanel viewsByDay={ds?.viewsByDay} totalViews={views} />
+              <AnalyticsPanel viewsByDay={ds?.viewsByDay} totalViews={views} wishlists={wishlists} />
               <RoadmapPanel items={roadmapItems ?? []} />
             </div>
           </section>
         </div>
 
         <div className="relative mx-auto mt-4 flex max-w-[1540px] items-center justify-between border border-border/70 bg-background/60 px-5 py-3 font-mono text-[0.58rem] uppercase tracking-[0.26em] text-muted-foreground clip-corner">
-          <span className="flex items-center gap-3">Signal Strength <span className="inline-flex gap-1">{Array.from({ length: 8 }).map((_, i) => <span key={i} className="h-2 w-1 bg-cyan" />)}</span></span>
-          <span className="hidden sm:inline">34.0522 N, 118.2437 W</span>
+          <span className="flex items-center gap-3">Playmorrow Studio Console <span className="inline-flex gap-1">{Array.from({ length: 8 }).map((_, i) => <span key={i} className="h-2 w-1 bg-cyan" />)}</span></span>
+          <span className="hidden sm:inline text-muted-foreground">{studio?.name || 'Studio'}</span>
           <span className="text-success">Connected</span>
         </div>
       </main>
@@ -383,7 +383,7 @@ function ActivityRow({ title, body, time }: { title: string; body: string; time:
   );
 }
 
-function AnalyticsPanel({ viewsByDay, totalViews }: { viewsByDay?: { date: string; count: number }[]; totalViews: number }) {
+function AnalyticsPanel({ viewsByDay, totalViews, wishlists }: { viewsByDay?: { date: string; count: number }[]; totalViews: number; wishlists: number }) {
   const chartData = viewsByDay?.length ? viewsByDay : [];
   const maxCount = Math.max(...chartData.map(d => d.count), 1);
   return (

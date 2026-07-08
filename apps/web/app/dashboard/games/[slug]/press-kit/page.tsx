@@ -116,6 +116,28 @@ export default function PressKitPage() {
     }
   };
 
+  const handleDownload = () => {
+    let md = `# ${game?.title || 'Game'} — Press Kit\n\n`;
+    if (headline) md += `## Headline\n${headline}\n\n`;
+    if (game?.description) md += `## About\n${game.description}\n\n`;
+    md += `## Fact Sheet\n`;
+    try {
+      const facts = JSON.parse(factSheetText);
+      for (const [key, value] of Object.entries(facts)) {
+        md += `- **${key}**: ${Array.isArray(value) ? value.join(', ') : value}\n`;
+      }
+    } catch { md += '_(Invalid JSON)_\n'; }
+    if (game?.tags?.length) md += `\n## Tags\n${game.tags.join(', ')}\n`;
+    if (game?.platformLinks?.length) md += `\n## Platforms\n${game.platformLinks.map((p: { platform: string; url: string }) => `- [${p.platform}](${p.url})`).join('\n')}\n`;
+    if (contactEmail) md += `\n## Contact\n${contactEmail}\n`;
+    if (downloadUrl) md += `\n## Download Assets\n${downloadUrl}\n`;
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${game?.slug || 'game'}-press-kit.md`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (isLoadingAll) {
     return (
       <>
@@ -250,30 +272,6 @@ export default function PressKitPage() {
               </p>
             </div>
           </div>
-
-  const handleDownload = () => {
-    let md = `# ${game?.title || 'Game'} — Press Kit\n\n`;
-    if (headline) md += `## Headline\n${headline}\n\n`;
-    if (game?.description) md += `## About\n${game.description}\n\n`;
-    md += `## Fact Sheet\n`;
-    try {
-      const facts = JSON.parse(factSheetText);
-      for (const [key, value] of Object.entries(facts)) {
-        md += `- **${key}**: ${Array.isArray(value) ? value.join(', ') : value}\n`;
-      }
-    } catch { md += '_(Invalid JSON)_\n'; }
-    if (game?.tags?.length) md += `\n## Tags\n${game.tags.join(', ')}\n`;
-    if (game?.platformLinks?.length) md += `\n## Platforms\n${game.platformLinks.map((p: { platform: string; url: string }) => `- [${p.platform}](${p.url})`).join('\n')}\n`;
-    if (contactEmail) md += `\n## Contact\n${contactEmail}\n`;
-    if (downloadUrl) md += `\n## Download Assets\n${downloadUrl}\n`;
-    const blob = new Blob([md], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `${game?.slug || 'game'}-press-kit.md`; a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  // ... component continues
 
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={upsert.isPending}

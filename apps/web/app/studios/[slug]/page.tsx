@@ -25,7 +25,7 @@ import { SiteFooter } from '@/components/site-footer';
 import { StatusBadge } from '@/components/status-badge';
 import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { ErrorState } from '@/components/error-state';
-import { useStudio, useStudioMembers, useStudioGames, useStudioAuditLogs, useRequestJoin } from '@/lib/api/hooks';
+import { useStudio, useStudioMembers, useStudioGames, useStudioAuditLogs, useRequestJoin, useStudios } from '@/lib/api/hooks';
 import type { AuditLogEntry } from '@/lib/api/hooks';
 import type { Game } from '@/lib/api/client';
 import { useAuth } from '@/lib/api/auth-context';
@@ -359,6 +359,9 @@ export default function StudioDetailPage() {
             </div>
           </section>
         )}
+
+        {/* Similar Studios */}
+        <SimilarStudios currentSlug={slug} />
       </main>
       <SiteFooter />
     </>
@@ -439,6 +442,30 @@ function coverForGame(title: string) {
   if (key.includes('echo')) return '/demo/games/neon-warden/hero.svg';
   if (key.includes('north')) return '/demo/games/neon-warden/hero.svg';
   return '/demo/games/neon-warden/hero.svg';
+}
+
+function SimilarStudios({ currentSlug }: { currentSlug: string }) {
+  const { data } = useStudios(1, 4);
+  const others = (data?.items ?? []).filter((s) => s.slug !== currentSlug).slice(0, 3);
+  if (!others.length) return null;
+  return (
+    <section className="relative z-10 mx-auto mt-6 max-w-6xl px-5 sm:px-8 lg:px-10">
+      <div className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+        <h2 className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">More Studios</h2>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {others.map((s) => (
+            <Link key={s.id} href={`/studios/${s.slug}`} className="clip-corner flex items-center gap-4 border border-border/60 bg-[#050b0f]/40 p-4 transition hover:border-cyan/50 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]">
+              <div className="grid size-12 shrink-0 place-items-center border border-cyan/30 bg-cyan/5 text-cyan font-display text-lg font-black">{s.name.charAt(0)}</div>
+              <div className="min-w-0">
+                <p className="truncate font-display text-sm font-bold text-white">{s.name}</p>
+                <p className="mt-0.5 font-mono text-[0.55rem] text-muted-foreground">{s.followersCount?.toLocaleString() || 0} followers</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function formatAction(action: string) {

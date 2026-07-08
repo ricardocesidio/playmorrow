@@ -4,6 +4,7 @@ import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { CookieConsent } from '@/components/cookie-consent';
+import { BackToTop } from '@/components/back-to-top';
 import { CursorGlow } from '@/components/cursor-glow';
 
 const display = Space_Grotesk({
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="relative flex min-h-screen flex-col z-10">
             {children}
             <CookieConsent />
+            <BackToTop />
           </div>
         </Providers>
       </body>

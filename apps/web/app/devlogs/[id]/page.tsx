@@ -347,6 +347,9 @@ export default function DevlogDetailPage() {
 
           {/* Header */}
           <div className="clip-corner mb-8 border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] sm:p-7">
+            {devlog.coverUrl && (
+              <img src={devlog.coverUrl} alt="" className="mb-4 h-48 w-full border border-border/50 object-cover" />
+            )}
             <div className="flex items-center gap-2 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
               <span className="clip-corner border border-cyan/60 px-1.5 py-0.5 text-cyan">Devlog</span>
               {devlog.publishedAt && <span className="normal-case">{new Date(devlog.publishedAt).toLocaleDateString()}</span>}
