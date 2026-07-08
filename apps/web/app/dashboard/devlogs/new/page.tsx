@@ -3,7 +3,7 @@
 import { Suspense, useState, type FormEvent, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, FileText } from 'lucide-react';
+import { ArrowLeft, FileText, X, Upload, Calendar } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
@@ -36,8 +36,13 @@ function CreateDevlogForm() {
   const [slugAuto, setSlugAuto] = useState(true);
   const [body, setBody] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
-  const [isPublished, setIsPublished] = useState(false);
+  const [subtitle, setSubtitle] = useState('');
+  const [tagInput, setTagInput] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [screenshots, setScreenshots] = useState<File[]>([]);
   const [status, setStatus] = useState<string>('DRAFT');
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [category, setCategory] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -94,6 +99,20 @@ function CreateDevlogForm() {
         isPublished: status === 'PUBLISHED',
         status,
         publishedAt: status === 'PUBLISHED' ? new Date().toISOString() : undefined,
+        scheduledFor: status === 'SCHEDULED' && scheduledDate ? new Date(scheduledDate).toISOString() : undefined,
+        subtitle: subtitle.trim() || undefined,
+        tags: tags.length ? tags : undefined,
+        category: category.trim() || undefined,
+        screenshots: screenshots.length
+          ? await Promise.all(screenshots.map(async (f, i) => {
+              const formData = new FormData();
+              formData.append('file', f);
+              const res = await fetch('/api/upload', { method: 'POST', body: formData, credentials: 'include' });
+              if (!res.ok) throw new Error('Upload failed');
+              const data = await res.json();
+              return { url: data.url, order: i };
+            }))
+          : undefined,
       });
       router.push(`/devlogs/${result.id}`);
     } catch (err) {
@@ -187,6 +206,76 @@ function CreateDevlogForm() {
               <input type="url" value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)}
                 className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
+
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Subtitle</label>
+              <input type="text" value={subtitle} onChange={(e) => setSubtitle(e.target.value)}
+                placeholder="A short summary of this devlog"
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            </div>
+
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Category</label>
+              <input type="text" value={category} onChange={(e) => setCategory(e.target.value)}
+                placeholder="e.g. Combat, Art, Design, Update"
+                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+            </div>
+
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Tags</label>
+              <div className="flex flex-wrap items-center gap-2 rounded border border-input bg-background/80 p-2 min-h-[42px]">
+                {tags.map((t) => (
+                  <span key={t} className="inline-flex items-center gap-1 border border-cyan/40 bg-cyan/5 px-2 py-0.5 font-mono text-[0.6rem] uppercase text-cyan">
+                    {t}
+                    <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))} className="cursor-pointer hover:text-coral"><X className="size-3" /></button>
+                  </span>
+                ))}
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
+                      e.preventDefault();
+                      const newTag = tagInput.trim().toLowerCase().replace(/\s+/g, '-');
+                      if (!tags.includes(newTag)) setTags([...tags, newTag]);
+                      setTagInput('');
+                    }
+                    if (e.key === 'Backspace' && !tagInput && tags.length) {
+                      setTags(tags.slice(0, -1));
+                    }
+                  }}
+                  placeholder="Type tag and press Enter…"
+                  className="flex-1 min-w-[120px] bg-transparent px-2 py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
+                />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Screenshots</label>
+              <div className="flex flex-wrap gap-3">
+                {screenshots.map((f, i) => (
+                  <div key={i} className="relative size-20 border border-border overflow-hidden group">
+                    <img src={URL.createObjectURL(f)} alt="" className="size-full object-cover" />
+                    <button type="button" onClick={() => setScreenshots(screenshots.filter((_, j) => j !== i))}
+                      className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-background/80 text-coral cursor-pointer opacity-0 group-hover:opacity-100 transition">
+                      <X className="size-3" />
+                    </button>
+                  </div>
+                ))}
+                <label className="grid size-20 cursor-pointer place-items-center border border-dashed border-border/60 text-muted-foreground hover:border-cyan hover:text-cyan transition">
+                  <Upload className="size-5" />
+                  <span className="mt-1 font-mono text-[0.5rem] uppercase">Add</span>
+                  <input type="file" accept="image/png,image/jpeg,image/webp" multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files ?? []);
+                      setScreenshots([...screenshots, ...files].slice(0, 15));
+                    }}
+                    className="hidden" />
+                </label>
+              </div>
+              <p className="mt-1.5 font-mono text-[0.5rem] text-muted-foreground">{screenshots.length}/15 screenshots</p>
+            </div>
           </div>
 
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
@@ -202,6 +291,16 @@ function CreateDevlogForm() {
                 </label>
               ))}
             </div>
+            {status === 'SCHEDULED' && (
+              <div className="mt-4">
+                <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                  <Calendar className="size-3" /> Scheduled date
+                </label>
+                <input type="datetime-local" value={scheduledDate}
+                  onChange={(e) => setScheduledDate(e.target.value)}
+                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3 pt-2">

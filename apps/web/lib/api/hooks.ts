@@ -656,6 +656,11 @@ export function useCreateDevlog() {
       isPublished?: boolean;
       publishedAt?: string;
       status?: string;
+      scheduledFor?: string;
+      subtitle?: string;
+      tags?: string[];
+      category?: string;
+      screenshots?: { url: string; order: number; caption?: string }[];
       token: string;
     }) => {
       const { gameSlug, token, ...body } = data;
