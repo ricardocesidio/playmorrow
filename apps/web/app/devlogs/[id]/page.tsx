@@ -267,6 +267,24 @@ function CommentItem({
           )}
         </>
       )}
+      {allReplies?.filter((r) => r.parentId === comment.id).length > 0 && depth < 5 && (
+        <div className="mt-3 space-y-3">
+          {allReplies
+            .filter((r) => r.parentId === comment.id)
+            .map((reply: any) => (
+              <CommentItem
+                key={reply.id}
+                comment={reply}
+                devlogId={devlogId}
+                currentUserId={currentUserId}
+                depth={depth + 1}
+                token={token}
+                reactionsByComment={reactionsByComment}
+                allReplies={allReplies}
+              />
+            ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -446,16 +464,16 @@ export default function DevlogDetailPage() {
             {topLevelComments.length > 0 ? (
               <div className="space-y-4">
                 {topLevelComments.map((comment) => (
-                  <div key={comment.id}>
-                    <CommentItem comment={comment} devlogId={id} currentUserId={user?.id} depth={0} token={token} reactionsByComment={commentReactions?.comments} />
-                    {replies
-                      .filter((r) => r.parentId === comment.id)
-                      .map((reply) => (
-                        <div key={reply.id} className="mt-2">
-                          <CommentItem comment={reply} devlogId={id} currentUserId={user?.id} depth={1} token={token} reactionsByComment={commentReactions?.comments} />
-                        </div>
-                      ))}
-                  </div>
+                  <CommentItem
+                    key={comment.id}
+                    comment={comment}
+                    devlogId={id}
+                    currentUserId={user?.id}
+                    depth={0}
+                    token={token}
+                    reactionsByComment={commentReactions?.comments}
+                    allReplies={replies}
+                  />
                 ))}
               </div>
             ) : (

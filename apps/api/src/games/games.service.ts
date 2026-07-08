@@ -330,6 +330,15 @@ export class GamesService {
       }).catch(() => {});
     }
 
+    if (dto.trailerUrl !== undefined && dto.trailerUrl !== game.trailerUrl) {
+      this.feedEngine.emit('TRAILER_UPDATED', {
+        studioId: game.studioId,
+        gameId: game.id,
+        actorId: userId,
+        payload: { title: game.title, trailerUrl: dto.trailerUrl },
+      }).catch(() => {});
+    }
+
     await this.auditLog.log({
       studioId: game.studioId,
       actorId: userId,
