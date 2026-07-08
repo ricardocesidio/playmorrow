@@ -357,6 +357,32 @@ export default function DevlogDetailPage() {
               <p className="mt-1 font-mono text-sm text-muted-foreground">{devlog.subtitle}</p>
             )}
 
+            {(devlog.status || devlog.category || (devlog.tags?.length ?? 0) > 0) && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {devlog.status && devlog.status !== 'PUBLISHED' && (
+                  <span className={`clip-corner px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-widest ${
+                    devlog.status === 'SCHEDULED' ? 'border border-amber/40 bg-amber/5 text-amber' : 'border border-border/40 bg-background/30 text-muted-foreground'
+                  }`}>
+                    {devlog.status === 'DRAFT' ? 'Draft' : 'Scheduled'}
+                  </span>
+                )}
+                {devlog.category && (
+                  <span className="clip-corner border border-violet/40 bg-violet/5 px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-widest text-violet">{devlog.category}</span>
+                )}
+                {devlog.tags?.map((tag) => (
+                  <span key={tag} className="clip-corner border border-cyan/30 bg-cyan/5 px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-widest text-cyan/80">{tag}</span>
+                ))}
+              </div>
+            )}
+
+            {devlog.screenshots?.length > 0 && (
+              <div className="mt-4 flex gap-2 overflow-x-auto">
+                {devlog.screenshots.map((s) => (
+                  <img key={s.id} src={s.url} alt={s.caption ?? ''} className="h-32 border border-border/50 object-cover" />
+                ))}
+              </div>
+            )}
+
             <div className="mt-3 flex flex-wrap items-center gap-3 font-mono text-[0.6rem] text-muted-foreground">
               {devlog.author?.avatarUrl && (
                 <img src={devlog.author.avatarUrl} alt="" className="size-6 rounded-full border border-border/50" />
