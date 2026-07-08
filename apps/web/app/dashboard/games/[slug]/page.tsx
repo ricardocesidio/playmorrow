@@ -245,6 +245,7 @@ export default function EditGamePage() {
               <div className="mb-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Price (e.g. 19.99)</label>
                 <input type="text" value={priceCents} onChange={(e) => setPriceCents(e.target.value)}
+                  onBlur={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v)) setPriceCents(v.toFixed(2)); }}
                   placeholder="19.99"
                   className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
