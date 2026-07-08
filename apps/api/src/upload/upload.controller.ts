@@ -15,8 +15,9 @@ import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { extname, join } from 'node:path';
 import { diskStorage } from 'multer';
 import type { Express } from 'express';
-import { createReadStream } from 'node:fs';
+import { createReadStream, readFileSync } from 'node:fs';
 import { unlink } from 'node:fs/promises';
+import { imageSize } from 'image-size';
 
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -95,6 +96,23 @@ export class UploadController {
     if (!isValid) {
       await unlink(file.path).catch(() => {});
       throw new BadRequestException('File content does not match expected type');
+    }
+
+    try {
+      const buffer = readFileSync(file.path);
+      const dimensions = imageSize(new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength));
+      if (dimensions.width && dimensions.width > 4096) {
+        await unlink(file.path).catch(() => {});
+        throw new BadRequestException('Image width exceeds maximum of 4096px');
+      }
+      if (dimensions.height && dimensions.height > 4096) {
+        await unlink(file.path).catch(() => {});
+        throw new BadRequestException('Image height exceeds maximum of 4096px');
+      }
+    } catch (dimErr) {
+      if (dimErr instanceof BadRequestException) throw dimErr;
+      await unlink(file.path).catch(() => {});
+      throw new BadRequestException('Could not read image dimensions');
     }
 
     const url = `/api/uploads/${file.filename}`;

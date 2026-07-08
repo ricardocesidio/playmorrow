@@ -31,6 +31,7 @@
     "cookie-parser": "^1.4.7",
     "express": "^5.1.0",
     "helmet": "^8.2.0",
+    "image-size": "^2.0.2",
     "multer": "^2.2.0",
     "passport": "^0.7.0",
     "passport-github2": "^0.1.12",
