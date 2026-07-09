@@ -21,7 +21,7 @@ import { StudiosModule } from '../studios/studios.module';
 import { UsersModule } from '../users/users.module';
 import { registerTestUser } from '../test/register-test-user';
 
-const SUFFIX = `sec_${Date.now()}`;
+const SUFFIX = `sec-${Date.now()}`;
 const EMAIL_A = `a_${SUFFIX}@example.com`;
 const EMAIL_B = `b_${SUFFIX}@example.com`;
 const USERNAME_A = `user_a_${SUFFIX}`;

@@ -16,7 +16,7 @@ import { MockEmailModule } from '../test/mock-email-service';
 import { registerTestUser } from '../test/register-test-user';
 import { createTestApp } from '../test/create-test-app';
 
-const SUFFIX = `dl_${Date.now()}`;
+const SUFFIX = `dl-${Date.now()}`;
 const OWNER_EMAIL = `own_${SUFFIX}@example.com`;
 const MEMBER_EMAIL = `mem_${SUFFIX}@example.com`;
 const NON_EMAIL = `non_${SUFFIX}@example.com`;
@@ -79,10 +79,13 @@ describe('DevlogsController (e2e)', () => {
     await prisma.user.update({ where: { email: cleanEmail(ADMIN_EMAIL) }, data: { role: 'ADMIN' } });
 
     // Create studio as owner
-    await request(httpServer)
+    const studioCreateRes = await request(httpServer)
       .post('/api/studios')
       .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ name: 'Devlog Test Studio', slug: STUDIO_SLUG });
+    if (studioCreateRes.status !== 201) {
+      throw new Error(`Create studio returned ${studioCreateRes.status}: ${JSON.stringify(studioCreateRes.body)}`);
+    }
 
     // Add member
     const studioRec = await prisma.studio.findUnique({ where: { slug: STUDIO_SLUG } });
@@ -94,10 +97,13 @@ describe('DevlogsController (e2e)', () => {
     }
 
     // Create game as owner
-    await request(httpServer)
+    const gameCreateRes = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
       .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Devlog Test Game', slug: GAME_SLUG });
+    if (gameCreateRes.status !== 201) {
+      throw new Error(`Create game returned ${gameCreateRes.status}: ${JSON.stringify(gameCreateRes.body)}`);
+    }
   });
 
   afterAll(async () => {

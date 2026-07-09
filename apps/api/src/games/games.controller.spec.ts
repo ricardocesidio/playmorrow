@@ -14,7 +14,7 @@ import { MockEmailModule } from '../test/mock-email-service';
 import { registerTestUser } from '../test/register-test-user';
 import { createTestApp } from '../test/create-test-app';
 
-const SUFFIX = `g_${Date.now()}`;
+const SUFFIX = `g-${Date.now()}`;
 const OWNER_EMAIL = `owner_${SUFFIX}@example.com`;
 const MEMBER_EMAIL = `member_${SUFFIX}@example.com`;
 const NON_MEMBER_EMAIL = `nonmem_${SUFFIX}@example.com`;

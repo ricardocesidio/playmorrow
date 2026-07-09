@@ -22,7 +22,7 @@ import { createTestApp } from '../test/create-test-app';
  * Verifies ownership enforcement (non-member → 403), success → 200, the entity
  * is gone afterwards (→ 404), and cascade (deleting a game removes its devlogs).
  */
-const SUFFIX = `del_${Date.now()}`;
+const SUFFIX = `del-${Date.now()}`;
 const OWNER_EMAIL = `own_${SUFFIX}@example.com`;
 const NON_EMAIL = `non_${SUFFIX}@example.com`;
 const PASSWORD = 'StrongPass123!';
@@ -65,37 +65,55 @@ describe('Delete endpoints (e2e) (#19)', () => {
     const non = await registerTestUser(httpServer, prisma, NON_EMAIL, PASSWORD);
     nonToken = non.sessionCookie;
 
-    await request(httpServer)
+    const studioRes = await request(httpServer)
       .post('/api/studios')
       .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ name: 'Delete Test Studio', slug: STUDIO_SLUG });
+    if (studioRes.status !== 201) {
+      throw new Error(`Create studio returned ${studioRes.status}: ${JSON.stringify(studioRes.body)}`);
+    }
 
-    await request(httpServer)
+    const gameRes = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
       .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Delete Test Game', slug: GAME_SLUG });
+    if (gameRes.status !== 201) {
+      throw new Error(`Create game returned ${gameRes.status}: ${JSON.stringify(gameRes.body)}`);
+    }
 
     const devlogRes = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/devlogs`)
       .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Doomed Devlog', slug: `dl-${SUFFIX}`, body: 'x', isPublished: true });
+    if (devlogRes.status !== 201) {
+      throw new Error(`Create devlog returned ${devlogRes.status}: ${JSON.stringify(devlogRes.body)}`);
+    }
     devlogId = devlogRes.body.id;
 
     const roadmapRes = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/roadmap`)
       .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Doomed Item', status: 'PLANNED' });
+    if (roadmapRes.status !== 201) {
+      throw new Error(`Create roadmap returned ${roadmapRes.status}: ${JSON.stringify(roadmapRes.body)}`);
+    }
     roadmapId = roadmapRes.body.id;
 
     // A second game + devlog to verify game deletion cascades to its devlogs.
-    await request(httpServer)
+    const game2Res = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
       .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Cascade Game', slug: GAME2_SLUG });
+    if (game2Res.status !== 201) {
+      throw new Error(`Create game2 returned ${game2Res.status}: ${JSON.stringify(game2Res.body)}`);
+    }
     const cascadeDevlog = await request(httpServer)
       .post(`/api/games/${GAME2_SLUG}/devlogs`)
       .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Cascade Devlog', slug: `cdl-${SUFFIX}`, body: 'x', isPublished: true });
+    if (cascadeDevlog.status !== 201) {
+      throw new Error(`Create cascade devlog returned ${cascadeDevlog.status}: ${JSON.stringify(cascadeDevlog.body)}`);
+    }
     cascadeDevlogId = cascadeDevlog.body.id;
   });
 

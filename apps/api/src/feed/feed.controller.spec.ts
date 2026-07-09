@@ -20,7 +20,7 @@ import { MockEmailModule } from '../test/mock-email-service';
 import { registerTestUser } from '../test/register-test-user';
 import { createTestApp } from '../test/create-test-app';
 
-const SUFFIX = `fd_${Date.now()}`;
+const SUFFIX = `fd-${Date.now()}`;
 const USER_EMAIL = `usr_${SUFFIX}@example.com`;
 const PASSWORD = 'StrongPass123!';
 const STUDIO_SLUG = `studio-${SUFFIX}`;
@@ -63,20 +63,29 @@ describe('FeedController (e2e)', () => {
     const user = await registerTestUser(httpServer, prisma, USER_EMAIL, PASSWORD);
     userToken = user.sessionCookie;
 
-    await request(httpServer)
+    const studioRes = await request(httpServer)
       .post('/api/studios')
       .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ name: 'Feed Test Studio', slug: STUDIO_SLUG });
+    if (studioRes.status !== 201) {
+      throw new Error(`Feed setup: create studio returned ${studioRes.status}: ${JSON.stringify(studioRes.body)}`);
+    }
 
-    await request(httpServer)
+    const gameRes = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
       .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ title: 'Feed Test Game', slug: GAME_SLUG });
+    if (gameRes.status !== 201) {
+      throw new Error(`Feed setup: create game returned ${gameRes.status}: ${JSON.stringify(gameRes.body)}`);
+    }
 
-    await request(httpServer)
+    const game2Res = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
       .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ title: 'Feed Game 2', slug: GAME2_SLUG });
+    if (game2Res.status !== 201) {
+      throw new Error(`Feed setup: create game2 returned ${game2Res.status}: ${JSON.stringify(game2Res.body)}`);
+    }
 
     await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/devlogs`)

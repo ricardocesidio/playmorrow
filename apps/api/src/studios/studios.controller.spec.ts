@@ -13,7 +13,7 @@ import { MockEmailModule } from '../test/mock-email-service';
 import { registerTestUser } from '../test/register-test-user';
 import { createTestApp } from '../test/create-test-app';
 
-const TEST_SUFFIX = `st_${Date.now()}`;
+const TEST_SUFFIX = `st-${Date.now()}`;
 const TEST_EMAIL = `${TEST_SUFFIX}@example.com`;
 const TEST_PASSWORD = 'StrongPass123!';
 const SECOND_EMAIL = `member_${TEST_SUFFIX}@example.com`;
