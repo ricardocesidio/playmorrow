@@ -38,7 +38,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="border-b border-border/60 bg-[#050b0f]/80 px-5 py-2 text-xs font-mono tracking-widest text-muted-foreground">
+      <div className="border-b border-border/60 bg-[#050b0f]/80 px-5 py-2 text-xs font-mono tracking-widest text-muted-foreground flex flex-wrap gap-2 items-center">
         {isStudio ? (
           <>STUDIO DASHBOARD — Managing your studio(s) and games</>
         ) : (
@@ -46,6 +46,22 @@ export default function DashboardPage() {
         )}
         <span className="ml-3 text-cyan/70">·</span>
         <a href="/settings/profile" className="ml-2 underline hover:text-cyan">Settings</a>
+        {!isStudio && (
+          <>
+            <span className="ml-2">·</span>
+            <a href="/me/wishlist" className="ml-2 underline hover:text-cyan">Wishlist</a>
+            <a href="/me/following" className="ml-2 underline hover:text-cyan">Following</a>
+            <a href="/dashboard/level" className="ml-2 underline hover:text-cyan">Level &amp; XP</a>
+          </>
+        )}
+        {isStudio && (
+          <>
+            <span className="ml-2">·</span>
+            <a href="/dashboard/studios" className="ml-2 underline hover:text-cyan">My Studios</a>
+            <a href="/dashboard/games" className="ml-2 underline hover:text-cyan">Games</a>
+            <a href="/dashboard/devlogs" className="ml-2 underline hover:text-cyan">Devlogs</a>
+          </>
+        )}
       </div>
 
       {isStudio ? <StudioDashboard /> : <PlayerDashboard />}
