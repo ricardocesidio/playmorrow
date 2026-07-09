@@ -33,6 +33,8 @@ export class FollowsService {
 
     await this.countersService.syncStudioCounters(studio.id);
 
+    const followerCount = await this.prisma.follow.count({ where: { studioId: studio.id } });
+
     await this.studioXpService.award(studio.id, 'FOLLOW');
 
     const followerMilestones = [100, 500];
@@ -85,6 +87,7 @@ export class FollowsService {
 
     await this.countersService.syncStudioCounters(studio.id);
 
+    const followerCount = await this.prisma.follow.count({ where: { studioId: studio.id } });
     return { targetType: 'STUDIO', targetId: studio.id, isFollowing: false, followerCount };
   }
 
