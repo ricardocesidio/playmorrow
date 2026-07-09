@@ -123,13 +123,9 @@ describe('CommentsController (e2e)', () => {
   it('GET /api/devlogs/:devlogId/comments for published devlog works publicly', async () => {
     const res = await request(httpServer).get(`/api/devlogs/${devlogId}/comments`);
     if (res.status !== HttpStatus.OK) {
-      console.log('=== DIAGNOSTIC: GET comments 500 response ===');
-      console.log('devlogId:', devlogId);
-      console.log('status:', res.status);
-      console.log('body:', JSON.stringify(res.body, null, 2));
-      console.log('=============================================');
+      const diag = `GET /api/devlogs/${devlogId}/comments returned ${res.status}: ${JSON.stringify(res.body)}`;
+      throw new Error(diag);
     }
-    expect(res.status).toBe(HttpStatus.OK);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
@@ -152,14 +148,8 @@ describe('CommentsController (e2e)', () => {
       .send({ body: 'This looks amazing!' });
 
     if (res.status !== HttpStatus.CREATED) {
-      console.log('=== DIAGNOSTIC: POST comments 500 response ===');
-      console.log('devlogId:', devlogId);
-      console.log('secondToken:', secondToken?.slice(0, 20));
-      console.log('status:', res.status);
-      console.log('body:', JSON.stringify(res.body, null, 2));
-      console.log('==============================================');
+      throw new Error(`POST /api/devlogs/${devlogId}/comments returned ${res.status}: ${JSON.stringify(res.body)}`);
     }
-    expect(res.status).toBe(HttpStatus.CREATED);
     expect(res.body.body).toBe('This looks amazing!');
     expect(res.body.parentId).toBeNull();
     expect(res.body.author.username).toBe(secondUsername);
