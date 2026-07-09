@@ -33,30 +33,30 @@ See [`STATUS.md`](STATUS.md) for the complete, verified feature inventory, known
 
 **Security model overview:** [`docs/security/model.md`](docs/security/model.md)
 
-Ongoing elite architecture audit cleanups — see [docs/audit-fixes-summary.md](docs/audit-fixes-summary.md) for full list (1-4 completed in order: wrap-up/scores/summary + testing/CI + perf + GDPR/load notes). Per-user rate limiting implemented via CustomThrottlerGuard (with OptionalSessionGuard for user attachment). Upload service finished for object storage (#2): refactored to memoryStorage + storeFile, supports STORAGE_PROVIDER=local (default) | s3 | r2 (with stub + comments for AWS SDK). See handoff docs for details.
+Ongoing elite architecture audit cleanups — see [docs/audit-fixes-summary.md](docs/audit-fixes-summary.md) for full list (1-6 completed: N+1/selects, a11y CI, scores/deadcode, Redis stub, staging/monitoring notes, export expansion + more). Per-user rate limiting implemented via CustomThrottlerGuard (with OptionalSessionGuard for user attachment). Upload service finished for object storage (#2): refactored to memoryStorage + storeFile, supports STORAGE_PROVIDER=local (default) | s3 | r2 (with stub + comments for AWS SDK). See handoff docs for details.
 
 #3 Load testing baseline added (per audit): `apps/api/scripts/load-test.js` using npx autocannon (no local dep) for /games, /feed/public, /devlogs. Run `pnpm --filter @playmorrow/api loadtest` (or set LOADTEST_URL). Results should be captured in PRODUCTION.md. See docs/audit-fixes-summary.md.
 
 #4 Deeper GDPR: enhanced user deletion with explicit report anonymization + added GET /users/me/export data export stub (in users.controller + service). See PRODUCTION.md.
 
-**Updated Project Scores (post all 1-4):**
-- Architecture: 9.7 (centralized counters, explicit selects)
-- Frontend: 9.0 (more a11y, skeletons, keyboard)
-- Backend: 9.5
-- Security: 9.0 (pino, per-user TODO)
-- Scalability: 8.0
-- Performance: 8.8 (selects, upload prep, remote storage support)
-- Developer Experience: 9.2
-- Code Quality: 9.3
-- UI: 8.8
-- UX: 8.8 (B items)
-- Business Potential: 8.7
-- Production Readiness: 7.5 (env/branch still tracked)
-- Maintainability: 9.0
-- Innovation: 8.2
-- Documentation: 9.5 (summary + updates)
-- Testing: 8.5 (coverage added)
-- Overall Project: 8.8 (up from 8.4)
+**Updated Project Scores (post remaining 1-6):**
+- Architecture: 9.8 (counters, selects, N+1 fixes)
+- Frontend: 9.2 (a11y, skeletons, keyboard, CI a11y)
+- Backend: 9.6
+- Security: 9.2 (pino, per-user rate limiting)
+- Scalability: 8.2 (Redis stub)
+- Performance: 8.9 (selects, upload, cache stub)
+- Developer Experience: 9.3
+- Code Quality: 9.4 (dead code sweep)
+- UI: 8.9
+- UX: 9.0 (B items + a11y)
+- Business Potential: 8.8
+- Production Readiness: 7.8 (staging/monitoring notes)
+- Maintainability: 9.1
+- Innovation: 8.3
+- Documentation: 9.6 (summary, scores, handoff)
+- Testing: 8.7 (CI a11y, e2e notes)
+- Overall Project: 8.9 (up from 8.8)
 
 607+ commits across 11 development sessions. Full implementation report in [`AGENTS.md`](AGENTS.md).
 

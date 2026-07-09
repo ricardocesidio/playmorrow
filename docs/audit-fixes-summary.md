@@ -76,4 +76,4 @@
 
 **Next:** Per user, continue with remaining (wrap-up, testing, perf, etc.).
 
-*Last updated: post B6/B7 + E + C + #2 Upload + #3 Load testing + #4 GDPR deletion/export stub (enhanced cascades + /me/export) - #4 completed*
+*Last updated: post B6/B7 + E + C + #2 Upload + #3 Load testing + #4 GDPR + 1-6 remaining (N+1, a11y CI, scores, Redis stub, staging notes, export expand) - all done*

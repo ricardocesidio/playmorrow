@@ -75,7 +75,16 @@ export class StudiosService {
     return this.toResponse(studio);
   }
 
+  // Simple in-memory cache stub for studios list (Redis cache stub per audit item 4)
+  private studiosCache = new Map<string, { data: any; expires: number }>();
+
   async findAll(page = 1, pageSize = 20, search?: string) {
+    const cacheKey = `studios:${page}:${pageSize}:${search || ''}`;
+    const cached = this.studiosCache.get(cacheKey);
+    if (cached && cached.expires > Date.now()) {
+      return cached.data;
+    }
+
     const where: Prisma.StudioWhereInput = {};
     if (search) {
       where.OR = [
@@ -87,7 +96,7 @@ export class StudiosService {
     const [studios, total] = await Promise.all([
       this.prisma.studio.findMany({
         where,
-        // Explicit select for performance (C1). TODO (C3): add Redis cache stub for hot lists.
+        // Explicit select for performance (C1)
         select: {
           id: true,
           slug: true,
@@ -115,13 +124,17 @@ export class StudiosService {
       this.prisma.studio.count({ where }),
     ]);
 
-    return {
+    const result = {
       items: studios.map((s) => this.toResponse(s)),
       total,
       page,
       pageSize,
       hasMore: page * pageSize < total,
     };
+
+    // Cache for 1 min (Redis cache stub per audit)
+    this.studiosCache.set(cacheKey, { data: result, expires: Date.now() + 60_000 });
+    return result;
   }
 
   async findBySlug(slug: string) {
