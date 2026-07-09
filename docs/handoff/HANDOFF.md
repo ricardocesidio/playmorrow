@@ -18,7 +18,7 @@ This document is **historical** — the project has undergone significant change
 | **Session 10 handoff** | Evidence-first hardening, CSRF, test cleanup, production verification | [`session-10.md`](./session-10.md) |
 | **Devlog System V2** | Community detection, rich editor, feed engine, comments | Implemented — see STATUS.md |
 
-**Ongoing (post audit):** Restarted full audit fix pass from Critical section start. Enhanced register (full try/catch + pino logging). Strengthened early env validation. Updated PRODUCTION.md (branch protection steps + smoke test). Cleanup: cleaned stale comments in app.module.ts. Security: added per-user rate limiting TODO in throttler. Performance: Server Components TODOs added to public pages. UX (B): dashboard nav links + wishlist skeleton + a11y on tabs (notifications, feed) + StudioDashboard skeleton + banner ARIA. Continuous pino/Sentry/skeletons etc. Build green. See latest commits.
+**Ongoing (post audit):** Restarted full audit fix pass from Critical section start. Enhanced register (full try/catch + pino logging). Strengthened early env validation. Updated PRODUCTION.md (branch protection steps + smoke test). Cleanup: cleaned stale comments in app.module.ts. Security: added per-user rate limiting TODO in throttler. Performance: Server Components TODOs added to public pages. UX (B4/B5): game comments + user profile a11y/skeleton polish (ARIA, alts, detailed loaders); MD editor keyboard/focus (tab roles, arrows, tabIndex); dashboard/leaderboard nav a11y. Continuous pino/Sentry/skeletons etc. Build green. See latest commits.
 
 ## Historical Reference (below this line)
 

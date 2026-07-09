@@ -14,17 +14,33 @@ interface MarkdownEditorProps {
 export function MarkdownEditor({ value, onChange, minHeight = 300 }: MarkdownEditorProps) {
   const [mode, setMode] = useState<'edit' | 'preview' | 'live'>('edit');
 
+  const modes = ['live', 'edit', 'preview'] as const;
+  const modeLabels = { live: 'Split view', edit: 'Edit mode', preview: 'Preview mode' };
+
+  const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const direction = e.key === 'ArrowRight' ? 1 : -1;
+      const nextIndex = (currentIndex + direction + modes.length) % modes.length;
+      setMode(modes[nextIndex]);
+    }
+  };
+
   return (
     <div data-color-mode="dark">
-      <div className="flex items-center gap-1 mb-2 border-b border-border/50 pb-2">
-        {(['live', 'edit', 'preview'] as const).map((m) => (
+      <div className="flex items-center gap-1 mb-2 border-b border-border/50 pb-2" role="tablist" aria-label="Editor modes">
+        {modes.map((m, index) => (
           <button
             key={m}
             type="button"
+            role="tab"
+            aria-selected={mode === m}
+            aria-controls={`editor-${m}`}
             onClick={() => setMode(m)}
-            aria-label={`${m === 'live' ? 'Split view' : m === 'edit' ? 'Edit mode' : 'Preview mode'}`}
-            aria-pressed={mode === m}
-            className={`cursor-pointer px-3 py-1 font-mono text-[0.6rem] uppercase tracking-widest border-b-2 transition ${
+            onKeyDown={(e) => handleKeyDown(e, index)}
+            aria-label={modeLabels[m]}
+            tabIndex={mode === m ? 0 : -1}
+            className={`cursor-pointer px-3 py-1 font-mono text-[0.6rem] uppercase tracking-widest border-b-2 transition focus:outline-none focus:ring-1 focus:ring-cyan/50 ${
               mode === m ? 'border-cyan text-cyan' : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -32,12 +48,14 @@ export function MarkdownEditor({ value, onChange, minHeight = 300 }: MarkdownEdi
           </button>
         ))}
       </div>
-      <MDEditor
-        value={value}
-        onChange={(val) => onChange(val ?? '')}
-        minHeight={minHeight}
-        preview={mode}
-      />
+      <div id={`editor-${mode}`} role="tabpanel">
+        <MDEditor
+          value={value}
+          onChange={(val) => onChange(val ?? '')}
+          minHeight={minHeight}
+          preview={mode}
+        />
+      </div>
     </div>
   );
 }
