@@ -127,6 +127,8 @@ Register:   ⚠️ 500 error (blocks signups — still unresolved)
 
 **Build error handled:** "Unterminated string constant" in games/page.tsx:292 (ToggleControl). The ternary inside the className template literal closed a 'string' arm with a stray `. Source now uses matching quotes on both branches. Cache cleaned and fresh dev confirmed clean compile + 200 for /games. Recorded in audit-fixes-summary.md.
 
+**Full-stack dev run + login 500 fixed:** Only frontend was running. Backend failed to boot (TS + DI for new CountersService in Follows + export types from GDPR work). Added provider wiring + return type annotations. Hardened form-login proxy with try/catch. Both ports now respond (health 200). Login action no longer 500s. Committed + pushed.
+
 ## Immediate Next Steps (next session)
 
 1. **Get Railway dashboard access** — check logs for register 500 root cause
