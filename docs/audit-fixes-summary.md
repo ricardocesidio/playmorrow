@@ -78,6 +78,12 @@
 
 *Last updated: post B6/B7 + E + C + #2 Upload + #3 Load testing + #4 GDPR + 1-6 remaining (N+1, a11y CI, scores, Redis stub, staging notes, export expand) - all done*
 
+**Runtime fixes for dev experience (login 500):**
+- Backend would not start due to two issues introduced in recent changes: (a) missing explicit return types on GDPR export methods (Prisma internal type leakage), (b) CountersService not registered in FollowsModule providers (DI failure on FollowsService).
+- Form-login proxy route was missing try/catch — any backend down / fetch failure crashed with HTTP 500 instead of graceful redirect.
+- Now: both servers boot, login POST returns proper redirects, error messages are user-friendly ("Unable to reach login service...").
+- Pushed with docs.
+
 ## Build Error Resolution (games page)
 - Root cause: `apps/web/app/games/page.tsx` ToggleControl had a JSX template literal for className containing a ternary:
   `... ${ active ? 'good' : 'bad'`   <--- false branch closed with stray backtick instead of '
