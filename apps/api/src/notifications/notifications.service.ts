@@ -104,7 +104,20 @@ export class NotificationsService {
     const [notifications, total] = await Promise.all([
       this.prisma.notification.findMany({
         where,
-        include: NOTIFICATION_INCLUDE,
+        // Explicit select for perf (C3) - avoid N+1 on actor
+        select: {
+          id: true,
+          recipientId: true,
+          actorId: true,
+          type: true,
+          title: true,
+          body: true,
+          targetType: true,
+          targetId: true,
+          readAt: true,
+          createdAt: true,
+          actor: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+        },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * pageSize,
         take: pageSize,

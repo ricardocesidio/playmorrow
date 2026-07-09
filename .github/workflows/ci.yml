@@ -93,4 +93,4 @@ jobs:
             apps/web/playwright-report/
             apps/web/test-results/
           retention-days: 7
-      # TODO (audit): Add a11y job using axe-core or @lhci/cli for key pages. See Testing section of elite audit.
+      # TODO (audit 2): Expand e2e for new a11y (tabs, ARIA from B6/B7), run full suite locally with PLAYWRIGHT_DEV=1. Add coverage report. See docs/audit-fixes-summary.md.
