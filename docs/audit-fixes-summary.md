@@ -76,4 +76,4 @@
 
 **Next:** Per user, continue with remaining (wrap-up, testing, perf, etc.).
 
-*Last updated: post B6/B7 + E + C + #2 Upload + #3 Load testing baseline (npx autocannon script, no local dep) - added root script, placeholder results in PRODUCTION.md*
+*Last updated: post B6/B7 + E + C + #2 Upload + #3 Load testing + #4 GDPR deletion/export stub (enhanced cascades + /me/export) - #4 completed*

@@ -109,4 +109,74 @@ export class UsersService {
       },
     });
   }
+
+  /**
+   * GDPR data export stub: gathers user's personal data.
+   * Returns a JSON blob with profile, activity, etc. (expand as needed).
+   */
+  async exportUserData(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        displayName: true,
+        bio: true,
+        location: true,
+        country: true,
+        avatarUrl: true,
+        role: true,
+        accountType: true,
+        isVerified: true,
+        level: true,
+        xp: true,
+        createdAt: true,
+        updatedAt: true,
+        marketingOptInAt: true,
+        partnerMarketingOptInAt: true,
+        cookiePreferences: true,
+        // omit passwordHash, tokens etc.
+      },
+    });
+
+    if (!user) return null;
+
+    const [
+      follows,
+      wishlist,
+      devlogs,
+      comments,
+      notifications,
+      xpEvents,
+      achievements,
+      sessions,
+      reportsFiled,
+    ] = await Promise.all([
+      this.prisma.follow.findMany({ where: { userId }, select: { targetType: true, studioId: true, gameId: true, createdAt: true } }),
+      this.prisma.wishlistItem.findMany({ where: { userId }, select: { gameId: true, createdAt: true } }),
+      this.prisma.devlog.findMany({ where: { authorId: userId }, select: { id: true, title: true, slug: true, status: true, createdAt: true } }),
+      this.prisma.comment.findMany({ where: { authorId: userId }, select: { id: true, body: true, devlogId: true, createdAt: true } }),
+      this.prisma.notification.findMany({ where: { recipientId: userId }, select: { id: true, type: true, title: true, createdAt: true } }),
+      this.prisma.playerXpEvent.findMany({ where: { userId }, select: { id: true, reason: true, amount: true, createdAt: true } }),
+      this.prisma.achievement.findMany({ where: { userId }, select: { achievementId: true, name: true, unlockedAt: true } }),
+      this.prisma.session.findMany({ where: { userId }, select: { id: true, createdAt: true, lastSeenAt: true, expiresAt: true } }),
+      this.prisma.moderationReport.findMany({ where: { reporterId: userId }, select: { id: true, targetType: true, targetId: true, reason: true, createdAt: true } }),
+    ]);
+
+    return {
+      profile: user,
+      follows,
+      wishlist,
+      devlogs,
+      comments,
+      notifications,
+      xpEvents,
+      achievements,
+      sessions,
+      reportsFiled,
+      exportedAt: new Date().toISOString(),
+      note: 'This is a GDPR data export stub. Expand fields as needed for full compliance.',
+    };
+  }
 }

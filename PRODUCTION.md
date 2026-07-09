@@ -103,7 +103,7 @@ After enabling, test by pushing a branch with a deliberate lint error — it sho
 **If you just fixed env vars or code related to auth/register**: run the browser test and update this file with the date + result.
 
 ## 7. Remaining from Audit (4)
-- Deeper GDPR: verify full deletion cascades (users.controller already explicit, but test anon for reports/comments).
+- Deeper GDPR: #4 implemented - enhanced deletion with report anonymization + GET /users/me/export data export stub. See users.controller.ts and users.service.ts.
 - Load testing: use k6/autocannon on /api/games, /feed, /devlogs (baseline p95 <200ms).
   Run: `pnpm --filter @playmorrow/api loadtest` (or set LOADTEST_URL=...).
   #3 implemented with apps/api/scripts/load-test.js.

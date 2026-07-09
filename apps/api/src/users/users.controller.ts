@@ -92,6 +92,7 @@ export class UsersController {
     }
     // Explicit cleanup + rely on Prisma cascade rules in schema (most User relations are Cascade).
     // This is the GDPR "right to erasure" path.
+    // Deeper cleanup for reports (SetNull on resolvedBy, Cascade on reporter) and other sensitive data.
     await this.prisma.$transaction([
       this.prisma.refreshToken.deleteMany({ where: { userId: user.id } }),
       this.prisma.verificationToken.deleteMany({ where: { userId: user.id } }),
@@ -100,11 +101,29 @@ export class UsersController {
       this.prisma.pushSubscription.deleteMany({ where: { userId: user.id } }),
       this.prisma.session.deleteMany({ where: { userId: user.id } }),
       this.prisma.wishlistItem.deleteMany({ where: { userId: user.id } }),
+      // Reports: anonymize those resolved by user (SetNull on cascade), delete those reported by user (Cascade)
+      this.prisma.moderationReport.updateMany({
+        where: { resolvedById: user.id },
+        data: { resolvedById: null, resolutionNote: '[user data erased]' },
+      }),
+      this.prisma.moderationReport.deleteMany({ where: { reporterId: user.id } }),
+      // XP events, achievements, game views, studio chat, audit logs etc. rely on Cascade
       // Many other relations (devlogs, comments, reactions, follows, notifications, xp events, etc.)
       // use onDelete: Cascade in the Prisma schema.
     ]);
 
     await this.prisma.user.delete({ where: { id: user.id } });
-    return { success: true, message: 'Account and associated data deleted (cascaded where configured).' };
+    return { success: true, message: 'Account and associated data deleted (cascaded where configured). Reports resolved by user anonymized.' };
+  }
+
+  @Get('me/export')
+  @UseGuards(SessionAuthGuard)
+  @ApiOkResponse({ description: 'GDPR data export for the current user.' })
+  async exportData(@CurrentUser() user: { id: string }) {
+    const data = await this.usersService.exportUserData(user.id);
+    if (!data) {
+      throw new NotFoundException('User data not found');
+    }
+    return data;
   }
 }
