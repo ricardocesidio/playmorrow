@@ -37,6 +37,8 @@ Ongoing elite architecture audit cleanups — see [docs/audit-fixes-summary.md](
 
 #3 Load testing baseline added (per audit): `apps/api/scripts/load-test.js` using npx autocannon (no local dep) for /games, /feed/public, /devlogs. Run `pnpm --filter @playmorrow/api loadtest` (or set LOADTEST_URL). Results should be captured in PRODUCTION.md. See docs/audit-fixes-summary.md.
 
+#4 Deeper GDPR: enhanced user deletion with explicit report anonymization + added GET /users/me/export data export stub (in users.controller + service). See PRODUCTION.md.
+
 **Updated Project Scores (post all 1-4):**
 - Architecture: 9.7 (centralized counters, explicit selects)
 - Frontend: 9.0 (more a11y, skeletons, keyboard)

@@ -18,7 +18,7 @@ This document is **historical** — the project has undergone significant change
 | **Session 10 handoff** | Evidence-first hardening, CSRF, test cleanup, production verification | [`session-10.md`](./session-10.md) |
 | **Devlog System V2** | Community detection, rich editor, feed engine, comments | Implemented — see STATUS.md |
 
-**Ongoing (post audit):** 1-4 done (wrap-up summary+scores; testing CI notes; perf selects/Redis; GDPR/load). Per-user rate limiting added (CustomThrottlerGuard + OptionalSessionGuard first). Upload finished for object storage (#2): memory buffer, STORAGE_PROVIDER=local|s3|r2 (stub). #3 Load testing baseline: apps/api/scripts/load-test.js (npx autocannon, no dep). Root 'loadtest' script added. Placeholder results in PRODUCTION. See docs/audit-fixes-summary.md. Build green.
+**Ongoing (post audit):** 1-4 done (wrap-up summary+scores; testing CI notes; perf selects/Redis; GDPR/load). Per-user rate limiting added (CustomThrottlerGuard + OptionalSessionGuard first). Upload finished for object storage (#2): memory buffer, STORAGE_PROVIDER=local|s3|r2 (stub). #3 Load testing baseline: apps/api/scripts/load-test.js (npx autocannon, no dep). Root 'loadtest' script added. Placeholder results in PRODUCTION. #4 GDPR: enhanced deletion + /me/export stub. See docs/audit-fixes-summary.md. Build green.
 
 ## Historical Reference (below this line)
 
