@@ -101,3 +101,8 @@ After enabling, test by pushing a branch with a deliberate lint error — it sho
 ---
 
 **If you just fixed env vars or code related to auth/register**: run the browser test and update this file with the date + result.
+
+## 7. Remaining from Audit (4)
+- Deeper GDPR: verify full deletion cascades (users.controller already explicit, but test anon for reports/comments).
+- Load testing: use k6 on /api/games, /feed, /devlogs (baseline p95 <200ms).
+- See docs/audit-fixes-summary.md for completed 1-4.

@@ -87,7 +87,7 @@ export class StudiosService {
     const [studios, total] = await Promise.all([
       this.prisma.studio.findMany({
         where,
-        // Explicit select for performance (C1)
+        // Explicit select for performance (C1). TODO (C3): add Redis cache stub for hot lists.
         select: {
           id: true,
           slug: true,

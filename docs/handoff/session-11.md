@@ -123,7 +123,7 @@ CI Pipeline:
 Register:   ⚠️ 500 error (blocks signups — still unresolved)
 ```
 
-**Post-session continuous audit fixes:** ... + D/F done; E (business stub/analytics/price/verified); C (counters, selects, logging). (full in HANDOFF). Build ✓.
+**Post-session continuous audit fixes:** 1-4 done in order (summary file, scores, testing CI, perf, GDPR/load notes). See docs/audit-fixes-summary.md. Build ✓.
 
 ## Immediate Next Steps (next session)
 
