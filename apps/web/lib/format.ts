@@ -13,6 +13,20 @@ export function formatFollowers(count: number): string {
   return `${count}`;
 }
 
+export function formatPrice(cents: number, currency?: string | null): string {
+  const symbol = getCurrencySymbol(currency ?? 'USD');
+  return `${symbol}${(cents / 100).toFixed(2)}`;
+}
+
+function getCurrencySymbol(code: string): string {
+  const symbols: Record<string, string> = {
+    USD: '$', EUR: '€', GBP: '£', JPY: '¥', BRL: 'R$',
+    CAD: 'C$', AUD: 'A$', CHF: 'Fr', CNY: '¥', INR: '₹',
+    KRW: '₩', MXN: 'Mex$',
+  };
+  return symbols[code] ?? '$';
+}
+
 export function truncate(str: string, max: number): string {
   return str.length > max ? `${str.slice(0, max)}...` : str;
 }

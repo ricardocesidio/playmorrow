@@ -34,7 +34,7 @@ import { ErrorState } from '@/components/error-state';
 import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { useAuth } from '@/lib/api/auth-context';
-import { formatFollowers } from '@/lib/format';
+import { formatFollowers, formatPrice } from '@/lib/format';
 import type { Devlog, Game, RoadmapItem } from '@/lib/api/client';
 import {
   useAddGameToWishlist,
@@ -953,25 +953,11 @@ function getDemoHref(game: Game) {
   return platformDemo?.url ?? null;
 }
 
-function formatPrice(cents: number, currency?: string | null): string {
-  const symbol = getCurrencySymbol(currency ?? 'USD');
-  return `${symbol}${(cents / 100).toFixed(2)}`;
-}
-
 function formatReleaseDate(dateStr: string | null | undefined): string {
   if (!dateStr) return 'TBA';
   const d = new Date(dateStr);
   if (isNaN(d.getTime()) || d.getFullYear() < 2020) return 'TBA';
   return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-}
-
-function getCurrencySymbol(code: string): string {
-  const symbols: Record<string, string> = {
-    USD: '$', EUR: '€', GBP: '£', JPY: '¥', BRL: 'R$',
-    CAD: 'C$', AUD: 'A$', CHF: 'Fr', CNY: '¥', INR: '₹',
-    KRW: '₩', MXN: 'Mex$',
-  };
-  return symbols[code] ?? '$';
 }
 
 function ManageDropdown({ slug }: { slug: string }) {

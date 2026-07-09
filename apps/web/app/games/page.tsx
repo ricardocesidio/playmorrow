@@ -13,7 +13,7 @@ import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
-import { formatFollowers } from '@/lib/format';
+import { formatFollowers, formatPrice } from '@/lib/format';
 import { useGames } from '@/lib/api/hooks';
 import type { Game } from '@/lib/api/client';
 
