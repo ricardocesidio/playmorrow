@@ -18,7 +18,7 @@ This document is **historical** — the project has undergone significant change
 | **Session 10 handoff** | Evidence-first hardening, CSRF, test cleanup, production verification | [`session-10.md`](./session-10.md) |
 | **Devlog System V2** | Community detection, rich editor, feed engine, comments | Implemented — see STATUS.md |
 
-**Ongoing (post audit):** Restarted full audit fix pass from Critical section start. Enhanced register (full try/catch + pino logging). Strengthened early env validation. Updated PRODUCTION.md (branch protection steps + smoke test). Cleanup: cleaned stale comments in app.module.ts. Security: added per-user rate limiting TODO in throttler. Performance: Server Components TODOs added to public pages. UX (B4-B7): game comments + profile + notifications a11y/skeletons; MD editor keyboard/focus; games filters ARIA+keyboard; leaderboard tabs + feed rows a11y/focus. Continuous pino/Sentry/skeletons etc. Build green. See latest commits.
+**Ongoing (post audit):** ... + D: cleaned historical in HANDOFF.md; updated PRODUCTION with B notes. (see full in README). UX (B4-B7) done. Build green. See latest commits.
 
 ## Historical Reference (below this line)
 
@@ -26,15 +26,13 @@ The following content is from the original 2026-06-28 handoff and may be inaccur
 
 ---
 
-## Architecture (historical)
+## Architecture (historical - kept for reference, see current in STATUS.md)
 
 ```
 playmorrow.vercel.app (Next.js 15)
-  └── /api/* → Next.js proxy → playmorrow-api.onrender.com (NestJS 11)
-                                        └── Neon (PostgreSQL) via Railway
+  └── /api/* → Next.js proxy → playmorrow-api (Railway)
+                                        └── Neon (PostgreSQL)
 ```
-
-**Note:** Backend is on **Railway**. See STATUS.md → Production Deployment and PRODUCTION.md.
 
 ### Key env vars
 
