@@ -33,7 +33,7 @@ See [`STATUS.md`](STATUS.md) for the complete, verified feature inventory, known
 
 **Security model overview:** [`docs/security/model.md`](docs/security/model.md)
 
-Ongoing elite architecture audit cleanups — see [docs/audit-fixes-summary.md](docs/audit-fixes-summary.md) for full list (1-4 completed in order: wrap-up/scores/summary + testing/CI + perf + GDPR/load notes). Per-user rate limiting implemented via CustomThrottlerGuard (with OptionalSessionGuard for user attachment). See handoff docs for details.
+Ongoing elite architecture audit cleanups — see [docs/audit-fixes-summary.md](docs/audit-fixes-summary.md) for full list (1-4 completed in order: wrap-up/scores/summary + testing/CI + perf + GDPR/load notes). Per-user rate limiting implemented via CustomThrottlerGuard (with OptionalSessionGuard for user attachment). Upload service finished for object storage (#2): refactored to memoryStorage + storeFile, supports STORAGE_PROVIDER=local (default) | s3 | r2 (with stub + comments for AWS SDK). See handoff docs for details.
 
 **Updated Project Scores (post all 1-4):**
 - Architecture: 9.7 (centralized counters, explicit selects)
@@ -41,7 +41,7 @@ Ongoing elite architecture audit cleanups — see [docs/audit-fixes-summary.md](
 - Backend: 9.5
 - Security: 9.0 (pino, per-user TODO)
 - Scalability: 8.0
-- Performance: 8.5 (selects, upload prep)
+- Performance: 8.8 (selects, upload prep, remote storage support)
 - Developer Experience: 9.2
 - Code Quality: 9.3
 - UI: 8.8

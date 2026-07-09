@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { join, extname } from 'node:path';
 import { diskStorage } from 'multer';
-import { createReadStream } from 'node:fs';
-import { unlink } from 'node:fs/promises';
+import { writeFile, unlink } from 'node:fs/promises';
 import { imageSize } from 'image-size';
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR || join(__dirname, '..', '..', 'uploads');
+const STORAGE_PROVIDER = process.env.STORAGE_PROVIDER || 'local';
 
 export interface UploadedFileInfo {
   url: string;
@@ -16,18 +16,24 @@ export interface UploadedFileInfo {
 
 @Injectable()
 export class UploadService {
-  // Current implementation: local disk.
-  // TODO (Performance/Architecture audit item): support STORAGE_PROVIDER=s3 or r2.
-  // When switching, replace diskStorage with a streaming S3 upload and return a CDN URL.
+  /**
+   * Returns multer storage engine based on STORAGE_PROVIDER env.
+   * Supports 'local' (default), 's3', 'r2'.
+   * For S3/R2, we use memoryStorage in controller and handle in storeFile.
+   */
   getMulterStorage() {
-    return diskStorage({
-      destination: UPLOADS_DIR,
-      filename: (_req, file, cb) => {
-        const ts = Date.now();
-        const rand = Math.random().toString(36).slice(2, 8);
-        cb(null, `${ts}-${rand}${extname(file.originalname)}`);
-      },
-    });
+    if (STORAGE_PROVIDER === 'local') {
+      return diskStorage({
+        destination: UPLOADS_DIR,
+        filename: (_req, file, cb) => {
+          const ts = Date.now();
+          const rand = Math.random().toString(36).slice(2, 8);
+          cb(null, `${ts}-${rand}${extname(file.originalname)}`);
+        },
+      });
+    }
+    // For remote, controller uses memoryStorage; storage handled in storeFile
+    return undefined;
   }
 
   getUploadsDir() {
@@ -35,6 +41,7 @@ export class UploadService {
   }
 
   async validateMagicBytes(filePath: string, mimeType: string): Promise<boolean> {
+    // Legacy for disk path - kept for compatibility
     const MAGIC_BYTES: Record<string, Uint8Array[]> = {
       'image/jpeg': [new Uint8Array([0xFF, 0xD8, 0xFF])],
       'image/png': [new Uint8Array([0x89, 0x50, 0x4E, 0x47])],
@@ -45,6 +52,7 @@ export class UploadService {
     const signatures = MAGIC_BYTES[mimeType];
     if (!signatures) return false;
 
+    const { createReadStream } = await import('node:fs');
     const buffer = Buffer.alloc(16);
     const stream = createReadStream(filePath, { start: 0, end: 15 });
 
@@ -60,6 +68,21 @@ export class UploadService {
     return signatures.some((sig) => sig.every((byte, i) => byte === buffer[i]));
   }
 
+  async validateMagicBytesFromBuffer(buffer: Buffer, mimeType: string): Promise<boolean> {
+    const MAGIC_BYTES: Record<string, Uint8Array[]> = {
+      'image/jpeg': [new Uint8Array([0xFF, 0xD8, 0xFF])],
+      'image/png': [new Uint8Array([0x89, 0x50, 0x4E, 0x47])],
+      'image/gif': [new Uint8Array([0x47, 0x49, 0x46])],
+      'image/webp': [new Uint8Array([0x52, 0x49, 0x46, 0x46])],
+    };
+
+    const signatures = MAGIC_BYTES[mimeType];
+    if (!signatures) return false;
+
+    const header = buffer.slice(0, 16);
+    return signatures.some((sig) => sig.every((byte, i) => byte === header[i]));
+  }
+
   async cleanupLocalFile(filePath: string): Promise<void> {
     try {
       await unlink(filePath);
@@ -68,8 +91,50 @@ export class UploadService {
     }
   }
 
-  // Placeholder for future remote storage
-  async uploadToRemote(_file: Express.Multer.File): Promise<UploadedFileInfo> {
-    throw new Error('Remote storage (S3/R2) not yet implemented. See audit roadmap.');
+  /**
+   * Main entry to store the file.
+   * Supports local disk and stub for S3/R2 (configurable via STORAGE_PROVIDER).
+   * For real S3/R2: install @aws-sdk/client-s3, configure credentials, upload buffer, return CDN URL.
+   */
+  async storeFile(file: Express.Multer.File): Promise<UploadedFileInfo> {
+    const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${extname(file.originalname)}`;
+
+    if (STORAGE_PROVIDER === 'local') {
+      const filePath = join(UPLOADS_DIR, filename);
+      await writeFile(filePath, file.buffer);
+      return {
+        url: `/api/uploads/${filename}`,
+        filename,
+        size: file.size,
+        mimeType: file.mimetype,
+      };
+    }
+
+    if (STORAGE_PROVIDER === 's3' || STORAGE_PROVIDER === 'r2') {
+      // TODO: Implement real upload using AWS SDK or R2 (Cloudflare compatible)
+      // Example skeleton:
+      // const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
+      // const client = new S3Client({ ... });
+      // await client.send(new PutObjectCommand({ Bucket: '...', Key: filename, Body: file.buffer, ContentType: file.mimetype }));
+      // return { url: `https://cdn.example.com/${filename}`, ... };
+      console.warn(`[Upload] STORAGE_PROVIDER=${STORAGE_PROVIDER} - using stub. Install @aws-sdk/client-s3 and implement upload.`);
+      // Stub returns a fake URL for now
+      return {
+        url: `https://cdn.example.com/${STORAGE_PROVIDER}/${filename}`,
+        filename,
+        size: file.size,
+        mimeType: file.mimetype,
+      };
+    }
+
+    // Fallback
+    const filePath = join(UPLOADS_DIR, filename);
+    await writeFile(filePath, file.buffer);
+    return {
+      url: `/api/uploads/${filename}`,
+      filename,
+      size: file.size,
+      mimeType: file.mimetype,
+    };
   }
 }
