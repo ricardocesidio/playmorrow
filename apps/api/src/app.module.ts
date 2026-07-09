@@ -39,9 +39,10 @@ import { PlayerXpModule } from './player-xp/player-xp.module';
       isGlobal: true,
       envFilePath: ['.env', 'apps/api/.env'],
     }),
-    // Global rate limiting (#3): 60 req/min per IP by default. Per-route
-    // `@Throttle()` overrides tighten abuse-prone endpoints (auth, comment/
-    // reaction creates); `@SkipThrottle()` exempts the health probe.
+    // Global rate limiting (#3 from audit): 60 req/min per IP by default.
+    // Per-route @Throttle() for auth etc.
+    // TODO (Security): consider per-user rate limiting (e.g. using user id as key when auth present) beyond IP-only.
+    // `@SkipThrottle()` exempts the health probe.
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
     PrismaModule,
