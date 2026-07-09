@@ -123,7 +123,7 @@ CI Pipeline:
 Register:   ⚠️ 500 error (blocks signups — still unresolved)
 ```
 
-**Post-session continuous audit fixes:** pino structured logging fully integrated (pino + contextual child loggers + usage in main/error paths + services e.g. follows, health, email), Sentry on both ends, upload abstraction, additional skeletons (search, leaderboard, profiles), dashboard clarity header, counter centralization in follows, error-monitoring service removed (unused), request context logger in middleware + req.log in health, more docs/readme/handoff updates. Nest build ✓.
+**Post-session continuous audit fixes:** ... + UX: dashboard nav links + wishlist skeleton polish. (full list in HANDOFF). Build ✓.
 
 ## Immediate Next Steps (next session)
 

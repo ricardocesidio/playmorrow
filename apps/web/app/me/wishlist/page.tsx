@@ -53,7 +53,15 @@ export default function WishlistPage() {
           </div>
 
           {isLoading ? (
-            <div className="flex justify-center py-20"><Loader2 className="size-8 animate-spin text-cyan" /></div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-3 animate-pulse">
+                  <div className="h-32 bg-border/20 mb-3" />
+                  <div className="h-4 w-3/4 bg-border/30 mb-1" />
+                  <div className="h-3 w-1/2 bg-border/20" />
+                </div>
+              ))}
+            </div>
           ) : items.length === 0 ? (
             <div className="clip-corner border border-border/60 bg-[#050b0f]/50 px-6 py-16 text-center">
               <Bookmark className="mx-auto mb-4 size-10 text-muted-foreground" />
