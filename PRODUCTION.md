@@ -88,6 +88,8 @@ To prevent untested code reaching main:
 
 After enabling, test by pushing a branch with a deliberate lint error — it should block merge.
 
+**Note (post B6/B7):** Recent UX a11y and keyboard fixes in games, notifications, feed, leaderboard, MD editor should be covered by e2e if added.
+
 ## 6. After every production deploy
 
 - [ ] Run the full browser smoke test above
