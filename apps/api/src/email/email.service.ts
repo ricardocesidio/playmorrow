@@ -1,10 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
+import { logger } from '../common/logger';
 
 @Injectable()
 export class EmailService {
-  private readonly logger = new Logger(EmailService.name);
   private readonly resend: Resend | null = null;
   private readonly from: string;
   private readonly isProduction: boolean;
@@ -16,9 +16,9 @@ export class EmailService {
     if (apiKey) {
       this.resend = new Resend(apiKey);
     } else if (this.isProduction) {
-      this.logger.error('RESEND_API_KEY is missing in production! Email sending will fail.');
+      logger.error('RESEND_API_KEY is missing in production! Email sending will fail.');
     } else {
-      this.logger.warn('RESEND_API_KEY not set — verification codes will be logged to console in dev mode.');
+      logger.warn('RESEND_API_KEY not set — verification codes will be logged to console in dev mode.');
     }
   }
 
@@ -31,11 +31,11 @@ export class EmailService {
         text: `Welcome to PlayMorrow.\n\nYour verification code is:\n\n${code}\n\nThis code expires in 15 minutes.\n\nIf you did not create a PlayMorrow account, you can ignore this email.`,
       });
     } else if (!this.isProduction) {
-      this.logger.log(`[DEV] Verification code for ${email}: ${code}`);
+      logger.debug(`[DEV] Verification code for ${email}: ${code}`);
     } else {
       // Do not throw in production — registration must succeed.
       // The code is stored in DB so resendVerification can be used once RESEND_API_KEY is fixed.
-      this.logger.error(
+      logger.error(
         `RESEND_API_KEY missing in production. Verification code for ${email} was NOT emailed. Code: ${code} (stored in DB for resend).`
       );
     }
@@ -72,12 +72,9 @@ export class EmailService {
         text,
       });
     } else if (!this.isProduction) {
-      this.logger.log(`[DEV] Invitation email for ${params.email}:`);
-      this.logger.log(`  To: ${params.email}`);
-      this.logger.log(`  Subject: ${subject}`);
-      this.logger.log(`  Link: ${acceptUrl}`);
+      logger.debug(`[DEV] Invitation email for ${params.email}: To: ${params.email} Subject: ${subject} Link: ${acceptUrl}`);
     } else {
-      this.logger.error(
+      logger.error(
         `RESEND_API_KEY missing in production. Invitation email to ${params.email} was NOT sent. Link: ${acceptUrl}`
       );
     }

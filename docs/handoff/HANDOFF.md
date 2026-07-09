@@ -18,7 +18,7 @@ This document is **historical** — the project has undergone significant change
 | **Session 10 handoff** | Evidence-first hardening, CSRF, test cleanup, production verification | [`session-10.md`](./session-10.md) |
 | **Devlog System V2** | Community detection, rich editor, feed engine, comments | Implemented — see STATUS.md |
 
-**Ongoing (post audit):** Continuous improvements: pino logging fully integrated (contextual child loggers via createContextLogger, usage in main/error paths + services e.g. follows, health), Sentry full, upload service for object storage, more skeletons (search, leaderboard, user profiles), counter sync centralization, 4-level comments, dead code removal (error-monitoring service), a11y polish, coverage support, request context in middleware, docs/readme/handoff updates. Build green. See latest commits.
+**Ongoing (post audit):** Continuous improvements: pino logging fully integrated (contextual child loggers via createContextLogger, usage in main/error paths + services e.g. follows, health, email), Sentry full, upload service for object storage, more skeletons (search, leaderboard, user profiles), counter sync centralization, 4-level comments, dead code removal (error-monitoring service), a11y polish, coverage support, request context in middleware, docs/readme/handoff updates. Build green. See latest commits.
 
 ## Historical Reference (below this line)
 
