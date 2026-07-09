@@ -14,7 +14,7 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
 import * as Sentry from '@sentry/node';
-import { logger, logRequest } from './common/logger';
+import { logger, logRequest, createContextLogger } from './common/logger';
 
 import { AppModule } from './app.module';
 
@@ -95,6 +95,9 @@ async function bootstrap() {
 
     const start = Date.now();
     const userId = (req as any).user?.id ?? null;
+
+    // Attach contextual logger for the request (polish for tracing)
+    req.log = createContextLogger({ requestId, userId: userId || undefined });
 
     res.on('finish', () => {
       const duration = Date.now() - start;
