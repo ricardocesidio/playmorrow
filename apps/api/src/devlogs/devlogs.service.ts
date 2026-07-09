@@ -6,6 +6,7 @@ import { assertStudioAccess } from '../common/studio-permissions';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
 import { FeedEngineService } from '../feed/feed-events.service';
+import { logger } from '../common/logger';
 import type { CreateDevlogDto } from './dto/create-devlog.dto';
 import type { UpdateDevlogDto } from './dto/update-devlog.dto';
 import { AuditLogService } from '../audit-log/audit-log.service';

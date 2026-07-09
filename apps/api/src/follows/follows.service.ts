@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { logger } from '../common/logger';
+import { CountersService } from '../common/counters.service';
 import { GamesService } from '../games/games.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PlayerXpService } from '../player-xp/player-xp.service';
@@ -15,6 +16,7 @@ export class FollowsService {
     private readonly notificationsService: NotificationsService,
     private readonly playerXpService: PlayerXpService,
     private readonly studioXpService: StudioXpService,
+    private readonly countersService: CountersService,
   ) {}
 
   async followStudio(userId: string, slug: string) {
@@ -29,13 +31,7 @@ export class FollowsService {
       create: { userId, targetType: 'STUDIO', studioId: studio.id },
     });
 
-    const followerCount = await this.prisma.follow.count({ where: { studioId: studio.id } });
-
-    // Keep denormalized count in sync (centralized side effect)
-    await this.prisma.studio.update({
-      where: { id: studio.id },
-      data: { followersCount: followerCount },
-    });
+    await this.countersService.syncStudioCounters(studio.id);
 
     await this.studioXpService.award(studio.id, 'FOLLOW');
 
@@ -87,13 +83,7 @@ export class FollowsService {
       where: { userId, studioId: studio.id },
     });
 
-    const followerCount = await this.prisma.follow.count({ where: { studioId: studio.id } });
-
-    // Keep denormalized count in sync
-    await this.prisma.studio.update({
-      where: { id: studio.id },
-      data: { followersCount: followerCount },
-    });
+    await this.countersService.syncStudioCounters(studio.id);
 
     return { targetType: 'STUDIO', targetId: studio.id, isFollowing: false, followerCount };
   }

@@ -87,7 +87,27 @@ export class StudiosService {
     const [studios, total] = await Promise.all([
       this.prisma.studio.findMany({
         where,
-        include: STUDIO_INCLUDE,
+        // Explicit select for performance (C1)
+        select: {
+          id: true,
+          slug: true,
+          name: true,
+          tagline: true,
+          description: true,
+          logoUrl: true,
+          bannerUrl: true,
+          websiteUrl: true,
+          location: true,
+          foundedYear: true,
+          isVerified: true,
+          level: true,
+          xp: true,
+          createdAt: true,
+          updatedAt: true,
+          followersCount: true,
+          gamesCount: true,
+          _count: { select: { members: true, games: true, followers: true } },
+        },
         skip: (page - 1) * pageSize,
         take: pageSize,
         orderBy: { createdAt: 'desc' },
