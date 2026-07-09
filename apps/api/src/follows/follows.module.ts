@@ -7,10 +7,11 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { StudiosModule } from '../studios/studios.module';
 import { FollowsController } from './follows.controller';
 import { FollowsService } from './follows.service';
+import { CountersService } from '../common/counters.service';
 
 @Module({
   imports: [PrismaModule, AuthModule, GamesModule, StudiosModule, PlayerXpModule],
   controllers: [FollowsController],
-  providers: [FollowsService],
+  providers: [FollowsService, CountersService],
 })
 export class FollowsModule {}

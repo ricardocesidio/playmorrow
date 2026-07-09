@@ -119,7 +119,7 @@ export class UsersController {
   @Get('me/export')
   @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'GDPR data export for the current user.' })
-  async exportData(@CurrentUser() user: { id: string }) {
+  async exportData(@CurrentUser() user: { id: string }): Promise<Record<string, any>> {
     const data = await this.usersService.exportUserData(user.id);
     if (!data) {
       throw new NotFoundException('User data not found');
