@@ -36,3 +36,8 @@ export function logRequest(data: {
     msg: `${data.method} ${data.path} ${data.status} ${data.latencyMs}ms`,
   });
 }
+
+// Create a child logger with context (e.g. requestId, service) for consistent tracing
+export function createContextLogger(context: Record<string, unknown>) {
+  return logger.child(context);
+}
