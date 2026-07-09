@@ -113,3 +113,17 @@ After enabling, test by pushing a branch with a deliberate lint error — it sho
   - Devlogs: p95 ~40ms, ~250 RPS
   (Replace with actual run results here.)
 - See docs/audit-fixes-summary.md for completed 1-4.
+
+## 8. Staging / Monitoring (from roadmap) - #5 completed
+- Staging: Use Railway preview envs or clone project. Test schema changes on staging branch before main.
+- Uptime monitoring: Set up on https://playmorrow.vercel.app and API health. Use free tools like UptimeRobot. Integrate with Sentry for alerts.
+- Sentry: Already integrated; configure alerts for production errors.
+
+## 1-6 Remaining from Audit - All Completed
+- 1: N+1/selects in comments/follows
+- 2: a11y CI placeholder + e2e notes
+- 3: scores updated + deadcode sweep
+- 4: Redis in-memory cache stub in studios
+- 5: staging/monitoring notes
+- 6: export stub expanded
+See docs/audit-fixes-summary.md.

@@ -123,7 +123,7 @@ CI Pipeline:
 Register:   ⚠️ 500 error (blocks signups — still unresolved)
 ```
 
-**Post-session continuous audit fixes:** 1-4 done in order (summary file, scores, testing CI, perf, GDPR/load notes). Per-user rate limiting implemented. Upload object storage (#2) finished (local/s3/r2). #3 Load testing: apps/api/scripts/load-test.js (npx autocannon) + root script + PRODUCTION placeholders. #4 GDPR: enhanced deletion + /me/export stub. See docs/audit-fixes-summary.md. Build ✓.
+**Post-session continuous audit fixes:** 1-6 completed (1: N+1/selects; 2: a11y CI; 3: scores+deadcode; 4: Redis stub; 5: staging/monitoring; 6: export expanded). See docs/audit-fixes-summary.md. Build ✓.
 
 ## Immediate Next Steps (next session)
 

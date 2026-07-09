@@ -42,7 +42,7 @@ import { CountersService } from './common/counters.service';
       isGlobal: true,
       envFilePath: ['.env', 'apps/api/.env'],
     }),
-    // Global rate limiting (#3 from audit): now per-user (userId if authenticated) or IP fallback.
+    // Global rate limiting (#3 from audit): per-user (userId if authenticated) or IP fallback via CustomThrottlerGuard.
     // Per-route @Throttle() for auth etc. still override.
     // `@SkipThrottle()` exempts the health probe.
     ScheduleModule.forRoot(),

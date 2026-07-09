@@ -153,7 +153,11 @@ export class FollowsService {
   async getMyFollows(userId: string) {
     const follows = await this.prisma.follow.findMany({
       where: { userId },
-      include: {
+      // Explicit select to avoid N+1 (performance audit item 1)
+      select: {
+        id: true,
+        targetType: true,
+        createdAt: true,
         studio: { select: { id: true, name: true, slug: true, logoUrl: true } },
         game: {
           select: {

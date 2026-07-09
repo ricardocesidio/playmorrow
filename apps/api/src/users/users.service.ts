@@ -175,6 +175,8 @@ export class UsersService {
       achievements,
       sessions,
       reportsFiled,
+      // Expanded for audit: add more if needed (e.g. reactions, studio memberships)
+      studioMemberships: await this.prisma.studioMember.findMany({ where: { userId }, select: { studioId: true, role: true, joinedAt: true } }),
       exportedAt: new Date().toISOString(),
       note: 'This is a GDPR data export stub. Expand fields as needed for full compliance.',
     };

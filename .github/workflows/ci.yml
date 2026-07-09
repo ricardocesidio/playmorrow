@@ -94,3 +94,6 @@ jobs:
             apps/web/test-results/
           retention-days: 7
       # TODO (audit 2): Expand e2e for new a11y (tabs, ARIA from B6/B7), run full suite locally with PLAYWRIGHT_DEV=1. Add coverage report. See docs/audit-fixes-summary.md.
+      # A11y: placeholder for Lighthouse CI or axe (run on key pages like /games, /feed)
+      # - name: A11y check
+      #   run: npx @lhci/cli autorun --upload.target=temporary-public-storage || echo "A11y check placeholder"

@@ -20,7 +20,16 @@ export class CommentsService {
   async create(userId: string, devlogId: string, dto: CreateCommentDto) {
     const devlog = await this.prisma.devlog.findUnique({
       where: { id: devlogId },
-      include: { game: { include: { studio: true } } },
+      // Explicit select to reduce N+1
+      select: {
+        id: true,
+        game: {
+          select: {
+            id: true,
+            studio: { select: { id: true } },
+          },
+        },
+      },
     });
     if (!devlog) {
       throw new NotFoundException('Devlog not found');
@@ -116,7 +125,22 @@ export class CommentsService {
   async findByDevlogId(devlogId: string, userId?: string) {
     const devlog = await this.prisma.devlog.findUnique({
       where: { id: devlogId },
-      include: { game: { include: { studio: { include: { members: true } } } } },
+      // Explicit select to reduce N+1 (performance audit)
+      select: {
+        id: true,
+        isPublished: true,
+        game: {
+          select: {
+            id: true,
+            studio: {
+              select: {
+                id: true,
+                members: { select: { userId: true, role: true } },
+              },
+            },
+          },
+        },
+      },
     });
     if (!devlog) {
       throw new NotFoundException('Devlog not found');
@@ -196,7 +220,26 @@ export class CommentsService {
   async delete(userId: string, commentId: string) {
     const comment = await this.prisma.comment.findUnique({
       where: { id: commentId },
-      include: { devlog: { include: { game: { include: { studio: { include: { members: true } } } } } } },
+      // Explicit select to reduce N+1 (performance audit)
+      select: {
+        id: true,
+        devlog: {
+          select: {
+            id: true,
+            game: {
+              select: {
+                id: true,
+                studio: {
+                  select: {
+                    id: true,
+                    members: { select: { userId: true, role: true } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
     if (!comment) {
       throw new NotFoundException('Comment not found');
