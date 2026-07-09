@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { logger } from '../common/logger';
 import { GamesService } from '../games/games.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PlayerXpService } from '../player-xp/player-xp.service';
@@ -70,6 +71,8 @@ export class FollowsService {
         })),
       );
     }
+
+    logger.info({ msg: 'studio followed', studioId: studio.id, userId });
 
     return { targetType: 'STUDIO', targetId: studio.id, isFollowing: true, followerCount };
   }

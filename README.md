@@ -33,7 +33,7 @@ See [`STATUS.md`](STATUS.md) for the complete, verified feature inventory, known
 
 **Security model overview:** [`docs/security/model.md`](docs/security/model.md)
 
-Ongoing elite architecture audit cleanups (Sentry full, pino structured logging + logger usage, upload abstraction for S3/R2, more skeletons (search/leaderboard/profile), counter centralization in follows, a11y focus/polish, test coverage, 4-level comments, dead code removal (error-monitoring), error monitoring now uses pino, etc.) are in progress on this branch. See handoff docs for details.
+Ongoing elite architecture audit cleanups (Sentry full, pino structured logging + logger usage in main/error paths + services (e.g. follows), upload abstraction for S3/R2, more skeletons (search/leaderboard/profile), counter centralization in follows, a11y focus/polish, test coverage, 4-level comments, dead code removal (error-monitoring), etc.) are in progress on this branch. See handoff docs for details.
 
 607+ commits across 11 development sessions. Full implementation report in [`AGENTS.md`](AGENTS.md).
 
