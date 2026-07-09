@@ -10,7 +10,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.redirect(new URL('/login?error=All+fields+required', request.url));
   }
 
-  const API = process.env.API_URL || 'https://playmorrow-api-production.up.railway.app/api';
+  const isDev = process.env.NODE_ENV === 'development';
+  const defaultApi = isDev ? 'http://localhost:4000/api' : 'https://playmorrow-api-production.up.railway.app/api';
+  const API = process.env.API_URL || defaultApi;
   const res = await fetch(`${API}/auth/session/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

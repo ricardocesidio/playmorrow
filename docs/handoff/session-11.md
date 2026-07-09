@@ -125,6 +125,8 @@ Register:   ⚠️ 500 error (blocks signups — still unresolved)
 
 **Post-session continuous audit fixes:** 1-6 completed (1: N+1/selects; 2: a11y CI; 3: scores+deadcode; 4: Redis stub; 5: staging/monitoring; 6: export expanded). See docs/audit-fixes-summary.md. Build ✓.
 
+**Build error handled:** "Unterminated string constant" in games/page.tsx:292 (ToggleControl). The ternary inside the className template literal closed a 'string' arm with a stray `. Source now uses matching quotes on both branches. Cache cleaned and fresh dev confirmed clean compile + 200 for /games. Recorded in audit-fixes-summary.md.
+
 ## Immediate Next Steps (next session)
 
 1. **Get Railway dashboard access** — check logs for register 500 root cause

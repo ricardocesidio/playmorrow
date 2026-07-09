@@ -35,6 +35,8 @@ See [`STATUS.md`](STATUS.md) for the complete, verified feature inventory, known
 
 Ongoing elite architecture audit cleanups — see [docs/audit-fixes-summary.md](docs/audit-fixes-summary.md) for full list (1-6 completed: N+1/selects, a11y CI, scores/deadcode, Redis stub, staging/monitoring notes, export expansion + more). Per-user rate limiting implemented via CustomThrottlerGuard (with OptionalSessionGuard for user attachment). Upload service finished for object storage (#2): refactored to memoryStorage + storeFile, supports STORAGE_PROVIDER=local (default) | s3 | r2 (with stub + comments for AWS SDK). See handoff docs for details.
 
+**Build hygiene:** Resolved "Unterminated string constant" in `apps/web/app/games/page.tsx` (ToggleControl className ternary). Source used consistent quotes; .next cache cleared + dev server restarted for clean compile. /games now compiles cleanly.
+
 #3 Load testing baseline added (per audit): `apps/api/scripts/load-test.js` using npx autocannon (no local dep) for /games, /feed/public, /devlogs. Run `pnpm --filter @playmorrow/api loadtest` (or set LOADTEST_URL). Results should be captured in PRODUCTION.md. See docs/audit-fixes-summary.md.
 
 #4 Deeper GDPR: enhanced user deletion with explicit report anonymization + added GET /users/me/export data export stub (in users.controller + service). See PRODUCTION.md.
