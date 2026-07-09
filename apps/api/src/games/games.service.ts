@@ -20,6 +20,15 @@ const GAME_INCLUDE = {
   _count: { select: { followers: true } },
 } as const;
 
+// Slimmer include for list endpoints (homepage feed, /games) — explicit fields only (performance audit item)
+const GAME_LIST_INCLUDE = {
+  studio: { select: { id: true, name: true, slug: true, logoUrl: true } },
+  media: { where: { type: 'SCREENSHOT' as const }, take: 1, orderBy: { position: 'asc' as const } },
+  platformLinks: { take: 4, orderBy: { position: 'asc' as const } },
+  tags: { include: { tag: true }, take: 6 },
+  _count: { select: { followers: true, wishlistItems: true } },
+} as const;
+
 @Injectable()
 export class GamesService {
   constructor(

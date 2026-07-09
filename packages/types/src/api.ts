@@ -35,6 +35,11 @@ export interface HealthStatus {
   version: string;
   uptimeSeconds: number;
   timestamp: string;
+  checks?: {
+    database?: boolean;
+    emailProvider?: boolean;
+    [key: string]: boolean | undefined;
+  };
 }
 
 /** ISO-8601 timestamp string (branded for clarity). */

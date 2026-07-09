@@ -123,6 +123,8 @@ CI Pipeline:
 Register:   ⚠️ 500 error (blocks signups — still unresolved)
 ```
 
+**Post-session continuous audit fixes:** pino structured logging fully integrated (pino + usage in main + error service), Sentry on both ends, upload abstraction, additional skeletons (search, leaderboard, profiles), dashboard clarity header, counter centralization in follows, error-monitoring service removed (unused), more docs/readme/handoff updates. Nest build ✓.
+
 ## Immediate Next Steps (next session)
 
 1. **Get Railway dashboard access** — check logs for register 500 root cause

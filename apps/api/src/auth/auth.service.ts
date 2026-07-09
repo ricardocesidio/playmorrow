@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { User } from '@playmorrow/database';
@@ -68,6 +68,7 @@ function generateRefreshToken(): string {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private readonly refreshSecret: string;
 
   constructor(
@@ -121,7 +122,14 @@ export class AuthService {
       data: { codeHash: hash, userId: user.id, expiresAt },
     });
 
-    await this.emailService.sendVerificationCode(user.email, raw);
+    // Email failure must never cause registration to 500.
+    // Code is persisted, so the user (or admin) can trigger resend later.
+    try {
+      await this.emailService.sendVerificationCode(user.email, raw);
+    } catch (err) {
+      // Log but swallow — registration succeeded. Code is in DB.
+      this.logger.error('Failed to send verification email during register (code stored for resend)', err);
+    }
 
     return {
       requiresEmailVerification: true,

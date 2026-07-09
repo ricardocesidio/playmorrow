@@ -4,9 +4,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { CsrfGuard } from './common/csrf.guard';
+// Removed default Nest scaffolding (AppController / AppService) per 2026-07-09 audit.
+// The API is fully prefixed under /api and served by feature modules.
 import { CsrfService } from './common/csrf.service';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
@@ -29,7 +29,9 @@ import { RoadmapItemsModule } from './roadmap-items/roadmap-items.module';
 import { StudiosModule } from './studios/studios.module';
 import { UploadModule } from './upload/upload.module';
 import { UsersModule } from './users/users.module';
-import { StudioChatModule } from './studio-chat/studio-chat.module';
+// StudioChatModule removed from registration (2026-07-09 audit):
+// Zero references in frontend. Files kept for future work if needed.
+// import { StudioChatModule } from './studio-chat/studio-chat.module';
 import { PushNotificationsModule } from './push-notifications/push-notifications.module';
 import { AchievementModule } from './achievements/achievement.module';
 import { PlayerXpModule } from './player-xp/player-xp.module';
@@ -66,14 +68,13 @@ import { PlayerXpModule } from './player-xp/player-xp.module';
     SearchModule,
     WishlistModule,
     InvitationsModule,
-    StudioChatModule,
+    // StudioChatModule, // not wired to any UI — see audit
     PushNotificationsModule,
     AchievementModule,
     PlayerXpModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [
-    AppService,
     CsrfService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: CsrfGuard },

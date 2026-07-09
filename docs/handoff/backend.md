@@ -2,6 +2,7 @@
 
 > **Historical document** (pre-DevlogV2, 2026-06-28). Many issues listed here have been resolved.
 > See [`STATUS.md`](../../STATUS.md) → Outstanding Work for current open issues.
+> Post-audit (2026-07-09): Many more items fixed including CSRF global, pino logging, upload abstraction, counter syncs, etc.
 
 Catalogue for `apps/api` (NestJS) and `packages/database` (Prisma). See
 [`HANDOFF.md`](./HANDOFF.md) for repo orientation and execution order.

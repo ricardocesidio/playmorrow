@@ -56,8 +56,23 @@ export default function UserProfilePage() {
         <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
           <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
-          <div className="relative mx-auto flex w-full max-w-3xl flex-1 items-center justify-center min-h-[calc(100vh-200px)]">
-            <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div className="relative mx-auto max-w-3xl pt-8">
+            {/* Profile skeleton for better loading UX (audit polish) */}
+            <div className="animate-pulse">
+              <div className="flex items-center gap-4">
+                <div className="size-20 rounded-full bg-border/30" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-6 w-48 bg-border/40" />
+                  <div className="h-4 w-32 bg-border/30" />
+                </div>
+              </div>
+              <div className="mt-8 grid grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="h-20 rounded border border-border/30 bg-[#050b0f]/40" />
+                ))}
+              </div>
+              <div className="mt-8 h-64 rounded border border-border/30 bg-[#050b0f]/40" />
+            </div>
           </div>
         </main>
       </>

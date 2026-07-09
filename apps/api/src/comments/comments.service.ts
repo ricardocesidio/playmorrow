@@ -142,6 +142,7 @@ export class CommentsService {
       where: { devlogId, parentId: null },
       include: {
         author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+        // 4-level recursion support (increased per audit for "Seed and verify 3–4 level nested comments")
         replies: {
           include: {
             author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
@@ -151,6 +152,11 @@ export class CommentsService {
                 replies: {
                   include: {
                     author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+                    replies: {
+                      include: {
+                        author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+                      },
+                    },
                   },
                 },
               },

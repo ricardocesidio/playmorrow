@@ -20,3 +20,4 @@ allowBuilds:
   prisma: true
   sharp: true
   core-js-pure: true
+  '@sentry/cli': set this to true or false

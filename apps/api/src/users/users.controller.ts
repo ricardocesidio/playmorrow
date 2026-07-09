@@ -90,9 +90,21 @@ export class UsersController {
       const valid = await argon2.verify(fullUser.passwordHash, password);
       if (!valid) throw new NotFoundException('Invalid password');
     }
-    // Session cleanup
-    await this.prisma.session.deleteMany({ where: { userId: user.id } });
+    // Explicit cleanup + rely on Prisma cascade rules in schema (most User relations are Cascade).
+    // This is the GDPR "right to erasure" path.
+    await this.prisma.$transaction([
+      this.prisma.refreshToken.deleteMany({ where: { userId: user.id } }),
+      this.prisma.verificationToken.deleteMany({ where: { userId: user.id } }),
+      this.prisma.emailVerificationCode.deleteMany({ where: { userId: user.id } }),
+      this.prisma.passwordResetToken.deleteMany({ where: { userId: user.id } }),
+      this.prisma.pushSubscription.deleteMany({ where: { userId: user.id } }),
+      this.prisma.session.deleteMany({ where: { userId: user.id } }),
+      this.prisma.wishlistItem.deleteMany({ where: { userId: user.id } }),
+      // Many other relations (devlogs, comments, reactions, follows, notifications, xp events, etc.)
+      // use onDelete: Cascade in the Prisma schema.
+    ]);
+
     await this.prisma.user.delete({ where: { id: user.id } });
-    return { success: true };
+    return { success: true, message: 'Account and associated data deleted (cascaded where configured).' };
   }
 }

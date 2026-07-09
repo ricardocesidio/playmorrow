@@ -307,9 +307,19 @@
     background: var(--border-bright);
   }
 
-  /* Focus ring */
+  /* Focus ring — stronger for accessibility (audit) */
   :focus-visible {
-    outline: 1px solid var(--ring);
+    outline: 2px solid var(--cyan);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 1px rgba(62, 231, 255, 0.3);
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--cyan);
     outline-offset: 2px;
   }
 }

@@ -13,11 +13,55 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
+import * as Sentry from '@sentry/node';
+import { logger, logRequest } from './common/logger';
+
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
+
+  // Fail fast in production if critical secrets are missing.
+  // This prevents confusing 500s (e.g. on register) caused by misconfigured deploys.
+  const nodeEnv = config.get<string>('NODE_ENV') || 'development';
+  const isProd = nodeEnv === 'production';
+
+  const requiredInProd = [
+    'DATABASE_URL',
+    'JWT_SECRET',
+    'SESSION_SECRET',   // used for cookie/session security
+    'CSRF_SECRET',      // required for global HMAC CSRF
+    'RESEND_API_KEY',   // email verification & invites
+    'WEB_ORIGIN',
+  ];
+
+  if (isProd) {
+    const missing = requiredInProd.filter((key) => !config.get<string>(key));
+    if (missing.length > 0) {
+      // Log clearly and exit so Railway shows the real problem immediately.
+      // eslint-disable-next-line no-console
+      console.error('❌ FATAL: Missing required production environment variables:', missing.join(', '));
+      // eslint-disable-next-line no-console
+      console.error('   Set them in the Railway dashboard and redeploy.');
+      process.exit(1);
+    }
+  }
+
+  // Sentry (error tracking) — from the elite audit Observability section
+  const sentryDsn = config.get<string>('SENTRY_DSN');
+  if (sentryDsn) {
+    Sentry.init({
+      dsn: sentryDsn,
+      environment: nodeEnv,
+      tracesSampleRate: isProd ? 0.15 : 1.0,
+      // Integrations can be added here later (e.g. Http, Prisma)
+    });
+    logger.info('✅ Sentry initialized');
+  } else if (isProd) {
+    logger.warn('⚠️  SENTRY_DSN not set — production errors will have no visibility (see PRODUCTION.md)');
+  }
+
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -31,7 +75,7 @@ async function bootstrap() {
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", 'data:', 'https:', 'http://localhost:*'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-        connectSrc: ["'self'", "https://*.vercel.app", "https://*.onrender.com", "https://*.neon.tech", "http://localhost:*"],
+        connectSrc: ["'self'", "https://*.vercel.app", "https://*.neon.tech", "http://localhost:*"],
         frameAncestors: ["'none'"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
@@ -42,6 +86,30 @@ async function bootstrap() {
 
   // Cookie parser for session auth
   app.use(cookieParser());
+
+  // Structured request logging with pino (Observability item from elite audit)
+  app.use((req: any, res: any, next: any) => {
+    const requestId = req.headers['x-request-id'] || require('crypto').randomBytes(8).toString('hex');
+    req.requestId = requestId;
+    res.setHeader('x-request-id', requestId);
+
+    const start = Date.now();
+    const userId = (req as any).user?.id ?? null;
+
+    res.on('finish', () => {
+      const duration = Date.now() - start;
+      logRequest({
+        method: req.method,
+        path: req.originalUrl || req.url,
+        status: res.statusCode,
+        latencyMs: duration,
+        requestId,
+        userId,
+        ip: req.ip,
+      });
+    });
+    next();
+  });
 
   // Strip unknown props, transform payloads into DTO instances.
   app.useGlobalPipes(
@@ -77,7 +145,7 @@ async function bootstrap() {
   const port = config.get<number>('PORT', 4000);
   await app.listen(port);
 
-  console.log(`🚀  Playmorrow API ready at http://localhost:${port} (docs: /docs)`);
+  logger.info(`🚀 Playmorrow API ready at http://localhost:${port} (docs: /docs)`);
 }
 
 void bootstrap();
