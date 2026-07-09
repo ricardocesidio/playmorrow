@@ -97,11 +97,14 @@ export default function NotificationsPage() {
       </div>
 
       {/* Status tabs */}
-      <div className="mb-6 flex gap-4 border-b border-border/40">
+      <div className="mb-6 flex gap-4 border-b border-border/40" role="tablist" aria-label="Notification filters">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => { setStatus(tab.key); setPage(1); }}
+            role="tab"
+            aria-selected={status === tab.key}
+            aria-controls={`notifications-${tab.key}`}
             className={`pb-2 font-mono text-[0.6rem] uppercase tracking-widest transition-colors ${
               status === tab.key
                 ? 'border-b-2 border-cyan text-cyan'
@@ -145,7 +148,7 @@ export default function NotificationsPage() {
 
       {/* List */}
       {data && data.items.length > 0 && (
-        <div className="space-y-2">
+        <div id={`notifications-${status}`} className="space-y-2" role="tabpanel">
           {data.items.map((n) => (
             <div
               key={n.id}

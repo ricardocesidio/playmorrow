@@ -141,7 +141,7 @@ export default function FeedPage() {
 
 function SignalTabs({ activeTab, onTabChange, onPageReset }: { activeTab: string; onTabChange: (tab: string) => void; onPageReset: () => void }) {
   return (
-    <div className="grid border-b border-border/80 bg-background/55 text-muted-foreground md:grid-cols-[150px_1fr_1fr_1fr_1fr]">
+    <div className="grid border-b border-border/80 bg-background/55 text-muted-foreground md:grid-cols-[150px_1fr_1fr_1fr_1fr]" role="tablist" aria-label="Feed filters">
       {['All signals', 'Devlogs', 'Roadmap', 'Releases', 'Milestones'].map((tab) => {
         const isActive = activeTab === tab;
         const typeKey = tab === 'All signals' ? 'all' : tab === 'Devlogs' ? 'devlogs' : tab === 'Roadmap' ? 'roadmap' : tab === 'Releases' ? 'releases' : 'milestones';
@@ -149,6 +149,8 @@ function SignalTabs({ activeTab, onTabChange, onPageReset }: { activeTab: string
           <button
             key={tab}
             type="button"
+            role="tab"
+            aria-selected={isActive}
             onClick={() => { onPageReset(); onTabChange(typeKey); }}
             className={`relative h-12 cursor-pointer border-b border-r border-border/55 px-4 pm-micro transition md:border-b-0 ${
               isActive
