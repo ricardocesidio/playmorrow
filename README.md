@@ -33,7 +33,7 @@ See [`STATUS.md`](STATUS.md) for the complete, verified feature inventory, known
 
 **Security model overview:** [`docs/security/model.md`](docs/security/model.md)
 
-Ongoing elite architecture audit cleanups (Sentry full, pino structured logging + contextual child loggers + usage in main/error paths + services (e.g. follows, health, email), upload abstraction for S3/R2, more skeletons (search/leaderboard/profile), counter centralization in follows, a11y focus/polish, test coverage, 4-level comments, dead code removal (error-monitoring), request context logger + req.log in health, etc.) are in progress on this branch. See handoff docs for details.
+Ongoing elite architecture audit cleanups — restarted full pass from Critical start: enhanced register (full try/catch + pino logging to prevent/hunt 500s), strengthened early secret validation in main.ts (recommended vars + logging), updated PRODUCTION.md with branch protection steps + smoke test guidance. Plus prior: Sentry full, pino + contextual loggers (main, services, health, email), upload abstraction for S3/R2, more skeletons, counter centralization, a11y, coverage, dead code removal, etc. Build green. See handoff docs for details.
 
 607+ commits across 11 development sessions. Full implementation report in [`AGENTS.md`](AGENTS.md).
 
