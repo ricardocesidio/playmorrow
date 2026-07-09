@@ -1,6 +1,32 @@
-import { type INestApplication, ValidationPipe } from '@nestjs/common';
+import { type INestApplication, ValidationPipe, Catch, type ExceptionFilter, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { type TestingModule, type TestingModuleBuilder } from '@nestjs/testing';
 import cookieParser from 'cookie-parser';
+
+@Catch()
+class DiagnosticFilter implements ExceptionFilter {
+  catch(exception: unknown, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse();
+    if (exception instanceof HttpException) {
+      const status = exception.getStatus();
+      const body = exception.getResponse();
+      response.status(status).json(body);
+    } else {
+      const err = exception as Error;
+      console.error('=== TEST DIAGNOSTIC: Unhandled exception ===');
+      console.error('Message:', err?.message ?? '(no message)');
+      console.error('Stack:', err?.stack ?? '(no stack)');
+      if (err && typeof err === 'object' && 'meta' in err) {
+        console.error('Meta:', JSON.stringify((err as any).meta, null, 2));
+      }
+      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: err?.message ?? 'Internal server error',
+        stack: err?.stack?.split('\n').slice(0, 5).join(' | '),
+      });
+    }
+  }
+}
 
 /**
  * Creates a NestJS test application that mirrors production bootstrap:
@@ -32,6 +58,8 @@ export async function createTestApp(
   // setGlobalPrefix BEFORE useGlobalPipes
   nestApp.setGlobalPrefix('api', { exclude: ['health'] });
   nestApp.use(cookieParser());
+
+  nestApp.useGlobalFilters(new DiagnosticFilter());
 
   nestApp.useGlobalPipes(
     new ValidationPipe({

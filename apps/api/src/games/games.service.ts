@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { StudioRole } from '@playmorrow/database';
 import type { Prisma } from '@playmorrow/database';
 
@@ -110,22 +110,36 @@ export class GamesService {
       });
     } catch (e: unknown) {
       const err = e as Error;
-      if (err && typeof err === 'object' && 'message' in err) {
-        throw new Error(`Game create Prisma error: ${err.message}${'meta' in err ? ` meta=${JSON.stringify((err as any).meta)}` : ''}`);
+      console.error('=== GAME CREATE PRISMA ERROR ===');
+      console.error('Message:', err?.message ?? '(none)');
+      console.error('Stack:', err?.stack ?? '(none)');
+      if (err && typeof err === 'object' && 'meta' in err) {
+        console.error('Meta:', JSON.stringify((err as any).meta, null, 2));
       }
-      throw e;
+      console.error('=== END GAME CREATE PRISMA ERROR ===');
+      const detail = err?.message ?? 'Unknown Prisma error';
+      throw new InternalServerErrorException(`Game creation failed: ${detail}`);
     }
 
-    await this.studioXpService.award(studio.id, 'GAME_CREATE', undefined, game.id);
+    try {
+      await this.studioXpService.award(studio.id, 'GAME_CREATE', undefined, game.id);
 
-    await this.auditLog.log({
-      studioId: studio.id,
-      actorId: userId,
-      action: 'GAME_CREATED',
-      targetType: 'GAME',
-      targetId: game.id,
-      metadata: { title: game.title },
-    });
+      await this.auditLog.log({
+        studioId: studio.id,
+        actorId: userId,
+        action: 'GAME_CREATED',
+        targetType: 'GAME',
+        targetId: game.id,
+        metadata: { title: game.title },
+      });
+    } catch (e2: unknown) {
+      const err2 = e2 as Error;
+      console.error('=== GAME CREATE POST-PRISMA ERROR ===');
+      console.error('Message:', err2?.message ?? '(none)');
+      console.error('Stack:', err2?.stack ?? '(none)');
+      console.error('=== END GAME CREATE POST-PRISMA ERROR ===');
+      throw new InternalServerErrorException(`Game creation post-Prisma failed: ${err2?.message ?? 'Unknown'}`);
+    }
 
     this.feedEngine.emit('GAME_CREATED', {
       studioId: studio.id,
