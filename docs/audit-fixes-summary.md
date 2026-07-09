@@ -76,4 +76,4 @@
 
 **Next:** Per user, continue with remaining (wrap-up, testing, perf, etc.).
 
-*Last updated: post B6/B7 + E + C + #2 Upload storage support (S3/R2) - refactored controller to memory + storeFile with provider support*
+*Last updated: post B6/B7 + E + C + #2 Upload + #3 Load testing baseline (autocannon script)*

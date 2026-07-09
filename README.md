@@ -35,6 +35,8 @@ See [`STATUS.md`](STATUS.md) for the complete, verified feature inventory, known
 
 Ongoing elite architecture audit cleanups — see [docs/audit-fixes-summary.md](docs/audit-fixes-summary.md) for full list (1-4 completed in order: wrap-up/scores/summary + testing/CI + perf + GDPR/load notes). Per-user rate limiting implemented via CustomThrottlerGuard (with OptionalSessionGuard for user attachment). Upload service finished for object storage (#2): refactored to memoryStorage + storeFile, supports STORAGE_PROVIDER=local (default) | s3 | r2 (with stub + comments for AWS SDK). See handoff docs for details.
 
+#3 Load testing baseline added (per audit): `apps/api/scripts/load-test.js` using autocannon for /games, /feed/public, /devlogs. Run `pnpm --filter @playmorrow/api loadtest` (or set LOADTEST_URL). Results should be captured in PRODUCTION.md. See docs/audit-fixes-summary.md.
+
 **Updated Project Scores (post all 1-4):**
 - Architecture: 9.7 (centralized counters, explicit selects)
 - Frontend: 9.0 (more a11y, skeletons, keyboard)

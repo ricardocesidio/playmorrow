@@ -123,7 +123,7 @@ CI Pipeline:
 Register:   ⚠️ 500 error (blocks signups — still unresolved)
 ```
 
-**Post-session continuous audit fixes:** 1-4 done in order (summary file, scores, testing CI, perf, GDPR/load notes). Per-user rate limiting implemented. Upload object storage (#2) finished (local/s3/r2). See docs/audit-fixes-summary.md. Build ✓.
+**Post-session continuous audit fixes:** 1-4 done in order (summary file, scores, testing CI, perf, GDPR/load notes). Per-user rate limiting implemented. Upload object storage (#2) finished (local/s3/r2). #3 Load testing: apps/api/scripts/load-test.js added. See docs/audit-fixes-summary.md. Build ✓.
 
 ## Immediate Next Steps (next session)
 
