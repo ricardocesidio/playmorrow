@@ -1,6 +1,4 @@
-import type { Metadata } from 'next';
-
-const API = process.env.API_URL || 'http://localhost:4000/api';
+const API = process.env.API_URL || 'https://playmorrow-api-production.up.railway.app/api';
 
 async function getGame(slug: string) {
   try {

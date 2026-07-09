@@ -11,13 +11,17 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
 
-  // Proxy API requests in dev to avoid cross-origin cookie issues
+  // Proxy API requests to backend to avoid cross-origin cookie issues
   async rewrites() {
-    if (process.env.NODE_ENV !== 'development') return [];
+    const apiDest = process.env.API_URL || (
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:4000/api'
+        : 'https://playmorrow-api-production.up.railway.app/api'
+    );
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:4000/api/:path*',
+        destination: `${apiDest}/:path*`,
       },
     ];
   },

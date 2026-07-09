@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "clean": "rm -rf dist .turbo",
-    "xp:recalculate": "npx ts-node src/scripts/recalculate-xp.ts"
+    "xp:recalculate": "npx ts-node src/scripts/recalculate-xp.ts",
+    "devlogs:publish-scheduled": "npx ts-node src/scripts/publish-scheduled-devlogs.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

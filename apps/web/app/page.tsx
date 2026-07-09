@@ -4,11 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import {
   Activity, ArrowRight, Gamepad2, Heart, Radio, SquarePlay, UserPlus, Users, Zap,
+  Crown,
 } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { StatusBadge } from '@/components/status-badge';
-import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
+import { CircuitFrame, HudPanel } from '@/components/playmorrow/hud';
 import { formatRelativeTime, formatFollowers } from '@/lib/format';
 import { usePublicFeed, useGames, useStudios } from '@/lib/api/hooks';
 import type { Game } from '@/lib/api/client';

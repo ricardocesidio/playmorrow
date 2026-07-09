@@ -235,25 +235,22 @@ Local dev uses Next.js rewrites to proxy `/api/*` to NestJS, keeping cookies sam
 | 1 | `coverUrl` still on Devlog model | Low | PRD says remove; needs data migration before dropping column |
 | 2 | Devlog author is `User` (not `StudioMember`) | Low | Works correctly; PRD spec differs |
 | 3 | Nested comments only 1 level deep in UI | Low | Backend supports recursive; frontend renders 1 level |
-| 4 | Feed Engine: TRAILER_UPDATED + STUDIO_VERIFIED not wired | Low | API DTOs don't expose trailer changes; studio verification has no API |
+| 4 | Feed Engine: TRAILER_UPDATED not wired | Low | API DTOs don't expose trailer changes |
 | 5 | `notFound()` in client components causes hang | Low | Reverted to error-state rendering; proper 404 requires server component refactor |
-| 6 | ~10-15 pre-existing ESLint warnings | Low | Unused imports in legacy files; non-blocking |
-| 7 | 15/17 API tests fail in CI | Medium | Pre-existing; need test env DB configuration |
-| 8 | Production login broken | High | Vercel → Railway `API_URL` env var propagation issue |
+| 6 | 15/17 API tests fail in CI | Medium | Pre-existing; need test env DB configuration |
+| 7 | Production login broken | High | Needs `NEXT_PUBLIC_API_URL` + `API_URL` set on Vercel, `WEB_ORIGIN` set on Railway (code fallbacks fixed) |
 
 ---
 
 ## What's Next
 
 ### Short-term
-- Fix production login (Vercel/Railway env var configuration)
-- Wire TRAILER_UPDATED + STUDIO_VERIFIED FeedEngine events
+- Set `NEXT_PUBLIC_API_URL` + `API_URL` on Vercel, `WEB_ORIGIN` + `COOKIE_DOMAIN` on Railway
+- Wire TRAILER_UPDATED FeedEngine event
 - Add "Load more" pagination to devlog/comment listing pages
-- Clean remaining ESLint warnings
 
 ### Medium-term (from PRD deferred items)
 - Email/push notifications to followers
-- Scheduled publish worker (cron-based; field exists)
 - Dedicated CommunityPost entity (currently reuses Comment model)
 - Recursive nested comment rendering
 

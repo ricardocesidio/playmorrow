@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-const API = process.env.API_URL || 'http://localhost:4000/api';
+const API = process.env.API_URL || 'https://playmorrow-api-production.up.railway.app/api';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

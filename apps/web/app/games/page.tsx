@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { ArrowLeft, ArrowRight, BarChart3, Bookmark, ChevronDown, Search, Users, X } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
@@ -179,30 +180,6 @@ export default function GamesPage() {
         <HudStatusRail />
       </main>
     </>
-  );
-}
-
-function FilterGroup({ label, options, selected, onChange }: { label: string; options: string[]; selected: string; onChange: (value: string) => void }) {
-  return (
-    <div>
-      <div className="pm-micro mb-1.5 text-muted-foreground">{label} <ChevronDown className="inline size-3" /></div>
-      <div className="flex flex-wrap gap-2">
-        {options.map((option) => (
-          <button
-            key={option}
-            type="button"
-            onClick={() => onChange(option)}
-            className={`clip-corner border px-4 py-1.5 pm-micro cursor-pointer ${
-              selected === option
-                ? 'border-cyan bg-cyan/10 text-cyan'
-                : 'border-border bg-background/50 text-muted-foreground'
-            }`}
-          >
-            {option === 'All' ? 'All' : option.replace(/_/g, ' ')}
-          </button>
-        ))}
-      </div>
-    </div>
   );
 }
 

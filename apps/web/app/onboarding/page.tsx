@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { ArrowRight, Check, Gamepad2, Building2, Heart, User, AtSign, Upload } from 'lucide-react';
 import { HudButton, HudPanel } from '@/components/playmorrow/hud';
-import { api, API } from '@/lib/api/client';
+import { API } from '@/lib/api/client';
 
 const PLAYER_STEPS = ['Account Type', 'Username', 'Profile', 'Review', 'Follow Studios', 'Wishlist Games'];
 const STUDIO_STEPS = ['Account Type', 'Username', 'Profile', 'Review'];
@@ -38,7 +38,6 @@ const COUNTRIES = [
 ];
 
 export default function OnboardingPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const provider = searchParams.get('provider');
   const email = searchParams.get('email') || '';

@@ -23,7 +23,7 @@ import {
   useReactToComment,
   useRemoveCommentReaction,
 } from '@/lib/api/hooks';
-import type { CommentReactionSummary } from '@/lib/api/client';
+import type { Comment, CommentReactionSummary } from '@/lib/api/client';
 const REACTION_ICONS: Record<string, React.ReactNode> = {
   LIKE: <ThumbsUp className="size-3.5" />,
   LOVE: <Heart className="size-3.5" />,
@@ -271,7 +271,7 @@ function CommentItem({
         <div className="mt-3 space-y-3">
           {allReplies
             .filter((r) => r.parentId === comment.id)
-            .map((reply: any) => (
+            .map((reply: Comment) => (
               <CommentItem
                 key={reply.id}
                 comment={reply}

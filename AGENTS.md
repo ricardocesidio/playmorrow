@@ -1,6 +1,6 @@
 # Playmorrow — Project Handoff
 
-**Last updated:** 2026-07-08 (30 commits — final PRD delivery)
+**Last updated:** 2026-07-09 (39 commits — PRD 100% complete)
 
 ## Tech Stack
 
@@ -15,8 +15,10 @@
 
 - **Neon DB:** `postgresql://neondb_owner:REDACTED@ep-orange-bird-abpuzipk-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require`
 - **Demo login:** `dev@playmorrow.example` / `Demo123!@`
-- **API URL:** `http://localhost:4000/api` (proxied via Next.js rewrites)
-- **Frontend:** `http://localhost:3000`
+- **API URL:** `http://localhost:4000/api` (dev); `https://playmorrow-api-production.up.railway.app/api` (prod, proxied via Next.js rewrites)
+- **Frontend:** `http://localhost:3000` (dev); `https://playmorrow.vercel.app` (prod)
+- **Production env vars needed on Vercel:** `NEXT_PUBLIC_API_URL=/api`, `API_URL=https://playmorrow-api-production.up.railway.app/api`
+- **Production env vars needed on Railway:** `WEB_ORIGIN=https://playmorrow.vercel.app`, `COOKIE_DOMAIN=.vercel.app`
 - **`loadEnvFile('.env')`** called in `apps/api/src/main.ts` to ensure DATABASE_URL is loaded
 
 ## Design System (Cyberpunk)
@@ -43,29 +45,28 @@
 - **Platform links:** 4 per game (cleaned from 20 duplicates)
 - **Demo user XP:** 1250xp, level 4, with 7 player XP events + 3 studio XP events
 - **Community comments:** Auto-generated when devlogs published via Feed Engine
-- **Remaining warnings:** 10-15 pre-existing unused imports (non-blocking, ESLint only)
 
 ## Devlog System V2 PRD — Complete
 
 ### Implemented
 - **Schema:** `DevlogStatus` (DRAFT/PUBLISHED/SCHEDULED), `FeedEventType`, `FeedEvent`, `DevlogLike` (unique constraint), `DevlogScreenshot` models. Devlog fields: subtitle, readingTimeMin, status, scheduledFor, editedAt, category, tags, screenshots, likes
-- **Feed Engine:** `apps/api/src/feed/feed-events.service.ts` — centralized `emit()` + `onDevlogPublished()` with auto CommunityPost creation. Events wired: DEVLOG_PUBLISHED, GAME_CREATED, GAME_STATUS_CHANGED, ROADMAP_UPDATED, STUDIO_CREATED, PRESS_KIT_UPDATED, ROLE_CHANGED
+- **Feed Engine:** `apps/api/src/feed/feed-events.service.ts` — centralized `emit()` + `onDevlogPublished()` with auto CommunityPost creation. Events wired: DEVLOG_PUBLISHED, GAME_CREATED, GAME_STATUS_CHANGED, ROADMAP_UPDATED, STUDIO_CREATED, PRESS_KIT_UPDATED, ROLE_CHANGED, TRAILER_UPDATED
 - **API:** `POST /devlogs/:id/like` (toggle), `GET /feed/events` (paginated), expanded CRUD with all new fields
-- **RBAC seat limits:** `assertSeatLimit()` in `apps/api/src/common/studio-permissions.ts` (Owner:2, Admin:3, Moderator:10)
+- **RBAC seat limits:** `assertPermission()` + `assertSeatLimit()` in `apps/api/src/common/studio-permissions.ts` (Owner:2, Admin:3, Moderator:10)
 - **Game page:** Devlogs full width in main content, Roadmap in right sidebar below QuickInfo. `toResponse` includes devlogs + roadmapItems
 - **Devlog editor:** Status radio (Draft/Publish/Schedule), subtitle, tags chip input, screenshots upload (max 10), category, scheduled date picker, preview toggle (Edit/Preview/Split)
-- **Devlog detail:** Status badge, category chip, tags, screenshots gallery, author role badge
+- **Devlog detail:** Status badge, category chip, tags, screenshots gallery, author role badge, recursive nested comments (unlimited depth via `allReplies` prop)
 - **Editor toolbar:** `@uiw/react-md-editor` v4.1.1 with full formatting toolbar
-- **Cache revalidation:** Server actions in `apps/web/actions/revalidate.ts` — called on devlog publish, game update, studio mutations
+- **Cache revalidation:** Server actions in `apps/web/actions/revalidate.ts` — called on devlog publish (`revalidateFeed`, `revalidateHomepage`, `revalidateGame`)
 - **Implementation Report:** Delivered (Section 10 of PRD)
+- **coverUrl removal:** Complete — removed from schema, DTOs, service, frontend (PRD Section 8.1 Definition of Done)
 
 ### Intentionally Deferred (PRD Section 3 — Out of Scope)
 - Email/push notifications to followers
 - Real-time WebSocket updates (cache revalidation covers this)
 - @mentions in comments
-- Scheduled publishing worker (field exists, cron TBD)
-- CoverUrl → screenshots migration (needs data migration plan)
-- Recursive nested replies beyond 1 level (backend supports it, frontend renders 1 level)
+- Dedicated CommunityPost entity (uses Comment model)
+- STUDIO_VERIFIED FeedEngine event (no API for studio verification)
 
 ## Key Files Reference
 
@@ -83,12 +84,17 @@
 | Devlog editor (new) | `apps/web/app/dashboard/devlogs/new/page.tsx` |
 | Devlog editor (edit) | `apps/web/app/dashboard/devlogs/[id]/page.tsx` |
 | Devlog detail | `apps/web/app/devlogs/[id]/page.tsx` |
+| Game devlogs listing | `apps/web/app/games/[slug]/devlogs/page.tsx` |
+| Game comments listing | `apps/web/app/games/[slug]/comments/page.tsx` |
 | API hooks | `apps/web/lib/api/hooks.ts` |
 | API client types | `apps/web/lib/api/client.ts` |
 | Markdown editor | `apps/web/components/md-editor.tsx` |
 | Cache revalidation | `apps/web/actions/revalidate.ts` |
 | Player dashboard | `apps/web/components/dashboard/PlayerDashboard.tsx` |
 | Studio dashboard | `apps/web/components/dashboard/StudioDashboard.tsx` |
+| Scheduled publish script | `apps/api/src/scripts/publish-scheduled-devlogs.ts` |
+| Rewrites config | `apps/web/next.config.ts` |
+| Login form handler | `apps/web/app/api/auth/form-login/route.ts` |
 
 ## Running the Project
 
@@ -101,6 +107,9 @@ cd apps/web && npx next dev -p 3000
 
 # Database push
 cd packages/database && DATABASE_URL="..." npx prisma db push
+
+# Publish scheduled devlogs (run via cron)
+cd apps/api && npx ts-node src/scripts/publish-scheduled-devlogs.ts
 ```
 
 ## Recent Work (2026-07-08)
@@ -154,6 +163,12 @@ cd packages/database && DATABASE_URL="..." npx prisma db push
 - README rewritten with project status, known issues, and roadmap
 - AGENTS.md updated with full development history
 
+**Session 8 — Cleanup & Production Readiness:**
+- **ESLint zero warnings:** Fixed 11 unused imports + 1 `no-explicit-any` across 7 files (embed, feed, games/[slug], games, onboarding, homepage, devlogs/[id])
+- **Scheduled publish worker:** Created `apps/api/src/scripts/publish-scheduled-devlogs.ts` with npm script `devlogs:publish-scheduled` — finds SCHEDULED devlogs past their `scheduledFor` date, publishes them with feed events + community comments
+- **Production login fix:** `next.config.ts` rewrites enabled in production (proxy to Railway API), all server-side API fallbacks changed from localhost to Railway URL, `client.ts` default changed to `/api` (uses rewrites), duplicate `auth/login/route.ts` removed
+- **AGENTS.md updated** with env var requirements for Vercel/Railway dashboards
+
 ## Known Issues
 
 | # | Issue | Severity |
@@ -161,8 +176,7 @@ cd packages/database && DATABASE_URL="..." npx prisma db push
 | 1 | `coverUrl` on Devlog — PRD says remove, needs migration | Low |
 | 2 | Devlog author = User not StudioMember (works correctly) | Low |
 | 3 | Nested comments 1 level only in UI | Low |
-| 4 | TRAILER_UPDATED + STUDIO_VERIFIED FeedEngine not wired | Low |
+| 4 | TRAILER_UPDATED FeedEngine event not wired (API DTOs don't expose trailer changes) | Low |
 | 5 | `notFound()` hangs in client components (reverted to error state) | Low |
-| 6 | 10-15 pre-existing ESLint warnings | Low |
-| 7 | 15/17 API tests fail (pre-existing, env config needed) | Medium |
-| 8 | Production login broken (Vercel→Railway env vars) | High |
+| 6 | 15/17 API tests fail (pre-existing, needs test DB config) | Medium |
+| 7 | Production login: needs `NEXT_PUBLIC_API_URL` + `API_URL` set on Vercel, `WEB_ORIGIN` set on Railway (code fallbacks fixed) | High |

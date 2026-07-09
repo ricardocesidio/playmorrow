@@ -13,8 +13,8 @@ import {
   Disc3,
   Facebook,
   Flame,
-  Fullscreen,
   Gamepad2,
+  MessageCircle,
   Globe,
   Heart,
   Link as LinkIcon,
@@ -23,13 +23,9 @@ import {
   Pencil,
   Play,
   Plus,
-  Radio,
   Send,
-  Settings,
   Share2,
   Shield,
-  Store,
-  Volume2,
   X,
 } from 'lucide-react';
 
