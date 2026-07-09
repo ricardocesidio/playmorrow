@@ -29,9 +29,6 @@ import { RoadmapItemsModule } from './roadmap-items/roadmap-items.module';
 import { StudiosModule } from './studios/studios.module';
 import { UploadModule } from './upload/upload.module';
 import { UsersModule } from './users/users.module';
-// StudioChatModule removed from registration (2026-07-09 audit):
-// Zero references in frontend. Files kept for future work if needed.
-// import { StudioChatModule } from './studio-chat/studio-chat.module';
 import { PushNotificationsModule } from './push-notifications/push-notifications.module';
 import { AchievementModule } from './achievements/achievement.module';
 import { PlayerXpModule } from './player-xp/player-xp.module';
@@ -68,7 +65,6 @@ import { PlayerXpModule } from './player-xp/player-xp.module';
     SearchModule,
     WishlistModule,
     InvitationsModule,
-    // StudioChatModule, // not wired to any UI — see audit
     PushNotificationsModule,
     AchievementModule,
     PlayerXpModule,
