@@ -66,22 +66,38 @@ Ongoing elite architecture audit cleanups — see [docs/audit-fixes-summary.md](
 
 ## Quick Start
 
+**One command (recommended):**
+
 ```bash
 git clone https://github.com/ricardocesidio/playmorrow
 cd playmorrow
 pnpm install
 
-# Backend (port 4000)
-cd apps/api && npx nest start
-
-# Frontend (port 3000)
-cd apps/web && npx next dev -p 3000
-
-# Database (if schema changes)
-cd packages/database && DATABASE_URL="postgresql://..." npx prisma db push
+# One command starts BOTH frontend + backend with turbo (parallel, persistent)
+pnpm dev
 ```
 
-**Demo login:** `dev@playmorrow.example` / `Demo123!@`
+Then open http://localhost:3000.
+
+**Alternative (separate terminals if you prefer):**
+
+```bash
+# Terminal 1 - API
+pnpm dev:api     # or: pnpm --filter @playmorrow/api dev
+
+# Terminal 2 - Web
+pnpm dev:web     # or: pnpm --filter @playmorrow/web dev
+```
+
+**Database (rarely needed in dev):**
+
+```bash
+pnpm db:push
+```
+
+**Demo login:** `dev@playmorrow.example` / `Demo123!@` (or register your own).
+
+**Note:** First `pnpm dev` can take 20-40s (Turbopack + Nest watch + Prisma + Neon cold start). Subsequent starts are much faster. Use `pnpm dev` from the repo root.
 
 ---
 
