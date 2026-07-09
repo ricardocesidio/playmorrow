@@ -30,6 +30,12 @@ export class FollowsService {
 
     const followerCount = await this.prisma.follow.count({ where: { studioId: studio.id } });
 
+    // Keep denormalized count in sync (centralized side effect)
+    await this.prisma.studio.update({
+      where: { id: studio.id },
+      data: { followersCount: followerCount },
+    });
+
     await this.studioXpService.award(studio.id, 'FOLLOW');
 
     const followerMilestones = [100, 500];
@@ -79,6 +85,13 @@ export class FollowsService {
     });
 
     const followerCount = await this.prisma.follow.count({ where: { studioId: studio.id } });
+
+    // Keep denormalized count in sync
+    await this.prisma.studio.update({
+      where: { id: studio.id },
+      data: { followersCount: followerCount },
+    });
+
     return { targetType: 'STUDIO', targetId: studio.id, isFollowing: false, followerCount };
   }
 

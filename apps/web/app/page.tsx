@@ -1,5 +1,9 @@
 'use client';
 
+// TODO (Performance audit): Evaluate converting parts of this page (e.g. static game/studio cards)
+// to Server Components + streaming for better initial load and SEO.
+// Current heavy client usage is for real-time feed + pagination.
+
 import { useState } from 'react';
 import Link from 'next/link';
 import {

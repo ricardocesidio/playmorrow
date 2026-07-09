@@ -262,6 +262,14 @@ export default function ProfileSettingsPage() {
             <PushNotificationToggle />
           </div>
         </div>
+
+        {/* Privacy & Marketing (surfaced) */}
+        <div className="mt-6 rounded border border-border/60 bg-black/40 p-5 text-xs">
+          <div className="mb-2 font-medium text-cyan">Privacy &amp; Marketing Preferences</div>
+          <div>Marketing emails: <span className="text-foreground">{(user as any).marketingOptInAt ? 'Opted in' : 'Not opted in'}</span></div>
+          <div>Partner marketing: <span className="text-foreground">{(user as any).partnerMarketingOptInAt ? 'Opted in' : 'Not opted in'}</span></div>
+          <div className="mt-1 text-[10px] text-muted-foreground">Full editing controls and data export coming soon. Use account deletion for full erasure.</div>
+        </div>
       </div>
     </div>
   );

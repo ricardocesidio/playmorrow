@@ -50,7 +50,19 @@ export default function LeaderboardPage() {
             <button onClick={() => setTab('weekly')} className={`pb-3 font-mono text-[0.6rem] uppercase tracking-widest cursor-pointer ${tab === 'weekly' ? 'border-b-2 border-cyan text-cyan' : 'text-muted-foreground'}`}>Weekly</button>
           </div>
           {loading ? (
-            <div className="flex justify-center py-20"><Loader2 className="size-8 animate-spin text-cyan" /></div>
+            <div className="space-y-1">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="clip-corner flex items-center gap-4 border border-border/40 bg-[#050b0f]/50 px-4 py-3 animate-pulse">
+                  <div className="w-8 h-4 bg-border/30" />
+                  <div className="size-9 rounded-full bg-border/30" />
+                  <div className="flex-1 space-y-1">
+                    <div className="h-3 w-1/3 bg-border/30" />
+                    <div className="h-2 w-1/4 bg-border/20" />
+                  </div>
+                  <div className="w-16 h-4 bg-border/30" />
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="space-y-1">
               {data.map((entry) => (

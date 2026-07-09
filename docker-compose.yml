@@ -17,20 +17,23 @@ services:
       timeout: 5s
       retries: 5
 
-  redis:
-    image: redis:7-alpine
-    container_name: playmorrow-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+  # Redis is currently UNUSED in the application (Throttler uses in-memory).
+  # It is prepared here for future use (BullMQ queues, caching, rate limiting store).
+  # See ROADMAP and audit (2026-07-09).
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: playmorrow-redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
 
 volumes:
   postgres_data:
-  redis_data:
+  # redis_data:   # uncomment when re-enabling Redis service above

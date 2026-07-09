@@ -7,6 +7,14 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.spec.ts'],
     root: './',
+    // Coverage support (added per audit "consider adding code coverage")
+    // Run with: pnpm test -- --coverage
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      reportsDirectory: './coverage',
+      exclude: ['src/test/**', '**/*.spec.ts', '**/node_modules/**'],
+    },
   },
   plugins: [
     swc.vite({

@@ -235,7 +235,11 @@ function GameHero({ game, title, heroImage, slug }: { game: Game; title: string;
 }
 
 function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title: string }) {
-  const price = game.priceCents == null ? '' : game.isFree ? 'Free' : `${formatPrice(game.priceCents, game.currency)}`;
+  const price = game.priceCents == null
+    ? ''
+    : game.isFree
+      ? 'Free'
+      : `${formatPrice(game.priceCents, game.currency)} (Coming Soon)`;
   const demoHref = getDemoHref(game) ?? undefined;
   const hasDemo = Boolean(demoHref);
 
@@ -680,7 +684,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
         <InfoField label="Developer" value={game.studio?.name ?? ''} />
         <InfoField label="Status" value={labelStatus(game.status)} />
         <InfoField label="Release" value={formatReleaseDate(game.releaseDate) || game.expectedReleaseText || 'TBA'} />
-        <InfoField label="Price" value={game.isFree ? 'Free' : game.priceCents != null ? `${formatPrice(game.priceCents, game.currency)}` : ''} />
+        <InfoField label="Price" value={game.isFree ? 'Free' : game.priceCents != null ? `${formatPrice(game.priceCents, game.currency)} (Coming Soon)` : ''} />
       </div>
       <Link href={`/games/${slug}`} className="mt-3 inline-flex items-center gap-3 text-sm text-cyan">View all details <ArrowRight className="size-4" /></Link>
 
@@ -703,17 +707,28 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
         </div>
       </div>
 
-      <div className="mt-4 border-t border-border pt-3">
-        <h2 className="text-sm mb-3 text-foreground">Widget</h2>
-        <button type="button" onClick={() => {
-          const code = `<iframe src="https://playmorrow.vercel.app/embed/${slug}" width="400" height="140" style="border:none;border-radius:4px" title="${game.title}"></iframe>`;
-          navigator.clipboard.writeText(code).then(() => {
-            const btn = document.activeElement as HTMLElement;
-            if (btn) { const orig = btn.innerText; btn.innerText = 'Copied!'; setTimeout(() => btn.innerText = orig, 1500); }
-          }).catch(() => alert('Copy failed'));
-        }} className="clip-corner flex h-7 w-full cursor-pointer items-center justify-center gap-2 border border-cyan/40 bg-cyan/5 px-3 text-xs text-cyan hover:bg-cyan/10 transition font-mono">
-          <Clipboard className="size-3" /> Copy Embed Code
+      <div className="mt-6 border-t border-border pt-4">
+        <h2 className="mb-2 text-sm font-medium text-cyan">Embed this game</h2>
+        <p className="mb-3 text-[11px] text-muted-foreground">Copy this snippet to embed a live card on your blog, site, or press page.</p>
+        <button 
+          type="button" 
+          onClick={() => {
+            const origin = typeof window !== 'undefined' ? window.location.origin : 'https://playmorrow.vercel.app';
+            const code = `<iframe src="${origin}/embed/${slug}" width="100%" height="160" style="border:none;border-radius:8px;max-width:520px" title="${game.title} — Playmorrow"></iframe>`;
+            navigator.clipboard.writeText(code).then(() => {
+              const btn = document.activeElement as HTMLElement;
+              if (btn) { 
+                const orig = btn.innerText; 
+                btn.innerText = '✓ Copied to clipboard'; 
+                setTimeout(() => btn.innerText = orig, 1800); 
+              }
+            }).catch(() => alert('Copy failed — please copy manually'));
+          }} 
+          className="clip-corner flex h-10 w-full cursor-pointer items-center justify-center gap-2 border border-cyan bg-cyan/10 px-4 text-sm text-cyan transition hover:bg-cyan hover:text-background font-mono tracking-widest"
+        >
+          <Clipboard className="size-4" /> COPY EMBED CODE
         </button>
+        <p className="mt-1.5 text-[10px] text-muted-foreground">Works on any site that allows iframes. Updates automatically.</p>
       </div>
     </HudPanel>
   );

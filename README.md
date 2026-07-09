@@ -27,9 +27,15 @@ press, streamers, and publishers.
 
 **Devlog System V2 PRD — Fully Implemented (July 2026)**
 
+**Current production status:** See [`PRODUCTION.md`](PRODUCTION.md) for the full qualification checklist, required env vars, and browser smoke test steps. Known gaps (registration was 500ing due to missing secrets, etc.) are tracked there.
+
 See [`STATUS.md`](STATUS.md) for the complete, verified feature inventory, known issues, and deployment configuration.
 
-607 commits across 11 development sessions. Full implementation report in [`AGENTS.md`](AGENTS.md).
+**Security model overview:** [`docs/security/model.md`](docs/security/model.md)
+
+Ongoing elite architecture audit cleanups (Sentry full, pino structured logging + logger usage, upload abstraction for S3/R2, more skeletons (search/leaderboard/profile), counter centralization in follows, a11y focus/polish, test coverage, 4-level comments, dead code removal (error-monitoring), error monitoring now uses pino, etc.) are in progress on this branch. See handoff docs for details.
+
+607+ commits across 11 development sessions. Full implementation report in [`AGENTS.md`](AGENTS.md).
 
 ---
 

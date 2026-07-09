@@ -45,7 +45,7 @@ Status atual: **v0.7 — MVP funcional, pré-produção.** Build, lint, typechec
   - Configurar variáveis de ambiente no Vercel Dashboard (nunca no .env)
 
 ### Backend (NestJS)
-Opção A: **Render.com** (mais simples, ~$7-15/mês)
+Opção A: **Railway** (atual) + Vercel (frontend)
 Opção B: **Railway.app** (~$5-20/mês)
 Opção C: **Fly.io** (~$2-10/mês)
 Opção D: **DigitalOcean App Platform** (~$12/mês)

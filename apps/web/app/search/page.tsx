@@ -59,6 +59,20 @@ export default function SearchPage() {
             )}
           </div>
 
+          {/* Result skeletons while loading */}
+          {isLoading && query.trim() && (
+            <div className="mt-8 space-y-8">
+              {[1,2].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-4 w-20 bg-border/40 mb-3" />
+                  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    {Array.from({ length: 3 }).map((_,j) => <div key={j} className="h-24 bg-border/20 rounded" />)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Error */}
           {error && (
             <p className="clip-corner border border-coral/40 bg-coral/5 px-4 py-3 font-mono text-[0.6rem] text-coral">{error}</p>

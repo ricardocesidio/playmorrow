@@ -152,6 +152,18 @@ export default function GamesPage() {
           <div>
           {error && !isLoading && <ErrorState message="Failed to load games." />}
 
+          {isLoading && (
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="clip-corner border border-border/60 bg-background/60 p-3">
+                  <div className="mb-3 h-28 animate-pulse bg-white/10" />
+                  <div className="h-3 w-2/3 animate-pulse bg-white/10" />
+                  <div className="mt-2 h-3 w-1/2 animate-pulse bg-white/10" />
+                </div>
+              ))}
+            </div>
+          )}
+
           {!isLoading && !error && items.length === 0 && (
             <EmptyState
               title={searchQuery ? `No games matching "${searchQuery}"` : 'No games yet'}
@@ -159,7 +171,7 @@ export default function GamesPage() {
             />
           )}
 
-          {items.length > 0 && (
+          {!isLoading && items.length > 0 && (
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {items.map((game) => (
                 <CatalogGameCard key={game.id} game={game} />

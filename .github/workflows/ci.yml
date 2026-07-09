@@ -1,5 +1,11 @@
 name: CI
 
+# IMPORTANT: After this workflow is green, enable branch protection on GitHub:
+# Settings → Branches → main → Require status checks to pass before merging
+# Select: "quality", "backend", "e2e"
+#
+# Future: add a11y (axe-core or Lighthouse CI) and coverage jobs here (see audit list).
+
 on:
   push:
   pull_request:
@@ -87,3 +93,4 @@ jobs:
             apps/web/playwright-report/
             apps/web/test-results/
           retention-days: 7
+      # TODO (audit): Add a11y job using axe-core or @lhci/cli for key pages. See Testing section of elite audit.

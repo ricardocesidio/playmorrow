@@ -2,6 +2,7 @@
 
 > **Historical document** (pre-DevlogV2, 2026-06-28). Many issues listed here have been resolved.
 > See [`STATUS.md`](../../STATUS.md) → Outstanding Work for current open issues.
+> **Note (2026-07-09 audit):** Additional cleanup, skeletons, focus states, embed UX, and dashboard clarity improvements applied after this document.
 
 Catalogue for `apps/web` (Next.js / React / Playwright). See [`HANDOFF.md`](./HANDOFF.md)
 for repo orientation and execution order.

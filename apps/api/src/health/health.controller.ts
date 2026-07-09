@@ -21,12 +21,19 @@ export class HealthController {
       dbOk = false;
     }
 
+    // Email provider status (from audit)
+    const emailConfigured = !!process.env.RESEND_API_KEY;
+
     return {
       status: dbOk ? 'ok' : 'degraded',
       service: 'playmorrow-api',
       version: '0.1.0',
       uptimeSeconds: Math.round(process.uptime()),
       timestamp: new Date().toISOString(),
+      checks: {
+        database: dbOk,
+        emailProvider: emailConfigured,
+      },
     };
   }
 }

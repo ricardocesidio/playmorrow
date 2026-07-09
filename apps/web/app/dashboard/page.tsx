@@ -33,9 +33,22 @@ export default function DashboardPage() {
 
   if (!user) return null;
 
-  if (user.accountType === 'PLAYER') {
-    return <PlayerDashboard />;
-  }
+  // Clear visual distinction between player and studio modes (UX audit item)
+  const isStudio = user.accountType === 'STUDIO';
 
-  return <StudioDashboard />;
+  return (
+    <div>
+      <div className="border-b border-border/60 bg-[#050b0f]/80 px-5 py-2 text-xs font-mono tracking-widest text-muted-foreground">
+        {isStudio ? (
+          <>STUDIO DASHBOARD — Managing your studio(s) and games</>
+        ) : (
+          <>PLAYER DASHBOARD — Your activity, XP, wishlist and following</>
+        )}
+        <span className="ml-3 text-cyan/70">·</span>
+        <a href="/settings/profile" className="ml-2 underline hover:text-cyan">Settings</a>
+      </div>
+
+      {isStudio ? <StudioDashboard /> : <PlayerDashboard />}
+    </div>
+  );
 }

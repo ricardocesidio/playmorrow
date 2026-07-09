@@ -33,7 +33,11 @@ export class EmailService {
     } else if (!this.isProduction) {
       this.logger.log(`[DEV] Verification code for ${email}: ${code}`);
     } else {
-      throw new Error('Email provider not configured. Set RESEND_API_KEY.');
+      // Do not throw in production — registration must succeed.
+      // The code is stored in DB so resendVerification can be used once RESEND_API_KEY is fixed.
+      this.logger.error(
+        `RESEND_API_KEY missing in production. Verification code for ${email} was NOT emailed. Code: ${code} (stored in DB for resend).`
+      );
     }
   }
 
@@ -73,7 +77,9 @@ export class EmailService {
       this.logger.log(`  Subject: ${subject}`);
       this.logger.log(`  Link: ${acceptUrl}`);
     } else {
-      throw new Error('Email provider not configured. Set RESEND_API_KEY.');
+      this.logger.error(
+        `RESEND_API_KEY missing in production. Invitation email to ${params.email} was NOT sent. Link: ${acceptUrl}`
+      );
     }
   }
 }
