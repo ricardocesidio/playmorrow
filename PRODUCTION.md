@@ -76,11 +76,25 @@ curl -s -X POST \
 - CSRF tokens were previously broken (fixed in Session 10/11 with global HMAC guard).
 - Various env var drift between Vercel and Railway.
 
-## 5. After every production deploy
+## 5. GitHub Branch Protection (High priority from audit)
+
+To prevent untested code reaching main:
+
+1. Go to repo Settings > Branches > Branch protection rules > Add rule for `main`.
+2. Enable "Require status checks to pass before merging".
+3. Select the checks: "Lint & Typecheck", "Backend tests (Postgres)", "E2E (Playwright desktop + mobile)".
+4. Also require "Require branches to be up to date before merging".
+5. (Optional) Require 1 approving review.
+
+After enabling, test by pushing a branch with a deliberate lint error — it should block merge.
+
+## 6. After every production deploy
 
 - [ ] Run the full browser smoke test above
 - [ ] Check Railway logs for any `FATAL` or secret-related errors on boot
 - [ ] Verify at least one real mutation works while logged in
+
+**Full browser smoke test note:** This must be performed manually in a real browser (incognito). Automated Playwright can cover parts but session/cookie persistence across reloads is best verified manually.
 
 ---
 

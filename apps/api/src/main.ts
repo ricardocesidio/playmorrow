@@ -46,6 +46,13 @@ async function bootstrap() {
       console.error('   Set them in the Railway dashboard and redeploy.');
       process.exit(1);
     }
+
+    // Recommended for full prod (from audit env var audit)
+    const recommended = ['COOKIE_DOMAIN', 'SENTRY_DSN', 'NODE_ENV'];
+    const missingRecommended = recommended.filter((key) => !config.get<string>(key));
+    if (missingRecommended.length > 0) {
+      logger.warn('Recommended production env vars not set (may cause subtle issues): ' + missingRecommended.join(', '));
+    }
   }
 
   // Sentry (error tracking) — from the elite audit Observability section

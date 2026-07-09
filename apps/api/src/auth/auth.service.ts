@@ -1,4 +1,5 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException, Logger } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
+import { logger } from '../common/logger';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { User } from '@playmorrow/database';
@@ -68,7 +69,6 @@ function generateRefreshToken(): string {
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
   private readonly refreshSecret: string;
 
   constructor(
@@ -83,64 +83,69 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto): Promise<RegisterResult> {
-    if (isCommonPassword(dto.password)) {
-      throw new BadRequestException('This password is too common. Choose a more unique password.');
-    }
-
-    if (dto.acceptedTerms !== true || dto.acceptedPrivacy !== true) {
-      throw new BadRequestException('You must accept the terms of service and privacy policy.');
-    }
-
-    const lowerPw = dto.password.toLowerCase();
-    if (lowerPw.includes(dto.email.split('@')[0]!.toLowerCase())) {
-      throw new BadRequestException('Password cannot contain your email.');
-    }
-
-    const passwordHash = await argon2.hash(dto.password);
-    const now = new Date();
-    const emailLower = dto.email.toLowerCase();
-    const pendingUsername = await this.generatePendingUsername(emailLower);
-    const user = await this.usersService.create({
-      email: emailLower,
-      username: pendingUsername,
-      displayName: emailLower.split('@')[0]!,
-      passwordHash,
-      accountType: 'PLAYER',
-      isOnboardingCompleted: false,
-      termsAcceptedAt: now,
-      privacyAcceptedAt: now,
-      communityGuidelinesAcceptedAt: now,
-      termsVersion: CURRENT_TERMS_VERSION,
-      privacyVersion: CURRENT_PRIVACY_VERSION,
-      communityGuidelinesVersion: CURRENT_COMMUNITY_GUIDELINES_VERSION,
-      marketingOptInAt: dto.marketingOptIn ? now : undefined,
-      partnerMarketingOptInAt: dto.partnerMarketingOptIn ? now : undefined,
-    });
-
-    const { raw, hash, expiresAt } = this.generateVerificationCode();
-    await this.prisma.emailVerificationCode.create({
-      data: { codeHash: hash, userId: user.id, expiresAt },
-    });
-
-    // Email failure must never cause registration to 500.
-    // Code is persisted, so the user (or admin) can trigger resend later.
     try {
-      await this.emailService.sendVerificationCode(user.email, raw);
-    } catch (err) {
-      // Log but swallow — registration succeeded. Code is in DB.
-      this.logger.error('Failed to send verification email during register (code stored for resend)', err);
-    }
+      if (isCommonPassword(dto.password)) {
+        throw new BadRequestException('This password is too common. Choose a more unique password.');
+      }
 
-    return {
-      requiresEmailVerification: true,
-      email: user.email,
-      user: {
-        id: user.id, displayName: user.displayName, username: user.username,
-        email: user.email, accountType: user.accountType ?? 'PLAYER',
-        emailVerifiedAt: null,
+      if (dto.acceptedTerms !== true || dto.acceptedPrivacy !== true) {
+        throw new BadRequestException('You must accept the terms of service and privacy policy.');
+      }
+
+      const lowerPw = dto.password.toLowerCase();
+      if (lowerPw.includes(dto.email.split('@')[0]!.toLowerCase())) {
+        throw new BadRequestException('Password cannot contain your email.');
+      }
+
+      const passwordHash = await argon2.hash(dto.password);
+      const now = new Date();
+      const emailLower = dto.email.toLowerCase();
+      const pendingUsername = await this.generatePendingUsername(emailLower);
+      const user = await this.usersService.create({
+        email: emailLower,
+        username: pendingUsername,
+        displayName: emailLower.split('@')[0]!,
+        passwordHash,
+        accountType: 'PLAYER',
         isOnboardingCompleted: false,
-      },
-    };
+        termsAcceptedAt: now,
+        privacyAcceptedAt: now,
+        communityGuidelinesAcceptedAt: now,
+        termsVersion: CURRENT_TERMS_VERSION,
+        privacyVersion: CURRENT_PRIVACY_VERSION,
+        communityGuidelinesVersion: CURRENT_COMMUNITY_GUIDELINES_VERSION,
+        marketingOptInAt: dto.marketingOptIn ? now : undefined,
+        partnerMarketingOptInAt: dto.partnerMarketingOptIn ? now : undefined,
+      });
+
+      const { raw, hash, expiresAt } = this.generateVerificationCode();
+      await this.prisma.emailVerificationCode.create({
+        data: { codeHash: hash, userId: user.id, expiresAt },
+      });
+
+      // Email failure must never cause registration to 500.
+      // Code is persisted, so the user (or admin) can trigger resend later.
+      try {
+        await this.emailService.sendVerificationCode(user.email, raw);
+      } catch (err) {
+        // Log but swallow — registration succeeded. Code is in DB.
+        logger.error({ msg: 'Failed to send verification email during register (code stored for resend)', err });
+      }
+
+      return {
+        requiresEmailVerification: true,
+        email: user.email,
+        user: {
+          id: user.id, displayName: user.displayName, username: user.username,
+          email: user.email, accountType: user.accountType ?? 'PLAYER',
+          emailVerifiedAt: null,
+          isOnboardingCompleted: false,
+        },
+      };
+    } catch (err) {
+      logger.error({ msg: 'Registration failed', email: dto.email, err });
+      throw err;
+    }
   }
 
   async login(dto: LoginDto): Promise<AuthResult> {
