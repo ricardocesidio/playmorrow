@@ -52,60 +52,69 @@ export class GamesService {
       throw new ConflictException('A game with this slug already exists');
     }
 
-    const game = await this.prisma.game.create({
-      data: {
-        title: dto.title,
-        slug,
-        studioId: studio.id,
-        createdBy: userId,
-        tagline: dto.tagline,
-        description: dto.description,
-        status: dto.status ?? 'IN_DEVELOPMENT',
-        releaseDate: dto.releaseDate ? new Date(dto.releaseDate) : undefined,
-        expectedReleaseText: dto.expectedReleaseText,
-        priceCents: dto.priceCents,
-        currency: dto.currency,
-        isFree: dto.isFree,
-        coverUrl: dto.coverUrl,
-        bannerUrl: dto.bannerUrl,
-        trailerUrl: dto.trailerUrl,
-        media: dto.media
-          ? {
-              create: dto.media.map((m) => ({
-                type: m.type,
-                url: m.url,
-                caption: m.caption,
-                position: m.sortOrder ?? 0,
-              })),
-            }
-          : undefined,
-        platformLinks: dto.platformLinks
-          ? {
-              create: dto.platformLinks.map((pl, i) => ({
-                kind: pl.platform,
-                url: pl.url,
-                label: pl.label,
-                position: i,
-              })),
-            }
-          : undefined,
-        tags: dto.tags
-          ? {
-              create: await Promise.all(
-                dto.tags.map(async (tagSlug) => {
-                  const tag = await this.prisma.tag.upsert({
-                    where: { slug: tagSlug.toLowerCase() },
-                    update: {},
-                    create: { slug: tagSlug.toLowerCase(), name: tagSlug },
-                  });
-                  return { tagId: tag.id };
-                }),
-              ),
-            }
-          : undefined,
-      },
-      include: GAME_INCLUDE,
-    });
+    let game;
+    try {
+      game = await this.prisma.game.create({
+        data: {
+          title: dto.title,
+          slug,
+          studioId: studio.id,
+          createdBy: userId,
+          tagline: dto.tagline,
+          description: dto.description,
+          status: dto.status ?? 'IN_DEVELOPMENT',
+          releaseDate: dto.releaseDate ? new Date(dto.releaseDate) : undefined,
+          expectedReleaseText: dto.expectedReleaseText,
+          priceCents: dto.priceCents,
+          currency: dto.currency,
+          isFree: dto.isFree,
+          coverUrl: dto.coverUrl,
+          bannerUrl: dto.bannerUrl,
+          trailerUrl: dto.trailerUrl,
+          media: dto.media
+            ? {
+                create: dto.media.map((m) => ({
+                  type: m.type,
+                  url: m.url,
+                  caption: m.caption,
+                  position: m.sortOrder ?? 0,
+                })),
+              }
+            : undefined,
+          platformLinks: dto.platformLinks
+            ? {
+                create: dto.platformLinks.map((pl, i) => ({
+                  kind: pl.platform,
+                  url: pl.url,
+                  label: pl.label,
+                  position: i,
+                })),
+              }
+            : undefined,
+          tags: dto.tags
+            ? {
+                create: await Promise.all(
+                  dto.tags.map(async (tagSlug) => {
+                    const tag = await this.prisma.tag.upsert({
+                      where: { slug: tagSlug.toLowerCase() },
+                      update: {},
+                      create: { slug: tagSlug.toLowerCase(), name: tagSlug },
+                    });
+                    return { tagId: tag.id };
+                  }),
+                ),
+              }
+            : undefined,
+        },
+        include: GAME_INCLUDE,
+      });
+    } catch (e: unknown) {
+      const err = e as Error;
+      if (err && typeof err === 'object' && 'message' in err) {
+        throw new Error(`Game create Prisma error: ${err.message}${'meta' in err ? ` meta=${JSON.stringify((err as any).meta)}` : ''}`);
+      }
+      throw e;
+    }
 
     await this.studioXpService.award(studio.id, 'GAME_CREATE', undefined, game.id);
 
