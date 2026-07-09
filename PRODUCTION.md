@@ -107,4 +107,9 @@ After enabling, test by pushing a branch with a deliberate lint error — it sho
 - Load testing: use k6/autocannon on /api/games, /feed, /devlogs (baseline p95 <200ms).
   Run: `pnpm --filter @playmorrow/api loadtest` (or set LOADTEST_URL=...).
   #3 implemented with apps/api/scripts/load-test.js.
+  Example baseline (run locally):
+  - Games: p95 ~50ms, ~200 RPS
+  - Feed: p95 ~80ms, ~150 RPS
+  - Devlogs: p95 ~40ms, ~250 RPS
+  (Replace with actual run results here.)
 - See docs/audit-fixes-summary.md for completed 1-4.

@@ -25,6 +25,7 @@
     "db:seed": "pnpm --filter @playmorrow/database db:seed",
     "admin:ensure": "tsx apps/api/src/admin-script.ts",
     "test:e2e": "pnpm --filter @playmorrow/web test:e2e",
+    "loadtest": "pnpm --filter @playmorrow/api loadtest",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
