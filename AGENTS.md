@@ -62,22 +62,38 @@ This file is a **chronological history log** of development sessions. It records
 
 ## Running the Project
 
-```bash
-# Backend (port 4000)
-cd apps/api && npx nest start
+**Fastest (recommended):**
 
-# Frontend (port 3000)
-cd apps/web && npx next dev -p 3000
+```bash
+pnpm dev
+```
+
+This uses turbo to run both `dev:api` + `dev:web` in parallel (see turbo.json + root package.json).
+
+**Separate terminals (if preferred):**
+
+```bash
+pnpm dev:api
+# and in another:
+pnpm dev:web
+```
+
+Legacy / direct (still works):
+
+```bash
+cd apps/api && pnpm dev     # nest start --watch
+cd apps/web && pnpm dev     # next dev --turbopack
 
 # Database push
-cd packages/database && DATABASE_URL="..." npx prisma db push
+pnpm db:push
 
 # Run DB migrations
-cd packages/database && DATABASE_URL="..." npx prisma migrate deploy
+pnpm db:migrate
 
-# Publish scheduled devlogs (automatic via cron, or manual)
-cd apps/api && npx ts-node src/scripts/publish-scheduled-devlogs.ts
+# Publish scheduled devlogs (now automatic via @nestjs/schedule 5min cron in DevlogsSchedulerService)
 ```
+
+**First start takes longer** (20-40s for full Turbopack + Nest + Prisma client + Neon). After that, changes are fast thanks to watch modes + cache:false on dev in turbo.
 
 ---
 

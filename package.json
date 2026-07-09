@@ -11,6 +11,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:api": "pnpm --filter @playmorrow/api dev",
+    "dev:web": "pnpm --filter @playmorrow/web dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "test:all": "turbo run test && pnpm --filter @playmorrow/web test:e2e",
