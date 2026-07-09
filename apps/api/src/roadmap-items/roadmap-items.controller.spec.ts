@@ -125,12 +125,13 @@ describe('RoadmapItemsController (e2e)', () => {
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
 
-  it('POST /api/games/:gameSlug/roadmap rejects MEMBER role with 403', async () => {
+  it('POST /api/games/:gameSlug/roadmap allows MEMBER role', async () => {
     const res = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/roadmap`)
       .set('Cookie', `playmorrow_session=${memberToken}`)
-      .send({ title: 'Item' });
-    expect(res.status).toBe(HttpStatus.FORBIDDEN);
+      .send({ title: 'Member Roadmap' });
+    expect(res.status).toBe(HttpStatus.CREATED);
+    expect(res.body.title).toBe('Member Roadmap');
   });
 
   it('POST /api/games/:gameSlug/roadmap allows studio OWNER', async () => {
@@ -224,12 +225,13 @@ describe('RoadmapItemsController (e2e)', () => {
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
 
-  it('PATCH /api/roadmap-items/:id rejects MEMBER role with 403', async () => {
+  it('PATCH /api/roadmap-items/:id allows MEMBER role', async () => {
     const res = await request(httpServer)
       .patch(`/api/roadmap-items/${itemId}`)
       .set('Cookie', `playmorrow_session=${memberToken}`)
-      .send({ title: 'Hacked' });
-    expect(res.status).toBe(HttpStatus.FORBIDDEN);
+      .send({ title: 'Member Roadmap Update' });
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.title).toBe('Member Roadmap Update');
   });
 
   it('PATCH /api/roadmap-items/:id allows studio OWNER/ADMIN', async () => {

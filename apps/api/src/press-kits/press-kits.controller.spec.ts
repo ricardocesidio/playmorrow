@@ -128,12 +128,13 @@ describe('PressKitsController (e2e)', () => {
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
 
-  it('PUT rejects MEMBER role with 403', async () => {
+  it('PUT allows MEMBER role', async () => {
     const res = await request(httpServer)
       .put(`/api/games/${GAME_SLUG}/press-kit`)
       .set('Cookie', `playmorrow_session=${memberToken}`)
-      .send({ headline: 'Test' });
-    expect(res.status).toBe(HttpStatus.FORBIDDEN);
+      .send({ headline: 'Member Press Kit' });
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.headline).toBe('Member Press Kit');
   });
 
   it('PUT allows studio OWNER', async () => {

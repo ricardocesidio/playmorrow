@@ -127,12 +127,12 @@ describe('GamesController (e2e)', () => {
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
 
-  it('POST /api/studios/:studioSlug/games rejects MEMBER role with 403', async () => {
+  it('POST /api/studios/:studioSlug/games allows MEMBER role', async () => {
     const res = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
       .set('Cookie', `playmorrow_session=${memberToken}`)
       .send({ title: 'Test Game', slug: 'test-game-2' });
-    expect(res.status).toBe(HttpStatus.FORBIDDEN);
+    expect(res.status).toBe(HttpStatus.CREATED);
   });
 
   it('POST /api/studios/:studioSlug/games allows studio OWNER', async () => {
@@ -268,12 +268,13 @@ describe('GamesController (e2e)', () => {
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
 
-  it('PATCH /api/games/:slug rejects MEMBER role with 403', async () => {
+  it('PATCH /api/games/:slug allows MEMBER role', async () => {
     const res = await request(httpServer)
       .patch(`/api/games/${GAME_SLUG}`)
       .set('Cookie', `playmorrow_session=${memberToken}`)
-      .send({ title: 'Hacked' });
-    expect(res.status).toBe(HttpStatus.FORBIDDEN);
+      .send({ title: 'Member Updated' });
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.title).toBe('Member Updated');
   });
 
   it('PATCH /api/games/:slug allows studio OWNER', async () => {

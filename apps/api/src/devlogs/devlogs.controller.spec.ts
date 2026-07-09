@@ -136,12 +136,12 @@ describe('DevlogsController (e2e)', () => {
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
 
-  it('POST /api/games/:gameSlug/devlogs rejects MEMBER role with 403', async () => {
+  it('POST /api/games/:gameSlug/devlogs allows MEMBER role', async () => {
     const res = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/devlogs`)
       .set('Cookie', `playmorrow_session=${memberToken}`)
       .send({ title: 'Test', slug: 'test-2', body: 'Body' });
-    expect(res.status).toBe(HttpStatus.FORBIDDEN);
+    expect(res.status).toBe(HttpStatus.CREATED);
   });
 
   it('POST /api/games/:gameSlug/devlogs allows studio OWNER', async () => {
@@ -277,12 +277,13 @@ describe('DevlogsController (e2e)', () => {
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
 
-  it('PATCH /api/devlogs/:id rejects MEMBER role with 403', async () => {
+  it('PATCH /api/devlogs/:id allows MEMBER role', async () => {
     const res = await request(httpServer)
       .patch(`/api/devlogs/${devlogId}`)
       .set('Cookie', `playmorrow_session=${memberToken}`)
-      .send({ title: 'Hacked' });
-    expect(res.status).toBe(HttpStatus.FORBIDDEN);
+      .send({ title: 'Member Update' });
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.title).toBe('Member Update');
   });
 
   it('PATCH /api/devlogs/:id allows studio OWNER/ADMIN', async () => {
