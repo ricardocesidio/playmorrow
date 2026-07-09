@@ -123,7 +123,7 @@ CI Pipeline:
 Register:   ⚠️ 500 error (blocks signups — still unresolved)
 ```
 
-**Post-session continuous audit fixes:** ... + UX (B4/B5): comments/profile skeletons + a11y; MD editor keyboard support; more nav polish. (full list in HANDOFF). Build ✓.
+**Post-session continuous audit fixes:** ... + UX (B4-B7): comments/profile/notifs a11y/skeletons; MD editor keyboard; games filters ARIA+kb; leaderboard/feed a11y. (full in HANDOFF). Build ✓.
 
 ## Immediate Next Steps (next session)
 
