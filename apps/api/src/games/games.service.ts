@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { StudioRole } from '@playmorrow/database';
 import type { Prisma } from '@playmorrow/database';
 
@@ -52,94 +52,71 @@ export class GamesService {
       throw new ConflictException('A game with this slug already exists');
     }
 
-    let game;
-    try {
-      game = await this.prisma.game.create({
-        data: {
-          title: dto.title,
-          slug,
-          studioId: studio.id,
-          createdBy: userId,
-          tagline: dto.tagline,
-          description: dto.description,
-          status: dto.status ?? 'IN_DEVELOPMENT',
-          releaseDate: dto.releaseDate ? new Date(dto.releaseDate) : undefined,
-          expectedReleaseText: dto.expectedReleaseText,
-          priceCents: dto.priceCents,
-          currency: dto.currency,
-          isFree: dto.isFree,
-          coverUrl: dto.coverUrl,
-          bannerUrl: dto.bannerUrl,
-          trailerUrl: dto.trailerUrl,
-          media: dto.media
-            ? {
-                create: dto.media.map((m) => ({
-                  type: m.type,
-                  url: m.url,
-                  caption: m.caption,
-                  position: m.sortOrder ?? 0,
-                })),
-              }
-            : undefined,
-          platformLinks: dto.platformLinks
-            ? {
-                create: dto.platformLinks.map((pl, i) => ({
-                  kind: pl.platform,
-                  url: pl.url,
-                  label: pl.label,
-                  position: i,
-                })),
-              }
-            : undefined,
-          tags: dto.tags
-            ? {
-                create: await Promise.all(
-                  dto.tags.map(async (tagSlug) => {
-                    const tag = await this.prisma.tag.upsert({
-                      where: { slug: tagSlug.toLowerCase() },
-                      update: {},
-                      create: { slug: tagSlug.toLowerCase(), name: tagSlug },
-                    });
-                    return { tagId: tag.id };
-                  }),
-                ),
-              }
-            : undefined,
-        },
-        include: GAME_INCLUDE,
-      });
-    } catch (e: unknown) {
-      const err = e as Error;
-      console.error('=== GAME CREATE PRISMA ERROR ===');
-      console.error('Message:', err?.message ?? '(none)');
-      console.error('Stack:', err?.stack ?? '(none)');
-      if (err && typeof err === 'object' && 'meta' in err) {
-        console.error('Meta:', JSON.stringify((err as any).meta, null, 2));
-      }
-      console.error('=== END GAME CREATE PRISMA ERROR ===');
-      const detail = err?.message ?? 'Unknown Prisma error';
-      throw new InternalServerErrorException(`Game creation failed: ${detail}`);
-    }
-
-    try {
-      await this.studioXpService.award(studio.id, 'GAME_CREATE', undefined, game.id);
-
-      await this.auditLog.log({
+    const game = await this.prisma.game.create({
+      data: {
+        title: dto.title,
+        slug,
         studioId: studio.id,
-        actorId: userId,
-        action: 'GAME_CREATED',
-        targetType: 'GAME',
-        targetId: game.id,
-        metadata: { title: game.title },
-      });
-    } catch (e2: unknown) {
-      const err2 = e2 as Error;
-      console.error('=== GAME CREATE POST-PRISMA ERROR ===');
-      console.error('Message:', err2?.message ?? '(none)');
-      console.error('Stack:', err2?.stack ?? '(none)');
-      console.error('=== END GAME CREATE POST-PRISMA ERROR ===');
-      throw new InternalServerErrorException(`Game creation post-Prisma failed: ${err2?.message ?? 'Unknown'}`);
-    }
+        createdBy: userId,
+        tagline: dto.tagline,
+        description: dto.description,
+        status: dto.status ?? 'IN_DEVELOPMENT',
+        releaseDate: dto.releaseDate ? new Date(dto.releaseDate) : undefined,
+        expectedReleaseText: dto.expectedReleaseText,
+        priceCents: dto.priceCents,
+        currency: dto.currency,
+        isFree: dto.isFree,
+        coverUrl: dto.coverUrl,
+        bannerUrl: dto.bannerUrl,
+        trailerUrl: dto.trailerUrl,
+        media: dto.media
+          ? {
+              create: dto.media.map((m) => ({
+                type: m.type,
+                url: m.url,
+                caption: m.caption,
+                position: m.sortOrder ?? 0,
+              })),
+            }
+          : undefined,
+        platformLinks: dto.platformLinks
+          ? {
+              create: dto.platformLinks.map((pl, i) => ({
+                kind: pl.platform,
+                url: pl.url,
+                label: pl.label,
+                position: i,
+              })),
+            }
+          : undefined,
+        tags: dto.tags
+          ? {
+              create: await Promise.all(
+                dto.tags.map(async (tagSlug) => {
+                  const tag = await this.prisma.tag.upsert({
+                    where: { slug: tagSlug.toLowerCase() },
+                    update: {},
+                    create: { slug: tagSlug.toLowerCase(), name: tagSlug },
+                  });
+                  return { tagId: tag.id };
+                }),
+              ),
+            }
+          : undefined,
+      },
+      include: GAME_INCLUDE,
+    });
+
+    await this.studioXpService.award(studio.id, 'GAME_CREATE', undefined, game.id);
+
+    await this.auditLog.log({
+      studioId: studio.id,
+      actorId: userId,
+      action: 'GAME_CREATED',
+      targetType: 'GAME',
+      targetId: game.id,
+      metadata: { title: game.title },
+    });
 
     this.feedEngine.emit('GAME_CREATED', {
       studioId: studio.id,
