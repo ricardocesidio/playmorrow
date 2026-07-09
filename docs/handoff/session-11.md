@@ -123,7 +123,7 @@ CI Pipeline:
 Register:   ⚠️ 500 error (blocks signups — still unresolved)
 ```
 
-**Post-session continuous audit fixes:** ... + UX (B): dashboard nav + a11y tabs + StudioDashboard skeleton polish. (full list in HANDOFF). Build ✓.
+**Post-session continuous audit fixes:** ... + UX (B4/B5): comments/profile skeletons + a11y; MD editor keyboard support; more nav polish. (full list in HANDOFF). Build ✓.
 
 ## Immediate Next Steps (next session)
 

@@ -58,7 +58,7 @@ export default function UserProfilePage() {
           <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
           <div className="relative mx-auto max-w-3xl pt-8">
             {/* Profile skeleton for better loading UX (audit polish) */}
-            <div className="animate-pulse">
+            <div className="animate-pulse" aria-label="Loading user profile">
               <div className="flex items-center gap-4">
                 <div className="size-20 rounded-full bg-border/30" />
                 <div className="flex-1 space-y-2">
@@ -66,12 +66,12 @@ export default function UserProfilePage() {
                   <div className="h-4 w-32 bg-border/30" />
                 </div>
               </div>
-              <div className="mt-8 grid grid-cols-3 gap-4">
-                {Array.from({ length: 3 }).map((_, i) => (
+              <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="h-20 rounded border border-border/30 bg-[#050b0f]/40" />
                 ))}
               </div>
-              <div className="mt-8 h-64 rounded border border-border/30 bg-[#050b0f]/40" />
+              <div className="mt-8 h-48 rounded border border-border/30 bg-[#050b0f]/40" />
             </div>
           </div>
         </main>
@@ -115,15 +115,15 @@ export default function UserProfilePage() {
           {/* ── Hero Section ── */}
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-shadow duration-300 hover:shadow-[0_0_30px_rgb(62_231_255_/_0.08)] sm:p-8">
             <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
-              <div className="relative">
+              <div className="relative" aria-label={`${data.displayName}'s profile avatar`}>
                 <div className="flex size-20 shrink-0 items-center justify-center border border-border/60 bg-[#050b0f]/50 font-display text-3xl font-bold text-muted-foreground transition-transform duration-300 hover:scale-105 sm:size-24">
                   {data.avatarUrl ? (
-                    <img src={data.avatarUrl} alt="" className="size-full object-cover" />
+                    <img src={data.avatarUrl} alt={`${data.displayName}'s avatar`} className="size-full object-cover" />
                   ) : (
                     data.displayName.charAt(0).toUpperCase()
                   )}
                 </div>
-                <div className="absolute -bottom-1 -right-1 size-3 bg-cyan shadow-[0_0_6px_rgb(62_231_255_/_0.6)]" />
+                <div className="absolute -bottom-1 -right-1 size-3 bg-cyan shadow-[0_0_6px_rgb(62_231_255_/_0.6)]" aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-center gap-2 sm:justify-start">
@@ -154,14 +154,16 @@ export default function UserProfilePage() {
           </div>
 
           {/* ── Stats Grid ── */}
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4" role="list" aria-label="User statistics">
             {stats.map((stat) => (
               <div
                 key={stat.label}
                 className="clip-corner border border-border/70 bg-[#050b0f]/80 p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan/30 hover:shadow-[0_0_25px_rgb(62_231_255_/_0.06)]"
+                role="listitem"
+                aria-label={`${stat.value} ${stat.label}`}
               >
                 <div className="flex flex-col items-center gap-2 text-center sm:items-start sm:text-left">
-                  <stat.icon className={cn('size-5', stat.color)} />
+                  <stat.icon className={cn('size-5', stat.color)} aria-hidden="true" />
                   <div>
                     <p className="font-display text-lg font-black text-white">{stat.value}</p>
                     <p className="font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground">{stat.label}</p>

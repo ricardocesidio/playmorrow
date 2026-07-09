@@ -38,12 +38,18 @@ export default function GameCommentsPage() {
           </div>
 
           {isLoading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 3 }).map((_, i) => (
+            <div className="space-y-4" aria-label="Loading comments">
+              {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="animate-pulse clip-corner border border-border/70 bg-[#050b0f]/80 p-5">
-                  <div className="h-3 w-1/4 rounded bg-border/20 mb-3" />
-                  <div className="h-4 w-2/3 rounded bg-border/20 mb-2" />
-                  <div className="h-3 w-1/2 rounded bg-border/20" />
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="size-8 rounded-full bg-border/30" />
+                    <div className="flex-1">
+                      <div className="h-3 w-1/3 bg-border/30 mb-1" />
+                      <div className="h-2 w-1/4 bg-border/20" />
+                    </div>
+                  </div>
+                  <div className="h-4 w-full bg-border/20 mb-2" />
+                  <div className="h-4 w-2/3 bg-border/20" />
                 </div>
               ))}
             </div>
@@ -52,23 +58,25 @@ export default function GameCommentsPage() {
               <p className="font-mono text-sm text-muted-foreground">No comments yet. Be the first to join the discussion.</p>
             </HudPanel>
           ) : (
-            <div className="space-y-4">
-              {comments.map((c) => (
-                <div key={c.id} className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6">
+            <div className="space-y-4" role="list" aria-label="Community comments">
+              {comments.map((c, index) => (
+                <div key={c.id} className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6" role="listitem" aria-labelledby={`comment-author-${index}`}>
                   <div className="flex items-center gap-3 mb-3">
-                    {c.author?.avatarUrl && (
-                      <img src={c.author.avatarUrl} alt="" className="size-8 rounded-full border border-border/40" />
+                    {c.author?.avatarUrl ? (
+                      <img src={c.author.avatarUrl} alt={`${c.author.displayName || 'Anonymous'} avatar`} className="size-8 rounded-full border border-border/40" />
+                    ) : (
+                      <div className="size-8 rounded-full border border-border/40 bg-background/60 flex items-center justify-center text-[0.55rem] font-mono">{(c.author?.displayName || 'A')[0]}</div>
                     )}
-                    <div>
+                    <div id={`comment-author-${index}`}>
                       <p className="font-mono text-xs font-semibold text-foreground">{c.author?.displayName || 'Anonymous'}</p>
                       <p className="font-mono text-[0.55rem] text-muted-foreground">
                         {c.createdAt ? new Date(c.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                       </p>
                     </div>
                   </div>
-                  <p className="font-mono text-sm text-foreground leading-relaxed">{c.body}</p>
+                  <p className="font-mono text-sm text-foreground leading-relaxed" aria-label="Comment body">{c.body}</p>
                   <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1">
+                    <span className="inline-flex items-center gap-1" aria-label={`${('reactions' in c ? (c as { reactions?: { LIKE?: number } }).reactions?.LIKE : 0) ?? 0} likes`}>
                       <Heart className="size-3" />
                       {('reactions' in c ? (c as { reactions?: { LIKE?: number } }).reactions?.LIKE : 0) ?? 0}
                     </span>
