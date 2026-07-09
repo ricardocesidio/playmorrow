@@ -123,7 +123,7 @@ CI Pipeline:
 Register:   ⚠️ 500 error (blocks signups — still unresolved)
 ```
 
-**Post-session continuous audit fixes:** ... + D: historical clean in HANDOFF + PRODUCTION update. UX B4-B7 done. Build ✓. (full in HANDOFF).
+**Post-session continuous audit fixes:** ... + D/F: docs clean + removed commented Redis. UX B done. (full in HANDOFF). Build ✓.
 
 ## Immediate Next Steps (next session)
 

@@ -18,7 +18,7 @@ This document is **historical** — the project has undergone significant change
 | **Session 10 handoff** | Evidence-first hardening, CSRF, test cleanup, production verification | [`session-10.md`](./session-10.md) |
 | **Devlog System V2** | Community detection, rich editor, feed engine, comments | Implemented — see STATUS.md |
 
-**Ongoing (post audit):** ... + D: cleaned historical in HANDOFF.md; updated PRODUCTION with B notes. (see full in README). UX (B4-B7) done. Build green. See latest commits.
+**Ongoing (post audit):** ... + D: historical clean; F: removed commented Redis from docker-compose (cleanup). UX B done. (full in README). Build green.
 
 ## Historical Reference (below this line)
 
