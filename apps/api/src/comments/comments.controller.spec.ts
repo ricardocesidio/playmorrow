@@ -79,21 +79,30 @@ describe('CommentsController (e2e)', () => {
     await prisma.user.update({ where: { email: cleanEmail(ADMIN_EMAIL) }, data: { role: 'ADMIN' } });
 
     // Create studio + game
-    await request(httpServer)
+    const studioRes = await request(httpServer)
       .post('/api/studios')
       .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ name: 'Comment Studio', slug: STUDIO_SLUG });
+    if (studioRes.status !== 201) {
+      throw new Error(`Create studio returned ${studioRes.status}: ${JSON.stringify(studioRes.body)}`);
+    }
 
-    await request(httpServer)
+    const gameRes = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
       .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Comment Game', slug: GAME_SLUG });
+    if (gameRes.status !== 201) {
+      throw new Error(`Create game returned ${gameRes.status}: ${JSON.stringify(gameRes.body)}`);
+    }
 
     // Create published devlog
     const pubRes = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/devlogs`)
       .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Published Devlog', slug: PUB_DEVLOG_ID, body: 'Public body', isPublished: true });
+    if (pubRes.status !== 201) {
+      throw new Error(`Create published devlog returned ${pubRes.status}: ${JSON.stringify(pubRes.body)}`);
+    }
     devlogId = pubRes.body.id;
 
     // Create draft devlog
@@ -101,6 +110,9 @@ describe('CommentsController (e2e)', () => {
       .post(`/api/games/${GAME_SLUG}/devlogs`)
       .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Draft Devlog', slug: DRAFT_DEVLOG_ID, body: 'Draft body', isPublished: false });
+    if (draftRes.status !== 201) {
+      throw new Error(`Create draft devlog returned ${draftRes.status}: ${JSON.stringify(draftRes.body)}`);
+    }
     draftDevlogId = draftRes.body.id;
   });
 
@@ -122,10 +134,7 @@ describe('CommentsController (e2e)', () => {
 
   it('GET /api/devlogs/:devlogId/comments for published devlog works publicly', async () => {
     const res = await request(httpServer).get(`/api/devlogs/${devlogId}/comments`);
-    if (res.status !== HttpStatus.OK) {
-      const diag = `GET /api/devlogs/${devlogId}/comments returned ${res.status}: ${JSON.stringify(res.body)}`;
-      throw new Error(diag);
-    }
+    expect(res.status).toBe(HttpStatus.OK);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
@@ -147,9 +156,7 @@ describe('CommentsController (e2e)', () => {
       .set('Cookie', `playmorrow_session=${secondToken}`)
       .send({ body: 'This looks amazing!' });
 
-    if (res.status !== HttpStatus.CREATED) {
-      throw new Error(`POST /api/devlogs/${devlogId}/comments returned ${res.status}: ${JSON.stringify(res.body)}`);
-    }
+    expect(res.status).toBe(HttpStatus.CREATED);
     expect(res.body.body).toBe('This looks amazing!');
     expect(res.body.parentId).toBeNull();
     expect(res.body.author.username).toBe(secondUsername);
