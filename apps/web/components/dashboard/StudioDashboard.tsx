@@ -74,8 +74,37 @@ export function StudioDashboard() {
     return (
       <>
         <SiteHeader />
-        <main className="grid min-h-[80vh] place-items-center bg-[#020609]">
-          <div className="size-8 animate-spin border border-cyan border-t-transparent" />
+        <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+          <div className="relative mx-auto max-w-7xl">
+            {/* Skeleton for studio header */}
+            <div className="mb-8 animate-pulse">
+              <div className="h-8 w-64 bg-border/40 mb-2" />
+              <div className="h-4 w-96 bg-border/30" />
+            </div>
+            {/* Stats skeleton */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/40 p-4">
+                  <div className="h-3 w-20 bg-border/30 mb-3" />
+                  <div className="h-6 w-12 bg-border/40" />
+                </div>
+              ))}
+            </div>
+            {/* Games / Devlogs skeleton */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/40 p-4">
+                  <div className="h-4 w-32 bg-border/30 mb-4" />
+                  <div className="space-y-2">
+                    {Array.from({ length: 3 }).map((_, j) => (
+                      <div key={j} className="h-12 bg-border/20 rounded" />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </main>
       </>
     );
