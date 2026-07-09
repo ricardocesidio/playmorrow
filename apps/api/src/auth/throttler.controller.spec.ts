@@ -2,7 +2,8 @@ import { HttpStatus } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { CustomThrottlerGuard } from '../common/custom-throttler.guard';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
@@ -14,8 +15,9 @@ import { createTestApp } from '../test/create-test-app';
 import { MockEmailModule } from '../test/mock-email-service';
 
 /**
- * Verifies the global ThrottlerGuard wiring (#3): the per-route `@Throttle`
+ * Verifies the global CustomThrottlerGuard wiring (#3): the per-route `@Throttle`
  * override on `POST /auth/login` (10/min) must return 429 once exceeded.
+ * Uses IP fallback for unauthenticated test requests.
  * Wires the same APP_GUARD + ThrottlerModule the production AppModule uses.
  */
 describe('Rate limiting (#3)', () => {
@@ -33,7 +35,7 @@ describe('Rate limiting (#3)', () => {
           AuthModule,
           MockEmailModule,
         ],
-        providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+        providers: [{ provide: APP_GUARD, useClass: CustomThrottlerGuard }],
       }),
     );
     httpServer = result.httpServer;

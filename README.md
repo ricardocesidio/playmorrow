@@ -33,7 +33,7 @@ See [`STATUS.md`](STATUS.md) for the complete, verified feature inventory, known
 
 **Security model overview:** [`docs/security/model.md`](docs/security/model.md)
 
-Ongoing elite architecture audit cleanups — see [docs/audit-fixes-summary.md](docs/audit-fixes-summary.md) for full list (1-4 completed in order: wrap-up/scores/summary + testing/CI + perf + GDPR/load notes). See handoff docs for details.
+Ongoing elite architecture audit cleanups — see [docs/audit-fixes-summary.md](docs/audit-fixes-summary.md) for full list (1-4 completed in order: wrap-up/scores/summary + testing/CI + perf + GDPR/load notes). Per-user rate limiting implemented via CustomThrottlerGuard (with OptionalSessionGuard for user attachment). See handoff docs for details.
 
 **Updated Project Scores (post all 1-4):**
 - Architecture: 9.7 (centralized counters, explicit selects)

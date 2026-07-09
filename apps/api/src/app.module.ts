@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { OptionalSessionGuard } from './auth/guards/optional-session.guard';
+import { CustomThrottlerGuard } from './common/custom-throttler.guard';
 
 import { CsrfGuard } from './common/csrf.guard';
 // Removed default Nest scaffolding (AppController / AppService) per 2026-07-09 audit.
@@ -40,9 +42,8 @@ import { CountersService } from './common/counters.service';
       isGlobal: true,
       envFilePath: ['.env', 'apps/api/.env'],
     }),
-    // Global rate limiting (#3 from audit): 60 req/min per IP by default.
-    // Per-route @Throttle() for auth etc.
-    // TODO (Security): consider per-user rate limiting (e.g. using user id as key when auth present) beyond IP-only.
+    // Global rate limiting (#3 from audit): now per-user (userId if authenticated) or IP fallback.
+    // Per-route @Throttle() for auth etc. still override.
     // `@SkipThrottle()` exempts the health probe.
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
@@ -75,7 +76,10 @@ import { CountersService } from './common/counters.service';
   providers: [
     CsrfService,
     CountersService,
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    // OptionalSessionGuard first to attach user (if present) before rate limiting
+    { provide: APP_GUARD, useClass: OptionalSessionGuard },
+    // Custom per-user (or IP fallback) rate limiting
+    { provide: APP_GUARD, useClass: CustomThrottlerGuard },
     { provide: APP_GUARD, useClass: CsrfGuard },
   ],
 })
