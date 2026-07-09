@@ -122,6 +122,13 @@ describe('CommentsController (e2e)', () => {
 
   it('GET /api/devlogs/:devlogId/comments for published devlog works publicly', async () => {
     const res = await request(httpServer).get(`/api/devlogs/${devlogId}/comments`);
+    if (res.status !== HttpStatus.OK) {
+      console.log('=== DIAGNOSTIC: GET comments 500 response ===');
+      console.log('devlogId:', devlogId);
+      console.log('status:', res.status);
+      console.log('body:', JSON.stringify(res.body, null, 2));
+      console.log('=============================================');
+    }
     expect(res.status).toBe(HttpStatus.OK);
     expect(Array.isArray(res.body)).toBe(true);
   });
@@ -144,6 +151,14 @@ describe('CommentsController (e2e)', () => {
       .set('Cookie', `playmorrow_session=${secondToken}`)
       .send({ body: 'This looks amazing!' });
 
+    if (res.status !== HttpStatus.CREATED) {
+      console.log('=== DIAGNOSTIC: POST comments 500 response ===');
+      console.log('devlogId:', devlogId);
+      console.log('secondToken:', secondToken?.slice(0, 20));
+      console.log('status:', res.status);
+      console.log('body:', JSON.stringify(res.body, null, 2));
+      console.log('==============================================');
+    }
     expect(res.status).toBe(HttpStatus.CREATED);
     expect(res.body.body).toBe('This looks amazing!');
     expect(res.body.parentId).toBeNull();

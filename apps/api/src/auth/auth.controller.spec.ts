@@ -92,13 +92,7 @@ describe('AuthController (e2e)', () => {
   });
 
   it('POST /api/auth/login works with valid credentials (by email)', async () => {
-    // Register + verify + login
-    await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: TEST_EMAIL, password: TEST_PASSWORD, acceptedTerms: true, acceptedPrivacy: true })
-      .expect(201);
-
-    // Bypass email verification
+    // User already registered in first test; just verify + login
     await prisma.user.update({ where: { email: cleanEmail(TEST_EMAIL) }, data: { emailVerifiedAt: new Date() } });
 
     const res = await request(httpServer)
