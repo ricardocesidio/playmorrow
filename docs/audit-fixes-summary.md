@@ -77,3 +77,12 @@
 **Next:** Per user, continue with remaining (wrap-up, testing, perf, etc.).
 
 *Last updated: post B6/B7 + E + C + #2 Upload + #3 Load testing + #4 GDPR + 1-6 remaining (N+1, a11y CI, scores, Redis stub, staging notes, export expand) - all done*
+
+## Build Error Resolution (games page)
+- Root cause: `apps/web/app/games/page.tsx` ToggleControl had a JSX template literal for className containing a ternary:
+  `... ${ active ? 'good' : 'bad'`   <--- false branch closed with stray backtick instead of '
+  This left the outer template unterminated (parser saw string start with ' but close attempt with ` mixed with following JSX `}> ).
+- Verified on disk: both arms now consistently use single quotes '...' and outer ` properly closes after } 
+- Action: cleaned apps/web/.next cache (stale turbopack state can retain prior compile errors), restarted fresh `next dev`. Confirmed: `Compiling /games ... ✓` and GET /games 200 with no syntax errors.
+- No other files had similar quote/backtick mixups (project scan clean).
+- This was the exact error reported; source had already been corrected in prior edit pass. Fresh server eliminates log noise from historical compile failures.

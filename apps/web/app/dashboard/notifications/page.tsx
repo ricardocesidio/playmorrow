@@ -118,9 +118,16 @@ export default function NotificationsPage() {
 
       {/* Loading */}
       {isLoading && (
-        <div className="space-y-3">
+        <div className="space-y-3" aria-label="Loading notifications">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="clip-corner h-20 animate-pulse border border-border/40 bg-[#050b0f]/30" />
+            <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-4 animate-pulse">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="h-3 w-16 bg-border/30 rounded" />
+                <div className="h-3 w-12 bg-border/20 rounded" />
+              </div>
+              <div className="h-4 w-3/4 bg-border/30 rounded mb-1" />
+              <div className="h-3 w-1/2 bg-border/20 rounded" />
+            </div>
           ))}
         </div>
       )}

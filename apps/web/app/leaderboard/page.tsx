@@ -78,13 +78,14 @@ export default function LeaderboardPage() {
               ))}
             </div>
           ) : (
-            <div className="space-y-1">
+            <div className="space-y-1" role="list" aria-label="Leaderboard entries">
               {data.map((entry) => (
                 <Link key={entry.id} href={`/users/${entry.username}`}
-                  className="clip-corner flex items-center gap-4 border border-border/60 bg-[#050b0f]/70 px-4 py-3 transition hover:border-cyan/50">
+                  className="clip-corner flex items-center gap-4 border border-border/60 bg-[#050b0f]/70 px-4 py-3 transition hover:border-cyan/50 focus:outline-none focus:ring-2 focus:ring-cyan/50"
+                  aria-label={`${entry.displayName} (@${entry.username}), level ${entry.level}, ${entry.xp} XP`}>
                   <span className={`w-8 text-center font-mono text-[0.65rem] font-bold ${rankColor(entry.rank)}`}>{rankIcon(entry.rank)}</span>
                   <div className="grid size-9 shrink-0 place-items-center rounded-full border border-border bg-background/60 text-xs font-bold overflow-hidden">
-                    {entry.avatarUrl ? <img src={entry.avatarUrl} className="size-full object-cover" /> : entry.displayName.slice(0, 1).toUpperCase()}
+                    {entry.avatarUrl ? <img src={entry.avatarUrl} alt={`${entry.displayName} avatar`} className="size-full object-cover" /> : entry.displayName.slice(0, 1).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-display text-sm font-semibold text-white">{entry.displayName}</p>

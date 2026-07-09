@@ -20,9 +20,10 @@ export class CommentsService {
   async create(userId: string, devlogId: string, dto: CreateCommentDto) {
     const devlog = await this.prisma.devlog.findUnique({
       where: { id: devlogId },
-      // Explicit select to reduce N+1
       select: {
         id: true,
+        isPublished: true,
+        title: true,
         game: {
           select: {
             id: true,
@@ -220,9 +221,10 @@ export class CommentsService {
   async delete(userId: string, commentId: string) {
     const comment = await this.prisma.comment.findUnique({
       where: { id: commentId },
-      // Explicit select to reduce N+1 (performance audit)
       select: {
         id: true,
+        authorId: true,
+        gameId: true,
         devlog: {
           select: {
             id: true,

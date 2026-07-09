@@ -200,6 +200,7 @@ export default function GamesPage() {
 function FilterSelect({ label, value, onChange, options, icon }: { label: string; value: string; onChange: (v: string) => void; options: string[]; icon?: ReactNode }) {
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
   useEffect(() => {
@@ -221,6 +222,13 @@ function FilterSelect({ label, value, onChange, options, icon }: { label: string
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  useEffect(() => {
+    if (open && dropdownRef.current) {
+      const firstOption = dropdownRef.current.querySelector('button[role="option"]') as HTMLButtonElement;
+      firstOption?.focus();
+    }
+  }, [open]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -252,7 +260,19 @@ function FilterSelect({ label, value, onChange, options, icon }: { label: string
         </span>
       </button>
       {open && typeof document !== 'undefined' && createPortal(
-        <div style={dropdownStyle} className="max-h-60 overflow-y-auto border border-border bg-elevated shadow-lg" role="listbox" aria-label={`${label} options`}>
+        <div 
+          ref={dropdownRef} 
+          style={dropdownStyle} 
+          className="max-h-60 overflow-y-auto border border-border bg-elevated shadow-lg" 
+          role="listbox" 
+          aria-label={`${label} options`}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              setOpen(false);
+              buttonRef.current?.focus();
+            }
+          }}
+        >
           {options.map((opt) => (
             <button
               key={opt}
@@ -289,7 +309,7 @@ function ToggleControl({ label, active, onChange }: { label: string; active: boo
       <span className={`relative h-4 w-8 rounded-full border transition-colors ${
         active
           ? 'border-cyan bg-cyan/20 shadow-[0_0_14px_rgb(62_231_255_/_0.25)]'
-          : 'border-cyan/65 bg-cyan/10 shadow-[0_0_14px_rgb(62_231_255_/_0.14)]`
+          : 'border-cyan/65 bg-cyan/10 shadow-[0_0_14px_rgb(62_231_255_/_0.14)]'
       }`}>
         <span className={`absolute top-1/2 size-3 -translate-y-1/2 rounded-full bg-cyan shadow-[0_0_12px_rgb(62_231_255_/_0.75)] transition-all ${
           active ? 'left-4' : 'left-0.5'
