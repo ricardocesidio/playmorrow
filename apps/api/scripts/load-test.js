@@ -15,8 +15,8 @@
  * See PRODUCTION.md and audit for details.
  */
 
-const autocannon = require('autocannon');
-const { execSync } = require('child_process');
+// Use npx to avoid local install issues; autocannon will be downloaded on first run if needed.
+const { spawnSync } = require('child_process');
 
 const BASE_URL = process.env.LOADTEST_URL || 'http://localhost:4000/api';
 const DURATION = process.env.LOADTEST_DURATION || '10'; // seconds
@@ -31,36 +31,30 @@ const endpoints = [
   { title: 'Devlogs', path: '/devlogs' },
 ];
 
-async function runTest({ title, path }) {
+function runTest({ title, path }) {
   console.log(`\n=== Testing ${title} (${path}) ===`);
-  const result = await autocannon({
-    url: `${BASE_URL}${path}`,
-    connections: parseInt(CONNECTIONS),
-    duration: parseInt(DURATION),
-    pipelining: 1,
-  });
-
-  console.log(autocannon.printResult(result));
+  const url = `${BASE_URL}${path}`;
+  const args = [
+    'autocannon',
+    '--connections', CONNECTIONS,
+    '--duration', DURATION,
+    url
+  ];
+  const result = spawnSync('npx', args, { encoding: 'utf8', stdio: 'inherit' });
+  if (result.error) {
+    console.error('Failed to run autocannon:', result.error);
+  }
   return result;
 }
 
-async function main() {
-  const results = [];
+function main() {
   for (const ep of endpoints) {
-    const res = await runTest(ep);
-    results.push({ ...ep, latency: res.latency, requests: res.requests });
+    runTest(ep);
   }
 
-  console.log('\n=== Summary ===');
-  results.forEach(r => {
-    console.log(`${r.title}: p95=${r.latency.p95}ms, RPS=${Math.round(r.requests.average)}`);
-  });
-
-  console.log('\nBaseline established. Update PRODUCTION.md with results.');
-  console.log('For production: set LOADTEST_URL=https://... and run against live (with caution).');
+  console.log('\n=== Load test complete ===');
+  console.log('Baseline established (see output above). Update PRODUCTION.md with p95/RPS results for each endpoint.');
+  console.log('For production: set LOADTEST_URL=https://playmorrow-api-production.up.railway.app/api and run (use with caution, low duration).');
 }
 
-main().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+main();
