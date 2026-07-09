@@ -3,6 +3,8 @@ import { StudioRole } from '@playmorrow/database';
 import type { Prisma } from '@playmorrow/database';
 
 import { assertStudioAccess } from '../common/studio-permissions';
+import { CountersService } from '../common/counters.service';
+import { logger } from '../common/logger';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateGameDto } from './dto/create-game.dto';
@@ -36,6 +38,7 @@ export class GamesService {
     private readonly studioXpService: StudioXpService,
     private readonly auditLog: AuditLogService,
     private readonly feedEngine: FeedEngineService,
+    private readonly countersService: CountersService,
   ) {}
 
   async create(userId: string, studioSlug: string, dto: CreateGameDto) {
@@ -134,6 +137,8 @@ export class GamesService {
       payload: { title: game.title, slug: game.slug },
     }).catch(() => {});
 
+    logger.info({ msg: 'game created', gameId: game.id, studioId: studio.id, userId });
+
     return this.toResponse(game);
   }
 
@@ -231,16 +236,7 @@ export class GamesService {
   }
 
   async syncGameCounters(gameId: string) {
-    const [followers, wishlists, comments, views] = await Promise.all([
-      this.prisma.follow.count({ where: { gameId } }),
-      this.prisma.wishlistItem.count({ where: { gameId } }),
-      this.prisma.comment.count({ where: { gameId } }),
-      this.prisma.gameView.count({ where: { gameId } }),
-    ]);
-    await this.prisma.game.update({
-      where: { id: gameId },
-      data: { followersCount: followers, wishlistsCount: wishlists, commentsCount: comments, viewsCount: views },
-    });
+    await this.countersService.syncGameCounters(gameId);
   }
 
   async update(userId: string, slug: string, dto: UpdateGameDto) {

@@ -218,7 +218,10 @@ function GameHero({ game, title, heroImage, slug }: { game: Game; title: string;
               <Shield className="size-7 text-foreground" />
             </div>
             <div>
-              <p className="pm-display text-[0.95rem] leading-none text-foreground">{game.studio?.name ?? ''} <span className="text-cyan">●</span></p>
+              <p className="pm-display text-[0.95rem] leading-none text-foreground">
+                {game.studio?.name ?? ''} <span className="text-cyan">●</span>
+                {game.studio?.isVerified && <span className="ml-1 text-[0.7rem] text-cyan">✓ Verified</span>}
+              </p>
             </div>
             <DetailFollowButton slug={slug} />
           </div>

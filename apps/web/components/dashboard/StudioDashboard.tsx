@@ -155,6 +155,18 @@ export function StudioDashboard() {
               <StatCard icon={<CalendarDays className="size-5" />} label="Since Joined" value={formatMonthYear(studio.createdAt)} tone="muted" />
             </div>
 
+            {/* E1: Basic studio analytics stub */}
+            <DashboardPanel className="p-3 mb-3">
+              <p className="mb-3 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-foreground">Analytics (Beta Stub)</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                <div>Followers this week: <span className="text-cyan">{ds?.stats.followsThisWeek ?? 0}</span></div>
+                <div>Views this week: <span className="text-cyan">{ds?.stats.viewsThisWeek ?? 0}</span></div>
+                <div>Wishlists this week: <span className="text-cyan">{ds?.stats.wishlistsThisWeek ?? 0}</span></div>
+                <div>Engagement: <span className="text-cyan">+{ds?.stats.commentsThisMonth ?? 0}</span> comments/mo</div>
+              </div>
+              <p className="mt-2 text-[0.5rem] text-muted-foreground">Full analytics coming soon. Data from studio dashboard.</p>
+            </DashboardPanel>
+
             <DashboardPanel className="p-3">
               <p className="mb-3 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-foreground">Quick Actions</p>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

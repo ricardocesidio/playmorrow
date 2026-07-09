@@ -32,6 +32,7 @@ import { UsersModule } from './users/users.module';
 import { PushNotificationsModule } from './push-notifications/push-notifications.module';
 import { AchievementModule } from './achievements/achievement.module';
 import { PlayerXpModule } from './player-xp/player-xp.module';
+import { CountersService } from './common/counters.service';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { PlayerXpModule } from './player-xp/player-xp.module';
   controllers: [],
   providers: [
     CsrfService,
+    CountersService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: CsrfGuard },
   ],

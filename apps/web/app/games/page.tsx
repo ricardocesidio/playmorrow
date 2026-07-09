@@ -337,6 +337,11 @@ function CatalogGameCard({ game }: { game: Game }) {
             <p className="pm-micro mt-3 text-muted-foreground">
               {game.studio?.name ?? 'Independent Studio'} <span className={accent.text}>●</span>
             </p>
+            {game.priceCents != null && (
+              <p className="mt-1 text-[0.6rem] font-mono text-amber/80">
+                {game.isFree ? 'Free' : `${formatPrice(game.priceCents, game.currency)} (Coming Soon)`}
+              </p>
+            )}
             <p className="mt-2 text-xs text-muted-foreground">
               {(game.tags?.length ? game.tags : ['Indie']).slice(0, 2).map((tag, index) => (
                 <span key={tag}>{index > 0 ? ' • ' : ''}{tag}</span>
