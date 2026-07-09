@@ -5,9 +5,11 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
 import { ScheduleModule } from '@nestjs/schedule';
+import { AuditLogModule } from '../audit-log/audit-log.module';
 import { AuthModule } from '../auth/auth.module';
 import { CommentsModule } from './comments.module';
 import { DevlogsModule } from '../devlogs/devlogs.module';
+import { FeedModule } from '../feed/feed.module';
 import { FollowsModule } from '../follows/follows.module';
 import { GamesModule } from '../games/games.module';
 import { NotificationsModule } from '../notifications/notifications.module';
@@ -54,8 +56,10 @@ describe('CommentsController (e2e)', () => {
           AuthModule,
           StudiosModule,
           GamesModule,
+          AuditLogModule,
           DevlogsModule,
           CommentsModule,
+          FeedModule,
           FollowsModule,
           NotificationsModule,
           MockEmailModule,
@@ -92,7 +96,7 @@ describe('CommentsController (e2e)', () => {
       .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Comment Game', slug: GAME_SLUG });
     if (gameRes.status !== 201) {
-      throw new Error(`Create game returned ${gameRes.status}: ${JSON.stringify(gameRes.body)}`);
+      throw new Error(`Create game returned ${gameRes.status}: ${JSON.stringify(gameRes.body, null, 2)}`);
     }
 
     // Create published devlog
