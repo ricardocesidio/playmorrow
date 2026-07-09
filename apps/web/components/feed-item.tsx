@@ -12,12 +12,13 @@ export function FeedItemCard({ item }: { item: FeedItemType }) {
     <Link
       href={href}
       className="clip-corner block border border-border/60 bg-[#050b0f]/50 p-4 transition-colors hover:border-cyan/30 relative overflow-hidden"
+      aria-label={`${item.type === 'DEVLOG' ? 'Devlog' : 'Roadmap'}: ${item.title} by ${item.studio.name} for ${item.game.title}`}
     >
       <span className="signal-dot absolute right-3 top-3" aria-hidden />
       <div className="flex items-start gap-4">
         {item.game.coverUrl && (
           <div className="shrink-0 overflow-hidden rounded-lg">
-            <img src={item.game.coverUrl} alt="" className="size-16 object-cover" />
+            <img src={item.game.coverUrl} alt={`${item.game.title} cover`} className="size-16 object-cover" />
           </div>
         )}
         <div className="min-w-0 flex-1">

@@ -148,7 +148,7 @@ export default function NotificationsPage() {
 
       {/* List */}
       {data && data.items.length > 0 && (
-        <div id={`notifications-${status}`} className="space-y-2" role="tabpanel">
+        <div id={`notifications-${status}`} className="space-y-2" role="tabpanel" aria-label="Notifications list">
           {data.items.map((n) => (
             <div
               key={n.id}
@@ -157,6 +157,8 @@ export default function NotificationsPage() {
                   ? 'border-border/60 bg-[#050b0f]/50'
                   : 'border-cyan/30 bg-[#050b0f]/70'
               }`}
+              role="article"
+              aria-label={`Notification: ${n.title}`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">

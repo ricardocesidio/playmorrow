@@ -222,13 +222,27 @@ function FilterSelect({ label, value, onChange, options, icon }: { label: string
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setOpen(false);
+    } else if ((e.key === 'Enter' || e.key === ' ') && !open) {
+      e.preventDefault();
+      setOpen(true);
+    }
+  };
+
   return (
     <div>
       <div className="mb-1.5 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">{label}</div>
       <button
         ref={buttonRef}
         type="button"
+        role="combobox"
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        aria-label={`${label} filter, current: ${value}`}
         onClick={() => setOpen(!open)}
+        onKeyDown={handleKeyDown}
         className="clip-corner flex h-9 w-full items-center justify-between gap-3 border border-border-bright/60 bg-background/80 px-3 font-mono text-[0.55rem] uppercase tracking-widest text-cyan cursor-pointer outline-none focus:border-cyan focus:ring-1 focus:ring-cyan"
       >
         {value}
@@ -238,11 +252,13 @@ function FilterSelect({ label, value, onChange, options, icon }: { label: string
         </span>
       </button>
       {open && typeof document !== 'undefined' && createPortal(
-        <div style={dropdownStyle} className="max-h-60 overflow-y-auto border border-border bg-elevated shadow-lg">
+        <div style={dropdownStyle} className="max-h-60 overflow-y-auto border border-border bg-elevated shadow-lg" role="listbox" aria-label={`${label} options`}>
           {options.map((opt) => (
             <button
               key={opt}
               type="button"
+              role="option"
+              aria-selected={value === opt}
               onClick={() => { onChange(opt); setOpen(false); }}
               className={`block w-full px-3 py-2 text-left font-mono text-xs transition-colors cursor-pointer ${
                 value === opt
@@ -262,11 +278,18 @@ function FilterSelect({ label, value, onChange, options, icon }: { label: string
 
 function ToggleControl({ label, active, onChange }: { label: string; active: boolean; onChange: (value: boolean) => void }) {
   return (
-    <button type="button" onClick={() => onChange(!active)} className="cursor-pointer group inline-flex items-center gap-3 pm-micro text-muted-foreground">
+    <button
+      type="button"
+      role="switch"
+      aria-checked={active}
+      aria-label={label}
+      onClick={() => onChange(!active)}
+      className="cursor-pointer group inline-flex items-center gap-3 pm-micro text-muted-foreground focus:outline-none focus:ring-1 focus:ring-cyan/50"
+    >
       <span className={`relative h-4 w-8 rounded-full border transition-colors ${
         active
           ? 'border-cyan bg-cyan/20 shadow-[0_0_14px_rgb(62_231_255_/_0.25)]'
-          : 'border-cyan/65 bg-cyan/10 shadow-[0_0_14px_rgb(62_231_255_/_0.14)]'
+          : 'border-cyan/65 bg-cyan/10 shadow-[0_0_14px_rgb(62_231_255_/_0.14)]`
       }`}>
         <span className={`absolute top-1/2 size-3 -translate-y-1/2 rounded-full bg-cyan shadow-[0_0_12px_rgb(62_231_255_/_0.75)] transition-all ${
           active ? 'left-4' : 'left-0.5'

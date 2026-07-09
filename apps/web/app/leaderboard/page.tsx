@@ -45,9 +45,23 @@ export default function LeaderboardPage() {
             <Trophy className="size-8 text-amber" />
             <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Leaderboard</h1>
           </div>
-          <div className="mb-6 flex gap-4 border-b border-border/60">
-            <button onClick={() => setTab('all')} className={`pb-3 font-mono text-[0.6rem] uppercase tracking-widest cursor-pointer ${tab === 'all' ? 'border-b-2 border-cyan text-cyan' : 'text-muted-foreground'}`}>All Time</button>
-            <button onClick={() => setTab('weekly')} className={`pb-3 font-mono text-[0.6rem] uppercase tracking-widest cursor-pointer ${tab === 'weekly' ? 'border-b-2 border-cyan text-cyan' : 'text-muted-foreground'}`}>Weekly</button>
+          <div className="mb-6 flex gap-4 border-b border-border/60" role="tablist" aria-label="Leaderboard time filters">
+            <button
+              onClick={() => setTab('all')}
+              role="tab"
+              aria-selected={tab === 'all'}
+              className={`pb-3 font-mono text-[0.6rem] uppercase tracking-widest cursor-pointer focus:outline-none focus:ring-1 focus:ring-cyan/50 ${tab === 'all' ? 'border-b-2 border-cyan text-cyan' : 'text-muted-foreground'}`}
+            >
+              All Time
+            </button>
+            <button
+              onClick={() => setTab('weekly')}
+              role="tab"
+              aria-selected={tab === 'weekly'}
+              className={`pb-3 font-mono text-[0.6rem] uppercase tracking-widest cursor-pointer focus:outline-none focus:ring-1 focus:ring-cyan/50 ${tab === 'weekly' ? 'border-b-2 border-cyan text-cyan' : 'text-muted-foreground'}`}
+            >
+              Weekly
+            </button>
           </div>
           {loading ? (
             <div className="space-y-1">
