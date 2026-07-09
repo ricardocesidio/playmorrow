@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { ArrowLeft, Heart, Loader2, Bookmark, Gamepad2, Star } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyWishlist, useRemoveGameFromWishlist } from '@/lib/api/hooks';

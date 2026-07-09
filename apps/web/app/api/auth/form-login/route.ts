@@ -17,8 +17,9 @@ export async function POST(request: NextRequest) {
     body: JSON.stringify({ emailOrUsername, password }),
   });
 
+  const body = await res.json().catch(() => ({ message: 'Invalid email/username or password' }));
+
   if (!res.ok) {
-    const body = await res.json().catch(() => ({ message: 'Invalid email/username or password' }));
     if (body.code === 'EMAIL_NOT_VERIFIED' && body.email) {
       return NextResponse.redirect(new URL(`/verify-email?email=${encodeURIComponent(body.email)}&from=login`, request.url));
     }
@@ -29,5 +30,17 @@ export async function POST(request: NextRequest) {
   const setCookie = res.headers.get('set-cookie');
   const response = NextResponse.redirect(new URL('/games', request.url));
   if (setCookie) response.headers.set('set-cookie', setCookie);
+
+  // Set CSRF token as a non-httpOnly cookie so the frontend can read it
+  if (body.csrfToken) {
+    response.cookies.set('playmorrow_csrf', body.csrfToken, {
+      httpOnly: false,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: 60 * 60 * 24, // 24 hours
+    });
+  }
+
   return response;
 }

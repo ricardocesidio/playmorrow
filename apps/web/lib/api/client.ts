@@ -185,6 +185,7 @@ export interface Comment {
   isDeleted?: boolean;
   deletedAt: string | null;
   author: { id: string; username: string; displayName: string; avatarUrl: string | null; role?: string };
+  replies?: Comment[];
   createdAt: string;
   updatedAt: string;
 }
@@ -236,7 +237,6 @@ export interface SearchResultDevlog {
   id: string;
   title: string;
   slug: string;
-  coverUrl: string | null;
   publishedAt: string | null;
   game: { id: string; title: string; slug: string };
 }
@@ -297,6 +297,14 @@ export interface CreateReportDto {
   details?: string;
 }
 
+// ── CSRF Token ──────────────────────────────────────────────────────────
+
+function getCsrfToken(): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  const match = document.cookie.match(/(?:^|;\s*)playmorrow_csrf=([^;]*)/);
+  return match ? match[1] : undefined;
+}
+
 // ── HTTP Client ─────────────────────────────────────────────────────────
 
 function createRealClient() {
@@ -306,6 +314,12 @@ function createRealClient() {
   ): Promise<T> {
     const { method = 'GET', body } = options;
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+
+    // Include CSRF token for state-changing requests
+    if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
+      const csrfToken = getCsrfToken();
+      if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+    }
 
     const res = await fetch(`${BASE_URL}${path}`, {
       method,

@@ -59,6 +59,7 @@ export class FeedEngineService {
           gameId: devlog.gameId,
           authorId: devlog.authorId,
           body: `📰 **${gameTitle} — ${devlog.title}**\n\nA new devlog was published. [Read more](/devlogs/${devlog.slug})`,
+          type: 'POST',
           parentId: null,
         },
       });

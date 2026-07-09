@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { SiteHeader } from '@/components/site-header';
 import { MarkdownEditor } from '@/components/md-editor';
 
+import { ArrowLeft, FileText, ExternalLink, X, Calendar, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/api/auth-context';
 import { useDevlog, useUpdateDevlog, useDeleteDevlog } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';

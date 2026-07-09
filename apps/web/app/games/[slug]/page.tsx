@@ -653,15 +653,14 @@ function RoadmapNode({ state }: { state: string }) {
 
 function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
   const rows = devlogs.length
-    ? devlogs.slice(0, 3).map((item) => [item.title, item.publishedAt ? new Date(item.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '', item.coverUrl ?? '', item.reactionsCount ?? 0, item.commentsCount ?? 0, `/devlogs/${item.id}`] as const)
-    : fallbackDevlogs.map((item) => [...item, '/devlogs/devlog-1'] as const);
+    ? devlogs.slice(0, 3).map((item) => [item.title, item.publishedAt ? new Date(item.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '', item.reactionsCount ?? 0, item.commentsCount ?? 0, `/devlogs/${item.id}`] as const)
+    : fallbackDevlogs.map((item) => [...item.slice(0, 2), ...item.slice(3)] as const);
 
   return (
     <TechPanel title="Latest Devlogs" action="View all" actionHref={`/games/${slug}/devlogs`} className="h-full">
       <div className="grid gap-3">
-        {rows.map(([title, date, image, reactions, comments, href]) => (
-          <Link href={href} key={title} className="grid cursor-pointer grid-cols-[92px_1fr] gap-3 border-b border-border/45 pb-3 last:border-b-0 transition hover:border-cyan">
-            <img src={image} alt="" className="h-14 w-[92px] object-cover" />
+        {rows.map(([title, date, reactions, comments, href]) => (
+          <Link href={href} key={title} className="block cursor-pointer border-b border-border/45 pb-3 last:border-b-0 transition hover:border-cyan">
             <span className="min-w-0">
               <span className="line-clamp-2 font-mono text-xs font-bold text-foreground">{title}</span>
               <span className="mt-1 flex items-center gap-4 text-[11px] text-muted-foreground">{date}<span className="inline-flex items-center gap-1"><Flame className="size-3" />{reactions}</span><span className="inline-flex items-center gap-1"><MessageCircle className="size-3" />{comments}</span></span>

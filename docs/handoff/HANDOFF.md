@@ -1,78 +1,30 @@
 # Playmorrow — Engineering Handoff
 
-> **Generated:** 2026-06-28
-> **Repo:** https://github.com/ricardocesidio/playmorrow (`main`)
+> **Original:** 2026-06-28 (Render-based deployment, pre-DevlogV2)
+> **Current:** See living docs below
 
-## Current status
+---
 
-### ✅ Completed
+This document is **historical** — the project has undergone significant changes since this was written (platform changed from Render to Railway, Devlog V2 system implemented, production hardening audit).
 
-| Feature | Status | Details |
-|---|---|---|
-| **Session auth** | ✅ | httpOnly cookies, SHA-256 hashed, revocable, SameSite conditional |
-| **Email verification** | ✅ | 6-digit code via Resend, rate limited, single-use |
-| **Password reset** | ✅ | Forgot/reset flow with tokens |
-| **Account lockout** | ✅ | 5 failed attempts → 15 min lockout |
-| **Rate limiting** | ✅ | Global 60/min, per-route tighter limits |
-| **Google OAuth** | ✅ | Working with proper client credentials |
-| **GitHub OAuth** | ✅ | Working with proper client credentials |
-| **Account types** | ✅ | PLAYER vs STUDIO, onboarding intent only |
-| **Permissions** | ✅ | StudioMember roles (OWNER/ADMIN/MEMBER) enforced |
-| **Admin role** | ✅ | Protected bootstrap via `pnpm admin:ensure` |
-| **Registration consent** | ✅ | Terms/Privacy/Community Guidelines acceptance |
-| **Game detail page** | ✅ | Premium interactive page with follow, wishlist, share, lightbox, community |
-| **Professional splash** | ✅ | Cyberpunk animated splash (5-8s, sessionStorage) |
-| **Pagination** | ✅ | 16 games/page with URL params |
-| **Search** | ✅ | Header dropdown + search page with 300ms debounce |
-| **Live feed** | ✅ | Real data from DB (devlogs + roadmap) |
-| **User profiles** | ✅ | `/users/[username]` with followers, activity |
-| **Studio profiles** | ✅ | `/studios/[slug]` with banner, stats, members, games |
-| **Follow system** | ✅ | Games + studios, real endpoints |
-| **Wishlist** | ✅ | Private, real endpoints |
-| **Comments** | ✅ | Game-level comments with likes |
-| **Onboarding wizard** | ✅ | Multi-step (account type, username, profile, review) |
-| **Player Dashboard** | ✅ | PLAYER-focused dashboard with sidebar, wishlist, following, feed |
-| **Dashboard separation** | ✅ | `/dashboard` routes by `accountType` |
-| **Seed data** | ✅ | 5 demo games + studios with real data |
-| **Demo assets** | ✅ | 30 SVG placeholder assets for 5 games |
-| **Footer** | ✅ | X/Twitter link + Instagram + copyright |
-| **Password visibility** | ✅ | Toggle on login/register/reset-password |
-| **Notification dropdown** | ✅ | Cyberpunk dropdown in header |
-| **Profile settings** | ✅ | `/settings/profile` with email change limit (2x) |
-| **Game creation form** | ✅ | Complete form with README, demo, engine, languages, genres |
-| **Game README page** | ✅ | `/games/[slug]/readme` |
-| **GameView tracking** | ✅ | Views counted per game detail visit |
-| **CSP headers** | ✅ | Helmet-configured, updated for Next.js compatibility |
+## Current Source of Truth
 
-### 🔴 Critical Issues
+| Document | Purpose | Link |
+|----------|---------|------|
+| **STATUS.md** | Complete feature inventory, deployment config, env vars, open issues | [`STATUS.md`](../../STATUS.md) |
+| **README.md** | Project overview, quick start, architecture | [`README.md`](../../README.md) |
+| **AGENTS.md** | Chronological development history (10 sessions) | [`AGENTS.md`](../../AGENTS.md) |
+| **ROADMAP.md** | Enterprise readiness items with hour estimates | [`ROADMAP.md`](../../ROADMAP.md) |
+| **Session 10 handoff** | Evidence-first hardening, CSRF, test cleanup, production verification | [`session-10.md`](./session-10.md) |
+| **Devlog System V2** | Community detection, rich editor, feed engine, comments | Implemented — see STATUS.md |
 
-| Issue | Status | Details |
-|---|---|---|
-| Google OAuth credentials need updating | 🔴 | User created new Google project. Render needs `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` updated |
-| Onboarding not fully integrated with email registration | 🟡 | Email registration still uses old flow, doesn't redirect to onboarding |
+## Historical Reference (below this line)
 
-### 🟡 Open / In Progress
+The following content is from the original 2026-06-28 handoff and may be inaccurate. Cross-reference with STATUS.md before acting on any claim.
 
-| Item | Priority | Notes |
-|---|---|---|
-| Email registration → onboarding | Medium | Should also use the new onboarding wizard |
-| Dashboard empty states | Medium | Professional empty states for wishlist/feed/notifications |
-| Remove fake seed data defaults | Medium | Dashboard should start completely empty for new users |
-| Account dropdown menu | Low | Click avatar → dropdown with navigation |
-| Activity feed / Signal Relay | Low | Real events for follows, comments, wishlist |
-| GitHub OAuth testing | Low | Not yet tested with credentials |
-| Production deployment | Low | Vercel + Render configured, needs final validation |
+---
 
-### 📋 Recommended Next Steps
-
-1. **Update Render env vars** with new Google OAuth credentials
-2. **Test Google login flow** end-to-end (Google → onboarding → dashboard)
-3. **Integrate email registration** with new onboarding wizard
-4. **Create empty states** for all dashboard sections
-5. **Add account dropdown** to header
-6. **Create activity feed events** for real-time Signal Relay
-
-## Architecture
+## Architecture (historical)
 
 ```
 playmorrow.vercel.app (Next.js 15)
@@ -80,30 +32,62 @@ playmorrow.vercel.app (Next.js 15)
                                         └── neon.tech (PostgreSQL)
 ```
 
+**Note:** Backend is now on **Railway**, not Render. See STATUS.md → Production Deployment.
+
 ### Key env vars
 
 | Variable | Where | Purpose |
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | Vercel | Frontend API URL |
 | `API_URL` | Vercel (server) | Server-side API calls |
-| `DATABASE_URL` | Render + `.env` | Prisma connection |
-| `JWT_SECRET` | Render | JWT signing |
-| `SESSION_SECRET` | Render | Session cookie signing |
-| `GOOGLE_CLIENT_ID` | Render | Google OAuth |
-| `GOOGLE_CLIENT_SECRET` | Render | Google OAuth |
-| `GOOGLE_CALLBACK_URL` | Render | Google OAuth callback |
-| `PLAYMORROW_OWNER_EMAIL` | Render | Admin bootstrap |
-| `RESEND_API_KEY` | Render | Email verification |
+| `DATABASE_URL` | Railway + `.env` | Prisma connection |
+| `JWT_SECRET` | Railway | JWT signing |
+| `SESSION_SECRET` | Railway | Session cookie signing |
+| `GOOGLE_CLIENT_ID` | Railway | Google OAuth |
+| `GOOGLE_CLIENT_SECRET` | Railway | Google OAuth |
+| `GOOGLE_CALLBACK_URL` | Railway | Google OAuth callback |
+| `PLAYMORROW_OWNER_EMAIL` | Railway | Admin bootstrap |
+| `RESEND_API_KEY` | Railway | Email verification |
+| `WEB_ORIGIN` | Railway | CORS allowed origin |
+| `COOKIE_DOMAIN` | Railway | Session cookie domain |
 
 ## Commands
 
 ```bash
-pnpm dev              # Run web + API
-pnpm build            # Full build
-pnpm lint             # Lint all
-pnpm typecheck        # TypeScript check
-pnpm admin:ensure     # Promote user to ADMIN
-pnpm db:seed          # Seed demo data
-pnpm db:migrate       # Create migration
-pnpm db:deploy        # Apply migration to production
+# Backend dev
+cd apps/api && npx nest start --watch
+
+# Frontend dev
+cd apps/web && npx next dev -p 3000
+
+# Run API unit tests
+cd apps/api && npx vitest run
+
+# Run E2E tests (Playwright)
+cd apps/web && npx playwright test
+
+# Build database client
+cd packages/database && npx prisma generate
+
+# Push schema (dev)
+cd packages/database && npx prisma db push
+
+# Deploy migrations
+cd packages/database && npx prisma migrate deploy
+
+# Seed database
+cd packages/database && npx prisma db seed
+
+# Admin bootstrap
+cd apps/api && npx ts-node src/scripts/admin-bootstrap.ts
 ```
+
+## Past Handoff Catalogs
+
+The original issue-by-issue breakdowns are preserved as historical reference:
+
+- [`backend.md`](./backend.md) — Backend issues (1–11)
+- [`frontend.md`](./frontend.md) — Frontend issues (12–29)
+- [`devx.md`](./devx.md) — DX issues (30–34)
+
+These catalogs pre-date the Devlog V2 implementation and production hardening audit (Sessions 3–9). Many listed issues have been resolved. For current status, see [`STATUS.md`](../../STATUS.md) → Outstanding Work.

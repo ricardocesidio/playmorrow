@@ -11,6 +11,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersModule } from '../users/users.module';
 import { createTestApp } from '../test/create-test-app';
+import { MockEmailModule } from '../test/mock-email-service';
 
 /**
  * Verifies the global ThrottlerGuard wiring (#3): the per-route `@Throttle`
@@ -30,6 +31,7 @@ describe('Rate limiting (#3)', () => {
           PrismaModule,
           UsersModule,
           AuthModule,
+          MockEmailModule,
         ],
         providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
       }),

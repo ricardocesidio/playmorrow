@@ -1,5 +1,8 @@
 # Frontend issues (12–29)
 
+> **Historical document** (pre-DevlogV2, 2026-06-28). Many issues listed here have been resolved.
+> See [`STATUS.md`](../../STATUS.md) → Outstanding Work for current open issues.
+
 Catalogue for `apps/web` (Next.js / React / Playwright). See [`HANDOFF.md`](./HANDOFF.md)
 for repo orientation and execution order.
 

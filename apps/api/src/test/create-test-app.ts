@@ -1,5 +1,6 @@
 import { type INestApplication, ValidationPipe } from '@nestjs/common';
 import { type TestingModule, type TestingModuleBuilder } from '@nestjs/testing';
+import cookieParser from 'cookie-parser';
 
 /**
  * Creates a NestJS test application that mirrors production bootstrap:
@@ -30,6 +31,7 @@ export async function createTestApp(
 
   // setGlobalPrefix BEFORE useGlobalPipes
   nestApp.setGlobalPrefix('api', { exclude: ['health'] });
+  nestApp.use(cookieParser());
 
   nestApp.useGlobalPipes(
     new ValidationPipe({

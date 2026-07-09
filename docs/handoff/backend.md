@@ -1,5 +1,8 @@
 # Backend issues (1–11)
 
+> **Historical document** (pre-DevlogV2, 2026-06-28). Many issues listed here have been resolved.
+> See [`STATUS.md`](../../STATUS.md) → Outstanding Work for current open issues.
+
 Catalogue for `apps/api` (NestJS) and `packages/database` (Prisma). See
 [`HANDOFF.md`](./HANDOFF.md) for repo orientation and execution order.
 

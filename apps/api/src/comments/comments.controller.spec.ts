@@ -4,6 +4,7 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from '../auth/auth.module';
 import { CommentsModule } from './comments.module';
 import { DevlogsModule } from '../devlogs/devlogs.module';
@@ -14,14 +15,14 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudiosModule } from '../studios/studios.module';
 import { UsersModule } from '../users/users.module';
+import { MockEmailModule } from '../test/mock-email-service';
+import { registerTestUser } from '../test/register-test-user';
+import { createTestApp } from '../test/create-test-app';
 
 const SUFFIX = `cm_${Date.now()}`;
 const OWNER_EMAIL = `own_${SUFFIX}@example.com`;
-const OWNER_USERNAME = `own_${SUFFIX}`;
 const SECOND_EMAIL = `sec_${SUFFIX}@example.com`;
-const SECOND_USERNAME = `sec_${SUFFIX}`;
 const ADMIN_EMAIL = `adm_${SUFFIX}@example.com`;
-const ADMIN_USERNAME = `adm_${SUFFIX}`;
 const PASSWORD = 'StrongPass123!';
 const STUDIO_SLUG = `studio-${SUFFIX}`;
 const GAME_SLUG = `game-${SUFFIX}`;
@@ -33,77 +34,72 @@ function cleanEmail(e: string) {
 }
 
 describe('CommentsController (e2e)', () => {
-  let app: TestingModule;
   let httpServer: unknown;
   let prisma: PrismaService;
   let ownerToken: string;
   let secondToken: string;
+  let secondUsername: string;
   let adminToken: string;
   let devlogId: string;
   let draftDevlogId: string;
   let commentId: string;
 
   beforeAll(async () => {
-    app = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', 'apps/api/.env'] }),
-        PrismaModule,
-        UsersModule,
-        AuthModule,
-        StudiosModule,
-        GamesModule,
-        DevlogsModule,
-        CommentsModule,
-        FollowsModule,
-        NotificationsModule,
-      ],
-    }).compile();
-
-    const nestApp = app.createNestApplication();
-    nestApp.setGlobalPrefix('api', { exclude: ['health'] });
-    await nestApp.init();
-    httpServer = nestApp.getHttpServer();
-    prisma = app.get(PrismaService);
+    const result = await createTestApp(
+      Test.createTestingModule({
+        imports: [
+          ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', 'apps/api/.env'] }),
+          PrismaModule,
+          UsersModule,
+          AuthModule,
+          StudiosModule,
+          GamesModule,
+          DevlogsModule,
+          CommentsModule,
+          FollowsModule,
+          NotificationsModule,
+          MockEmailModule,
+          ScheduleModule.forRoot(),
+        ],
+      }),
+    );
+    httpServer = result.httpServer;
+    prisma = result.app.get(PrismaService);
 
     // Register users
-    const ownerRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: OWNER_EMAIL, username: OWNER_USERNAME, displayName: 'Owner', password: PASSWORD });
-    ownerToken = ownerRes.body.accessToken;
+    const owner = await registerTestUser(httpServer, prisma, OWNER_EMAIL, PASSWORD);
+    ownerToken = owner.sessionCookie;
 
-    const secondRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: SECOND_EMAIL, username: SECOND_USERNAME, displayName: 'Second', password: PASSWORD });
-    secondToken = secondRes.body.accessToken;
+    const second = await registerTestUser(httpServer, prisma, SECOND_EMAIL, PASSWORD);
+    secondToken = second.sessionCookie;
+    secondUsername = second.username;
 
-    const adminRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: ADMIN_EMAIL, username: ADMIN_USERNAME, displayName: 'Admin', password: PASSWORD });
-    adminToken = adminRes.body.accessToken;
+    const admin = await registerTestUser(httpServer, prisma, ADMIN_EMAIL, PASSWORD);
+    adminToken = admin.sessionCookie;
     await prisma.user.update({ where: { email: cleanEmail(ADMIN_EMAIL) }, data: { role: 'ADMIN' } });
 
     // Create studio + game
     await request(httpServer)
       .post('/api/studios')
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ name: 'Comment Studio', slug: STUDIO_SLUG });
 
     await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Comment Game', slug: GAME_SLUG });
 
     // Create published devlog
     const pubRes = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/devlogs`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Published Devlog', slug: PUB_DEVLOG_ID, body: 'Public body', isPublished: true });
     devlogId = pubRes.body.id;
 
     // Create draft devlog
     const draftRes = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/devlogs`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Draft Devlog', slug: DRAFT_DEVLOG_ID, body: 'Draft body', isPublished: false });
     draftDevlogId = draftRes.body.id;
   });
@@ -145,20 +141,20 @@ describe('CommentsController (e2e)', () => {
   it('POST /api/devlogs/:devlogId/comments creates top-level comment', async () => {
     const res = await request(httpServer)
       .post(`/api/devlogs/${devlogId}/comments`)
-      .set('Authorization', `Bearer ${secondToken}`)
+      .set('Cookie', `playmorrow_session=${secondToken}`)
       .send({ body: 'This looks amazing!' });
 
     expect(res.status).toBe(HttpStatus.CREATED);
     expect(res.body.body).toBe('This looks amazing!');
     expect(res.body.parentId).toBeNull();
-    expect(res.body.author.username).toBe(SECOND_USERNAME);
+    expect(res.body.author.username).toBe(secondUsername);
     commentId = res.body.id;
   });
 
   it('POST /api/devlogs/:devlogId/comments creates reply with parentId', async () => {
     const res = await request(httpServer)
       .post(`/api/devlogs/${devlogId}/comments`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ body: 'Thanks!', parentId: commentId });
 
     expect(res.status).toBe(HttpStatus.CREATED);
@@ -170,12 +166,12 @@ describe('CommentsController (e2e)', () => {
     const otherSlug = `other-${SUFFIX}`;
     const otherRes = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/devlogs`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Other Devlog', slug: otherSlug, body: 'Other', isPublished: true });
 
     const res = await request(httpServer)
       .post(`/api/devlogs/${otherRes.body.id}/comments`)
-      .set('Authorization', `Bearer ${secondToken}`)
+      .set('Cookie', `playmorrow_session=${secondToken}`)
       .send({ body: 'Wrong place', parentId: commentId });
 
     expect(res.status).toBe(HttpStatus.NOT_FOUND);
@@ -184,7 +180,7 @@ describe('CommentsController (e2e)', () => {
   it('POST /api/devlogs/:devlogId/comments rejects unknown devlog', async () => {
     const res = await request(httpServer)
       .post('/api/devlogs/nonexistent-id/comments')
-      .set('Authorization', `Bearer ${secondToken}`)
+      .set('Cookie', `playmorrow_session=${secondToken}`)
       .send({ body: 'Test' });
     expect(res.status).toBe(HttpStatus.NOT_FOUND);
   });
@@ -201,7 +197,7 @@ describe('CommentsController (e2e)', () => {
   it('PATCH /api/comments/:id rejects non-author', async () => {
     const res = await request(httpServer)
       .patch(`/api/comments/${commentId}`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ body: 'Hacked' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -209,7 +205,7 @@ describe('CommentsController (e2e)', () => {
   it('PATCH /api/comments/:id allows author', async () => {
     const res = await request(httpServer)
       .patch(`/api/comments/${commentId}`)
-      .set('Authorization', `Bearer ${secondToken}`)
+      .set('Cookie', `playmorrow_session=${secondToken}`)
       .send({ body: 'Updated comment text' });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -225,15 +221,12 @@ describe('CommentsController (e2e)', () => {
 
   it('DELETE /api/comments/:id rejects non-author/non-admin/non-studio-admin', async () => {
     // second user created the comment, non-member should not be able to delete
-    const nonUserSlug = `non_${SUFFIX}`;
-    const nonRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: `non_${SUFFIX}@example.com`, username: nonUserSlug, displayName: 'Non', password: PASSWORD });
-    const nonToken = nonRes.body.accessToken;
+    const nonEmail = `non_${SUFFIX}@example.com`;
+    const non = await registerTestUser(httpServer, prisma, nonEmail, PASSWORD);
 
     const res = await request(httpServer)
       .delete(`/api/comments/${commentId}`)
-      .set('Authorization', `Bearer ${nonToken}`);
+      .set('Cookie', `playmorrow_session=${non.sessionCookie}`);
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
 
@@ -241,20 +234,20 @@ describe('CommentsController (e2e)', () => {
     // Create a new comment as author
     const tempRes = await request(httpServer)
       .post(`/api/devlogs/${devlogId}/comments`)
-      .set('Authorization', `Bearer ${secondToken}`)
+      .set('Cookie', `playmorrow_session=${secondToken}`)
       .send({ body: 'Temp comment' });
     const tempId = tempRes.body.id;
 
     const res = await request(httpServer)
       .delete(`/api/comments/${tempId}`)
-      .set('Authorization', `Bearer ${secondToken}`);
+      .set('Cookie', `playmorrow_session=${secondToken}`);
     expect(res.status).toBe(HttpStatus.OK);
   });
 
   it('DELETE /api/comments/:id allows global ADMIN', async () => {
     const res = await request(httpServer)
       .delete(`/api/comments/${commentId}`)
-      .set('Authorization', `Bearer ${adminToken}`);
+      .set('Cookie', `playmorrow_session=${adminToken}`);
     expect(res.status).toBe(HttpStatus.OK);
   });
 
@@ -262,14 +255,14 @@ describe('CommentsController (e2e)', () => {
     // Create a new comment as second user
     const tempRes = await request(httpServer)
       .post(`/api/devlogs/${devlogId}/comments`)
-      .set('Authorization', `Bearer ${secondToken}`)
+      .set('Cookie', `playmorrow_session=${secondToken}`)
       .send({ body: 'Another comment' });
     const tempId = tempRes.body.id;
 
     // Owner should be able to delete (studio OWNER)
     const res = await request(httpServer)
       .delete(`/api/comments/${tempId}`)
-      .set('Authorization', `Bearer ${ownerToken}`);
+      .set('Cookie', `playmorrow_session=${ownerToken}`);
     expect(res.status).toBe(HttpStatus.OK);
   });
 
@@ -277,13 +270,13 @@ describe('CommentsController (e2e)', () => {
     // Create comment, delete it, then check DB
     const tempRes = await request(httpServer)
       .post(`/api/devlogs/${devlogId}/comments`)
-      .set('Authorization', `Bearer ${secondToken}`)
+      .set('Cookie', `playmorrow_session=${secondToken}`)
       .send({ body: 'Soft delete test' });
     const tempId = tempRes.body.id;
 
     await request(httpServer)
       .delete(`/api/comments/${tempId}`)
-      .set('Authorization', `Bearer ${secondToken}`);
+      .set('Cookie', `playmorrow_session=${secondToken}`);
 
     const dbComment = await prisma.comment.findUnique({ where: { id: tempId } });
     expect(dbComment).toBeDefined();
@@ -317,7 +310,7 @@ describe('CommentsController (e2e)', () => {
   it('Cannot reply to a deleted comment', async () => {
     const res = await request(httpServer)
       .post(`/api/devlogs/${devlogId}/comments`)
-      .set('Authorization', `Bearer ${secondToken}`)
+      .set('Cookie', `playmorrow_session=${secondToken}`)
       .send({ body: 'Reply to deleted', parentId: commentId });
     expect(res.status).toBe(HttpStatus.NOT_FOUND);
   });

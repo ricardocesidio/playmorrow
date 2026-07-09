@@ -70,7 +70,7 @@ export default function GameCommentsPage() {
                   <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
                       <Heart className="size-3" />
-                      {c.reactions?.LIKE || 0}
+                      {('reactions' in c ? (c as { reactions?: { LIKE?: number } }).reactions?.LIKE : 0) ?? 0}
                     </span>
                   </div>
                 </div>

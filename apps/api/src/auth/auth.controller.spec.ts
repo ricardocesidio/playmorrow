@@ -8,10 +8,11 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersModule } from '../users/users.module';
 import { AuthModule } from './auth.module';
+import { MockEmailModule } from '../test/mock-email-service';
+import { registerTestUser } from '../test/register-test-user';
 
 const TEST_SUFFIX = `test_${Date.now()}`;
 const TEST_EMAIL = `${TEST_SUFFIX}@example.com`;
-const TEST_USERNAME = `user_${TEST_SUFFIX}`;
 const TEST_PASSWORD = 'StrongPass123!';
 
 function cleanEmail(email: string): string {
@@ -34,6 +35,7 @@ describe('AuthController (e2e)', () => {
         PrismaModule,
         UsersModule,
         AuthModule,
+        MockEmailModule,
       ],
     }).compile();
 
@@ -55,31 +57,25 @@ describe('AuthController (e2e)', () => {
     }
   });
 
-  it('POST /api/auth/register creates a user and returns a token', async () => {
+  it('POST /api/auth/register creates a user and requires email verification', async () => {
     const res = await request(httpServer)
       .post('/api/auth/register')
       .send({
         email: TEST_EMAIL,
-        username: TEST_USERNAME,
-        displayName: 'Test User',
         password: TEST_PASSWORD,
+        acceptedTerms: true,
+        acceptedPrivacy: true,
       });
 
     expect(res.status).toBe(HttpStatus.CREATED);
+    expect(res.body.requiresEmailVerification).toBe(true);
+    expect(res.body.email).toBe(cleanEmail(TEST_EMAIL));
     expect(res.body.user).toBeDefined();
     expect(res.body.user.email).toBe(cleanEmail(TEST_EMAIL));
-    expect(res.body.user.username).toBe(TEST_USERNAME);
-    expect(res.body.user.displayName).toBe('Test User');
-    expect(res.body.user.role).toBe('PLAYER');
-    expect(res.body.accessToken).toBeDefined();
-    expect(typeof res.body.accessToken).toBe('string');
-
-    // Save token for subsequent tests
-    accessToken = res.body.accessToken;
-
-    // Verify passwordHash is never returned
+    expect(typeof res.body.user.username).toBe('string');
+    expect(typeof res.body.user.displayName).toBe('string');
+    expect(res.body.user.emailVerifiedAt).toBeNull();
     expect(res.body.user.passwordHash).toBeUndefined();
-    expect(res.body.passwordHash).toBeUndefined();
   });
 
   it('POST /api/auth/register rejects duplicate email', async () => {
@@ -87,48 +83,42 @@ describe('AuthController (e2e)', () => {
       .post('/api/auth/register')
       .send({
         email: TEST_EMAIL,
-        username: `unique_${TEST_SUFFIX}`,
-        displayName: 'Duplicate Email',
         password: TEST_PASSWORD,
-      });
-
-    expect(res.status).toBe(HttpStatus.CONFLICT);
-  });
-
-  it('POST /api/auth/register rejects duplicate username', async () => {
-    const res = await request(httpServer)
-      .post('/api/auth/register')
-      .send({
-        email: `unique_${TEST_SUFFIX}@example.com`,
-        username: TEST_USERNAME,
-        displayName: 'Duplicate Username',
-        password: TEST_PASSWORD,
+        acceptedTerms: true,
+        acceptedPrivacy: true,
       });
 
     expect(res.status).toBe(HttpStatus.CONFLICT);
   });
 
   it('POST /api/auth/login works with valid credentials (by email)', async () => {
+    // Register + verify + login
+    await request(httpServer)
+      .post('/api/auth/register')
+      .send({ email: TEST_EMAIL, password: TEST_PASSWORD, acceptedTerms: true, acceptedPrivacy: true })
+      .expect(201);
+
+    // Bypass email verification
+    await prisma.user.update({ where: { email: cleanEmail(TEST_EMAIL) }, data: { emailVerifiedAt: new Date() } });
+
     const res = await request(httpServer)
       .post('/api/auth/login')
-      .send({
-        emailOrUsername: TEST_EMAIL,
-        password: TEST_PASSWORD,
-      });
+      .send({ emailOrUsername: TEST_EMAIL, password: TEST_PASSWORD });
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.user.email).toBe(cleanEmail(TEST_EMAIL));
     expect(res.body.accessToken).toBeDefined();
+    accessToken = res.body.accessToken;
     expect(res.body.user.passwordHash).toBeUndefined();
   });
 
   it('POST /api/auth/login works with valid credentials (by username)', async () => {
+    const user = await prisma.user.findUnique({ where: { email: cleanEmail(TEST_EMAIL) } });
+    if (!user) throw new Error('User not found');
+
     const res = await request(httpServer)
       .post('/api/auth/login')
-      .send({
-        emailOrUsername: TEST_USERNAME,
-        password: TEST_PASSWORD,
-      });
+      .send({ emailOrUsername: user.username, password: TEST_PASSWORD });
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.user.email).toBe(cleanEmail(TEST_EMAIL));
@@ -170,32 +160,22 @@ describe('AuthController (e2e)', () => {
   });
 
   it('GET /api/auth/me accepts valid token and returns profile', async () => {
+    if (!accessToken) throw new Error('No access token from login test');
+
     const res = await request(httpServer)
       .get('/api/auth/me')
       .set('Authorization', `Bearer ${accessToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.email).toBe(cleanEmail(TEST_EMAIL));
-    expect(res.body.username).toBe(TEST_USERNAME);
+    expect(typeof res.body.username).toBe('string');
     expect(res.body.role).toBe('PLAYER');
     expect(res.body.passwordHash).toBeUndefined();
   });
 
   it('returned user never includes passwordHash', async () => {
-    // Register a second user to verify
     const email2 = `nohash_${TEST_SUFFIX}@example.com`;
-    const username2 = `nohash_${TEST_SUFFIX}`;
-
-    const registerRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({
-        email: email2,
-        username: username2,
-        displayName: 'No Hash Test',
-        password: TEST_PASSWORD,
-      });
-
-    expect(registerRes.body.user.passwordHash).toBeUndefined();
+    const user = await registerTestUser(httpServer, prisma, email2, TEST_PASSWORD);
 
     const loginRes = await request(httpServer)
       .post('/api/auth/login')
@@ -205,7 +185,7 @@ describe('AuthController (e2e)', () => {
 
     const meRes = await request(httpServer)
       .get('/api/auth/me')
-      .set('Authorization', `Bearer ${loginRes.body.accessToken}`);
+      .set('Authorization', `Bearer ${user.accessToken}`);
 
     expect(meRes.body.passwordHash).toBeUndefined();
   });

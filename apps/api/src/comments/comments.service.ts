@@ -139,9 +139,24 @@ export class CommentsService {
     }
 
     const comments = await this.prisma.comment.findMany({
-      where: { devlogId },
+      where: { devlogId, parentId: null },
       include: {
         author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+        replies: {
+          include: {
+            author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+            replies: {
+              include: {
+                author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+                replies: {
+                  include: {
+                    author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       orderBy: { createdAt: 'asc' },
     });
@@ -294,7 +309,8 @@ export class CommentsService {
     createdAt: Date;
     updatedAt: Date;
     author: { id: string; username: string; displayName: string; avatarUrl: string | null };
-  }) {
+    replies?: any[];
+  }): any {
     if (comment.deletedAt) {
       return {
         id: comment.id,
@@ -303,6 +319,7 @@ export class CommentsService {
         deletedAt: comment.deletedAt.toISOString(),
         parentId: comment.parentId,
         createdAt: comment.createdAt.toISOString(),
+        replies: comment.replies?.map((r) => this.toResponse(r)) ?? [],
       };
     }
 
@@ -319,6 +336,7 @@ export class CommentsService {
       },
       createdAt: comment.createdAt.toISOString(),
       updatedAt: comment.updatedAt.toISOString(),
+      replies: comment.replies?.map((r) => this.toResponse(r)) ?? [],
     };
   }
 }

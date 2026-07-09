@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CsrfGuard } from './common/csrf.guard';
+import { CsrfService } from './common/csrf.service';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { CommentsModule } from './comments/comments.module';
@@ -40,6 +43,7 @@ import { PlayerXpModule } from './player-xp/player-xp.module';
     // Global rate limiting (#3): 60 req/min per IP by default. Per-route
     // `@Throttle()` overrides tighten abuse-prone endpoints (auth, comment/
     // reaction creates); `@SkipThrottle()` exempts the health probe.
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
     PrismaModule,
     AuditLogModule,
@@ -68,6 +72,11 @@ import { PlayerXpModule } from './player-xp/player-xp.module';
     PlayerXpModule,
   ],
   controllers: [AppController],
-  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    AppService,
+    CsrfService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: CsrfGuard },
+  ],
 })
 export class AppModule {}

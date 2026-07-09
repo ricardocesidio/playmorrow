@@ -4,6 +4,7 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from '../auth/auth.module';
 import { DevlogsModule } from './devlogs.module';
 import { GamesModule } from '../games/games.module';
@@ -11,16 +12,15 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudiosModule } from '../studios/studios.module';
 import { UsersModule } from '../users/users.module';
+import { MockEmailModule } from '../test/mock-email-service';
+import { registerTestUser } from '../test/register-test-user';
+import { createTestApp } from '../test/create-test-app';
 
 const SUFFIX = `dl_${Date.now()}`;
 const OWNER_EMAIL = `own_${SUFFIX}@example.com`;
-const OWNER_USERNAME = `own_${SUFFIX}`;
 const MEMBER_EMAIL = `mem_${SUFFIX}@example.com`;
-const MEMBER_USERNAME = `mem_${SUFFIX}`;
 const NON_EMAIL = `non_${SUFFIX}@example.com`;
-const NON_USERNAME = `non_${SUFFIX}`;
 const ADMIN_EMAIL = `adm_${SUFFIX}@example.com`;
-const ADMIN_USERNAME = `adm_${SUFFIX}`;
 const PASSWORD = 'StrongPass123!';
 const STUDIO_SLUG = `studio-${SUFFIX}`;
 const GAME_SLUG = `game-${SUFFIX}`;
@@ -39,54 +39,49 @@ describe('DevlogsController (e2e)', () => {
   let memberToken: string;
   let nonToken: string;
   let adminToken: string;
+  let ownerUsername: string;
   let devlogId: string;
   let draftId: string;
 
   beforeAll(async () => {
-    app = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', 'apps/api/.env'] }),
-        PrismaModule,
-        UsersModule,
-        AuthModule,
-        StudiosModule,
-        GamesModule,
-        DevlogsModule,
-      ],
-    }).compile();
-
-    const nestApp = app.createNestApplication();
-    nestApp.setGlobalPrefix('api', { exclude: ['health'] });
-    await nestApp.init();
-    httpServer = nestApp.getHttpServer();
-    prisma = app.get(PrismaService);
+    const result = await createTestApp(
+      Test.createTestingModule({
+        imports: [
+          ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', 'apps/api/.env'] }),
+          PrismaModule,
+          UsersModule,
+          AuthModule,
+          StudiosModule,
+          GamesModule,
+          DevlogsModule,
+          MockEmailModule,
+          ScheduleModule.forRoot(),
+        ],
+      }),
+    );
+    app = result.app;
+    httpServer = result.httpServer;
+    prisma = result.app.get(PrismaService);
 
     // Register users
-    const ownerRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: OWNER_EMAIL, username: OWNER_USERNAME, displayName: 'Owner', password: PASSWORD });
-    ownerToken = ownerRes.body.accessToken;
+    const owner = await registerTestUser(httpServer, prisma, OWNER_EMAIL, PASSWORD);
+    ownerToken = owner.sessionCookie;
+    ownerUsername = owner.username;
 
-    const memberRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: MEMBER_EMAIL, username: MEMBER_USERNAME, displayName: 'Member', password: PASSWORD });
-    memberToken = memberRes.body.accessToken;
+    const member = await registerTestUser(httpServer, prisma, MEMBER_EMAIL, PASSWORD);
+    memberToken = member.sessionCookie;
 
-    const nonRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: NON_EMAIL, username: NON_USERNAME, displayName: 'Non', password: PASSWORD });
-    nonToken = nonRes.body.accessToken;
+    const non = await registerTestUser(httpServer, prisma, NON_EMAIL, PASSWORD);
+    nonToken = non.sessionCookie;
 
-    const adminRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: ADMIN_EMAIL, username: ADMIN_USERNAME, displayName: 'Admin', password: PASSWORD });
-    adminToken = adminRes.body.accessToken;
+    const admin = await registerTestUser(httpServer, prisma, ADMIN_EMAIL, PASSWORD);
+    adminToken = admin.sessionCookie;
     await prisma.user.update({ where: { email: cleanEmail(ADMIN_EMAIL) }, data: { role: 'ADMIN' } });
 
     // Create studio as owner
     await request(httpServer)
       .post('/api/studios')
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ name: 'Devlog Test Studio', slug: STUDIO_SLUG });
 
     // Add member
@@ -101,7 +96,7 @@ describe('DevlogsController (e2e)', () => {
     // Create game as owner
     await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Devlog Test Game', slug: GAME_SLUG });
   });
 
@@ -130,7 +125,7 @@ describe('DevlogsController (e2e)', () => {
   it('POST /api/games/:gameSlug/devlogs rejects non-member with 403', async () => {
     const res = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/devlogs`)
-      .set('Authorization', `Bearer ${nonToken}`)
+      .set('Cookie', `playmorrow_session=${nonToken}`)
       .send({ title: 'Test', slug: 'test-1', body: 'Body' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -138,7 +133,7 @@ describe('DevlogsController (e2e)', () => {
   it('POST /api/games/:gameSlug/devlogs rejects MEMBER role with 403', async () => {
     const res = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/devlogs`)
-      .set('Authorization', `Bearer ${memberToken}`)
+      .set('Cookie', `playmorrow_session=${memberToken}`)
       .send({ title: 'Test', slug: 'test-2', body: 'Body' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -146,12 +141,11 @@ describe('DevlogsController (e2e)', () => {
   it('POST /api/games/:gameSlug/devlogs allows studio OWNER', async () => {
     const res = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/devlogs`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({
         title: 'Combat prototype update',
         slug: DEVLOG_SLUG,
         body: 'This is a long devlog body about the combat prototype update.',
-        coverUrl: 'https://example.com/cover.jpg',
         isPublished: true,
       });
 
@@ -161,14 +155,14 @@ describe('DevlogsController (e2e)', () => {
     expect(res.body.isPublished).toBe(true);
     expect(res.body.publishedAt).toBeTruthy();
     expect(res.body.game.slug).toBe(GAME_SLUG);
-    expect(res.body.author.username).toBe(OWNER_USERNAME);
+    expect(res.body.author.username).toBe(ownerUsername);
     devlogId = res.body.id;
   });
 
   it('POST /api/games/:gameSlug/devlogs allows global ADMIN', async () => {
     const res = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/devlogs`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', `playmorrow_session=${adminToken}`)
       .send({
         title: 'Admin devlog',
         slug: DRAFT_SLUG,
@@ -185,7 +179,7 @@ describe('DevlogsController (e2e)', () => {
   it('POST /api/games/:gameSlug/devlogs rejects unknown game with 404', async () => {
     const res = await request(httpServer)
       .post('/api/games/unknown-game/devlogs')
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Test', slug: 'test-3', body: 'Body' });
     expect(res.status).toBe(HttpStatus.NOT_FOUND);
   });
@@ -193,7 +187,7 @@ describe('DevlogsController (e2e)', () => {
   it('POST /api/games/:gameSlug/devlogs rejects duplicate devlog slug with 409', async () => {
     const res = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/devlogs`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Duplicate', slug: DEVLOG_SLUG, body: 'Body' });
     expect(res.status).toBe(HttpStatus.CONFLICT);
   });
@@ -254,7 +248,7 @@ describe('DevlogsController (e2e)', () => {
   it('GET /api/devlogs/:id returns draft visible to authorized owner', async () => {
     const res = await request(httpServer)
       .get(`/api/devlogs/${draftId}`)
-      .set('Authorization', `Bearer ${ownerToken}`);
+      .set('Cookie', `playmorrow_session=${ownerToken}`);
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.id).toBe(draftId);
     expect(res.body.isPublished).toBe(false);
@@ -272,7 +266,7 @@ describe('DevlogsController (e2e)', () => {
   it('PATCH /api/devlogs/:id rejects non-member with 403', async () => {
     const res = await request(httpServer)
       .patch(`/api/devlogs/${devlogId}`)
-      .set('Authorization', `Bearer ${nonToken}`)
+      .set('Cookie', `playmorrow_session=${nonToken}`)
       .send({ title: 'Hacked' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -280,7 +274,7 @@ describe('DevlogsController (e2e)', () => {
   it('PATCH /api/devlogs/:id rejects MEMBER role with 403', async () => {
     const res = await request(httpServer)
       .patch(`/api/devlogs/${devlogId}`)
-      .set('Authorization', `Bearer ${memberToken}`)
+      .set('Cookie', `playmorrow_session=${memberToken}`)
       .send({ title: 'Hacked' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -288,7 +282,7 @@ describe('DevlogsController (e2e)', () => {
   it('PATCH /api/devlogs/:id allows studio OWNER/ADMIN', async () => {
     const res = await request(httpServer)
       .patch(`/api/devlogs/${devlogId}`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Updated title' });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -298,7 +292,7 @@ describe('DevlogsController (e2e)', () => {
   it('PATCH /api/devlogs/:id allows global ADMIN', async () => {
     const res = await request(httpServer)
       .patch(`/api/devlogs/${devlogId}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', `playmorrow_session=${adminToken}`)
       .send({ title: 'Admin updated' });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -310,7 +304,7 @@ describe('DevlogsController (e2e)', () => {
 
     const res = await request(httpServer)
       .patch(`/api/devlogs/${draftId}`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ isPublished: true });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -321,7 +315,7 @@ describe('DevlogsController (e2e)', () => {
   it('PATCH /api/devlogs/:id can unpublish a devlog', async () => {
     const res = await request(httpServer)
       .patch(`/api/devlogs/${devlogId}`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ isPublished: false });
 
     expect(res.status).toBe(HttpStatus.OK);

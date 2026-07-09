@@ -10,16 +10,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UsersModule } from '../users/users.module';
 import { GamesModule } from './games.module';
 import { StudiosModule } from '../studios/studios.module';
+import { MockEmailModule } from '../test/mock-email-service';
+import { registerTestUser } from '../test/register-test-user';
+import { createTestApp } from '../test/create-test-app';
 
 const SUFFIX = `g_${Date.now()}`;
 const OWNER_EMAIL = `owner_${SUFFIX}@example.com`;
-const OWNER_USERNAME = `owner_${SUFFIX}`;
 const MEMBER_EMAIL = `member_${SUFFIX}@example.com`;
-const MEMBER_USERNAME = `member_${SUFFIX}`;
 const NON_MEMBER_EMAIL = `nonmem_${SUFFIX}@example.com`;
-const NON_MEMBER_USERNAME = `nonmem_${SUFFIX}`;
 const ADMIN_EMAIL = `admin_${SUFFIX}@example.com`;
-const ADMIN_USERNAME = `admin_${SUFFIX}`;
 const PASSWORD = 'StrongPass123!';
 const STUDIO_SLUG = `studio-${SUFFIX}`;
 const GAME_SLUG = `game-${SUFFIX}`;
@@ -38,49 +37,41 @@ describe('GamesController (e2e)', () => {
   let adminToken: string;
 
   beforeAll(async () => {
-    app = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', 'apps/api/.env'] }),
-        PrismaModule,
-        UsersModule,
-        AuthModule,
-        StudiosModule,
-        GamesModule,
-      ],
-    }).compile();
-
-    const nestApp = app.createNestApplication();
-    nestApp.setGlobalPrefix('api', { exclude: ['health'] });
-    await nestApp.init();
-    httpServer = nestApp.getHttpServer();
-    prisma = app.get(PrismaService);
+    const result = await createTestApp(
+      Test.createTestingModule({
+        imports: [
+          ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', 'apps/api/.env'] }),
+          PrismaModule,
+          UsersModule,
+          AuthModule,
+          MockEmailModule,
+          StudiosModule,
+          GamesModule,
+        ],
+      }),
+    );
+    app = result.app;
+    httpServer = result.httpServer;
+    prisma = result.app.get(PrismaService);
 
     // Register users
-    const ownerRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: OWNER_EMAIL, username: OWNER_USERNAME, displayName: 'Owner', password: PASSWORD });
-    ownerToken = ownerRes.body.accessToken;
+    const owner = await registerTestUser(httpServer, prisma, OWNER_EMAIL, PASSWORD);
+    ownerToken = owner.sessionCookie;
 
-    const memberRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: MEMBER_EMAIL, username: MEMBER_USERNAME, displayName: 'Member', password: PASSWORD });
-    memberToken = memberRes.body.accessToken;
+    const member = await registerTestUser(httpServer, prisma, MEMBER_EMAIL, PASSWORD);
+    memberToken = member.sessionCookie;
 
-    const nonRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: NON_MEMBER_EMAIL, username: NON_MEMBER_USERNAME, displayName: 'NonMember', password: PASSWORD });
-    nonMemberToken = nonRes.body.accessToken;
+    const nonMember = await registerTestUser(httpServer, prisma, NON_MEMBER_EMAIL, PASSWORD);
+    nonMemberToken = nonMember.sessionCookie;
 
-    const adminRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: ADMIN_EMAIL, username: ADMIN_USERNAME, displayName: 'Admin', password: PASSWORD });
-    adminToken = adminRes.body.accessToken;
+    const admin = await registerTestUser(httpServer, prisma, ADMIN_EMAIL, PASSWORD);
+    adminToken = admin.sessionCookie;
     await prisma.user.update({ where: { email: cleanEmail(ADMIN_EMAIL) }, data: { role: 'ADMIN' } });
 
     // Create studio as owner
     await request(httpServer)
       .post('/api/studios')
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ name: 'Game Test Studio', slug: STUDIO_SLUG, tagline: 'Studio for game tests' });
 
     // Add member user as MEMBER
@@ -131,7 +122,7 @@ describe('GamesController (e2e)', () => {
   it('POST /api/studios/:studioSlug/games rejects non-member with 403', async () => {
     const res = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
-      .set('Authorization', `Bearer ${nonMemberToken}`)
+      .set('Cookie', `playmorrow_session=${nonMemberToken}`)
       .send({ title: 'Test Game', slug: 'test-game-1' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -139,7 +130,7 @@ describe('GamesController (e2e)', () => {
   it('POST /api/studios/:studioSlug/games rejects MEMBER role with 403', async () => {
     const res = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
-      .set('Authorization', `Bearer ${memberToken}`)
+      .set('Cookie', `playmorrow_session=${memberToken}`)
       .send({ title: 'Test Game', slug: 'test-game-2' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -147,7 +138,7 @@ describe('GamesController (e2e)', () => {
   it('POST /api/studios/:studioSlug/games allows studio OWNER', async () => {
     const res = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({
         title: 'Echoes of the Deep',
         slug: GAME_SLUG,
@@ -212,7 +203,7 @@ describe('GamesController (e2e)', () => {
   it('POST rejects duplicate game slug with 409', async () => {
     const res = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Duplicate Game', slug: GAME_SLUG });
     expect(res.status).toBe(HttpStatus.CONFLICT);
   });
@@ -272,7 +263,7 @@ describe('GamesController (e2e)', () => {
   it('PATCH /api/games/:slug rejects non-member with 403', async () => {
     const res = await request(httpServer)
       .patch(`/api/games/${GAME_SLUG}`)
-      .set('Authorization', `Bearer ${nonMemberToken}`)
+      .set('Cookie', `playmorrow_session=${nonMemberToken}`)
       .send({ title: 'Hacked' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -280,7 +271,7 @@ describe('GamesController (e2e)', () => {
   it('PATCH /api/games/:slug rejects MEMBER role with 403', async () => {
     const res = await request(httpServer)
       .patch(`/api/games/${GAME_SLUG}`)
-      .set('Authorization', `Bearer ${memberToken}`)
+      .set('Cookie', `playmorrow_session=${memberToken}`)
       .send({ title: 'Hacked' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -288,7 +279,7 @@ describe('GamesController (e2e)', () => {
   it('PATCH /api/games/:slug allows studio OWNER', async () => {
     const res = await request(httpServer)
       .patch(`/api/games/${GAME_SLUG}`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Updated Title', tagline: 'Updated tagline', priceCents: 2499 });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -301,7 +292,7 @@ describe('GamesController (e2e)', () => {
   it('PATCH /api/games/:slug allows global ADMIN', async () => {
     const res = await request(httpServer)
       .patch(`/api/games/${GAME_SLUG}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', `playmorrow_session=${adminToken}`)
       .send({ title: 'Admin Updated' });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -312,7 +303,7 @@ describe('GamesController (e2e)', () => {
     // Slug should be immutable; studioId changes are silently ignored (not in DTO)
     const res = await request(httpServer)
       .patch(`/api/games/${GAME_SLUG}`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Final Title' });
 
     expect(res.status).toBe(HttpStatus.OK);

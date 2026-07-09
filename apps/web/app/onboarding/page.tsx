@@ -122,7 +122,7 @@ export default function OnboardingPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { setError('Image too large. Max 5MB.'); return; }
-    setAvatarFile(file);
+
     // Resize to 256x256 before creating data URL to avoid body size issues
     const img = new Image();
     const url = URL.createObjectURL(file);

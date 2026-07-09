@@ -4,6 +4,7 @@ import { Test } from '@nestjs/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from '../auth/auth.module';
 import { CommentsModule } from '../comments/comments.module';
 import { DevlogsModule } from '../devlogs/devlogs.module';
@@ -15,12 +16,12 @@ import { StudiosModule } from '../studios/studios.module';
 import { UsersModule } from '../users/users.module';
 import { ReportsModule } from './reports.module';
 import { createTestApp } from '../test/create-test-app';
+import { MockEmailModule } from '../test/mock-email-service';
+import { registerTestUser } from '../test/register-test-user';
 
 const SUFFIX = `rp${Date.now()}`;
 const USER_EMAIL = `u${SUFFIX}@example.com`;
-const USER_USERNAME = `u${SUFFIX}`;
 const ADMIN_EMAIL = `a${SUFFIX}@example.com`;
-const ADMIN_USERNAME = `a${SUFFIX}`;
 const PASSWORD = 'StrongPass123!';
 const STUDIO_SLUG = `studio-${SUFFIX}`;
 const GAME_SLUG = `game-${SUFFIX}`;
@@ -54,6 +55,8 @@ describe('ReportsController (e2e)', () => {
           CommentsModule,
           ReportsModule,
           NotificationsModule,
+          MockEmailModule,
+          ScheduleModule.forRoot(),
         ],
       }),
     );
@@ -61,41 +64,37 @@ describe('ReportsController (e2e)', () => {
     prisma = result.app.get(PrismaService);
 
     // Register users
-    const userRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: USER_EMAIL, username: USER_USERNAME, displayName: 'User', password: PASSWORD });
-    userToken = userRes.body.accessToken;
+    const user = await registerTestUser(httpServer, prisma, USER_EMAIL, PASSWORD);
+    userToken = user.sessionCookie;
 
-    const adminRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: ADMIN_EMAIL, username: ADMIN_USERNAME, displayName: 'Admin', password: PASSWORD });
-    adminToken = adminRes.body.accessToken;
+    const admin = await registerTestUser(httpServer, prisma, ADMIN_EMAIL, PASSWORD);
+    adminToken = admin.sessionCookie;
     await prisma.user.update({ where: { email: cleanEmail(ADMIN_EMAIL) }, data: { role: 'ADMIN' } });
 
     // Create studio + game
     const studioRes = await request(httpServer)
       .post('/api/studios')
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ name: 'Report Studio', slug: STUDIO_SLUG });
     studioId = studioRes.body.id;
 
     const gameRes = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ title: 'Report Game', slug: GAME_SLUG });
     gameId = gameRes.body.id;
 
     // Create published devlog
     const devlogRes = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/devlogs`)
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ title: 'Report Devlog', slug: `rd-${SUFFIX}`, body: 'Test', isPublished: true });
     devlogId = devlogRes.body.id;
 
     // Create comment
     const commentRes = await request(httpServer)
       .post(`/api/devlogs/${devlogId}/comments`)
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ body: 'Report comment' });
     commentId = commentRes.body.id;
   });
@@ -130,7 +129,7 @@ describe('ReportsController (e2e)', () => {
   it('POST /api/reports rejects invalid reason with 400', async () => {
     const res = await request(httpServer)
       .post('/api/reports')
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ targetType: 'STUDIO', targetId: studioId, reason: 'INVALID_REASON' });
     expect(res.status).toBe(HttpStatus.BAD_REQUEST);
   });
@@ -138,7 +137,7 @@ describe('ReportsController (e2e)', () => {
   it('POST /api/reports rejects invalid targetType with 400', async () => {
     const res = await request(httpServer)
       .post('/api/reports')
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ targetType: 'INVALID_TYPE', targetId: 'x', reason: 'SPAM' });
     expect(res.status).toBe(HttpStatus.BAD_REQUEST);
   });
@@ -146,7 +145,7 @@ describe('ReportsController (e2e)', () => {
   it('POST /api/reports reports studio', async () => {
     const res = await request(httpServer)
       .post('/api/reports')
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ targetType: 'STUDIO', targetId: studioId, reason: 'SPAM', details: 'This studio is spam' });
 
     expect(res.status).toBe(HttpStatus.CREATED);
@@ -160,7 +159,7 @@ describe('ReportsController (e2e)', () => {
   it('POST /api/reports reports game', async () => {
     const res = await request(httpServer)
       .post('/api/reports')
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ targetType: 'GAME', targetId: gameId, reason: 'MISLEADING' });
 
     expect(res.status).toBe(HttpStatus.CREATED);
@@ -170,7 +169,7 @@ describe('ReportsController (e2e)', () => {
   it('POST /api/reports reports devlog', async () => {
     const res = await request(httpServer)
       .post('/api/reports')
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ targetType: 'DEVLOG', targetId: devlogId, reason: 'VIOLENCE' });
 
     expect(res.status).toBe(HttpStatus.CREATED);
@@ -180,7 +179,7 @@ describe('ReportsController (e2e)', () => {
   it('POST /api/reports reports comment', async () => {
     const res = await request(httpServer)
       .post('/api/reports')
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ targetType: 'COMMENT', targetId: commentId, reason: 'HARASSMENT' });
 
     expect(res.status).toBe(HttpStatus.CREATED);
@@ -190,7 +189,7 @@ describe('ReportsController (e2e)', () => {
   it('POST /api/reports rejects missing target', async () => {
     const res = await request(httpServer)
       .post('/api/reports')
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ targetType: 'STUDIO', targetId: 'nonexistent-id', reason: 'SPAM' });
     expect(res.status).toBe(HttpStatus.NOT_FOUND);
   });
@@ -198,7 +197,7 @@ describe('ReportsController (e2e)', () => {
   it('POST /api/reports reports duplicate returns 409', async () => {
     const res = await request(httpServer)
       .post('/api/reports')
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ targetType: 'STUDIO', targetId: studioId, reason: 'SPAM' });
     expect(res.status).toBe(HttpStatus.CONFLICT);
   });
@@ -213,14 +212,14 @@ describe('ReportsController (e2e)', () => {
   it('GET /api/admin/reports rejects non-admin', async () => {
     const res = await request(httpServer)
       .get('/api/admin/reports')
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
 
   it('GET /api/admin/reports allows global ADMIN', async () => {
     const res = await request(httpServer)
       .get('/api/admin/reports')
-      .set('Authorization', `Bearer ${adminToken}`);
+      .set('Cookie', `playmorrow_session=${adminToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.items.length).toBeGreaterThanOrEqual(4);
@@ -229,7 +228,7 @@ describe('ReportsController (e2e)', () => {
   it('GET /api/admin/reports/:id allows global ADMIN', async () => {
     const res = await request(httpServer)
       .get(`/api/admin/reports/${reportId}`)
-      .set('Authorization', `Bearer ${adminToken}`);
+      .set('Cookie', `playmorrow_session=${adminToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.id).toBe(reportId);
@@ -241,7 +240,7 @@ describe('ReportsController (e2e)', () => {
   it('PATCH /api/admin/reports/:id rejects non-admin', async () => {
     const res = await request(httpServer)
       .patch(`/api/admin/reports/${reportId}`)
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ status: 'RESOLVED' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -249,7 +248,7 @@ describe('ReportsController (e2e)', () => {
   it('PATCH /api/admin/reports/:id updates status', async () => {
     const res = await request(httpServer)
       .patch(`/api/admin/reports/${reportId}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', `playmorrow_session=${adminToken}`)
       .send({ status: 'RESOLVED' });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -259,7 +258,7 @@ describe('ReportsController (e2e)', () => {
   it('PATCH /api/admin/reports/:id persists a resolutionNote (#8)', async () => {
     const res = await request(httpServer)
       .patch(`/api/admin/reports/${reportId}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', `playmorrow_session=${adminToken}`)
       .send({ status: 'DISMISSED', resolutionNote: 'Reviewed — not a violation.' });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -269,14 +268,14 @@ describe('ReportsController (e2e)', () => {
     // Persisted and surfaced on the detail endpoint.
     const detail = await request(httpServer)
       .get(`/api/admin/reports/${reportId}`)
-      .set('Authorization', `Bearer ${adminToken}`);
+      .set('Cookie', `playmorrow_session=${adminToken}`);
     expect(detail.body.resolutionNote).toBe('Reviewed — not a violation.');
   });
 
   it('PATCH /api/admin/reports/:id clears resolutionNote when reopened (#8)', async () => {
     const res = await request(httpServer)
       .patch(`/api/admin/reports/${reportId}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', `playmorrow_session=${adminToken}`)
       .send({ status: 'OPEN' });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -287,7 +286,7 @@ describe('ReportsController (e2e)', () => {
   it('PATCH /api/admin/reports/:missing returns 404', async () => {
     const res = await request(httpServer)
       .patch('/api/admin/reports/nonexistent')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', `playmorrow_session=${adminToken}`)
       .send({ status: 'DISMISSED' });
     expect(res.status).toBe(HttpStatus.NOT_FOUND);
   });
@@ -295,7 +294,7 @@ describe('ReportsController (e2e)', () => {
   it('Response never exposes passwordHash', async () => {
     const res = await request(httpServer)
       .get('/api/admin/reports')
-      .set('Authorization', `Bearer ${adminToken}`);
+      .set('Cookie', `playmorrow_session=${adminToken}`);
     expect(res.body.passwordHash).toBeUndefined();
   });
 });

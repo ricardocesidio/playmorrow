@@ -1,5 +1,8 @@
 # Documentation & Dev-Experience issues (30–34)
 
+> **Historical document** (pre-DevlogV2, 2026-06-28). Many issues listed here have been resolved.
+> See [`STATUS.md`](../../STATUS.md) → Outstanding Work for current open issues.
+
 Catalogue for tooling, environment, and contributor experience. See
 [`HANDOFF.md`](./HANDOFF.md) for repo orientation and execution order.
 

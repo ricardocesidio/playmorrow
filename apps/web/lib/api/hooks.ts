@@ -653,7 +653,6 @@ export function useCreateDevlog() {
       title: string;
       slug: string;
       body: string;
-      coverUrl?: string;
       isPublished?: boolean;
       publishedAt?: string;
       status?: string;

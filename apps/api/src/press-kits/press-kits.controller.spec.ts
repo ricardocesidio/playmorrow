@@ -11,16 +11,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StudiosModule } from '../studios/studios.module';
 import { UsersModule } from '../users/users.module';
 import { PressKitsModule } from './press-kits.module';
+import { MockEmailModule } from '../test/mock-email-service';
+import { registerTestUser } from '../test/register-test-user';
+import { createTestApp } from '../test/create-test-app';
 
 const SUFFIX = `pk_${Date.now()}`;
 const OWNER_EMAIL = `own_${SUFFIX}@example.com`;
-const OWNER_USERNAME = `own_${SUFFIX}`;
 const MEMBER_EMAIL = `mem_${SUFFIX}@example.com`;
-const MEMBER_USERNAME = `mem_${SUFFIX}`;
 const NON_EMAIL = `non_${SUFFIX}@example.com`;
-const NON_USERNAME = `non_${SUFFIX}`;
 const ADMIN_EMAIL = `adm_${SUFFIX}@example.com`;
-const ADMIN_USERNAME = `adm_${SUFFIX}`;
 const PASSWORD = 'StrongPass123!';
 const STUDIO_SLUG = `studio-${SUFFIX}`;
 const GAME_SLUG = `game-${SUFFIX}`;
@@ -39,48 +38,40 @@ describe('PressKitsController (e2e)', () => {
   let adminToken: string;
 
   beforeAll(async () => {
-    app = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', 'apps/api/.env'] }),
-        PrismaModule,
-        UsersModule,
-        AuthModule,
-        StudiosModule,
-        GamesModule,
-        PressKitsModule,
-      ],
-    }).compile();
+    const result = await createTestApp(
+      Test.createTestingModule({
+        imports: [
+          ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', 'apps/api/.env'] }),
+          PrismaModule,
+          UsersModule,
+          AuthModule,
+          StudiosModule,
+          GamesModule,
+          PressKitsModule,
+          MockEmailModule,
+        ],
+      }),
+    );
+    app = result.app;
+    httpServer = result.httpServer;
+    prisma = result.app.get(PrismaService);
 
-    const nestApp = app.createNestApplication();
-    nestApp.setGlobalPrefix('api', { exclude: ['health'] });
-    await nestApp.init();
-    httpServer = nestApp.getHttpServer();
-    prisma = app.get(PrismaService);
+    const owner = await registerTestUser(httpServer, prisma, OWNER_EMAIL, PASSWORD);
+    ownerToken = owner.sessionCookie;
 
-    const ownerRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: OWNER_EMAIL, username: OWNER_USERNAME, displayName: 'Owner', password: PASSWORD });
-    ownerToken = ownerRes.body.accessToken;
+    const member = await registerTestUser(httpServer, prisma, MEMBER_EMAIL, PASSWORD);
+    memberToken = member.sessionCookie;
 
-    const memberRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: MEMBER_EMAIL, username: MEMBER_USERNAME, displayName: 'Member', password: PASSWORD });
-    memberToken = memberRes.body.accessToken;
+    const non = await registerTestUser(httpServer, prisma, NON_EMAIL, PASSWORD);
+    nonToken = non.sessionCookie;
 
-    const nonRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: NON_EMAIL, username: NON_USERNAME, displayName: 'Non', password: PASSWORD });
-    nonToken = nonRes.body.accessToken;
-
-    const adminRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: ADMIN_EMAIL, username: ADMIN_USERNAME, displayName: 'Admin', password: PASSWORD });
-    adminToken = adminRes.body.accessToken;
+    const admin = await registerTestUser(httpServer, prisma, ADMIN_EMAIL, PASSWORD);
+    adminToken = admin.sessionCookie;
     await prisma.user.update({ where: { email: cleanEmail(ADMIN_EMAIL) }, data: { role: 'ADMIN' } });
 
     await request(httpServer)
       .post('/api/studios')
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ name: 'PK Test Studio', slug: STUDIO_SLUG });
 
     const studioRec = await prisma.studio.findUnique({ where: { slug: STUDIO_SLUG } });
@@ -93,7 +84,7 @@ describe('PressKitsController (e2e)', () => {
 
     await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({
         title: 'PK Test Game',
         slug: GAME_SLUG,
@@ -132,7 +123,7 @@ describe('PressKitsController (e2e)', () => {
   it('PUT rejects non-member with 403', async () => {
     const res = await request(httpServer)
       .put(`/api/games/${GAME_SLUG}/press-kit`)
-      .set('Authorization', `Bearer ${nonToken}`)
+      .set('Cookie', `playmorrow_session=${nonToken}`)
       .send({ headline: 'Test' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -140,7 +131,7 @@ describe('PressKitsController (e2e)', () => {
   it('PUT rejects MEMBER role with 403', async () => {
     const res = await request(httpServer)
       .put(`/api/games/${GAME_SLUG}/press-kit`)
-      .set('Authorization', `Bearer ${memberToken}`)
+      .set('Cookie', `playmorrow_session=${memberToken}`)
       .send({ headline: 'Test' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -148,7 +139,7 @@ describe('PressKitsController (e2e)', () => {
   it('PUT allows studio OWNER', async () => {
     const res = await request(httpServer)
       .put(`/api/games/${GAME_SLUG}/press-kit`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({
         headline: 'A hand-painted exploration game',
         factSheet: { developer: 'Moonlit Forge', releaseDate: 'Q4 2026', platforms: ['PC'] },
@@ -170,7 +161,7 @@ describe('PressKitsController (e2e)', () => {
   it('PUT allows global ADMIN', async () => {
     const res = await request(httpServer)
       .put(`/api/games/${GAME_SLUG}/press-kit`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', `playmorrow_session=${adminToken}`)
       .send({ headline: 'Admin headline' });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -180,7 +171,7 @@ describe('PressKitsController (e2e)', () => {
   it('PUT rejects unknown game with 404', async () => {
     const res = await request(httpServer)
       .put('/api/games/unknown-game/press-kit')
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ headline: 'Test' });
     expect(res.status).toBe(HttpStatus.NOT_FOUND);
   });
@@ -190,12 +181,12 @@ describe('PressKitsController (e2e)', () => {
     const game2Slug = `game2-${SUFFIX}`;
     await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Second Game', slug: game2Slug });
 
     const res = await request(httpServer)
       .put(`/api/games/${game2Slug}/press-kit`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ headline: 'Brand new press kit' });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -205,7 +196,7 @@ describe('PressKitsController (e2e)', () => {
   it('PUT updates existing press kit idempotently', async () => {
     const res = await request(httpServer)
       .put(`/api/games/${GAME_SLUG}/press-kit`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({
         headline: 'Updated headline',
         contactEmail: 'updated@example.com',
@@ -255,7 +246,7 @@ describe('PressKitsController (e2e)', () => {
     const noPkSlug = `no-pk-${SUFFIX}`;
     await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'No PK Game', slug: noPkSlug });
 
     const res = await request(httpServer).get(`/api/games/${noPkSlug}/press-kit`);

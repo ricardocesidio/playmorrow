@@ -11,16 +11,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StudiosModule } from '../studios/studios.module';
 import { UsersModule } from '../users/users.module';
 import { RoadmapItemsModule } from './roadmap-items.module';
+import { MockEmailModule } from '../test/mock-email-service';
+import { registerTestUser } from '../test/register-test-user';
+import { createTestApp } from '../test/create-test-app';
 
 const SUFFIX = `rm_${Date.now()}`;
 const OWNER_EMAIL = `own_${SUFFIX}@example.com`;
-const OWNER_USERNAME = `own_${SUFFIX}`;
 const MEMBER_EMAIL = `mem_${SUFFIX}@example.com`;
-const MEMBER_USERNAME = `mem_${SUFFIX}`;
 const NON_EMAIL = `non_${SUFFIX}@example.com`;
-const NON_USERNAME = `non_${SUFFIX}`;
 const ADMIN_EMAIL = `adm_${SUFFIX}@example.com`;
-const ADMIN_USERNAME = `adm_${SUFFIX}`;
 const PASSWORD = 'StrongPass123!';
 const STUDIO_SLUG = `studio-${SUFFIX}`;
 const GAME_SLUG = `game-${SUFFIX}`;
@@ -40,50 +39,42 @@ describe('RoadmapItemsController (e2e)', () => {
   let itemId: string;
 
   beforeAll(async () => {
-    app = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', 'apps/api/.env'] }),
-        PrismaModule,
-        UsersModule,
-        AuthModule,
-        StudiosModule,
-        GamesModule,
-        RoadmapItemsModule,
-      ],
-    }).compile();
-
-    const nestApp = app.createNestApplication();
-    nestApp.setGlobalPrefix('api', { exclude: ['health'] });
-    await nestApp.init();
-    httpServer = nestApp.getHttpServer();
-    prisma = app.get(PrismaService);
+    const result = await createTestApp(
+      Test.createTestingModule({
+        imports: [
+          ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', 'apps/api/.env'] }),
+          PrismaModule,
+          UsersModule,
+          AuthModule,
+          StudiosModule,
+          GamesModule,
+          RoadmapItemsModule,
+          MockEmailModule,
+        ],
+      }),
+    );
+    app = result.app;
+    httpServer = result.httpServer;
+    prisma = result.app.get(PrismaService);
 
     // Register users
-    const ownerRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: OWNER_EMAIL, username: OWNER_USERNAME, displayName: 'Owner', password: PASSWORD });
-    ownerToken = ownerRes.body.accessToken;
+    const owner = await registerTestUser(httpServer, prisma, OWNER_EMAIL, PASSWORD);
+    ownerToken = owner.sessionCookie;
 
-    const memberRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: MEMBER_EMAIL, username: MEMBER_USERNAME, displayName: 'Member', password: PASSWORD });
-    memberToken = memberRes.body.accessToken;
+    const member = await registerTestUser(httpServer, prisma, MEMBER_EMAIL, PASSWORD);
+    memberToken = member.sessionCookie;
 
-    const nonRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: NON_EMAIL, username: NON_USERNAME, displayName: 'Non', password: PASSWORD });
-    nonToken = nonRes.body.accessToken;
+    const non = await registerTestUser(httpServer, prisma, NON_EMAIL, PASSWORD);
+    nonToken = non.sessionCookie;
 
-    const adminRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: ADMIN_EMAIL, username: ADMIN_USERNAME, displayName: 'Admin', password: PASSWORD });
-    adminToken = adminRes.body.accessToken;
+    const admin = await registerTestUser(httpServer, prisma, ADMIN_EMAIL, PASSWORD);
+    adminToken = admin.sessionCookie;
     await prisma.user.update({ where: { email: cleanEmail(ADMIN_EMAIL) }, data: { role: 'ADMIN' } });
 
     // Create studio as owner
     await request(httpServer)
       .post('/api/studios')
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ name: 'Roadmap Test Studio', slug: STUDIO_SLUG });
 
     // Add member user as MEMBER
@@ -98,7 +89,7 @@ describe('RoadmapItemsController (e2e)', () => {
     // Create game as owner
     await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Roadmap Test Game', slug: GAME_SLUG });
   });
 
@@ -129,7 +120,7 @@ describe('RoadmapItemsController (e2e)', () => {
   it('POST /api/games/:gameSlug/roadmap rejects non-member with 403', async () => {
     const res = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/roadmap`)
-      .set('Authorization', `Bearer ${nonToken}`)
+      .set('Cookie', `playmorrow_session=${nonToken}`)
       .send({ title: 'Item' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -137,7 +128,7 @@ describe('RoadmapItemsController (e2e)', () => {
   it('POST /api/games/:gameSlug/roadmap rejects MEMBER role with 403', async () => {
     const res = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/roadmap`)
-      .set('Authorization', `Bearer ${memberToken}`)
+      .set('Cookie', `playmorrow_session=${memberToken}`)
       .send({ title: 'Item' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -145,7 +136,7 @@ describe('RoadmapItemsController (e2e)', () => {
   it('POST /api/games/:gameSlug/roadmap allows studio OWNER', async () => {
     const res = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/roadmap`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({
         title: 'Public demo',
         description: 'Release a playable demo',
@@ -168,7 +159,7 @@ describe('RoadmapItemsController (e2e)', () => {
   it('POST /api/games/:gameSlug/roadmap allows global ADMIN', async () => {
     const res = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/roadmap`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', `playmorrow_session=${adminToken}`)
       .send({ title: 'Admin item', status: 'IN_PROGRESS', position: 1 });
 
     expect(res.status).toBe(HttpStatus.CREATED);
@@ -179,7 +170,7 @@ describe('RoadmapItemsController (e2e)', () => {
   it('POST /api/games/:gameSlug/roadmap rejects unknown game with 404', async () => {
     const res = await request(httpServer)
       .post('/api/games/unknown-game/roadmap')
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Item' });
     expect(res.status).toBe(HttpStatus.NOT_FOUND);
   });
@@ -228,7 +219,7 @@ describe('RoadmapItemsController (e2e)', () => {
   it('PATCH /api/roadmap-items/:id rejects non-member with 403', async () => {
     const res = await request(httpServer)
       .patch(`/api/roadmap-items/${itemId}`)
-      .set('Authorization', `Bearer ${nonToken}`)
+      .set('Cookie', `playmorrow_session=${nonToken}`)
       .send({ title: 'Hacked' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -236,7 +227,7 @@ describe('RoadmapItemsController (e2e)', () => {
   it('PATCH /api/roadmap-items/:id rejects MEMBER role with 403', async () => {
     const res = await request(httpServer)
       .patch(`/api/roadmap-items/${itemId}`)
-      .set('Authorization', `Bearer ${memberToken}`)
+      .set('Cookie', `playmorrow_session=${memberToken}`)
       .send({ title: 'Hacked' });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
@@ -244,7 +235,7 @@ describe('RoadmapItemsController (e2e)', () => {
   it('PATCH /api/roadmap-items/:id allows studio OWNER/ADMIN', async () => {
     const res = await request(httpServer)
       .patch(`/api/roadmap-items/${itemId}`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ title: 'Updated demo' });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -254,7 +245,7 @@ describe('RoadmapItemsController (e2e)', () => {
   it('PATCH /api/roadmap-items/:id allows global ADMIN', async () => {
     const res = await request(httpServer)
       .patch(`/api/roadmap-items/${itemId}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', `playmorrow_session=${adminToken}`)
       .send({ title: 'Admin updated' });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -264,7 +255,7 @@ describe('RoadmapItemsController (e2e)', () => {
   it('PATCH /api/roadmap-items/:id updates status', async () => {
     const res = await request(httpServer)
       .patch(`/api/roadmap-items/${itemId}`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ status: 'DONE' });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -274,7 +265,7 @@ describe('RoadmapItemsController (e2e)', () => {
   it('PATCH /api/roadmap-items/:id updates ordering field', async () => {
     const res = await request(httpServer)
       .patch(`/api/roadmap-items/${itemId}`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ position: 5 });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -296,7 +287,7 @@ describe('RoadmapItemsController (e2e)', () => {
 
     const res = await request(httpServer)
       .patch(`/api/games/${GAME_SLUG}/roadmap/reorder`)
-      .set('Authorization', `Bearer ${ownerToken}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
       .send({ items: reorderPayload });
 
     expect(res.status).toBe(HttpStatus.OK);
@@ -313,7 +304,7 @@ describe('RoadmapItemsController (e2e)', () => {
   it('PATCH /api/games/:gameSlug/roadmap/reorder rejects non-member with 403', async () => {
     const res = await request(httpServer)
       .patch(`/api/games/${GAME_SLUG}/roadmap/reorder`)
-      .set('Authorization', `Bearer ${nonToken}`)
+      .set('Cookie', `playmorrow_session=${nonToken}`)
       .send({ items: [] });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });

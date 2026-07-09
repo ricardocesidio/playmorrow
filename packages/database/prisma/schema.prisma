@@ -618,6 +618,7 @@ model Comment {
   gameId    String?
   authorId  String
   body      String
+  type      String    @default("REPLY")
   /// Self-relation for threaded replies.
   parentId  String?
   createdAt DateTime  @default(now())

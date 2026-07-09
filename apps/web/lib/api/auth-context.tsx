@@ -86,9 +86,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (emailOrUsername: string, password: string) => {
     try {
-      const u = await api.post<AuthUser>('/auth/session/login', { emailOrUsername, password });
-      setUser(u);
-      return u;
+      const res = await api.post<AuthUser & { csrfToken?: string }>('/auth/session/login', { emailOrUsername, password });
+      if (res.csrfToken) {
+        document.cookie = `playmorrow_csrf=${res.csrfToken}; path=/; sameSite=lax; maxAge=${60 * 60 * 24}`;
+      }
+      const { csrfToken: _, ...user } = res;
+      setUser(user);
+      return user;
     } catch (err) {
       if (err instanceof ApiError) {
         const body = err.body as Record<string, unknown> | undefined;
@@ -135,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try { await api.post('/auth/session/logout'); } catch { /* ignore */ }
+    document.cookie = 'playmorrow_csrf=; path=/; maxAge=0';
     setUser(null);
   }, []);
 

@@ -12,12 +12,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StudiosModule } from '../studios/studios.module';
 import { UsersModule } from '../users/users.module';
 import { FollowsModule } from './follows.module';
+import { MockEmailModule } from '../test/mock-email-service';
+import { registerTestUser } from '../test/register-test-user';
+import { createTestApp } from '../test/create-test-app';
 
 const SUFFIX = `fw_${Date.now()}`;
 const USER_EMAIL = `usr_${SUFFIX}@example.com`;
-const USER_USERNAME = `usr_${SUFFIX}`;
 const USER2_EMAIL = `usr2_${SUFFIX}@example.com`;
-const USER2_USERNAME = `usr2_${SUFFIX}`;
 const PASSWORD = 'StrongPass123!';
 const STUDIO_SLUG = `studio-${SUFFIX}`;
 const GAME_SLUG = `game-${SUFFIX}`;
@@ -27,54 +28,47 @@ function cleanEmail(e: string) {
 }
 
 describe('FollowsController (e2e)', () => {
-  let app: TestingModule;
   let httpServer: unknown;
   let prisma: PrismaService;
   let userToken: string;
   let user2Token: string;
 
   beforeAll(async () => {
-    app = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', 'apps/api/.env'] }),
-        PrismaModule,
-        UsersModule,
-        AuthModule,
-        StudiosModule,
-        GamesModule,
-        FollowsModule,
-        NotificationsModule,
-      ],
-    }).compile();
+    const result = await createTestApp(
+      Test.createTestingModule({
+        imports: [
+          ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', 'apps/api/.env'] }),
+          PrismaModule,
+          UsersModule,
+          AuthModule,
+          StudiosModule,
+          GamesModule,
+          FollowsModule,
+          NotificationsModule,
+          MockEmailModule,
+        ],
+      }),
+    );
+    httpServer = result.httpServer;
+    prisma = result.app.get(PrismaService);
 
-    const nestApp = app.createNestApplication();
-    nestApp.setGlobalPrefix('api', { exclude: ['health'] });
-    await nestApp.init();
-    httpServer = nestApp.getHttpServer();
-    prisma = app.get(PrismaService);
+    // Register users
+    const user = await registerTestUser(httpServer, prisma, USER_EMAIL, PASSWORD);
+    userToken = user.sessionCookie;
 
-    // Register user
-    const userRes = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: USER_EMAIL, username: USER_USERNAME, displayName: 'User', password: PASSWORD });
-    userToken = userRes.body.accessToken;
-
-    // Register second user
-    const user2Res = await request(httpServer)
-      .post('/api/auth/register')
-      .send({ email: USER2_EMAIL, username: USER2_USERNAME, displayName: 'User2', password: PASSWORD });
-    user2Token = user2Res.body.accessToken;
+    const user2 = await registerTestUser(httpServer, prisma, USER2_EMAIL, PASSWORD);
+    user2Token = user2.sessionCookie;
 
     // Create studio as owner
     await request(httpServer)
       .post('/api/studios')
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ name: 'Follow Test Studio', slug: STUDIO_SLUG });
 
     // Create game as owner
     await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', `playmorrow_session=${userToken}`)
       .send({ title: 'Follow Test Game', slug: GAME_SLUG });
   });
 
@@ -105,7 +99,7 @@ describe('FollowsController (e2e)', () => {
   it('POST /api/studios/:slug/follow follows studio', async () => {
     const res = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/follow`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.targetType).toBe('STUDIO');
@@ -116,7 +110,7 @@ describe('FollowsController (e2e)', () => {
   it('POST /api/studios/:slug/follow is idempotent', async () => {
     const res = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/follow`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.isFollowing).toBe(true);
@@ -126,7 +120,7 @@ describe('FollowsController (e2e)', () => {
   it('DELETE /api/studios/:slug/follow unfollows studio', async () => {
     const res = await request(httpServer)
       .delete(`/api/studios/${STUDIO_SLUG}/follow`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.targetType).toBe('STUDIO');
@@ -137,7 +131,7 @@ describe('FollowsController (e2e)', () => {
   it('DELETE /api/studios/:slug/follow is idempotent', async () => {
     const res = await request(httpServer)
       .delete(`/api/studios/${STUDIO_SLUG}/follow`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.isFollowing).toBe(false);
@@ -147,7 +141,7 @@ describe('FollowsController (e2e)', () => {
   it('POST /api/studios/:missing/follow returns 404', async () => {
     const res = await request(httpServer)
       .post('/api/studios/unknown-studio/follow')
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
     expect(res.status).toBe(HttpStatus.NOT_FOUND);
   });
 
@@ -165,11 +159,11 @@ describe('FollowsController (e2e)', () => {
     // Follow first
     await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/follow`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
 
     const res = await request(httpServer)
       .get(`/api/studios/${STUDIO_SLUG}/follow-status`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.isFollowing).toBe(true);
@@ -186,7 +180,7 @@ describe('FollowsController (e2e)', () => {
   it('POST /api/games/:slug/follow follows game', async () => {
     const res = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/follow`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.targetType).toBe('GAME');
@@ -197,7 +191,7 @@ describe('FollowsController (e2e)', () => {
   it('POST /api/games/:slug/follow is idempotent', async () => {
     const res = await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/follow`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.isFollowing).toBe(true);
@@ -207,7 +201,7 @@ describe('FollowsController (e2e)', () => {
   it('DELETE /api/games/:slug/follow unfollows game', async () => {
     const res = await request(httpServer)
       .delete(`/api/games/${GAME_SLUG}/follow`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.targetType).toBe('GAME');
@@ -218,7 +212,7 @@ describe('FollowsController (e2e)', () => {
   it('DELETE /api/games/:slug/follow is idempotent', async () => {
     const res = await request(httpServer)
       .delete(`/api/games/${GAME_SLUG}/follow`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.isFollowing).toBe(false);
@@ -228,7 +222,7 @@ describe('FollowsController (e2e)', () => {
   it('POST /api/games/:missing/follow returns 404', async () => {
     const res = await request(httpServer)
       .post('/api/games/unknown-game/follow')
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
     expect(res.status).toBe(HttpStatus.NOT_FOUND);
   });
 
@@ -246,11 +240,11 @@ describe('FollowsController (e2e)', () => {
     // Follow first
     await request(httpServer)
       .post(`/api/games/${GAME_SLUG}/follow`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
 
     const res = await request(httpServer)
       .get(`/api/games/${GAME_SLUG}/follow-status`)
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.isFollowing).toBe(true);
@@ -268,7 +262,7 @@ describe('FollowsController (e2e)', () => {
     // User should have followed studio + game from previous tests
     const res = await request(httpServer)
       .get('/api/me/follows')
-      .set('Authorization', `Bearer ${userToken}`);
+      .set('Cookie', `playmorrow_session=${userToken}`);
 
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.studios.length).toBeGreaterThanOrEqual(1);
@@ -283,7 +277,7 @@ describe('FollowsController (e2e)', () => {
   it('Follow responses never expose passwordHash', async () => {
     const followRes = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/follow`)
-      .set('Authorization', `Bearer ${user2Token}`);
+      .set('Cookie', `playmorrow_session=${user2Token}`);
     expect(followRes.body.passwordHash).toBeUndefined();
 
     const statusRes = await request(httpServer)
@@ -292,7 +286,7 @@ describe('FollowsController (e2e)', () => {
 
     const myRes = await request(httpServer)
       .get('/api/me/follows')
-      .set('Authorization', `Bearer ${user2Token}`);
+      .set('Cookie', `playmorrow_session=${user2Token}`);
     expect(myRes.body.passwordHash).toBeUndefined();
   });
 

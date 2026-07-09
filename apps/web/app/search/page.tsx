@@ -145,11 +145,7 @@ export default function SearchPage() {
                         href={`/devlogs/${d.id}`}
                         className="clip-corner flex items-center gap-3 border border-border/70 bg-[#050b0f]/80 p-3 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-colors hover:border-cyan/30"
                       >
-                        {d.coverUrl ? (
-                          <img src={d.coverUrl} alt="" className="size-12 border border-border/60 object-cover" />
-                        ) : (
-                          <div className="flex size-12 items-center justify-center border border-border/60 bg-[#050b0f]/50 font-mono text-[0.55rem] uppercase text-muted-foreground">No cover</div>
-                        )}
+                        <div className="flex size-12 items-center justify-center border border-border/60 bg-[#050b0f]/50 font-mono text-[0.55rem] uppercase text-muted-foreground">Devlog</div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-display font-semibold text-white">{d.title}</p>
                           <p className="font-mono text-[0.55rem] text-muted-foreground/60">{d.game.title}</p>

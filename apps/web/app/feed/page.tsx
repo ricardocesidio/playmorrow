@@ -12,6 +12,7 @@ import {
   Hexagon,
   MessageCircle,
   Play,
+  Radio,
   Zap,
 } from 'lucide-react';
 
