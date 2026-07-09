@@ -29,7 +29,7 @@ press, streamers, and publishers.
 
 See [`STATUS.md`](STATUS.md) for the complete, verified feature inventory, known issues, and deployment configuration.
 
-594 commits across 10 development sessions. Full implementation report in [`AGENTS.md`](AGENTS.md).
+607 commits across 11 development sessions. Full implementation report in [`AGENTS.md`](AGENTS.md).
 
 ---
 
