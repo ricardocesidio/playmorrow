@@ -1,3 +1,4 @@
+# Build timestamp: 2026-07-10T09:30:00Z
 FROM node:22-alpine AS base
 RUN npm i -g pnpm@11
 
@@ -26,3 +27,4 @@ COPY --from=builder /app/node_modules/.pnpm ./node_modules/.pnpm
 COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 EXPOSE 4000
 CMD ["node", "apps/api/dist/main.js"]
+// force rebuild Fri Jul 10 10:34:16 WEST 2026
