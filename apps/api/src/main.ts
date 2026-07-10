@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { loadEnvFile } from 'node:process';
 
-loadEnvFile('.env');
+try { loadEnvFile('.env'); } catch { /* no .env file — env vars provided by runtime */ }
 
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
