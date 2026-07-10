@@ -16,6 +16,8 @@ This document is **historical** — the project has undergone significant change
 | **AGENTS.md** | Chronological development history (10 sessions) | [`AGENTS.md`](../../AGENTS.md) |
 | **ROADMAP.md** | Enterprise readiness items with hour estimates | [`ROADMAP.md`](../../ROADMAP.md) |
 | **Session 10 handoff** | Evidence-first hardening, CSRF, test cleanup, production verification | [`session-10.md`](./session-10.md) |
+| **Session 11 handoff** | CI reconciliation, unskipping integration tests, migrations | [`session-11.md`](./session-11.md) |
+| **Session 12 handoff** | Professional project audit — gaps to reach professional-grade status + prioritized plan | [`session-12.md`](./session-12.md) |
 | **Devlog System V2** | Community detection, rich editor, feed engine, comments | Implemented — see STATUS.md |
 
 **Ongoing (post audit):** 1-6 completed (1: N+1/selects in comments/follows; 2: a11y CI placeholder + e2e notes; 3: scores updated + deadcode sweep; 4: Redis in-memory cache stub in studios; 5: staging/monitoring notes in PRODUCTION; 6: export stub expanded). Per-user rate limiting added (CustomThrottlerGuard + OptionalSessionGuard first). Upload finished for object storage (#2): memory buffer, STORAGE_PROVIDER=local|s3|r2 (stub). #3 Load testing baseline: apps/api/scripts/load-test.js (npx autocannon, no dep). Root 'loadtest' script added. Placeholder results in PRODUCTION. #4 GDPR: enhanced deletion + /me/export stub. See docs/audit-fixes-summary.md. Build green.

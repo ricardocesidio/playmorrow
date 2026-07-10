@@ -41,26 +41,9 @@ Ongoing elite architecture audit cleanups — see [docs/audit-fixes-summary.md](
 
 #4 Deeper GDPR: enhanced user deletion with explicit report anonymization + added GET /users/me/export data export stub (in users.controller + service). See PRODUCTION.md.
 
-**Updated Project Scores (post remaining 1-6):**
-- Architecture: 9.8 (counters, selects, N+1 fixes)
-- Frontend: 9.2 (a11y, skeletons, keyboard, CI a11y)
-- Backend: 9.6
-- Security: 9.2 (pino, per-user rate limiting)
-- Scalability: 8.2 (Redis stub)
-- Performance: 8.9 (selects, upload, cache stub)
-- Developer Experience: 9.3
-- Code Quality: 9.4 (dead code sweep)
-- UI: 8.9
-- UX: 9.0 (B items + a11y)
-- Business Potential: 8.8
-- Production Readiness: 7.8 (staging/monitoring notes)
-- Maintainability: 9.1
-- Innovation: 8.3
-- Documentation: 9.6 (summary, scores, handoff)
-- Testing: 8.7 (CI a11y, e2e notes)
-- Overall Project: 8.9 (up from 8.8)
+**Current verified state:** See [`STATUS.md`](STATUS.md) for the complete, evidence-backed feature inventory, open issues, test status, and production configuration. All claims in STATUS.md are tied to specific commands or artifacts.
 
-607+ commits across 11 development sessions. Full implementation report in [`AGENTS.md`](AGENTS.md).
+638+ commits across 12 development sessions. Full implementation report in [`AGENTS.md`](AGENTS.md). Professionalization audit and gaps documented in [`docs/handoff/session-12.md`](docs/handoff/session-12.md).
 
 ---
 

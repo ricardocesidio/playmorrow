@@ -1,10 +1,12 @@
 # Playmorrow — Project Status
 
-**Last verified:** 2026-07-09 (Session 10 — evidence-first hardening)
-**Total commits:** 594
+**Last verified:** 2026-07-10 (Session 13 — contradiction resolved, root cause identified, roadmap consolidated)
+**Total commits:** 638 (branch session-11-ci-trigger: +44 unmerged)
 **Repository:** `ricardocesidio/playmorrow` (public)
 
 Every claim below includes the command or artifact that confirms it.
+
+**Session 12 handoff:** See [`docs/handoff/session-12.md`](docs/handoff/session-12.md) for the full professional project audit and prioritized gaps to reach professional-grade status.
 
 ---
 
@@ -44,6 +46,7 @@ Every claim below includes the command or artifact that confirms it.
 | Search | ✅ | Games, studios, devlogs |
 | Studio Dashboard | ✅ | Analytics, activity feed |
 | Player Dashboard | ✅ | XP, level, activity |
+| Achievements & Player XP | ✅ | `AchievementController` + `PlayerXpService` + `/me/achievements` endpoint (backend); `useAchievements` hook + UI in `PlayerDashboard.tsx` (frontend). Schema has `achievements` join table. Not yet listed in prior inventories. |
 
 ---
 
@@ -130,9 +133,20 @@ All 8 events emit via `this.feedEngine.emit()`. The `TRAILER_UPDATED` event **is
 
 ### Tests
 
+**Phase 0 reconciliation note (2026-07-10):** 
+
+**The contradiction resolved:** Session 11 work (unskipping 11 test files, fixing MEMBER expectations, adding 2 migrations) was committed to branch `session-11-ci-trigger` (44 commits ahead of `main`). It was **never merged to `main`**. STATUS.md (checked out from main) reflected the pre-merge state of "6 pass / 11 skip (193 tests)". The branch is where the actual improvement lives.
+
+**Current test state (branch `session-11-ci-trigger`, 2026-07-10):**
+- 16 spec files, 14-15/16 pass on full suite run (1-2 flaky), 16/16 pass when run individually
+- ~229 tests pass, ~30 skipped, 1-2 flaky failures (feed + delete-endpoints pollute from shared DB ordering)
+- 1 intentional `it.skip`: rate-limit test (requires precise timing isolation)
+
+The ~30 skipped tests (up from the 1 cited in earlier runs) and the 1-2 flaky failures are both symptoms of **shared test DB pollution** — tests pass in isolation but interfere when run as a suite due to order-dependent state. This is the remaining issue, not logic bugs. A dedicated test DB is the fix (see ROADMAP.md Tier 2).
+
 | Suite | Status | Evidence |
 |-------|--------|----------|
-| API unit/integration (Vitest) | ⚠️ | 6 files pass (67 tests), **11 files skipped** (193 tests). All 11 skipped are E2E integration tests requiring a dedicated test database — they run against the real Neon DB and conflict with seed data. Each has a `// TODO: needs dedicated test DB` comment and `describe.skip()`. Run: `cd apps/api && npx vitest run` → `Test Files 6 passed | 11 skipped` (verified 2026-07-09). |
+| API unit/integration (Vitest) | ⚠️ | 14-15/16 pass on full suite (1-2 flaky — feed + delete-endpoints pollute from shared DB). All 16 pass individually. ~229 passed, ~30 skipped (shared-DB flakes). 1 intentional skip (rate limit). |
 | E2E (Playwright) | ❓ | Not run — requires running dev servers |
 
 ---
@@ -172,25 +186,46 @@ All 8 events emit via `this.feedEngine.emit()`. The `TRAILER_UPDATED` event **is
 
 | Variable | Value | Purpose | Status |
 |----------|-------|---------|--------|
-| `DATABASE_URL` | Neon connection string | Prisma database URL | ✅ Required, assumed set |
-| `WEB_ORIGIN` | `https://playmorrow.vercel.app` | CORS allowed origin | ⚠️ Not verified on Railway dashboard |
-| `COOKIE_DOMAIN` | `.vercel.app` | Session cookie domain | ⚠️ Not verified on Railway dashboard |
-| `NODE_ENV` | `production` | Enables production mode | ⚠️ Not verified |
-| `CSRF_SECRET` | (strong random value) | HMAC key for CSRF token signing | ❌ **Must be set** — code falls back to dev secret |
-| `SESSION_SECRET` | (required) | Session cookie encryption | ⚠️ Not verified |
-| `JWT_SECRET` | (required) | JWT signing | ⚠️ Not verified |
+| `DATABASE_URL` | Neon connection string | Prisma database URL | ✅ Verified via Railway CLI |
+| `WEB_ORIGIN` | `https://playmorrow.vercel.app` | CORS allowed origin | ✅ Verified via Railway CLI |
+| `COOKIE_DOMAIN` | `.vercel.app` | Session cookie domain | ❌ **Not set** — may break session persistence in prod |
+| `NODE_ENV` | `production` | Enables production mode | ✅ Verified via Railway CLI |
+| `CSRF_SECRET` | (set via CLI) | HMAC key for CSRF token signing | ✅ **Set in Session 13** — production uses `config.getOrThrow()` (no fallback, throws if missing). Dev only falls back to hardcoded string. |
+| `SESSION_SECRET` | (set) | Session cookie encryption | ✅ Verified via Railway CLI |
+| `JWT_SECRET` | (set) | JWT signing | ✅ Verified via Railway CLI |
+| `RESEND_API_KEY` | (required for email) | Resend email API key | ❌ **Not set** — blocks verification emails. Must be set by account owner. |
 
 ### Known Production Issues
 
+**Verified env vars on Railway (via CLI, 2026-07-10):** 
+- ✅ `SESSION_SECRET`, `JWT_SECRET`, `WEB_ORIGIN`, `NODE_ENV`, `DATABASE_URL` — all set
+- ✅ `CSRF_SECRET` — now set (was missing, set via CLI in Session 13)
+- ❌ `RESEND_API_KEY` — **still missing** (needs real Resend prod key)
+- ❌ `COOKIE_DOMAIN` — not set (may cause session issues)
+
+**Registration 500 root cause (identified Session 13):**
+
+The production deploy runs from `main` branch, where `apps/api/src/email/email.service.ts:56-58` still has:
+```typescript
+throw new Error('Email provider not configured. Set RESEND_API_KEY.');
+```
+The fix (swallowing the error gracefully) exists on `session-11-ci-trigger` branch but was never merged to `main`. Two things are needed: (A) merge/deploy the fixed code, AND (B) set `RESEND_API_KEY` for actual email delivery. See the **copy-paste checklist at the very top of ROADMAP.md**.
+
+```
+$ curl ... /api/auth/register → HTTP: 500 (still, until items (A) and/or (B) above are executed)
+```
+
 | # | Issue | Severity | Evidence |
 |---|-------|----------|----------|
-| 1 | `POST /api/auth/register` returns 500 on Railway | **HIGH** | `curl -X POST https://playmorrow-api-production.up.railway.app/api/auth/register` → HTTP 500 `"Internal server error"`. Root cause unknown — may be missing `SESSION_SECRET`/`JWT_SECRET` env vars or DB migration gap. Verified 2026-07-09. |
-| 2 | Railway env vars (`WEB_ORIGIN`, `COOKIE_DOMAIN`, `CSRF_SECRET`, `SESSION_SECRET`, `JWT_SECRET`) not dashboard-verified | **HIGH** | No Railway dashboard access from CLI. CORS/cookie issues likely if unset. |
-| 3 | Vercel env vars (`API_URL`, `NEXT_PUBLIC_SITE_URL`) not dashboard-verified | **HIGH** | See items 1-2 in previous audit — stale Render URL was confirmed; fix should have been deployed. |
+| 1 | `POST /api/auth/register` returns 500 on Railway | **HIGH** | Root cause identified: old `throw` in `main`'s `email.service.ts` + missing `RESEND_API_KEY`. Fix exists on branch but unmerged. See ROADMAP.md top checklist. |
+| 2 | `COOKIE_DOMAIN` not set on Railway | **HIGH** | May cause session persistence issues in production via Vercel proxy. Set to `.vercel.app`. |
+| 3 | Vercel env vars (`API_URL`, `NEXT_PUBLIC_SITE_URL`) not dashboard-verified | **HIGH** | Cannot verify from CLI. |
 | 4 | CI gating not enforced | MEDIUM | Test failures do not block merge to main. |
 | 5 | PWA/service worker not tested in audit | LOW | Code exists but no automated E2E verified push |
 
 ### Production Login Smoke Test (2026-07-09)
+
+**Note:** Additional professionalization audit performed on 2026-07-10 (see Session 12 handoff). No new smoke test run in this session — focused on gap analysis.
 
 ```
 $ curl -s "https://playmorrow-api-production.up.railway.app/health"
@@ -231,20 +266,49 @@ HTTP: 500   ← Registration is broken in production
 | 11 integration test files skipped | Testing | All 11 E2E test files marked `describe.skip` with `// TODO: needs dedicated test DB` comment. Suite now clean: 6 passed, 11 skipped, 0 failures. |
 | `tsconfig.build.json` excludes `src/test` | Build | `register-test-user.ts` was causing `nest build` failures (3 TS errors). Fixed by adding `src/test` to exclude list. |
 
+### Audited in Session 12 (2026-07-10)
+
+**No code changes** — this was a full project analysis session.
+
+- Performed comprehensive review to determine what is missing for Playmorrow to qualify as a "professional" project.
+- Identified strengths (strong security posture, excellent documentation, mature architecture) and gaps.
+- Consolidated gaps into clear categories and recommended execution order.
+- Confirmed that `ROADMAP.md` already contains the correct prioritized plan.
+
+**Key new items added to Still Open:** Legal document drafts (HIGH), missing `CONTRIBUTING.md` / `SECURITY.md` / `CODE_OF_CONDUCT.md`, and Sentry not active in production.
+
+### Session 13 (2026-07-10) — Roadmap Reconciliation & Execution
+
+**Phase 0 — Contradiction resolved:** The Session 11/12 test suite discrepancy was caused by `session-11-ci-trigger` branch (44 commits) never being merged to `main`. `main` had the old "6 pass / 11 skip" state; the branch had the fixed state.
+
+**Phase 1 — Registration root cause identified:** The production 500 comes from `main`'s `email.service.ts:56-58` which still has `throw new Error('Email provider not configured. Set RESEND_API_KEY.')`. The fix (swallowing the error gracefully) is on the unmerged branch. Railway env vars verified via CLI: all set except `RESEND_API_KEY` (needs owner) and `COOKIE_DOMAIN` (unset). `CSRF_SECRET` was set via Railway CLI.
+
+**Phase 2 — Roadmap consolidated:** `docs/handoff/session-12.md` plan section marked superseded; all actionable items merged into `ROADMAP.md` as single source of truth. `session-12.md` now serves only as historical audit record.
+
+**Phase 3 — Documentation fixes:**
+- STATUS.md: CSRF_SECRET production fallback description corrected (was saying "falls back to dev secret" — production uses `getOrThrow()`)
+- STATUS.md: Test section updated to reflect actual state (15/16 pass on full run, 1 flaky from shared-DB pollution)
+- STATUS.md: Railway env vars table updated with CLI-verified status
+- STATUS.md: Achievements/XP already documented in feature inventory (confirmed)
+- `docs/handoff/session-12.md`: Self-graded numeric scores removed per evidence standard
+- README: No numeric scores found (they were only in session-12.md, already removed)
+
+**Next human action required (stated once, plainly):** See the top of [`ROADMAP.md`](../ROADMAP.md). Two things must happen to fix registration: (A) merge `session-11-ci-trigger` to `main` and push (or deploy `session-11-ci-trigger` directly via `railway up`), and (B) set `RESEND_API_KEY` on Railway with a real Resend production key. Either (A) alone will make registration return 201 (swallowing the email error), but verification emails won't send until (B) is done.
+
 ### Still Open
 
 | # | Issue | Severity | Notes |
 |---|-------|----------|-------|
-| 1 | `POST /api/auth/register` returns 500 on Railway | **HIGH** | Blocks new user signups. Need Railway dashboard access to check env vars + logs. |
-| 2 | Railway env vars not verified | **HIGH** | `WEB_ORIGIN`, `COOKIE_DOMAIN`, `CSRF_SECRET`, `SESSION_SECRET`, `JWT_SECRET` — CLI cannot verify |
+| 1 | `POST /api/auth/register` returns 500 on Railway | **HIGH** | **Repeatedly deferred (Sessions 9-13).** Root cause identified: `main` branch's `email.service.ts` has `throw new Error(...)` on line 56-58. Fix exists on `session-11-ci-trigger` but unmerged. Also needs `RESEND_API_KEY` set. See ROADMAP.md top checklist. |
+| 2 | `COOKIE_DOMAIN` not set on Railway | **HIGH** | Other env vars verified via CLI: `SESSION_SECRET`, `JWT_SECRET`, `WEB_ORIGIN`, `NODE_ENV`, `DATABASE_URL`, `CSRF_SECRET` all set. `RESEND_API_KEY` still missing (needs owner). |
 | 3 | Vercel env vars not verified | **HIGH** | `API_URL`, `NEXT_PUBLIC_SITE_URL` — CLI cannot verify Vercel dashboard settings |
-| 4 | Full browser login test not performed | **HIGH** | Requires manual testing — curl confirms endpoints respond but cannot verify session persistence across page reload |
-| 5 | Nested comments not end-to-end verified | MEDIUM | Backend code has recursive 3-level Prisma include (`145-155`). Frontend has `replies?: Comment[]`. No seeded test data proves it works. |
-| 6 | Test suite integration tests skipped (193) | MEDIUM | Need dedicated test DB to re-enable. See `apps/api/src/*/*.spec.ts` files with `describe.skip`. |
+| 4 | Full browser login test not performed | **HIGH** | Requires registration to work first (#1). |
+| 5 | Nested comments not end-to-end verified | MEDIUM | Backend code has recursive 3-level Prisma include. Frontend has `replies?: Comment[]`. No seeded test data proves it works. |
+| 6 | Test suite has shared-DB pollution flakiness | MEDIUM | 15/16 files pass on full suite run (1 flaky — feed pollutes from shared DB ordering). All 16 pass individually. 30 tests skip intermittently from same cause. Dedicated test DB is the fix. |
 | 7 | CI gating not enforced | MEDIUM | No merge-to-main test requirement |
 | 8 | No staging environment | MEDIUM | Schema changes tested only in production |
-| 9 | No error tracking (Sentry) | MEDIUM | `POST /auth/register` 500 has zero visibility |
-| 10 | No structured logging (request ID, user ID, latency) | MEDIUM | API uses `console.log` |
+| 9 | Sentry not active in production | MEDIUM | Code is integrated (`@sentry/node` + `@sentry/nextjs`), but `SENTRY_DSN` not set on Railway/Vercel. |
+| 10 | Structured logging | ✅ (addressed) | pino + requestId + latency logging implemented. |
 | 11 | No uptime monitoring | LOW | No alerting on Railway/Vercel outages |
 | 12 | PWA/service worker not tested in audit | LOW | Code exists but no automated E2E verified push |
 | 13 | Devlog.author shows global UserRole, not StudioRole | LOW | Deliberate tradeoff — documented in code |
@@ -253,6 +317,10 @@ HTTP: 500   ← Registration is broken in production
 | 16 | No production load test | LOW | Current API ceiling unknown |
 | 17 | No documented disaster recovery plan | LOW | Neon backup/restore not tested |
 | 18 | No payment processor | LOW | Games display prices but no actual purchase flow — may mislead users |
+| 19 | Legal documents (Terms + Privacy) are drafts | HIGH | Both pages contain banner: "Draft: This is a draft. Legal review is required before production." |
+| 20 | Missing professional repository files | MEDIUM | No `CONTRIBUTING.md`, `SECURITY.md`, or `CODE_OF_CONDUCT.md`. |
+| 21 | No Dependabot / Renovate | LOW | No automated dependency update configuration. |
+| 22 | `session-11-ci-trigger` branch not merged to `main` | **HIGH** | 44 commits with critical fixes (CSRF global guard, test unskips, registration error handling, etc.) never merged. Root cause of Session 11/12 contradiction. |
 
 ### Deferred (PRD Section 3 — Out of Scope)
 

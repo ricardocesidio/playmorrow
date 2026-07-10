@@ -1,6 +1,81 @@
 # Playmorrow — Enterprise Readiness Roadmap
 
-Items from the production-hardening audit (Session 10, 2026-07-09) that could not be completed during the session. Each includes an honest size estimate and dependencies.
+**URGENT BLOCKER — COPY-PASTE CHECKLIST (do this first)**
+
+This item has been HIGH and unexecuted across Sessions 9–13. **Root cause now fully identified:**
+
+The production version deploys from `main` branch, which has OLD code in `apps/api/src/email/email.service.ts:56-58`:
+```typescript
+} else {
+  throw new Error('Email provider not configured. Set RESEND_API_KEY.');
+}
+```
+
+The fix (swallowing the error gracefully so registration succeeds without email sending) exists on the `session-11-ci-trigger` branch but was **never merged to main**. Two things are needed: (A) deploy the fixed code, AND (B) set RESEND_API_KEY for actual email delivery.
+
+**Checklist:**
+
+**(A) Deploy the fixed code (registration will succeed even without RESEND_API_KEY):**
+
+Option 1 — Merge & deploy from main (recommended):
+```
+git checkout main && git merge session-11-ci-trigger && git push origin main
+```
+(Railway auto-deploys from main. Wait ~2 min.)
+
+Option 2 — Deploy current branch directly:
+```
+cd /path/to/playmorrow && railway up --detach
+```
+(Deploys from session-11-ci-trigger's code.)
+
+**(B) Set environment variables (pick one):**
+
+Option 1 — Railway CLI (already authenticated as Ricardo Cesídio):
+```
+railway variable set RESEND_API_KEY="re_YOUR_REAL_RESEND_PROD_KEY"
+```
+
+Option 2 — Railway Dashboard:
+1. Open https://railway.app/project/gentle-grace
+2. Select "playmorrow-api" service → "Variables" tab
+3. Add `RESEND_API_KEY` with your real Resend production API key
+4. Click "Deploy" (Railway will auto-redeploy)
+
+**(C) Verify:**
+```
+curl -s -X POST "https://playmorrow-api-production.up.railway.app/api/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"smoke-'$(date +%s)'@example.com","password":"Test1234!@#","acceptedTerms":true,"acceptedPrivacy":true}'
+```
+Expected: HTTP 201 with `{"requiresEmailVerification":true,...}`
+
+**Current env var status on Railway (verified 2026-07-10 via CLI):**
+- ✅ `SESSION_SECRET` — set
+- ✅ `JWT_SECRET` — set
+- ✅ `WEB_ORIGIN` — set to `https://playmorrow.vercel.app`
+- ✅ `NODE_ENV` — set to `production`
+- ✅ `DATABASE_URL` — set
+- ✅ `CSRF_SECRET` — set (was missing, now set via CLI in Session 13)
+- ❌ `RESEND_API_KEY` — **still missing** (needs your Resend key)
+- ❌ `COOKIE_DOMAIN` — not set (may cause session issues in prod; set to `.vercel.app`)
+
+**Full browser walkthrough (after registration is fixed):**
+
+1. Open https://playmorrow.vercel.app in fresh incognito.
+2. Go to /register, create account with real email → should succeed or require verification.
+3. Verify email (6-digit code via Resend or DB).
+4. Log in.
+5. Navigate to home, a game page, feed, dashboard.
+6. Hard refresh pages — session must persist.
+7. Perform mutations: follow a game, post a comment, create wishlist item.
+8. Publish a devlog (if studio role), comment on it, confirm appears in feed.
+9. Log out — session cleared, protected routes deny.
+10. Record exact results (screenshots or curl + browser notes) here.
+
+---
+
+Items from the production-hardening audit (Session 10, 2026-07-09) that could not be completed during the session. Each includes an honest size estimate and dependencies. **Session 12 items merged and re-tiered below.**
 
 ---
 
@@ -82,7 +157,7 @@ Configure branch protection on GitHub:
 
 **Estimate:** 4–6 hours
 
-The 11 skipped test files (193 tests) all require a clean test database. Options:
+(The number of skipped files/tests has improved on the session-11-ci-trigger branch — see Phase 0 paragraph in STATUS.md. A dedicated test DB is still recommended for reliable CI runs of all suites.) Options:
 - **(Recommended)** Spin up a free Neon branch for testing — `TEST_DATABASE_URL` env var
 - **(Alternative)** Docker Compose with local PostgreSQL for CI
 
@@ -266,3 +341,36 @@ Establish current ceiling (rps, p95 latency). Document in STATUS.md so future op
 **Immediate priorities (next session):** Items 1-3 (production functionality), then Item 7 (Sentry, since the 500 shows you're blind).
 
 **One-week sprint (40h):** Items 1-3 (6h) + Item 7 (6h) + Item 4 (3h) + Item 5 (6h) + Item 6 (2h) + Item 8 (3h) + Item 10 (0.5h) + Item 14 UI fix (0.5h) ≈ 27h.
+
+---
+
+## Items Merged from Professionalization Audit (Session 12) — Re-tiered
+
+These were identified in the Session 12 audit and consolidated here as the single source of truth. Re-tiered by **actual current blocking impact** and history of deferral. Items open across 3+ sessions are explicitly flagged.
+
+### Repeatedly Deferred HIGH (open since Session 9/10, re-documented 11 & 12 without execution)
+
+- **1. Fix production registration (500 error)** — See top checklist. **Repeatedly deferred.**
+
+### New / Specific Items (added from Session 12 audit)
+
+**Legal & Compliance (HIGH — concrete, not generic)**
+
+- Get the existing Terms of Service and Privacy Policy drafts legally reviewed. Remove the "Draft: This is a draft..." banners from both pages once reviewed. (Previously buried under generic "GDPR compliance".)
+
+**Repository & Process Hygiene (MEDIUM)**
+
+- Add `CONTRIBUTING.md`
+- Add `SECURITY.md` (vulnerability reporting process)
+- Add `CODE_OF_CONDUCT.md`
+- Add Dependabot or Renovate config for dependency updates
+- Add `CHANGELOG.md` or formal release process notes
+- Document API versioning strategy (or confirm none needed)
+- Publish/version Swagger docs (currently only available at /docs on running instance)
+
+**Other Gaps (LOW/MEDIUM)**
+
+- Add feature flag mechanism (or document why none is needed)
+- Achievements/XP subsystem exists in code (AchievementController, PlayerXpService, schema, frontend hooks/UI) but was missing from prior STATUS.md feature inventories — documented in STATUS now.
+
+See `docs/handoff/session-12.md` (plan section superseded by this document).
