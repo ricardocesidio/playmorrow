@@ -123,7 +123,7 @@ describe('GamesController (e2e)', () => {
     const res = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
       .set('Cookie', `playmorrow_session=${nonMemberToken}`)
-      .send({ title: 'Test Game', slug: 'test-game-1' });
+      .send({ title: 'Test Game', slug: `test-game-1-${SUFFIX}` });
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
 
@@ -131,7 +131,7 @@ describe('GamesController (e2e)', () => {
     const res = await request(httpServer)
       .post(`/api/studios/${STUDIO_SLUG}/games`)
       .set('Cookie', `playmorrow_session=${memberToken}`)
-      .send({ title: 'Test Game', slug: 'test-game-2' });
+      .send({ title: 'Test Game', slug: `test-game-2-${SUFFIX}` });
     expect(res.status).toBe(HttpStatus.CREATED);
   });
 

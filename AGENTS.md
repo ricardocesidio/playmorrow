@@ -20,7 +20,7 @@ This file is a **chronological history log** of development sessions. It records
 - **API URL:** `http://localhost:4000/api` (dev); `https://playmorrow-api-production.up.railway.app/api` (prod, proxied via Next.js rewrites)
 - **Frontend:** `http://localhost:3000` (dev); `https://playmorrow.vercel.app` (prod)
 - **Production env vars:** See `STATUS.md` → Production Deployment section
-- **CSRF_SECRET:** Required on Railway for production HMAC signing (falls back to dev secret if unset)
+- **CSRF_SECRET:** Required on Railway for production HMAC signing. In production, `CsrfService` uses `config.getOrThrow('CSRF_SECRET')` (no fallback). Dev only falls back to a hardcoded string.
 
 ## Key Files Reference
 
@@ -174,7 +174,7 @@ pnpm db:migrate
 - **Production smoke test:** API health → 200. Auth endpoint → 401 for bad creds. Vercel proxy working. **Discovered `POST /api/auth/register` returns 500** in production — blocks all signups. Likely missing env vars or DB migration gap.
 - **STATUS.md rewritten:** Every claim backed by verifiable evidence. Evidence columns added. 18 open issues documented.
 - **ROADMAP.md created:** 15 enterprise readiness items with honest hour estimates (~35–67h total). Top priority: fix registration 500, then Sentry.
-- **CSRF_SECRET env var added:** Required on Railway for production CSRF token signing. Falls back to dev secret if unset.
+- **CSRF_SECRET env var added:** Required on Railway for production CSRF token signing. Code uses `getOrThrow` in production (no fallback allowed in prod).
 - **Key files documented:** `apps/api/src/common/csrf.service.ts` (HMAC token), `apps/api/src/common/csrf.guard.ts` (global guard), `apps/web/lib/api/client.ts` (token capture), `apps/web/app/api/auth/form-login/route.ts` (cookie bridge).
 
 ### Session 11 — CI Reconciliation & Test Suite Green (2026-07-09)
@@ -187,3 +187,16 @@ pnpm db:migrate
 - **Full CI green:** 17 test files, 260+ tests, 0 failures, 0 code-related annotations.
 - **Diagnostics flushed:** Temporary `console.error` catch blocks + exception filter removed after root cause identified.
 - **Branch pushed:** `session-11-ci-trigger` — CI verified passing (Backend tests: success).
+
+### Session 12 — Professionalization Audit (2026-07-10)
+- Performed full project analysis to answer: "what is missing for this to be a professional project?"
+- Reviewed: README, STATUS.md, ROADMAP.md, PRODUCTION.md, entire source tree, CI, security implementation, legal pages, observability, tests, Docker, etc.
+- Documented strengths (mature security, excellent evidence-based docs, solid architecture) and gaps.
+- Created detailed handoff: [`docs/handoff/session-12.md`](docs/handoff/session-12.md)
+- Updated STATUS.md with new audit findings and professional readiness section.
+- Prioritized plan (aligned with ROADMAP.md):
+  1. Immediate: Fix production registration + env vars + smoke test
+  2. 1-2 weeks: Branch protection + test DB for integration tests
+  3. Short term: Real Sentry + monitoring + legal fixes
+  4. Medium term: A11y, load tests, staging, repo files, price labeling
+- Updated README commit count and references. No code changes in this session — pure analysis.
