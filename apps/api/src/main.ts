@@ -19,6 +19,11 @@ import { logger, logRequest, createContextLogger } from './common/logger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  console.log('=== BOOTSTRAP STARTED ===');
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('RESEND:', process.env.RESEND_API_KEY ? 'set' : 'not set');
+  console.log('CSRF:', process.env.CSRF_SECRET ? 'set' : 'not set');
+  console.log('COOKIE_DOMAIN:', process.env.COOKIE_DOMAIN ? 'set' : 'not set');
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
