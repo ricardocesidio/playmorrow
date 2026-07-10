@@ -26,5 +26,5 @@ COPY --from=builder /app/packages/database/package.json ./packages/database/
 COPY --from=builder /app/node_modules/.pnpm ./node_modules/.pnpm
 COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 EXPOSE 4000
-CMD ["node", "apps/api/dist/main.js"]
+CMD node -e "console.log('BOOT: start'); process.env.RESEND_API_KEY = process.env.RESEND_API_KEY || 'missing'; const m = require('./apps/api/dist/main.js');"
 // force rebuild Fri Jul 10 10:34:16 WEST 2026
