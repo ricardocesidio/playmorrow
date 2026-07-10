@@ -1,7 +1,7 @@
-FROM node:22-alpine AS base
+ARG CACHEBUST=1
+FROM node:22-alpine3.21 AS base
 RUN npm install -g pnpm@11.1.3
 
-# Cache-bust: rebuild without using cached layers
 FROM base AS deps
 WORKDIR /app
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
