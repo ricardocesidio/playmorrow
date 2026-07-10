@@ -142,20 +142,23 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // OpenAPI / Swagger docs at /docs
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Playmorrow API')
-    .setDescription('The social discovery layer for indie games.')
-    .setVersion('0.1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('docs', app, document);
+  // OpenAPI / Swagger docs at /docs (disabled in production)
+  if (!isProd) {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('Playmorrow API')
+      .setDescription('The social discovery layer for indie games.')
+      .setVersion('0.1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('docs', app, document);
+  }
 
   const port = config.get<number>('PORT', 4000);
   await app.listen(port);
 
-  logger.info(`🚀 Playmorrow API ready at http://localhost:${port} (docs: /docs)`);
+  const docs = isProd ? '' : ' (docs: /docs)';
+  logger.info(`🚀 Playmorrow API ready at http://localhost:${port}${docs}`);
 }
 
 void bootstrap();
