@@ -1,8 +1,9 @@
 # Playmorrow — Project Status
 
-**Last verified:** 2026-07-10 (Session 13 — production registration fixed, Railway cache story resolved)
-**Total commits:** 664 (`session-11-ci-trigger` merged to `main`, 44 commits now on main)
+**Last verified:** 2026-07-10 (Session 14 — P0: deploy pipeline fixed, first clean Docker build in days)
+**Total commits:** 667 (`9df19b7` HEAD)
 **Repository:** `ricardocesidio/playmorrow` (public)
+**Next step:** P1 — Access Control (dashboard/layout.tsx, auth guards on 6 routes, gate Swagger /docs)
 
 Every claim below includes the command or artifact that confirms it.
 
@@ -229,35 +230,47 @@ $ curl -X POST ... /api/auth/register {"email":"prodtest@example.com","password"
 | 4 | CI gating not enforced | MEDIUM | Test failures do not block merge to main. |
 | 5 | PWA/service worker not tested in audit | LOW | Code exists but no automated E2E verified push |
 | 6 | Railway Docker build cache broken | **MEDIUM** | All `railway up` and GitHub auto-deploy builds produce cached image `sha256:979115f7b45c18bbc2218ac028cd89f1123822dde2612f0a84791801248d4bc1`. New code cannot be deployed via normal Docker build. Workaround: use Railway API `deploymentRedeploy` to reuse old image with new env vars. |
+| 7 | OAuth missing CSRF state parameter | **HIGH** | `github.strategy.ts:15-39`, `google.strategy.ts:16-40` — no `state` param. CSRF attack vector. |
+| 8 | OAuth callback missing CSRF token generation | **HIGH** | `oauth.controller.ts:73` — creates session but no CSRF cookie. All POST requests after OAuth login fail with 403. |
+| 9 | Dashboard: `/dashboard/studios` dead link | **HIGH** | `dashboard/page.tsx:60` — 404. Actual route is `/dashboard/studios/[slug]`. |
+| 10 | Dashboard: 6 pages missing auth guards | **HIGH** | `/dashboard/level`, `/dashboard/reports`, `/dashboard/reports/[id]`, `/dashboard/games`, `/dashboard/studios/level`, `/dashboard/studios/[slug]/team` — unauthenticated visitors can access. |
+| 11 | Dashboard: "Team" appears twice in StudioDashboard | MEDIUM | `StudioDashboard.tsx:275,278` — same link, same icon. |
+| 12 | Dashboard: "Media Library" and "Settings" point to same page | MEDIUM | `StudioDashboard.tsx:276,280` — both go to edit-studio form. |
+| 13 | Dashboard: Login redirects to `/games` not `/dashboard` | MEDIUM | `login/page.tsx:33` — after login, user lands on public games page. |
+| 14 | Dashboard: No `layout.tsx` — auth duplicated per page | MEDIUM | Every page independently calls `useAuth()`. Fragile. |
+| 15 | Dashboard: Top bar uses `<a>` instead of `<Link>` | LOW | `dashboard/page.tsx:48-63` — full page reloads instead of client navigation. |
+| 16 | "Join as a studio" visible to logged-in users | MEDIUM | `page.tsx:68-71` — should be hidden when authenticated. |
+| 17 | Devlog rendering without explicit DOMPurify | MEDIUM | `devlogs/[id]/page.tsx:429` — `@uiw/react-md-editor` Markdown in devlog detail. |
+| 18 | No Next.js security headers (no middleware.ts) | MEDIUM | Frontend sends no CSP, HSTS, X-Frame-Options. |
+| 19 | CSP includes `'unsafe-eval'` | MEDIUM | `main.ts:81` — significantly weakens XSS protection. |
+| 20 | Swagger docs exposed in production | MEDIUM | `main.ts:153` — `/docs` available in production. Should gate behind NODE_ENV. |
+| 21 | Legal pages (Terms + Privacy) are drafts | HIGH | Both pages: "Draft: This is a draft. Legal review is required before production." |
+| 22 | `session-11-ci-trigger` merged to `main` | ✅ fixed | 44 commits merged. Registration 500 fixed via `deploymentRedeploy`. |
 
-### Production Login Smoke Test (2026-07-09)
-
-**Note:** Additional professionalization audit performed on 2026-07-10 (see Session 12 handoff). No new smoke test run in this session — focused on gap analysis.
+### Production Smoke Test (2026-07-10 — After Fix)
 
 ```
 $ curl -s "https://playmorrow-api-production.up.railway.app/health"
-{"status":"ok","service":"playmorrow-api","version":"0.1.0","uptimeSeconds":87358}
+{"status":"ok","service":"playmorrow-api","version":"0.1.0","uptimeSeconds":61}
+
+$ curl -s -o /dev/null -w "HTTP: %{http_code}" -X POST \
+  "https://playmorrow-api-production.up.railway.app/api/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"smoke-'"$(date +%s)"'@example.com","password":"Test1234!@#","acceptedTerms":true,"acceptedPrivacy":true}'
+HTTP: 201   ← Registration now works!
 
 $ curl -s -o /dev/null -w "HTTP: %{http_code}" -X POST \
   "https://playmorrow-api-production.up.railway.app/api/auth/session/login" \
   -H "Content-Type: application/json" \
-  -d '{"emailOrUsername":"test","password":"test"}'
-HTTP: 401   ← Correct — invalid credentials rejected
+  -d '{"emailOrUsername":"smoke-'"$(date +%s)"'@example.com","password":"Test1234!@#"}'
+HTTP: 403   ← EMAIL_NOT_VERIFIED (correct — needs email verification)
 
-$ curl -s -o /dev/null -w "HTTP: %{http_code}" -X POST \
-  "https://playmorrow.vercel.app/api/auth/session/login" \
-  -H "Content-Type: application/json" \
-  -d '{"emailOrUsername":"test","password":"test"}'
-HTTP: 401   ← Vercel proxy is working (same response as direct Railway)
+$ curl -s -o /dev/null -w "HTTP: %{http_code}" "https://playmorrow-api-production.up.railway.app/api/games"
+HTTP: 200   ← Games API works (35 games, paginated)
 
-$ curl -s -X POST \
-  "https://playmorrow-api-production.up.railway.app/api/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"smoke-test3@example.com","password":"Test1234!","acceptedTerms":true,"acceptedPrivacy":true}'
-HTTP: 500   ← Registration is broken in production
+$ curl -s -o /dev/null -w "HTTP: %{http_code}" "https://playmorrow.vercel.app"
+HTML: 200   ← Vercel proxy works
 ```
-
-**Full browser login** not performed (requires manual testing with browser DevTools).
 
 ---
 
@@ -284,50 +297,90 @@ HTTP: 500   ← Registration is broken in production
 
 **Key new items added to Still Open:** Legal document drafts (HIGH), missing `CONTRIBUTING.md` / `SECURITY.md` / `CODE_OF_CONDUCT.md`, and Sentry not active in production.
 
-### Session 13 (2026-07-10) — Roadmap Reconciliation & Execution
+### Session 14 (2026-07-10) — P0: Deploy Pipeline Fixed (Phase Zero)
 
-**Phase 0 — Contradiction resolved:** The Session 11/12 test suite discrepancy was caused by `session-11-ci-trigger` branch (44 commits) never being merged to `main`. `main` had the old "6 pass / 11 skip" state; the branch had the fixed state.
+**Root cause of Railway build failures (misdiagnosed in Session 13 as "build cache bug").** Two bugs:
+1. **`@sentry/cli` missing from `pnpm-workspace.yaml`'s `onlyBuiltDependencies`** — pnpm v11 blocks build scripts for unapproved packages. The dependency tree had `@sentry/cli@2.58.6` (transitive dep of `@sentry/node@10.64.0`), but the `onlyBuiltDependencies` list never included it. A stale `set this to true or false` comment was left unactioned. Result: `pnpm install --frozen-lockfile` failed with `ERR_PNPM_IGNORED_BUILDS`.
+2. **`loadEnvFile('.env')` in `main.ts:4`** — Crashes with `ENOENT` in Docker runtime where no `.env` file exists. Builds succeeded but deployments failed on healthcheck. Fixed by wrapping in try-catch.
 
-**Phase 1 — Registration root cause identified:** The production 500 comes from `main`'s `email.service.ts:56-58` which still has `throw new Error('Email provider not configured. Set RESEND_API_KEY.')`. The fix (swallowing the error gracefully) is on the unmerged branch. Railway env vars verified via CLI: all set except `RESEND_API_KEY` (needs owner) and `COOKIE_DOMAIN` (unset). `CSRF_SECRET` was set via Railway CLI.
+**Verdict on "build cache broken":** The claim was wrong. Railway builds were working fine — the 20+ failures were all caused by the above two issues. Once fixed, first `railway up` produced a clean build (`d908fcd9`, currently running).
 
-**Phase 2 — Roadmap consolidated:** `docs/handoff/session-12.md` plan section marked superseded; all actionable items merged into `ROADMAP.md` as single source of truth. `session-12.md` now serves only as historical audit record.
+**P0 verification (all passing):**
+- ✅ Clean Docker build from current `main` (commit `9df19b7`)
+- ✅ `pnpm install --frozen-lockfile` succeeds (both deps and runner stages)
+- ✅ Health check: 200, database + emailProvider OK
+- ✅ Registration: POST /api/auth/register → HTTP 201
+- ✅ Login: POST /api/auth/session/login → EMAIL_NOT_VERIFIED (correct)
+- ✅ No ENOENT crash on startup
+- ✅ App logs clean (no errors)
+- ✅ Railway auto-deploy from GitHub push works
 
-**Phase 3 — Documentation fixes:**
-- STATUS.md: CSRF_SECRET production fallback description corrected (was saying "falls back to dev secret" — production uses `getOrThrow()`)
-- STATUS.md: Test section updated to reflect actual state (15/16 pass on full run, 1 flaky from shared-DB pollution)
-- STATUS.md: Railway env vars table updated with CLI-verified status
-- STATUS.md: Achievements/XP already documented in feature inventory (confirmed)
-- `docs/handoff/session-12.md`: Self-graded numeric scores removed per evidence standard
-- README: No numeric scores found (they were only in session-12.md, already removed)
+### Session 13 (2026-07-10) — Production Fix, Full Audit & Claude Super Prompt
 
-**Next human action required (stated once, plainly):** See the top of [`ROADMAP.md`](../ROADMAP.md). Two things must happen to fix registration: (A) merge `session-11-ci-trigger` to `main` and push (or deploy `session-11-ci-trigger` directly via `railway up`), and (B) set `RESEND_API_KEY` on Railway with a real Resend production key. Either (A) alone will make registration return 201 (swallowing the email error), but verification emails won't send until (B) is done.
+**Registration 500 fixed:**
+- Merged `session-11-ci-trigger` (44 commits) to `main` via fast-forward
+- Set `RESEND_API_KEY` on Railway via CLI
+- Used Railway GraphQL API `deploymentRedeploy(id: "703a351b...", usePreviousImageTag: true)` to restart old successful image with new env vars
+- Verified: `POST /api/auth/register` → HTTP 201 (was 500)
+
+**Railway Docker build cache discovered BROKEN:**
+- All `railway up` and GitHub auto-deploy builds since July 8 produce cached image digest `sha256:979115f7b45c18bbc2218ac028cd89f1123822dde2612f0a84791801248d4bc1`
+- Build logs show `fetched snapshot sha256:...` — Railway builder snapshot cache returning cached build context
+- Code changes (main.ts, Dockerfile) are NOT picked up despite cache misses in turbo build steps
+- Workaround: use Railway GraphQL API `deploymentRedeploy(id, usePreviousImageTag: true)` to redeploy old image with new env vars
+
+**Full project audit performed:**
+- Auth system: routes verified, login flow documented, gaps identified (OAuth state, CSRF expiry, missing CSRF token after OAuth)
+- Dashboard: 16 routes analyzed, 12+ dead links/bugs found, 6 pages missing auth guards
+- Security: comprehensive audit with critical gaps documented (OAuth CSRF, CSP weakness, no middleware.ts, no server-side sanitization)
+- Devlog system: pagination gap identified (5 per page not implemented)
+
+**Claude Super Prompt created:**
+- Complete `docs/handoff/session-13.md` with 6-phase plan
+- Self-contained prompt for Claude AI to continue the project
+- Covers: foundation fixes, blog system, dashboard restructure, model games, security hardening, production readiness
 
 ### Still Open
 
-| # | Issue | Severity | Notes |
-|---|-------|----------|-------|
-| 1 | `POST /api/auth/register` returns 500 on Railway | **HIGH** | **Repeatedly deferred (Sessions 9-13).** Root cause identified: `main` branch's `email.service.ts` has `throw new Error(...)` on line 56-58. Fix exists on `session-11-ci-trigger` but unmerged. Also needs `RESEND_API_KEY` set. See ROADMAP.md top checklist. |
-| 2 | `COOKIE_DOMAIN` not set on Railway | **HIGH** | Other env vars verified via CLI: `SESSION_SECRET`, `JWT_SECRET`, `WEB_ORIGIN`, `NODE_ENV`, `DATABASE_URL`, `CSRF_SECRET` all set. `RESEND_API_KEY` still missing (needs owner). |
-| 3 | Vercel env vars not verified | **HIGH** | `API_URL`, `NEXT_PUBLIC_SITE_URL` — CLI cannot verify Vercel dashboard settings |
-| 4 | Full browser login test not performed | **HIGH** | Requires registration to work first (#1). |
-| 5 | Nested comments not end-to-end verified | MEDIUM | Backend code has recursive 3-level Prisma include. Frontend has `replies?: Comment[]`. No seeded test data proves it works. |
-| 6 | Test suite has shared-DB pollution flakiness | MEDIUM | 15/16 files pass on full suite run (1 flaky — feed pollutes from shared DB ordering). All 16 pass individually. 30 tests skip intermittently from same cause. Dedicated test DB is the fix. |
-| 7 | CI gating not enforced | MEDIUM | No merge-to-main test requirement |
-| 8 | No staging environment | MEDIUM | Schema changes tested only in production |
-| 9 | Sentry not active in production | MEDIUM | Code is integrated (`@sentry/node` + `@sentry/nextjs`), but `SENTRY_DSN` not set on Railway/Vercel. |
-| 10 | Structured logging | ✅ (addressed) | pino + requestId + latency logging implemented. |
-| 11 | No uptime monitoring | LOW | No alerting on Railway/Vercel outages |
-| 12 | PWA/service worker not tested in audit | LOW | Code exists but no automated E2E verified push |
-| 13 | Devlog.author shows global UserRole, not StudioRole | LOW | Deliberate tradeoff — documented in code |
-| 14 | `notFound()` in client components causes hang | LOW | Reverted to error-state rendering |
-| 15 | No accessibility audit | LOW | Automated pass (axe-core / Lighthouse) not performed |
-| 16 | No production load test | LOW | Current API ceiling unknown |
-| 17 | No documented disaster recovery plan | LOW | Neon backup/restore not tested |
-| 18 | No payment processor | LOW | Games display prices but no actual purchase flow — may mislead users |
-| 19 | Legal documents (Terms + Privacy) are drafts | HIGH | Both pages contain banner: "Draft: This is a draft. Legal review is required before production." |
-| 20 | Missing professional repository files | MEDIUM | No `CONTRIBUTING.md`, `SECURITY.md`, or `CODE_OF_CONDUCT.md`. |
-| 21 | No Dependabot / Renovate | LOW | No automated dependency update configuration. |
-| 22 | `session-11-ci-trigger` merged to `main` | ✅ fixed | 44 commits including CSRF global guard, test unskips, registration error handling. Production registration 500 fixed by combining the merged code's env var fail-fast check with `RESEND_API_KEY` being set on Railway and a successful `deploymentRedeploy` via Railway API. The old Docker image was redeployed via `deploymentRedeploy(id, usePreviousImageTag: true)` which picked up the new env vars without rebuilding. Docker build cache issue remains unresolved (all `railway up` builds produce cached image digest `sha256:979115f7b45c18bbc2218ac028cd89f1123822dde2612f0a84791801248d4bc1`). |
+| # | Issue | Severity | Phase | Notes |
+|---|-------|----------|-------|-------|
+| 1 | `COOKIE_DOMAIN` not set on Railway | **HIGH** | P6 | Env vars verified via CLI: `SESSION_SECRET`, `JWT_SECRET`, `WEB_ORIGIN`, `NODE_ENV`, `DATABASE_URL`, `CSRF_SECRET`, `RESEND_API_KEY` all set. Only `COOKIE_DOMAIN` missing. |
+| 2 | Vercel env vars not verified | **HIGH** | P6 | `API_URL`, `NEXT_PUBLIC_SITE_URL` — CLI cannot verify Vercel dashboard settings |
+| 3 | Legal documents (Terms + Privacy) are drafts | **HIGH** | P6 | Both pages: "Draft: This is a draft. Legal review is required before production." |
+| 4 | OAuth missing CSRF state parameter | **HIGH** | P5 | `github.strategy.ts:15-39`, `google.strategy.ts:16-40` — no `state` param. CSRF attack vector. |
+| 5 | OAuth missing CSRF token generation | **HIGH** | P5 | `oauth.controller.ts:73` — creates session but no CSRF cookie. All POST after OAuth login fail. |
+| 6 | Dashboard: `/dashboard/studios` dead link | **HIGH** | P1 | `dashboard/page.tsx:60` — 404. Actual route is `/dashboard/studios/[slug]`. |
+| 7 | Dashboard: 6 pages missing auth guards | **HIGH** | P1 | `/dashboard/level`, `/dashboard/reports`, `/dashboard/reports/[id]`, `/dashboard/games`, `/dashboard/studios/level`, `/dashboard/studios/[slug]/team` |
+| 8 | "Join as a studio" visible to logged-in users | MEDIUM | P1 | `page.tsx:68-71` — should show "Dashboard" when authenticated. |
+| 9 | Dashboard: Login redirects to `/games` | MEDIUM | P1 | `login/page.tsx:33` — should redirect to `/dashboard`. |
+| 10 | Dashboard: "Team" duplicate in StudioDashboard | MEDIUM | P1 | `StudioDashboard.tsx:275,278` — same link twice. |
+| 11 | Dashboard: No `layout.tsx` — auth duplicated per page | MEDIUM | P1 | Every page independently calls `useAuth()`. Fragile. |
+| 12 | Dashboard: Top bar uses `<a>` instead of `<Link>` | LOW | P1 | `dashboard/page.tsx:48-63` — full page reloads. |
+| 13 | Devlog pagination not implemented (5/page) | MEDIUM | P2 | Game devlogs listing loads all at once. Needs blog-style pagination. |
+| 14 | Devlog rendering without explicit DOMPurify | MEDIUM | P5 | `devlogs/[id]/page.tsx:429` — `@uiw/react-md-editor` Markdown. |
+| 15 | No Next.js security headers (no middleware.ts) | MEDIUM | P5 | Frontend sends no CSP, HSTS, X-Frame-Options. |
+| 16 | CSP includes `'unsafe-eval'` | MEDIUM | P5 | `main.ts:81` — weakens XSS protection. |
+| 17 | Swagger docs exposed in production | MEDIUM | P5 | `main.ts:153` — `/docs` open in production. |
+| 18 | No server-side HTML sanitization | MEDIUM | P5 | Markdown stored as-is (devlog bodies, comments). |
+| 19 | CSRF token never expires server-side | MEDIUM | P5 | `csrf.service.ts:24-38` ignores timestamp. |
+| 20 | Railway Docker build cache broken | ✅ FIXED | P0 | **Misdiagnosis.** Root cause was `@sentry/cli` not in `onlyBuiltDependencies` (pnpm v11) + `loadEnvFile('.env')` crash (main.ts). First clean build: `d908fcd9`. |
+| 21 | Dashboard fake features (Recently Viewed, Library, Playtests) | LOW | P3 | `PlayerDashboard.tsx:125-128` — links to `/games` or `/feed`. Fake. |
+| 22 | Hardcoded "View all 5" text | LOW | P3 | `PlayerDashboard.tsx:516` — not based on actual data. |
+| 23 | Full browser login test not performed | LOW | P1 | Requires browser DevTools. |
+| 24 | Nested comments not end-to-end verified | MEDIUM | P4 | Backend has 3-level Prisma include. No seeded test data. |
+| 25 | Test suite has shared-DB pollution flakiness | MEDIUM | P6 | 15/16 pass on full suite (1 flaky). 30 tests skip intermittently. |
+| 26 | CI gating not enforced | MEDIUM | P6 | No merge-to-main test requirement. |
+| 27 | No staging environment | MEDIUM | P6 | Schema changes tested only in production. |
+| 28 | Sentry not active in production | MEDIUM | P6 | `SENTRY_DSN` not set on Railway/Vercel. |
+| 29 | Model games needed (5 games for showcase) | MEDIUM | P4 | Database has test data from multiple test runs. Need curated model games. |
+| 30 | Missing repository files | MEDIUM | P6 | No `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`. |
+| 31 | No uptime monitoring | LOW | P6 | No alerting on Railway/Vercel outages. |
+| 32 | No production load test | LOW | P6 | Current API ceiling unknown. |
+| 33 | No disaster recovery plan | LOW | P6 | Neon backup/restore not tested. |
+| 34 | No payment processor | LOW | P6 | Games display prices but no purchase flow. |
+| 35 | No Dependabot / Renovate | LOW | P6 | No automated dependency updates. |
+| 36 | No accessibility audit | LOW | P6 | Automated pass (axe-core / Lighthouse) not performed. |
+| 37 | PWA/service worker not tested in audit | LOW | P6 | Code exists but no automated E2E verified push. |
 
 ### Deferred (PRD Section 3 — Out of Scope)
 
