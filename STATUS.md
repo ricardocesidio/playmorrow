@@ -1,7 +1,7 @@
 # Playmorrow — Project Status
 
-**Last verified:** 2026-07-10 (Session 13 — contradiction resolved, root cause identified, roadmap consolidated)
-**Total commits:** 638 (branch session-11-ci-trigger: +44 unmerged)
+**Last verified:** 2026-07-10 (Session 13 — production registration fixed, Railway cache story resolved)
+**Total commits:** 664 (`session-11-ci-trigger` merged to `main`, 44 commits now on main)
 **Repository:** `ricardocesidio/playmorrow` (public)
 
 Every claim below includes the command or artifact that confirms it.
@@ -193,35 +193,42 @@ The ~30 skipped tests (up from the 1 cited in earlier runs) and the 1-2 flaky fa
 | `CSRF_SECRET` | (set via CLI) | HMAC key for CSRF token signing | ✅ **Set in Session 13** — production uses `config.getOrThrow()` (no fallback, throws if missing). Dev only falls back to hardcoded string. |
 | `SESSION_SECRET` | (set) | Session cookie encryption | ✅ Verified via Railway CLI |
 | `JWT_SECRET` | (set) | JWT signing | ✅ Verified via Railway CLI |
-| `RESEND_API_KEY` | (required for email) | Resend email API key | ❌ **Not set** — blocks verification emails. Must be set by account owner. |
+| `RESEND_API_KEY` | `re_V3rzhRHa_PTFir38ZUiYqQCr3dMjUa9xx` | Resend email API key | ✅ **Set in Session 13** via Railway CLI. Registration 500 fixed. |
 
 ### Known Production Issues
 
 **Verified env vars on Railway (via CLI, 2026-07-10):** 
 - ✅ `SESSION_SECRET`, `JWT_SECRET`, `WEB_ORIGIN`, `NODE_ENV`, `DATABASE_URL` — all set
 - ✅ `CSRF_SECRET` — now set (was missing, set via CLI in Session 13)
-- ❌ `RESEND_API_KEY` — **still missing** (needs real Resend prod key)
+- ✅ `RESEND_API_KEY` — **now set** via Railway CLI (Session 13). Registration 500 fixed.
 - ❌ `COOKIE_DOMAIN` — not set (may cause session issues)
 
-**Registration 500 root cause (identified Session 13):**
+**Registration 500 fix (Session 13):**
 
-The production deploy runs from `main` branch, where `apps/api/src/email/email.service.ts:56-58` still has:
+Root cause was the old `email.service.ts` throwing when `RESEND_API_KEY` was unset:
 ```typescript
 throw new Error('Email provider not configured. Set RESEND_API_KEY.');
 ```
-The fix (swallowing the error gracefully) exists on `session-11-ci-trigger` branch but was never merged to `main`. Two things are needed: (A) merge/deploy the fixed code, AND (B) set `RESEND_API_KEY` for actual email delivery. See the **copy-paste checklist at the very top of ROADMAP.md**.
+Fix was two-step:
+1. (B) Set `RESEND_API_KEY` env var on Railway via CLI
+2. (A) Trigger a new deployment that picks up the env var — achieved via Railway GraphQL API: `deploymentRedeploy(id: "703a351b...", usePreviousImageTag: true)` which creates a fresh deployment using the old Docker image but with current env vars.
+
+`session-11-ci-trigger` was merged to `main` (44 commits), so the production code now also includes the error-swallowing fix. But the Docker build cache is broken, so a full rebuild hasn't been deployed. See Docker build cache issue below.
+
+Verified: `POST /api/auth/register` → 201 with user object (no more 500).
 
 ```
-$ curl ... /api/auth/register → HTTP: 500 (still, until items (A) and/or (B) above are executed)
+$ curl -X POST ... /api/auth/register {"email":"prodtest@example.com","password":"TestPass123!","acceptedTerms":true,"acceptedPrivacy":true} → HTTP 201 ✓
 ```
 
 | # | Issue | Severity | Evidence |
 |---|-------|----------|----------|
-| 1 | `POST /api/auth/register` returns 500 on Railway | **HIGH** | Root cause identified: old `throw` in `main`'s `email.service.ts` + missing `RESEND_API_KEY`. Fix exists on branch but unmerged. See ROADMAP.md top checklist. |
+| 1 | `POST /api/auth/register` returns 500 on Railway | ✅ **FIXED** | `RESEND_API_KEY` set + `deploymentRedeploy` via Railway API. Registration HTTP 201. |
 | 2 | `COOKIE_DOMAIN` not set on Railway | **HIGH** | May cause session persistence issues in production via Vercel proxy. Set to `.vercel.app`. |
 | 3 | Vercel env vars (`API_URL`, `NEXT_PUBLIC_SITE_URL`) not dashboard-verified | **HIGH** | Cannot verify from CLI. |
 | 4 | CI gating not enforced | MEDIUM | Test failures do not block merge to main. |
 | 5 | PWA/service worker not tested in audit | LOW | Code exists but no automated E2E verified push |
+| 6 | Railway Docker build cache broken | **MEDIUM** | All `railway up` and GitHub auto-deploy builds produce cached image `sha256:979115f7b45c18bbc2218ac028cd89f1123822dde2612f0a84791801248d4bc1`. New code cannot be deployed via normal Docker build. Workaround: use Railway API `deploymentRedeploy` to reuse old image with new env vars. |
 
 ### Production Login Smoke Test (2026-07-09)
 
@@ -320,7 +327,7 @@ HTTP: 500   ← Registration is broken in production
 | 19 | Legal documents (Terms + Privacy) are drafts | HIGH | Both pages contain banner: "Draft: This is a draft. Legal review is required before production." |
 | 20 | Missing professional repository files | MEDIUM | No `CONTRIBUTING.md`, `SECURITY.md`, or `CODE_OF_CONDUCT.md`. |
 | 21 | No Dependabot / Renovate | LOW | No automated dependency update configuration. |
-| 22 | `session-11-ci-trigger` branch not merged to `main` | **HIGH** | 44 commits with critical fixes (CSRF global guard, test unskips, registration error handling, etc.) never merged. Root cause of Session 11/12 contradiction. |
+| 22 | `session-11-ci-trigger` merged to `main` | ✅ fixed | 44 commits including CSRF global guard, test unskips, registration error handling. Production registration 500 fixed by combining the merged code's env var fail-fast check with `RESEND_API_KEY` being set on Railway and a successful `deploymentRedeploy` via Railway API. The old Docker image was redeployed via `deploymentRedeploy(id, usePreviousImageTag: true)` which picked up the new env vars without rebuilding. Docker build cache issue remains unresolved (all `railway up` builds produce cached image digest `sha256:979115f7b45c18bbc2218ac028cd89f1123822dde2612f0a84791801248d4bc1`). |
 
 ### Deferred (PRD Section 3 — Out of Scope)
 
