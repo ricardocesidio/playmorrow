@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { PlayerDashboard } from '@/components/dashboard/PlayerDashboard';
 import { StudioDashboard } from '@/components/dashboard/StudioDashboard';
 import { useAuth } from '@/lib/api/auth-context';
@@ -20,21 +21,22 @@ export default function DashboardPage() {
           <>PLAYER DASHBOARD — Your activity, XP, wishlist and following</>
         )}
         <span className="ml-3 text-cyan/70">·</span>
-        <a href="/settings/profile" className="ml-2 underline hover:text-cyan">Settings</a>
+        <Link href="/settings/profile" className="ml-2 underline hover:text-cyan">Settings</Link>
         {!isStudio && (
           <>
             <span className="ml-2">·</span>
-            <a href="/me/wishlist" className="ml-2 underline hover:text-cyan" aria-label="View your wishlist">Wishlist</a>
-            <a href="/me/following" className="ml-2 underline hover:text-cyan" aria-label="View who you follow">Following</a>
-            <a href="/dashboard/level" className="ml-2 underline hover:text-cyan" aria-label="View level and XP">Level &amp; XP</a>
+            <Link href="/me/wishlist" className="ml-2 underline hover:text-cyan" aria-label="View your wishlist">Wishlist</Link>
+            <Link href="/me/following" className="ml-2 underline hover:text-cyan" aria-label="View who you follow">Following</Link>
+            <Link href="/dashboard/level" className="ml-2 underline hover:text-cyan" aria-label="View level and XP">Level &amp; XP</Link>
           </>
         )}
         {isStudio && (
           <>
             <span className="ml-2">·</span>
-            <a href="/dashboard/studios" className="ml-2 underline hover:text-cyan" aria-label="Manage my studios">My Studios</a>
-            <a href="/dashboard/games" className="ml-2 underline hover:text-cyan" aria-label="Manage games">Games</a>
-            <a href="/dashboard/devlogs" className="ml-2 underline hover:text-cyan" aria-label="Manage devlogs">Devlogs</a>
+            <Link href="/studios" className="ml-2 underline hover:text-cyan" aria-label="Browse studios">Browse Studios</Link>
+            <Link href="/dashboard/games" className="ml-2 underline hover:text-cyan" aria-label="Manage games">Games</Link>
+            <Link href="/dashboard/devlogs" className="ml-2 underline hover:text-cyan" aria-label="Manage devlogs">Devlogs</Link>
+            <Link href="/dashboard/studios/level" className="ml-2 underline hover:text-cyan" aria-label="View studio level and XP">Studio Level</Link>
           </>
         )}
       </div>

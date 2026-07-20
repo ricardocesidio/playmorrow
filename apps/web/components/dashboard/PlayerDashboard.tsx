@@ -15,8 +15,6 @@ import {
   Gamepad2,
   Gauge,
   Heart,
-  History,
-  Library,
   Lock,
   LogOut,
   MessageSquare,
@@ -122,12 +120,9 @@ export function PlayerDashboard() {
               <SidebarLink href="/dashboard" icon={<Users className="size-4" />} label="Overview" active />
               <SidebarLink href="/me/wishlist" icon={<Heart className="size-4" />} label="Wishlist" count={wishlistCount} />
               <SidebarLink href="/me/following" icon={<Users className="size-4" />} label="Following" count={followingCount} />
-              <SidebarLink href="/dashboard" icon={<Trophy className="size-4" />} label="Achievements" />
-              <SidebarLink href="/feed" icon={<Gamepad2 className="size-4" />} label="Playtests" />
-              <SidebarLink href="/games" icon={<History className="size-4" />} label="Recently Viewed" />
-              <SidebarLink href="/games" icon={<Library className="size-4" />} label="Library" />
-              <SidebarLink href="/dashboard/notifications" icon={<MessageSquare className="size-4" />} label="Messages" count={unreadCount} />
-              <SidebarLink href="/dashboard/level" icon={<Trophy className="size-4" />} label="Level System" count={user.level ?? 1} />
+              <SidebarLink href="/dashboard/level" icon={<Trophy className="size-4" />} label="Level & XP" count={user.level ?? 1} />
+              <SidebarLink href="/dashboard/notifications" icon={<Bell className="size-4" />} label="Notifications" count={unreadCount} />
+              <SidebarLink href="/games" icon={<Gamepad2 className="size-4" />} label="Browse Games" />
               <SidebarLink href="/settings/profile" icon={<Settings className="size-4" />} label="Settings" />
               <button
                 onClick={() => { logout(); router.push('/'); }}
@@ -220,7 +215,7 @@ export function PlayerDashboard() {
           </div>
 
           <DashboardPanel className="p-4">
-            <SectionHeader title="Achievements" href="/dashboard" compact />
+            <SectionHeader title="Recent Achievements" href="/dashboard/level" compact />
             <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
               {(achievementsData ?? []).slice(0, 6).map((a) => (
                 <div key={a.id} className={`flex flex-col items-center gap-2 border p-3 text-center transition ${
@@ -459,7 +454,7 @@ function DashboardHero({ name, onLogout }: { name: string; onLogout: () => void 
             <ActionButton href="/me/wishlist" icon={<Heart className="size-4" />} label="Open wishlist" />
             <ActionButton href="/me/following" icon={<Users className="size-4" />} label="Manage follows" />
             <ActionButton href="/settings/profile" icon={<UserRound className="size-4" />} label="Update profile" />
-            <ActionButton href="/feed" icon={<Radio className="size-4" />} label="Join playtests" />
+            <ActionButton href="/feed" icon={<Radio className="size-4" />} label="Live feed" />
           </div>
         </div>
       </div>
@@ -513,7 +508,7 @@ function SectionHeader({ title, href, meta, locked, compact }: { title: string; 
       </div>
       {href && (
         <Link href={href} className="inline-flex shrink-0 items-center gap-2 font-mono text-[0.62rem] text-cyan transition hover:text-white">
-          View all <span className="hidden sm:inline">5</span> <ArrowRight className="size-3" />
+          View all <ArrowRight className="size-3" />
         </Link>
       )}
     </div>

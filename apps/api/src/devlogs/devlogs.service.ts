@@ -3,6 +3,7 @@ import { StudioRole } from '@playmorrow/database';
 import type { Prisma } from '@playmorrow/database';
 
 import { assertStudioAccess } from '../common/studio-permissions';
+import { sanitizeHtml } from '../common/sanitize-html';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
 import { FeedEngineService } from '../feed/feed-events.service';
@@ -51,16 +52,17 @@ export class DevlogsService {
       throw new ConflictException('A devlog with this slug already exists for this game');
     }
 
+    const sanitizedBody = sanitizeHtml(dto.body);
     const isPublished = dto.isPublished ?? (dto.status === 'PUBLISHED');
     const publishedAt = isPublished ? (dto.publishedAt ? new Date(dto.publishedAt) : new Date()) : null;
-    const readingTimeMin = dto.readingTimeMin ?? Math.ceil(dto.body.split(/\s+/).length / 200);
+    const readingTimeMin = dto.readingTimeMin ?? Math.ceil(sanitizedBody.split(/\s+/).length / 200);
 
     const devlog = await this.prisma.devlog.create({
       data: {
         title: dto.title,
         subtitle: dto.subtitle,
         slug,
-        body: dto.body,
+        body: sanitizedBody,
         status: (dto.status ?? (isPublished ? 'PUBLISHED' : 'DRAFT')) as 'DRAFT' | 'PUBLISHED' | 'SCHEDULED',
         isPublished,
         publishedAt,
@@ -237,8 +239,9 @@ export class DevlogsService {
     const data: Prisma.DevlogUpdateInput = {};
     if (dto.title !== undefined) data.title = dto.title;
     if (dto.body !== undefined) {
-      data.body = dto.body;
-      data.readingTimeMin = Math.ceil(dto.body.split(/\s+/).length / 200);
+      const sanitizedBody = sanitizeHtml(dto.body);
+      data.body = sanitizedBody;
+      data.readingTimeMin = Math.ceil(sanitizedBody.split(/\s+/).length / 200);
     }
 
     if (dto.isPublished !== undefined) {

@@ -48,6 +48,8 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
+      # Use TEST_DATABASE_URL so vitest.setup.ts override + guard is exercised
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/playmorrow_test?schema=public
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/playmorrow_test?schema=public
       JWT_SECRET: test-secret
     steps:

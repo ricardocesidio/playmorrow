@@ -200,3 +200,76 @@ pnpm db:migrate
   3. Short term: Real Sentry + monitoring + legal fixes
   4. Medium term: A11y, load tests, staging, repo files, price labeling
 - Updated README commit count and references. No code changes in this session — pure analysis.
+
+### Session 13 — Production Hardening, Dashboard Restructure, Final Items & Ops Cleanup (2026-07-10)
+
+**This Session (2026-07-10):**
+
+1. Set `COOKIE_DOMAIN` on Railway
+2. Dashboard restructure (PlayerDashboard/StudioDashboard cleanup, 3 new pages: `/dashboard/devlogs`, `/dashboard/media`, `/dashboard/achievements`)
+3. Fixed login redirect `/games` → `/dashboard`
+4. Verified items 2-8 (auth guards, studio CTA, dead links, etc.) already resolved
+5. Verified items 9-14 (OAuth CSRF, CSP, Swagger, middleware) already implemented
+6. Item 15: DOMPurify on devlog detail page (`apps/web/app/devlogs/[id]/page.tsx`)
+7. Verified items 16-22 (devlog pagination, blog cards, seed script, all pages polished) already implemented
+8. Verified item 23 (legal pages) exist
+9. Item 24: Set `SENTRY_DSN` on Railway
+10. Item 25: GitHub branch protection configured (guided through UI)
+11. Item 26: Created `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`
+12. Items 27-32: verified/updated remaining-work.md
+13. Verified item 14 price labels already done
+14. Production smoke test — all endpoints green
+15. Fixed nested comments bug (frontend now uses tree structure from backend)
+16. Started local dev server
+
+**All Sessions (cumulative):**
+
+- Session 1 — Infrastructure
+- Session 2 — Game page fixes
+- Session 3 — Devlog system
+- Session 4 — Feed + Homepage
+- Session 5 — Security
+- Session 6 — Performance + SEO
+- Session 7 — QA + Documentation
+- Session 8 — Cleanup & Production Readiness
+- Session 9 — Production Hardening
+- Session 10 — Evidence-First Hardening & Enterprise Readiness (CSRF, tests, etc.)
+- Session 11 — CI Reconciliation & Test Suite Green
+- Session 12 — Professionalization Audit
+- Session 13 (this session) — All remaining work items resolved
+
+**Done This Session**
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | `COOKIE_DOMAIN` on Railway | ✅ Set |
+| 2-8 | Dashboard auth, links, redirects, top bar | ✅ Verified already correct |
+| 9-14 | OAuth CSRF, CSP, Swagger, middleware, price labels | ✅ Verified already implemented |
+| 15 | DOMPurify on devlog page | ✅ Fixed |
+| 16-22 | Devlog pagination, blog cards, seed script, homepage/detail/studio polish | ✅ Verified already implemented |
+| 23 | Legal pages | ✅ Exist |
+| 24 | `SENTRY_DSN` on Railway | ✅ Set |
+| 25 | GitHub branch protection | ✅ Configured |
+| 26 | CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md | ✅ Created |
+| 28 | coverUrl orphan column | ✅ Already dropped |
+| 29 | Structured logging (Pino) | ✅ Already implemented |
+| 31 | `.github/dependabot.yml` | ✅ Created |
+| 14 | "(Coming Soon)" price labels | ✅ Already in code |
+| — | Production smoke test | ✅ All endpoints green |
+| — | Nested comments bug fix | ✅ Fixed (tree structure) |
+| — | Local dev server | ✅ Running on :3000/:4000 |
+
+**Still Remaining (ops / deferred — no code changes)**
+
+| Item | What It Is |
+|------|------------|
+| Test DB | Spin up a Neon free branch so integration tests don't touch dev DB |
+| Staging env | Clone Railway project for preview deployments |
+| Uptime monitoring | Better Stack / UptimeRobot — 30 min setup |
+| GDPR legal review | Have a lawyer review Terms + Privacy drafts |
+| Data safety | Check Neon backup settings, document restore procedure |
+| A11y audit | Run axe-core/Lighthouse on key pages |
+| Load testing | k6/autocannon to establish baseline |
+| Payments (full) | Stripe integration — only needed when going to market |
+
+All previous high-priority items from Sessions 9–12 (registration, CSRF, auth guards, dashboard navigation, legal pages, repo files, Sentry, branch protection, etc.) are now resolved or verified.

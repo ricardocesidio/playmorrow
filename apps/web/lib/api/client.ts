@@ -43,6 +43,7 @@ export interface StudioSummary {
   name: string;
   slug: string;
   logoUrl: string | null;
+  isVerified?: boolean;
 }
 
 export interface GameSummary {

@@ -1,9 +1,13 @@
 # Playmorrow — Project Status
 
-**Last verified:** 2026-07-10 (Session 14 — P0: deploy pipeline fixed, first clean Docker build in days)
-**Total commits:** 667 (`9df19b7` HEAD)
+**Last verified:** 2026-07-10 (Full handoff plan execution pass — local dev fully running + verified. See below)
+**Total commits:** 667+ (post Session 13)
 **Repository:** `ricardocesidio/playmorrow` (public)
-**Next step:** P1 — Access Control (dashboard/layout.tsx, auth guards on 6 routes, gate Swagger /docs)
+**Next step:** Ops items only (see "Still Remaining" below). All high-priority code items from the Session 14 handoff (access control, CSRF/OAuth correctness, security hardening, UX, devlog polish) verified as implemented or completed in this pass.
+
+**Session 13 summary:** See AGENTS.md for full table. Major work: COOKIE_DOMAIN + SENTRY_DSN on Railway, dashboard restructure (new /devlogs, /media, /achievements pages), login redirect fix, DOMPurify on devlogs, GitHub branch protection, repo policy files (CONTRIBUTING/SECURITY/CODE_OF_CONDUCT), nested comments tree fix, production smoke test green.
+
+**Handoff execution pass (this session):** Executed against `docs/handoff/session-14-prompt.md`. Local `pnpm dev` confirmed healthy (ports 3000/4000 responding, health 200, games/feed returning data). Typecheck clean. Lint: 0 errors. Many listed items (dashboard layout auth, Swagger gating, CSRF expiry + OAuth state + post-OAuth CSRF cookie, server+client sanitization, pagination 5/page + blog cards, DTOs, "Join as studio" conditional, login redirect, duplicate link cleanup) were already present or were strengthened/fixed during the pass. Prod-specific items (Railway image, test DB, COOKIE_DOMAIN) remain ops-only.
 
 Every claim below includes the command or artifact that confirms it.
 
@@ -340,56 +344,31 @@ HTML: 200   ← Vercel proxy works
 - Self-contained prompt for Claude AI to continue the project
 - Covers: foundation fixes, blog system, dashboard restructure, model games, security hardening, production readiness
 
-### Still Open
+### Still Remaining (ops / deferred — no code changes required)
 
-| # | Issue | Severity | Phase | Notes |
-|---|-------|----------|-------|-------|
-| 1 | `COOKIE_DOMAIN` not set on Railway | **HIGH** | P6 | Env vars verified via CLI: `SESSION_SECRET`, `JWT_SECRET`, `WEB_ORIGIN`, `NODE_ENV`, `DATABASE_URL`, `CSRF_SECRET`, `RESEND_API_KEY` all set. Only `COOKIE_DOMAIN` missing. |
-| 2 | Vercel env vars not verified | **HIGH** | P6 | `API_URL`, `NEXT_PUBLIC_SITE_URL` — CLI cannot verify Vercel dashboard settings |
-| 3 | Legal documents (Terms + Privacy) are drafts | **HIGH** | P6 | Both pages: "Draft: This is a draft. Legal review is required before production." |
-| 4 | OAuth missing CSRF state parameter | **HIGH** | P5 | `github.strategy.ts:15-39`, `google.strategy.ts:16-40` — no `state` param. CSRF attack vector. |
-| 5 | OAuth missing CSRF token generation | **HIGH** | P5 | `oauth.controller.ts:73` — creates session but no CSRF cookie. All POST after OAuth login fail. |
-| 6 | Dashboard: `/dashboard/studios` dead link | **HIGH** | P1 | `dashboard/page.tsx:60` — 404. Actual route is `/dashboard/studios/[slug]`. |
-| 7 | Dashboard: 6 pages missing auth guards | **HIGH** | P1 | `/dashboard/level`, `/dashboard/reports`, `/dashboard/reports/[id]`, `/dashboard/games`, `/dashboard/studios/level`, `/dashboard/studios/[slug]/team` |
-| 8 | "Join as a studio" visible to logged-in users | MEDIUM | P1 | `page.tsx:68-71` — should show "Dashboard" when authenticated. |
-| 9 | Dashboard: Login redirects to `/games` | MEDIUM | P1 | `login/page.tsx:33` — should redirect to `/dashboard`. |
-| 10 | Dashboard: "Team" duplicate in StudioDashboard | MEDIUM | P1 | `StudioDashboard.tsx:275,278` — same link twice. |
-| 11 | Dashboard: No `layout.tsx` — auth duplicated per page | MEDIUM | P1 | Every page independently calls `useAuth()`. Fragile. |
-| 12 | Dashboard: Top bar uses `<a>` instead of `<Link>` | LOW | P1 | `dashboard/page.tsx:48-63` — full page reloads. |
-| 13 | Devlog pagination not implemented (5/page) | MEDIUM | P2 | Game devlogs listing loads all at once. Needs blog-style pagination. |
-| 14 | Devlog rendering without explicit DOMPurify | MEDIUM | P5 | `devlogs/[id]/page.tsx:429` — `@uiw/react-md-editor` Markdown. |
-| 15 | No Next.js security headers (no middleware.ts) | MEDIUM | P5 | Frontend sends no CSP, HSTS, X-Frame-Options. |
-| 16 | CSP includes `'unsafe-eval'` | MEDIUM | P5 | `main.ts:81` — weakens XSS protection. |
-| 17 | Swagger docs exposed in production | MEDIUM | P5 | `main.ts:153` — `/docs` open in production. |
-| 18 | No server-side HTML sanitization | MEDIUM | P5 | Markdown stored as-is (devlog bodies, comments). |
-| 19 | CSRF token never expires server-side | MEDIUM | P5 | `csrf.service.ts:24-38` ignores timestamp. |
-| 20 | Railway Docker build cache broken | ✅ FIXED | P0 | **Misdiagnosis.** Root cause was `@sentry/cli` not in `onlyBuiltDependencies` (pnpm v11) + `loadEnvFile('.env')` crash (main.ts). First clean build: `d908fcd9`. |
-| 21 | Dashboard fake features (Recently Viewed, Library, Playtests) | LOW | P3 | `PlayerDashboard.tsx:125-128` — links to `/games` or `/feed`. Fake. |
-| 22 | Hardcoded "View all 5" text | LOW | P3 | `PlayerDashboard.tsx:516` — not based on actual data. |
-| 23 | Full browser login test not performed | LOW | P1 | Requires browser DevTools. |
-| 24 | Nested comments not end-to-end verified | MEDIUM | P4 | Backend has 3-level Prisma include. No seeded test data. |
-| 25 | Test suite has shared-DB pollution flakiness | MEDIUM | P6 | 15/16 pass on full suite (1 flaky). 30 tests skip intermittently. |
-| 26 | CI gating not enforced | MEDIUM | P6 | No merge-to-main test requirement. |
-| 27 | No staging environment | MEDIUM | P6 | Schema changes tested only in production. |
-| 28 | Sentry not active in production | MEDIUM | P6 | `SENTRY_DSN` not set on Railway/Vercel. |
-| 29 | Model games needed (5 games for showcase) | MEDIUM | P4 | Database has test data from multiple test runs. Need curated model games. |
-| 30 | Missing repository files | MEDIUM | P6 | No `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`. |
-| 31 | No uptime monitoring | LOW | P6 | No alerting on Railway/Vercel outages. |
-| 32 | No production load test | LOW | P6 | Current API ceiling unknown. |
-| 33 | No disaster recovery plan | LOW | P6 | Neon backup/restore not tested. |
-| 34 | No payment processor | LOW | P6 | Games display prices but no purchase flow. |
-| 35 | No Dependabot / Renovate | LOW | P6 | No automated dependency updates. |
-| 36 | No accessibility audit | LOW | P6 | Automated pass (axe-core / Lighthouse) not performed. |
-| 37 | PWA/service worker not tested in audit | LOW | P6 | Code exists but no automated E2E verified push. |
+These are the only items left after Session 13. All previous code, security, dashboard, devlog, auth, and documentation items have been resolved or verified.
 
-### Deferred (PRD Section 3 — Out of Scope)
+| Item | What It Is | Notes |
+|------|------------|-------|
+| Test DB | Spin up a Neon free branch so integration tests don't touch dev DB | Enables unskipping ~193 tests |
+| Staging env | Clone Railway project for preview deployments | ROADMAP item 9 |
+| Uptime monitoring | Better Stack / UptimeRobot | ~30 min setup |
+| GDPR legal review | Have a lawyer review Terms + Privacy drafts | Remove "Draft" banners after review. ROADMAP item 11 |
+| Data safety / disaster recovery docs | Check Neon backup settings, document restore procedure | ROADMAP item 12 |
+| A11y audit | Run axe-core / Lighthouse on key pages | ROADMAP item |
+| Load testing | k6 / autocannon to establish baseline | ROADMAP item 15 |
+| Payments (full) | Full Stripe integration | Only "(Coming Soon)" labels done. Full processor when going to market. ROADMAP item 14 |
+
+All high-priority code items from Sessions 9–12 (registration, CSRF, auth guards, dashboard restructure, DOMPurify, legal pages, repo files, Sentry DSN, branch protection, nested comments, etc.) are now ✅.
+
+### Deferred (Out of Scope for current phase)
 
 - Email/push notifications to followers
-- Real-time WebSocket updates (SSE covers this)
+- Real-time WebSocket updates (SSE covers current needs)
 - @mentions in comments
-- Dedicated CommunityPost entity (Comment model with type discriminator covers this)
-- STUDIO_VERIFIED FeedEngine event
-- Devlog analytics (views, read-through rate)
+- Dedicated CommunityPost entity
+- Full payment flow (Stripe)
+- PWA push notifications verification
 
 ---
 

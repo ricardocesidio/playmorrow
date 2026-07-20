@@ -8,13 +8,11 @@ import {
   BarChart3,
   Boxes,
   CalendarDays,
-  CircleDollarSign,
   Download,
   FileText,
   Gamepad2,
   Gauge,
   Heart,
-  Library,
   LineChart,
   MessageSquare,
   MonitorPlay,
@@ -151,7 +149,7 @@ export function StudioDashboard() {
               <StatCard icon={<Target className="size-5" />} label="Total Wishlists" value={formatNumber(wishlists)} delta={ds ? formatDelta(ds.stats.wishlistsThisWeek) : undefined} tone="cyan" />
               <StatCard icon={<MonitorPlay className="size-5" />} label="Total Views" value={formatNumber(views)} delta={ds ? formatDelta(ds.stats.viewsThisWeek) : undefined} tone="violet" />
               <StatCard icon={<MessageSquare className="size-5" />} label="Comments" value={formatNumber(comments)} delta={ds ? formatDelta(ds.stats.commentsThisMonth) : undefined} tone="cyan" />
-              <StatCard icon={<Users className="size-5" />} label="Playtests Active" value={0} tone="muted" />
+              <StatCard icon={<Users className="size-5" />} label="Team Members" value={studio?.membersCount ?? '-'} tone="muted" />
               <StatCard icon={<CalendarDays className="size-5" />} label="Since Joined" value={formatMonthYear(studio.createdAt)} tone="muted" />
             </div>
 
@@ -172,10 +170,10 @@ export function StudioDashboard() {
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <ActionCard href="/dashboard/games/new" icon={<Rocket className="size-5" />} title="Create Game" body="Start a new project" />
                 <ActionCard href="/dashboard/devlogs/new" icon={<FileText className="size-5" />} title="New Devlog" body="Share development" />
-                <ActionCard href={studioSlug ? `/dashboard/studios/${studioSlug}` : '/studios/new'} icon={<UploadCloud className="size-5" />} title="Upload Media" body="Images, videos, files" />
+                <ActionCard href="/dashboard/media" icon={<UploadCloud className="size-5" />} title="Upload Media" body="Images, videos, files" />
                 <ActionCard href="/dashboard/roadmap" icon={<Workflow className="size-5" />} title="Update Roadmap" body="Plan your progress" />
-                <ActionCard href={studioSlug ? `/dashboard/studios/${studioSlug}` : '/studios/new'} icon={<Users className="size-5" />} title="Invite Members" body="Add to your team" />
-                <ActionCard href="/dashboard/feed" icon={<BarChart3 className="size-5" />} title="Studio Analytics" body="View performance" />
+                <ActionCard href={studioSlug ? `/dashboard/studios/${studioSlug}/team` : '/studios/new'} icon={<Users className="size-5" />} title="Invite Team" body="Add members" />
+                <ActionCard href="/dashboard/reports" icon={<BarChart3 className="size-5" />} title="Studio Reports" body="View performance" />
                 <ActionCard href={studioSlug ? `/dashboard/studios/${studioSlug}` : '/studios/new'} icon={<Settings className="size-5" />} title="Studio Settings" body="Manage studio" />
               </div>
             </DashboardPanel>
@@ -268,15 +266,11 @@ function StudioSidebar({ unreadCount, studioSlug }: { unreadCount: number; studi
         <nav className="mt-3 space-y-1">
           <SidebarLink href="/dashboard" icon={<PanelLeft className="size-4" />} label="Overview" active />
           <SidebarLink href="/dashboard/games" icon={<Gamepad2 className="size-4" />} label="My Games" />
-          <SidebarLink href="/dashboard/devlogs/new" icon={<FileText className="size-4" />} label="Devlogs" />
+          <SidebarLink href="/dashboard/devlogs" icon={<FileText className="size-4" />} label="Devlogs" />
           <SidebarLink href="/dashboard/roadmap" icon={<Workflow className="size-4" />} label="Roadmap" />
-          <SidebarLink href="/dashboard/feed" icon={<LineChart className="size-4" />} label="Analytics" />
-          <SidebarLink href="/dashboard/notifications" icon={<MessageSquare className="size-4" />} label="Community" count={unreadCount} />
+          <SidebarLink href="/dashboard/reports" icon={<LineChart className="size-4" />} label="Reports" />
+          <SidebarLink href="/dashboard/notifications" icon={<MessageSquare className="size-4" />} label="Activity" count={unreadCount} />
           <SidebarLink href={`/dashboard/studios/${studioSlug}/team`} icon={<ShieldCheck className="size-4" />} label="Team" />
-          <SidebarLink href={`/dashboard/studios/${studioSlug}`} icon={<Library className="size-4" />} label="Media Library" />
-          <SidebarLink href="/studios" icon={<Users className="size-4" />} label="Followers" />
-          <SidebarLink href={`/dashboard/studios/${studioSlug}/team`} icon={<ShieldCheck className="size-4" />} label="Team" />
-          <SidebarLink href="/dashboard/reports" icon={<CircleDollarSign className="size-4" />} label="Payouts" />
           <SidebarLink href={`/dashboard/studios/${studioSlug}`} icon={<Settings className="size-4" />} label="Settings" />
         </nav>
         <div className="mt-5 overflow-hidden border border-border/70 p-3">

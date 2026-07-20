@@ -22,7 +22,8 @@ export function MarkdownEditor({ value, onChange, minHeight = 300 }: MarkdownEdi
       e.preventDefault();
       const direction = e.key === 'ArrowRight' ? 1 : -1;
       const nextIndex = (currentIndex + direction + modes.length) % modes.length;
-      setMode(modes[nextIndex]);
+      const nextMode = modes[nextIndex];
+      if (nextMode) setMode(nextMode);
     }
   };
 

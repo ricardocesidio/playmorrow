@@ -52,7 +52,6 @@ import {
 
 const fallbackScreenshots: string[] = [];
 const fallbackRoadmap: never[][] = [];
-const fallbackDevlogs: never[][] = [];
 
 interface GameCommentItem {
   id: string;
@@ -659,19 +658,33 @@ function RoadmapNode({ state }: { state: string }) {
 }
 
 function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
-  const rows = devlogs.length
-    ? devlogs.slice(0, 3).map((item) => [item.title, item.publishedAt ? new Date(item.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '', item.reactionsCount ?? 0, item.commentsCount ?? 0, `/devlogs/${item.id}`] as const)
-    : fallbackDevlogs.map((item) => [...item.slice(0, 2), ...item.slice(3)] as const);
+  const items = devlogs.slice(0, 3);
 
   return (
     <TechPanel title="Latest Devlogs" action="View all" actionHref={`/games/${slug}/devlogs`} className="h-full">
-      <div className="grid gap-3">
-        {rows.map(([title, date, reactions, comments, href]) => (
-          <Link href={href} key={title} className="block cursor-pointer border-b border-border/45 pb-3 last:border-b-0 transition hover:border-cyan">
-            <span className="min-w-0">
-              <span className="line-clamp-2 font-mono text-xs font-bold text-foreground">{title}</span>
-              <span className="mt-1 flex items-center gap-4 text-[11px] text-muted-foreground">{date}<span className="inline-flex items-center gap-1"><Flame className="size-3" />{reactions}</span><span className="inline-flex items-center gap-1"><MessageCircle className="size-3" />{comments}</span></span>
-            </span>
+      <div className="space-y-3">
+        {items.map((dl) => (
+          <Link
+            key={dl.id}
+            href={`/devlogs/${dl.id}`}
+            className="group block clip-corner border border-border/60 bg-[#050b0f]/60 p-3 transition hover:border-cyan/60"
+          >
+            <div className="flex gap-3">
+              {dl.screenshots && dl.screenshots.length > 0 ? (
+                <div className="size-12 shrink-0 overflow-hidden rounded border border-border/40">
+                  <img src={dl.screenshots[0]?.url ?? ''} alt="" className="size-full object-cover" />
+                </div>
+              ) : null}
+              <div className="min-w-0 flex-1">
+                <div className="font-mono text-xs font-bold text-foreground group-hover:text-cyan">{dl.title}</div>
+                {dl.subtitle && <div className="mt-0.5 line-clamp-1 text-[10px] text-muted-foreground">{dl.subtitle}</div>}
+                {dl.body && <div className="mt-0.5 text-[9px] text-muted-foreground line-clamp-2">{dl.body.replace(/[#*`_]/g, ' ').substring(0, 120)}...</div>}
+                <div className="mt-1 text-[10px] text-muted-foreground">
+                  {dl.author && `by ${dl.author.displayName || dl.author.username} · `}
+                  {dl.publishedAt ? new Date(dl.publishedAt).toLocaleDateString() : ''} · {dl.readingTimeMin || 1} min
+                </div>
+              </div>
+            </div>
           </Link>
         ))}
       </div>

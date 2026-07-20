@@ -13,6 +13,7 @@ import { EmailService } from '../email/email.service';
 import { TokenService } from './token.service';
 import type { LoginDto } from './dto/login.dto';
 import type { RegisterDto } from './dto/register.dto';
+import { CompleteOnboardingDto } from './dto/complete-onboarding.dto';
 
 const LOCKOUT_THRESHOLD = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 min
@@ -377,17 +378,11 @@ export class AuthService {
     return { accessToken, refreshToken: rawRefresh };
   }
 
-  async completeOnboarding(dto: Record<string, unknown>) {
-    const accountType = dto.accountType as string;
-    if (!['PLAYER', 'STUDIO'].includes(accountType)) throw new BadRequestException('Invalid account type');
-
-    const username = (dto.username as string)?.trim();
-    const usernameLowercase = username?.toLowerCase();
-    if (!username || username.length < 3 || username.length > 20) throw new BadRequestException('Username must be 3-20 characters');
-    if (!USERNAME_PATTERN.test(username)) throw new BadRequestException('Username can only contain letters, numbers, and underscores');
-
-    const email = (dto.email as string)?.toLowerCase();
-    if (!email) throw new BadRequestException('Email is required');
+  async completeOnboarding(dto: CompleteOnboardingDto) {
+    const accountType = dto.accountType;
+    const username = dto.username.trim();
+    const usernameLowercase = username.toLowerCase();
+    const email = dto.email.toLowerCase();
 
     const existingByUsername = await this.prisma.user.findFirst({ where: { usernameLowercase } });
     if (existingByUsername && existingByUsername.email !== email) throw new ConflictException('Username already taken');
@@ -398,7 +393,7 @@ export class AuthService {
     }
 
     if (accountType === 'STUDIO') {
-      const studioSlug = ((dto.studioSlug as string) || username).trim().toLowerCase();
+      const studioSlug = (dto.studioSlug ?? username).trim().toLowerCase();
       if (!STUDIO_SLUG_PATTERN.test(studioSlug) || studioSlug.length < 3 || studioSlug.length > 40) {
         throw new BadRequestException('Studio slug must be 3-40 lowercase letters, numbers, or hyphens.');
       }
@@ -412,11 +407,11 @@ export class AuthService {
         email,
         username,
         usernameLowercase,
-        displayName: ((dto.displayName as string) || username).trim(),
-        avatarUrl: (dto.avatarUrl as string) || null,
-        bio: (dto.bio as string) || null,
-        country: (dto.country as string) || null,
-        accountType: accountType as 'PLAYER' | 'STUDIO',
+        displayName: (dto.displayName || username).trim(),
+        avatarUrl: dto.avatarUrl || null,
+        bio: dto.bio || null,
+        country: dto.country || null,
+        accountType,
         role: accountType === 'STUDIO' ? 'PUBLISHER' as const : 'PLAYER' as const,
         emailVerifiedAt: now,
         isVerified: true,
@@ -436,13 +431,13 @@ export class AuthService {
       if (accountType === 'STUDIO') {
         await tx.studio.create({
           data: {
-            slug: ((dto.studioSlug as string) || username).trim().toLowerCase(),
-            name: ((dto.studioName as string) || (dto.displayName as string) || username).trim(),
-            tagline: (dto.studioBio as string) || null,
-            description: (dto.studioBio as string) || null,
-            logoUrl: (dto.studioLogoUrl as string) || (dto.avatarUrl as string) || null,
-            websiteUrl: (dto.websiteUrl as string) || null,
-            location: (dto.location as string) || null,
+            slug: (dto.studioSlug || username).trim().toLowerCase(),
+            name: (dto.studioName || dto.displayName || username).trim(),
+            tagline: dto.studioBio || null,
+            description: dto.studioBio || null,
+            logoUrl: dto.studioLogoUrl || dto.avatarUrl || null,
+            websiteUrl: dto.websiteUrl || null,
+            location: dto.location || null,
             isVerified: false,
             members: { create: { userId: completedUser.id, role: 'OWNER' } },
           },
@@ -450,8 +445,8 @@ export class AuthService {
       }
 
       if (accountType === 'PLAYER') {
-        const followSlugs = (dto.followStudioSlugs as string[]) ?? [];
-        const wishlistSlugs = (dto.wishlistGameSlugs as string[]) ?? [];
+        const followSlugs = dto.followStudioSlugs ?? [];
+        const wishlistSlugs = dto.wishlistGameSlugs ?? [];
 
         if (followSlugs.length > 0) {
           const studios = await tx.studio.findMany({ where: { slug: { in: followSlugs } }, select: { id: true } });

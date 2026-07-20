@@ -140,13 +140,13 @@ export function useStudios(page = 1, pageSize = 20, search?: string) {
 
 // ── Devlogs ─────────────────────────────────────────────────────────────
 
-export function useGameDevlogs(gameSlug: string, token?: string, includeDrafts?: boolean) {
+export function useGameDevlogs(gameSlug: string, page = 1, pageSize = 5) {
   const params = new URLSearchParams();
-  if (includeDrafts) params.set('includeDrafts', 'true');
-  const qs = params.toString() ? `?${params}` : '';
+  params.set('page', String(page));
+  params.set('pageSize', String(pageSize));
   return useQuery({
-    queryKey: ['gameDevlogs', gameSlug, includeDrafts],
-    queryFn: () => api.get<Paginated<Devlog>>(`/games/${gameSlug}/devlogs${qs}`, token),
+    queryKey: ['gameDevlogs', gameSlug, page, pageSize],
+    queryFn: () => api.get<Paginated<Devlog>>(`/games/${gameSlug}/devlogs?${params}`),
     enabled: !!gameSlug,
   });
 }
