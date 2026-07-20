@@ -15,7 +15,6 @@ import { RolesGuard } from './guards/roles.guard';
 import { AuthService } from './auth.service';
 import { SessionService } from '../session/session.service';
 import { CsrfService } from '../common/csrf.service';
-import { CsrfGuard } from '../common/csrf.guard';
 
 const SESSION_COOKIE = 'playmorrow_session';
 

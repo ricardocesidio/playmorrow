@@ -299,7 +299,7 @@ export class CommentsService {
       }),
       this.prisma.comment.count({ where }),
     ]);
-    return { items, total, page, pageSize };
+    return { items, total, page, pageSize, hasMore: page * pageSize < total };
   }
 
   async createForGame(slug: string, authorId: string, body: string) {
