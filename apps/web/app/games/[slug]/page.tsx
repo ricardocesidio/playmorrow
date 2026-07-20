@@ -672,7 +672,7 @@ function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
             <div className="flex gap-3">
               {dl.screenshots && dl.screenshots.length > 0 ? (
                 <div className="size-12 shrink-0 overflow-hidden rounded border border-border/40">
-                  <img src={dl.screenshots[0]?.url ?? ''} alt="" className="size-full object-cover" />
+                  <img src={dl.screenshots[0]?.url ?? ''} alt={`${dl.title} screenshot`} className="size-full object-cover" />
                 </div>
               ) : null}
               <div className="min-w-0 flex-1">
@@ -786,7 +786,7 @@ function CommunityPanel({ slug }: { slug: string }) {
     } else {
       reactToComment.mutate({ commentId: comment.id, type: 'LIKE' });
     }
-    console.log('Like toggled for comment:', comment.id);
+
   };
 
   return (
@@ -820,7 +820,7 @@ function CommunityPanel({ slug }: { slug: string }) {
             return (
             <div key={comment.id} className="grid grid-cols-[32px_1fr_auto] gap-3">
               {author.avatarUrl ? (
-                <img src={author.avatarUrl} alt="" className="size-7 rounded-full object-cover" />
+                <img src={author.avatarUrl} alt={`${author.displayName}'s avatar`} className="size-7 rounded-full object-cover" />
               ) : (
                 <span className="grid size-7 place-items-center rounded-full bg-muted text-xs text-foreground">
                   {author.displayName.slice(0, 1)}

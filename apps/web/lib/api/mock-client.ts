@@ -35,11 +35,11 @@ const mockAuditEvents: any[] = [
 
 export function createMockApi() {
   const handler = {
-    get: <T>(path: string, _token?: string): Promise<T> => handleRequest('GET', path) as Promise<T>,
-    post: <T>(path: string, _body?: unknown, _token?: string): Promise<T> => handleRequest('POST', path, _body) as Promise<T>,
-    put: <T>(path: string, _body?: unknown, _token?: string): Promise<T> => handleRequest('PUT', path, _body) as Promise<T>,
-    patch: <T>(path: string, _body?: unknown, _token?: string): Promise<T> => handleRequest('PATCH', path, _body) as Promise<T>,
-    delete: <T>(path: string, _token?: string): Promise<T> => handleRequest('DELETE', path) as Promise<T>,
+    get: <T>(path: string): Promise<T> => handleRequest('GET', path) as Promise<T>,
+    post: <T>(path: string, _body?: unknown): Promise<T> => handleRequest('POST', path, _body) as Promise<T>,
+    put: <T>(path: string, _body?: unknown): Promise<T> => handleRequest('PUT', path, _body) as Promise<T>,
+    patch: <T>(path: string, _body?: unknown): Promise<T> => handleRequest('PATCH', path, _body) as Promise<T>,
+    delete: <T>(path: string, _bodyOrToken?: unknown): Promise<T> => handleRequest('DELETE', path) as Promise<T>,
   };
 
   return handler;

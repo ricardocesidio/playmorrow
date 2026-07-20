@@ -1,16 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { createHash, randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
+
+import { hashToken } from '../common/crypto-utils';
 
 const TOKEN_BYTES = 32; // 256 bits
 const TOKEN_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 
-function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex');
-}
-
 @Injectable()
 export class TokenService {
-  constructor() {}
 
   generate() {
     const raw = randomBytes(TOKEN_BYTES).toString('base64url');

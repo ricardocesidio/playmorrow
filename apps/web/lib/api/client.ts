@@ -338,10 +338,10 @@ function createRealClient() {
   }
 
   return {
-    get: <T>(path: string, _token?: string) => request<T>(path),
-    post: <T>(path: string, body?: unknown, _token?: string) => request<T>(path, { method: 'POST', body }),
-    put: <T>(path: string, body?: unknown, _token?: string) => request<T>(path, { method: 'PUT', body }),
-    patch: <T>(path: string, body?: unknown, _token?: string) => request<T>(path, { method: 'PATCH', body }),
+    get: <T>(path: string) => request<T>(path),
+    post: <T>(path: string, body?: unknown) => request<T>(path, { method: 'POST', body }),
+    put: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PUT', body }),
+    patch: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PATCH', body }),
     delete: <T>(path: string, bodyOrToken?: unknown) => {
       const body = bodyOrToken != null && typeof bodyOrToken === 'object' ? bodyOrToken : undefined;
       return request<T>(path, { method: 'DELETE', body });
@@ -361,11 +361,11 @@ function createHybridClient(): ReturnType<typeof createRealClient> {
   const mock = createMockClient();
   const isAuth = (path: string) => path.startsWith('/auth/');
   return {
-    get: <T>(path: string, token?: string) => isAuth(path) ? real.get<T>(path, token) : mock.get<T>(path, token),
-    post: <T>(path: string, body?: unknown, token?: string) => isAuth(path) ? real.post<T>(path, body, token) : mock.post<T>(path, body, token),
-    put: <T>(path: string, body?: unknown, token?: string) => isAuth(path) ? real.put<T>(path, body, token) : mock.put<T>(path, body, token),
-    patch: <T>(path: string, body?: unknown, token?: string) => isAuth(path) ? real.patch<T>(path, body, token) : mock.patch<T>(path, body, token),
-    delete: <T>(path: string, bodyOrToken?: unknown) => isAuth(path) ? real.delete<T>(path, bodyOrToken) : mock.delete<T>(path, bodyOrToken),
+    get: <T>(path: string) => (isAuth(path) ? real.get<T>(path) : mock.get<T>(path)),
+    post: <T>(path: string, body?: unknown) => (isAuth(path) ? real.post<T>(path, body) : mock.post<T>(path, body)),
+    put: <T>(path: string, body?: unknown) => (isAuth(path) ? real.put<T>(path, body) : mock.put<T>(path, body)),
+    patch: <T>(path: string, body?: unknown) => (isAuth(path) ? real.patch<T>(path, body) : mock.patch<T>(path, body)),
+    delete: <T>(path: string, bodyOrToken?: unknown) => (isAuth(path) ? real.delete<T>(path, bodyOrToken) : mock.delete<T>(path, bodyOrToken)),
   };
 }
 
