@@ -6,6 +6,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['src/**/*.spec.ts'],
+    setupFiles: ['./vitest.setup.ts'],
     root: './',
     // Coverage support (added per audit "consider adding code coverage")
     // Run with: pnpm test -- --coverage

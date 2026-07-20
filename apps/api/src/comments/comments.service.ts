@@ -3,6 +3,7 @@ import { GamesService } from '../games/games.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PlayerXpService } from '../player-xp/player-xp.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { sanitizeHtml } from '../common/sanitize-html';
 import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateCommentDto } from './dto/create-comment.dto';
 import type { UpdateCommentDto } from './dto/update-comment.dto';
@@ -59,7 +60,7 @@ export class CommentsService {
 
     const comment = await this.prisma.comment.create({
       data: {
-        body: dto.body,
+        body: sanitizeHtml(dto.body),
         devlogId,
         authorId: userId,
         parentId: dto.parentId ?? null,
@@ -209,7 +210,7 @@ export class CommentsService {
 
     const updated = await this.prisma.comment.update({
       where: { id: commentId },
-      data: { body: dto.body },
+      data: { body: sanitizeHtml(dto.body) },
       include: {
         author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
       },
@@ -303,11 +304,11 @@ export class CommentsService {
 
   async createForGame(slug: string, authorId: string, body: string) {
     const game = await this.prisma.game.findUniqueOrThrow({ where: { slug }, select: { id: true, studioId: true } });
-    const trimmed = body.trim();
-    if (!trimmed) throw new BadRequestException('Comment cannot be empty');
-    if (trimmed.length > 1000) throw new BadRequestException('Comment must be 1000 characters or fewer');
+    const sanitized = sanitizeHtml(body.trim());
+    if (!sanitized) throw new BadRequestException('Comment cannot be empty');
+    if (sanitized.length > 1000) throw new BadRequestException('Comment must be 1000 characters or fewer');
     const comment = await this.prisma.comment.create({
-      data: { gameId: game.id, authorId, body: trimmed },
+      data: { gameId: game.id, authorId, body: sanitized },
       include: {
         author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
       },

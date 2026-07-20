@@ -31,9 +31,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.redirect(new URL(`/login?error=${msg}`, request.url));
     }
 
-    const setCookie = res.headers.get('set-cookie');
-    const response = NextResponse.redirect(new URL('/games', request.url));
-    if (setCookie) response.headers.set('set-cookie', setCookie);
+    const response = NextResponse.redirect(new URL('/dashboard', request.url));
+
+    // Forward session cookie from backend using Next's cookie setter (more reliable for attributes/domain/sameSite in prod)
+    const setCookies = res.headers.getSetCookie ? res.headers.getSetCookie() : (res.headers.get('set-cookie') ? [res.headers.get('set-cookie') as string] : []);
+    for (const cookieStr of setCookies) {
+      if (!cookieStr) continue;
+      // Parse "name=value; Path=...; ..."
+      const parts = cookieStr.split(';').map(s => s.trim());
+      const nameValue = parts[0];
+      if (!nameValue) continue;
+      const eqIdx = nameValue.indexOf('=');
+      if (eqIdx === -1) continue;
+      const name = nameValue.slice(0, eqIdx);
+      const value = nameValue.slice(eqIdx + 1);
+      const options: Record<string, string | number | boolean | Date> = { path: '/' };
+      for (let i = 1; i < parts.length; i++) {
+        const attr = parts[i];
+        if (!attr) continue;
+        const [kRaw, ...vParts] = attr.split('=');
+        const k = kRaw?.trim();
+        if (!k) continue;
+        const v = vParts.join('=').trim();
+        const key = k.toLowerCase();
+        if (key === 'path') options.path = v || '/';
+        else if (key === 'expires') options.expires = new Date(v);
+        else if (key === 'max-age') options.maxAge = parseInt(v, 10);
+        else if (key === 'domain') options.domain = v;
+        else if (key === 'samesite') options.sameSite = v.toLowerCase() as 'lax' | 'strict' | 'none';
+        else if (key === 'secure') options.secure = true;
+        else if (key === 'httponly') options.httpOnly = true;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      response.cookies.set(name, value, options as any);
+    }
 
     // Set CSRF token as a non-httpOnly cookie so the frontend can read it
     if (body.csrfToken) {
@@ -42,7 +73,7 @@ export async function POST(request: NextRequest) {
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',
         path: '/',
-        maxAge: 60 * 60 * 24, // 24 hours
+        maxAge: 60 * 60 * 24,
       });
     }
 

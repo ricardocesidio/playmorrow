@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Trophy, ArrowLeft, Loader2 } from 'lucide-react';
+import { Trophy, ArrowLeft } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 import { api } from '@/lib/api/client';
 

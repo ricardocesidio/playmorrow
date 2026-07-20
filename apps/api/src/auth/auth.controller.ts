@@ -8,6 +8,7 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { Roles } from './decorators/roles.decorator';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { CompleteOnboardingDto } from './dto/complete-onboarding.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { SessionAuthGuard } from './guards/session-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -18,6 +19,18 @@ import { CsrfGuard } from '../common/csrf.guard';
 
 const SESSION_COOKIE = 'playmorrow_session';
 
+/**
+ * Set the session cookie (`playmorrow_session`).
+ *
+ * SameSite strategy (cross-origin reality between Vercel frontend and Railway backend):
+ * - Dev: SameSite=Lax (Next.js proxy makes requests appear same-origin; avoids Secure requirement for local HTTP).
+ * - Prod: SameSite=None + Secure (required because frontend and API are different origins).
+ *   SameSite=None is the minimum necessary for cookies to be sent on cross-site fetch().
+ *   We cannot use Lax without a shared registrable domain (e.g. moving to *.playmorrow.app + COOKIE_DOMAIN).
+ *
+ * See also oauth.controller.ts for oauth_state and csrf cookies (Lax where possible).
+ * If a proxy/rewrite setup on a shared domain becomes available, we can downgrade to Lax for better security.
+ */
 function setSessionCookie(res: Response, raw: string, expiresAt: Date) {
   const isProduction = process.env.NODE_ENV === 'production';
   res.cookie(SESSION_COOKIE, raw, {
@@ -178,7 +191,7 @@ export class AuthController {
 
   @Post('complete-onboarding')
   @HttpCode(HttpStatus.CREATED)
-  async completeOnboarding(@Body() dto: Record<string, unknown>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async completeOnboarding(@Body() dto: CompleteOnboardingDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.completeOnboarding(dto);
     const ua = (req.headers['user-agent'] ?? '').slice(0, 512);
     const ip = req.ip ?? req.socket?.remoteAddress;

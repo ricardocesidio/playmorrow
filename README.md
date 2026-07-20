@@ -25,19 +25,31 @@ press, streamers, and publishers.
 
 ## Project Status
 
-**Devlog System V2 PRD — Fully Implemented (July 2026)**
+**Production registration 500 — FIXED (Session 13, 2026-07-10)**
+Registration now works in production. Root cause was missing `RESEND_API_KEY` + old throwing code. Fixed by setting env var + `deploymentRedeploy` via Railway API.
 
-**Current production status:** See [`PRODUCTION.md`](PRODUCTION.md) for the full qualification checklist, required env vars, and browser smoke test steps. Known gaps (registration was 500ing due to missing secrets, etc.) are tracked there.
+**Next major effort:** Full project polish across 6 phases. See `docs/handoff/session-13.md` for the complete audit and Claude AI super prompt.
 
-See [`STATUS.md`](STATUS.md) for the complete, verified feature inventory, known issues, and deployment configuration.
+For the complete, verified feature inventory, known issues, and deployment configuration, see [`STATUS.md`](STATUS.md).
 
-**Security model overview:** [`docs/security/model.md`](docs/security/model.md)
+For the prioritized roadmap with hour estimates, see [`ROADMAP.md`](ROADMAP.md).
 
-Ongoing elite architecture audit cleanups — see [docs/audit-fixes-summary.md](docs/audit-fixes-summary.md) for full list (1-6 completed: N+1/selects, a11y CI, scores/deadcode, Redis stub, staging/monitoring notes, export expansion + more). Per-user rate limiting implemented via CustomThrottlerGuard (with OptionalSessionGuard for user attachment). Upload service finished for object storage (#2): refactored to memoryStorage + storeFile, supports STORAGE_PROVIDER=local (default) | s3 | r2 (with stub + comments for AWS SDK). See handoff docs for details.
+---
 
-**Build hygiene:** Resolved "Unterminated string constant" in `apps/web/app/games/page.tsx` (ToggleControl className ternary). Source used consistent quotes; .next cache cleared + dev server restarted for clean compile. /games now compiles cleanly.
+## The Plan Ahead
 
-#3 Load testing baseline added (per audit): `apps/api/scripts/load-test.js` using npx autocannon (no local dep) for /games, /feed/public, /devlogs. Run `pnpm --filter @playmorrow/api loadtest` (or set LOADTEST_URL). Results should be captured in PRODUCTION.md. See docs/audit-fixes-summary.md.
+The project is being taken to professional/production-ready level across 6 phases:
+
+| Phase | Focus | Est. Time |
+|-------|-------|-----------|
+| P1 | Foundation Fixes (login redirect, dead links, auth guards, "Join as studio" fix) | 1-2 days |
+| P2 | Devlog → Notícias (blog system with 5/page pagination) | 2-3 days |
+| P3 | Dashboard Restructure (player/studio separation, fix navigation) | 2-3 days |
+| P4 | Model Games & Page Polish (5 showcase games, homepage, game pages) | 2-3 days |
+| P5 | Security Hardening (OAuth state, CSRF expiry, CSP, DOMPurify, middleware) | 2-3 days |
+| P6 | Production Readiness (Railway cache, legal pages, Sentry, CI gating) | 2-3 days |
+
+See [`docs/handoff/session-13.md`](docs/handoff/session-13.md) for the complete audit and the Claude AI super prompt to execute these phases.
 
 #4 Deeper GDPR: enhanced user deletion with explicit report anonymization + added GET /users/me/export data export stub (in users.controller + service). See PRODUCTION.md.
 

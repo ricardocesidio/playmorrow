@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowUpRight, Chrome, Eye, EyeOff, Github, Lock, User } from 'lucide-react';
 
-import { useAuth } from '@/lib/api/auth-context';
+import { useAuth, EmailNotVerifiedError } from '@/lib/api/auth-context';
 import { API } from '@/lib/api/client';
 import {
   AuthArtCollage,
@@ -17,20 +17,22 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [emailOrUsername, setEmailOrUsername] = useState('');
+  const [password, setPassword] = useState('');
   const searchParams = useSearchParams();
 
-  // Show error from form-login redirect
+  // Show error from redirect (e.g. from OAuth or old flow)
   useEffect(() => {
     const err = searchParams.get('error');
     if (err) setError(decodeURIComponent(err));
   }, [searchParams]);
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated) router.replace('/games');
+    if (!authLoading && isAuthenticated) router.replace('/dashboard');
   }, [authLoading, isAuthenticated, router]);
 
   if (authLoading) {
@@ -75,15 +77,34 @@ export default function LoginPage() {
                 <div className="mx-auto mt-5 h-0.5 w-12 bg-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.7)]" />
               </div>
 
-              <form action="/api/auth/form-login" method="POST" className="mt-12 space-y-8" autoComplete="on">
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setError('');
+                setLoading(true);
+                try {
+                  await login(emailOrUsername, password);
+                  // Success: the useEffect will redirect to /dashboard once isAuthenticated updates
+                  router.replace('/dashboard');
+                } catch (err: unknown) {
+                  if (err instanceof EmailNotVerifiedError) {
+                    router.push(`/verify-email?email=${encodeURIComponent(err.email)}&from=login`);
+                    return;
+                  }
+                  const message = err instanceof Error ? err.message : undefined;
+                  setError(message || 'Invalid email/username or password');
+                } finally {
+                  setLoading(false);
+                }
+              }} className="mt-12 space-y-8" autoComplete="on">
                 <div>
                   <label htmlFor="email" className="pm-micro mb-4 block text-muted-foreground">Email or username</label>
                   <div className="relative">
                     <User className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
                     <input
                       id="email"
-                      name="emailOrUsername"
                       type="text"
+                      value={emailOrUsername}
+                      onChange={(e) => setEmailOrUsername(e.target.value)}
                       className="clip-corner h-14 w-full border border-cyan bg-background/80 px-14 text-sm text-foreground shadow-[0_0_24px_rgb(62_231_255_/_0.12)] outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan"
                       placeholder="Enter your email or username"
                       autoComplete="username"
@@ -98,8 +119,9 @@ export default function LoginPage() {
                     <Lock className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
                     <input
                       id="password"
-                      name="password"
                       type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       className="clip-corner h-14 w-full border border-input bg-background/80 px-14 pr-12 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan"
                       placeholder="Enter your password"
                       autoComplete="current-password"

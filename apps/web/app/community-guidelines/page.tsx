@@ -16,10 +16,6 @@ export default function CommunityGuidelinesPage() {
 
         <main className="relative z-10 mx-auto mt-8 max-w-3xl pb-16">
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-6 sm:p-8 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
-            <div className="mb-8 rounded-md border border-amber/40 bg-amber/10 px-4 py-3 text-sm text-amber">
-              <strong>Draft:</strong> This is a draft. Legal review is required before production.
-            </div>
-
             <h1 className="font-display font-black uppercase tracking-tight text-white text-2xl sm:text-3xl">Community Guidelines</h1>
             <p className="mt-2 text-sm text-muted-foreground">Last updated: June 2026</p>
 

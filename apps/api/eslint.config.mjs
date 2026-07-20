@@ -4,6 +4,9 @@ import { baseConfig } from '@playmorrow/config/eslint/base';
 export default [
   ...baseConfig,
   {
+    ignores: ['dist/**', 'node_modules/**'],
+  },
+  {
     rules: {
       // NestJS leans on `any` at framework boundaries; keep it a warning.
       '@typescript-eslint/no-explicit-any': 'warn',

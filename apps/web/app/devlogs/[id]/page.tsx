@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import { ArrowLeft, MessageSquare, ThumbsUp, Heart, Zap, Lightbulb } from 'lucide-react';
 
-const MDMarkdown = dynamic(() => import('@uiw/react-md-editor').then((m) => m.default.Markdown), { ssr: false });
+import { SanitizedMarkdown } from '@/components/sanitized-markdown';
 
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
@@ -156,16 +155,14 @@ function CommentItem({
   depth,
   token,
   reactionsByComment,
-  allReplies,
 }: {
   token?: string | null;
 
-  comment: { id: string; body: string | null; parentId: string | null; isDeleted?: boolean; deletedAt: string | null; author: { id: string; username: string; displayName: string; avatarUrl: string | null } | null; createdAt: string; updatedAt: string };
+  comment: Comment;
   devlogId: string;
   currentUserId: string | undefined;
   depth: number;
   reactionsByComment?: Record<string, CommentReactionSummary>;
-  allReplies: Comment[];
 }) {
   const [replying, setReplying] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -269,22 +266,19 @@ function CommentItem({
           )}
         </>
       )}
-      {allReplies?.filter((r) => r.parentId === comment.id).length > 0 && depth < 5 && (
+      {(comment.replies?.length ?? 0) > 0 && depth < 5 && (
         <div className="mt-3 space-y-3">
-          {allReplies
-            .filter((r) => r.parentId === comment.id)
-            .map((reply: Comment) => (
-              <CommentItem
-                key={reply.id}
-                comment={reply}
-                devlogId={devlogId}
-                currentUserId={currentUserId}
-                depth={depth + 1}
-                token={token}
-                reactionsByComment={reactionsByComment}
-                allReplies={allReplies}
-              />
-            ))}
+          {comment.replies!.map((reply) => (
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              devlogId={devlogId}
+              currentUserId={currentUserId}
+              depth={depth + 1}
+              token={token}
+              reactionsByComment={reactionsByComment}
+            />
+          ))}
         </div>
       )}
     </div>
@@ -309,8 +303,9 @@ export default function DevlogDetailPage() {
     } catch { /* ignore */ }
   };
 
-  const topLevelComments = comments?.filter((c) => !c.parentId) ?? [];
-  const replies = comments?.filter((c) => c.parentId) ?? [];
+  const countAllComments = (items: Comment[]): number =>
+    items.reduce((acc, c) => acc + 1 + countAllComments(c.replies ?? []), 0);
+  const topLevelComments = comments ?? [];
 
   if (isLoading) {
     return (
@@ -425,16 +420,17 @@ export default function DevlogDetailPage() {
 
           {/* Content */}
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] sm:p-7">
-            <div data-color-mode="dark" className="prose prose-invert max-w-none font-mono text-[0.6rem]">
-              <MDMarkdown source={devlog.body} />
-            </div>
+            <SanitizedMarkdown
+              source={devlog.body}
+              className="prose prose-invert max-w-none font-mono text-[0.6rem]"
+            />
           </div>
 
           {/* Comments */}
           <section className="mt-16">
             <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-black uppercase tracking-tight text-white">
               <MessageSquare className="size-4 text-cyan" />
-              Comments {comments ? `(${comments.length})` : ''}
+              Comments {comments ? `(${countAllComments(comments)})` : ''}
             </h2>
 
             {/* Add comment form */}
@@ -471,7 +467,6 @@ export default function DevlogDetailPage() {
                     depth={0}
                     token={token}
                     reactionsByComment={commentReactions?.comments}
-                    allReplies={replies}
                   />
                 ))}
               </div>

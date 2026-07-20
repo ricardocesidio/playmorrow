@@ -1,60 +1,43 @@
-#!/usr/bin/env node
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+import { Rate, Trend } from 'k6/metrics';
 
-/**
- * Load testing baseline script for Playmorrow API.
- * Uses autocannon for HTTP benchmarking.
- *
- * Run with: pnpm --filter @playmorrow/api loadtest
- *
- * Targets key read-heavy endpoints from the audit:
- * - GET /api/games (homepage)
- * - GET /api/feed (feed)
- * - GET /api/devlogs (devlogs)
- *
- * Establish baseline p95 latency and RPS.
- * See PRODUCTION.md and audit for details.
- */
+const API_BASE = __ENV.API_URL || 'http://localhost:4000';
+const API_PREFIX = '/api';
 
-// Use npx to avoid local install issues; autocannon will be downloaded on first run if needed.
-const { spawnSync } = require('child_process');
+const errorRate = new Rate('errors');
+const latencyTrend = new Trend('latency_ms');
 
-const BASE_URL = process.env.LOADTEST_URL || 'http://localhost:4000/api';
-const DURATION = process.env.LOADTEST_DURATION || '10'; // seconds
-const CONNECTIONS = process.env.LOADTEST_CONNECTIONS || '100';
-
-console.log(`Starting load test against ${BASE_URL}`);
-console.log(`Duration: ${DURATION}s, Connections: ${CONNECTIONS}`);
+export const options = {
+  stages: [
+    { duration: '10s', target: 10 },
+    { duration: '20s', target: 50 },
+    { duration: '10s', target: 0 },
+  ],
+  thresholds: {
+    errors: ['rate<0.05'],
+    http_req_duration: ['p(95)<500'],
+  },
+};
 
 const endpoints = [
-  { title: 'Games (homepage)', path: '/games' },
-  { title: 'Feed', path: '/feed/public' },
-  { title: 'Devlogs', path: '/devlogs' },
+  { method: 'GET', url: '/api/games', name: 'games_list' },
+  { method: 'GET', url: '/api/feed/public?page=1&pageSize=10', name: 'public_feed' },
+  { method: 'GET', url: '/api/devlogs?page=1&pageSize=5', name: 'devlogs_list' },
 ];
 
-function runTest({ title, path }) {
-  console.log(`\n=== Testing ${title} (${path}) ===`);
-  const url = `${BASE_URL}${path}`;
-  const args = [
-    'autocannon',
-    '--connections', CONNECTIONS,
-    '--duration', DURATION,
-    url
-  ];
-  const result = spawnSync('npx', args, { encoding: 'utf8', stdio: 'inherit' });
-  if (result.error) {
-    console.error('Failed to run autocannon:', result.error);
-  }
-  return result;
+export default function () {
+  const endpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
+  const res = http.request(endpoint.method, `${API_BASE}${endpoint.url}`, null, {
+    tags: { name: endpoint.name },
+  });
+
+  const ok = check(res, {
+    'status is 200': (r) => r.status === 200,
+    'response time < 500ms': (r) => r.timings.duration < 500,
+  });
+
+  errorRate.add(!ok);
+  latencyTrend.add(res.timings.duration);
+  sleep(1);
 }
-
-function main() {
-  for (const ep of endpoints) {
-    runTest(ep);
-  }
-
-  console.log('\n=== Load test complete ===');
-  console.log('Baseline established (see output above). Update PRODUCTION.md with p95/RPS results for each endpoint.');
-  console.log('For production: set LOADTEST_URL=https://playmorrow-api-production.up.railway.app/api and run (use with caution, low duration).');
-}
-
-main();

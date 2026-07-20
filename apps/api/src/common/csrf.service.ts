@@ -14,9 +14,12 @@ export class CsrfService {
     }
   }
 
+  private readonly tokenMaxAgeMs = 7 * 24 * 60 * 60 * 1000; // 7 days (matches session lifetime)
+
   generateToken(userId: string): string {
     const nonce = randomBytes(16).toString('hex');
-    const payload = `${userId}:${nonce}:${Date.now()}`;
+    const now = Date.now();
+    const payload = `${userId}:${nonce}:${now}`;
     const signature = createHmac('sha256', this.secret).update(payload).digest('hex');
     return Buffer.from(`${payload}:${signature}`).toString('base64url');
   }
@@ -30,8 +33,14 @@ export class CsrfService {
       const signature = decoded.slice(lastColon + 1);
       const expected = createHmac('sha256', this.secret).update(payload).digest('hex');
       if (signature !== expected) return false;
-      const userIdPart = payload.split(':')[0];
-      return userIdPart === userId;
+      const parts = payload.split(':');
+      if (parts.length < 3) return false;
+      const userIdPart = parts[0];
+      if (userIdPart !== userId) return false;
+      const ts = Number(parts[parts.length - 1]);
+      if (Number.isNaN(ts)) return false;
+      if (Date.now() - ts > this.tokenMaxAgeMs) return false;
+      return true;
     } catch {
       return false;
     }

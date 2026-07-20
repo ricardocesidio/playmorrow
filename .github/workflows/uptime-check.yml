@@ -1,0 +1,23 @@
+name: Uptime Check
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for url in \
+            "https://playmorrow.vercel.app" \
+            "https://playmorrow-api-production.up.railway.app/health" \
+            "https://playmorrow-api-temp-staging.up.railway.app/health"; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$url")
+            if [ "$status" != "200" ]; then
+              echo "FAIL: $url (HTTP $status)"
+              exit 1
+            else
+              echo "OK:   $url"
+            fi
+          done

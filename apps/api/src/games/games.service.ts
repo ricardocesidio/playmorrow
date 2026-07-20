@@ -17,7 +17,7 @@ const GAME_INCLUDE = {
   media: { orderBy: { position: 'asc' as const } },
   platformLinks: { orderBy: { position: 'asc' as const } },
   tags: { include: { tag: true } },
-  devlogs: { where: { status: { not: 'DRAFT' } }, orderBy: { createdAt: 'desc' as const }, take: 10 },
+  devlogs: { where: { status: { not: 'DRAFT' } }, orderBy: { createdAt: 'desc' as const }, take: 10, include: { screenshots: { orderBy: { order: 'asc' as const }, take: 1 } } },
   roadmapItems: { orderBy: { position: 'asc' as const } },
   _count: { select: { followers: true } },
 } as const;

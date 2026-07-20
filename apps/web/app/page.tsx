@@ -16,6 +16,7 @@ import { StatusBadge } from '@/components/status-badge';
 import { CircuitFrame, HudPanel } from '@/components/playmorrow/hud';
 import { formatRelativeTime, formatFollowers } from '@/lib/format';
 import { usePublicFeed, useGames, useStudios } from '@/lib/api/hooks';
+import { useAuth } from '@/lib/api/auth-context';
 import type { Game } from '@/lib/api/client';
 
 function getFeedIcon(type: string) {
@@ -28,6 +29,7 @@ export default function HomePage() {
   const [gamePage, setGamePage] = useState(1);
   const { data: gamesData, isLoading: gamesLoading } = useGames(gamePage, 9);
   const { data: studiosData } = useStudios();
+  const { user } = useAuth();
 
   const games = normalizeLatestGames(gamesData?.items);
   const gamesCount = gamesData?.total ?? 0;
@@ -61,14 +63,16 @@ export default function HomePage() {
                   Follow development in real-time, play demos, and be part of the journey before the game ships.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-4">
-                  <Link href="/games"
+                  <Link href={user ? '/dashboard' : '/games'}
                 className="clip-corner flex items-center gap-2 border border-cyan bg-cyan/10 px-8 py-3.5 font-mono text-[0.65rem] uppercase tracking-widest text-cyan shadow-[0_0_24px_rgb(62_231_255_/_0.15)] transition hover:bg-cyan hover:text-background hover:shadow-[0_0_36px_rgb(62_231_255_/_0.25)]">
-                    <Gamepad2 className="size-5" /> Browse games
+                    <Gamepad2 className="size-5" /> {user ? 'Dashboard' : 'Browse games'}
                   </Link>
-                  <Link href="/register"
-                    className="clip-corner flex items-center gap-2 border border-coral bg-coral/10 px-8 py-3.5 font-mono text-[0.65rem] uppercase tracking-widest text-coral transition hover:bg-coral hover:text-coral-foreground">
-                    <UserPlus className="size-5" /> Join as a studio
-                  </Link>
+                  {!user && (
+                    <Link href="/register"
+                      className="clip-corner flex items-center gap-2 border border-coral bg-coral/10 px-8 py-3.5 font-mono text-[0.65rem] uppercase tracking-widest text-coral transition hover:bg-coral hover:text-coral-foreground">
+                      <UserPlus className="size-5" /> Join as a studio
+                    </Link>
+                  )}
                 </div>
 
                 {/* Stats row */}
@@ -84,20 +88,8 @@ export default function HomePage() {
                   <div>
                     <p className="font-display text-2xl font-black text-white">{feedCount}+</p>
                     <p className="mt-1 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Feed updates</p>
-            </div>
-            {gamesHasMore && (
-              <div className="mt-6 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => setGamePage((p) => p + 1)}
-                  disabled={gamesLoading}
-                  className="clip-corner inline-flex h-10 items-center gap-2 border border-cyan/50 bg-cyan/5 px-6 font-mono text-xs text-cyan hover:bg-cyan/10 transition disabled:opacity-50"
-                >
-                  {gamesLoading ? 'Loading...' : 'Load more games'} <ArrowRight className="size-4" />
-                </button>
-              </div>
-            )}
-          </div>
+                  </div>
+                </div>
               </div>
 
               <div className="hidden lg:block">
@@ -147,6 +139,18 @@ export default function HomePage() {
                 ))
               )}
             </div>
+            {gamesHasMore && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setGamePage((p) => p + 1)}
+                  disabled={gamesLoading}
+                  className="clip-corner inline-flex h-10 items-center gap-2 border border-cyan/50 bg-cyan/5 px-6 font-mono text-xs text-cyan hover:bg-cyan/10 transition disabled:opacity-50"
+                >
+                  {gamesLoading ? 'Loading...' : 'Load more games'} <ArrowRight className="size-4" />
+                </button>
+              </div>
+            )}
           </div>
         </section>
 
@@ -198,10 +202,17 @@ export default function HomePage() {
               Join {studioCount}+ studios already building their audience on Playmorrow
             </p>
             <div className="mt-8 flex justify-center gap-4">
-              <Link href="/register"
-                className="clip-corner flex items-center gap-2 border border-cyan bg-cyan/10 px-8 py-3.5 font-mono text-[0.65rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">
-                Create your studio profile
-              </Link>
+              {user ? (
+                <Link href="/dashboard"
+                  className="clip-corner flex items-center gap-2 border border-cyan bg-cyan/10 px-8 py-3.5 font-mono text-[0.65rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">
+                  Go to dashboard <ArrowRight className="size-4" />
+                </Link>
+              ) : (
+                <Link href="/register"
+                  className="clip-corner flex items-center gap-2 border border-cyan bg-cyan/10 px-8 py-3.5 font-mono text-[0.65rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">
+                  Create your studio profile
+                </Link>
+              )}
               <Link href="/games"
                 className="clip-corner flex items-center gap-2 border border-border/60 px-8 py-3.5 font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
                 Browse games <ArrowRight className="size-4" />

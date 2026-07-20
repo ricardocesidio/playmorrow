@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+import * as crypto from 'node:crypto';
 
 import * as Sentry from '@sentry/node';
 import { logger, logRequest, createContextLogger } from './common/logger';
@@ -73,12 +74,16 @@ async function bootstrap() {
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
   // Security headers
+  const scriptSrc = isProd
+    ? ["'self'", "'unsafe-inline'"]
+    : ["'self'", "'unsafe-inline'", "'unsafe-eval'"];
+
   app.use(helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        scriptSrc,
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", 'data:', 'https:', 'http://localhost:*'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
@@ -96,7 +101,7 @@ async function bootstrap() {
 
   // Structured request logging with pino (Observability item from elite audit)
   app.use((req: any, res: any, next: any) => {
-    const requestId = req.headers['x-request-id'] || require('crypto').randomBytes(8).toString('hex');
+    const requestId = req.headers['x-request-id'] || crypto.randomBytes(8).toString('hex');
     req.requestId = requestId;
     res.setHeader('x-request-id', requestId);
 

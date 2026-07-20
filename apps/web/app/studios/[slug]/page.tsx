@@ -423,6 +423,9 @@ function StudioGameCard({ game }: { game: Game }) {
             ))}
           </div>
         )}
+        <div className="mt-1">
+          <Link href={`/games/${game.slug}/devlogs`} className="text-[10px] text-cyan hover:underline">View devlogs →</Link>
+        </div>
       </div>
     </Link>
   );

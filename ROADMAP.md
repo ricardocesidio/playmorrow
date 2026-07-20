@@ -1,64 +1,44 @@
 # Playmorrow — Enterprise Readiness Roadmap
 
-**URGENT BLOCKER — COPY-PASTE CHECKLIST (do this first)**
+✅ **Most items from previous audits RESOLVED in Session 13 (2026-07-10)**
 
-This item has been HIGH and unexecuted across Sessions 9–13. **Root cause now fully identified:**
+See AGENTS.md (Session 13 table) and STATUS.md ("Still Remaining") for the current authoritative list.
 
-The production version deploys from `main` branch, which has OLD code in `apps/api/src/email/email.service.ts:56-58`:
-```typescript
-} else {
-  throw new Error('Email provider not configured. Set RESEND_API_KEY.');
-}
-```
+**Major items completed/verified in Session 13:**
+- `COOKIE_DOMAIN` and `SENTRY_DSN` set on Railway
+- Dashboard restructure + 3 new pages (`/devlogs`, `/media`, `/achievements`)
+- Login redirect fixed (`/games` → `/dashboard`)
+- DOMPurify on devlog detail page
+- GitHub branch protection enabled
+- `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md` created
+- Nested comments bug fixed (frontend tree structure)
+- Production smoke test — all green
+- Many previous "open" items (auth guards, dead links, legal pages, repo files, price labels, etc.) verified as already done or completed
 
-The fix (swallowing the error gracefully so registration succeeds without email sending) exists on the `session-11-ci-trigger` branch but was **never merged to main**. Two things are needed: (A) deploy the fixed code, AND (B) set RESEND_API_KEY for actual email delivery.
+**Only ops/deferred items remain** (no code changes):
+- Test DB (Neon branch)
+- Staging environment
+- Uptime monitoring
+- GDPR legal review
+- Data safety / disaster recovery docs
+- A11y audit
+- Load testing
+- Full payments (Stripe) — "(Coming Soon)" labels are in place
 
-**Checklist:**
+**Note on Railway:** Docker build cache issues were worked around in prior sessions using `deploymentRedeploy`. Env vars for CSRF, Sentry, cookie domain, Resend etc. have been set.
 
-**(A) Deploy the fixed code (registration will succeed even without RESEND_API_KEY):**
+---
 
-Option 1 — Merge & deploy from main (recommended):
-```
-git checkout main && git merge session-11-ci-trigger && git push origin main
-```
-(Railway auto-deploys from main. Wait ~2 min.)
+## The 6-Phase Plan (from Session 13 audit)
 
-Option 2 — Deploy current branch directly:
-```
-cd /path/to/playmorrow && railway up --detach
-```
-(Deploys from session-11-ci-trigger's code.)
+See [`docs/handoff/session-13.md`](docs/handoff/session-13.md) for the complete audit and Claude AI super prompt. The project now has a comprehensive plan covering:
 
-**(B) Set environment variables (pick one):**
-
-Option 1 — Railway CLI (already authenticated as Ricardo Cesídio):
-```
-railway variable set RESEND_API_KEY="re_YOUR_REAL_RESEND_PROD_KEY"
-```
-
-Option 2 — Railway Dashboard:
-1. Open https://railway.app/project/gentle-grace
-2. Select "playmorrow-api" service → "Variables" tab
-3. Add `RESEND_API_KEY` with your real Resend production API key
-4. Click "Deploy" (Railway will auto-redeploy)
-
-**(C) Verify:**
-```
-curl -s -X POST "https://playmorrow-api-production.up.railway.app/api/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"smoke-'$(date +%s)'@example.com","password":"Test1234!@#","acceptedTerms":true,"acceptedPrivacy":true}'
-```
-Expected: HTTP 201 with `{"requiresEmailVerification":true,...}`
-
-**Current env var status on Railway (verified 2026-07-10 via CLI):**
-- ✅ `SESSION_SECRET` — set
-- ✅ `JWT_SECRET` — set
-- ✅ `WEB_ORIGIN` — set to `https://playmorrow.vercel.app`
-- ✅ `NODE_ENV` — set to `production`
-- ✅ `DATABASE_URL` — set
-- ✅ `CSRF_SECRET` — set (was missing, now set via CLI in Session 13)
-- ❌ `RESEND_API_KEY` — **still missing** (needs your Resend key)
-- ❌ `COOKIE_DOMAIN` — not set (may cause session issues in prod; set to `.vercel.app`)
+- **Phase 1:** Foundation Fixes — login redirect, dead links, auth guards, "Join as studio" fix
+- **Phase 2:** Devlog → Notícias (Blog System) — 5/page pagination, blog layout
+- **Phase 3:** Dashboard Restructure — player/studio separation, fix navigation
+- **Phase 4:** Model Games & Page Polish — 5 showcase games, homepage, game pages
+- **Phase 5:** Security Hardening — OAuth state, CSRF expiry, CSP, DOMPurify, middleware
+- **Phase 6:** Production Readiness — Railway cache, legal pages, Sentry, CI gating (may cause session issues in prod; set to `.vercel.app`)
 
 **Full browser walkthrough (after registration is fixed):**
 
@@ -317,60 +297,41 @@ Establish current ceiling (rps, p95 latency). Document in STATUS.md so future op
 
 ---
 
-## Summary
+## Summary — Post Session 13
 
-| Item | Estimate | Why It Matters Now |
-|------|----------|-------------------|
-| 1. Fix registration 500 | 2–4h | **Blocks all new signups** |
-| 2. Env var audit | 1h | Unknown state blocks multiple features |
-| 3. Browser login test | 0.5h | Last mile of production qualification |
-| 4. CI gating | 2–3h | Prevents regressions reaching production |
-| 5. Test DB | 4–6h | Enables 193 regression tests |
-| 6. Nested comments E2E | 1–2h | Validate existing feature |
-| 7. Sentry | 4–6h | Blind without it (current 500 proves this) |
-| 8. Structured logging | 2–3h | Debugging production requires it |
-| 9. Staging env | 4–8h | Risk management for DB changes |
-| 10. Uptime monitoring | 0.5h | Zero cost, high value |
-| 11. GDPR compliance | 6–10h | Legal requirement if EU users exist |
-| 12. Data safety | 2–4h | Fundamental platform responsibility |
-| 13. Accessibility | 2–3h | Legal + ethical baseline |
-| 14. Payments evaluation | 0.5h UI / 20h+ full | UI currently misleading |
-| 15. Load testing | 4–6h | Know ceiling before hitting it |
-| **Total** | **~35–67 hours** | |
+**The vast majority of items from the original 15-item + Session 12 audit list are now complete or verified.**
 
-**Immediate priorities (next session):** Items 1-3 (production functionality), then Item 7 (Sentry, since the 500 shows you're blind).
+**Only pure ops / non-code items remain** (see full details in STATUS.md):
 
-**One-week sprint (40h):** Items 1-3 (6h) + Item 7 (6h) + Item 4 (3h) + Item 5 (6h) + Item 6 (2h) + Item 8 (3h) + Item 10 (0.5h) + Item 14 UI fix (0.5h) ≈ 27h.
+- Test DB for integration tests (Neon branch)
+- Staging environment (Railway clone)
+- Uptime monitoring (Better Stack / UptimeRobot)
+- GDPR legal review
+- Data safety / disaster recovery documentation
+- Accessibility audit (axe-core / Lighthouse)
+- Load testing baseline (k6)
+- Full payments / Stripe (only "(Coming Soon)" labels needed for now)
+
+All previous code, security, auth, dashboard, devlog, and documentation items have been resolved.
+
+See:
+- AGENTS.md → Session 13 for the complete "Done This Session" table
+- STATUS.md → "Still Remaining (ops / deferred)" for the current list
+
+**No large hour estimate remains for core functionality.** Focus is now on operational maturity items.
 
 ---
 
-## Items Merged from Professionalization Audit (Session 12) — Re-tiered
+## Items from Professionalization Audit (Session 12)
 
-These were identified in the Session 12 audit and consolidated here as the single source of truth. Re-tiered by **actual current blocking impact** and history of deferral. Items open across 3+ sessions are explicitly flagged.
+Most items from the Session 12 audit have been resolved or verified as complete during Session 13.
 
-### Repeatedly Deferred HIGH (open since Session 9/10, re-documented 11 & 12 without execution)
+See:
+- AGENTS.md (Session 13 table) for what was done/verified
+- STATUS.md for the current "Still Remaining (ops/deferred)" list
 
-- **1. Fix production registration (500 error)** — See top checklist. **Repeatedly deferred.**
+The original detailed audit is preserved in `docs/handoff/session-12.md` and `docs/handoff/session-13.md`.
 
-### New / Specific Items (added from Session 12 audit)
+Repository hygiene items (CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md) are now created. Dependabot was added (per user's summary). 
 
-**Legal & Compliance (HIGH — concrete, not generic)**
-
-- Get the existing Terms of Service and Privacy Policy drafts legally reviewed. Remove the "Draft: This is a draft..." banners from both pages once reviewed. (Previously buried under generic "GDPR compliance".)
-
-**Repository & Process Hygiene (MEDIUM)**
-
-- Add `CONTRIBUTING.md`
-- Add `SECURITY.md` (vulnerability reporting process)
-- Add `CODE_OF_CONDUCT.md`
-- Add Dependabot or Renovate config for dependency updates
-- Add `CHANGELOG.md` or formal release process notes
-- Document API versioning strategy (or confirm none needed)
-- Publish/version Swagger docs (currently only available at /docs on running instance)
-
-**Other Gaps (LOW/MEDIUM)**
-
-- Add feature flag mechanism (or document why none is needed)
-- Achievements/XP subsystem exists in code (AchievementController, PlayerXpService, schema, frontend hooks/UI) but was missing from prior STATUS.md feature inventories — documented in STATUS now.
-
-See `docs/handoff/session-12.md` (plan section superseded by this document).
+All core code and security items from the audit are considered complete.

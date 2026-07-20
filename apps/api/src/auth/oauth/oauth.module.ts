@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import type { JwtModuleOptions, JwtSignOptions } from '@nestjs/jwt';
 
+import { CsrfService } from '../../common/csrf.service';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { SessionModule } from '../../session/session.module';
 import { OAuthController } from './oauth.controller';
@@ -24,6 +25,6 @@ import { GithubStrategy } from './strategies/github.strategy';
     }),
   ],
   controllers: [OAuthController],
-  providers: [OAuthService, GoogleStrategy, GithubStrategy],
+  providers: [OAuthService, GoogleStrategy, GithubStrategy, CsrfService],
 })
 export class OAuthModule {}
