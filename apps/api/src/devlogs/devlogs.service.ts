@@ -55,7 +55,8 @@ export class DevlogsService {
     const sanitizedBody = sanitizeHtml(dto.body);
     const isPublished = dto.isPublished ?? (dto.status === 'PUBLISHED');
     const publishedAt = isPublished ? (dto.publishedAt ? new Date(dto.publishedAt) : new Date()) : null;
-    const readingTimeMin = dto.readingTimeMin ?? Math.ceil(sanitizedBody.split(/\s+/).length / 200);
+    const WORDS_PER_MINUTE = 200;
+    const readingTimeMin = dto.readingTimeMin ?? Math.ceil(sanitizedBody.split(/\s+/).length / WORDS_PER_MINUTE);
 
     const devlog = await this.prisma.devlog.create({
       data: {

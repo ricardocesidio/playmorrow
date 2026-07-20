@@ -7,11 +7,7 @@ export class CsrfService {
   private readonly secret: string;
 
   constructor(config: ConfigService) {
-    if (process.env.NODE_ENV === 'production') {
-      this.secret = config.getOrThrow('CSRF_SECRET');
-    } else {
-      this.secret = config.get('CSRF_SECRET') ?? 'dev-csrf-secret-do-not-use-in-prod';
-    }
+    this.secret = config.getOrThrow('CSRF_SECRET');
   }
 
   private readonly tokenMaxAgeMs = 7 * 24 * 60 * 60 * 1000; // 7 days (matches session lifetime)

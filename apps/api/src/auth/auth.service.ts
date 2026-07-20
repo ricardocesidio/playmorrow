@@ -5,8 +5,9 @@ import { JwtService } from '@nestjs/jwt';
 import type { User } from '@playmorrow/database';
 import type { Prisma } from '@playmorrow/database';
 import * as argon2 from 'argon2';
-import { createHash, randomBytes, randomInt } from 'node:crypto';
+import { randomInt } from 'node:crypto';
 
+import { hashToken, generateRefreshToken } from '../common/crypto-utils';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { EmailService } from '../email/email.service';
@@ -59,14 +60,6 @@ export interface RefreshResult {
 }
 
 const REFRESH_EXPIRES_DAYS = 30;
-
-function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex');
-}
-
-function generateRefreshToken(): string {
-  return randomBytes(48).toString('hex');
-}
 
 @Injectable()
 export class AuthService {

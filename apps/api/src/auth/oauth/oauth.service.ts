@@ -1,20 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { createHash, randomBytes } from 'node:crypto';
-
 import { PrismaService } from '../../prisma/prisma.service';
 import type { User } from '@playmorrow/database';
 import type { OAuthProfile } from './strategies/google.strategy';
+import { hashToken, generateRefreshToken } from '../../common/crypto-utils';
 
 const REFRESH_EXPIRES_DAYS = 30;
-
-function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex');
-}
-
-function generateRefreshToken(): string {
-  return randomBytes(48).toString('hex');
-}
 
 @Injectable()
 export class OAuthService {
