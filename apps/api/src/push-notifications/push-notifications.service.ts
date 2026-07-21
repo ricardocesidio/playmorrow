@@ -34,7 +34,7 @@ export class PushNotificationsService {
       } catch (err) {
         this.logger.warn(`Push send failed for ${sub.endpoint.slice(0, 40)}...`);
         if ((err as any)?.statusCode === 410) {
-          await this.prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => {});
+          await this.prisma.pushSubscription.delete({ where: { id: sub.id } }).catch((err) => logger.error({ err }));
         }
       }
     }

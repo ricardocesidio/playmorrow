@@ -46,11 +46,11 @@ export class WishlistService {
     // Player XP
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (user?.accountType === 'PLAYER') {
-      await this.playerXpService.award(userId, 'WISHLIST_GAME', gameSlug).catch(() => {});
+      await this.playerXpService.award(userId, 'WISHLIST_GAME', gameSlug).catch((err) => logger.error({ err }));
     }
 
     // Sync game counters
-    this.gamesService.syncGameCounters(game.id).catch(() => {});
+    this.gamesService.syncGameCounters(game.id).catch((err) => logger.error({ err }));
 
     return { gameId: game.id, gameSlug, isWishlisted: true };
   }
@@ -62,7 +62,7 @@ export class WishlistService {
     await this.prisma.wishlistItem.deleteMany({ where: { userId, gameId: game.id } });
 
     // Sync game counters
-    this.gamesService.syncGameCounters(game.id).catch(() => {});
+    this.gamesService.syncGameCounters(game.id).catch((err) => logger.error({ err }));
 
     return { gameId: game.id, gameSlug, isWishlisted: false };
   }
