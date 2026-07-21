@@ -19,7 +19,7 @@
     "clean": "rm -rf dist .turbo",
     "xp:recalculate": "npx ts-node src/scripts/recalculate-xp.ts",
     "devlogs:publish-scheduled": "echo 'Now automatic via DevlogsSchedulerService (@nestjs/schedule cron every 5 min)'",
-    "loadtest": "node scripts/load-test.js",
+    "loadtest": "k6 run scripts/load-test.js",
     "seed:model-games": "npx ts-node -r tsconfig-paths/register src/scripts/seed-model-games.ts"
   },
   "dependencies": {
