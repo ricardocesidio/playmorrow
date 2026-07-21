@@ -144,7 +144,8 @@ export class StudiosController {
   }
 
   @Get(':slug/dashboard')
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, StudioRolesGuard)
+  @StudioRoles(StudioRole.OWNER, StudioRole.ADMIN)
   @ApiOkResponse({ description: 'Studio dashboard aggregated stats.' })
   async getDashboard(@Param('slug') slug: string) {
     const studio = await this.studiosService.findBySlug(slug);

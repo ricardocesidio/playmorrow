@@ -254,21 +254,33 @@ export class GamesService {
       throw new NotFoundException('User not found');
     }
 
-    assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
+    const memberRole = game.studio.members.find((m) => m.userId === userId)?.role;
+    const isMember = memberRole === StudioRole.MEMBER;
 
-    const data: Prisma.GameUpdateInput = { updatedBy: userId };
+    let data: Prisma.GameUpdateInput = { updatedBy: userId };
+
     if (dto.title !== undefined) data.title = dto.title;
     if (dto.tagline !== undefined) data.tagline = dto.tagline;
     if (dto.description !== undefined) data.description = dto.description;
-    if (dto.status !== undefined) data.status = dto.status as never;
-    if (dto.releaseDate !== undefined) data.releaseDate = new Date(dto.releaseDate);
-    if (dto.expectedReleaseText !== undefined) data.expectedReleaseText = dto.expectedReleaseText;
-    if (dto.priceCents !== undefined) data.priceCents = dto.priceCents;
-    if (dto.currency !== undefined) data.currency = dto.currency;
-    if (dto.isFree !== undefined) data.isFree = dto.isFree;
     if (dto.coverUrl !== undefined) data.coverUrl = dto.coverUrl;
     if (dto.bannerUrl !== undefined) data.bannerUrl = dto.bannerUrl;
     if (dto.trailerUrl !== undefined) data.trailerUrl = dto.trailerUrl;
+
+    if (!isMember) {
+      if (dto.status !== undefined) data.status = dto.status as never;
+      if (dto.releaseDate !== undefined) data.releaseDate = new Date(dto.releaseDate);
+      if (dto.expectedReleaseText !== undefined) data.expectedReleaseText = dto.expectedReleaseText;
+      if (dto.priceCents !== undefined) data.priceCents = dto.priceCents;
+      if (dto.currency !== undefined) data.currency = dto.currency;
+      if (dto.isFree !== undefined) data.isFree = dto.isFree;
+      // publishedBy/publishedAt must be set BEFORE the update call
+      if (dto.status === 'RELEASED') {
+        data.publishedBy = userId;
+        data.publishedAt = new Date();
+      }
+    }
+
+    assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
     if (dto.media !== undefined) {
       await this.prisma.gameMedia.deleteMany({ where: { gameId: game.id } });
@@ -315,11 +327,6 @@ export class GamesService {
       data,
       include: GAME_INCLUDE,
     });
-
-    if (dto.status === 'RELEASED') {
-      data.publishedBy = userId;
-      data.publishedAt = new Date();
-    }
 
     if (dto.status && dto.status !== game.status) {
       if (dto.status === 'BETA') {
