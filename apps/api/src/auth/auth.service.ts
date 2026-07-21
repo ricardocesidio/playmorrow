@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { User } from '@playmorrow/database';
 import type { Prisma } from '@playmorrow/database';
 import * as argon2 from 'argon2';
-import { randomInt } from 'node:crypto';
+import { randomInt, createHash, timingSafeEqual } from 'node:crypto';
 
 import { hashToken, generateRefreshToken } from '../common/crypto-utils';
 import { PrismaService } from '../prisma/prisma.service';
@@ -279,7 +279,7 @@ export class AuthService {
       orderBy: { createdAt: 'desc' },
     });
 
-    if (!stored || stored.codeHash !== codeHash) {
+    if (!stored || !timingSafeEqual(Buffer.from(stored.codeHash, 'hex'), Buffer.from(codeHash, 'hex'))) {
       throw new BadRequestException('Invalid verification code');
     }
 
