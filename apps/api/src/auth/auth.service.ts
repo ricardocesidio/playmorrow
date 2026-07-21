@@ -185,9 +185,20 @@ export class AuthService {
   async refresh(refreshToken: string): Promise<RefreshResult> {
     const tokenHash = hashToken(refreshToken);
     const stored = await this.prisma.refreshToken.findFirst({
-      where: { tokenHash, revokedAt: null, expiresAt: { gt: new Date() } },
+      where: { tokenHash, expiresAt: { gt: new Date() } },
     });
     if (!stored) throw new UnauthorizedException('Invalid or expired refresh token');
+
+    // Reuse detection: if the token was already revoked, this indicates token theft
+    if (stored.revokedAt) {
+      logger.warn({ msg: 'Refresh token reuse detected — possible token theft', userId: stored.userId });
+      // Revoke all refresh tokens for the user as a security measure
+      await this.prisma.refreshToken.updateMany({
+        where: { userId: stored.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
 
     await this.prisma.refreshToken.update({
       where: { id: stored.id }, data: { revokedAt: new Date() },
@@ -348,6 +359,11 @@ export class AuthService {
       }),
       // Revoke all sessions
       this.prisma.session.updateMany({
+        where: { userId: stored.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+      // Revoke all refresh tokens (security: password reset must invalidate all existing tokens)
+      this.prisma.refreshToken.updateMany({
         where: { userId: stored.userId, revokedAt: null },
         data: { revokedAt: new Date() },
       }),

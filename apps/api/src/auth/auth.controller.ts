@@ -131,7 +131,13 @@ export class AuthController {
     const raw = req.cookies?.[SESSION_COOKIE];
     if (raw) {
       const hash = createHash('sha256').update(raw).digest('hex');
-      await this.sessionService.revoke(hash);
+      // Look up the session to get userId, then revoke ALL sessions for that user
+      const session = await this.sessionService.validate(hash).catch(() => null);
+      if (session?.user?.id) {
+        await this.sessionService.revokeAllForUser(session.user.id);
+      } else {
+        await this.sessionService.revoke(hash);
+      }
     }
     clearSessionCookie(res);
     return { success: true };
@@ -199,6 +205,10 @@ export class AuthController {
     const ip = req.ip ?? req.socket?.remoteAddress;
     const { raw, expiresAt } = await this.sessionService.create(result.user.id, ip, ua);
     setSessionCookie(res, raw, expiresAt);
-    return { user: { id: result.user.id, username: result.user.username, displayName: result.user.displayName, role: result.user.role, accountType: result.user.accountType } };
+    const csrfToken = this.csrfService.generateToken(result.user.id);
+    return {
+      user: { id: result.user.id, username: result.user.username, displayName: result.user.displayName, role: result.user.role, accountType: result.user.accountType },
+      csrfToken,
+    };
   }
 }

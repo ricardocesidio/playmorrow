@@ -173,8 +173,11 @@ export default function OnboardingPage() {
         const errBody = await res.json().catch(() => ({ message: 'Failed' }));
         throw new Error(errBody.message || 'Failed to complete setup');
       }
+      const data = await res.json();
+      if (data.csrfToken) {
+        document.cookie = `playmorrow_csrf=${data.csrfToken}; path=/; max-age=86400; SameSite=Lax`;
+      }
       setSuccess(true);
-      // Full page navigation ensures cookie is sent with the request
       window.location.href = '/dashboard';
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to complete setup');

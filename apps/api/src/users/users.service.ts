@@ -78,14 +78,12 @@ export class UsersService {
   }): Promise<User> {
     const emailLower = data.email.toLowerCase();
 
-    const existingEmail = await this.findByEmail(emailLower);
-    if (existingEmail) {
-      throw new ConflictException('A user with this email already exists');
-    }
-
-    const existingUsername = await this.findByUsername(data.username);
-    if (existingUsername) {
-      throw new ConflictException('A user with this username already exists');
+    const [existingEmail, existingUsername] = await Promise.all([
+      this.findByEmail(emailLower),
+      this.findByUsername(data.username),
+    ]);
+    if (existingEmail || existingUsername) {
+      throw new ConflictException('A user with this email or username already exists');
     }
 
     return this.prisma.user.create({

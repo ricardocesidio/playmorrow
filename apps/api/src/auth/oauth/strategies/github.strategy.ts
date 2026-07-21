@@ -23,15 +23,33 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
   }
 
   async validate(
-    _accessToken: string,
+    accessToken: string,
     _refreshToken: string,
     profile: { id: string; emails?: { value: string }[]; username?: string; displayName?: string; photos?: { value: string }[] },
     done: (err: Error | null, user?: unknown) => void,
   ): Promise<void> {
+    let email = profile.emails?.[0]?.value;
+    // If GitHub didn't provide an email (user has it private), fetch it via API
+    if (!email && accessToken) {
+      try {
+        const res = await fetch('https://api.github.com/user/emails', {
+          headers: { Authorization: `Bearer ${accessToken}`, Accept: 'application/vnd.github+json' },
+        });
+        const emails: { email: string; primary: boolean; verified: boolean }[] = await res.json();
+        const primary = emails.find((e) => e.primary && e.verified);
+        if (primary) email = primary.email;
+      } catch {
+        // Fall through to error below
+      }
+    }
+    if (!email) {
+      done(new Error('GitHub did not provide an email. Please ensure your GitHub email is public or grant email access.'));
+      return;
+    }
     const profileData: OAuthProfile = {
       provider: 'github',
       providerId: profile.id,
-      email: profile.emails?.[0]?.value ?? `${profile.username ?? 'user'}@github.oauth`,
+      email,
       displayName: profile.displayName ?? profile.username ?? 'GitHub User',
       avatarUrl: profile.photos?.[0]?.value ?? null,
     };
