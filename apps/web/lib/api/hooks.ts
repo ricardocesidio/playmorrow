@@ -289,7 +289,7 @@ export function useCreateRoadmapItem() {
       position?: number;
       token: string;
     }) => {
-      const { gameSlug, token, ...body } = data;
+      const { gameSlug, token: _token, ...body } = data;
       return api.post<RoadmapItem>(`/games/${gameSlug}/roadmap`, body);
     },
     onSuccess: () => {
@@ -357,7 +357,7 @@ export function useUpsertPressKit() {
       downloadUrl?: string;
       token: string;
     }) => {
-      const { gameSlug, token, ...body } = data;
+      const { gameSlug, token: _token, ...body } = data;
       return api.put<PressKit>(`/games/${gameSlug}/press-kit`, body);
     },
     onSuccess: () => {
@@ -661,7 +661,7 @@ export function useCreateDevlog() {
       screenshots?: { url: string; order: number; caption?: string }[];
       token: string;
     }) => {
-      const { gameSlug, token, ...body } = data;
+      const { gameSlug, token: _token, ...body } = data;
       return api.post<Devlog>(`/games/${gameSlug}/devlogs`, body);
     },
     onSuccess: (result: Devlog) => {
@@ -755,7 +755,7 @@ export function useCreateGame() {
       tags?: string[];
       token: string;
     }) => {
-      const { studioSlug, token, ...body } = data;
+      const { studioSlug, token: _token, ...body } = data;
       return api.post<Game>(`/studios/${studioSlug}/games`, body);
     },
     onSuccess: () => {
