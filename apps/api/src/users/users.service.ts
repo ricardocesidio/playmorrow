@@ -152,6 +152,8 @@ export class UsersService {
       achievements,
       sessions,
       reportsFiled,
+      reactions,
+      studioMemberships,
     ] = await Promise.all([
       this.prisma.follow.findMany({ where: { userId }, select: { targetType: true, studioId: true, gameId: true, createdAt: true } }),
       this.prisma.wishlistItem.findMany({ where: { userId }, select: { gameId: true, createdAt: true } }),
@@ -162,6 +164,8 @@ export class UsersService {
       this.prisma.achievement.findMany({ where: { userId }, select: { achievementId: true, name: true, unlockedAt: true } }),
       this.prisma.session.findMany({ where: { userId }, select: { id: true, createdAt: true, lastSeenAt: true, expiresAt: true } }),
       this.prisma.moderationReport.findMany({ where: { reporterId: userId }, select: { id: true, targetType: true, targetId: true, reason: true, createdAt: true } }),
+      this.prisma.reaction.findMany({ where: { userId }, select: { id: true, type: true, devlogId: true, commentId: true, createdAt: true } }),
+      this.prisma.studioMember.findMany({ where: { userId }, select: { studioId: true, role: true, joinedAt: true } }),
     ]);
 
     return {
@@ -175,10 +179,9 @@ export class UsersService {
       achievements,
       sessions,
       reportsFiled,
-      // Expanded for audit: add more if needed (e.g. reactions, studio memberships)
-      studioMemberships: await this.prisma.studioMember.findMany({ where: { userId }, select: { studioId: true, role: true, joinedAt: true } }),
+      reactions,
+      studioMemberships,
       exportedAt: new Date().toISOString(),
-      note: 'This is a GDPR data export stub. Expand fields as needed for full compliance.',
     };
   }
 }

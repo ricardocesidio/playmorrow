@@ -65,6 +65,12 @@ export class UploadService {
       stream.on('error', reject);
     });
 
+    if (mimeType === 'image/webp') {
+      const riffOk = buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46;
+      const webpOk = buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50;
+      return riffOk && webpOk;
+    }
+
     return signatures.some((sig) => sig.every((byte, i) => byte === buffer[i]));
   }
 
@@ -73,13 +79,21 @@ export class UploadService {
       'image/jpeg': [new Uint8Array([0xFF, 0xD8, 0xFF])],
       'image/png': [new Uint8Array([0x89, 0x50, 0x4E, 0x47])],
       'image/gif': [new Uint8Array([0x47, 0x49, 0x46])],
-      'image/webp': [new Uint8Array([0x52, 0x49, 0x46, 0x46])],
+      'image/webp': [new Uint8Array([0x52, 0x49, 0x46, 0x46]), new Uint8Array([0x57, 0x45, 0x42, 0x50])],
     };
 
     const signatures = MAGIC_BYTES[mimeType];
     if (!signatures) return false;
 
     const header = buffer.slice(0, 16);
+
+    // WebP requires both RIFF header AND WEBP identifier
+    if (mimeType === 'image/webp') {
+      const riffOk = header[0] === 0x52 && header[1] === 0x49 && header[2] === 0x46 && header[3] === 0x46;
+      const webpOk = header[8] === 0x57 && header[9] === 0x45 && header[10] === 0x42 && header[11] === 0x50;
+      return riffOk && webpOk;
+    }
+
     return signatures.some((sig) => sig.every((byte, i) => byte === header[i]));
   }
 

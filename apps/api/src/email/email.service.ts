@@ -41,6 +41,37 @@ export class EmailService {
     }
   }
 
+  async sendPasswordResetEmail(email: string, token: string): Promise<void> {
+    const resetUrl = `${this.configService.get<string>('WEB_ORIGIN', 'http://localhost:3000')}/reset-password?token=${token}`;
+    const subject = 'Reset your PlayMorrow password';
+    const text = [
+      `Hello,`,
+      ``,
+      `You requested a password reset for your PlayMorrow account.`,
+      ``,
+      `Click the link below to reset your password:`,
+      `${resetUrl}`,
+      ``,
+      `This link expires in 1 hour.`,
+      `If you did not request this reset, you can safely ignore this email.`,
+      ``,
+      `— The PlayMorrow Team`,
+    ].join('\n');
+
+    if (this.resend) {
+      await this.resend.emails.send({
+        from: this.from,
+        to: email,
+        subject,
+        text,
+      });
+    } else if (!this.isProduction) {
+      logger.debug(`[DEV] Password reset for ${email}: ${resetUrl}`);
+    } else {
+      logger.error(`RESEND_API_KEY missing in production. Password reset for ${email} was NOT sent. Link: ${resetUrl}`);
+    }
+  }
+
   async sendInvitationEmail(params: {
     email: string;
     studioName: string;
