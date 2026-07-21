@@ -41,9 +41,9 @@ async function bootstrap() {
     const missing = requiredInProd.filter((key) => !config.get<string>(key));
     if (missing.length > 0) {
       // Log clearly and exit so Railway shows the real problem immediately.
-      // eslint-disable-next-line no-console
+       
       console.error('❌ FATAL: Missing required production environment variables:', missing.join(', '));
-      // eslint-disable-next-line no-console
+       
       console.error('   Set them in the Railway dashboard and redeploy.');
       process.exit(1);
     }

@@ -1,3 +1,4 @@
+import { logger } from '../common/logger';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { GamesService } from '../games/games.service';
 import { PlayerXpService } from '../player-xp/player-xp.service';

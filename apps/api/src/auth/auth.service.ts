@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { User } from '@playmorrow/database';
 import type { Prisma } from '@playmorrow/database';
 import * as argon2 from 'argon2';
-import { randomInt, createHash, timingSafeEqual } from 'node:crypto';
+import { randomInt, randomBytes, createHash, timingSafeEqual } from 'node:crypto';
 
 import { hashToken, generateRefreshToken } from '../common/crypto-utils';
 import { PrismaService } from '../prisma/prisma.service';

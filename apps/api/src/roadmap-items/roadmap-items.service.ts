@@ -1,3 +1,4 @@
+import { logger } from '../common/logger';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { StudioRole } from '@playmorrow/database';
 

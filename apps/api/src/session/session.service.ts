@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { createHash, randomBytes } from 'crypto';
+import { logger } from '../common/logger';
 import { PrismaService } from '../prisma/prisma.service';
 
 const SESSION_BYTES = 32;

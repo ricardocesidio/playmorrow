@@ -1,3 +1,4 @@
+import { logger } from '../common/logger';
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { GamesService } from '../games/games.service';
 import { NotificationsService } from '../notifications/notifications.service';
