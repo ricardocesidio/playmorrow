@@ -1,5 +1,5 @@
 const CACHE_NAME = 'playmorrow-v1';
-const STATIC_ASSETS = ['/', '/games', '/studios', '/feed', '/offline'];
+const STATIC_ASSETS = ['/', '/games', '/studios', '/feed'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
