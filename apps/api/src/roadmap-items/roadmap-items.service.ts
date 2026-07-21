@@ -66,7 +66,7 @@ export class RoadmapItemsService {
       gameId: game.id,
       actorId: userId,
       payload: { title: item.title, status: item.status },
-    }).catch(() => {});
+    }).catch((err) => logger.error({ err }));
 
     return this.toResponse(item, game.studio);
   }
@@ -148,7 +148,7 @@ export class RoadmapItemsService {
       gameId: item.gameId,
       actorId: userId,
       payload: { title: updated.title, status: updated.status },
-    }).catch(() => {});
+    }).catch((err) => logger.error({ err }));
 
     const studio = await this.prisma.studio.findUnique({
       where: { id: item.game.studioId },

@@ -135,7 +135,7 @@ export class GamesService {
       gameId: game.id,
       actorId: userId,
       payload: { title: game.title, slug: game.slug },
-    }).catch(() => {});
+    }).catch((err) => logger.error({ err }));
 
     logger.info({ msg: 'game created', gameId: game.id, studioId: studio.id, userId });
 
@@ -227,10 +227,10 @@ export class GamesService {
     // Track view (increment async, don't block response)
     this.prisma.gameView.create({
       data: { gameId: game.id },
-    }).catch(() => {});
+    }).catch((err) => logger.error({ err }));
 
     // Sync all denormalized counters
-    this.syncGameCounters(game.id).catch(() => {});
+    this.syncGameCounters(game.id).catch((err) => logger.error({ err }));
 
     return this.toResponse(game);
   }
@@ -332,7 +332,7 @@ export class GamesService {
         gameId: game.id,
         actorId: userId,
         payload: { title: game.title, status: dto.status, previousStatus: game.status },
-      }).catch(() => {});
+      }).catch((err) => logger.error({ err }));
     }
 
     if (dto.trailerUrl !== undefined && dto.trailerUrl !== game.trailerUrl) {
@@ -341,7 +341,7 @@ export class GamesService {
         gameId: game.id,
         actorId: userId,
         payload: { title: game.title, trailerUrl: dto.trailerUrl },
-      }).catch(() => {});
+      }).catch((err) => logger.error({ err }));
     }
 
     await this.auditLog.log({

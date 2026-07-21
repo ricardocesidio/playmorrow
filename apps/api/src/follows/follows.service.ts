@@ -52,7 +52,7 @@ export class FollowsService {
     // Player XP
     const actor = await this.prisma.user.findUnique({ where: { id: userId } });
     if (actor && actor.accountType === 'PLAYER') {
-      await this.playerXpService.award(userId, 'FOLLOW_STUDIO', studio.id).catch(() => {});
+      await this.playerXpService.award(userId, 'FOLLOW_STUDIO', studio.id).catch((err) => logger.error({ err }));
     }
 
     // Notify studio OWNER/ADMIN members
@@ -108,7 +108,7 @@ export class FollowsService {
     // Player XP
     const actor = await this.prisma.user.findUnique({ where: { id: userId } });
     if (actor && actor.accountType === 'PLAYER') {
-      await this.playerXpService.award(userId, 'FOLLOW_GAME', game.id).catch(() => {});
+      await this.playerXpService.award(userId, 'FOLLOW_GAME', game.id).catch((err) => logger.error({ err }));
     }
 
     // Notify game studio OWNER/ADMIN members
@@ -127,7 +127,7 @@ export class FollowsService {
     }
 
     // Sync game counters
-    this.gamesService.syncGameCounters(game.id).catch(() => {});
+    this.gamesService.syncGameCounters(game.id).catch((err) => logger.error({ err }));
 
     return { targetType: 'GAME', targetId: game.id, isFollowing: true, followerCount };
   }
@@ -145,7 +145,7 @@ export class FollowsService {
     const followerCount = await this.prisma.follow.count({ where: { gameId: game.id } });
 
     // Sync game counters
-    this.gamesService.syncGameCounters(game.id).catch(() => {});
+    this.gamesService.syncGameCounters(game.id).catch((err) => logger.error({ err }));
 
     return { targetType: 'GAME', targetId: game.id, isFollowing: false, followerCount };
   }

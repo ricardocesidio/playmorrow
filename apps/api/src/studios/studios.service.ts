@@ -70,7 +70,7 @@ export class StudiosService {
       studioId: studio.id,
       actorId: userId,
       payload: { name: studio.name, slug: studio.slug },
-    }).catch(() => {});
+    }).catch((err) => logger.error({ err }));
 
     return this.toResponse(studio);
   }
@@ -258,7 +258,7 @@ export class StudiosService {
         studioId: studio.id,
         actorId,
         payload: { userId: targetUserId, oldRole: targetMember.role, newRole: dto.role },
-      }).catch(() => {});
+      }).catch((err) => logger.error({ err }));
     }
     if (dto.title !== undefined && dto.title !== targetMember.title) {
       await this.auditLog.log({

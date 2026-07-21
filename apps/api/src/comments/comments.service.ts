@@ -115,11 +115,11 @@ export class CommentsService {
     // Player XP
     const commentAuthor = await this.prisma.user.findUnique({ where: { id: userId } });
     if (commentAuthor?.accountType === 'PLAYER') {
-      await this.playerXpService.award(userId, 'COMMENT', comment.id).catch(() => {});
+      await this.playerXpService.award(userId, 'COMMENT', comment.id).catch((err) => logger.error({ err }));
     }
 
     // Sync game counters
-    this.gamesService.syncGameCounters(devlog.game.id).catch(() => {});
+    this.gamesService.syncGameCounters(devlog.game.id).catch((err) => logger.error({ err }));
 
     return this.toResponse(comment);
   }
@@ -277,7 +277,7 @@ export class CommentsService {
     // Sync game counters
     const gameId = comment.gameId ?? comment.devlog?.game?.id;
     if (gameId) {
-      this.gamesService.syncGameCounters(gameId).catch(() => {});
+      this.gamesService.syncGameCounters(gameId).catch((err) => logger.error({ err }));
     }
 
     return this.toResponse(updated);
@@ -319,11 +319,11 @@ export class CommentsService {
     // Player XP
     const commentAuthor = await this.prisma.user.findUnique({ where: { id: authorId } });
     if (commentAuthor?.accountType === 'PLAYER') {
-      await this.playerXpService.award(authorId, 'COMMENT', comment.id).catch(() => {});
+      await this.playerXpService.award(authorId, 'COMMENT', comment.id).catch((err) => logger.error({ err }));
     }
 
     // Sync game counters
-    this.gamesService.syncGameCounters(game.id).catch(() => {});
+    this.gamesService.syncGameCounters(game.id).catch((err) => logger.error({ err }));
 
     return comment;
   }

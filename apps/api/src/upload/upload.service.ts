@@ -87,7 +87,7 @@ export class UploadService {
     try {
       await unlink(filePath);
     } catch {
-      // ignore
+      // File may not exist — acceptable cleanup failure
     }
   }
 
@@ -111,30 +111,9 @@ export class UploadService {
     }
 
     if (STORAGE_PROVIDER === 's3' || STORAGE_PROVIDER === 'r2') {
-      // TODO: Implement real upload using AWS SDK or R2 (Cloudflare compatible)
-      // Example skeleton:
-      // const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
-      // const client = new S3Client({ ... });
-      // await client.send(new PutObjectCommand({ Bucket: '...', Key: filename, Body: file.buffer, ContentType: file.mimetype }));
-      // return { url: `https://cdn.example.com/${filename}`, ... };
-      console.warn(`[Upload] STORAGE_PROVIDER=${STORAGE_PROVIDER} - using stub. Install @aws-sdk/client-s3 and implement upload.`);
-      // Stub returns a fake URL for now
-      return {
-        url: `https://cdn.example.com/${STORAGE_PROVIDER}/${filename}`,
-        filename,
-        size: file.size,
-        mimeType: file.mimetype,
-      };
+      throw new Error(`STORAGE_PROVIDER=${STORAGE_PROVIDER} is not implemented. Install @aws-sdk/client-s3 and implement upload, or use STORAGE_PROVIDER=local.`);
     }
 
-    // Fallback
-    const filePath = join(UPLOADS_DIR, filename);
-    await writeFile(filePath, file.buffer);
-    return {
-      url: `/api/uploads/${filename}`,
-      filename,
-      size: file.size,
-      mimeType: file.mimetype,
-    };
+    throw new Error(`Unknown STORAGE_PROVIDER=${STORAGE_PROVIDER}. Set STORAGE_PROVIDER=local for local disk storage.`);
   }
 }

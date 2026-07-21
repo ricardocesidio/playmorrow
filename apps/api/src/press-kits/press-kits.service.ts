@@ -95,7 +95,7 @@ export class PressKitsService {
       gameId: game.id,
       actorId: userId,
       payload: { title: game.title },
-    }).catch(() => {});
+    }).catch((err) => logger.error({ err }));
 
     return this.findByGameSlug(gameSlug);
   }

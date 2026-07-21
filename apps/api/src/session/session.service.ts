@@ -49,7 +49,7 @@ export class SessionService {
       await this.prisma.session.update({
         where: { id: session.id },
         data: { lastSeenAt: new Date() },
-      }).catch(() => {});
+      }).catch((err) => logger.error({ err }));
     }
 
     return { session, user: session.user };
