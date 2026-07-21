@@ -57,8 +57,6 @@ export function PlayerDashboard() {
   const { data: achievementsData } = useAchievements();
   const { data: xpHistory } = usePlayerXpHistory();
 
-  if (!user) return null;
-
   const prevLevel = typeof window !== 'undefined' ? parseInt(localStorage.getItem('player-level') || '0') : 0;
   useEffect(() => {
     if (user?.level && user.level > prevLevel && prevLevel > 0) {
@@ -70,6 +68,8 @@ export function PlayerDashboard() {
     }
     if (user?.level) localStorage.setItem('player-level', String(user.level));
   }, [user?.level]);
+
+  if (!user) return null;
 
   const unreadCount = unreadData?.unreadCount ?? 0;
   const wishlistItems = wishlist?.items ?? [];
