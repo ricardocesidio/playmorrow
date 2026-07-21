@@ -91,7 +91,7 @@ export class AuthService {
         throw new BadRequestException('Password cannot contain your email.');
       }
 
-      const passwordHash = await argon2.hash(dto.password);
+      const passwordHash = await argon2.hash(dto.password, { type: argon2.argon2id, memoryCost: 19456, timeCost: 3, parallelism: 1 });
       const now = new Date();
       const emailLower = dto.email.toLowerCase();
       const pendingUsername = await this.generatePendingUsername(emailLower);
@@ -315,7 +315,7 @@ export class AuthService {
 
   async createPasswordResetToken(email: string) {
     const user = await this.usersService.findByEmail(email);
-    if (!user) return; // Don't reveal whether email exists
+    if (!user) return;
 
     await this.prisma.passwordResetToken.updateMany({
       where: { userId: user.id, consumedAt: null },
@@ -326,7 +326,8 @@ export class AuthService {
     await this.prisma.passwordResetToken.create({
       data: { tokenHash: token.hash, userId: user.id, expiresAt: token.expiresAt },
     });
-    return token.raw;
+
+    this.emailService.sendPasswordResetEmail(user.email, token.raw).catch((err) => logger.error({ msg: 'Failed to send password reset email', err }));
   }
 
   async resetPassword(rawToken: string, newPassword: string) {
@@ -336,7 +337,7 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired reset token');
     }
 
-    const passwordHash = await argon2.hash(newPassword);
+    const passwordHash = await argon2.hash(newPassword, { type: argon2.argon2id, memoryCost: 19456, timeCost: 3, parallelism: 1 });
     const newAuthVersion = Date.now();
 
     await this.prisma.$transaction([

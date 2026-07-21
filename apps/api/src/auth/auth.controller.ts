@@ -152,6 +152,7 @@ export class AuthController {
   // ── Email verification ──────────────────────────────────────────────
 
   @Post('verify-email')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @HttpCode(HttpStatus.OK)
   async verifyEmail(@Body('email') email: string, @Body('code') code: string, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.verifyEmail(email, code);
@@ -190,6 +191,7 @@ export class AuthController {
   }
 
   @Post('complete-onboarding')
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @HttpCode(HttpStatus.CREATED)
   async completeOnboarding(@Body() dto: CompleteOnboardingDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.completeOnboarding(dto);

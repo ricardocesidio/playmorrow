@@ -92,6 +92,7 @@ async function bootstrap() {
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
+        reportUri: "/api/csp-report",
       },
     },
   }));
