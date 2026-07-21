@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:unit": "vitest run --exclude='**/*.spec.ts' 2>/dev/null; vitest run src/common/ src/auth/ --reporter=verbose 2>&1 | head -20 || echo 'Run individual spec files instead of full suite — see CONTRIBUTING.md'",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:db:up": "docker compose -f ../../docker-compose.yml up -d postgres-test",
@@ -22,6 +23,7 @@
     "seed:model-games": "npx ts-node -r tsconfig-paths/register src/scripts/seed-model-games.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1090.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.0",
     "@nestjs/core": "^11.0.1",

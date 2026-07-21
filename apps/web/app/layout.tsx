@@ -4,6 +4,7 @@ import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { CookieConsent } from '@/components/cookie-consent';
+import { Analytics } from '@/components/analytics';
 import { BackToTop } from '@/components/back-to-top';
 import { SiteFooter } from '@/components/site-footer';
 import { CursorGlow } from '@/components/cursor-glow';
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
             <SiteFooter />
             <CookieConsent />
+            <Analytics />
             <BackToTop />
           </div>
         </Providers>
