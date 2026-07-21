@@ -4,7 +4,7 @@ import { baseConfig } from '@playmorrow/config/eslint/base';
 export default [
   ...baseConfig,
   {
-    ignores: ['dist/**', 'node_modules/**'],
+    ignores: ['dist/**', 'node_modules/**', 'scripts/**'],
   },
   {
     rules: {

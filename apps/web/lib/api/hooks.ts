@@ -51,7 +51,7 @@ export function usePersonalFeed(type: string, page: number, pageSize: number, to
   if (type !== 'all') params.set('type', type);
   return useQuery({
     queryKey: ['personalFeed', type, page, pageSize],
-    queryFn: () => api.get<Paginated<FeedItem>>(`/me/feed?${params}`, token),
+    queryFn: () => api.get<Paginated<FeedItem>>(`/me/feed?${params}`),
     enabled: !!token,
     placeholderData: (prev) => prev,
   });
@@ -63,7 +63,7 @@ export function useInfinitePersonalFeed(type: string, pageSize: number, token?: 
     queryFn: ({ pageParam }) => {
       const params = new URLSearchParams({ page: String(pageParam), pageSize: String(pageSize) });
       if (type !== 'all') params.set('type', type);
-      return api.get<Paginated<FeedItem>>(`/me/feed?${params}`, token);
+      return api.get<Paginated<FeedItem>>(`/me/feed?${params}`);
     },
     getNextPageParam: (last) => (last.hasMore ? last.page + 1 : undefined),
     initialPageParam: 1,
@@ -163,7 +163,7 @@ export function useDevlog(id: string) {
 export function useDevlogComments(devlogId: string, token?: string) {
   return useQuery({
     queryKey: ['devlogComments', devlogId],
-    queryFn: () => api.get<Comment[]>(`/devlogs/${devlogId}/comments`, token),
+    queryFn: () => api.get<Comment[]>(`/devlogs/${devlogId}/comments`),
     enabled: !!devlogId,
   });
 }
@@ -173,7 +173,7 @@ export function useDevlogComments(devlogId: string, token?: string) {
 export function useDevlogReactions(devlogId: string, token?: string) {
   return useQuery({
     queryKey: ['devlogReactions', devlogId],
-    queryFn: () => api.get<ReactionStatus>(`/devlogs/${devlogId}/reactions`, token),
+    queryFn: () => api.get<ReactionStatus>(`/devlogs/${devlogId}/reactions`),
     enabled: !!devlogId,
   });
 }
@@ -182,7 +182,7 @@ export function useReactToDevlog() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { devlogId: string; type: string; token: string }) =>
-      api.post<ReactionStatus>(`/devlogs/${data.devlogId}/reactions`, { type: data.type }, data.token),
+      api.post<ReactionStatus>(`/devlogs/${data.devlogId}/reactions`, { type: data.type }),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['devlogReactions', vars.devlogId] });
     },
@@ -193,7 +193,7 @@ export function useRemoveDevlogReaction() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { devlogId: string; type: string; token: string }) =>
-      api.delete<ReactionStatus>(`/devlogs/${data.devlogId}/reactions?type=${data.type}`, data.token),
+      api.delete<ReactionStatus>(`/devlogs/${data.devlogId}/reactions?type=${data.type}`),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['devlogReactions', vars.devlogId] });
     },
@@ -205,7 +205,7 @@ export function useCreateComment() {
   return useMutation({
     mutationFn: (data: { devlogId: string; body: string; parentId?: string; token: string }) => {
       const { devlogId, token, ...body } = data;
-      return api.post<Comment>(`/devlogs/${devlogId}/comments`, body, token);
+      return api.post<Comment>(`/devlogs/${devlogId}/comments`, body);
     },
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['devlogComments', vars.devlogId] });
@@ -217,7 +217,7 @@ export function useUpdateComment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { commentId: string; body: string; token: string }) =>
-      api.patch<Comment>(`/comments/${data.commentId}`, { body: data.body }, data.token),
+      api.patch<Comment>(`/comments/${data.commentId}`, { body: data.body }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['devlogComments'] });
     },
@@ -228,7 +228,7 @@ export function useDeleteComment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { commentId: string; token: string }) =>
-      api.delete(`/comments/${data.commentId}`, data.token),
+      api.delete(`/comments/${data.commentId}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['devlogComments'] });
     },
@@ -240,7 +240,7 @@ export function useDeleteComment() {
 export function useDevlogCommentReactions(devlogId: string, token?: string) {
   return useQuery({
     queryKey: ['devlogCommentReactions', devlogId],
-    queryFn: () => api.get<DevlogCommentReactions>(`/devlogs/${devlogId}/comments/reactions`, token),
+    queryFn: () => api.get<DevlogCommentReactions>(`/devlogs/${devlogId}/comments/reactions`),
     enabled: !!devlogId,
   });
 }
@@ -249,7 +249,7 @@ export function useReactToComment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { commentId: string; devlogId: string; type: string; token: string }) =>
-      api.post<ReactionStatus>(`/comments/${data.commentId}/reactions`, { type: data.type }, data.token),
+      api.post<ReactionStatus>(`/comments/${data.commentId}/reactions`, { type: data.type }),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['devlogCommentReactions', vars.devlogId] });
     },
@@ -260,7 +260,7 @@ export function useRemoveCommentReaction() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { commentId: string; devlogId: string; type: string; token: string }) =>
-      api.delete<ReactionStatus>(`/comments/${data.commentId}/reactions?type=${data.type}`, data.token),
+      api.delete<ReactionStatus>(`/comments/${data.commentId}/reactions?type=${data.type}`),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['devlogCommentReactions', vars.devlogId] });
     },
@@ -290,7 +290,7 @@ export function useCreateRoadmapItem() {
       token: string;
     }) => {
       const { gameSlug, token, ...body } = data;
-      return api.post<RoadmapItem>(`/games/${gameSlug}/roadmap`, body, token);
+      return api.post<RoadmapItem>(`/games/${gameSlug}/roadmap`, body);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['gameRoadmap'] });
@@ -302,7 +302,7 @@ export function useUpdateRoadmapItem() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { id: string; body: Record<string, unknown>; token: string }) => {
-      return api.patch<RoadmapItem>(`/roadmap-items/${data.id}`, data.body, data.token);
+      return api.patch<RoadmapItem>(`/roadmap-items/${data.id}`, data.body);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['gameRoadmap'] });
@@ -314,7 +314,7 @@ export function useDeleteRoadmapItem() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { id: string; token: string }) =>
-      api.delete(`/roadmap-items/${data.id}`, data.token),
+      api.delete(`/roadmap-items/${data.id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['gameRoadmap'] });
     },
@@ -328,7 +328,6 @@ export function useReorderRoadmapItems() {
       return api.patch<{ reordered: number }>(
         `/games/${data.gameSlug}/roadmap/reorder`,
         { items: data.items },
-        data.token,
       );
     },
     onSuccess: () => {
@@ -359,7 +358,7 @@ export function useUpsertPressKit() {
       token: string;
     }) => {
       const { gameSlug, token, ...body } = data;
-      return api.put<PressKit>(`/games/${gameSlug}/press-kit`, body, token);
+      return api.put<PressKit>(`/games/${gameSlug}/press-kit`, body);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['gamePressKit'] });
@@ -395,7 +394,6 @@ export function useNotifications(status: string, page: number, pageSize: number,
     queryFn: () =>
       api.get<PaginatedNotifications>(
         `/me/notifications?status=${status}&page=${page}&pageSize=${pageSize}`,
-        token,
       ),
   });
 }
@@ -433,7 +431,7 @@ export function useMarkNotificationRead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { id: string; token: string }) =>
-      api.patch(`/notifications/${data.id}/read`, undefined, data.token),
+      api.patch(`/notifications/${data.id}/read`, undefined),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['notifications'] });
       qc.invalidateQueries({ queryKey: ['unreadNotificationCount'] });
@@ -445,7 +443,7 @@ export function useMarkAllNotificationsRead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (token: string) =>
-      api.patch('/me/notifications/read-all', undefined, token),
+      api.patch('/me/notifications/read-all', undefined),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['notifications'] });
       qc.invalidateQueries({ queryKey: ['unreadNotificationCount'] });
@@ -457,7 +455,7 @@ export function useDeleteNotification() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { id: string; token: string }) =>
-      api.delete(`/notifications/${data.id}`, data.token),
+      api.delete(`/notifications/${data.id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['notifications'] });
       qc.invalidateQueries({ queryKey: ['unreadNotificationCount'] });
@@ -504,7 +502,7 @@ export interface FollowStatus {
 export function useStudioFollowStatus(slug: string, token?: string) {
   return useQuery({
     queryKey: ['studioFollow', slug],
-    queryFn: () => api.get<FollowStatus>(`/studios/${slug}/follow-status`, token),
+    queryFn: () => api.get<FollowStatus>(`/studios/${slug}/follow-status`),
     enabled: !!slug,
   });
 }
@@ -512,7 +510,7 @@ export function useStudioFollowStatus(slug: string, token?: string) {
 export function useGameFollowStatus(slug: string, token?: string) {
   return useQuery({
     queryKey: ['gameFollow', slug],
-    queryFn: () => api.get<FollowStatus>(`/games/${slug}/follow-status`, token),
+    queryFn: () => api.get<FollowStatus>(`/games/${slug}/follow-status`),
     enabled: !!slug,
   });
 }
@@ -521,7 +519,7 @@ export function useFollowStudio() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { slug: string; token: string }) =>
-      api.post<FollowStatus>(`/studios/${data.slug}/follow`, undefined, data.token),
+      api.post<FollowStatus>(`/studios/${data.slug}/follow`, undefined),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['studioFollow'] });
       qc.invalidateQueries({ queryKey: ['myFollows'] });
@@ -535,7 +533,7 @@ export function useUnfollowStudio() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { slug: string; token: string }) =>
-      api.delete<FollowStatus>(`/studios/${data.slug}/follow`, data.token),
+      api.delete<FollowStatus>(`/studios/${data.slug}/follow`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['studioFollow'] });
       qc.invalidateQueries({ queryKey: ['myFollows'] });
@@ -549,7 +547,7 @@ export function useFollowGame() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { slug: string; token: string }) =>
-      api.post<FollowStatus>(`/games/${data.slug}/follow`, undefined, data.token),
+      api.post<FollowStatus>(`/games/${data.slug}/follow`, undefined),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['gameFollow'] });
       qc.invalidateQueries({ queryKey: ['myFollows'] });
@@ -563,7 +561,7 @@ export function useUnfollowGame() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { slug: string; token: string }) =>
-      api.delete<FollowStatus>(`/games/${data.slug}/follow`, data.token),
+      api.delete<FollowStatus>(`/games/${data.slug}/follow`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['gameFollow'] });
       qc.invalidateQueries({ queryKey: ['myFollows'] });
@@ -579,7 +577,6 @@ export function useMyFollows(token?: string) {
     queryFn: () =>
       api.get<{ studios: { id: string; name: string; slug: string; logoUrl: string | null }[]; games: { id: string; title: string; slug: string; coverUrl: string | null; studio: { id: string; name: string; slug: string } }[] }>(
         '/me/follows',
-        token,
       ),
   });
 }
@@ -589,7 +586,7 @@ export function useMyFollows(token?: string) {
 export function useMyStudios(token?: string) {
   return useQuery({
     queryKey: ['myStudios'],
-    queryFn: () => api.get<Studio[]>('/studios/me', token),
+    queryFn: () => api.get<Studio[]>('/studios/me'),
   });
 }
 
@@ -598,7 +595,7 @@ export function useCreateStudio() {
   return useMutation({
     mutationFn: (data: { name: string; slug: string; tagline?: string; description?: string; location?: string; websiteUrl?: string; logoUrl?: string; bannerUrl?: string; token: string }) => {
       const { token, ...body } = data;
-      return api.post<Studio>('/studios', body, token);
+      return api.post<Studio>('/studios', body);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['myStudios'] });
@@ -642,7 +639,7 @@ export function useDeleteStudio() {
 export function useMyDevlogs(token?: string) {
   return useQuery({
     queryKey: ['myDevlogs', token],
-    queryFn: () => api.get<Devlog[]>('/me/devlogs', token),
+    queryFn: () => api.get<Devlog[]>('/me/devlogs'),
   });
 }
 
@@ -665,7 +662,7 @@ export function useCreateDevlog() {
       token: string;
     }) => {
       const { gameSlug, token, ...body } = data;
-      return api.post<Devlog>(`/games/${gameSlug}/devlogs`, body, token);
+      return api.post<Devlog>(`/games/${gameSlug}/devlogs`, body);
     },
     onSuccess: (result: Devlog) => {
       qc.invalidateQueries({ queryKey: ['myDevlogs'] });
@@ -682,7 +679,7 @@ export function useUpdateDevlog() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { id: string; body: Record<string, unknown>; token: string }) => {
-      return api.patch<Devlog>(`/devlogs/${data.id}`, data.body, data.token);
+      return api.patch<Devlog>(`/devlogs/${data.id}`, data.body);
     },
     onSuccess: (result: Devlog) => {
       qc.invalidateQueries({ queryKey: ['myDevlogs'] });
@@ -699,7 +696,7 @@ export function useDeleteDevlog() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { id: string; token: string }) =>
-      api.delete(`/devlogs/${data.id}`, data.token),
+      api.delete(`/devlogs/${data.id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['myDevlogs'] });
       qc.invalidateQueries({ queryKey: ['gameDevlogs'] });
@@ -716,9 +713,9 @@ export function useMyGames(token?: string) {
   return useQuery({
     queryKey: ['myGames', token],
     queryFn: async () => {
-      const studios = await api.get<Studio[]>('/studios/me', token);
+      const studios = await api.get<Studio[]>('/studios/me');
       const results = await Promise.all(
-        studios.map((s) => api.get<Paginated<Game>>(`/studios/${s.slug}/games`, token)),
+        studios.map((s) => api.get<Paginated<Game>>(`/studios/${s.slug}/games`)),
       );
       return results.flatMap((r, i) =>
         r.items.map((g) => ({ ...g, studio: studios[i] })),
@@ -759,7 +756,7 @@ export function useCreateGame() {
       token: string;
     }) => {
       const { studioSlug, token, ...body } = data;
-      return api.post<Game>(`/studios/${studioSlug}/games`, body, token);
+      return api.post<Game>(`/studios/${studioSlug}/games`, body);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['myGames'] });
@@ -775,7 +772,7 @@ export function useUpdateGame() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { slug: string; body: Record<string, unknown>; token: string }) => {
-      return api.patch<Game>(`/games/${data.slug}`, data.body, data.token);
+      return api.patch<Game>(`/games/${data.slug}`, data.body);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['myGames'] });
@@ -791,7 +788,7 @@ export function useDeleteGame() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { slug: string; token: string }) =>
-      api.delete(`/games/${data.slug}`, data.token),
+      api.delete(`/games/${data.slug}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['myGames'] });
       qc.invalidateQueries({ queryKey: ['games'] });

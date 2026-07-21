@@ -1,3 +1,4 @@
+import { logger } from '../common/logger';
 import {
   BadRequestException,
   ConflictException,

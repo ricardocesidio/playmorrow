@@ -257,7 +257,7 @@ export class GamesService {
     const memberRole = game.studio.members.find((m) => m.userId === userId)?.role;
     const isMember = memberRole === StudioRole.MEMBER;
 
-    let data: Prisma.GameUpdateInput = { updatedBy: userId };
+    const data: Prisma.GameUpdateInput = { updatedBy: userId };
 
     if (dto.title !== undefined) data.title = dto.title;
     if (dto.tagline !== undefined) data.tagline = dto.tagline;
