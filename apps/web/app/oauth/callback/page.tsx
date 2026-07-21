@@ -9,9 +9,12 @@ function OAuthCallbackInner() {
   const router = useRouter();
 
   useEffect(() => {
-    // Session cookie is already set by the backend redirect for returning users.
-    // The auth-context will pick it up on next render via /auth/session/me.
-    // New users without accounts are redirected to /onboarding by the backend.
+    // Capture CSRF token from query param and set it as a frontend-domain cookie
+    const params = new URLSearchParams(window.location.search);
+    const csrfToken = params.get('csrf');
+    if (csrfToken) {
+      document.cookie = `playmorrow_csrf=${csrfToken}; path=/; max-age=86400; SameSite=Lax`;
+    }
     router.replace('/dashboard');
   }, [router]);
 
