@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { join, extname } from 'node:path';
 import { diskStorage } from 'multer';
 import { writeFile, unlink } from 'node:fs/promises';
 import { imageSize } from 'image-size';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { logger } from '../common/logger';
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR || join(__dirname, '..', '..', 'uploads');
 const REDACTED_STORAGE_PROVIDER = process.env.REDACTED_STORAGE_PROVIDER || 'local';
@@ -16,6 +19,28 @@ export interface UploadedFileInfo {
 
 @Injectable()
 export class UploadService {
+  private readonly s3Client: S3Client | null = null;
+  private readonly s3Bucket: string;
+
+  constructor(private configService: ConfigService) {
+    const region = this.configService.get('AWS_REGION') || 'us-east-1';
+    const accessKeyId = this.configService.get('REDACTED_AWS_KEY');
+    const secretAccessKey = this.configService.get('REDACTED_AWS_SECRET');
+    this.s3Bucket = this.configService.get('REDACTED_S3_BUCKET') || 'playmorrow-uploads';
+
+    if (REDACTED_STORAGE_PROVIDER === 's3' || REDACTED_STORAGE_PROVIDER === 'r2') {
+      if (accessKeyId && secretAccessKey) {
+        this.s3Client = new S3Client({
+          region,
+          credentials: { accessKeyId, secretAccessKey },
+          ...(REDACTED_STORAGE_PROVIDER === 'r2' ? { endpoint: this.configService.get('REDACTED_R2_ENDPOINT') } : {}),
+        });
+      } else {
+        logger.warn('REDACTED_AWS_KEY or REDACTED_AWS_SECRET not set — S3/R2 uploads will fail. Falling back to local.');
+      }
+    }
+  }
+
   /**
    * Returns multer storage engine based on REDACTED_STORAGE_PROVIDER env.
    * Supports 'local' (default), 's3', 'r2'.
@@ -125,7 +150,24 @@ export class UploadService {
     }
 
     if (REDACTED_STORAGE_PROVIDER === 's3' || REDACTED_STORAGE_PROVIDER === 'r2') {
-      throw new Error(`REDACTED_STORAGE_PROVIDER=${REDACTED_STORAGE_PROVIDER} is not implemented. Install @aws-sdk/client-s3 and implement upload, or use REDACTED_STORAGE_PROVIDER=local.`);
+      if (!this.s3Client) {
+        throw new Error(`S3/R2 credentials not configured. Set REDACTED_AWS_KEY and REDACTED_AWS_SECRET env vars.`);
+      }
+      const key = `uploads/${filename}`;
+      await this.s3Client.send(new PutObjectCommand({
+        Bucket: this.s3Bucket,
+        Key: key,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+        CacheControl: 'public, max-age=31536000, immutable',
+      }));
+      const publicUrl = this.configService.get('CDN_URL') || `https://${this.s3Bucket}.s3.amazonaws.com`;
+      return {
+        url: `${publicUrl}/${key}`,
+        filename,
+        size: file.size,
+        mimeType: file.mimetype,
+      };
     }
 
     throw new Error(`Unknown REDACTED_STORAGE_PROVIDER=${REDACTED_STORAGE_PROVIDER}. Set REDACTED_STORAGE_PROVIDER=local for local disk storage.`);
