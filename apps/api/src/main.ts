@@ -6,6 +6,7 @@ try { loadEnvFile('.env'); } catch { /* no .env file — env vars provided by ru
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import * as http from 'node:http';
 
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { join } from 'node:path';
@@ -20,7 +21,31 @@ import { logger, logRequest, createContextLogger } from './common/logger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  // Start a minimal health-check server BEFORE NestJS loads.
+  // Railway's deploy health check needs a 200 within the timeout window,
+  // but NestFactory.create() can take minutes on cold start (free tier).
+  // This pre-server responds to /health and /api/health immediately,
+  // then shuts down when NestJS is ready to take over the port.
+  const preServer = http.createServer((req, res) => {
+    if (req.url === '/health' || req.url === '/api/health') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'ok', service: 'playmorrow-api' }));
+    } else {
+      res.writeHead(404);
+      res.end('Not found');
+    }
+  });
+
+  const port = parseInt(process.env.PORT || '4000', 10);
+
+  await new Promise<void>((resolve) => preServer.listen(port, resolve));
+  logger.info(`[pre-server] Health check server listening on port ${port}`);
+
+  // NestJS startup (may take 30-120s on Railway free tier)
   const app = await NestFactory.create(AppModule);
+
+  // Shut down pre-server now that NestJS is ready
+  await new Promise<void>((resolve) => preServer.close(() => resolve()));
   const config = app.get(ConfigService);
 
   // Fail fast in production if critical secrets are missing.
@@ -143,6 +168,9 @@ async function bootstrap() {
   app.use('/api/health', (_req: any, res: any) => res.json({ status: 'ok', service: 'playmorrow-api' }));
   app.use('/health', (_req: any, res: any) => res.json({ status: 'ok', service: 'playmorrow-api' }));
 
+  // Give OS a moment to release the port before NestJS claims it
+  await new Promise((r) => setTimeout(r, 500));
+
   app.setGlobalPrefix('api', { exclude: ['health'] });
 
   // Serve uploaded files at /api/uploads/*
@@ -166,7 +194,6 @@ async function bootstrap() {
     SwaggerModule.setup('docs', app, document);
   }
 
-  const port = config.get<number>('PORT', 4000);
   await app.listen(port);
 
   const docs = isProd ? '' : ' (docs: /docs)';
