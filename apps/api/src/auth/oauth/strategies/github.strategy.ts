@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-github2';
@@ -14,9 +14,14 @@ export interface OAuthProfile {
 @Injectable()
 export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(configService: ConfigService) {
+    const clientID = configService.get<string>('GITHUB_CLIENT_ID', '');
+    const clientSecret = configService.get<string>('GITHUB_CLIENT_SECRET', '');
+    if (!clientID || !clientSecret) {
+      Logger.warn('GITHUB_CLIENT_ID or GITHUB_CLIENT_SECRET not set — GitHub OAuth disabled');
+    }
     super({
-      clientID: configService.getOrThrow('GITHUB_CLIENT_ID'),
-      clientSecret: configService.getOrThrow('GITHUB_CLIENT_SECRET'),
+      clientID,
+      clientSecret,
       callbackURL: configService.get<string>('GITHUB_CALLBACK_URL', 'http://localhost:4000/api/auth/github/callback'),
       scope: ['user:email'],
     });

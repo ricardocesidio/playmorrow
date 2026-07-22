@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHmac, randomBytes } from 'node:crypto';
 
@@ -7,7 +7,15 @@ export class CsrfService {
   private readonly secret: string;
 
   constructor(config: ConfigService) {
-    this.secret = config.getOrThrow('CSRF_SECRET');
+    const isProduction = config.get<string>('NODE_ENV') === 'production';
+    const secret = config.get<string>('CSRF_SECRET');
+    if (!secret && isProduction) {
+      throw new Error('CSRF_SECRET environment variable is required in production');
+    }
+    this.secret = secret || 'dev-csrf-secret';
+    if (!secret) {
+      Logger.warn('CSRF_SECRET not set — using development fallback. Set CSRF_SECRET in production.');
+    }
   }
 
   private readonly tokenMaxAgeMs = 7 * 24 * 60 * 60 * 1000; // 7 days (matches session lifetime)
