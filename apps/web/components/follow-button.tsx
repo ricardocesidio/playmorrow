@@ -36,15 +36,15 @@ export function FollowButton({ targetType, slug }: FollowButtonProps) {
   const followerCount = status?.followerCount ?? 0;
 
   const handleClick = async () => {
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated) {
       router.push('/login');
       return;
     }
     try {
       if (isFollowing) {
-        await unfollowMut.mutateAsync({ slug, token });
+        await unfollowMut.mutateAsync({ slug });
       } else {
-        await followMut.mutateAsync({ slug, token });
+        await followMut.mutateAsync({ slug });
       }
     } catch {
       // ignore
