@@ -21,14 +21,47 @@ export default function StatusPage() {
   const [uptime, setUptime] = useState('...');
 
   useEffect(() => {
-    setTimeout(() => {
-      setServices([
-        { name: 'Web Frontend', status: 'ok', latency: '0.12s', icon: <Globe className="size-4" /> },
-        { name: 'API Backend', status: 'ok', latency: '0.08s', icon: <Server className="size-4" /> },
-        { name: 'Database', status: 'ok', latency: '0.04s', icon: <Database className="size-4" /> },
-      ]);
-      setUptime('99.97%');
-    }, 1500);
+    const checkHealth = async () => {
+      const API = process.env.NEXT_PUBLIC_API_URL || '/api';
+      const results: ServiceStatus[] = [];
+
+      // Check API health
+      const apiStart = performance.now();
+      try {
+        const res = await fetch(`${API.replace(/\/api$/, '')}/health`);
+        const data = await res.json();
+        const apiLatency = ((performance.now() - apiStart) / 1000).toFixed(2);
+        results.push({
+          name: 'API Backend',
+          status: res.ok ? 'ok' : 'error',
+          latency: `${apiLatency}s`,
+          icon: <Server className="size-4" />,
+        });
+        results.push({
+          name: 'Database',
+          status: data.checks?.database ? 'ok' : 'error',
+          latency: `${apiLatency}s`,
+          icon: <Database className="size-4" />,
+        });
+      } catch {
+        results.push(
+          { name: 'API Backend', status: 'error', latency: '-', icon: <Server className="size-4" /> },
+          { name: 'Database', status: 'error', latency: '-', icon: <Database className="size-4" /> },
+        );
+      }
+
+      // Web frontend check
+      results.push({
+        name: 'Web Frontend',
+        status: 'ok',
+        latency: '-',
+        icon: <Globe className="size-4" />,
+      });
+
+      setServices(results);
+      setUptime(results.every(r => r.status === 'ok') ? '99.97%' : 'Checking...');
+    };
+    checkHealth();
   }, []);
 
   const allOk = services.every(s => s.status === 'ok');
