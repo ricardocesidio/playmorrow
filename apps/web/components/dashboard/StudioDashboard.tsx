@@ -160,7 +160,7 @@ export function StudioDashboard() {
                 <div>Followers this week: <span className="text-cyan">{ds?.stats.followsThisWeek ?? 0}</span></div>
                 <div>Views this week: <span className="text-cyan">{ds?.stats.viewsThisWeek ?? 0}</span></div>
                 <div>Wishlists this week: <span className="text-cyan">{ds?.stats.wishlistsThisWeek ?? 0}</span></div>
-                <div>Engagement: <span className="text-cyan">+{ds?.stats.commentsThisMonth ?? 0}</span> comments/mo</div>
+                <div>Engagement: <span className="text-cyan">{`+${ds?.stats.commentsThisMonth ?? 0}`}</span> comments/mo</div>
               </div>
               <p className="mt-2 text-[0.5rem] text-muted-foreground">Full analytics coming soon. Data from studio dashboard.</p>
             </DashboardPanel>
