@@ -52,6 +52,12 @@ jobs:
       TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/playmorrow_test?schema=public
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/playmorrow_test?schema=public
       JWT_SECRET: test-secret
+      # OAuth + CSRF secrets required by getOrThrow() in strategies + CsrfService
+      GOOGLE_CLIENT_ID: ci-test
+      GOOGLE_CLIENT_SECRET: ci-test
+      GITHUB_CLIENT_ID: ci-test
+      GITHUB_CLIENT_SECRET: ci-test
+      CSRF_SECRET: ci-test-csrf-secret-for-github-actions
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
