@@ -137,6 +137,11 @@ async function bootstrap() {
     }),
   );
 
+  // Mount health endpoint BEFORE global prefix so Railway's deploy health
+  // check (which pings /api/health) does not 404. The NestJS @Controller('health')
+  // handles GET /health; this handles GET /api/health for Railway.
+  app.use('/api/health', (_req: any, res: any) => res.json({ status: 'ok', service: 'playmorrow-api' }));
+
   app.setGlobalPrefix('api', { exclude: ['health'] });
 
   // Serve uploaded files at /api/uploads/*
