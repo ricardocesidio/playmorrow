@@ -29,5 +29,5 @@ COPY --from=build /app/packages ./packages
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @playmorrow/database db:generate
 RUN mkdir -p apps/api/uploads
-EXPOSE 4000
+EXPOSE 8080
 CMD ["dumb-init", "node", "apps/api/dist/main.js"]
