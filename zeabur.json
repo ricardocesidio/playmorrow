@@ -1,0 +1,5 @@
+{
+  "name": "playmorrow-api",
+  "dockerfile": "apps/api/Dockerfile",
+  "port": 8080
+}
