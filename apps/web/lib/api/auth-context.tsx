@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (res.csrfToken) {
         document.cookie = `playmorrow_csrf=${res.csrfToken}; path=/; sameSite=lax; maxAge=${60 * 60 * 24}`;
       }
-      const { csrfToken: _, ...user } = res;
+      const { csrfToken: _unused, ...user } = res;
       setUser(user);
       return user;
     } catch (err) {
