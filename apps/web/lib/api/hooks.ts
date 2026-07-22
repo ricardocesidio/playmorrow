@@ -52,12 +52,12 @@ export function usePersonalFeed(type: string, page: number, pageSize: number, to
   return useQuery({
     queryKey: ['personalFeed', type, page, pageSize],
     queryFn: () => api.get<Paginated<FeedItem>>(`/me/feed?${params}`),
-    enabled: !!token,
+    enabled: true,
     placeholderData: (prev) => prev,
   });
 }
 
-export function useInfinitePersonalFeed(type: string, pageSize: number, token?: string) {
+export function useInfinitePersonalFeed(type: string, pageSize: number, _token?: string) {
   return useInfiniteQuery({
     queryKey: ['infinitePersonalFeed', type, pageSize],
     queryFn: ({ pageParam }) => {
@@ -67,7 +67,7 @@ export function useInfinitePersonalFeed(type: string, pageSize: number, token?: 
     },
     getNextPageParam: (last) => (last.hasMore ? last.page + 1 : undefined),
     initialPageParam: 1,
-    enabled: !!token,
+    enabled: true,
   });
 }
 
