@@ -42,9 +42,9 @@ export function FollowButton({ targetType, slug }: FollowButtonProps) {
     }
     try {
       if (isFollowing) {
-        await unfollowMut.mutateAsync({ slug });
+        await unfollowMut.mutateAsync({ slug, token: '' });
       } else {
-        await followMut.mutateAsync({ slug });
+        await followMut.mutateAsync({ slug, token: '' });
       }
     } catch {
       // ignore
