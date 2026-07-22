@@ -40,7 +40,7 @@ export function PushNotificationToggle() {
         }
         setSubscribed(false);
       } else {
-        const publicKey = 'BPP0mLF9MwYi2YWivQfqAjGJbXFoX9YFQW4rsSEb-9ivFMoDxsQjzL8vWl7PJgv5D5jHNBgU6hVp8QBmm80k_LA';
+        const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BPP0mLF9MwYi2YWivQfqAjGJbXFoX9YFQW4rsSEb-9ivFMoDxsQjzL8vWl7PJgv5D5jHNBgU6hVp8QBmm80k_LA';
         const sub = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(publicKey) as unknown as BufferSource,
