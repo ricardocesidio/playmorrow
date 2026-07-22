@@ -76,7 +76,7 @@ function DevlogReactions({ devlogId }: { devlogId: string }) {
       } else {
         await reactMut.mutateAsync({ devlogId, type, token: token! });
       }
-    } catch { /* ignore */ }
+    } catch (e) { console.error(e) }
   };
 
   if (isLoading) return <div className="mb-8 h-8 animate-pulse rounded-lg bg-muted" />;
@@ -121,7 +121,7 @@ function CommentReactions({
       } else {
         await reactMut.mutateAsync({ commentId, devlogId, type, token: token! });
       }
-    } catch { /* ignore */ }
+    } catch (e) { console.error(e) }
   };
 
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
@@ -179,7 +179,7 @@ function CommentItem({
       await createComment.mutateAsync({ devlogId, body: replyBody.trim(), parentId: comment.id, token });
       setReplyBody('');
       setReplying(false);
-    } catch { /* ignore */ }
+    } catch (e) { console.error(e) }
   };
 
   const handleEdit = async () => {
@@ -187,14 +187,14 @@ function CommentItem({
     try {
       await updateComment.mutateAsync({ commentId: comment.id, body: editBody.trim(), token });
       setEditing(false);
-    } catch { /* ignore */ }
+    } catch (e) { console.error(e) }
   };
 
   const handleDelete = async () => {
     if (!token || !confirm('Delete this comment?')) return;
     try {
       await deleteComment.mutateAsync({ commentId: comment.id, token });
-    } catch { /* ignore */ }
+    } catch (e) { console.error(e) }
   };
 
   return (
@@ -254,6 +254,7 @@ function CommentItem({
                 onChange={(e) => setReplyBody(e.target.value)}
                 rows={2}
                 placeholder="Write a reply…"
+                aria-label="Write a reply"
                 className="clip-corner w-full border border-input bg-background/80 px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
               />
               <div className="flex gap-2">
@@ -300,7 +301,7 @@ export default function DevlogDetailPage() {
     try {
       await createComment.mutateAsync({ devlogId: id, body: newComment.trim(), token });
       setNewComment('');
-    } catch { /* ignore */ }
+    } catch (e) { console.error(e) }
   };
 
   const countAllComments = (items: Comment[]): number =>
@@ -441,6 +442,7 @@ export default function DevlogDetailPage() {
                   onChange={(e) => setNewComment(e.target.value)}
                   rows={3}
                   placeholder="Write a comment…"
+                  aria-label="Write a comment"
                   className="clip-corner w-full border border-input bg-background/80 px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
                 />
                 <button onClick={handlePostComment} disabled={createComment.isPending || !newComment.trim()} className="clip-corner border border-cyan bg-cyan/10 px-5 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:opacity-40">

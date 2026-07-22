@@ -90,6 +90,7 @@ export function SiteHeader() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => { if (searchResults) setSearchOpen(true); }}
                 placeholder="Search games, studios, genres..."
+                aria-label="Search games, studios, genres"
                 className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground/60"
               />
               {searchLoading && <Loader2 className="size-4 animate-spin shrink-0" />}

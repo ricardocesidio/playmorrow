@@ -849,6 +849,7 @@ function CommunityPanel({ slug }: { slug: string }) {
             onKeyDown={handleKeyDown}
             placeholder="Join the conversation..."
             className="h-full flex-1 bg-transparent px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            aria-label="Join the conversation"
           />
           <button
             type="button"
