@@ -49,6 +49,7 @@ export default function SearchPage() {
             <input
               type="text"
               placeholder="Search..."
+                aria-label="Search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               autoFocus

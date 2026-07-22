@@ -119,6 +119,7 @@ export default function StudiosPage() {
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                   placeholder="Search studios..."
+                  aria-label="Search studios"
                   className="clip-corner h-12 w-full border border-cyan/30 bg-[#050b0f]/80 pl-12 pr-4 font-mono text-sm text-white outline-none placeholder:text-muted-foreground/40 shadow-[0_0_12px_rgb(62_231_255_/_0.06)] transition-all duration-500 focus:border-cyan focus:shadow-[0_0_30px_rgb(62_231_255_/_0.2)]"
                 />
               </div>

@@ -303,9 +303,9 @@ function ChangePasswordSection() {
     <form onSubmit={handleChange} className="mt-6 clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-6">
       <h2 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-4">Change Password</h2>
       <div className="grid gap-4 sm:grid-cols-3">
-        <input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} placeholder="Current password" className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
-        <input type="password" value={newPass} onChange={(e) => setNewPass(e.target.value)} placeholder="New password" className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
-        <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Confirm new password" className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
+        <input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} aria-label="Current password" placeholder="Current password" className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
+        <input type="password" value={newPass} onChange={(e) => setNewPass(e.target.value)} aria-label="New password" placeholder="New password" className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
+        <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} aria-label="Confirm new password" placeholder="Confirm new password" className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
       </div>
       {msg && <p className={`mt-3 font-mono text-xs ${msg.includes('success') ? 'text-cyan' : 'text-coral'}`}>{msg}</p>}
       <button type="submit" disabled={loading} className="clip-corner mt-4 inline-flex cursor-pointer items-center gap-2 border border-coral/50 bg-coral/5 px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-coral hover:bg-coral hover:text-coral-foreground disabled:opacity-50">

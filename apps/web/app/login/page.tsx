@@ -100,16 +100,17 @@ export default function LoginPage() {
                   <label htmlFor="email" className="pm-micro mb-4 block text-muted-foreground">Email or username</label>
                   <div className="relative">
                     <User className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      id="email"
-                      type="text"
-                      value={emailOrUsername}
-                      onChange={(e) => setEmailOrUsername(e.target.value)}
-                      className="clip-corner h-14 w-full border border-cyan bg-background/80 px-14 text-sm text-foreground shadow-[0_0_24px_rgb(62_231_255_/_0.12)] outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan"
-                      placeholder="Enter your email or username"
-                      autoComplete="username"
-                      required
-                    />
+<input
+  id="email"
+  type="text"
+  value={emailOrUsername}
+  onChange={(e) => setEmailOrUsername(e.target.value)}
+  className="clip-corner h-14 w-full border border-cyan bg-background/80 px-14 text-sm text-foreground shadow-[0_0_24px_rgb(62_231_255_/_0.12)] outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan"
+  placeholder="Enter your email or username"
+  autoComplete="username"
+  required
+  aria-label="Email or username"
+/>
                   </div>
                 </div>
 
