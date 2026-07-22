@@ -30,4 +30,4 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @playmorrow/database db:generate
 RUN mkdir -p apps/api/uploads
 EXPOSE 8080
-CMD ["dumb-init", "node", "apps/api/dist/main.js"]
+CMD node apps/api/dist/main.js
