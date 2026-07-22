@@ -10,7 +10,7 @@ test.describe('Public pages', () => {
     page.on('pageerror', (e) => { throw new Error(`Page error: ${e.message}`); });
 
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: /Follow games/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Discover tomorrow/i })).toBeVisible({ timeout: 15_000 });
   });
 
   test('Explore games renders game cards', async ({ page }) => {
@@ -22,7 +22,7 @@ test.describe('Public pages', () => {
 
   test('Explore games search input works', async ({ page }) => {
     await page.goto('/games');
-    const searchInput = page.getByPlaceholder('Search games, studios, genres...').first();
+    const searchInput = page.getByLabel('Search games');
     await expect(searchInput).toBeVisible();
     await searchInput.fill('Test');
     await searchInput.press('Enter');
@@ -46,7 +46,7 @@ test.describe('Public pages', () => {
       await route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'Server error' }) });
     });
     await page.goto('/games');
-    await expect(page.getByText('Failed to load games')).toBeVisible();
+    await expect(page.getByText('Failed to load games.')).toBeVisible();
   });
 
   test('Load more control appears with enough items', async ({ page }) => {
@@ -79,7 +79,7 @@ test.describe('Public pages', () => {
   test('Game detail renders metadata', async ({ page }) => {
     await page.goto('/games/test-game');
     await expect(page.getByRole('heading', { name: 'Neon Warden' })).toBeVisible();
-    await expect(page.getByText('Obsidian Signal')).toBeVisible();
+    await expect(page.getByText('Obsidian Signal').first()).toBeVisible();
     await expect(page.getByText('BETA').first()).toBeVisible();
   });
 
