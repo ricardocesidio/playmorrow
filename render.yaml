@@ -1,13 +1,45 @@
 services:
   - type: web
     name: playmorrow-api
-    env: node
-    nodeVersion: 22
-    buildCommand: pnpm exec turbo run build --filter=@playmorrow/api^...
-    startCommand: node apps/api/dist/main.js
+    runtime: docker
+    repo: https://github.com/ricardocesidio/playmorrow
+    branch: main
+    dockerfilePath: apps/api/Dockerfile
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
-      - key: UPLOADS_DIR
-        value: /var/data/uploads
+      - key: PORT
+        value: "8080"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: playmorrow-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: CSRF_SECRET
+        generateValue: true
+      - key: WEB_ORIGIN
+        value: https://playmorrow.vercel.app
+      - key: COOKIE_DOMAIN
+        value: .onrender.com
+      - key: RESEND_API_KEY
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+
+databases:
+  - name: playmorrow-db
+    databaseName: playmorrow
+    plan: free
+    postgresMajorVersion: 16
