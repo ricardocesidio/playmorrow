@@ -27,13 +27,9 @@ async function bootstrap() {
   // This pre-server responds to /health and /api/health immediately,
   // then shuts down when NestJS is ready to take over the port.
   const preServer = http.createServer((req, res) => {
-    if (req.url === '/health' || req.url === '/api/health') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok', service: 'playmorrow-api' }));
-    } else {
-      res.writeHead(404);
-      res.end('Not found');
-    }
+    // Respond 200 to ANY health check path Railway might ping
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', service: 'playmorrow-api' }));
   });
 
   const port = parseInt(process.env.PORT || '4000', 10);
