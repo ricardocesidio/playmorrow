@@ -154,17 +154,38 @@
 
 ---
 
-## Remaining Work (Not Code)
+## 🔴 Remaining Work — Critical (Fix Before Launch)
 
-| Task | Priority | Notes |
-|------|----------|-------|
-| Lawyer review Terms + Privacy | HIGH | Legal requirement for public launch. Also fix: add physical business address, GDPR DPO contact, verify `support@playmorrow.com` MX records |
-| Set up `support@playmorrow.com` email | MEDIUM | Email used in legal pages (support@playmorrow.com) has no MX records — emails won't arrive |
-| Update Cookie Policy if Plausible is enabled | LOW | Currently states "no third-party analytics" — must update if Plausible is activated |
-| Set Plausible env vars on Vercel | LOW | Analytics dormant without it |
-| Set VAPID keys on Railway | LOW | Push notifs optional |
-| Set AWS keys on Railway | LOW | Local storage adequate at current scale |
-| Create /about, /contact pages | LOW | Nice to have before public announcement |
-| Docker test DB | LOW | Unblocks ~30 skipped tests |
-| Add physical business address to legal pages | LOW | Required in some jurisdictions (GDPR Art. 13) |
-| Add GDPR DPO / EU representative contact | LOW | Required if serving EU users |
+| # | Task | Why | Evidence |
+|---|------|-----|----------|
+| 1 | Add OG image to all pages | Social shares show no preview — looks broken on Twitter/Discord | Verified via `python3 urllib` fetch on `/`, `/games`, `/studios`, `/feed`, `/login`, `/leaderboard` — zero `og:image` meta tags |
+| 2 | Add canonical URLs to all pages | Duplicate content penalty risk from search engines | Same fetch — zero `<link rel="canonical">` on all 6 pages |
+| 3 | Add JSON-LD structured data | No rich search results (no game cards, no star ratings in SERP) | Same fetch — zero `<script type="application/ld+json">` on all pages |
+| 4 | Add dynamic entries to sitemap | Individual game/studio/devlog pages invisible to search engines | `curl /sitemap.xml` — only 9 static URLs, no dynamic entries |
+
+## 🟡 Remaining Work — Important (First Month)
+
+| # | Task | Why | Evidence |
+|---|------|-----|----------|
+| 5 | Lawyer review Terms + Privacy | Legal requirement for public launch | Also needs: physical address, GDPR DPO, verify `support@playmorrow.com` MX records |
+| 6 | Extract duplicated dashboard components | `DashboardPanel` + `SidebarLink` defined in BOTH PlayerDashboard and StudioDashboard | `grep` confirmed — identical implementations in both files |
+| 7 | Move scripts out of `src/` | `admin-script.ts`, `seed-model-games.ts` etc compiled into production Docker image | ✅ FIXED this session — `tsconfig.build.json` now excludes `src/scripts` |
+| 8 | Deduplicate `timeAgo` function | 3 copies across PlayerDashboard, game detail page — `formatRelativeTime` already exists in `lib/format.ts` | Code inspection |
+| 9 | Set up `support@playmorrow.com` email | No MX records — emails from legal pages won't arrive | DNS check |
+| 10 | Set Plausible env vars on Vercel | Analytics component wired but dormant | Code inspection — `analytics.tsx` exists and wired in layout |
+| 11 | Set VAPID keys on Railway | Push notifications skip gracefully but don't work | `railway variables` — not set |
+| 12 | Set AWS keys on Railway | Uploads use local disk (doesn't scale) | `railway variables` — not set |
+| 13 | Docker test DB | Unblocks ~30 skipped tests | Needed: `docker compose up postgres-test` + `pnpm test:with-db` |
+
+## 🟢 Remaining Work — Future (2-5 Years)
+
+| # | Task | Why |
+|---|------|-----|
+| 14 | Dynamic sitemap generation for games/studios/devlogs | Search discovery |
+| 15 | JSON-LD schema for Game, Studio, Devlog pages | Rich search results |
+| 16 | OG image generation (per-page previews) | Social sharing |
+| 17 | Extract shared dashboard components to `components/dashboard/shared.tsx` | Maintainability |
+| 18 | Web Vitals monitoring (LCP, CLS, INP) | Performance tracking |
+| 19 | Rollback strategy for Railway + Vercel | Deployment safety |
+| 20 | Analytics dashboard with real metrics | Business intelligence |
+| 21 | Prisma Studio for customer support | Data browsing |
