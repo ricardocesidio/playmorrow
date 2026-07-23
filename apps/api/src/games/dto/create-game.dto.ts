@@ -8,7 +8,7 @@ class CreateMediaDto {
   type!: 'SCREENSHOT' | 'TRAILER' | 'VIDEO' | 'LOGO' | 'BANNER' | 'IMAGE';
 
   @ApiProperty({ example: 'https://example.com/screen1.jpg' })
-  @IsUrl({ require_tld: false, require_protocol: false })
+  @IsString()
   url!: string;
 
   @ApiPropertyOptional({ example: 'Ruins biome' })
@@ -28,7 +28,7 @@ class CreatePlatformLinkDto {
   platform!: 'STEAM' | 'ITCH' | 'EPIC' | 'GOG' | 'PLAYSTATION' | 'XBOX' | 'NINTENDO' | 'WEB' | 'ANDROID' | 'IOS' | 'DEMO' | 'DISCORD' | 'WEBSITE' | 'OTHER';
 
   @ApiProperty({ example: 'https://store.steampowered.com/app/example' })
-  @IsUrl({ require_tld: false, require_protocol: false })
+  @IsString()
   url!: string;
 
   @ApiPropertyOptional({ example: 'Wishlist on Steam' })
