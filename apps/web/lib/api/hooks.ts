@@ -151,6 +151,7 @@ export function useGameDevlogs(gameSlug: string, page = 1, pageSize = 5) {
     queryKey: ['gameDevlogs', gameSlug, page, pageSize],
     queryFn: () => api.get<Paginated<Devlog>>(`/games/${gameSlug}/devlogs?${params}`),
     enabled: !!gameSlug,
+    refetchInterval: 30_000,
   });
 }
 
@@ -287,6 +288,7 @@ export function useGameRoadmap(gameSlug: string) {
     queryKey: ['gameRoadmap', gameSlug],
     queryFn: () => api.get<RoadmapItem[]>(`/games/${gameSlug}/roadmap`),
     enabled: !!gameSlug,
+    refetchInterval: 30_000,
   });
 }
 
