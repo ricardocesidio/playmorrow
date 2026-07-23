@@ -167,6 +167,23 @@ export class AuthController {
     return { success: true };
   }
 
+  @Post('send-email-change-code')
+  @Throttle({ default: { ttl: 60_000, limit: 3 } })
+  @UseGuards(SessionAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async sendEmailChangeCode(@CurrentUser() user: { id: string }, @Body('newEmail') newEmail: string) {
+    await this.authService.sendEmailChangeCode(user.id, newEmail);
+    return { message: 'Verification code sent to new email.' };
+  }
+
+  @Post('confirm-email-change')
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @UseGuards(SessionAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async confirmEmailChange(@CurrentUser() user: { id: string }, @Body('newEmail') newEmail: string, @Body('code') code: string) {
+    return this.authService.confirmEmailChange(user.id, newEmail, code);
+  }
+
   @Post('complete-onboarding')
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @HttpCode(HttpStatus.CREATED)

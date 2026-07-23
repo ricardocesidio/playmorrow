@@ -496,6 +496,39 @@ export class AuthService {
     return { user };
   }
 
+  async sendEmailChangeCode(userId: string, newEmail: string) {
+    const emailLower = newEmail.toLowerCase().trim();
+    const existing = await this.prisma.user.findUnique({ where: { email: emailLower } });
+    if (existing && existing.id !== userId) throw new ConflictException('Email already in use');
+
+    await this.prisma.emailVerificationCode.updateMany({
+      where: { userId, consumedAt: null },
+      data: { consumedAt: new Date() },
+    });
+
+    const { raw, hash, expiresAt } = this.generateVerificationCode();
+    await this.prisma.emailVerificationCode.create({ data: { codeHash: hash, userId, expiresAt } });
+    await this.emailService.sendVerificationCode(emailLower, raw);
+  }
+
+  async confirmEmailChange(userId: string, newEmail: string, code: string) {
+    const emailLower = newEmail.toLowerCase().trim();
+    const codeHash = createHash('sha256').update(code).digest('hex');
+    const stored = await this.prisma.emailVerificationCode.findFirst({
+      where: { userId, consumedAt: null, expiresAt: { gt: new Date() } },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!stored || !timingSafeEqual(Buffer.from(stored.codeHash, 'hex'), Buffer.from(codeHash, 'hex'))) {
+      throw new BadRequestException('Invalid verification code');
+    }
+    const now = new Date();
+    await this.prisma.$transaction([
+      this.prisma.emailVerificationCode.update({ where: { id: stored.id }, data: { consumedAt: now } }),
+      this.prisma.user.update({ where: { id: userId }, data: { email: emailLower, emailVerifiedAt: now, emailChangeCount: { increment: 1 } } }),
+    ]);
+    return { success: true, email: emailLower };
+  }
+
   async isUsernameAvailable(username: string) {
     const normalized = username.trim();
     if (normalized.length < 3 || normalized.length > 20 || !USERNAME_PATTERN.test(normalized)) {
