@@ -408,6 +408,7 @@ export function useNotifications(status: string, page: number, pageSize: number,
       api.get<PaginatedNotifications>(
         `/me/notifications?status=${status}&page=${page}&pageSize=${pageSize}`,
       ),
+    refetchInterval: 30_000,
   });
 }
 
