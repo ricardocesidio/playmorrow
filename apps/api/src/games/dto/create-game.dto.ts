@@ -98,17 +98,17 @@ export class CreateGameDto {
 
   @ApiPropertyOptional({ example: 'https://example.com/cover.jpg' })
   @IsOptional()
-  @IsUrl({ require_tld: false, require_protocol: false })
+  @IsString()
   coverUrl?: string;
 
   @ApiPropertyOptional({ example: 'https://example.com/banner.png' })
   @IsOptional()
-  @IsUrl({ require_tld: false, require_protocol: false })
+  @IsString()
   bannerUrl?: string;
 
   @ApiPropertyOptional({ example: 'https://www.youtube.com/watch?v=...' })
   @IsOptional()
-  @IsUrl({ require_tld: false, require_protocol: false })
+  @IsString()
   trailerUrl?: string;
 
   @ApiPropertyOptional({ type: [CreatePlatformLinkDto] })
