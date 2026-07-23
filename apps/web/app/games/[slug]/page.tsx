@@ -127,7 +127,7 @@ function PremiumGameDetail({
   const [coverSaved, setCoverSaved] = useState(false);
   const [savingCover, setSavingCover] = useState(false);
   const title = game.title || '';
-  const heroImage = pendingCover || game.bannerUrl || game.coverUrl || '';
+  const heroImage = pendingCover || game.coverUrl || game.bannerUrl || '';
   const tags = game.tags?.length ? game.tags : [];
   const allScreenshots = useMemo(() => {
     return game.media?.filter((item) => item.type !== 'VIDEO').map((item) => item.thumbnailUrl ?? item.url) ?? [];
