@@ -34,6 +34,10 @@ export default function ProfileSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [emailVerifyCode, setEmailVerifyCode] = useState('');
+  const [emailVerifySent, setEmailVerifySent] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [verifyingEmail, setVerifyingEmail] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -72,8 +76,39 @@ export default function ProfileSettingsPage() {
     setSuccess(false);
   };
 
+  const handleSendEmailCode = async () => {
+    if (!form.email.trim()) return;
+    setVerifyingEmail(true);
+    try {
+      await api.post('/auth/send-email-change-code', { newEmail: form.email.trim() });
+      setEmailVerifySent(true);
+      setError('');
+    } catch (err: unknown) {
+      setError(err instanceof ApiError ? String((err.body as any)?.message || err.message) : 'Failed to send code');
+    }
+    setVerifyingEmail(false);
+  };
+
+  const handleVerifyEmail = async () => {
+    if (!emailVerifyCode.trim()) return;
+    setVerifyingEmail(true);
+    try {
+      await api.post('/auth/confirm-email-change', { newEmail: form.email.trim(), code: emailVerifyCode.trim() });
+      setEmailVerified(true);
+      setEmailVerifySent(false);
+      setError('');
+    } catch (err: unknown) {
+      setError(err instanceof ApiError ? String((err.body as any)?.message || err.message) : 'Invalid code');
+    }
+    setVerifyingEmail(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (form.email !== user.email && !emailVerified) {
+      handleSendEmailCode();
+      return;
+    }
     setSaving(true);
     setError('');
     setSuccess(false);
@@ -82,7 +117,7 @@ export default function ProfileSettingsPage() {
       const payload: Record<string, string> = {};
       if (form.username !== user.username) payload.username = form.username;
       if (form.displayName !== user.displayName) payload.displayName = form.displayName;
-      if (form.email !== user.email) payload.email = form.email;
+      if (form.email !== user.email && emailVerified) payload.email = form.email;
       if (form.bio !== (user.bio ?? '')) payload.bio = form.bio;
       if (form.location !== (user.location ?? '')) payload.location = form.location;
       if (form.avatarUrl !== (user.avatarUrl ?? '')) payload.avatarUrl = form.avatarUrl;
@@ -95,6 +130,7 @@ export default function ProfileSettingsPage() {
       await api.patch('/users/me/profile', payload);
       await refreshMe();
       setSuccess(true);
+      setEmailVerified(false);
     } catch (err: unknown) {
       if (err instanceof ApiError && err.body && typeof err.body === 'object') {
         const body = err.body as Record<string, unknown>;
@@ -176,6 +212,17 @@ export default function ProfileSettingsPage() {
                 ) : (
                   <p className="mt-1.5 text-xs text-muted-foreground">You can change your email up to 2 times.</p>
                 )}
+                {emailVerifySent && (
+                  <div className="mt-3 flex items-center gap-3">
+                    <Input type="text" value={emailVerifyCode} onChange={(e) => setEmailVerifyCode(e.target.value)} placeholder="Enter verification code" className="h-9 w-40" />
+                    <button type="button" onClick={handleVerifyEmail} disabled={verifyingEmail} className="cursor-pointer rounded bg-cyan px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-black hover:bg-cyan/90 transition disabled:opacity-50">
+                      {verifyingEmail ? 'Verifying...' : 'Verify'}
+                    </button>
+                  </div>
+                )}
+                {emailVerified && (
+                  <p className="mt-1.5 text-xs text-green-500">Email verified! Save your profile to confirm.</p>
+                )}
               </div>
 
               <div className="flex flex-col items-center py-6">
@@ -246,7 +293,7 @@ export default function ProfileSettingsPage() {
             className="clip-corner inline-flex h-14 w-full cursor-pointer items-center justify-center gap-3 border border-cyan bg-cyan/10 px-7 font-mono text-xs uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:pointer-events-none disabled:opacity-50"
           >
             <Save className="size-5" />
-            {saving ? 'Saving...' : 'Save Changes'}
+            {form.email !== user.email && !emailVerified ? 'Send verification code' : saving ? 'Saving...' : 'Save Changes'}
           </button>
         </form>
 
