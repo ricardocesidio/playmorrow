@@ -293,13 +293,7 @@ export class CommentsService {
   }
 
   async findByGame(slug: string, page: number, pageSize: number, currentUserId?: string) {
-    const game = await this.prisma.game.findUniqueOrThrow({ where: { slug }, select: { id: true, studioId: true } });
-    // Get studio members and their logos for avatar lookup
-    const studioMembers = await this.prisma.studioMember.findMany({
-      where: { studioId: game.studioId },
-      include: { studio: { select: { logoUrl: true } } },
-    });
-    const memberLogoMap = new Map(studioMembers.map((m) => [m.userId, m.studio.logoUrl]));
+    const game = await this.prisma.game.findUniqueOrThrow({ where: { slug }, select: { id: true } });
     const where = { gameId: game.id, parentId: null, deletedAt: null };
     const [items, total] = await Promise.all([
       this.prisma.comment.findMany({
@@ -314,6 +308,20 @@ export class CommentsService {
       }),
       this.prisma.comment.count({ where }),
     ]);
+    // Fetch studio logos for comment authors (their own studios, not the game's studio)
+    const authorIds = [...new Set(items.map((c) => c.authorId))];
+    const authorStudios = authorIds.length > 0
+      ? await this.prisma.studioMember.findMany({
+          where: { userId: { in: authorIds } },
+          include: { studio: { select: { logoUrl: true } } },
+        })
+      : [];
+    const authorLogoMap = new Map<string, string | null>();
+    for (const as of authorStudios) {
+      if (as.studio.logoUrl && !authorLogoMap.has(as.userId)) {
+        authorLogoMap.set(as.userId, as.studio.logoUrl);
+      }
+    }
     const transformed = items.map((c) => ({
       id: c.id,
       body: c.body,
@@ -322,7 +330,7 @@ export class CommentsService {
       updatedAt: c.updatedAt.toISOString(),
       deletedAt: c.deletedAt?.toISOString() ?? null,
       author: c.author,
-      studioLogoUrl: memberLogoMap.get(c.authorId) ?? null,
+      studioLogoUrl: authorLogoMap.get(c.authorId) ?? null,
       reactions: (c.reactions as Array<{ type: string; userId: string }>).reduce(
         (acc, r) => { acc[r.type] = (acc[r.type] ?? 0) + 1; return acc; },
         {} as Record<string, number>,
