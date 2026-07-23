@@ -41,8 +41,10 @@ export function PushNotificationToggle() {
     }
 
     setLoading(true);
-    // Safety timeout — never get stuck in loading state
-    const timeout = setTimeout(() => setLoading(false), 10000);
+    const timeout = setTimeout(() => {
+      setLoading(false);
+      if (!subscribed) toast.error('Push subscription timed out. Check your browser notification settings.');
+    }, 30000);
 
     try {
       let registration: ServiceWorkerRegistration;
@@ -92,8 +94,6 @@ export function PushNotificationToggle() {
       setLoading(false);
     }
   };
-
-  if (!supported) return null;
 
   return (
     <button onClick={toggleSubscription} disabled={loading} title={subscribed ? 'Disable push notifications' : 'Enable push notifications'}
