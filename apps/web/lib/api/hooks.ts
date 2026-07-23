@@ -935,7 +935,30 @@ export function useReactToGameComment() {
   return useMutation({
     mutationFn: ({ commentId, type }: { commentId: string; type: string }) =>
       api.post(`/game-comments/${commentId}/reactions`, { type }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['gameComments'] }),
+    onMutate: async ({ commentId, type }) => {
+      await qc.cancelQueries({ queryKey: ['gameComments'] });
+      qc.setQueriesData({ queryKey: ['gameComments'] }, (old: any) => {
+        if (!old?.items) return old;
+        return {
+          ...old,
+          items: old.items.map((c: any) =>
+            c.id === commentId
+              ? {
+                  ...c,
+                  reactions: { ...c.reactions, [type]: (c.reactions?.[type] ?? 0) + 1 },
+                  viewerReactions: [...(c.viewerReactions ?? []), type],
+                }
+              : c,
+          ),
+        };
+      });
+    },
+    onError: (_err, _vars, _ctx) => {
+      qc.invalidateQueries({ queryKey: ['gameComments'] });
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['gameComments'] });
+    },
   });
 }
 
@@ -944,7 +967,30 @@ export function useRemoveGameCommentReaction() {
   return useMutation({
     mutationFn: ({ commentId, type }: { commentId: string; type: string }) =>
       api.delete(`/game-comments/${commentId}/reactions`, { type }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['gameComments'] }),
+    onMutate: async ({ commentId, type }) => {
+      await qc.cancelQueries({ queryKey: ['gameComments'] });
+      qc.setQueriesData({ queryKey: ['gameComments'] }, (old: any) => {
+        if (!old?.items) return old;
+        return {
+          ...old,
+          items: old.items.map((c: any) =>
+            c.id === commentId
+              ? {
+                  ...c,
+                  reactions: { ...c.reactions, [type]: Math.max(0, (c.reactions?.[type] ?? 1) - 1) },
+                  viewerReactions: (c.viewerReactions ?? []).filter((r: string) => r !== type),
+                }
+              : c,
+          ),
+        };
+      });
+    },
+    onError: (_err, _vars, _ctx) => {
+      qc.invalidateQueries({ queryKey: ['gameComments'] });
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['gameComments'] });
+    },
   });
 }
 

@@ -254,8 +254,7 @@ export class CommentsService {
       throw new NotFoundException('User not found');
     }
 
-    // Check authorization
-    const isAuthor = comment.authorId === userId;
+    // Check authorization — only studio OWNER/ADMIN/MODERATOR or global ADMIN can delete
     const isGlobalAdmin = user.role === 'ADMIN';
     const studioMembers = comment.devlog
       ? comment.devlog.game.studio.members
@@ -268,11 +267,11 @@ export class CommentsService {
         }))?.studio.members
       : undefined;
     const members = studioMembers ?? gameStudioMembers ?? [];
-    const isStudioAdmin = members.some(
-      (m) => m.userId === userId && (m.role === 'OWNER' || m.role === 'ADMIN'),
+    const isStudioMod = members.some(
+      (m) => m.userId === userId && (m.role === 'OWNER' || m.role === 'ADMIN' || m.role === 'MODERATOR'),
     );
 
-    if (!isAuthor && !isGlobalAdmin && !isStudioAdmin) {
+    if (!isGlobalAdmin && !isStudioMod) {
       throw new ForbiddenException('You are not allowed to delete this comment');
     }
 

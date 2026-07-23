@@ -837,7 +837,9 @@ function CommunityPanel({ slug, user, game }: { slug: string; user: { id: string
   const deleteComment = useDeleteGameComment(slug);
   const [newComment, setNewComment] = useState('');
 
-  const comments = (commentsData?.items ?? []) as GameCommentItem[];
+  const comments = ((commentsData?.items ?? []) as GameCommentItem[]).sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
   const total = commentsData?.total ?? 0;
 
   const handleSubmit = async () => {
@@ -914,7 +916,7 @@ function CommunityPanel({ slug, user, game }: { slug: string; user: { id: string
                   <Heart className={`size-3.5 ${comment.viewerReactions?.includes('LIKE') ? 'fill-coral text-coral' : ''}`} />
                   {comment.reactions?.LIKE ?? 0}
                 </button>
-                {(user?.id === author?.id || user?.role === 'ADMIN') && (
+                {user?.role === 'ADMIN' && (
                   <button type="button" onClick={() => deleteComment.mutate({ commentId: comment.id })} className="cursor-pointer text-muted-foreground hover:text-coral ml-1" aria-label="Delete comment">
                     <X className="size-3" />
                   </button>
