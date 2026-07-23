@@ -37,17 +37,15 @@ export function middleware(request: NextRequest) {
   // Reduce referrer leakage
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-  // Nonce-based CSP — removes 'unsafe-inline' for scripts in production.
-  // In development, Next.js HMR + React DevTools inject inline scripts without
-  // nonces, so we add 'unsafe-inline' as a fallback (CSP L3 ignores it when
-  // a nonce is present, but older browsers may still honor it).
+  // Production: strict nonce-based CSP.
+  // Development: unsafe-inline + unsafe-eval because Next.js HMR and React
+  // DevTools inject inline scripts without nonces. We must NOT include both
+  // the nonce AND unsafe-inline — CSP L3 ignores unsafe-inline when a nonce
+  // is present, making the fallback useless.
   const isDev = process.env.NODE_ENV === 'development';
-  const scriptSrc = [
-    "'self'",
-    `'nonce-${nonce}'`,
-    'https://plausible.io',
-    ...(isDev ? ["'unsafe-inline'", "'unsafe-eval'"] : []),
-  ].join(' ');
+  const scriptSrc = isDev
+    ? ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://plausible.io'].join(' ')
+    : ["'self'", `'nonce-${nonce}'`, 'https://plausible.io'].join(' ');
   response.headers.set(
     'Content-Security-Policy',
     [
