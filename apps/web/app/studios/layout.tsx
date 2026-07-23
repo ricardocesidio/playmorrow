@@ -6,6 +6,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Studios · Playmorrow',
     description: 'Discover indie game studios.',
+    images: '/og-image.svg',
+  },
+  twitter: {
+    images: '/og-image.svg',
+  },
+  alternates: {
+    canonical: '/studios',
   },
 };
 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { ArrowLeft, MessageSquare, ThumbsUp, Heart, Zap, Lightbulb } from 'lucide-react';
 
 import { SanitizedMarkdown } from '@/components/sanitized-markdown';
@@ -76,7 +77,7 @@ function DevlogReactions({ devlogId }: { devlogId: string }) {
       } else {
         await reactMut.mutateAsync({ devlogId, type, token: token! });
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { toast.error('Something went wrong. Please try again.') }
   };
 
   if (isLoading) return <div className="mb-8 h-8 animate-pulse rounded-lg bg-muted" />;
@@ -121,7 +122,7 @@ function CommentReactions({
       } else {
         await reactMut.mutateAsync({ commentId, devlogId, type, token: token! });
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { toast.error('Something went wrong. Please try again.') }
   };
 
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
@@ -179,7 +180,7 @@ function CommentItem({
       await createComment.mutateAsync({ devlogId, body: replyBody.trim(), parentId: comment.id, token });
       setReplyBody('');
       setReplying(false);
-    } catch (e) { console.error(e) }
+    } catch (e) { toast.error('Something went wrong. Please try again.') }
   };
 
   const handleEdit = async () => {
@@ -187,14 +188,14 @@ function CommentItem({
     try {
       await updateComment.mutateAsync({ commentId: comment.id, body: editBody.trim(), token });
       setEditing(false);
-    } catch (e) { console.error(e) }
+    } catch (e) { toast.error('Something went wrong. Please try again.') }
   };
 
   const handleDelete = async () => {
     if (!token || !confirm('Delete this comment?')) return;
     try {
       await deleteComment.mutateAsync({ commentId: comment.id, token });
-    } catch (e) { console.error(e) }
+    } catch (e) { toast.error('Something went wrong. Please try again.') }
   };
 
   return (
@@ -301,7 +302,7 @@ export default function DevlogDetailPage() {
     try {
       await createComment.mutateAsync({ devlogId: id, body: newComment.trim(), token });
       setNewComment('');
-    } catch (e) { console.error(e) }
+    } catch (e) { toast.error('Something went wrong. Please try again.') }
   };
 
   const countAllComments = (items: Comment[]): number =>

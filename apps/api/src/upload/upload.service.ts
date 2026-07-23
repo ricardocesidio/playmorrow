@@ -86,8 +86,8 @@ export class UploadService {
         const buf = typeof chunk === 'string' ? Buffer.from(chunk, 'utf-8') : chunk;
         buf.copy(buffer);
       });
-      stream.on('end', () => resolve());
-      stream.on('error', reject);
+      stream.on('end', () => { stream.destroy(); resolve(); });
+      stream.on('error', (err) => { stream.destroy(); reject(err); });
     });
 
     if (mimeType === 'image/webp') {

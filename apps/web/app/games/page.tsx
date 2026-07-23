@@ -2,12 +2,10 @@
 
 // TODO (Performance audit): Evaluate Server Components for public read-heavy parts of this page (filters, static content) to reduce client JS.
 
-import { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import type { ReactNode } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, BarChart3, Bookmark, ChevronDown, Search, Users, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Bookmark, Search, Users, X } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
@@ -25,13 +23,6 @@ export default function GamesPage() {
 
   const [search, setSearch] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [priceFilter, setPriceFilter] = useState('All');
-  const [playtestOnly, setPlaytestOnly] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('All');
-  const [genreFilter, setGenreFilter] = useState('All');
-  const [platformFilter, setPlatformFilter] = useState('All');
-  const [releaseFilter, setReleaseFilter] = useState('All time');
-  const [sortFilter, setSortFilter] = useState('Newest');
 
   const { data, isLoading, error } =
     useGames(page, pageSize, searchQuery || undefined);
@@ -53,19 +44,6 @@ export default function GamesPage() {
     router.push('/games?page=1');
   };
 
-  const clearAll = () => {
-    setSearchQuery('');
-    setSearch('');
-    setPriceFilter('All');
-    setPlaytestOnly(false);
-    setStatusFilter('All');
-    setGenreFilter('All');
-    setPlatformFilter('All');
-    setReleaseFilter('All time');
-    setSortFilter('Newest');
-    router.push('/games?page=1');
-  };
-
   const items = data?.items ?? [];
   const totalGames = data?.total ?? 0;
   const totalPages = Math.ceil(totalGames / pageSize);
@@ -73,12 +51,6 @@ export default function GamesPage() {
   const handlePageChange = (newPage: number) => {
     router.push(`/games?page=${newPage}`);
   };
-
-  const activeFilters = [
-    statusFilter !== 'All' ? `Status: ${statusFilter}` : null,
-    priceFilter !== 'All' ? `Price: ${priceFilter}` : null,
-    playtestOnly ? 'Playtest available' : null,
-  ].filter(Boolean) as string[];
 
   return (
     <>
@@ -101,53 +73,27 @@ export default function GamesPage() {
               </div>
             </div>
 
-            <form onSubmit={handleSearch} className="mt-3 grid gap-3">
-              <div className="grid gap-3 xl:grid-cols-[minmax(340px,680px)_1fr] xl:items-center">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search games, studios, genres..."
-                    aria-label="Search games"
-                    className="clip-corner h-10 w-full border border-border-bright/50 bg-background/70 pl-12 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground/45 focus:border-cyan focus:ring-1 focus:ring-cyan"
-                  />
-                  <button type="submit" className="cursor-pointer sr-only">Search</button>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-start gap-5 xl:justify-end">
-                  <ToggleControl label="Playtest available" active={playtestOnly} onChange={setPlaytestOnly} />
-                  <button type="button" onClick={clearAll} className="cursor-pointer pm-micro inline-flex items-center gap-3 text-coral transition-colors hover:text-coral/80">
-                    Clear all <X className="size-4" />
+            <form onSubmit={handleSearch} className="mt-3">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search games by name, studio, or tag..."
+                  aria-label="Search games"
+                  className="clip-corner h-10 w-full max-w-xl border border-border-bright/50 bg-background/70 pl-12 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground/45 focus:border-cyan focus:ring-1 focus:ring-cyan"
+                />
+                <button type="submit" className="cursor-pointer sr-only">Search</button>
+              </div>
+              {searchQuery && (
+                <div className="mt-3 flex items-center gap-3">
+                  <span className="pm-micro text-muted-foreground">Searching: &quot;{searchQuery}&quot;</span>
+                  <button type="button" onClick={() => { setSearchQuery(''); setSearch(''); router.push('/games?page=1'); }} className="cursor-pointer px-2 py-1 pm-micro text-coral transition-colors hover:text-coral/80">
+                    Clear <X className="inline size-3" />
                   </button>
                 </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-                <FilterSelect label="Genre" value={genreFilter} onChange={setGenreFilter} options={GENRES} />
-                <FilterSelect label="Status" value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
-                <FilterSelect label="Price" value={priceFilter} onChange={setPriceFilter} options={PRICE_OPTIONS} />
-                <FilterSelect label="Sort by" value={sortFilter} onChange={setSortFilter} options={SORT_OPTIONS} icon={<BarChart3 className="size-4" />} />
-                <FilterSelect label="Platform" value={platformFilter} onChange={setPlatformFilter} options={PLATFORMS} />
-                <FilterSelect label="Release window" value={releaseFilter} onChange={setReleaseFilter} options={RELEASE_WINDOWS} />
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                {activeFilters.map((chip) => (
-                  <button
-                    key={chip}
-                    type="button"
-                    className="clip-corner inline-flex items-center gap-2 border border-cyan/45 bg-cyan/5 px-3 py-1.5 pm-micro text-cyan"
-                  >
-                    {chip} <X className="size-3" />
-                  </button>
-                ))}
-                {activeFilters.length > 0 && <button type="button" onClick={clearAll} className="cursor-pointer px-3 py-1.5 pm-micro text-coral transition-colors hover:text-coral/80">Clear all</button>}
-                <span className="ml-auto hidden text-xs text-muted-foreground/70 lg:inline">
-                  Showing {items.length} of {totalGames.toLocaleString()} games
-                </span>
-              </div>
+              )}
             </form>
           </HudPanel>
 
@@ -194,129 +140,6 @@ export default function GamesPage() {
         <HudStatusRail />
       </main>
     </>
-  );
-}
-
-function FilterSelect({ label, value, onChange, options, icon }: { label: string; value: string; onChange: (v: string) => void; options: string[]; icon?: ReactNode }) {
-  const [open, setOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
-
-  useEffect(() => {
-    if (!open || !buttonRef.current) return;
-    const rect = buttonRef.current.getBoundingClientRect();
-    setDropdownStyle({
-      position: 'fixed',
-      top: `${rect.bottom + 4}px`,
-      left: `${rect.left}px`,
-      width: `${rect.width}px`,
-      zIndex: 9999,
-    });
-  }, [open]);
-
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
-
-  useEffect(() => {
-    if (open && dropdownRef.current) {
-      const firstOption = dropdownRef.current.querySelector('button[role="option"]') as HTMLButtonElement;
-      firstOption?.focus();
-    }
-  }, [open]);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      setOpen(false);
-    } else if ((e.key === 'Enter' || e.key === ' ') && !open) {
-      e.preventDefault();
-      setOpen(true);
-    }
-  };
-
-  return (
-    <div>
-      <div className="mb-1.5 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">{label}</div>
-      <button
-        ref={buttonRef}
-        type="button"
-        role="combobox"
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        aria-label={`${label} filter, current: ${value}`}
-        onClick={() => setOpen(!open)}
-        onKeyDown={handleKeyDown}
-        className="clip-corner flex h-9 w-full items-center justify-between gap-3 border border-border-bright/60 bg-background/80 px-3 font-mono text-[0.55rem] uppercase tracking-widest text-cyan cursor-pointer outline-none focus:border-cyan focus:ring-1 focus:ring-cyan"
-      >
-        {value}
-        <span className="flex items-center gap-2 text-muted-foreground">
-          {icon}
-          <ChevronDown className="size-3" />
-        </span>
-      </button>
-      {open && typeof document !== 'undefined' && createPortal(
-        <div 
-          ref={dropdownRef} 
-          style={dropdownStyle} 
-          className="max-h-60 overflow-y-auto border border-border bg-elevated shadow-lg" 
-          role="listbox" 
-          aria-label={`${label} options`}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              setOpen(false);
-              buttonRef.current?.focus();
-            }
-          }}
-        >
-          {options.map((opt) => (
-            <button
-              key={opt}
-              type="button"
-              role="option"
-              aria-selected={value === opt}
-              onClick={() => { onChange(opt); setOpen(false); }}
-              className={`block w-full px-3 py-2 text-left font-mono text-xs transition-colors cursor-pointer ${
-                value === opt
-                  ? 'bg-cyan/10 text-cyan'
-                  : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-              }`}
-            >
-              {opt}
-            </button>
-          ))}
-        </div>,
-        document.body
-      )}
-    </div>
-  );
-}
-
-function ToggleControl({ label, active, onChange }: { label: string; active: boolean; onChange: (value: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={active}
-      aria-label={label}
-      onClick={() => onChange(!active)}
-      className="cursor-pointer group inline-flex items-center gap-3 pm-micro text-muted-foreground focus:outline-none focus:ring-1 focus:ring-cyan/50"
-    >
-      <span className={`relative h-4 w-8 rounded-full border transition-colors ${
-        active
-          ? 'border-cyan bg-cyan/20 shadow-[0_0_14px_rgb(62_231_255_/_0.25)]'
-          : 'border-cyan/65 bg-cyan/10 shadow-[0_0_14px_rgb(62_231_255_/_0.14)]'
-      }`}>
-        <span className={`absolute top-1/2 size-3 -translate-y-1/2 rounded-full bg-cyan shadow-[0_0_12px_rgb(62_231_255_/_0.75)] transition-all ${
-          active ? 'left-4' : 'left-0.5'
-        }`} />
-      </span>
-      {label}
-    </button>
   );
 }
 
@@ -502,24 +325,4 @@ function accentForGame(status: string, _title: string) {
   if (status === 'PRE_ALPHA') return { badge: 'border-amber/70 text-amber', bar: 'bg-amber text-amber', text: 'text-amber' };
   return { badge: 'border-cyan/70 text-cyan', bar: 'bg-cyan text-cyan', text: 'text-cyan' };
 }
-const GENRES = [
-  'All', 'Action', 'Adventure', 'RPG', 'Strategy', 'Simulation', 'Puzzle',
-  'Horror', 'Racing', 'Fighting', 'Sports',
-];
 
-const STATUS_OPTIONS = [
-  'All', 'CONCEPT', 'PRE_ALPHA', 'ALPHA', 'BETA', 'EARLY_ACCESS', 'RELEASED',
-];
-
-const PRICE_OPTIONS = ['All', 'Free', 'Paid'];
-
-const PLATFORMS = [
-  'All', 'PC', 'Mac', 'Linux', 'PS5', 'PS4', 'XBOX', 'Nintendo Switch',
-  'iOS', 'Android', 'Web', 'VR', 'Meta Quest',
-];
-
-const RELEASE_WINDOWS = [
-  'All time', 'This year', 'Next year', 'Coming soon', 'Already released',
-];
-
-const SORT_OPTIONS = ['Newest', 'Most Followed', 'Most Wishlisted', 'A-Z'];

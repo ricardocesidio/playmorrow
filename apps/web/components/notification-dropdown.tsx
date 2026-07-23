@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Bell, ExternalLink, Users, MessageSquare, Flame, Heart } from 'lucide-react';
 import { useNotifications, useUnreadNotificationCount, type NotificationItem } from '@/lib/api/hooks';
+import { formatRelativeTime } from '@/lib/format';
 
 const TYPE_ICONS: Record<string, typeof Heart> = {
   NEW_FOLLOWER: Users,
@@ -11,17 +12,6 @@ const TYPE_ICONS: Record<string, typeof Heart> = {
   NEW_REPLY: MessageSquare,
   NEW_REACTION: Heart,
 };
-
-function timeAgo(dateString: string): string {
-  const diff = Date.now() - new Date(dateString).getTime();
-  const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return 'now';
-  if (mins < 60) return `${mins}m`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h`;
-  const days = Math.floor(hours / 24);
-  return `${days}d`;
-}
 
 function NotificationRow({ item }: { item: NotificationItem }) {
   const Icon = TYPE_ICONS[item.type] ?? Flame;
@@ -41,7 +31,7 @@ function NotificationRow({ item }: { item: NotificationItem }) {
         <p className={`truncate text-sm ${item.readAt ? 'text-muted-foreground' : 'text-foreground'}`}>
           {item.body || item.title}
         </p>
-        <p className="text-xs text-muted-foreground/60">{timeAgo(item.createdAt)}</p>
+        <p className="text-xs text-muted-foreground/60">{formatRelativeTime(item.createdAt)}</p>
       </div>
       {!item.readAt && (
         <span className="mt-1.5 size-1.5 rounded-none bg-cyan shadow-[0_0_6px_rgb(62_231_255_/_0.8)]" />

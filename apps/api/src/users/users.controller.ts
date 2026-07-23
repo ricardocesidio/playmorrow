@@ -1,4 +1,4 @@
-import { Controller, Get, Param, NotFoundException, Delete, Body, Patch, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException, Delete, Body, Patch, HttpCode, HttpStatus, UseGuards, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOkResponse, ApiNotFoundResponse } from '@nestjs/swagger';
 import * as argon2 from 'argon2';
 
@@ -86,9 +86,9 @@ export class UsersController {
   async deleteAccount(@CurrentUser() user: { id: string }, @Body('password') password?: string) {
     const fullUser = await this.usersService.findById(user.id);
     if (fullUser?.passwordHash) {
-      if (!password) throw new NotFoundException('Password required');
+      if (!password) throw new BadRequestException('Password required');
       const valid = await argon2.verify(fullUser.passwordHash, password);
-      if (!valid) throw new NotFoundException('Invalid password');
+      if (!valid) throw new BadRequestException('Invalid password');
     }
     // Explicit cleanup + rely on Prisma cascade rules in schema (most User relations are Cascade).
     // This is the GDPR "right to erasure" path.

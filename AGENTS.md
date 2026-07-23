@@ -201,6 +201,43 @@ pnpm db:migrate
   4. Medium term: A11y, load tests, staging, repo files, price labeling
 - Updated README commit count and references. No code changes in this session — pure analysis.
 
+### Session 15 (continued) — Production Hardening, Principal Audit Fixes (2026-07-23)
+
+After the comprehensive audit, executed all 5 critical fixes + 10 quality/security improvements:
+- **C1**: `completeOnboarding` now sends `res.setHeader('X-CSRF-Token')` — was blocking all post-onboarding mutations
+- **C2**: OAuth cookie domain — replaced manual cookie construction with shared `cookie-helper.ts` (was hardcoded to `localhost`)
+- **C3**: Upload FD leak — `stream.destroy()` in both end/error paths of `validateMagicBytes`
+- **C4**: Homepage error handling — error banner now renders when API calls fail
+- **C5**: Removed non-functional game filters — 8 controls that did nothing; kept working search
+- Replaced 6 `console.error` → `toast.error`, 2 `alert()` → `toast.error`
+- Batched N+1 tag upsert in `games.service.ts`
+- Fixed backend CSP (removed `unsafe-inline` from prod script-src)
+- Fixed HTTP status codes (validation errors return 400, not 404)
+- Removed unused `@sentry/tracing` dependency
+- Created `CHANGELOG.md`
+- Archived stale June 22 security docs to `docs/security/archive/`
+- Typecheck: 6/6, lint: 0 errors, live: 17/17 pages 200
+
+**Updated:** STATUS.md, AGENTS.md, docs/handoff/session-15-complete.md, CHANGELOG.md
+
+### Session 15 — Full Audit, SEO Fix Pass & Dashboard Cleanup (2026-07-23)
+
+A comprehensive 13-item double-check verifying every claimed accomplishment from prior sessions. 24/26 items confirmed correct; 2 skipped (Docker build + race condition test not feasible in this env).
+
+**SEO — all 4 critical gaps fixed:**
+- OG image: Created `/og-image.svg`, added `openGraph.images` + `twitter.images` to root and all 15 child layouts
+- Canonical URLs: Added `alternates.canonical` to root layout and all static page layouts
+- JSON-LD: WebSite schema with SearchAction in root layout
+- Sitemap: Replaced static XML with dynamic `sitemap.ts` — 16 URLs (was 9), extensible for dynamic content
+
+**Maintainability:**
+- Extracted duplicated `DashboardPanel`/`SidebarLink` from both dashboards into `components/dashboard/shared.tsx`
+- Replaced 4 local `timeAgo` copies with canonical `formatRelativeTime` from `@/lib/format`
+
+**Updated:** STATUS.md, docs/STATUS-verified.md (Round 5), docs/handoff/session-15-complete.md, AGENTS.md
+
+**Verified live:** Local dev server (ports 3000/4000) — all 16+ pages return 200, OG/canonical/JSON-LD confirmed via curl.
+
 ### Session 13 — Production Hardening, Dashboard Restructure, Final Items & Ops Cleanup (2026-07-10)
 
 **This Session (2026-07-10):**

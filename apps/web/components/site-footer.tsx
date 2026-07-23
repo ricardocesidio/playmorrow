@@ -29,6 +29,12 @@ export function SiteFooter() {
           <a href="https://github.com/ricardocesidio/playmorrow" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-foreground">GitHub</a>
         </div>
 
+        {/* About + Contact */}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground/70">
+          <Link href="/about" className="transition-colors hover:text-foreground">About</Link>
+          <Link href="/contact" className="transition-colors hover:text-foreground">Contact</Link>
+        </div>
+
         {/* Legal links */}
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground/50">
           <Link href="/terms" className="transition-colors hover:text-foreground">Terms of Service</Link>

@@ -6,13 +6,13 @@ import * as passport from 'passport';
 import { randomBytes } from 'node:crypto';
 
 import { CsrfService } from '../../common/csrf.service';
+import { setSessionCookie } from '../../common/cookie-helper';
 import { OAuthService } from './oauth.service';
 import { SessionService } from '../../session/session.service';
 
 import type { OAuthProfile } from './strategies/github.strategy';
 
 const FRONTEND_URL_KEY = 'WEB_ORIGIN';
-const SESSION_COOKIE = 'playmorrow_session';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -133,20 +133,13 @@ export class OAuthController {
         const ua = (req.headers['user-agent'] ?? '').slice(0, 512);
         const ip = req.ip ?? req.socket?.remoteAddress;
         const { raw, expiresAt } = await this.sessionService.create(existingUser.id, ip, ua);
-        const isProduction = process.env.NODE_ENV === 'production';
-        res.cookie(SESSION_COOKIE, raw, {
-          httpOnly: true,
-          secure: isProduction,
-          sameSite: isProduction ? 'none' : 'lax',
-          domain: isProduction ? process.env.COOKIE_DOMAIN || undefined : 'localhost',
-          path: '/',
-          expires: expiresAt,
-        });
+        setSessionCookie(res, raw, expiresAt);
 
         const csrfToken = this.csrfService.generateToken(existingUser.id);
+        const isProd = process.env.NODE_ENV === 'production';
         res.cookie('playmorrow_csrf', csrfToken, {
           httpOnly: false,
-          secure: isProduction,
+          secure: isProd,
           sameSite: 'lax',
           path: '/',
           maxAge: 60 * 60 * 24,

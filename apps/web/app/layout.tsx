@@ -41,11 +41,17 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Playmorrow — Discover tomorrow\'s indie games today',
     description: 'The social discovery layer for indie games.',
+    images: '/og-image.svg',
   },
   openGraph: {
     title: 'Playmorrow — Discover tomorrow\'s indie games today',
     description: 'The social discovery layer for indie games.',
     type: 'website',
+    images: '/og-image.svg',
+    siteName: 'Playmorrow',
+  },
+  alternates: {
+    canonical: '/',
   },
 };
 
@@ -58,6 +64,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning className={`${display.variable} ${body.variable}`}>
       <body className="min-h-screen bg-black font-body text-foreground antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'Playmorrow',
+              url: 'https://playmorrow.vercel.app',
+              description: 'Discover tomorrow\'s indie games today. Playmorrow is a curated social platform where indie studios showcase their games.',
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: {
+                  '@type': 'EntryPoint',
+                  urlTemplate: 'https://playmorrow.vercel.app/search?q={search_term_string}',
+                },
+                'query-input': 'required name=search_term_string',
+              },
+            }),
+          }}
+        />
         <CursorGlow />
         <Providers>
           <div className="relative flex min-h-screen flex-col z-10">

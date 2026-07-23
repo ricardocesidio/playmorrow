@@ -1,0 +1,14 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#020609"/>
+  <rect x="0" y="0" width="1200" height="630" fill="url(#grid)" fill-opacity="0.3"/>
+  <defs>
+    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M 44 0 L 0 0 0 44" fill="none" stroke="#3ee7ff" stroke-opacity="0.08" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect x="40" y="40" width="1120" height="550" rx="10" fill="#050b0f" stroke="#1b3038" stroke-width="1" stroke-opacity="0.7"/>
+  <text x="600" y="260" text-anchor="middle" fill="white" font-family="Space Grotesk, sans-serif" font-size="72" font-weight="900" letter-spacing="-1">Playmorrow</text>
+  <text x="600" y="320" text-anchor="middle" fill="#8c969b" font-family="Space Grotesk, sans-serif" font-size="28" letter-spacing="0.5">Discover tomorrow&apos;s indie games today</text>
+  <rect x="420" y="355" width="360" height="1" fill="#3ee7ff" fill-opacity="0.3"/>
+  <text x="600" y="400" text-anchor="middle" fill="#3ee7ff" font-family="JetBrains Mono, monospace" font-size="16" letter-spacing="3" opacity="0.8">PLAYMORROW</text>
+</svg>
