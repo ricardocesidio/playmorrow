@@ -275,7 +275,7 @@ export default function EditDevlogPage() {
             </div>
             <button type="button"
               onClick={async () => {
-                if (!token || !confirm(`Delete devlog "${devlog?.title}" permanently? This cannot be undone.`)) return;
+                if (!token) return;
                 try {
                   await deleteDevlog.mutateAsync({ id, token });
                   router.push('/dashboard');

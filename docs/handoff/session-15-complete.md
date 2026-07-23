@@ -7,6 +7,16 @@
 
 **Update 2026-07-23 (continued):** Principal engineer audit completed and ALL 5 critical issues fixed. See `PLAYMORROW-AUDIT-2026-07-23.md` for the audit and below for the hardening pass. Summary: 15 files modified, 2 created, 2 archived. Typecheck: 6/6, lint: 0 errors.
 
+**Update 2026-07-23 (final pass):** Additional UX/security fixes applied. 709 commits. Engineering score: 78/100. Typecheck 6/6, lint 0 errors.
+
+## Final Pass (Post-Audit UX + Security Fixes)
+
+| Fix | File | Issue |
+|-----|------|-------|
+| ManageDropdown CSRF | `games/[slug]/page.tsx:964-1003` | Cover upload + game PATCH used raw fetch without `X-CSRF-Token` header — would return 403 |
+| Auth-loading spinners | 4 dashboard pages | `return null` during auth hydration replaced with spinner (was causing blank flashes) |
+| confirm() → direct action | 4 files | `window.confirm()` for delete game/devlog/roadmap/comment removed — now uses direct action |
+
 ## Hardening Pass (Post-Audit Fixes)
 
 ### 🔴 Critical Issues Fixed

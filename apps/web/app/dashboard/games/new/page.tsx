@@ -200,7 +200,13 @@ function CreateGameForm() {
     }
   };
 
-  if (authLoading) return null;
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <>

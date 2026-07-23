@@ -144,7 +144,13 @@ function RoadmapContent() {
     await reorderItems.mutateAsync({ gameSlug, items: payload, token });
   };
 
-  if (authLoading) return null;
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -289,7 +295,7 @@ function RoadmapContent() {
                           </button>
                           <button
                             onClick={async () => {
-                              if (!token || !confirm(`Delete roadmap item "${item.title}"?`)) return;
+                              if (!token) return;
                               try { await deleteItem.mutateAsync({ id: item.id, token }); } catch { /* ignore */ }
                             }}
                             disabled={deleteItem.isPending}

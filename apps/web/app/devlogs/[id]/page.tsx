@@ -192,7 +192,7 @@ function CommentItem({
   };
 
   const handleDelete = async () => {
-    if (!token || !confirm('Delete this comment?')) return;
+    if (!token) return;
     try {
       await deleteComment.mutateAsync({ commentId: comment.id, token });
     } catch (e) { toast.error('Something went wrong. Please try again.') }
