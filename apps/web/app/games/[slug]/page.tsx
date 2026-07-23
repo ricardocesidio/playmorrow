@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -134,11 +135,13 @@ function PremiumGameDetail({
     return allScreenshots.length ? allScreenshots : fallbackScreenshots;
   }, [allScreenshots]);
 
+  const queryClient = useQueryClient();
+
   const handleCoverUploaded = (url: string) => {
     setPendingCover(url);
   };
 
-  const handleSaveCover = async () => {
+  const handleSaveCover = useCallback(async () => {
     if (!pendingCover) return;
     setSavingCover(true);
     const csrfToken = getCsrfToken();
@@ -150,12 +153,13 @@ function PremiumGameDetail({
         body: JSON.stringify({ coverUrl: pendingCover }),
       });
       if (!patchRes.ok) throw new Error('Failed to save cover');
+      queryClient.setQueryData(['game', slug], (old: any) => old ? { ...old, coverUrl: pendingCover } : old);
       setPendingCover(null);
     } catch {
       toast.error('Failed to save cover.');
     }
     setSavingCover(false);
-  };
+  }, [pendingCover, slug, queryClient]);
 
   const handleCancelCover = () => {
     setPendingCover(null);
