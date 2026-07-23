@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { ShieldAlert, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
@@ -97,15 +98,15 @@ export default function AdminReportsPage() {
 
           {totalPages > 1 && (
             <div className="mt-8 flex items-center justify-center gap-3">
-              <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
-                className="clip-corner border border-border/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan disabled:opacity-40">
-                <ChevronLeft className="inline size-3" /> Previous
-              </button>
+              <Button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
+                variant="outline" size="sm">
+                <ChevronLeft className="size-3" /> Previous
+              </Button>
               <span className="font-mono text-[0.55rem] text-muted-foreground/60">{page} / {totalPages}</span>
-              <button disabled={!data?.hasMore} onClick={() => setPage((p) => p + 1)}
-                className="clip-corner border border-border/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan disabled:opacity-40">
-                Next <ChevronRight className="inline size-3" />
-              </button>
+              <Button disabled={!data?.hasMore} onClick={() => setPage((p) => p + 1)}
+                variant="outline" size="sm">
+                Next <ChevronRight className="size-3" />
+              </Button>
             </div>
           )}
         </div>

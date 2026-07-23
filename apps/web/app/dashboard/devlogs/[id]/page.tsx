@@ -7,7 +7,9 @@ import Link from 'next/link';
 import { SiteHeader } from '@/components/site-header';
 import { MarkdownEditor } from '@/components/md-editor';
 
+import { Button } from '@/components/ui/button';
 import { ArrowLeft, FileText, ExternalLink, X, Calendar, Trash2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/api/auth-context';
 import { useDevlog, useUpdateDevlog, useDeleteDevlog } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
@@ -173,8 +175,8 @@ export default function EditDevlogPage() {
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Content</h3>
             <div className="mb-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Title</label>
-              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              <Input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
+                className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
             <div className="mb-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Body</label>
@@ -186,15 +188,15 @@ export default function EditDevlogPage() {
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Details</h3>
             <div className="mb-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Subtitle</label>
-              <input type="text" value={subtitle} onChange={(e) => setSubtitle(e.target.value)}
+              <Input type="text" value={subtitle} onChange={(e) => setSubtitle(e.target.value)}
                 placeholder="A short summary"
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
             <div className="mb-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Category</label>
-              <input type="text" value={category} onChange={(e) => setCategory(e.target.value)}
+              <Input type="text" value={category} onChange={(e) => setCategory(e.target.value)}
                 placeholder="e.g. Combat, Art, Design, Update"
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
             <div>
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Tags</label>
@@ -238,8 +240,8 @@ export default function EditDevlogPage() {
                 <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center gap-1.5">
                   <Calendar className="size-3" /> Scheduled date
                 </label>
-                <input type="datetime-local" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)}
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                <Input type="datetime-local" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)}
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
             )}
           </div>
@@ -264,16 +266,15 @@ export default function EditDevlogPage() {
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
             <div className="flex gap-3">
-              <button type="submit" disabled={updateDevlog.isPending}
-                className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+              <Button type="submit" disabled={updateDevlog.isPending}>
                 {updateDevlog.isPending ? 'Saving…' : status === 'PUBLISHED' ? 'Save & Publish' : status === 'SCHEDULED' ? 'Save & Schedule' : 'Save changes'}
-              </button>
+              </Button>
               <Link href="/dashboard"
                 className="clip-corner inline-flex items-center border border-border/60 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
                 Cancel
               </Link>
             </div>
-            <button type="button"
+            <Button type="button"
               onClick={async () => {
                 if (!token) return;
                 try {
@@ -282,10 +283,10 @@ export default function EditDevlogPage() {
                 } catch { /* ignore */ }
               }}
               disabled={deleteDevlog.isPending}
-              className="clip-corner cursor-pointer border border-coral/60 bg-coral/5 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-widest text-coral transition hover:bg-coral/20 disabled:cursor-not-allowed disabled:opacity-40">
-              <Trash2 className="mr-1.5 inline size-4" />
+              variant="destructive" size="sm">
+              <Trash2 className="size-4" />
               {deleteDevlog.isPending ? 'Deleting…' : 'Delete devlog'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

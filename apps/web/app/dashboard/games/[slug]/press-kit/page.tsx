@@ -3,9 +3,11 @@
 import { useState, type FormEvent, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save, ExternalLink, ScrollText, Download } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/api/auth-context';
 import { useGame, useGamePressKit, useUpsertPressKit } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
@@ -220,37 +222,37 @@ export default function PressKitPage() {
 
             <div>
               <label htmlFor="headline" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Press headline *</label>
-              <input
+              <Input
                 id="headline"
                 type="text"
                 value={headline}
                 onChange={(e) => setHeadline(e.target.value)}
                 placeholder="A hand-painted exploration game about forgotten underwater ruins."
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
+                className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
               />
             </div>
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="contactEmail" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Press contact email</label>
-                <input
+                <Input
                   id="contactEmail"
                   type="email"
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
                   placeholder="press@example.com"
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
                 />
               </div>
               <div>
                 <label htmlFor="downloadUrl" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Press assets URL</label>
-                <input
+                <Input
                   id="downloadUrl"
                   type="url"
                   value={downloadUrl}
                   onChange={(e) => setDownloadUrl(e.target.value)}
                   placeholder="https://drive.google.com/…"
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
                 />
                 <p className="mt-1 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
                   Use a Drive, Dropbox, or public press assets folder for now.
@@ -274,15 +276,13 @@ export default function PressKitPage() {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={upsert.isPending}
-              className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+            <Button type="submit" disabled={upsert.isPending}>
               {upsert.isPending ? 'Saving…' : 'Save press kit'}
-              <Save className="ml-1.5 inline size-3" />
-            </button>
-            <button type="button" onClick={handleDownload}
-              className="clip-corner cursor-pointer border border-coral bg-coral/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-coral transition hover:bg-coral hover:text-coral-foreground">
-              Download <Download className="ml-1.5 inline size-3" />
-            </button>
+              <Save className="size-3" />
+            </Button>
+            <Button type="button" onClick={handleDownload} variant="destructive">
+              Download <Download className="size-3" />
+            </Button>
             <Link href={'/dashboard/games/' + slug}
               className="clip-corner inline-flex items-center border border-border/60 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
               Cancel

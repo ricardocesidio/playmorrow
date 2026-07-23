@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check, X } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
@@ -119,14 +120,12 @@ export default function ReportDetailPage() {
                 className="clip-corner w-full border border-border/60 bg-[#050b0f]/50 px-3 py-2 font-mono text-[0.55rem] text-foreground placeholder:text-muted-foreground/40 focus:border-cyan focus:outline-none"
               />
               <div className="mt-4 flex gap-3">
-                <button onClick={handleResolve} disabled={updateReport.isPending}
-                  className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
-                  <Check className="mr-1 inline size-3" /> Resolve
-                </button>
-                <button onClick={handleDismiss} disabled={updateReport.isPending}
-                  className="clip-corner cursor-pointer border border-border/60 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-coral hover:text-coral disabled:cursor-not-allowed disabled:opacity-40">
-                  <X className="mr-1 inline size-3" /> Dismiss
-                </button>
+                <Button onClick={handleResolve} disabled={updateReport.isPending}>
+                  <Check className="size-3" /> Resolve
+                </Button>
+                <Button onClick={handleDismiss} disabled={updateReport.isPending} variant="outline">
+                  <X className="size-3" /> Dismiss
+                </Button>
               </div>
             </div>
           )}

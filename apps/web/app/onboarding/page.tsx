@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ArrowRight, Check, Gamepad2, Building2, Heart, User, AtSign, Upload } from 'lucide-react';
 import { HudButton, HudPanel } from '@/components/playmorrow/hud';
+import { Input } from '@/components/ui/input';
 import { API } from '@/lib/api/client';
 
 const PLAYER_STEPS = ['Account Type', 'Username', 'Profile', 'Review', 'Follow Studios', 'Wishlist Games'];
@@ -246,14 +247,15 @@ export default function OnboardingPage() {
               <h2 className="font-display text-xl font-bold text-foreground">Choose your username</h2>
               <div className="relative">
                 <AtSign className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <input
+                <Input
                   value={username}
                   onChange={e => {
                     const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
                     if (val.length <= 20) setUsername(val);
                   }}
                   onKeyDown={handleUsernameKeyDown}
-                  className={`clip-corner h-12 w-full border bg-background/80 pl-10 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan ${username && usernameAvailable === false ? 'border-coral' : 'border-input'}`}
+                  error={!!(username && usernameAvailable === false)}
+                  className="pl-10"
                   placeholder="Choose a username" autoComplete="username" maxLength={20} />
               </div>
               {checkingUsername && <p className="pm-micro text-muted-foreground">Checking availability...</p>}
@@ -262,8 +264,7 @@ export default function OnboardingPage() {
               <p className="text-xs text-muted-foreground">3-20 characters. Letters, numbers, and underscore _ only.</p>
               <div className="space-y-1">
                 <label className="pm-micro text-muted-foreground">Display name</label>
-                <input value={displayName} onChange={e => setDisplayName(e.target.value.slice(0, 40))}
-                  className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan"
+                <Input value={displayName} onChange={e => setDisplayName(e.target.value.slice(0, 40))}
                   placeholder="Your display name (max 40 characters)" maxLength={40} />
               </div>
             </div>
@@ -316,26 +317,25 @@ export default function OnboardingPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1">
                       <label className="pm-micro text-muted-foreground">Studio Name *</label>
-                      <input value={studioName} onChange={e => { setStudioName(e.target.value); setTouched(prev => ({ ...prev, studioName: true })); }}
-                        className={`clip-corner h-12 w-full border bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan ${touched.studioName && !studioName ? 'border-coral' : 'border-input'}`}
+                      <Input value={studioName} onChange={e => { setStudioName(e.target.value); setTouched(prev => ({ ...prev, studioName: true })); }}
+                        error={!!(touched.studioName && !studioName)}
                         placeholder="Your studio name" required />
                     </div>
                     <div className="space-y-1">
                       <label className="pm-micro text-muted-foreground">Studio Slug *</label>
-                      <input value={studioSlug} onChange={e => { setStudioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')); setTouched(prev => ({ ...prev, studioSlug: true })); }}
-                        className={`clip-corner h-12 w-full border bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan ${touched.studioSlug && !studioSlug ? 'border-coral' : 'border-input'}`}
+                      <Input value={studioSlug} onChange={e => { setStudioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')); setTouched(prev => ({ ...prev, studioSlug: true })); }}
+                        error={!!(touched.studioSlug && !studioSlug)}
                         placeholder="studio-slug" required />
                     </div>
                     <div className="space-y-1">
                       <label className="pm-micro text-muted-foreground">Website *</label>
-                      <input value={studioWebsite} onChange={e => { setStudioWebsite(e.target.value); setTouched(prev => ({ ...prev, studioWebsite: true })); }}
-                        className={`clip-corner h-12 w-full border bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan ${touched.studioWebsite && !studioWebsite ? 'border-coral' : 'border-input'}`}
+                      <Input value={studioWebsite} onChange={e => { setStudioWebsite(e.target.value); setTouched(prev => ({ ...prev, studioWebsite: true })); }}
+                        error={!!(touched.studioWebsite && !studioWebsite)}
                         placeholder="https://..." required />
                     </div>
                     <div className="space-y-1">
                       <label className="pm-micro text-muted-foreground">Discord (optional)</label>
-                      <input value={studioDiscord} onChange={e => setStudioDiscord(e.target.value)}
-                        className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan"
+                      <Input value={studioDiscord} onChange={e => setStudioDiscord(e.target.value)}
                         placeholder="discord.gg/..." />
                     </div>
                   </div>

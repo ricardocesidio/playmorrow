@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Eye, EyeOff } from 'lucide-react';
 import { api, ApiError } from '@/lib/api/client';
 import { SiteHeader } from '@/components/site-header';
+import { Input } from '@/components/ui/input';
 
 function ResetPasswordInner() {
   const searchParams = useSearchParams();
@@ -65,7 +66,7 @@ function ResetPasswordInner() {
             <div>
               <label htmlFor="password" className="mb-1 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">New password</label>
               <div className="relative">
-                <input id="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className="clip-corner h-12 w-full border border-input bg-background/80 px-4 pr-10 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" autoComplete="new-password" />
+                <Input id="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className="pr-10 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" autoComplete="new-password" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground" aria-label={showPassword ? 'Hide password' : 'Show password'}>
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -74,7 +75,7 @@ function ResetPasswordInner() {
             <div>
               <label htmlFor="confirm" className="mb-1 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Confirm password</label>
               <div className="relative">
-                <input id="confirm" type={showConfirm ? 'text' : 'password'} value={confirm} onChange={(e) => setConfirm(e.target.value)} className="clip-corner h-12 w-full border border-input bg-background/80 px-4 pr-10 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" autoComplete="new-password" />
+                <Input id="confirm" type={showConfirm ? 'text' : 'password'} value={confirm} onChange={(e) => setConfirm(e.target.value)} className="pr-10 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" autoComplete="new-password" />
                 <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground" aria-label={showConfirm ? 'Hide password' : 'Show password'}>
                   {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>

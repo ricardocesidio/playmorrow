@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
 import { GameCard } from '@/components/game-card';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
+import { Input } from '@/components/ui/input';
 import { useGames } from '@/lib/api/hooks';
 
 export default function GamesPage() {
@@ -74,13 +75,13 @@ export default function GamesPage() {
             <form onSubmit={handleSearch} className="mt-3">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
-                <input
+                <Input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search games by name, studio, or tag..."
                   aria-label="Search games"
-                  className="clip-corner h-10 w-full max-w-xl border border-border-bright/50 bg-background/70 pl-12 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground/45 focus:border-cyan focus:ring-1 focus:ring-cyan"
+                  className="h-10 max-w-xl border-border-bright/50 bg-background/70 pl-12 placeholder:text-muted-foreground/45"
                 />
                 <button type="submit" className="cursor-pointer sr-only">Search</button>
               </div>

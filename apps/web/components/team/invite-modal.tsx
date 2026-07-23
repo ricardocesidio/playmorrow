@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { X, Mail, Search, Send, Loader2 } from 'lucide-react';
+import { Modal } from '@/components/ui/modal';
+import { Input } from '@/components/ui/input';
 
 interface InviteModalProps {
   open: boolean;
@@ -44,14 +46,8 @@ export function InviteModal({ open, onClose, onInvite }: InviteModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      <div className="clip-corner w-full max-w-md border border-border/70 bg-[#050b0f] p-6 shadow-[0_0_60px_rgb(0_0_0_/_0.5)]" onClick={e => e.stopPropagation()}>
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="font-display text-lg font-bold text-white">Invite Member</h2>
-          <button onClick={onClose} className="cursor-pointer text-muted-foreground hover:text-foreground"><X className="size-5" /></button>
-        </div>
-
-        <div className="mb-5 flex border-b border-border/60">
+    <Modal isOpen={open} onClose={onClose} title="Invite Member">
+      <div className="mb-5 flex border-b border-border/60">
           <button onClick={() => { setTab('email'); setError(''); }} className={`flex-1 pb-3 font-mono text-[0.6rem] uppercase tracking-widest ${tab === 'email' ? 'border-b-2 border-cyan text-cyan' : 'text-muted-foreground'}`}>
             <Mail className="mr-1 inline size-3" /> By Email
           </button>
@@ -64,8 +60,7 @@ export function InviteModal({ open, onClose, onInvite }: InviteModalProps) {
           {tab === 'email' ? (
             <div>
               <label className="mb-1.5 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Email address</label>
-              <input value={email} onChange={e => setEmail(e.target.value)} type="email" placeholder="user@example.com" autoFocus
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
+              <Input value={email} onChange={e => setEmail(e.target.value)} type="email" placeholder="user@example.com" autoFocus className="h-11" />
             </div>
           ) : (
             <div>
@@ -76,8 +71,7 @@ export function InviteModal({ open, onClose, onInvite }: InviteModalProps) {
                   <button type="button" onClick={() => { setSelectedUserId(null); setSelectedUserName(''); }} className="cursor-pointer text-coral hover:text-coral/80"><X className="size-4" /></button>
                 </div>
               ) : (
-                <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Type a username..." autoFocus
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
+                <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Type a username..." autoFocus className="h-11" />
               )}
             </div>
           )}
@@ -105,7 +99,6 @@ export function InviteModal({ open, onClose, onInvite }: InviteModalProps) {
             {loading ? 'Sending...' : 'Send Invitation'}
           </button>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft, MessageSquare, ThumbsUp, Heart, Zap, Lightbulb } from 'lucide-react';
 
 import { SanitizedMarkdown } from '@/components/sanitized-markdown';
@@ -211,8 +212,8 @@ function CommentItem({
             className="clip-corner w-full border border-input bg-background/80 px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
           />
           <div className="flex gap-2">
-            <button onClick={handleEdit} disabled={updateComment.isPending} className="clip-corner border border-cyan bg-cyan/10 px-4 py-1.5 font-mono text-[0.6rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:opacity-40">Save</button>
-            <button onClick={() => setEditing(false)} className="clip-corner border border-border/60 px-4 py-1.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">Cancel</button>
+            <Button onClick={handleEdit} disabled={updateComment.isPending} size="sm">Save</Button>
+            <Button onClick={() => setEditing(false)} variant="outline" size="sm">Cancel</Button>
           </div>
         </div>
       ) : (
@@ -259,10 +260,10 @@ function CommentItem({
                 className="clip-corner w-full border border-input bg-background/80 px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
               />
               <div className="flex gap-2">
-                <button onClick={handleReply} disabled={createComment.isPending} className="clip-corner border border-cyan bg-cyan/10 px-4 py-1.5 font-mono text-[0.6rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:opacity-40">
+                <Button onClick={handleReply} disabled={createComment.isPending} size="sm">
                   {createComment.isPending ? 'Posting…' : 'Reply'}
-                </button>
-                <button onClick={() => setReplying(false)} className="clip-corner border border-border/60 px-4 py-1.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">Cancel</button>
+                </Button>
+                <Button onClick={() => setReplying(false)} variant="outline" size="sm">Cancel</Button>
               </div>
             </div>
           )}
@@ -446,9 +447,9 @@ export default function DevlogDetailPage() {
                   aria-label="Write a comment"
                   className="clip-corner w-full border border-input bg-background/80 px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
                 />
-                <button onClick={handlePostComment} disabled={createComment.isPending || !newComment.trim()} className="clip-corner border border-cyan bg-cyan/10 px-5 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:opacity-40">
+                <Button onClick={handlePostComment} disabled={createComment.isPending || !newComment.trim()}>
                   {createComment.isPending ? 'Posting…' : 'Post comment'}
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="clip-corner mb-6 border border-border/70 bg-[#050b0f]/80 p-4 text-center shadow-[0_0_20px_rgb(0_0_0_/_0.25)]">

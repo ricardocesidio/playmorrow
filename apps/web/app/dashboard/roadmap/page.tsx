@@ -3,6 +3,8 @@
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ArrowLeft, Plus, Pencil, Trash2, ArrowUp, ArrowDown, Milestone, GripVertical } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
@@ -214,9 +216,9 @@ function RoadmapContent() {
             <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] mb-8">
               <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-4 flex items-center gap-2"><Plus className="size-3.5" /> Add roadmap item</h3>
               <form onSubmit={handleCreate} className="space-y-3">
-                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
+                <Input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
                   placeholder="Title"
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
                 <textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)}
                   placeholder="Description (optional)"
                   className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
@@ -225,12 +227,11 @@ function RoadmapContent() {
                     className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
                     {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
-                  <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)}
-                    className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
-                  <button type="submit" disabled={createItem.isPending}
-                    className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-5 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+                  <Input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)}
+                    className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                  <Button type="submit" disabled={createItem.isPending}>
                     {createItem.isPending ? 'Adding…' : 'Add'}
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>
@@ -248,8 +249,8 @@ function RoadmapContent() {
                   <div key={item.id} className="clip-corner border border-border/70 bg-[#050b0f]/80 p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition hover:border-cyan/40">
                     {editingId === item.id ? (
                       <div className="space-y-3">
-                        <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)}
-                          className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                        <Input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)}
+                          className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
                         <textarea rows={2} value={editDescription} onChange={(e) => setEditDescription(e.target.value)}
                           className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
                         <div className="flex flex-wrap gap-3">
@@ -257,14 +258,12 @@ function RoadmapContent() {
                             className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] cursor-pointer">
                             {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                           </select>
-                          <button onClick={saveEdit} disabled={updateItem.isPending}
-                            className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-5 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+                          <Button onClick={saveEdit} disabled={updateItem.isPending}>
                             {updateItem.isPending ? 'Saving…' : 'Save'}
-                          </button>
-                          <button onClick={() => setEditingId(null)}
-                            className="clip-corner cursor-pointer border border-border/60 px-5 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
+                          </Button>
+                          <Button onClick={() => setEditingId(null)} variant="outline">
                             Cancel
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     ) : (
