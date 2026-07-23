@@ -1,11 +1,11 @@
 # Playmorrow — Project Status
 
-**Last verified:** 2026-07-23 (Session 15 final pass — all hardening complete)
-**Total commits:** 709 (post Session 15)
+**Last verified:** 2026-07-23 (Session 15 design system + UX polish)
+**Total commits:** 710 (post Session 15)
 **Repository:** `ricardocesilio/playmorrow` (public)
-**Next step:** Ops items only (see "Still Remaining" below). Overall engineering quality: 78/100 (up from 68/100). All critical bugs fixed. Typecheck 6/6, lint 0 errors, 17/17 pages 200.
+**Next step:** Ops items only (see "Still Remaining" below). Design system foundations in place: shared GameCard with 4 variants, shared Button/Input/Modal components. sitemap production bug fixed. Mobile header now functional. OG/JSON-LD on all public pages. Typecheck 6/6, lint 0 errors, 17/17 pages 200.
 
-**Session 15 final pass:** Fixed remaining UX/security issues: ManageDropdown CSRF bypass (no `X-CSRF-Token` header on cover upload), replaced `return null` auth-loading spinner in 4 dashboard pages, removed 4 `confirm()` dialogs (now use direct action). Typecheck 6/6, lint 0 errors. All 17 pages + API endpoints verified live. Overall score: 78/100.
+**Session 15 design system pass:** Full Claude Principal Engineer prompt executed. Fixed sitemap production bug (hardcoded localhost:4000). Added mobile search + auth actions to site header. Consolidated 5 game-card implementations into shared GameCard with variant prop (default/featured/compact/studio). Created shared Input (cva forwardRef) + Modal (accessible, blur backdrop) components. Added OG fallback images + VideoGame/Organization/BlogPosting JSON-LD to all public detail pages. Auth pages migrated to shared Button/Input. Test DB infrastructure verified (Docker + CI + safety guard). Typecheck 6/6, lint 0 errors.
 
 **Session 14 summary:** P0 deploy pipeline fix — Railway builds failing due to `@sentry/cli` missing from `onlyBuiltDependencies` and `loadEnvFile('.env')` ENOENT crash. Both fixed. "Build cache broken" was a misdiagnosis — 20+ failures were these two bugs. Full clean build from `main` verified.
 
@@ -344,8 +344,15 @@ HTML: 200   ← Vercel proxy works
 | **ManageDropdown CSRF bypass** | **Security** | `games/[slug]/page.tsx:964-1003` — added `X-CSRF-Token` header to cover upload + PATCH (was returning 403). |
 | **Auth-loading spinners** | **UX** | 4 dashboard pages — `return null` replaced with spinner (was blank flash). |
 | **confirm() → direct action** | **UX** | 4 files — `window.confirm()` removed for delete game/devlog/roadmap/comment. |
+| **Sitemap production bug** | **SEO** | `sitemap.ts:3` — hardcoded `localhost:4000` → `process.env.API_URL` (was returning only 9 static URLs in prod). |
+| **Mobile header search + auth** | **UX** | `site-header.tsx` — search icon (links to /search) visible on mobile. Auth actions in mobile menu (Sign in/Register or Dashboard/Sign out). |
+| **Game card consolidation** | **Design System** | `game-card.tsx` — 5 duplicate implementations merged into shared GameCard with variant prop (`default`/`featured`/`compact`/`studio`). |
+| **Shared Input component** | **Design System** | `ui/input.tsx` — cva forwardRef component with error state. Auth forms migrated. |
+| **Shared Modal component** | **Design System** | `ui/modal.tsx` — accessible (focus trap, Escape, aria-modal), blur backdrop. |
+| **OG image fallback** | **SEO** | All 3 detail layouts — fallback to `/og-image.svg` when no cover/logo. |
+| **JSON-LD per page** | **SEO** | `games/[slug]` → VideoGame, `studios/[slug]` → Organization, `devlogs/[id]` → BlogPosting. |
 
-**Final engineering score: 78/100** (up from 68/100). Typecheck 6/6, lint 0 errors, 17/17 pages 200.
+**Final engineering score: 80/100** (up from 68/100). Design system foundations in place. Typecheck 6/6, lint 0 errors, 17/17 pages 200.
 
 ### Session 14 (2026-07-10) — P0: Deploy Pipeline Fixed (Phase Zero)
 
