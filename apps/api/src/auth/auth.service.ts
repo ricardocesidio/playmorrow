@@ -12,6 +12,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { EmailService } from '../email/email.service';
 import { TokenService } from './token.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import type { LoginDto } from './dto/login.dto';
 import type { RegisterDto } from './dto/register.dto';
 import { CompleteOnboardingDto } from './dto/complete-onboarding.dto';
@@ -72,6 +73,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly tokenService: TokenService,
     private readonly emailService: EmailService,
+    private readonly notificationsService: NotificationsService,
   ) {
     this.refreshSecret = this.configService.getOrThrow<string>('JWT_SECRET');
   }
@@ -125,6 +127,15 @@ export class AuthService {
         // Log but swallow — registration succeeded. Code is in DB.
         logger.error({ msg: 'Failed to send verification email during register (code stored for resend)', err });
       }
+
+      // Send welcome notification
+      this.notificationsService.create({
+        recipientId: user.id,
+        actorId: null,
+        type: 'WELCOME',
+        title: 'Welcome to Playmorrow!',
+        body: 'Discover indie games, follow studios, and be part of the journey. Browse games, create wishlists, and join the community discussion. Your adventure starts now!',
+      }).catch((err) => logger.error({ msg: 'Failed to send welcome notification', err }));
 
       return {
         requiresEmailVerification: true,
