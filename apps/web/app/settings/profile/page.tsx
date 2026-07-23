@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/api/auth-context';
 import { PushNotificationToggle } from '@/components/push-toggle';
 import { api, ApiError } from '@/lib/api/client';
 import { SiteHeader } from '@/components/site-header';
+import { Input } from '@/components/ui/input';
 
 interface FormData {
   username: string;
@@ -112,7 +113,7 @@ export default function ProfileSettingsPage() {
     }
   };
 
-  const inputClass = 'clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]';
+  const inputClass = 'h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]';
 
   return (
     <div className="relative min-h-screen bg-[#020609]">
@@ -135,7 +136,7 @@ export default function ProfileSettingsPage() {
             <div className="space-y-5">
               <div>
                 <label htmlFor="username" className="mb-1.5 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Username</label>
-                <input
+                <Input
                   id="username"
                   type="text"
                   value={form.username}
@@ -148,7 +149,7 @@ export default function ProfileSettingsPage() {
 
               <div>
                 <label htmlFor="displayName" className="mb-1.5 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Display Name</label>
-                <input
+                <Input
                   id="displayName"
                   type="text"
                   value={form.displayName}
@@ -160,7 +161,7 @@ export default function ProfileSettingsPage() {
 
               <div>
                 <label htmlFor="email" className="mb-1.5 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Email</label>
-                <input
+                <Input
                   id="email"
                   type="email"
                   value={form.email}
@@ -188,7 +189,7 @@ export default function ProfileSettingsPage() {
                   ) : null}
                   <label className="clip-corner cursor-pointer border border-cyan/60 bg-cyan/5 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-widest text-cyan hover:bg-cyan/10">
                     Upload
-                    <input type="file" accept="image/png,image/jpeg" className="hidden" onChange={(e) => {
+                    <Input type="file" accept="image/png,image/jpeg" className="hidden" onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
                       if (file.size > 5 * 1024 * 1024) return;
@@ -215,7 +216,7 @@ export default function ProfileSettingsPage() {
 
               <div>
                 <label htmlFor="location" className="mb-1.5 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Location</label>
-                <input
+                <Input
                   id="location"
                   type="text"
                   value={form.location}
@@ -303,9 +304,9 @@ function ChangePasswordSection() {
     <form onSubmit={handleChange} className="mt-6 clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-6">
       <h2 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-4">Change Password</h2>
       <div className="grid gap-4 sm:grid-cols-3">
-        <input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} aria-label="Current password" placeholder="Current password" className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
-        <input type="password" value={newPass} onChange={(e) => setNewPass(e.target.value)} aria-label="New password" placeholder="New password" className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
-        <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} aria-label="Confirm new password" placeholder="Confirm new password" className="clip-corner h-11 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
+        <Input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} aria-label="Current password" placeholder="Current password" className="h-11" />
+        <Input type="password" value={newPass} onChange={(e) => setNewPass(e.target.value)} aria-label="New password" placeholder="New password" className="h-11" />
+        <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} aria-label="Confirm new password" placeholder="Confirm new password" className="h-11" />
       </div>
       {msg && <p className={`mt-3 font-mono text-xs ${msg.includes('success') ? 'text-cyan' : 'text-coral'}`}>{msg}</p>}
       <button type="submit" disabled={loading} className="clip-corner mt-4 inline-flex cursor-pointer items-center gap-2 border border-coral/50 bg-coral/5 px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-coral hover:bg-coral hover:text-coral-foreground disabled:opacity-50">

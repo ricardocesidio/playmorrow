@@ -3,9 +3,11 @@
 import { useState, type FormEvent, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save, ExternalLink, Gamepad2, Milestone, FileText, ScrollText, Trash2, Upload, Loader2, } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/api/auth-context';
 import { useGame, useUpdateGame, useDeleteGame } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
@@ -244,10 +246,10 @@ export default function EditGamePage() {
             {!isFree && (
               <div className="mb-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Price (e.g. 19.99)</label>
-                <input type="text" value={priceCents} onChange={(e) => setPriceCents(e.target.value)}
+                <Input type="text" value={priceCents} onChange={(e) => setPriceCents(e.target.value)}
                   onBlur={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v)) setPriceCents(v.toFixed(2)); }}
                   placeholder="19.99"
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
             )}
             <div className="grid gap-4 sm:grid-cols-2">
@@ -271,15 +273,15 @@ export default function EditGamePage() {
               </div>
               <div>
                 <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Expected release</label>
-                <input type="text" value={expectedReleaseText} onChange={(e) => setExpectedReleaseText(e.target.value)}
+                <Input type="text" value={expectedReleaseText} onChange={(e) => setExpectedReleaseText(e.target.value)}
                   placeholder="e.g. Q4 2026"
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
             </div>
             <div className="mt-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Release date</label>
-              <input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)}
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              <Input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)}
+                className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
           </div>
 
@@ -306,14 +308,14 @@ export default function EditGamePage() {
               </div>
               <div>
                 <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Title</label>
-                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                <Input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
             </div>
             <div className="mt-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Tagline</label>
-              <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)}
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              <Input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)}
+                className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
             <div className="mt-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-2 block">Tags ({tagsInput.length} selected)</label>
@@ -341,9 +343,9 @@ export default function EditGamePage() {
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Trailer</h3>
             <div>
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">YouTube trailer URL</label>
-              <input type="url" value={trailerUrl} onChange={(e) => setTrailerUrl(e.target.value)}
+              <Input type="url" value={trailerUrl} onChange={(e) => setTrailerUrl(e.target.value)}
                 placeholder="https://www.youtube.com/watch?v=..."
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               <p className="mt-1 font-mono text-[0.55rem] text-muted-foreground">Link a YouTube video to appear as the game trailer.</p>
             </div>
           </div>
@@ -352,11 +354,10 @@ export default function EditGamePage() {
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Screenshots ({media.length}/{MAX_SCREENSHOTS})</h3>
-              <button type="button" onClick={addMedia} disabled={uploadingShot || media.length >= MAX_SCREENSHOTS}
-                className="clip-corner cursor-pointer border border-cyan/60 px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-widest text-cyan transition hover:bg-cyan/10 disabled:opacity-40 disabled:cursor-not-allowed">
-                {uploadingShot ? <Loader2 className="size-3 mr-1 inline animate-spin" /> : <Upload className="size-3 mr-1 inline" />}
+              <Button type="button" onClick={addMedia} disabled={uploadingShot || media.length >= MAX_SCREENSHOTS} size="sm">
+                {uploadingShot ? <Loader2 className="size-3 animate-spin" /> : <Upload className="size-3" />}
                 Add screenshot
-              </button>
+              </Button>
               <input ref={fileInputRef} type="file" accept="image/png,image/jpeg" multiple onChange={handleShotUpload} className="hidden" />
             </div>
             <div className="space-y-3">
@@ -366,9 +367,9 @@ export default function EditGamePage() {
                     <img src={m.url} alt="" className="size-full object-cover" />
                   </div>
                   <div className="flex-1">
-                    <input type="text" value={m.caption} onChange={(e) => updateMedia(i, 'caption', e.target.value)}
+                    <Input type="text" value={m.caption} onChange={(e) => updateMedia(i, 'caption', e.target.value)}
                       placeholder="Caption (optional)"
-                      className="clip-corner h-9 w-full border border-input bg-background/80 px-3 text-xs text-foreground outline-none focus:border-cyan" />
+                      className="h-9 px-3 text-xs" />
                   </div>
                   <button type="button" onClick={() => removeMedia(i)} className="mt-1 cursor-pointer text-coral hover:text-coral/80">
                     <Trash2 className="size-4" />
@@ -383,19 +384,18 @@ export default function EditGamePage() {
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
             <div className="flex gap-3">
-              <button type="submit" disabled={updateGame.isPending}
-                className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+              <Button type="submit" disabled={updateGame.isPending}>
                 {updateGame.isPending ? 'Saving\u2026' : 'Save changes'}
-                <Save className="size-3 ml-1 inline" />
-              </button>
+                <Save className="size-3" />
+              </Button>
               <Link href="/dashboard"
                 className="clip-corner inline-flex items-center border border-border/60 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
                 Cancel
               </Link>
             </div>
-            <button
+            <Button
               type="button"
-              className="clip-corner cursor-pointer border border-coral/60 bg-coral/5 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-coral transition hover:bg-coral/20 disabled:cursor-not-allowed disabled:opacity-40"
+              variant="destructive" size="sm"
               onClick={async () => {
                 if (!token) return;
                 try {
@@ -405,9 +405,9 @@ export default function EditGamePage() {
               }}
               disabled={deleteGame.isPending}
             >
-              <Trash2 className="size-3 mr-1 inline" />
+              <Trash2 className="size-3" />
               {deleteGame.isPending ? 'Deleting\u2026' : 'Delete game'}
-            </button>
+            </Button>
           </div>
         </form>
 

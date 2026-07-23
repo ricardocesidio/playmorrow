@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft, Bell, Check, CheckCheck, EyeOff, X } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
@@ -93,13 +94,12 @@ export default function NotificationsPage() {
           <Bell className="size-6 text-cyan" />
           <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white">Notifications</h1>
         </div>
-        <button
+        <Button
           onClick={handleMarkAllRead}
           disabled={markAllRead.isPending}
-          className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <CheckCheck className="mr-1 inline size-3" /> Mark all read
-        </button>
+          <CheckCheck className="size-3" /> Mark all read
+        </Button>
       </div>
 
       {/* Status tabs */}
@@ -237,23 +237,23 @@ export default function NotificationsPage() {
           {/* Pagination */}
           {data.total > data.pageSize && (
             <div className="flex items-center justify-center gap-3 pt-4">
-              <button
+              <Button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}
-                className="clip-corner border border-border/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan disabled:opacity-40"
+                variant="outline" size="sm"
               >
                 Previous
-              </button>
+              </Button>
               <span className="font-mono text-[0.55rem] text-muted-foreground/60">
                 Page {data.page}
               </span>
-              <button
+              <Button
                 disabled={page * data.pageSize >= data.total}
                 onClick={() => setPage((p) => p + 1)}
-                className="clip-corner border border-border/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan disabled:opacity-40"
+                variant="outline" size="sm"
               >
                 Next
-              </button>
+              </Button>
             </div>
           )}
         </div>

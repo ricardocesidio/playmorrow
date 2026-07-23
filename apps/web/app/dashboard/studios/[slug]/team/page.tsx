@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, UserPlus, Users, Crown, Shield, Mail, History, UserCheck, UserX, Send, MessageCircle, Trash2 } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/api/auth-context';
 import { useStudio, useStudioMembers, useUpdateMemberRole, useRemoveMember, useTransferOwnership, useCreateInvitation, useCancelInvitation, useStudioInvitations, useStudioAuditLogs, useApproveJoinRequest, useRejectJoinRequest } from '@/lib/api/hooks';
 import type { AuditLogEntry } from '@/lib/api/hooks';
@@ -13,6 +14,7 @@ import { TeamMemberCard } from '@/components/team/team-member-card';
 import { InviteModal } from '@/components/team/invite-modal';
 import type { Invitation } from '@/lib/api/hooks';
 import { formatRelativeTime } from '@/lib/format';
+import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api/client';
 
 interface FeedChatItem { type: 'chat'; id: string; author: { id: string; displayName: string; username: string; avatarUrl?: string | null }; message: string; createdAt: string }
@@ -201,10 +203,9 @@ export default function TeamPage() {
               </p>
             </div>
             {(currentUserRole === 'OWNER' || currentUserRole === 'ADMIN') && (
-              <button onClick={() => setInviteOpen(true)}
-                className="clip-corner flex cursor-pointer items-center gap-2 border border-cyan bg-cyan/10 px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">
+              <Button onClick={() => setInviteOpen(true)}>
                 <UserPlus className="size-4" /> Invite Member
-              </button>
+              </Button>
             )}
           </div>
 
@@ -294,14 +295,12 @@ export default function TeamPage() {
                       <p className="font-mono text-[0.6rem] text-foreground">{req.user?.displayName ?? 'Unknown'}</p>
                       <p className="font-mono text-[0.55rem] text-muted-foreground/60">{new Date(req.createdAt).toLocaleDateString()}</p>
                     </div>
-                    <button onClick={() => approveJoin.mutate({ slug, userId: req.userId! })}
-                      className="clip-corner flex cursor-pointer items-center gap-1 border border-cyan bg-cyan/10 px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-wider text-cyan hover:bg-cyan hover:text-background">
+                    <Button onClick={() => approveJoin.mutate({ slug, userId: req.userId! })} size="sm">
                       <UserCheck className="size-3" /> Approve
-                    </button>
-                    <button onClick={() => rejectJoin.mutate({ slug, userId: req.userId! })}
-                      className="clip-corner flex cursor-pointer items-center gap-1 border border-coral/60 px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-wider text-coral hover:bg-coral/20">
+                    </Button>
+                    <Button onClick={() => rejectJoin.mutate({ slug, userId: req.userId! })} variant="destructive" size="sm">
                       <UserX className="size-3" /> Reject
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -404,14 +403,13 @@ export default function TeamPage() {
               )}
             </div>
             <div className="mt-2 flex gap-2">
-              <input value={chatMessage} onChange={e => setChatMessage(e.target.value)}
+              <Input value={chatMessage} onChange={e => setChatMessage(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
                 placeholder="Write a message..."
-                className="clip-corner h-10 flex-1 border border-input bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan" />
-              <button onClick={sendMessage} disabled={sending || !chatMessage.trim()}
-                className="clip-corner flex cursor-pointer items-center gap-1 border border-cyan bg-cyan/10 px-4 font-mono text-[0.6rem] uppercase tracking-wider text-cyan transition hover:bg-cyan hover:text-background disabled:opacity-40">
+                className="h-10 flex-1" />
+              <Button onClick={sendMessage} disabled={sending || !chatMessage.trim()}>
                 <Send className="size-3.5" /> Send
-              </button>
+              </Button>
             </div>
           </div>
         </div>

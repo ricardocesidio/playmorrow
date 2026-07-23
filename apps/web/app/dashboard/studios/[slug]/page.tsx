@@ -10,6 +10,9 @@ import {
 import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
 import { useStudio, useUpdateStudio, useDeleteStudio } from '@/lib/api/hooks';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Modal } from '@/components/ui/modal';
 import { ApiError } from '@/lib/api/client';
 
 export default function EditStudioPage() {
@@ -195,15 +198,16 @@ export default function EditStudioPage() {
             {/* Identity */}
             <Section title="Studio Identity" desc="Basic information about your studio.">
               <Field label="Studio Name" error={!name.trim() ? 'Required' : undefined}>
-                <input value={name} onChange={e => setName(e.target.value)} maxLength={40}
-                  className={`clip-corner h-11 w-full border bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)] ${!name.trim() ? 'border-coral/60' : 'border-input'}`} />
+                <Input value={name} onChange={e => setName(e.target.value)} maxLength={40}
+                  error={!name.trim()}
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </Field>
               <Field label="Slug (immutable)">
-                <input value={slug} disabled className="clip-corner h-11 w-full border border-input bg-muted/30 px-4 text-sm text-muted-foreground outline-none cursor-not-allowed" />
+                <Input value={slug} disabled className="h-11 bg-muted/30 cursor-not-allowed" />
               </Field>
               <Field label="Tagline" hint={`${tagline.length}/120`}>
-                <input value={tagline} onChange={e => setTagline(e.target.value.slice(0, 120))} maxLength={120}
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                <Input value={tagline} onChange={e => setTagline(e.target.value.slice(0, 120))} maxLength={120}
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </Field>
               <Field label="Description" hint={`${descLen}/3000`}>
                 <textarea ref={descRef} value={description} onChange={e => { setDescription(e.target.value.slice(0, 3000)); autoResize(); }} rows={5} maxLength={3000}
@@ -215,12 +219,12 @@ export default function EditStudioPage() {
             <Section title="Contact & Links" desc="How players and press can reach you.">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Location">
-                  <input value={location} onChange={e => setLocation(e.target.value)}
-                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                  <Input value={location} onChange={e => setLocation(e.target.value)}
+                    className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
                 </Field>
                 <Field label="Website">
-                  <input value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)} placeholder="https://..."
-                    className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                  <Input value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)} placeholder="https://..."
+                    className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
                 </Field>
               </div>
             </Section>
@@ -240,10 +244,9 @@ export default function EditStudioPage() {
               <div className="clip-corner border border-coral/30 bg-coral/5 p-4">
                 <p className="font-mono text-xs font-semibold text-coral">Delete this studio</p>
                 <p className="mt-1 text-xs text-muted-foreground">Permanently delete your studio and all associated data.</p>
-                <button type="button" onClick={() => setShowDeleteModal(true)}
-                  className="mt-3 cursor-pointer border border-coral/60 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-widest text-coral transition hover:bg-coral/20">
-                  <Trash2 className="mr-1 inline size-3" /> Delete Studio
-                </button>
+                <Button type="button" onClick={() => setShowDeleteModal(true)} variant="destructive" size="sm">
+                  <Trash2 className="size-3" /> Delete Studio
+                </Button>
               </div>
             </Section>
 
@@ -251,11 +254,10 @@ export default function EditStudioPage() {
             <div className="sticky bottom-0 z-10 -mx-4 border-t border-border/70 bg-[#050b0f]/95 px-4 py-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <button type="submit" disabled={updateStudio.isPending || !hasChanges}
-                    className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
-                    {updateStudio.isPending ? <Loader2 className="mr-1 inline size-3 animate-spin" /> : <Save className="mr-1 inline size-3" />}
+                  <Button type="submit" disabled={updateStudio.isPending || !hasChanges}>
+                    {updateStudio.isPending ? <Loader2 className="size-3 animate-spin" /> : <Save className="size-3" />}
                     {updateStudio.isPending ? 'Saving...' : 'Save Changes'}
-                  </button>
+                  </Button>
                   <Link href="/dashboard"
                     className="border border-border/60 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
                     Cancel
@@ -325,26 +327,17 @@ export default function EditStudioPage() {
       </div>
       </div>
 
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="clip-corner w-full max-w-md border border-coral/40 bg-[#050b0f] p-6 shadow-[0_0_60px_rgb(0_0_0_/_0.5)]">
-            <AlertTriangle className="mx-auto size-10 text-coral" />
-            <h2 className="mt-4 text-center font-display text-lg font-bold text-foreground">Delete Studio</h2>
-            <p className="mt-2 text-center text-sm text-muted-foreground">Type <strong className="text-coral">{studio.name}</strong> to confirm:</p>
-            <input value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} placeholder="Type studio name..."
-              className="mt-4 w-full border border-coral/60 bg-background/80 px-4 py-3 text-sm text-foreground outline-none focus:border-coral" />
-            <div className="mt-5 flex gap-3">
-              <button onClick={() => { setShowDeleteModal(false); setDeleteConfirm(''); }}
-                className="flex-1 cursor-pointer border border-border/60 px-4 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">Cancel</button>
-              <button onClick={handleDelete} disabled={deleteConfirm !== studio.name || deleteStudio.isPending}
-                className="flex-1 cursor-pointer border border-coral bg-coral/10 px-4 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-coral transition hover:bg-coral hover:text-coral-foreground disabled:cursor-not-allowed disabled:opacity-40">
+      <Modal isOpen={showDeleteModal} onClose={() => { setShowDeleteModal(false); setDeleteConfirm(''); }} title="Delete Studio">
+        <AlertTriangle className="mx-auto size-10 text-coral" />
+        <p className="mt-2 text-center text-sm text-muted-foreground">Type <strong className="text-coral">{studio.name}</strong> to confirm:</p>
+        <Input value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} placeholder="Type studio name..." error className="mt-4" />
+        <div className="mt-5 flex gap-3">
+              <Button onClick={() => { setShowDeleteModal(false); setDeleteConfirm(''); }} variant="outline" className="flex-1">Cancel</Button>
+              <Button onClick={handleDelete} disabled={deleteConfirm !== studio.name || deleteStudio.isPending} variant="destructive" className="flex-1">
                 {deleteStudio.isPending ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
+              </Button>
         </div>
-      )}
+      </Modal>
     </>
   );
 }

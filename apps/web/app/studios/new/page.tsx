@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, Building2 } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/api/auth-context';
 import { useCreateStudio } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
@@ -119,24 +120,24 @@ export default function CreateStudioPage() {
 
             <div>
               <label htmlFor="name" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Name *</label>
-              <input id="name" type="text" value={name} onChange={(e) => handleNameChange(e.target.value)}
+              <Input id="name" type="text" value={name} onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="Moonlit Forge"
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
 
             <div className="mt-4">
               <label htmlFor="slug" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Slug *</label>
-              <input id="slug" type="text" value={slug} onChange={(e) => { setSlug(e.target.value); setSlugAuto(false); }}
+              <Input id="slug" type="text" value={slug} onChange={(e) => { setSlug(e.target.value); setSlugAuto(false); }}
                 placeholder="moonlit-forge"
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               <p className="mt-1 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">URL-safe identifier. Lowercase letters, numbers, hyphens.</p>
             </div>
 
             <div className="mt-4">
               <label htmlFor="tagline" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Tagline</label>
-              <input id="tagline" type="text" value={tagline} onChange={(e) => setTagline(e.target.value)}
+              <Input id="tagline" type="text" value={tagline} onChange={(e) => setTagline(e.target.value)}
                 placeholder="Small indie studio making atmospheric adventure games."
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
 
             <div className="mt-4">
@@ -154,30 +155,30 @@ export default function CreateStudioPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="location" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Location</label>
-                <input id="location" type="text" value={location} onChange={(e) => setLocation(e.target.value)}
+                <Input id="location" type="text" value={location} onChange={(e) => setLocation(e.target.value)}
                   placeholder="Lisbon, Portugal"
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
               <div>
                 <label htmlFor="websiteUrl" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Website</label>
-                <input id="websiteUrl" type="url" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)}
+                <Input id="websiteUrl" type="url" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)}
                   placeholder="https://example.com"
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
             </div>
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="logoUrl" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Logo URL</label>
-                <input id="logoUrl" type="url" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)}
+                <Input id="logoUrl" type="url" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)}
                   placeholder="https://example.com/logo.png"
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
               <div>
                 <label htmlFor="bannerUrl" className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Banner URL</label>
-                <input id="bannerUrl" type="url" value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)}
+                <Input id="bannerUrl" type="url" value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)}
                   placeholder="https://example.com/banner.png"
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
             </div>
           </div>

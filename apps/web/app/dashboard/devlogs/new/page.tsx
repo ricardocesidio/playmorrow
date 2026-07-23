@@ -3,9 +3,11 @@
 import { Suspense, useState, type FormEvent, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft, FileText, X, Upload, Calendar } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyStudios, useCreateDevlog } from '@/lib/api/hooks';
 import type { Game } from '@/lib/api/client';
@@ -190,13 +192,13 @@ function CreateDevlogForm() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Title *</label>
-                <input type="text" value={title} onChange={(e) => handleTitleChange(e.target.value)}
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                <Input type="text" value={title} onChange={(e) => handleTitleChange(e.target.value)}
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
               <div>
                 <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Slug *</label>
-                <input type="text" value={slug} onChange={(e) => { setSlug(e.target.value); setSlugAuto(false); }}
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                <Input type="text" value={slug} onChange={(e) => { setSlug(e.target.value); setSlugAuto(false); }}
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
             </div>
 
@@ -207,16 +209,16 @@ function CreateDevlogForm() {
 
             <div className="mt-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Subtitle</label>
-              <input type="text" value={subtitle} onChange={(e) => setSubtitle(e.target.value)}
+              <Input type="text" value={subtitle} onChange={(e) => setSubtitle(e.target.value)}
                 placeholder="A short summary of this devlog"
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
 
             <div className="mt-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Category</label>
-              <input type="text" value={category} onChange={(e) => setCategory(e.target.value)}
+              <Input type="text" value={category} onChange={(e) => setCategory(e.target.value)}
                 placeholder="e.g. Combat, Art, Design, Update"
-                className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
 
             <div className="mt-4">
@@ -294,18 +296,17 @@ function CreateDevlogForm() {
                 <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center gap-1.5">
                   <Calendar className="size-3" /> Scheduled date
                 </label>
-                <input type="datetime-local" value={scheduledDate}
+                <Input type="datetime-local" value={scheduledDate}
                   onChange={(e) => setScheduledDate(e.target.value)}
-                  className="clip-corner h-11 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+                  className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
             )}
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={createDevlog.isPending}
-              className="clip-corner cursor-pointer border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:cursor-not-allowed disabled:opacity-40">
+            <Button type="submit" disabled={createDevlog.isPending}>
               {createDevlog.isPending ? 'Saving…' : status === 'PUBLISHED' ? 'Publish devlog' : status === 'SCHEDULED' ? 'Schedule devlog' : 'Save draft'}
-            </button>
+            </Button>
             <Link href="/dashboard"
               className="clip-corner inline-flex items-center border border-border/60 px-6 py-2.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
               Cancel

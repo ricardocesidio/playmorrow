@@ -16,6 +16,7 @@ import {
   Zap,
 } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
@@ -116,14 +117,14 @@ export default function FeedPage() {
 
               {!error && !isExplicitEmpty && hasMore && (
                 <div className="mt-5 flex justify-center">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setPage((p) => p + 1)}
                     disabled={isLoading}
-                    className="clip-corner inline-flex h-10 min-w-[320px] items-center justify-center gap-3 border border-cyan/70 bg-cyan/5 px-8 pm-display text-xs text-cyan transition hover:bg-cyan hover:text-cyan-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="min-w-[320px]"
                   >
                     {isLoading ? 'Loading…' : 'Load more transmissions'} <ArrowDown className="size-4" />
-                  </button>
+                  </Button>
                 </div>
               )}
             </section>

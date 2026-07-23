@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Search, Loader2, Gamepad2, Building2, FileText } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
+import { Input } from '@/components/ui/input';
 import { api, type SearchResponse } from '@/lib/api/client';
 
 export default function SearchPage() {
@@ -46,14 +47,14 @@ export default function SearchPage() {
           {/* Search input */}
           <div className="relative mb-8">
             <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
+            <Input
               type="text"
               placeholder="Search..."
-                aria-label="Search"
+              aria-label="Search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               autoFocus
-              className="clip-corner h-12 w-full border border-input bg-background/80 pl-11 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
+              className="pl-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]"
             />
             {isLoading && (
               <Loader2 className="absolute right-4 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
