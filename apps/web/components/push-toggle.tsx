@@ -22,6 +22,10 @@ export function PushNotificationToggle() {
       setSupported(true);
       navigator.serviceWorker.register('/sw.js').then((reg) => {
         reg.pushManager.getSubscription().then((sub) => setSubscribed(!!sub));
+        setSupported(true);
+      }).catch((err) => {
+        console.warn('SW registration failed:', err);
+        setSupported(false);
       });
     }
   }, []);
@@ -30,8 +34,12 @@ export function PushNotificationToggle() {
     if (loading || !supported) return;
 
     if (!subscribed && Notification.permission === 'denied') {
-      toast.error('Notifications blocked. Enable them in your browser settings.');
+      toast.error('Notifications blocked. Enable them in your browser site settings (lock icon in address bar → Site settings → Notifications → Allow).');
       return;
+    }
+
+    if (!subscribed && Notification.permission === 'granted') {
+      // Permission already granted, proceed directly
     }
 
     setLoading(true);
