@@ -152,7 +152,7 @@ export class OAuthController {
           maxAge: 60 * 60 * 24,
         });
 
-        res.redirect(`${frontendUrl}/oauth/callback?csrf=${csrfToken}`);
+        res.redirect(`${frontendUrl}/oauth/callback#csrf=${csrfToken}`);
       } else {
         const params = new URLSearchParams({ provider: profile.provider, email: profile.email, displayName: profile.displayName });
         if (profile.avatarUrl) params.set('avatarUrl', profile.avatarUrl);

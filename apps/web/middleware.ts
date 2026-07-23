@@ -22,6 +22,8 @@ export function middleware(_request: NextRequest) {
   // Basic CSP — restricts resources to trusted origins.
   // NOTE: 'unsafe-inline' is required by Next.js hydration scripts and Tailwind.
   //       A nonce-based approach would be more secure but needs framework support.
+  //       See https://nextjs.org/docs/app/api-reference/config/next-config-js#contentsecuritypolicy
+  //       for nonce-based CSP with Next.js.
   //       Update the connect-src when adding new external API dependencies.
   response.headers.set(
     'Content-Security-Policy',
