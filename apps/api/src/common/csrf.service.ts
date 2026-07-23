@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createHmac, randomBytes } from 'node:crypto';
+import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
 @Injectable()
 export class CsrfService {
@@ -36,7 +36,7 @@ export class CsrfService {
       const payload = decoded.slice(0, lastColon);
       const signature = decoded.slice(lastColon + 1);
       const expected = createHmac('sha256', this.secret).update(payload).digest('hex');
-      if (signature !== expected) return false;
+      if (signature.length !== expected.length || !timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'))) return false;
       const parts = payload.split(':');
       if (parts.length < 3) return false;
       const userIdPart = parts[0];

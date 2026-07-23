@@ -9,8 +9,11 @@ function OAuthCallbackInner() {
   const router = useRouter();
 
   useEffect(() => {
-    // Capture CSRF token from query param and set it as a frontend-domain cookie
-    const params = new URLSearchParams(window.location.search);
+    // Capture CSRF token from URL hash fragment and set it as a frontend-domain cookie.
+    // Hash fragment is used instead of query param to avoid leaking the token
+    // into browser history, server access logs, and Referer headers.
+    const hash = window.location.hash.replace(/^#/, '');
+    const params = new URLSearchParams(hash);
     const csrfToken = params.get('csrf');
     if (csrfToken) {
       document.cookie = `playmorrow_csrf=${csrfToken}; path=/; max-age=86400; SameSite=Lax`;
