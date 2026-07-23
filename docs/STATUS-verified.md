@@ -330,6 +330,55 @@
 
 ---
 
+## Round 6 (2026-07-23) — Final UX + Security Pass
+
+### Fixes Applied
+
+| Issue | File | Root Cause | Fix |
+|-------|------|-----------|-----|
+| ManageDropdown CSRF bypass | `games/[slug]/page.tsx:964-1003` | Cover upload + PATCH used raw `fetch()` without `X-CSRF-Token` header — global CsrfGuard returns 403 | Added `getCsrfToken()` helper + header to both fetch calls |
+| Auth-loading blank flash | 4 dashboard pages | `if (authLoading) return null` during auth hydration | Replaced with centered spinner (`border-2 border-cyan border-t-transparent`) |
+| confirm() dialogs | 4 files (`games/[slug]`, `devlogs/[id]`, `dashboard/devlogs/[id]`, `dashboard/roadmap`) | `window.confirm()` blocks event loop, breaks visual language | Removed — user already clicked delete button, action proceeds directly |
+
+### Build Verification
+
+| Command | Result | Evidence |
+|---------|--------|----------|
+| `pnpm typecheck` | ✅ 6/6 tasks, 0 errors | `Tasks: 6 successful, 6 total` |
+| `pnpm lint` | ✅ 0 errors, 18 warnings | All warnings pre-existing (token unused-vars pattern) |
+| Live dev server | ✅ 17/17 pages 200, API green | Full curl scan this session |
+
+### Final Engineering Scores
+
+| Category | Score | Delta from Audit |
+|----------|-------|-----------------|
+| Architecture | 85/100 | — |
+| Frontend | 78/100 | ↑ +13 |
+| Backend | 80/100 | ↑ +8 |
+| Security | 85/100 | ↑ +7 |
+| Database | 85/100 | — |
+| DevOps | 72/100 | ↑ +2 |
+| Documentation | 82/100 | ↑ +7 |
+| Testing | 40/100 | ⚠️ Needs test DB |
+| SEO | 90/100 | ↑ +70 |
+| Product | 65/100 | ↑ +5 |
+| Business | 45/100 | → Needs legal |
+| Company | 42/100 | → Needs trust signals |
+| **Overall** | **78/100** | **↑ +10** |
+
+### Decision: Launch Ready?
+
+**Not yet.** The project has a 78/100 engineering score — solid but not launch-ready. The remaining blockers are:
+
+1. **Isolated test database** — highest risk. One bad CI run could corrupt production data.
+2. **Uptime monitoring** — no alerting if API goes down at 3 AM.
+3. **Lawyer-reviewed legal pages** — Terms, Privacy, Contact exist but haven't passed legal review.
+4. **`COOKIE_DOMAIN` on Railway** — cross-domain session persistence may fail in production.
+
+**Recommended path:** Fix items 1+2 this week (2 hours total), launch private beta with 10-20 studios, then fix items 3+4 over the next month.
+
+---
+
 ## 🟢 Remaining Work — Future (2-5 Years)
 
 | # | Task | Why |
