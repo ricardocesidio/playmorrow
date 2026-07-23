@@ -143,9 +143,14 @@ function PremiumGameDetail({
 
   const handleSaveCover = async () => {
     const coverToSave = pendingCover;
-    if (!coverToSave) return;
+    console.log('[cover] Save clicked. pendingCover:', coverToSave, 'game.coverUrl:', game?.coverUrl);
+    if (!coverToSave) {
+      console.log('[cover] No pending cover — doing nothing');
+      return;
+    }
     setSavingCover(true);
     const csrfToken = getCsrfToken();
+    console.log('[cover] CSRF token:', csrfToken ? 'found' : 'missing');
     try {
       const patchRes = await fetch(`/api/games/${slug}`, {
         method: 'PATCH',
@@ -153,13 +158,21 @@ function PremiumGameDetail({
         credentials: 'include',
         body: JSON.stringify({ coverUrl: coverToSave }),
       });
+      console.log('[cover] PATCH response status:', patchRes.status);
       if (!patchRes.ok) {
         const errBody = await patchRes.text().catch(() => '');
-        throw new Error(`Failed to save cover: ${patchRes.status} ${errBody}`);
+        throw new Error(`${patchRes.status}: ${errBody}`);
       }
-      queryClient.setQueryData(['game', slug], (old: any) => old ? { ...old, coverUrl: coverToSave } : old);
+      const patchData = await patchRes.json();
+      console.log('[cover] PATCH success. Response coverUrl:', patchData?.coverUrl);
+      queryClient.setQueryData(['game', slug], (old: any) => {
+        console.log('[cover] Updating cache with new coverUrl:', coverToSave);
+        return old ? { ...old, coverUrl: coverToSave } : old;
+      });
       setPendingCover(null);
+      console.log('[cover] Done — pending cleared');
     } catch (err) {
+      console.error('[cover] Error:', err);
       toast.error(err instanceof Error ? err.message : 'Failed to save cover.');
     }
     setSavingCover(false);
