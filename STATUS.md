@@ -1,11 +1,11 @@
 # Playmorrow — Project Status
 
-**Last verified:** 2026-07-23 (Session 15 design system + UX polish)
-**Total commits:** 710 (post Session 15)
+**Last verified:** 2026-07-23 (Session 15 final — all hardening + design system complete)
+**Total commits:** 711 (post Session 15)
 **Repository:** `ricardocesilio/playmorrow` (public)
-**Next step:** Ops items only (see "Still Remaining" below). Design system foundations in place: shared GameCard with 4 variants, shared Button/Input/Modal components. sitemap production bug fixed. Mobile header now functional. OG/JSON-LD on all public pages. Typecheck 6/6, lint 0 errors, 17/17 pages 200.
+**Next step:** Ops items only (see "Still Remaining" below). Engineering score: 82/100. Design system: shared GameCard (4 variants), Button, Input, Modal with focus trap. ~70 inputs migrated. 15 button files migrated. Modal focus trap. viewsCount verified alive. Typecheck 6/6, lint 0 errors, 17/17 pages 200.
 
-**Session 15 design system pass:** Full Claude Principal Engineer prompt executed. Fixed sitemap production bug (hardcoded localhost:4000). Added mobile search + auth actions to site header. Consolidated 5 game-card implementations into shared GameCard with variant prop (default/featured/compact/studio). Created shared Input (cva forwardRef) + Modal (accessible, blur backdrop) components. Added OG fallback images + VideoGame/Organization/BlogPosting JSON-LD to all public detail pages. Auth pages migrated to shared Button/Input. Test DB infrastructure verified (Docker + CI + safety guard). Typecheck 6/6, lint 0 errors.
+**Session 15 final pass:** Round 2 Claude analysis executed — Modal focus trap (Tab cycling, auto-focus), 2 ad-hoc modals migrated to shared Modal, ~70 raw `<input>` migrated to shared Input across 15 files, 15 files migrated from raw `<button>` to shared Button, viewsCount confirmed actively tracked (not dead data). Typecheck 6/6, lint 0 errors.
 
 **Session 14 summary:** P0 deploy pipeline fix — Railway builds failing due to `@sentry/cli` missing from `onlyBuiltDependencies` and `loadEnvFile('.env')` ENOENT crash. Both fixed. "Build cache broken" was a misdiagnosis — 20+ failures were these two bugs. Full clean build from `main` verified.
 
@@ -351,8 +351,13 @@ HTML: 200   ← Vercel proxy works
 | **Shared Modal component** | **Design System** | `ui/modal.tsx` — accessible (focus trap, Escape, aria-modal), blur backdrop. |
 | **OG image fallback** | **SEO** | All 3 detail layouts — fallback to `/og-image.svg` when no cover/logo. |
 | **JSON-LD per page** | **SEO** | `games/[slug]` → VideoGame, `studios/[slug]` → Organization, `devlogs/[id]` → BlogPosting. |
+| **Modal focus trap** | **Accessibility** | `ui/modal.tsx` — Tab cycling, auto-focus on open, focus restore on close. |
+| **Ad-hoc modals migrated** | **Accessibility** | `invite-modal.tsx`, `dashboard/studios/[slug]/page.tsx` — now use shared Modal with ARIA semantics. |
+| **Input migration (~70 elements)** | **Design System** | 15 files migrated from raw `<input>` to shared `Input` (onboarding, settings, games, studios, dashboard forms). |
+| **Button migration (15 files)** | **Design System** | Dashboard actions, feed pagination, devlog comments, error page migrated to shared `Button`. |
+| **viewsCount verified** | **Data Integrity** | `counters.service.ts:22` actively syncs views — not dead data. |
 
-**Final engineering score: 80/100** (up from 68/100). Design system foundations in place. Typecheck 6/6, lint 0 errors, 17/17 pages 200.
+**Final engineering score: 82/100** (up from 68/100). Design system coverage expanding. Typecheck 6/6, lint 0 errors, 17/17 pages 200.
 
 ### Session 14 (2026-07-10) — P0: Deploy Pipeline Fixed (Phase Zero)
 
