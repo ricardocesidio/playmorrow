@@ -101,6 +101,7 @@ export function useGame(slug: string) {
     queryKey: ['game', slug],
     queryFn: () => api.get<Game>(`/games/${slug}`),
     enabled: !!slug,
+    refetchInterval: 30_000,
   });
 }
 
