@@ -16,11 +16,5 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Build web app
-        run: pnpm exec turbo run build --filter=@playmorrow/web...
-      - name: Pull Vercel env
-        run: npx vercel pull --cwd apps/web --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Build for Vercel
-        run: npx vercel build --cwd apps/web --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy to Vercel
-        run: npx vercel deploy --prebuilt --cwd apps/web --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
+        run: npx vercel deploy --cwd apps/web --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
