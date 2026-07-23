@@ -2,18 +2,24 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 function generateNonce(): string {
-  // CSP nonce — doesn't need cryptographic strength, just per-request uniqueness.
-  // Math.random is available everywhere including Edge Runtime and is sufficient.
-  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  // CSP nonce MUST be cryptographically random — otherwise an attacker can
+  // predict it and bypass CSP entirely. Web Crypto API (globalThis.crypto)
+  // is available in Edge Runtime without any import.
+  const bytes = new Uint8Array(16);
+  globalThis.crypto.getRandomValues(bytes);
+  return btoa(String.fromCharCode(...bytes));
 }
 
-export function middleware(_request: NextRequest) {
-  const response = NextResponse.next();
-
+export function middleware(request: NextRequest) {
   // Generate a CSP nonce per-request. Next.js automatically adds this nonce
   // to its inline scripts (__NEXT_F__, __NEXT_DATA__) when x-nonce header is set.
+  // The nonce must be on REQUEST headers so Server Components can read it
+  // via the headers() function. It also goes on response headers for the CSP.
   // See https://nextjs.org/docs/app/api-reference/config/next-config-js#contentsecuritypolicy
   const nonce = generateNonce();
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-nonce', nonce);
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set('x-nonce', nonce);
 
   // HSTS — tell browsers to always use HTTPS
