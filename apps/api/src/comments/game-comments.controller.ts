@@ -14,8 +14,8 @@ export class GameCommentsController {
   @Get('games/:slug/comments')
   @UseGuards(OptionalSessionGuard)
   @ApiOperation({ summary: 'List comments for a game' })
-  async findByGame(@Param('slug') slug: string, @Query('page') page = 1, @Query('pageSize') pageSize = 20) {
-    return this.commentsService.findByGame(slug, +page, +pageSize);
+  async findByGame(@Param('slug') slug: string, @Query('page') page = 1, @Query('pageSize') pageSize = 20, @CurrentUser() user?: { id: string }) {
+    return this.commentsService.findByGame(slug, +page, +pageSize, user?.id);
   }
 
   @Post('games/:slug/comments')
