@@ -7,17 +7,15 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  Activity, ArrowRight, Gamepad2, Heart, Radio, SquarePlay, UserPlus, Users, Zap,
-  Crown,
+  Activity, ArrowRight, Crown, Gamepad2, Radio, SquarePlay, UserPlus,
 } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { StatusBadge } from '@/components/status-badge';
-import { CircuitFrame, HudPanel } from '@/components/playmorrow/hud';
-import { formatRelativeTime, formatFollowers } from '@/lib/format';
+import { GameCard } from '@/components/game-card';
+import { CircuitFrame } from '@/components/playmorrow/hud';
+import { formatRelativeTime } from '@/lib/format';
 import { usePublicFeed, useGames, useStudios } from '@/lib/api/hooks';
 import { useAuth } from '@/lib/api/auth-context';
-import type { Game } from '@/lib/api/client';
 
 function getFeedIcon(type: string) {
   if (type === 'ROADMAP_ITEM') return <Activity className="size-4" />;
@@ -33,7 +31,7 @@ export default function HomePage() {
 
   const hasError = !!feedError || !!gamesError || !!studiosError;
 
-  const games = normalizeLatestGames(gamesData?.items);
+  const games = gamesData?.items?.slice(0, 9) ?? [];
   const gamesCount = gamesData?.total ?? 0;
   const gamesHasMore = (gamesData?.hasMore) ?? false;
   const feedItems = feedData?.items?.slice(0, 4) ?? [];
@@ -105,7 +103,7 @@ export default function HomePage() {
 
               <div className="hidden lg:block">
                 {games.length > 0 && (
-                  <FeaturedGameCard game={games[0]!} />
+                  <GameCard game={games[0]!} variant="featured" />
                 )}
               </div>
             </div>
@@ -146,7 +144,7 @@ export default function HomePage() {
                 ))
               ) : (
                 games.map((game) => (
-                  <LatestGameCard key={game.id} game={game} />
+                  <GameCard key={game.id} game={game} variant="compact" />
                 ))
               )}
             </div>
@@ -257,74 +255,6 @@ function EngageIcon({ className }: { className: string }) {
     </svg>
   );
 }
-function FeaturedGameCard({ game }: { game: HomeGame }) {
-  const cover = game.coverUrl || '/demo/games/neon-warden/hero.svg';
-  return (
-    <Link href={`/games/${game.slug}`} className="block cursor-pointer">
-      <HudPanel className="relative min-h-[438px] overflow-hidden p-6 sm:p-7 transition hover:border-cyan/70" accent="muted">
-        <img src={cover} alt={game.title} className="absolute inset-0 size-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/56 to-background/6" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/92 via-transparent to-background/20" />
-        <div className="relative z-10 grid min-h-[386px] content-between">
-          <div>
-            <StatusBadge status={game.status} />
-            <h2 className="mt-5 font-display text-5xl font-black uppercase leading-none text-foreground sm:text-[3.55rem]">{game.title}</h2>
-            <p className="pm-micro mt-5 text-muted-foreground">{game.tags.slice(0, 2).join(' • ')}</p>
-            <p className="mt-3 max-w-xs text-sm leading-6 text-muted-foreground">{game.tagline ?? ''}</p>
-          </div>
-          <div className="grid gap-4 xl:grid-cols-[0.72fr_1fr]">
-            <div>
-              <div className="flex items-center gap-4 border-t border-border/80 pt-3">
-                <div className="grid size-12 place-items-center border border-border-bright bg-background/70">
-                  <Zap className="size-6 text-foreground" />
-                </div>
-                <div>
-                  <p className="pm-display text-sm text-foreground">{game.studio.name} <span className="text-cyan">●</span></p>
-                  <p className="text-xs text-muted-foreground">{game.tags[0] ?? ''}</p>
-                </div>
-              </div>
-              <p className="mt-4 flex items-center gap-2 text-lg text-cyan"><Users className="size-5" /> {formatFollowers(game.followersCount)} followers</p>
-            </div>
-            <div className="clip-corner border border-border bg-background/70 p-4 backdrop-blur-sm">
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <span className="pm-micro text-foreground">Status</span>
-                <span className="pm-micro inline-flex items-center gap-2 text-cyan">
-                  View game <ArrowRight className="size-3" />
-                </span>
-              </div>
-              <div className="flex items-center gap-4">
-                <StatusBadge status={game.status} />
-                {game.expectedReleaseText && (
-                  <span className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
-                    Expected: {game.expectedReleaseText}
-                  </span>
-                )}
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-                <div className="border border-border/50 px-2 py-2">
-                  <p className="font-display text-lg font-black text-cyan">{formatFollowers(game.followersCount)}</p>
-                  <p className="font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground">Followers</p>
-                </div>
-                {game.wishlistsCount != null && (
-                  <div className="border border-border/50 px-2 py-2">
-                    <p className="font-display text-lg font-black text-coral">{game.wishlistsCount}</p>
-                    <p className="font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground">Wishlists</p>
-                  </div>
-                )}
-                {game.commentsCount != null && (
-                  <div className="border border-border/50 px-2 py-2">
-                    <p className="font-display text-lg font-black text-violet">{game.commentsCount}</p>
-                    <p className="font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground">Comments</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </HudPanel>
-    </Link>
-  );
-}
 function LiveTicker({ items }: { items: { type: string; title?: string; game?: { title: string }; createdAt: string }[] }) {
   return (
     <div className="grid overflow-hidden border border-border bg-background/72 lg:grid-cols-[170px_1fr_170px]">
@@ -352,55 +282,5 @@ function LiveTicker({ items }: { items: { type: string; title?: string; game?: {
   );
 }
 
-function LatestGameCard({ game }: { game: HomeGame }) {
-  const cover = game.coverUrl || '/demo/games/neon-warden/hero.svg';
-  return (
-    <Link href={`/games/${game.slug}`} className="group grid min-h-[260px] overflow-hidden border border-border bg-card transition hover:border-cyan/70">
-      <div className="relative min-h-[180px] p-4">
-        <img src={cover} alt={game.title} className="img-glitch-hover absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-[1.035]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/86 via-background/42 to-transparent" />
-        <div className="relative z-10">
-          <StatusBadge status={game.status} />
-          <h3 className="mt-6 font-display text-4xl font-black uppercase leading-none text-foreground">{game.title}</h3>
-          <p className="mt-4 text-xs text-muted-foreground">{game.tags.join(' • ')}</p>
-          <p className="mt-4 max-w-[250px] text-sm leading-6 text-muted-foreground">{game.tagline ?? 'No description available'}</p>
-        </div>
-      </div>
-      <div className="border-t border-border bg-background/50 p-4">
-        <div className="flex items-center justify-between gap-3">
-          <span className="pm-micro text-foreground">{game.studio.name}</span>
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><Users className="size-3 text-cyan" /> {formatFollowers(game.followersCount)}</span>
-            {game.wishlistsCount != null && <span className="flex items-center gap-1"><Heart className="size-3 text-coral" /> {game.wishlistsCount}</span>}
-          </div>
-        </div>
-        {game.expectedReleaseText && (
-          <p className="mt-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Expected: {game.expectedReleaseText}</p>
-        )}
-      </div>
-    </Link>
-  );
-}
 
-type HomeGame = {
-  id: string; title: string; slug: string; status: string; coverUrl: string;
-  followersCount: number; wishlistsCount: number | null; commentsCount: number | null;
-  studio: { name: string; slug: string }; tags: string[];
-  tagline: string | null; expectedReleaseText: string | null;
-};
-
-function normalizeLatestGames(games?: Game[]): HomeGame[] {
-  if (!games?.length) return [];
-  return games.slice(0, 9).map((g) => ({
-    id: g.id, title: g.title, slug: g.slug, status: g.status,
-    coverUrl: g.coverUrl || '/demo/games/neon-warden/hero.svg',
-    followersCount: g.followersCount,
-    wishlistsCount: g.wishlistsCount ?? null,
-    commentsCount: g.commentsCount ?? null,
-    studio: { name: g.studio?.name ?? 'Independent Studio', slug: g.studio?.slug ?? 'studio' },
-    tags: g.tags?.length ? g.tags.slice(0, 2) : ['Indie', 'In Development'],
-    tagline: g.tagline,
-    expectedReleaseText: g.expectedReleaseText ?? null,
-  }));
-}
 

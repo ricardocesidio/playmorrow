@@ -81,7 +81,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center justify-end gap-5">
-          <div ref={searchRef} className="relative hidden xl:block">
+          <div ref={searchRef} className="relative max-xl:hidden xl:block">
             <div className="clip-corner flex h-10 w-[340px] items-center gap-3 border border-border bg-background/60 px-4 text-sm text-muted-foreground">
               <Search className="size-4 shrink-0" />
               <input
@@ -206,6 +206,13 @@ export function SiteHeader() {
             {user?.accountType === 'STUDIO' ? 'Studio Dashboard' : 'Share your game'} <ArrowUpRight className="size-4" />
           </Link>
 
+          <Link
+            href="/search"
+            className="grid size-8 place-items-center text-muted-foreground hover:text-cyan xl:hidden"
+            aria-label="Search"
+          >
+            <Search className="size-4" />
+          </Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="grid size-8 place-items-center text-muted-foreground md:hidden"
@@ -234,6 +241,26 @@ export function SiteHeader() {
                 {link.label}
               </Link>
             ))}
+            <hr className="my-2 border-border" />
+            {isAuthenticated && user ? (
+              <>
+                <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="px-3 py-2 font-mono text-xs uppercase tracking-widest text-cyan">
+                  Dashboard
+                </Link>
+                <button onClick={() => { logout(); window.location.href = '/'; setMobileOpen(false); }} className="px-3 py-2 text-left font-mono text-xs uppercase tracking-widest text-coral">
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setMobileOpen(false)} className="px-3 py-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                  Sign in
+                </Link>
+                <Link href="/register" onClick={() => setMobileOpen(false)} className="px-3 py-2 font-mono text-xs uppercase tracking-widest text-cyan">
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </nav>
       )}

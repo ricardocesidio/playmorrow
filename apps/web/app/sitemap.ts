@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-const API_BASE = 'http://localhost:4000/api';
+const API_BASE = process.env.API_URL || 'https://playmorrow-api-production.up.railway.app/api';
 
 async function fetchGames(): Promise<{ slug: string; updatedAt: string }[]> {
   try {

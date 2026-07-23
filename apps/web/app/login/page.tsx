@@ -7,6 +7,7 @@ import { ArrowUpRight, Chrome, Eye, EyeOff, Github, Lock, User } from 'lucide-re
 
 import { useAuth, EmailNotVerifiedError } from '@/lib/api/auth-context';
 import { API } from '@/lib/api/client';
+import { Input } from '@/components/ui/input';
 import {
   AuthArtCollage,
   CircuitFrame,
@@ -100,12 +101,12 @@ export default function LoginPage() {
                   <label htmlFor="email" className="pm-micro mb-4 block text-muted-foreground">Email or username</label>
                   <div className="relative">
                     <User className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
-<input
+<Input
   id="email"
   type="text"
   value={emailOrUsername}
   onChange={(e) => setEmailOrUsername(e.target.value)}
-  className="clip-corner h-14 w-full border border-cyan bg-background/80 px-14 text-sm text-foreground shadow-[0_0_24px_rgb(62_231_255_/_0.12)] outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan"
+  className="px-14"
   placeholder="Enter your email or username"
   autoComplete="username"
   required
@@ -118,12 +119,12 @@ export default function LoginPage() {
                   <label htmlFor="password" className="pm-micro mb-4 block text-muted-foreground">Password</label>
                   <div className="relative">
                     <Lock className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
-                    <input
+                    <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="clip-corner h-14 w-full border border-input bg-background/80 px-14 pr-12 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan"
+                      className="px-14 pr-12"
                       placeholder="Enter your password"
                       autoComplete="current-password"
                       required
