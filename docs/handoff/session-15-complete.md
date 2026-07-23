@@ -1,11 +1,24 @@
 # Playmorrow — Session 15 Handoff
 
 **Date:** 2026-07-23
-**Status:** 🟢 All hardening + design system expansion complete
-**Commits:** 711
+**Status:** 🟢 All hardening + design system + final polish complete
+**Commits:** 755
 **Engineering score:** 82/100 (from 68/100)
 
 ---
+
+**Final polish pass — Push notifications, email verification, auto-refresh, footer, avatar & settings:**
+- Push notification toggle hardened: service worker fixed (removed TS syntax, broken cache preload), 30s stuck loading timeout, VAPID key config validation, permission checks, real error toasts
+- Footer: full black background, no animations (was jumping on page load)
+- Email change with verification: send verification code to new email, verify before saving
+- Studio logo in community discussion: author's own studio logo shown (not game's studio logo)
+- Auto-refresh: feed, game stats, roadmap, devlogs, notifications all refresh every 30s via TanStack Query `refetchInterval`
+- Comment ordering: newest at bottom (chronological), like button optimistic update
+- Delete permissions: gated to studio OWNER/ADMIN/MODERATOR or global ADMIN only
+- Avatar upload fix: `MaxLength(500)` → `MaxLength(5000000)` — was rejecting valid uploads; avatar section centered with larger preview
+- Settings link added to header user dropdown
+- Welcome notification bot for new users
+- Real-time notifications: auto-refresh, mark-all-read, responsive design
 
 **Round 2 Claude pass — Frontend polish:** Focus trap added to Modal (Tab cycling, auto-focus). 2 ad-hoc modals migrated to shared Modal (invite-modal, studio delete). ~70 raw `<input>` elements migrated to shared `Input` across 15 files. 15 files migrated from raw `<button>` to shared `Button`. viewsCount confirmed actively tracked (not dead data). Old prompt archives deleted. Typecheck 6/6, lint 0 errors.
 

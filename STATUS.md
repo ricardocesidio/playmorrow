@@ -1,11 +1,13 @@
 # Playmorrow — Project Status
 
-**Last verified:** 2026-07-23 (Session 15 final — all hardening + design system complete)
-**Total commits:** 711 (post Session 15)
+**Last verified:** 2026-07-23 (Session 15 final — all hardening + design system + polish complete)
+**Total commits:** 755 (post final polish pass)
 **Repository:** `ricardocesilio/playmorrow` (public)
 **Next step:** Ops items only (see "Still Remaining" below). Engineering score: 82/100. Design system: shared GameCard (4 variants), Button, Input, Modal with focus trap. ~70 inputs migrated. 15 button files migrated. Modal focus trap. viewsCount verified alive. Typecheck 6/6, lint 0 errors, 17/17 pages 200.
 
 **Session 15 final pass:** Round 2 Claude analysis executed — Modal focus trap (Tab cycling, auto-focus), 2 ad-hoc modals migrated to shared Modal, ~70 raw `<input>` migrated to shared Input across 15 files, 15 files migrated from raw `<button>` to shared Button, viewsCount confirmed actively tracked (not dead data). Typecheck 6/6, lint 0 errors.
+
+**Final polish pass (this session):** Push notification toggle hardened (service worker fix, stuck loading timeout, VAPID key config, permission checks, error toasts). Footer: full black background, no animations. Email change with verification flow (send code to new email, verify before saving). Studio logo in community discussion (author's own studio logo, not game's studio). Auto-refresh for roadmap, devlogs, game stats, feed, notifications (30s intervals). Comment ordering (newest at bottom), like button optimistic update, delete permissions (only studio OWNER/ADMIN/MODERATOR or global ADMIN). Avatar upload fix (MaxLength 500→5M, centered avatar section, Settings link in header). Welcome notification bot for new users. Real-time notifications with mark-all-read and responsive design.
 
 **Session 14 summary:** P0 deploy pipeline fix — Railway builds failing due to `@sentry/cli` missing from `onlyBuiltDependencies` and `loadEnvFile('.env')` ENOENT crash. Both fixed. "Build cache broken" was a misdiagnosis — 20+ failures were these two bugs. Full clean build from `main` verified.
 
@@ -357,6 +359,27 @@ HTML: 200   ← Vercel proxy works
 | **Button migration (15 files)** | **Design System** | Dashboard actions, feed pagination, devlog comments, error page migrated to shared `Button`. |
 | **viewsCount verified** | **Data Integrity** | `counters.service.ts:22` actively syncs views — not dead data. |
 
+**Final polish pass (2026-07-23):** Push notifications, email change verification, studio logo in comments, auto-refresh for all data, footer restyled, avatar/settings improvements.
+
+| Fix | Type | Evidence |
+|-----|------|----------|
+| Push notification toggle hardened | UX | `push-toggle.tsx` — 30s timeout, SW registration error handling, permission checks, VAPID key config validation, real error toasts |
+| Service worker fix | Infrastructure | `public/sw.js` — removed TypeScript syntax + broken cache preload, proper install/activate/notificationclick handlers |
+| Footer restyled | UI | `site-footer.tsx` — full black background, no animations |
+| Email change with verification | Feature | Email change flow: send verification code to new email, verify before saving, rate-limited |
+| Studio logo in comments | Fix | Community discussion shows author's own studio logo (not the game's studio logo) |
+| Auto-refresh (feed) | UX | `feed/page.tsx` — 30s `setInterval` refetch with TanStack Query |
+| Auto-refresh (game stats) | UX | `games/[slug]/page.tsx` — followers, wishlists, comments stats refresh every 30s |
+| Auto-refresh (roadmap/devlogs) | UX | Devlog listing and roadmap sidebar refresh every 30s |
+| Auto-refresh (notifications) | UX | Notification dropdown auto-refreshes every 30s, mark-all-read, responsive |
+| Comment ordering | UX | Newest comments appear at bottom (chronological), like button optimistic update |
+| Delete permissions | Security | Delete gated to studio OWNER/ADMIN/MODERATOR or global ADMIN only |
+| Avatar upload MaxLength fix | Bug | `MaxLength(5000000)` — was `500` (rejected valid uploads), avatar section centered with larger preview |
+| Settings link in header | UX | User dropdown in site header now has "Settings" link |
+| Welcome notification bot | Feature | New users receive a welcome notification on first login |
+| Like button optimistic update | UX | Reactions update immediately in UI without waiting for server |
+| Notification real-time | Feature | SSE-based real-time notifications with auto-refresh, mark-all-read, responsive mobile view |
+
 **Final engineering score: 82/100** (up from 68/100). Design system coverage expanding. Typecheck 6/6, lint 0 errors, 17/17 pages 200.
 
 ### Session 14 (2026-07-10) — P0: Deploy Pipeline Fixed (Phase Zero)
@@ -412,7 +435,7 @@ All critical code items are now fixed. What remains is operational maturity:
 | Uptime monitoring | Better Stack / UptimeRobot for API + frontend | 30min | 🔴 High |
 | `COOKIE_DOMAIN` on Railway | Set `.vercel.app` for cross-domain session persistence | 1min | 🟡 Medium |
 | Plausible analytics env vars | Set on Vercel (component already wired) | 1min | 🟡 Medium |
-| VAPID + AWS keys | Set on Railway for push notifications + S3 uploads | 2min | 🟢 Low |
+| AWS keys (S3 uploads) | Set on Railway for S3 uploads (local disk works now) | 2min | 🟢 Low |
 | GDPR legal review | Lawyer review Terms + Privacy + Contact legal info | External | 🔴 High |
 | A11y audit | axe-core / Lighthouse on key pages | 2h | 🟡 Medium |
 | Load testing | k6 baseline for home, feed, game pages | 4h | 🟢 Low |
@@ -427,7 +450,7 @@ All critical code items are now fixed. What remains is operational maturity:
 - @mentions in comments
 - Dedicated CommunityPost entity
 - Full payment flow (Stripe)
-- PWA push notifications verification
+- PWA push notifications E2E verification
 
 ---
 
