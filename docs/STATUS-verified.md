@@ -158,9 +158,13 @@
 
 | Task | Priority | Notes |
 |------|----------|-------|
-| Lawyer review Terms + Privacy | HIGH | Legal requirement for public launch |
+| Lawyer review Terms + Privacy | HIGH | Legal requirement for public launch. Also fix: add physical business address, GDPR DPO contact, verify `support@playmorrow.com` MX records |
+| Set up `support@playmorrow.com` email | MEDIUM | Email used in legal pages (support@playmorrow.com) has no MX records — emails won't arrive |
+| Update Cookie Policy if Plausible is enabled | LOW | Currently states "no third-party analytics" — must update if Plausible is activated |
 | Set Plausible env vars on Vercel | LOW | Analytics dormant without it |
 | Set VAPID keys on Railway | LOW | Push notifs optional |
 | Set AWS keys on Railway | LOW | Local storage adequate at current scale |
 | Create /about, /contact pages | LOW | Nice to have before public announcement |
 | Docker test DB | LOW | Unblocks ~30 skipped tests |
+| Add physical business address to legal pages | LOW | Required in some jurisdictions (GDPR Art. 13) |
+| Add GDPR DPO / EU representative contact | LOW | Required if serving EU users |
