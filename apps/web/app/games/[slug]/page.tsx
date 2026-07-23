@@ -988,12 +988,13 @@ function ManageDropdown({ slug }: { slug: string }) {
       });
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
-      await fetch(`/api/games/${slug}`, {
+      const patchRes = await fetch(`/api/games/${slug}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}) },
         credentials: 'include',
         body: JSON.stringify({ coverUrl: data.url }),
       });
+      if (!patchRes.ok) throw new Error('Failed to update game cover');
       window.location.reload();
     } catch {
       toast.error('Cover change failed.');
