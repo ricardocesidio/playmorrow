@@ -2,36 +2,37 @@
 
 **Discover tomorrow's indie games today.**
 
-Playmorrow is a curated social platform where indie studios showcase their games,
-share development logs, publish roadmaps, grow communities, and connect with players,
-press, streamers, and publishers.
+Playmorrow is a social platform where indie studios share their development journey — devlogs, roadmaps, trailers, and community — and players discover games before they ship.
+
+<p align="center">
+  <a href="https://playmorrow.vercel.app">Browse games →</a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://playmorrow.vercel.app/studios/new">Start your studio →</a>
+</p>
 
 ---
 
-## Project Status — Production Ready
+## For Players
 
-All 8 audit rounds complete. **No known bugs, 0 TypeScript errors, 0 lint errors.**
+Follow games in development, get real-time devlog updates, build a wishlist, and join the conversation. Every studio page shows their roadmap, media, and community activity so you know what's coming next.
 
-| Deployment | URL | Status |
-|------------|-----|--------|
-| Frontend | https://playmorrow.vercel.app | ✅ Live |
-| API | https://playmorrow-api-production.up.railway.app | ✅ Health 200 |
-| Staging | https://playmorrow-api-temp-staging.up.railway.app | ✅ |
+- **Discover** — Browse curated indie games with tags, genres, and status filters
+- **Follow** — Get notified when studios publish devlogs or update roadmaps
+- **Wishlist** — Save upcoming releases and track their progress
+- **Community** — Comment on devlogs, react with LIKE/LOVE/HYPE/INSIGHTFUL
 
-## Quick Start
+## For Studios
 
-```bash
-git clone https://github.com/ricardocesidio/playmorrow
-cd playmorrow
-pnpm install
-pnpm dev
-```
+Create a public presence for your game in minutes. Share devlogs with a rich markdown editor, manage your roadmap, publish press kits, and build a following before launch.
 
-Then open http://localhost:3000.
+- **Game pages** — Screenshots, trailers, tags, platforms, pricing
+- **Devlogs** — Markdown editor with preview/split modes, scheduling, categories, tags, screenshots
+- **Roadmap** — Visual timeline of planned, in-progress, and completed milestones
+- **Team management** — Owner/Admin/Moderator/Member roles with invitations
+- **Analytics** — Dashboard with views, follows, wishlists, and engagement data
+- **Press kits** — Auto-generated .md downloads for media and publishers
 
-**Demo login:** `dev@playmorrow.example` / `Demo123!@`
-
-**Note:** First `pnpm dev` can take 20-40s (Turbopack + Nest watch + Prisma + Neon cold start).
+---
 
 ## Tech Stack
 
@@ -54,39 +55,29 @@ Then open http://localhost:3000.
 Browser → Next.js (Vercel) → /api/* → NestJS (Railway) → PostgreSQL (Neon)
 ```
 
-## Features (170+ implemented)
+## Developer Quick Start
 
-- **Auth:** Email/password + Google OAuth + GitHub OAuth, email verification, password reset
-- **Games:** Full CRUD with screenshots, trailers, tags, platforms, pricing
-- **Devlogs:** Rich markdown editor, scheduling, categories, tags, screenshots gallery
-- **Studios:** Profiles, team management (Owner/Admin/Moderator/Member), invitations
-- **Feed:** 8 event types (devlogs, roadmap updates, game status changes, etc.)
-- **Comments:** Threaded (4 levels), reactions (LIKE/LOVE/HYPE/INSIGHTFUL)
-- **Social:** Follow studios/games, wishlist, player XP + levels, achievements
-- **Search:** Full-text across games, studios, devlogs
-- **Dashboards:** Player dashboard (XP, wishlist, following) + Studio dashboard (analytics, games, devlogs)
-- **Security:** Global HMAC CSRF, rate limiting, argon2id password hashing, CSP, DOMPurify XSS sanitization
+```bash
+git clone https://github.com/ricardocesidio/playmorrow
+cd playmorrow
+pnpm install
+pnpm dev
+```
 
-## CI/CD Status
+Open http://localhost:3000. Demo login: `dev@playmorrow.example` / `Demo123!@`
 
-| Check | Status |
-|-------|--------|
-| Typecheck | ✅ 0 errors |
-| Lint | ✅ 0 errors |
-| Build | ✅ 4/4 packages |
-| Backend tests | ✅ Postgres tests pass |
-| E2E (Playwright) | ✅ All selectors fixed |
-| Deploy (Vercel) | ✅ Auto-deploy from main |
-| Deploy (Railway) | ✅ Auto-deploy from main |
+---
 
-## Documentation
+<p align="center">
+  <a href="https://playmorrow.vercel.app/terms">Terms of Service</a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://playmorrow.vercel.app/privacy">Privacy Policy</a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://playmorrow.vercel.app/cookies">Cookie Policy</a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://github.com/ricardocesidio/playmorrow">GitHub</a>
+</p>
 
-- [`docs/qa-report.md`](docs/qa-report.md) — Full QA audit
-- [`docs/launch-readiness-report.md`](docs/launch-readiness-report.md) — Launch readiness
-- [`docs/production-readiness-report.md`](docs/production-readiness-report.md) — Production verification
-- [`docs/company-readiness-report.md`](docs/company-readiness-report.md) — Company readiness
-- [`docs/handoff/`](docs/handoff/) — Development history
-
-## License
-
-All Rights Reserved. Playmorrow is proprietary software.
+<p align="center">
+  All Rights Reserved. Playmorrow is proprietary software.
+</p>
