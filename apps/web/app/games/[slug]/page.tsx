@@ -48,6 +48,7 @@ import {
   useGameWishlistStatus,
   useReactToGameComment,
   useRemoveGameCommentReaction,
+  useDeleteGameComment,
   useRemoveGameFromWishlist,
   useUnfollowGame,
 } from '@/lib/api/hooks';
@@ -122,6 +123,7 @@ function PremiumGameDetail({
   roadmap: RoadmapItem[];
   slug: string;
 }) {
+  const { user } = useAuth();
   const [activeScreenshot, setActiveScreenshot] = useState(0);
   const [pendingCover, setPendingCover] = useState<string | null>(null);
   const [coverSaved, setCoverSaved] = useState(false);
@@ -195,7 +197,7 @@ function PremiumGameDetail({
               <AboutPanel game={game} slug={slug} />
               <InfoLinksPanel game={game} slug={slug} />
               <RoadmapPanel roadmap={roadmap} />
-              <CommunityPanel slug={slug} />
+              <CommunityPanel slug={slug} user={user} game={game} />
             </aside>
           </section>
         </div>
@@ -825,13 +827,14 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
   );
 }
 
-function CommunityPanel({ slug }: { slug: string }) {
+function CommunityPanel({ slug, user, game }: { slug: string; user: { id: string; role: string } | null; game: { studio?: { slug: string } } | null }) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const { data: commentsData, isLoading } = useGameComments(slug);
   const createComment = useCreateGameComment(slug);
   const reactToComment = useReactToGameComment();
   const removeReaction = useRemoveGameCommentReaction();
+  const deleteComment = useDeleteGameComment(slug);
   const [newComment, setNewComment] = useState('');
 
   const comments = (commentsData?.items ?? []) as GameCommentItem[];
@@ -906,10 +909,17 @@ function CommunityPanel({ slug }: { slug: string }) {
                 <span className="ml-2">{formatRelativeTime(comment.createdAt)}</span>
                 <span className="block leading-5">{comment.body}</span>
               </span>
-              <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(comment); }} style={{ pointerEvents: 'auto', zIndex: 10, position: 'relative' }} className="flex cursor-pointer items-start gap-1 text-xs text-muted-foreground hover:text-coral shrink-0 pt-0.5">
-                <Heart className={`size-3.5 ${comment.viewerReactions?.includes('LIKE') ? 'fill-coral text-coral' : ''}`} />
-                {comment.reactions?.LIKE ?? 0}
-              </button>
+              <div className="flex items-start gap-1 shrink-0 pt-0.5">
+                <button type="button" onClick={() => handleLike(comment)} className="flex cursor-pointer items-center gap-1 text-xs text-muted-foreground hover:text-coral">
+                  <Heart className={`size-3.5 ${comment.viewerReactions?.includes('LIKE') ? 'fill-coral text-coral' : ''}`} />
+                  {comment.reactions?.LIKE ?? 0}
+                </button>
+                {(user?.id === author?.id || user?.role === 'ADMIN') && (
+                  <button type="button" onClick={() => deleteComment.mutate({ commentId: comment.id })} className="cursor-pointer text-muted-foreground hover:text-coral ml-1" aria-label="Delete comment">
+                    <X className="size-3" />
+                  </button>
+                )}
+              </div>
             </div>
           );
           })}

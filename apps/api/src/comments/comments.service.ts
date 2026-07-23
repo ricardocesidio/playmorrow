@@ -257,11 +257,20 @@ export class CommentsService {
     // Check authorization
     const isAuthor = comment.authorId === userId;
     const isGlobalAdmin = user.role === 'ADMIN';
-    const isStudioAdmin = comment.devlog
-      ? comment.devlog.game.studio.members.some(
-          (m) => m.userId === userId && (m.role === 'OWNER' || m.role === 'ADMIN'),
-        )
-      : false;
+    const studioMembers = comment.devlog
+      ? comment.devlog.game.studio.members
+      : undefined;
+    // For game comments (no devlog), fetch studio membership from the game
+    const gameStudioMembers = !studioMembers && comment.gameId
+      ? (await this.prisma.game.findUnique({
+          where: { id: comment.gameId },
+          select: { studio: { select: { members: { select: { userId: true, role: true } } } } },
+        }))?.studio.members
+      : undefined;
+    const members = studioMembers ?? gameStudioMembers ?? [];
+    const isStudioAdmin = members.some(
+      (m) => m.userId === userId && (m.role === 'OWNER' || m.role === 'ADMIN'),
+    );
 
     if (!isAuthor && !isGlobalAdmin && !isStudioAdmin) {
       throw new ForbiddenException('You are not allowed to delete this comment');
