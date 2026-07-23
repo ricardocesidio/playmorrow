@@ -1,3 +1,4 @@
 {
-  "framework": "nextjs"
+  "version": 2,
+  "rootDirectory": "apps/web"
 }
