@@ -1,10 +1,6 @@
 const CACHE_NAME = 'playmorrow-v1';
-const STATIC_ASSETS = ['/', '/games', '/studios', '/feed'];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
-  );
   self.skipWaiting();
 });
 
@@ -19,7 +15,7 @@ self.addEventListener('push', (event) => {
   if (!event.data) return;
 
   const data = event.data.json();
-  const options: NotificationOptions = {
+  const options = {
     body: data.body || '',
     icon: data.icon || '/favicon.svg',
     badge: '/favicon.svg',
