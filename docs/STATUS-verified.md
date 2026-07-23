@@ -49,8 +49,8 @@
 
 | Item | Status | Evidence |
 |------|--------|----------|
-| SENTRY_DSN on Railway | ✅ Set | Verified via Railway CLI Session 14 |
-| COOKIE_DOMAIN on Railway | ✅ Set (`.vercel.app`) | Verified via Railway CLI Session 13 |
+| SENTRY_DSN on Railway | ✅ Set | Verified 2026-07-23 via `railway variables list --json` → `SENTRY_DSN=https://c3768cab1d01200caf6b72ade3a4a663@o45117...` |
+| COOKIE_DOMAIN on Railway | ✅ Set (`.vercel.app`) | Verified 2026-07-23 via `railway variables list --json` → `COOKIE_DOMAIN=.vercel.app` |
 | VAPID keys (push notifications) | ❌ Not set | Push notifs skip gracefully (logged warning) |
 | AWS keys (S3 uploads) | ❌ Not set | Local disk storage (adequate for current scale) |
 | Plausible analytics on Vercel | ❌ Not set | Component wired in layout, dormant without env var |
@@ -67,7 +67,7 @@
 | API entry | `apps/api/src/main.ts` | ✅ Swagger gated, CSP conditional |
 | CSP (frontend) | `apps/web/middleware.ts` | ✅ Noted unsafe-inline limitation |
 | Dashboard layout | `apps/web/app/dashboard/layout.tsx` | ✅ Central auth redirect |
-| Prisma schema | `packages/database/prisma/schema.prisma` | ✅ 7 indexes, 3 cascade deletes added |
+| Prisma schema | `packages/database/prisma/schema.prisma` | ✅ 58 @@index, 8 @@unique, 43 onDelete: Cascade, 2 onDelete: SetNull — no changes this session; previous sessions added 7 indexes + 3 cascades |
 | Railway health | `railway.json` | ✅ /api/health path, 600s timeout |
 
 ---
