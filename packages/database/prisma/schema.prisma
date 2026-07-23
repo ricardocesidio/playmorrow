@@ -725,6 +725,7 @@ model ModerationReport {
 // ──────────────────────────────────────────────────────────────────────────
 
 enum NotificationType {
+  WELCOME
   NEW_FOLLOWER
   NEW_COMMENT
   NEW_REPLY
