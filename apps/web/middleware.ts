@@ -44,11 +44,11 @@ export function middleware(request: NextRequest) {
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      `script-src 'self' 'nonce-${nonce}'`,
+      `script-src 'self' 'nonce-${nonce}' https://plausible.io`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https: http://localhost:*",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://playmorrow-api-production.up.railway.app http://localhost:*",
+      "connect-src 'self' https://playmorrow-api-production.up.railway.app https://plausible.io http://localhost:*",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
