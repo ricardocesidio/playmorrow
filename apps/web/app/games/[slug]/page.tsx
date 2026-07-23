@@ -122,8 +122,10 @@ function PremiumGameDetail({
   slug: string;
 }) {
   const [activeScreenshot, setActiveScreenshot] = useState(0);
+  const [pendingCover, setPendingCover] = useState<string | null>(null);
+  const [savingCover, setSavingCover] = useState(false);
   const title = game.title || '';
-  const heroImage = game.bannerUrl || game.coverUrl || '';
+  const heroImage = pendingCover || game.bannerUrl || game.coverUrl || '';
   const tags = game.tags?.length ? game.tags : [];
   const allScreenshots = useMemo(() => {
     return game.media?.filter((item) => item.type !== 'VIDEO').map((item) => item.thumbnailUrl ?? item.url) ?? [];
@@ -131,6 +133,33 @@ function PremiumGameDetail({
   const screenshots = useMemo(() => {
     return allScreenshots.length ? allScreenshots : fallbackScreenshots;
   }, [allScreenshots]);
+
+  const handleCoverUploaded = (url: string) => {
+    setPendingCover(url);
+  };
+
+  const handleSaveCover = async () => {
+    if (!pendingCover) return;
+    setSavingCover(true);
+    const csrfToken = getCsrfToken();
+    try {
+      const patchRes = await fetch(`/api/games/${slug}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}) },
+        credentials: 'include',
+        body: JSON.stringify({ coverUrl: pendingCover }),
+      });
+      if (!patchRes.ok) throw new Error('Failed to save cover');
+      setPendingCover(null);
+    } catch {
+      toast.error('Failed to save cover.');
+    }
+    setSavingCover(false);
+  };
+
+  const handleCancelCover = () => {
+    setPendingCover(null);
+  };
 
   return (
     <>
@@ -142,7 +171,7 @@ function PremiumGameDetail({
 
           <section className="grid items-start gap-5 xl:grid-cols-[1fr_430px]">
             <div className="grid gap-5">
-              <GameHero game={game} title={title} heroImage={heroImage} slug={slug} />
+              <GameHero game={game} title={title} heroImage={heroImage} slug={slug} pendingCover={!!pendingCover} onSaveCover={handleSaveCover} onCancelCover={handleCancelCover} savingCover={savingCover} onCoverUploaded={handleCoverUploaded} />
               <TagRow tags={tags} />
               <div className="grid items-start gap-5 lg:grid-cols-[0.95fr_1.05fr]">
                 <TrailerPanel title={title} image={heroImage} trailerUrl={game.trailerUrl} />
@@ -179,17 +208,27 @@ function Breadcrumbs({ title }: { title: string }) {
   );
 }
 
-function GameHero({ game, title, heroImage, slug }: { game: Game; title: string; heroImage: string; slug: string }) {
+function GameHero({ game, title, heroImage, slug, pendingCover, onSaveCover, onCancelCover, savingCover, onCoverUploaded }: { game: Game; title: string; heroImage: string; slug: string; pendingCover: boolean; onSaveCover: () => void; onCancelCover: () => void; savingCover: boolean; onCoverUploaded?: (url: string) => void }) {
   return (
     <HudPanel className="relative min-h-[420px] overflow-hidden p-0 xl:h-[420px] xl:min-h-0" accent="muted">
       <img src={heroImage} alt={`${title} hero art`} className="absolute inset-0 size-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-r from-background/82 via-background/28 to-background/0" />
       <div className="absolute inset-0 bg-gradient-to-t from-background/72 via-transparent to-background/5" />
+      {pendingCover && (
+        <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-end gap-3 bg-background/80 px-4 py-3 backdrop-blur-sm">
+          <button onClick={onCancelCover} disabled={savingCover} className="cursor-pointer rounded border border-border px-4 py-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition disabled:opacity-50">
+            Cancel
+          </button>
+          <button onClick={onSaveCover} disabled={savingCover} className="cursor-pointer rounded bg-cyan px-4 py-2 text-xs font-mono uppercase tracking-widest text-black hover:bg-cyan/90 transition disabled:opacity-50">
+            {savingCover ? 'Saving...' : 'Save cover'}
+          </button>
+        </div>
+      )}
 
       <div className="relative z-10 grid min-h-[420px] content-between p-6 pb-0 sm:p-8 sm:pb-0 xl:h-full xl:min-h-0 xl:px-12 xl:pb-0 xl:pt-8">
         <div>
           {game.featured && <span className="clip-corner-sm border border-cyan/70 bg-background/70 px-3.5 py-1.5 pm-micro text-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.18)]">Featured</span>}
-          <ManageDropdown slug={slug} />
+          <ManageDropdown slug={slug} onCoverUploaded={onCoverUploaded} />
           <h1 className="mt-5 font-display text-[4rem] font-black uppercase leading-[0.86] text-foreground drop-shadow-[0_6px_18px_rgb(0_0_0_/_0.85)] sm:text-[5.05rem] xl:text-[5.25rem]">
             {title.split(' ').map((word) => (
               <span key={word} className="block">{word}</span>
@@ -966,7 +1005,7 @@ function getCsrfToken(): string | null {
   return match?.[1] ? decodeURIComponent(match[1]) : null;
 }
 
-function ManageDropdown({ slug }: { slug: string }) {
+function ManageDropdown({ slug, onCoverUploaded }: { slug: string; onCoverUploaded?: (url: string) => void }) {
   const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
   const [changingCover, setChangingCover] = useState(false);
@@ -988,16 +1027,9 @@ function ManageDropdown({ slug }: { slug: string }) {
       });
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
-      const patchRes = await fetch(`/api/games/${slug}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}) },
-        credentials: 'include',
-        body: JSON.stringify({ coverUrl: data.url }),
-      });
-      if (!patchRes.ok) throw new Error('Failed to update game cover');
-      window.location.reload();
+      onCoverUploaded?.(data.url);
     } catch {
-      toast.error('Cover change failed.');
+      toast.error('Cover upload failed.');
     }
     setChangingCover(false);
     setOpen(false);
