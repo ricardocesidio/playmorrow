@@ -1,0 +1,5 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#0a1620"/>
+  <rect x="540" y="310" width="200" height="100" rx="8" fill="#1b3038" stroke="#3ee7ff" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="640" y="370" text-anchor="middle" fill="#3ee7ff" font-family="monospace" font-size="14" opacity="0.6">Playmorrow</text>
+</svg>
