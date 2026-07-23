@@ -235,6 +235,17 @@ export function useDeleteComment() {
   });
 }
 
+export function useDeleteGameComment(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { commentId: string }) =>
+      api.delete(`/comments/${data.commentId}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['gameComments', slug] });
+    },
+  });
+}
+
 // Single batched query for every comment's reactions on a devlog (#9 / #24).
 // Replaces the previous per-comment `useCommentReactions` N+1 fan-out.
 export function useDevlogCommentReactions(devlogId: string, token?: string) {
