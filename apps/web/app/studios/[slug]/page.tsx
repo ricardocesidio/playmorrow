@@ -11,7 +11,6 @@ import {
   Globe,
   Heart,
   MapPin,
-  Monitor,
   Users,
   UserPlus,
   Check,
@@ -21,12 +20,11 @@ import {
 import { formatFollowers, formatRelativeTime } from '@/lib/format';
 
 import { SiteHeader } from '@/components/site-header';
-import { StatusBadge } from '@/components/status-badge';
+import { GameCard } from '@/components/game-card';
 import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { ErrorState } from '@/components/error-state';
 import { useStudio, useStudioMembers, useStudioGames, useStudioAuditLogs, useRequestJoin, useStudios } from '@/lib/api/hooks';
 import type { AuditLogEntry } from '@/lib/api/hooks';
-import type { Game } from '@/lib/api/client';
 import { useAuth } from '@/lib/api/auth-context';
 import { FollowButton } from '@/components/follow-button';
 import { ReportForm } from '@/components/report-form';
@@ -297,8 +295,8 @@ export default function StudioDetailPage() {
             </div>
             {games.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {games.map((game: Game) => (
-                  <StudioGameCard key={game.id} game={game} />
+                {games.map((game) => (
+                  <GameCard key={game.id} game={game} variant="compact" />
                 ))}
               </div>
             ) : (
@@ -363,68 +361,6 @@ function RoleBadge({ role }: { role: string }) {
       {role}
     </span>
   );
-}
-
-/* ── Studio Game Card ───────────────────────────────────────────────── */
-function StudioGameCard({ game }: { game: Game }) {
-  const cover = game.coverUrl ?? coverForGame(game.title);
-  return (
-    <Link
-      href={`/games/${game.slug}`}
-      className="group clip-corner relative flex min-h-[260px] flex-col overflow-hidden border border-border/70 bg-[#050b0f]/60 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition duration-300 hover:border-cyan/60 hover:shadow-[0_0_30px_rgb(62_231_255_/_0.12)] hover:scale-[1.02]"
-    >
-      <div className="relative aspect-[1.82] overflow-hidden">
-        <img
-          src={cover}
-          alt={game.title}
-          className="size-full object-cover transition duration-500 group-hover:scale-[1.08]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#020609] via-[#020609]/40 to-transparent" />
-        <div className="absolute left-3 top-3">
-          <StatusBadge status={game.status} />
-        </div>
-        <span className="signal-dot absolute right-3 top-3" aria-hidden />
-      </div>
-      <div className="flex flex-1 flex-col border-t border-border/60 p-4">
-        <h3 className="font-display text-lg font-black uppercase leading-tight text-white transition-colors group-hover:text-cyan">
-          {game.title}
-        </h3>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          {(game.tags?.length ? game.tags : ['Indie']).slice(0, 3).map((tag, i) => (
-            <span key={tag} className="font-mono text-[10px] uppercase tracking-wider">
-              {i > 0 && <span className="mr-3 text-border">/</span>}{tag}
-            </span>
-          ))}
-        </div>
-        <div className="mt-auto flex items-center gap-2 pt-3 text-xs text-cyan">
-          <Heart className="size-3.5 text-coral drop-shadow-[0_0_6px_rgb(255_87_77_/_0.4)]" />
-          <span className="font-mono text-[11px]">{formatFollowers(game.followersCount)} followers</span>
-        </div>
-        {game.platformLinks.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {game.platformLinks.slice(0, 3).map((p) => (
-              <span key={p.platform} className="flex items-center gap-1 border border-border/50 px-2 py-1 font-mono text-[9px] uppercase text-muted-foreground">
-                <Monitor className="size-3" /> {p.platform}
-              </span>
-            ))}
-          </div>
-        )}
-        <div className="mt-1">
-          <Link href={`/games/${game.slug}/devlogs`} className="text-[10px] text-cyan hover:underline">View devlogs →</Link>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function coverForGame(title: string) {
-  const key = title.toLowerCase();
-  if (key.includes('neon')) return '/playmorrow/neon-warden.png';
-  if (key.includes('starfall')) return '/playmorrow/starfall-tactics.png';
-  if (key.includes('moss')) return '/playmorrow/mossbound.png';
-  if (key.includes('paper')) return '/playmorrow/paper-relics.png';
-  if (key.includes('void')) return '/playmorrow/voidrunner.png';
-  return '/playmorrow/neon-warden.png';
 }
 
 function SimilarStudios({ currentSlug }: { currentSlug: string }) {

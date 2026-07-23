@@ -30,14 +30,11 @@ import {
 } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
+import { GameCard } from '@/components/game-card';
 import { useAuth } from '@/lib/api/auth-context';
 import { type Game, type Studio } from '@/lib/api/client';
 import { useMyDevlogs, useMyGames, useMyStudios, useNotifications, useUnreadNotificationCount, useStudioDashboard, useGameRoadmap, useStudioAuditLogs } from '@/lib/api/hooks';
 import type { RoadmapItem } from '@/lib/api/client';
-
-type StudioGame = Game & {
-  studio: Studio;
-};
 
 export function StudioDashboard() {
   const { user, token } = useAuth();
@@ -48,7 +45,7 @@ export function StudioDashboard() {
   const { data: unreadData } = useUnreadNotificationCount();
 
   const studio = studios?.[0];
-  const studioGames = (games ?? []) as StudioGame[];
+  const studioGames = (games ?? []) as Game[];
   const firstGame = studioGames[0];
 
   const { data: dashboard } = useStudioDashboard(studio?.slug ?? '');
@@ -189,7 +186,7 @@ export function StudioDashboard() {
                 ) : (
                   <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                     {(studioGames.length ? studioGames : []).slice(0, 4).map((game) => (
-                      <StudioGameCard key={game.id} game={game} />
+                      <GameCard key={game.id} game={game} variant="studio" />
                     ))}
                     {studioGames.length === 0 && (
                       <Link href="/dashboard/games/new" className="col-span-full grid min-h-44 place-items-center border border-dashed border-border text-sm text-muted-foreground hover:border-cyan hover:text-cyan">
@@ -361,35 +358,6 @@ function SectionHeader({ title, href, linkLabel = 'View all' }: { title: string;
   );
 }
 
-function StudioGameCard({ game }: { game: StudioGame }) {
-  const cover = game.coverUrl || game.bannerUrl || '/demo/games/neon-warden/hero.svg';
-  const progress = statusProgress(game.status);
-  return (
-    <Link href={`/games/${game.slug}`} className="group overflow-hidden border border-border/90 bg-background/70 transition hover:-translate-y-0.5 hover:border-cyan/70">
-      <div className="relative aspect-[1.2/1] overflow-hidden">
-        <img src={cover} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" />
-        <span className="absolute right-2 top-2 border border-coral/60 bg-coral/15 px-2 py-1 font-mono text-[0.55rem] uppercase text-coral">{statusLabel(game.status)}</span>
-        <div className="absolute inset-x-3 bottom-3">
-          <h3 className="font-display text-xl uppercase leading-none text-white">{game.title}</h3>
-          <p className="mt-1 text-[0.68rem] text-muted-foreground">{game.tags?.[0] ?? game.genres ?? 'Studio Project'}</p>
-        </div>
-      </div>
-      <div className="space-y-2 p-3">
-        <div className="grid grid-cols-3 gap-2 font-mono text-[0.58rem] text-muted-foreground">
-          <span>{formatNumber(game.followersCount)} followers</span>
-          <span>{formatNumber(game.viewsCount ?? 0)} views</span>
-          <span>{progress}%</span>
-        </div>
-        <ProgressBar value={progress} />
-        <p className="truncate text-[0.68rem] text-muted-foreground">
-          Updated {relativeDays(game.updatedAt)}
-        </p>
-      </div>
-    </Link>
-  );
-}
-
 function ActivityRow({ title, body, time }: { title: string; body: string; time: string }) {
   return (
     <div className="flex items-center gap-3 border-b border-border/60 pb-3 last:border-0">
@@ -512,7 +480,7 @@ function Badge({ icon, label }: { icon: React.ReactNode; label: string }) {
   return <span className="inline-flex items-center gap-2 border border-border-bright bg-background/60 px-3 py-1.5 font-mono text-[0.62rem] text-foreground">{icon}{label}</span>;
 }
 
-function buildActivity(games: StudioGame[], devlogs: { title: string }[], auditLogs: { action: string; createdAt: string }[]) {
+function buildActivity(games: Game[], devlogs: { title: string }[], auditLogs: { action: string; createdAt: string }[]) {
   const items: { title: string; body: string; time: string }[] = [];
   if (games[0]) {
     items.push({ title: `${games[0].title}`, body: `${formatNumber(games[0].followersCount)} followers`, time: relativeDays(games[0].createdAt) });
@@ -532,19 +500,6 @@ function buildActivity(games: StudioGame[], devlogs: { title: string }[], auditL
 function formatDelta(value: number): string {
   if (value <= 0) return '';
   return `+${formatNumber(value)} this week`;
-}
-
-function statusProgress(status: string) {
-  const key = status.toUpperCase();
-  if (key.includes('PUBLISHED') || key.includes('RELEASE')) return 100;
-  if (key.includes('BETA')) return 85;
-  if (key.includes('ALPHA')) return 42;
-  if (key.includes('DEVELOP')) return 68;
-  return 31;
-}
-
-function statusLabel(status: string) {
-  return status.replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function formatNumber(value: number) {

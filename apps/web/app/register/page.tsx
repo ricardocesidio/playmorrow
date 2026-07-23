@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowUpRight, Eye, EyeOff, Lock, Mail, User, Gamepad2, Building2 } from 'lucide-react';
 
 import { useAuth } from '@/lib/api/auth-context';
+import { Input } from '@/components/ui/input';
 import {
   AuthArtCollage,
   CircuitFrame,
@@ -306,12 +307,12 @@ function HudTextField({
         <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground">
           {icon}
         </span>
-        <input
+        <Input
           id={id}
           type={isPassword && show ? 'text' : type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="clip-corner h-12 w-full border border-input bg-background/80 px-14 pr-12 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:ring-1 focus:ring-cyan"
+          className="px-14 pr-12"
           placeholder={placeholder}
           autoComplete={autoComplete}
         />

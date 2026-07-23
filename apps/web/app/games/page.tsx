@@ -3,17 +3,15 @@
 // TODO (Performance audit): Evaluate Server Components for public read-heavy parts of this page (filters, static content) to reduce client JS.
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Bookmark, Search, Users, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Search, X } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
+import { GameCard } from '@/components/game-card';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
-import { formatFollowers, formatPrice } from '@/lib/format';
 import { useGames } from '@/lib/api/hooks';
-import type { Game } from '@/lib/api/client';
 
 export default function GamesPage() {
   const searchParams = useSearchParams();
@@ -122,7 +120,7 @@ export default function GamesPage() {
           {!isLoading && items.length > 0 && (
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {items.map((game) => (
-                <CatalogGameCard key={game.id} game={game} />
+                <GameCard key={game.id} game={game} variant="default" />
               ))}
             </div>
           )}
@@ -140,85 +138,6 @@ export default function GamesPage() {
         <HudStatusRail />
       </main>
     </>
-  );
-}
-
-function CatalogGameCard({ game }: { game: Game }) {
-  const title = game.title;
-  const progress = game.progressPercent ?? null;
-  const accent = accentForGame(game.status, title);
-  const cover = game.coverUrl || '/demo/games/neon-warden/hero.svg';
-  const platforms = game.platformLinks?.length
-    ? game.platformLinks.map((platform) => platform.platform)
-    : [];
-
-  return (
-    <Link
-      href={`/games/${game.slug}`}
-      className="panel group grid h-[232px] grid-rows-[193px_39px] overflow-hidden border-border/95 bg-card transition hover:border-cyan/70 hover:shadow-[0_0_24px_rgb(62_231_255_/_0.12)]"
-    >
-      <div className="relative min-h-0 overflow-hidden p-3">
-        <img
-          src={cover}
-          alt={title}
-          className="absolute inset-0 size-full object-cover transition duration-300 group-hover:scale-[1.035]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/30 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/82 via-transparent to-background/12" />
-
-        <div className="relative z-10 flex h-full flex-col">
-          <div className="flex items-start justify-between gap-2">
-            <span className={`clip-corner-sm border bg-background/65 px-2 py-1 pm-micro ${accent.badge}`}>
-              {badgeForGame(game.status, title)}
-            </span>
-          </div>
-
-          <div className="mt-auto">
-            <h2 className="font-display text-[1.9rem] font-black uppercase leading-[0.92] text-foreground drop-shadow-[0_4px_14px_rgb(0_0_0_/_0.9)]">
-              {title}
-            </h2>
-            <p className="pm-micro mt-3 text-muted-foreground">
-              {game.studio?.name ?? 'Independent Studio'} <span className={accent.text}>●</span>
-            </p>
-            {game.priceCents != null && (
-              <p className="mt-1 text-[0.6rem] font-mono text-amber/80">
-                {game.isFree ? 'Free' : `${formatPrice(game.priceCents, game.currency)} (Coming Soon)`}
-              </p>
-            )}
-            <p className="mt-2 text-xs text-muted-foreground">
-              {(game.tags?.length ? game.tags : ['Indie']).slice(0, 2).map((tag, index) => (
-                <span key={tag}>{index > 0 ? ' • ' : ''}{tag}</span>
-              ))}
-            </p>
-            <p className="mt-2 flex items-center gap-2 text-xs text-cyan">
-              <Users className="size-3.5" /> {formatFollowers(game.followersCount)} <span className="text-muted-foreground">followers</span>
-            </p>
-            {progress !== null && (
-              <div className="mt-3">
-                <div className="mb-1.5 flex justify-between pm-micro text-muted-foreground">
-                  <span>Progress</span>
-                  <span>{progress}%</span>
-                </div>
-                <div className="h-1 bg-border">
-                  <div className={`h-full ${accent.bar} shadow-[0_0_12px_currentColor]`} style={{ width: `${progress}%` }} />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between gap-2 border-t border-border/80 bg-background/60 px-3 py-2">
-          <div className="flex flex-wrap gap-1.5">
-            {[...new Set(platforms)].slice(0, 4).map((platform) => (
-              <span key={platform} className="border border-border-bright/45 bg-background/50 px-2 py-1 font-mono text-[10px] uppercase leading-none text-muted-foreground">
-                {platform}
-              </span>
-            ))}
-          </div>
-          <Bookmark className="size-4 shrink-0 text-muted-foreground transition group-hover:text-cyan" />
-      </div>
-    </Link>
   );
 }
 
@@ -313,16 +232,5 @@ function PaginationControl({
     </div>
   );
 }
-function badgeForGame(status: string, _title: string) {
-  return status.replace(/_/g, ' ');
-}
 
-function accentForGame(status: string, _title: string) {
-  if (status === 'BETA' || status === 'IN_DEVELOPMENT') {
-    return { badge: 'border-cyan/70 text-cyan', bar: 'bg-cyan text-cyan', text: 'text-cyan' };
-  }
-  if (status === 'ALPHA') return { badge: 'border-violet/70 text-violet', bar: 'bg-violet text-violet', text: 'text-violet' };
-  if (status === 'PRE_ALPHA') return { badge: 'border-amber/70 text-amber', bar: 'bg-amber text-amber', text: 'text-amber' };
-  return { badge: 'border-cyan/70 text-cyan', bar: 'bg-cyan text-cyan', text: 'text-cyan' };
-}
 

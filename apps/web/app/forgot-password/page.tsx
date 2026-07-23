@@ -2,8 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import { LogoIcon } from '@/components/logo-icon';
 import { api, ApiError } from '@/lib/api/client';
+import { Input } from '@/components/ui/input';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { SiteHeader } from '@/components/site-header';
 
 export default function ForgotPasswordPage() {
@@ -35,7 +38,7 @@ export default function ForgotPasswordPage() {
           <div className="clip-corner w-full max-w-sm border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h1 className="font-display font-black uppercase tracking-tight text-white">Check your email</h1>
             <p className="mt-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">If an account exists with that email, a reset link has been sent.</p>
-            <Link href="/login" className="clip-corner mt-6 inline-flex items-center justify-center border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-xs uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">Back to sign in</Link>
+            <Link href="/login" className={cn(buttonVariants({ className: "mt-6" }))}>Back to sign in</Link>
           </div>
         </div>
       </div>
@@ -58,12 +61,12 @@ export default function ForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="email" className="mb-1 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Email</label>
-              <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="clip-corner h-12 w-full border border-input bg-background/80 px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" autoComplete="email" />
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
             </div>
             {error && <p className="font-mono text-[0.6rem] uppercase tracking-widest text-coral">{error}</p>}
-            <button type="submit" disabled={loading} className="clip-corner w-full cursor-pointer border border-cyan bg-cyan/10 py-3 font-mono text-xs uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background disabled:opacity-50">
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? 'Sending...' : 'Send reset link'}
-            </button>
+            </Button>
           </form>
           <div className="mt-6 text-center">
             <Link href="/login" className="font-mono text-xs uppercase tracking-widest text-cyan underline">Back to sign in</Link>
