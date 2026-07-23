@@ -15,9 +15,9 @@ export interface OAuthProfile {
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(configService: ConfigService) {
-    const clientID = configService.get<string>('GOOGLE_CLIENT_ID', '');
-    const clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET', '');
-    if (!clientID || !clientSecret) {
+    const clientID = configService.get<string>('GOOGLE_CLIENT_ID') || 'missing';
+    const clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET') || 'missing';
+    if (clientID === 'missing' || clientSecret === 'missing') {
       Logger.warn('GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not set — Google OAuth disabled');
     }
     super({

@@ -14,9 +14,9 @@ export interface OAuthProfile {
 @Injectable()
 export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(configService: ConfigService) {
-    const clientID = configService.get<string>('GITHUB_CLIENT_ID', '');
-    const clientSecret = configService.get<string>('GITHUB_CLIENT_SECRET', '');
-    if (!clientID || !clientSecret) {
+    const clientID = configService.get<string>('GITHUB_CLIENT_ID') || 'missing';
+    const clientSecret = configService.get<string>('GITHUB_CLIENT_SECRET') || 'missing';
+    if (clientID === 'missing' || clientSecret === 'missing') {
       Logger.warn('GITHUB_CLIENT_ID or GITHUB_CLIENT_SECRET not set — GitHub OAuth disabled');
     }
     super({
