@@ -33,7 +33,13 @@ export default function NotificationsPage() {
     if (!authLoading && !isAuthenticated) router.replace('/login');
   }, [authLoading, isAuthenticated, router]);
 
-  if (authLoading) return null;
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
+      </div>
+    );
+  }
 
   const handleMarkRead = async (id: string) => {
     if (!token) return;

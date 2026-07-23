@@ -961,6 +961,11 @@ function formatReleaseDate(dateStr: string | null | undefined): string {
   return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+function getCsrfToken(): string | null {
+  const match = document.cookie.match(/(?:^|;\s*)playmorrow_csrf=([^;]*)/);
+  return match?.[1] ? decodeURIComponent(match[1]) : null;
+}
+
 function ManageDropdown({ slug }: { slug: string }) {
   const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
@@ -973,13 +978,19 @@ function ManageDropdown({ slug }: { slug: string }) {
     setChangingCover(true);
     const form = new FormData();
     form.append('file', file);
+    const csrfToken = getCsrfToken();
     try {
-      const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: form,
+        credentials: 'include',
+        headers: csrfToken ? { 'X-CSRF-Token': csrfToken } as Record<string, string> : undefined,
+      });
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
       await fetch(`/api/games/${slug}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}) },
         credentials: 'include',
         body: JSON.stringify({ coverUrl: data.url }),
       });

@@ -397,7 +397,7 @@ export default function EditGamePage() {
               type="button"
               className="clip-corner cursor-pointer border border-coral/60 bg-coral/5 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-coral transition hover:bg-coral/20 disabled:cursor-not-allowed disabled:opacity-40"
               onClick={async () => {
-                if (!token || !confirm(`Delete game "${game?.title}" permanently? This cannot be undone.`)) return;
+                if (!token) return;
                 try {
                   await deleteGame.mutateAsync({ slug, token });
                   router.push('/dashboard');

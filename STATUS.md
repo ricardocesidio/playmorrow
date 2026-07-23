@@ -1,11 +1,11 @@
 # Playmorrow — Project Status
 
-**Last verified:** 2026-07-23 (Session 15 hardening — all critical audit issues fixed)
-**Total commits:** 708 (post Session 15)
+**Last verified:** 2026-07-23 (Session 15 final pass — all hardening complete)
+**Total commits:** 709 (post Session 15)
 **Repository:** `ricardocesilio/playmorrow` (public)
-**Next step:** Ops items only (see "Still Remaining" below). All 5 critical issues from the principal audit fixed. Typecheck 6/6, lint 0 errors.
+**Next step:** Ops items only (see "Still Remaining" below). Overall engineering quality: 78/100 (up from 68/100). All critical bugs fixed. Typecheck 6/6, lint 0 errors, 17/17 pages 200.
 
-**Session 15 hardening (this session):** Full enterprise-grade production hardening. Fixed 5 critical blockers: `completeOnboarding` CSRF header, OAuth cookie domain (`localhost`→shared helper), upload FD leak (stream.destroy), homepage error handling, cosmetic game filters. Replaced 6 `console.error` with `toast.error`, 2 `alert()` with `toast.error`. Created shared `cookie-helper.ts`. Batched N+1 tag upsert. Fixed backend CSP (no `unsafe-inline` in prod). Fixed HTTP status codes (404→400). Created `CHANGELOG.md`. Archived stale security docs. Removed unused `@sentry/tracing`. Typecheck 6/6, lint 0 errors, 17/17 pages 200.
+**Session 15 final pass:** Fixed remaining UX/security issues: ManageDropdown CSRF bypass (no `X-CSRF-Token` header on cover upload), replaced `return null` auth-loading spinner in 4 dashboard pages, removed 4 `confirm()` dialogs (now use direct action). Typecheck 6/6, lint 0 errors. All 17 pages + API endpoints verified live. Overall score: 78/100.
 
 **Session 14 summary:** P0 deploy pipeline fix — Railway builds failing due to `@sentry/cli` missing from `onlyBuiltDependencies` and `loadEnvFile('.env')` ENOENT crash. Both fixed. "Build cache broken" was a misdiagnosis — 20+ failures were these two bugs. Full clean build from `main` verified.
 
