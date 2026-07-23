@@ -43,6 +43,7 @@ export function usePublicFeed(page = 1, pageSize = 10, type?: string) {
     queryKey: ['publicFeed', page, pageSize, type],
     queryFn: () => api.get<Paginated<FeedItem>>(`/feed/public?page=${page}&pageSize=${pageSize}${type ? `&type=${type}` : ''}`),
     placeholderData: (prev) => prev,
+    refetchInterval: 30_000,
   });
 }
 
