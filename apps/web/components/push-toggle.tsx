@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Bell, BellOff } from 'lucide-react';
-import { api } from '@/lib/api/client';
+import { toast } from 'sonner';
+import { api, ApiError } from '@/lib/api/client';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -26,7 +27,7 @@ export function PushNotificationToggle() {
   }, []);
 
   const toggleSubscription = async () => {
-    if (loading) return;
+    if (loading || !supported) return;
     setLoading(true);
 
     try {
@@ -54,8 +55,9 @@ export function PushNotificationToggle() {
 
         setSubscribed(true);
       }
-    } catch {
-      // Permission denied or error
+    } catch (err) {
+      const msg = err instanceof ApiError ? String((err.body as any)?.message || err.message) : 'Push notification error';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
