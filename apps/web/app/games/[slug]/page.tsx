@@ -29,12 +29,13 @@ import {
   X,
 } from 'lucide-react';
 
+import { toast } from 'sonner';
 import { SiteHeader } from '@/components/site-header';
 import { ErrorState } from '@/components/error-state';
 import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { useAuth } from '@/lib/api/auth-context';
-import { formatFollowers, formatPrice } from '@/lib/format';
+import { formatFollowers, formatPrice, formatRelativeTime } from '@/lib/format';
 import type { Devlog, Game, RoadmapItem } from '@/lib/api/client';
 import {
   useAddGameToWishlist,
@@ -64,21 +65,7 @@ interface GameCommentItem {
   viewerReactions?: string[];
 }
 
-function timeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const seconds = Math.floor((now - then) / 1000);
-  if (seconds < 60) return 'just now';
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months}mo ago`;
-  return `${Math.floor(months / 12)}y ago`;
-}
+
 
 type GameWithDemoSettings = Game & {
   demoAvailable?: boolean | null;
@@ -738,7 +725,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
                 btn.innerText = '✓ Copied to clipboard'; 
                 setTimeout(() => btn.innerText = orig, 1800); 
               }
-            }).catch(() => alert('Copy failed — please copy manually'));
+            }).catch(() => toast.error('Copy failed — please copy manually'));
           }} 
           className="clip-corner flex h-10 w-full cursor-pointer items-center justify-center gap-2 border border-cyan bg-cyan/10 px-4 text-sm text-cyan transition hover:bg-cyan hover:text-background font-mono tracking-widest"
         >
@@ -828,7 +815,7 @@ function CommunityPanel({ slug }: { slug: string }) {
               )}
               <span className="min-w-0 text-[11px] text-muted-foreground">
                 <span className="font-mono font-bold text-foreground">{author.displayName}</span>{' '}
-                <span className="ml-2">{timeAgo(comment.createdAt)}</span>
+                <span className="ml-2">{formatRelativeTime(comment.createdAt)}</span>
                 <span className="block leading-5">{comment.body}</span>
               </span>
               <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(comment); }} style={{ pointerEvents: 'auto', zIndex: 10, position: 'relative' }} className="flex cursor-pointer items-start gap-1 text-xs text-muted-foreground hover:text-coral shrink-0 pt-0.5">
@@ -998,7 +985,7 @@ function ManageDropdown({ slug }: { slug: string }) {
       });
       window.location.reload();
     } catch {
-      alert('Cover change failed.');
+      toast.error('Cover change failed.');
     }
     setChangingCover(false);
     setOpen(false);

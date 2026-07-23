@@ -16,36 +16,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { AuthService } from './auth.service';
 import { SessionService } from '../session/session.service';
 import { CsrfService } from '../common/csrf.service';
-
-const SESSION_COOKIE = 'playmorrow_session';
-
-/**
- * Set the session cookie (`playmorrow_session`).
- *
- * SameSite strategy (cross-origin reality between Vercel frontend and Railway backend):
- * - Dev: SameSite=Lax (Next.js proxy makes requests appear same-origin; avoids Secure requirement for local HTTP).
- * - Prod: SameSite=None + Secure (required because frontend and API are different origins).
- *   SameSite=None is the minimum necessary for cookies to be sent on cross-site fetch().
- *   We cannot use Lax without a shared registrable domain (e.g. moving to *.playmorrow.app + COOKIE_DOMAIN).
- *
- * See also oauth.controller.ts for oauth_state and csrf cookies (Lax where possible).
- * If a proxy/rewrite setup on a shared domain becomes available, we can downgrade to Lax for better security.
- */
-function setSessionCookie(res: Response, raw: string, expiresAt: Date) {
-  const isProduction = process.env.NODE_ENV === 'production';
-  res.cookie(SESSION_COOKIE, raw, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
-    domain: isProduction ? process.env.COOKIE_DOMAIN || undefined : undefined,
-    path: '/',
-    expires: expiresAt,
-  });
-}
-
-function clearSessionCookie(res: Response) {
-  res.clearCookie(SESSION_COOKIE, { path: '/' });
-}
+import { SESSION_COOKIE, setSessionCookie, clearSessionCookie } from '../common/cookie-helper';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -206,6 +177,7 @@ export class AuthController {
     const { raw, expiresAt } = await this.sessionService.create(result.user.id, ip, ua);
     setSessionCookie(res, raw, expiresAt);
     const csrfToken = this.csrfService.generateToken(result.user.id);
+    res.setHeader('X-CSRF-Token', csrfToken);
     return {
       user: { id: result.user.id, username: result.user.username, displayName: result.user.displayName, role: result.user.role, accountType: result.user.accountType },
       csrfToken,

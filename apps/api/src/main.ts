@@ -96,7 +96,7 @@ async function bootstrap() {
 
   // Security headers
   const scriptSrc = isProd
-    ? ["'self'", "'unsafe-inline'"]
+    ? ["'self'"]
     : ["'self'", "'unsafe-inline'", "'unsafe-eval'"];
 
   app.use(helmet({

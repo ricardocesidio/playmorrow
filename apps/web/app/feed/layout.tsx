@@ -6,6 +6,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Live Feed · Playmorrow',
     description: 'Real-time feed of devlogs, roadmaps, and updates from indie game studios.',
+    images: '/og-image.svg',
+  },
+  twitter: {
+    images: '/og-image.svg',
+  },
+  alternates: {
+    canonical: '/feed',
   },
 };
 

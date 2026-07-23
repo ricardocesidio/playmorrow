@@ -36,7 +36,6 @@
     "@playmorrow/database": "workspace:*",
     "@playmorrow/types": "workspace:*",
     "@sentry/node": "^10.64.0",
-    "@sentry/tracing": "^7.120.4",
     "argon2": "^0.44.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",

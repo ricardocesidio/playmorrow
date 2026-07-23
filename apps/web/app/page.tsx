@@ -25,11 +25,13 @@ function getFeedIcon(type: string) {
 }
 
 export default function HomePage() {
-  const { data: feedData, isLoading: feedLoading } = usePublicFeed();
+  const { data: feedData, isLoading: feedLoading, error: feedError } = usePublicFeed();
   const [gamePage, setGamePage] = useState(1);
-  const { data: gamesData, isLoading: gamesLoading } = useGames(gamePage, 9);
-  const { data: studiosData } = useStudios();
+  const { data: gamesData, isLoading: gamesLoading, error: gamesError } = useGames(gamePage, 9);
+  const { data: studiosData, error: studiosError } = useStudios();
   const { user } = useAuth();
+
+  const hasError = !!feedError || !!gamesError || !!studiosError;
 
   const games = normalizeLatestGames(gamesData?.items);
   const gamesCount = gamesData?.total ?? 0;
@@ -42,6 +44,15 @@ export default function HomePage() {
   return (
     <>
       <SiteHeader />
+      {hasError && (
+        <div className="relative px-5 sm:px-8 lg:px-10 z-10">
+          <div className="mx-auto max-w-[1500px]">
+            <div className="mt-4 clip-corner border border-coral/50 bg-coral/5 p-4 text-sm text-coral">
+              <p>Unable to load some content. The data may be temporarily unavailable. Please try again later.</p>
+            </div>
+          </div>
+        </div>
+      )}
       <main className="relative overflow-hidden bg-[#020609]">
         <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
         <CircuitFrame className="opacity-30" />

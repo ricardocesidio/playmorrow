@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { DashboardPanel, SidebarLink } from './shared';
 import {
   Activity,
   ArrowRight,
@@ -32,17 +33,7 @@ import { SiteHeader } from '@/components/site-header';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyFollows, useMyWishlist, useNotifications, useUnreadNotificationCount, usePublicFeed, usePlayerWeeklyXp, usePlayerMonthlyXp, usePlayerXpHistory, useAchievements } from '@/lib/api/hooks';
 import { useRouter } from 'next/navigation';
-
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return `${Math.floor(days / 30)}mo ago`;
-}
+import { formatRelativeTime } from '@/lib/format';
 
 export function PlayerDashboard() {
   const router = useRouter();
@@ -88,14 +79,14 @@ export function PlayerDashboard() {
     id: item.id,
     studio: item.studio.name,
     body: item.summary || item.title,
-    time: timeAgo(item.createdAt),
+    time: formatRelativeTime(item.createdAt),
     icon: item.type === 'DEVLOG' ? BadgeCheck : Activity,
   }));
 
   const notifItems = (recentNotifs?.items ?? []).map((item) => ({
     id: item.id,
     title: item.title,
-    time: timeAgo(item.createdAt),
+    time: formatRelativeTime(item.createdAt),
     icon: Bell,
     tone: 'violet' as const,
   }));
@@ -459,33 +450,6 @@ function DashboardHero({ name, onLogout }: { name: string; onLogout: () => void 
         </div>
       </div>
     </DashboardPanel>
-  );
-}
-
-function DashboardPanel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`clip-corner border border-border/90 bg-[#050b0f]/86 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)] ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-function SidebarLink({ href, icon, label, count, active }: { href: string; icon: React.ReactNode; label: string; count?: number; active?: boolean }) {
-  return (
-    <Link
-      href={href}
-      className={`group flex items-center gap-3 px-3 py-2.5 text-sm transition ${
-        active ? 'border-r-2 border-cyan bg-cyan/10 text-foreground' : 'text-muted-foreground hover:bg-cyan/5 hover:text-foreground'
-      }`}
-    >
-      <span className={active ? 'text-cyan' : 'text-muted-foreground group-hover:text-cyan'}>{icon}</span>
-      <span className="flex-1">{label}</span>
-      {count !== undefined && (
-        <span className="grid min-w-5 place-items-center border border-border bg-background px-1.5 py-0.5 font-mono text-[0.62rem] text-muted-foreground">
-          {count}
-        </span>
-      )}
-    </Link>
   );
 }
 

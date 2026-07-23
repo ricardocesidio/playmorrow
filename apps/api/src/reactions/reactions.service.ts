@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -12,7 +12,7 @@ export class ReactionsService {
     private readonly studioXpService: StudioXpService,
   ) {}
 
-  // ── DEVOOG REACTIONS ─────────────────────────────────────────────────
+  // ── DEVLOG REACTIONS ─────────────────────────────────────────────────
 
   async reactToDevlog(userId: string, devlogId: string, type: string) {
     const devlog = await this.prisma.devlog.findUnique({
@@ -23,11 +23,18 @@ export class ReactionsService {
       throw new NotFoundException('Devlog not found');
     }
 
-    await this.prisma.reaction.upsert({
-      where: { userId_devlogId_type: { userId, devlogId, type: type as never } },
-      update: {},
-      create: { userId, devlogId, type: type as never },
-    });
+    try {
+      await this.prisma.reaction.upsert({
+        where: { userId_devlogId_type: { userId, devlogId, type: type as never } },
+        update: {},
+        create: { userId, devlogId, type: type as never },
+      });
+    } catch (err: unknown) {
+      if (typeof err === 'object' && err !== null && (err as Record<string, unknown>).code === 'P2002') {
+        throw new ConflictException('Reaction already exists');
+      }
+      throw err;
+    }
 
     await this.studioXpService.award(devlog.game.studioId, 'REACTION');
 
@@ -92,11 +99,18 @@ export class ReactionsService {
       throw new NotFoundException('Comment not found');
     }
 
-    await this.prisma.reaction.upsert({
-      where: { userId_commentId_type: { userId, commentId, type: type as never } },
-      update: {},
-      create: { userId, commentId, type: type as never },
-    });
+    try {
+      await this.prisma.reaction.upsert({
+        where: { userId_commentId_type: { userId, commentId, type: type as never } },
+        update: {},
+        create: { userId, commentId, type: type as never },
+      });
+    } catch (err) {
+      if (typeof err === 'object' && err !== null && (err as Record<string, unknown>).code === 'P2002') {
+        throw new ConflictException('Reaction already exists');
+      }
+      throw err;
+    }
 
     // Notify comment author (exclude actor)
     if (comment.authorId !== userId) {

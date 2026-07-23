@@ -6,6 +6,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Cookie Policy · Playmorrow',
     description: 'Learn about how Playmorrow uses cookies and your privacy choices.',
+    images: '/og-image.svg',
+  },
+  twitter: {
+    images: '/og-image.svg',
+  },
+  alternates: {
+    canonical: '/cookies',
   },
 };
 

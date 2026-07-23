@@ -1,9 +1,13 @@
 # Playmorrow — Project Status
 
-**Last verified:** 2026-07-10 (Full handoff plan execution pass — local dev fully running + verified. See below)
-**Total commits:** 667+ (post Session 13)
-**Repository:** `ricardocesidio/playmorrow` (public)
-**Next step:** Ops items only (see "Still Remaining" below). All high-priority code items from the Session 14 handoff (access control, CSRF/OAuth correctness, security hardening, UX, devlog polish) verified as implemented or completed in this pass.
+**Last verified:** 2026-07-23 (Session 15 hardening — all critical audit issues fixed)
+**Total commits:** 708 (post Session 15)
+**Repository:** `ricardocesilio/playmorrow` (public)
+**Next step:** Ops items only (see "Still Remaining" below). All 5 critical issues from the principal audit fixed. Typecheck 6/6, lint 0 errors.
+
+**Session 15 hardening (this session):** Full enterprise-grade production hardening. Fixed 5 critical blockers: `completeOnboarding` CSRF header, OAuth cookie domain (`localhost`→shared helper), upload FD leak (stream.destroy), homepage error handling, cosmetic game filters. Replaced 6 `console.error` with `toast.error`, 2 `alert()` with `toast.error`. Created shared `cookie-helper.ts`. Batched N+1 tag upsert. Fixed backend CSP (no `unsafe-inline` in prod). Fixed HTTP status codes (404→400). Created `CHANGELOG.md`. Archived stale security docs. Removed unused `@sentry/tracing`. Typecheck 6/6, lint 0 errors, 17/17 pages 200.
+
+**Session 14 summary:** P0 deploy pipeline fix — Railway builds failing due to `@sentry/cli` missing from `onlyBuiltDependencies` and `loadEnvFile('.env')` ENOENT crash. Both fixed. "Build cache broken" was a misdiagnosis — 20+ failures were these two bugs. Full clean build from `main` verified.
 
 **Session 13 summary:** See AGENTS.md for full table. Major work: COOKIE_DOMAIN + SENTRY_DSN on Railway, dashboard restructure (new /devlogs, /media, /achievements pages), login redirect fix, DOMPurify on devlogs, GitHub branch protection, repo policy files (CONTRIBUTING/SECURITY/CODE_OF_CONDUCT), nested comments tree fix, production smoke test green.
 
@@ -49,6 +53,9 @@ Every claim below includes the command or artifact that confirms it.
 | Roadmap management | ✅ | Visual timeline |
 | Press kit management | ✅ | .md download |
 | Search | ✅ | Games, studios, devlogs |
+| About page | ✅ | `apps/web/app/about/page.tsx` — mission, player/studio value props, team. Full OG metadata. |
+| Contact page | ✅ | `apps/web/app/contact/page.tsx` — 5 email channels (support, press, partnerships, security, legal) + social links. Full OG metadata. |
+| Site footer links | ✅ | `apps/web/components/site-footer.tsx` — About + Contact row above legal links |
 | Studio Dashboard | ✅ | Analytics, activity feed |
 | Player Dashboard | ✅ | XP, level, activity |
 | Achievements & Player XP | ✅ | `AchievementController` + `PlayerXpService` + `/me/achievements` endpoint (backend); `useAchievements` hook + UI in `PlayerDashboard.tsx` (frontend). Schema has `achievements` join table. Not yet listed in prior inventories. |
@@ -107,6 +114,7 @@ All 8 events emit via `this.feedEngine.emit()`. The `TRAILER_UPDATED` event **is
 | Likes unique constraint | ✅ | `@@unique([devlogId, userId])` |
 | RBAC seat limits (2/3/10) | ✅ | HTTP 409 on over-limit |
 | Rate limiting (ThrottlerModule) | ✅ | Global 60/min, per-route overrides |
+| Race condition protection (reactions) | ✅ | `apps/api/src/reactions/reactions.service.ts:26-36, 102-114` — Prisma P2002 upsert race caught → 409 Conflict instead of 500 crash |
 | Helmet security headers | ✅ | CSP, CORS, etc. |
 | CSRF token generation | ✅ | Stateless HMAC (`HMAC-SHA256(userId:nonce:ts, CSRF_SECRET)`), base64url-encoded. Returns in response header + body at login. |
 | CSRF token validation | ✅ | `CsrfGuard` applied **globally** via `APP_GUARD`. Skips GET/HEAD/OPTIONS + unauthenticated. Requires valid `X-CSRF-Token` for all authenticated POST/PUT/PATCH/DELETE. Source: `apps/api/src/common/csrf.guard.ts`, `apps/api/src/app.module.ts:76` |
@@ -131,7 +139,7 @@ All 8 events emit via `this.feedEngine.emit()`. The `TRAILER_UPDATED` event **is
 | CI (GitHub Actions) | ⚠️ | Lint + typecheck + Playwright configured. **No CI gating** — test failures do not block merge to main. |
 | PWA manifest | ✅ | `public/manifest.json` |
 | Service worker | ✅ | `public/sw.js` — push notifications + cache |
-| SEO metadata | ✅ | OpenGraph on game/studio/devlog pages |
+| SEO metadata (OG image, canonical, JSON-LD) | ✅ | Default OG image (`/og-image.svg`) on all 16 static pages. Canonical URLs on all pages. WebSite JSON-LD with SearchAction. Sitemap: 16 entries (all static). |
 | Skeleton loading states | ✅ | Feed, homepage, game page |
 
 ---
@@ -300,6 +308,21 @@ HTML: 200   ← Vercel proxy works
 - Confirmed that `ROADMAP.md` already contains the correct prioritized plan.
 
 **Key new items added to Still Open:** Legal document drafts (HIGH), missing `CONTRIBUTING.md` / `SECURITY.md` / `CODE_OF_CONDUCT.md`, and Sentry not active in production.
+
+### Session 15 (2026-07-23) — Race Condition Fix, Public Pages, Full SEO Pass & Dashboard Cleanup
+
+| Fix | Type | Evidence |
+|-----|------|----------|
+| Devlog/comment reaction race condition | Reliability | `apps/api/src/reactions/reactions.service.ts:26-36,102-114` — `prisma.reaction.upsert()` wrapped in try-catch for Prisma P2002. Duplicate rapid clicks return 409 Conflict instead of crashing with HTTP 500. |
+| /about page created | Content | `apps/web/app/about/page.tsx` — mission, player value prop, studio value prop, team section. OG metadata via co-located `layout.tsx`. |
+| /contact page created | Content | `apps/web/app/contact/page.tsx` — 5 contact channels (Support, Press, Partnerships, Security, Legal) with mailto links + social links. OG metadata via co-located `layout.tsx`. |
+| Footer links updated | Navigation | `apps/web/components/site-footer.tsx:33-38` — "About" and "Contact" links added in a dedicated row above legal links. |
+| OG image on all pages | SEO | `apps/web/public/og-image.svg` — default OG SVG. `openGraph.images` + `twitter.images` in root + 15 child layouts. |
+| Canonical URLs on all pages | SEO | `alternates.canonical` set on root layout and all 15 static page layouts. Each page canonical matches its path. |
+| JSON-LD structured data | SEO | WebSite schema with SearchAction in root layout (`layout.tsx:60-77`). |
+| Sitemap expanded | SEO | 16 static URLs (was 9) via dynamic `sitemap.ts`. Extensible for dynamic content. |
+| DashboardPanel/SidebarLink extracted | Maintainability | `components/dashboard/shared.tsx` — both dashboards import from shared, local defs removed. |
+| timeAgo deduplicated | Maintainability | 4 local `timeAgo` → shared `formatRelativeTime` from `@/lib/format`. |
 
 ### Session 14 (2026-07-10) — P0: Deploy Pipeline Fixed (Phase Zero)
 

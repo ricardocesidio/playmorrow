@@ -64,6 +64,20 @@ export class GamesService {
       throw new ConflictException('A game with this slug already exists');
     }
 
+    let tagCreateData: { tagId: string }[] | undefined;
+    if (dto.tags) {
+      const tagRecords = await this.prisma.$transaction(
+        dto.tags.map((tagSlug) =>
+          this.prisma.tag.upsert({
+            where: { slug: tagSlug.toLowerCase() },
+            update: {},
+            create: { slug: tagSlug.toLowerCase(), name: tagSlug },
+          }),
+        ),
+      );
+      tagCreateData = tagRecords.map((tag) => ({ tagId: tag.id }));
+    }
+
     const game = await this.prisma.game.create({
       data: {
         title: dto.title,
@@ -101,20 +115,7 @@ export class GamesService {
               })),
             }
           : undefined,
-        tags: dto.tags
-          ? {
-              create: await Promise.all(
-                dto.tags.map(async (tagSlug) => {
-                  const tag = await this.prisma.tag.upsert({
-                    where: { slug: tagSlug.toLowerCase() },
-                    update: {},
-                    create: { slug: tagSlug.toLowerCase(), name: tagSlug },
-                  });
-                  return { tagId: tag.id };
-                }),
-              ),
-            }
-          : undefined,
+        tags: tagCreateData ? { create: tagCreateData } : undefined,
       },
       include: GAME_INCLUDE,
     });
@@ -308,18 +309,16 @@ export class GamesService {
 
     if (dto.tags !== undefined) {
       await this.prisma.gameTag.deleteMany({ where: { gameId: game.id } });
-      data.tags = {
-        create: await Promise.all(
-          dto.tags.map(async (tagSlug) => {
-            const tag = await this.prisma.tag.upsert({
-              where: { slug: tagSlug.toLowerCase() },
-              update: {},
-              create: { slug: tagSlug.toLowerCase(), name: tagSlug },
-            });
-            return { tagId: tag.id };
+      const tagRecords = await this.prisma.$transaction(
+        dto.tags.map((tagSlug) =>
+          this.prisma.tag.upsert({
+            where: { slug: tagSlug.toLowerCase() },
+            update: {},
+            create: { slug: tagSlug.toLowerCase(), name: tagSlug },
           }),
         ),
-      };
+      );
+      data.tags = { create: tagRecords.map((tag) => ({ tagId: tag.id })) };
     }
 
     const updated = await this.prisma.game.update({

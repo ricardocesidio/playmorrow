@@ -6,6 +6,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Leaderboard · Playmorrow',
     description: 'Top players ranked by XP and achievements on Playmorrow.',
+    images: '/og-image.svg',
+  },
+  twitter: {
+    images: '/og-image.svg',
+  },
+  alternates: {
+    canonical: '/leaderboard',
   },
 };
 
