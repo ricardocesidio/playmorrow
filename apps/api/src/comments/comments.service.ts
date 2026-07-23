@@ -293,7 +293,13 @@ export class CommentsService {
   }
 
   async findByGame(slug: string, page: number, pageSize: number, currentUserId?: string) {
-    const game = await this.prisma.game.findUniqueOrThrow({ where: { slug }, select: { id: true } });
+    const game = await this.prisma.game.findUniqueOrThrow({ where: { slug }, select: { id: true, studioId: true } });
+    // Get studio members and their logos for avatar lookup
+    const studioMembers = await this.prisma.studioMember.findMany({
+      where: { studioId: game.studioId },
+      include: { studio: { select: { logoUrl: true } } },
+    });
+    const memberLogoMap = new Map(studioMembers.map((m) => [m.userId, m.studio.logoUrl]));
     const where = { gameId: game.id, parentId: null, deletedAt: null };
     const [items, total] = await Promise.all([
       this.prisma.comment.findMany({
@@ -316,6 +322,7 @@ export class CommentsService {
       updatedAt: c.updatedAt.toISOString(),
       deletedAt: c.deletedAt?.toISOString() ?? null,
       author: c.author,
+      studioLogoUrl: memberLogoMap.get(c.authorId) ?? null,
       reactions: (c.reactions as Array<{ type: string; userId: string }>).reduce(
         (acc, r) => { acc[r.type] = (acc[r.type] ?? 0) + 1; return acc; },
         {} as Record<string, number>,

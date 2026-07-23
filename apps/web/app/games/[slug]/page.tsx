@@ -61,6 +61,7 @@ interface GameCommentItem {
   body: string | null;
   parentId: string | null;
   author: { id: string; username: string; displayName: string; avatarUrl: string | null };
+  studioLogoUrl?: string | null;
   createdAt: string;
   updatedAt: string;
   reactions?: { LIKE: number };
@@ -897,10 +898,11 @@ function CommunityPanel({ slug, user, game }: { slug: string; user: { id: string
         <div className="grid gap-2.5">
           {(comments ?? []).map((comment) => {
             const author = comment.author ?? { displayName: '?', avatarUrl: null };
+            const avatarUrl = (comment as any).studioLogoUrl || author.avatarUrl;
             return (
             <div key={comment.id} className="grid grid-cols-[32px_1fr_auto] gap-3">
-              {author.avatarUrl ? (
-                <img src={author.avatarUrl} alt={`${author.displayName}'s avatar`} className="size-7 rounded-full object-cover" />
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={`${author.displayName}'s avatar`} className="size-7 rounded-full object-cover" />
               ) : (
                 <span className="grid size-7 place-items-center rounded-full bg-muted text-xs text-foreground">
                   {author.displayName.slice(0, 1)}
