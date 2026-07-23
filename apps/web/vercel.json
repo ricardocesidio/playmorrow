@@ -1,5 +1,3 @@
 {
-  "version": 2,
-  "installCommand": "cd ../.. && pnpm install",
-  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=@playmorrow/web..."
+  "version": 2
 }
