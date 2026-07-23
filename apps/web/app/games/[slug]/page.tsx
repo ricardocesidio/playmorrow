@@ -226,13 +226,51 @@ function Breadcrumbs({ title }: { title: string }) {
 }
 
 function GameHero({ game, title, heroImage, slug, pendingCover, onSaveCover, onCancelCover, savingCover, onCoverUploaded }: { game: Game; title: string; heroImage: string; slug: string; pendingCover: boolean; onSaveCover: () => void; onCancelCover: () => void; savingCover: boolean; onCoverUploaded?: (url: string) => void }) {
+  const [offsetY, setOffsetY] = useState(0);
+  const dragRef = useRef({ dragging: false, startY: 0, startOffset: 0 });
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!pendingCover) return;
+    e.preventDefault();
+    dragRef.current = { dragging: true, startY: e.clientY, startOffset: offsetY };
+  };
+
+  useEffect(() => {
+    if (!pendingCover) { setOffsetY(0); return; }
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!dragRef.current.dragging) return;
+      const delta = e.clientY - dragRef.current.startY;
+      const maxOffset = 200;
+      setOffsetY(Math.max(-maxOffset, Math.min(maxOffset, dragRef.current.startOffset + delta)));
+    };
+    const handleMouseUp = () => { dragRef.current.dragging = false; };
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [pendingCover, offsetY]);
+
   return (
     <HudPanel className="relative min-h-[420px] overflow-hidden p-0 xl:h-[420px] xl:min-h-0" accent="muted">
-      <img src={heroImage} alt={`${title} hero art`} className="absolute inset-0 size-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-r from-background/82 via-background/28 to-background/0" />
-      <div className="absolute inset-0 bg-gradient-to-t from-background/72 via-transparent to-background/5" />
+      <div
+        className="absolute inset-0"
+        onMouseDown={handleMouseDown}
+        style={{ cursor: pendingCover ? 'grab' : undefined }}
+      >
+        <img
+          src={heroImage}
+          alt={`${title} hero art`}
+          className="absolute inset-0 size-full object-cover"
+          style={pendingCover ? { height: '140%', transform: `translateY(${offsetY}px)`, objectFit: 'cover' } : undefined}
+        />
+      </div>
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-background/82 via-background/28 to-background/0" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/72 via-transparent to-background/5" />
       {pendingCover && (
         <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-end gap-3 bg-background/80 px-4 py-3 backdrop-blur-sm">
+          <span className="mr-auto font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Drag to reposition cover</span>
           <button onClick={onCancelCover} disabled={savingCover} className="cursor-pointer rounded border border-border px-4 py-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition disabled:opacity-50">
             Cancel
           </button>
