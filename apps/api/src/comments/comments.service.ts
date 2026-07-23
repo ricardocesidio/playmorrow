@@ -292,13 +292,13 @@ export class CommentsService {
     return this.toResponse(updated);
   }
 
-  async findByGame(slug: string, page: number, pageSize: number) {
+  async findByGame(slug: string, page: number, pageSize: number, currentUserId?: string) {
     const game = await this.prisma.game.findUniqueOrThrow({ where: { slug }, select: { id: true } });
     const where = { gameId: game.id, parentId: null, deletedAt: null };
     const [items, total] = await Promise.all([
       this.prisma.comment.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: 'asc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
         include: {
@@ -308,7 +308,25 @@ export class CommentsService {
       }),
       this.prisma.comment.count({ where }),
     ]);
-    return { items, total, page, pageSize, hasMore: page * pageSize < total };
+    const transformed = items.map((c) => ({
+      id: c.id,
+      body: c.body,
+      parentId: c.parentId,
+      createdAt: c.createdAt.toISOString(),
+      updatedAt: c.updatedAt.toISOString(),
+      deletedAt: c.deletedAt?.toISOString() ?? null,
+      author: c.author,
+      reactions: (c.reactions as Array<{ type: string; userId: string }>).reduce(
+        (acc, r) => { acc[r.type] = (acc[r.type] ?? 0) + 1; return acc; },
+        {} as Record<string, number>,
+      ),
+      viewerReactions: currentUserId
+        ? (c.reactions as Array<{ type: string; userId: string }>)
+            .filter((r) => r.userId === currentUserId)
+            .map((r) => r.type)
+        : [],
+    }));
+    return { items: transformed, total, page, pageSize, hasMore: page * pageSize < total };
   }
 
   async createForGame(slug: string, authorId: string, body: string) {
