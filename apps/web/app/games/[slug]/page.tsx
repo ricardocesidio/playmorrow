@@ -124,6 +124,7 @@ function PremiumGameDetail({
 }) {
   const [activeScreenshot, setActiveScreenshot] = useState(0);
   const [pendingCover, setPendingCover] = useState<string | null>(null);
+  const [coverSaved, setCoverSaved] = useState(false);
   const [savingCover, setSavingCover] = useState(false);
   const title = game.title || '';
   const heroImage = pendingCover || game.bannerUrl || game.coverUrl || '';
@@ -139,15 +140,8 @@ function PremiumGameDetail({
 
   const handleCoverUploaded = (url: string) => {
     setPendingCover(url);
+    setCoverSaved(false);
   };
-
-  // Wait until the query cache catches up before clearing the pending cover
-  // to avoid a render cycle where heroImage falls back to stale game.coverUrl
-  useEffect(() => {
-    if (pendingCover && game?.coverUrl === pendingCover) {
-      setPendingCover(null);
-    }
-  }, [pendingCover, game?.coverUrl]);
 
   const handleSaveCover = async () => {
     const coverToSave = pendingCover;
@@ -165,17 +159,17 @@ function PremiumGameDetail({
         const errBody = await patchRes.text().catch(() => '');
         throw new Error(`${patchRes.status}: ${errBody}`);
       }
+      setCoverSaved(true);
       queryClient.setQueryData(['game', slug], (old: any) => old ? { ...old, coverUrl: coverToSave } : old);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to save cover.');
-      setSavingCover(false);
-      return;
     }
     setSavingCover(false);
   };
 
   const handleCancelCover = () => {
     setPendingCover(null);
+    setCoverSaved(false);
   };
 
   return (
@@ -188,7 +182,7 @@ function PremiumGameDetail({
 
           <section className="grid items-start gap-5 xl:grid-cols-[1fr_430px]">
             <div className="grid gap-5">
-              <GameHero game={game} title={title} heroImage={heroImage} slug={slug} pendingCover={!!pendingCover} onSaveCover={handleSaveCover} onCancelCover={handleCancelCover} savingCover={savingCover} onCoverUploaded={handleCoverUploaded} />
+              <GameHero game={game} title={title} heroImage={heroImage} slug={slug} pendingCover={!!pendingCover && !coverSaved} onSaveCover={handleSaveCover} onCancelCover={handleCancelCover} savingCover={savingCover} onCoverUploaded={handleCoverUploaded} />
               <TagRow tags={tags} />
               <div className="grid items-start gap-5 lg:grid-cols-[0.95fr_1.05fr]">
                 <TrailerPanel title={title} image={heroImage} trailerUrl={game.trailerUrl} />
