@@ -264,7 +264,7 @@ function GameHero({ game, title, heroImage, slug, pendingCover, onSaveCover, onC
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/72 via-transparent to-background/5" />
       {pendingCover && (
         <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-end gap-3 bg-background/80 px-4 py-3 backdrop-blur-sm">
-          <span className="mr-auto font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Drag to reposition cover</span>
+
           <button onClick={onCancelCover} disabled={savingCover} className="cursor-pointer rounded border border-border px-4 py-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition disabled:opacity-50">
             Cancel
           </button>
