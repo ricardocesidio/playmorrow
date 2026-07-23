@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Bell, ExternalLink, Users, MessageSquare, Flame, Heart } from 'lucide-react';
-import { useNotifications, useUnreadNotificationCount, type NotificationItem } from '@/lib/api/hooks';
+import { Bell, ExternalLink, Users, MessageSquare, Flame, Heart, Check } from 'lucide-react';
+import { useNotifications, useUnreadNotificationCount, useMarkAllNotificationsRead, type NotificationItem } from '@/lib/api/hooks';
 import { formatRelativeTime } from '@/lib/format';
 
 const TYPE_ICONS: Record<string, typeof Heart> = {
@@ -45,6 +45,7 @@ export function NotificationDropdown() {
   const ref = useRef<HTMLDivElement>(null);
   const { data: unreadData } = useUnreadNotificationCount();
   const { data: notifData, isLoading } = useNotifications('all', 1, 5);
+  const markAllRead = useMarkAllNotificationsRead();
 
   const unreadCount = unreadData?.unreadCount ?? 0;
   const notifications = notifData?.items ?? [];
@@ -57,24 +58,33 @@ export function NotificationDropdown() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleOpen = useCallback(() => {
+    setOpen((prev) => {
+      if (!prev && unreadCount > 0) {
+        markAllRead.mutate();
+      }
+      return !prev;
+    });
+  }, [unreadCount, markAllRead]);
+
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={() => setOpen(!open)}
-        className="relative grid size-8 place-items-center text-muted-foreground hover:text-cyan cursor-pointer"
+        onClick={handleOpen}
+        className="relative grid size-8 place-items-center text-muted-foreground hover:text-cyan cursor-pointer transition-colors"
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
       >
-        <Bell className="size-4" />
+        <Bell className={`size-4 ${unreadCount > 0 ? 'text-cyan' : ''}`} />
         {unreadCount > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-none bg-coral text-[9px] font-bold text-coral-foreground">
-            {unreadCount > 9 ? '9+' : unreadCount}
+          <span className="absolute -right-0.5 -top-0.5 flex min-w-[18px] items-center justify-center rounded-full bg-coral px-1 py-0.5 text-[9px] font-bold text-coral-foreground leading-none shadow-[0_0_8px_rgb(255_87_77_/_0.6)]">
+            {unreadCount > 99 ? '99+' : unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
         <div
-          className="panel absolute right-0 top-full z-50 mt-3 w-[380px] border border-border/90 bg-background shadow-[0_0_40px_rgb(0_0_0_/_0.6)]"
+          className="panel absolute right-0 top-full z-50 mt-3 w-[90vw] max-w-[380px] border border-border/90 bg-background shadow-[0_0_40px_rgb(0_0_0_/_0.6)] right-[-60px] sm:right-0"
           style={{
             clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))',
           }}
@@ -82,9 +92,18 @@ export function NotificationDropdown() {
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border/70 px-4 py-3">
             <span className="pm-display text-xs uppercase tracking-widest text-foreground">Notifications</span>
-            <span className="pm-micro text-muted-foreground">
-              {unreadCount > 0 ? `${unreadCount} unread` : 'All clear'}
-            </span>
+            <div className="flex items-center gap-3">
+              {unreadCount > 0 && (
+                <span className="pm-micro text-coral">{unreadCount} unread</span>
+              )}
+              <button
+                onClick={() => markAllRead.mutate()}
+                className="pm-micro flex items-center gap-1 text-muted-foreground hover:text-cyan transition-colors cursor-pointer"
+                aria-label="Mark all as read"
+              >
+                <Check className="size-3" /> Mark read
+              </button>
+            </div>
           </div>
 
           {/* List */}
