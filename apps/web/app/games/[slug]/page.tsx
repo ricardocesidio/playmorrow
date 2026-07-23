@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
 import { useParams, useRouter } from 'next/navigation';
@@ -141,8 +141,9 @@ function PremiumGameDetail({
     setPendingCover(url);
   };
 
-  const handleSaveCover = useCallback(async () => {
-    if (!pendingCover) return;
+  const handleSaveCover = async () => {
+    const coverToSave = pendingCover;
+    if (!coverToSave) return;
     setSavingCover(true);
     const csrfToken = getCsrfToken();
     try {
@@ -150,16 +151,19 @@ function PremiumGameDetail({
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}) },
         credentials: 'include',
-        body: JSON.stringify({ coverUrl: pendingCover }),
+        body: JSON.stringify({ coverUrl: coverToSave }),
       });
-      if (!patchRes.ok) throw new Error('Failed to save cover');
-      queryClient.setQueryData(['game', slug], (old: any) => old ? { ...old, coverUrl: pendingCover } : old);
+      if (!patchRes.ok) {
+        const errBody = await patchRes.text().catch(() => '');
+        throw new Error(`Failed to save cover: ${patchRes.status} ${errBody}`);
+      }
+      queryClient.setQueryData(['game', slug], (old: any) => old ? { ...old, coverUrl: coverToSave } : old);
       setPendingCover(null);
-    } catch {
-      toast.error('Failed to save cover.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save cover.');
     }
     setSavingCover(false);
-  }, [pendingCover, slug, queryClient]);
+  };
 
   const handleCancelCover = () => {
     setPendingCover(null);
