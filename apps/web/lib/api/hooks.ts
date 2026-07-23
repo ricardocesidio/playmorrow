@@ -953,10 +953,7 @@ export function useReactToGameComment() {
         };
       });
     },
-    onError: (_err, _vars, _ctx) => {
-      qc.invalidateQueries({ queryKey: ['gameComments'] });
-    },
-    onSettled: () => {
+    onError: () => {
       qc.invalidateQueries({ queryKey: ['gameComments'] });
     },
   });
@@ -985,10 +982,7 @@ export function useRemoveGameCommentReaction() {
         };
       });
     },
-    onError: (_err, _vars, _ctx) => {
-      qc.invalidateQueries({ queryKey: ['gameComments'] });
-    },
-    onSettled: () => {
+    onError: () => {
       qc.invalidateQueries({ queryKey: ['gameComments'] });
     },
   });

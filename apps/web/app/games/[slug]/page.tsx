@@ -916,7 +916,7 @@ function CommunityPanel({ slug, user, game }: { slug: string; user: { id: string
                   <Heart className={`size-3.5 ${comment.viewerReactions?.includes('LIKE') ? 'fill-coral text-coral' : ''}`} />
                   {comment.reactions?.LIKE ?? 0}
                 </button>
-                {user?.role === 'ADMIN' && (
+                {isAuthenticated && (
                   <button type="button" onClick={() => deleteComment.mutate({ commentId: comment.id })} className="cursor-pointer text-muted-foreground hover:text-coral ml-1" aria-label="Delete comment">
                     <X className="size-3" />
                   </button>
