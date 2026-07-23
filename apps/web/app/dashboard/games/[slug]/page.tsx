@@ -100,7 +100,12 @@ export default function EditGamePage() {
       const form = new FormData();
       form.append('file', file);
       try {
-        const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
+        const csrfMatch = document.cookie.match(/(?:^|;\s*)playmorrow_csrf=([^;]*)/);
+        const csrfToken = csrfMatch?.[1] ? decodeURIComponent(csrfMatch[1]) : null;
+        const res = await fetch('/api/upload', {
+          method: 'POST', body: form, credentials: 'include',
+          headers: csrfToken ? { 'X-CSRF-Token': csrfToken } as Record<string, string> : undefined,
+        });
         if (!res.ok) {
           const errBody = await res.text();
           setError(`Upload failed: ${res.status} ${errBody}`);
