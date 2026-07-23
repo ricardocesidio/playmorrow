@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+### Added
+- Push notification toggle with VAPID key configuration, permission checks, and error toasts
+- Email change with verification flow (send code to new email, verify before saving)
+- Studio logo in community discussion (author's own studio logo, not game's studio)
+- Auto-refresh for feed, game stats, roadmap, devlogs, and notifications (30s intervals)
+- Welcome notification bot for new users on first login
+- Real-time notifications with auto-refresh, mark-all-read, and responsive design
+- Settings link in header user dropdown
+
+### Fixed
+- Push notification toggle: service worker fixed (removed TypeScript syntax + broken cache preload), 30s timeout added, stuck loading state resolved
+- Footer: full black background (#000), no animations (was causing layout jump)
+- Comment ordering: newest comments at bottom (chronological)
+- Like button: optimistic update for instant feedback
+- Delete permissions: gated to studio OWNER/ADMIN/MODERATOR or global ADMIN only
+- Avatar upload: MaxLength 500 → 5,000,000 (was rejecting valid uploads)
+- Avatar section: centered with larger preview
+
 ## [0.1.0] - 2026-07-23
 
 ### Added

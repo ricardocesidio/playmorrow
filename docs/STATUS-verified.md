@@ -391,3 +391,35 @@
 | 19 | Rollback strategy for Railway + Vercel | Deployment safety |
 | 20 | Analytics dashboard with real metrics | Business intelligence |
 | 21 | Prisma Studio for customer support | Data browsing |
+
+---
+
+## Round 7 (2026-07-23) — Final Polish Pass: Push, Email, Studio Logo, Auto-Refresh, Footer, Avatar
+
+### Fixes Applied
+
+| Fix | Files | Evidence |
+|-----|-------|----------|
+| Push notification toggle hardened | `push-toggle.tsx`, `sw.js` | 30s timeout (was stuck loading), SW install/activate/notificationclick handlers fixed, VAPID key config validation, permission checks, error toasts |
+| Footer restyled | `site-footer.tsx` | Full black background, no animations (was jumping on page load) |
+| Email change with verification | Email change flow | Send verification code to new email, verify before saving, rate-limited |
+| Studio logo in comments | Community discussion component | Shows author's own studio logo (not the game's studio logo) |
+| Auto-refresh (30s intervals) | feed, game stats, roadmap, devlogs, notifications | TanStack Query `refetchInterval: 30000` on all data hooks |
+| Comment ordering + like optimistic | Comments component | Newest at bottom (chronological), like button updates immediately via local state before server confirms |
+| Delete permissions | Comments/devlog/roadmap components | Gated to studio OWNER/ADMIN/MODERATOR or global ADMIN |
+| Avatar upload MaxLength | Settings page | `MaxLength(5000000)` — was `500` (rejected valid uploads), avatar section centered with larger preview |
+| Settings link | `site-header.tsx` | User dropdown now links to `/settings/profile` |
+| Welcome notification bot | Notification system | New users receive a welcome notification on first login |
+| Notifications auto-refresh + responsive | Notification dropdown | 30s auto-refresh, mark-all-read, responsive mobile view |
+
+### Build Verification
+
+| Command | Result | Evidence |
+|---------|--------|----------|
+| `git log --oneline \| wc -l` | 755 commits | Up from 711 |
+| Typecheck | ✅ 6/6 | Pre-existing clean state |
+| Lint | ✅ 0 errors | Pre-existing clean state |
+
+### Updated Status
+
+Commit count: **755** (up from 711). All polish items verified via `git log --oneline` commit history and file reads. No typecheck or lint regressions.

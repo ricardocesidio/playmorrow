@@ -201,6 +201,23 @@ pnpm db:migrate
   4. Medium term: A11y, load tests, staging, repo files, price labeling
 - Updated README commit count and references. No code changes in this session — pure analysis.
 
+### Session 15 (final polish) — Push Notifications, Email Verification, Auto-Refresh, Avatar & Settings Fixes (2026-07-23)
+
+Final UX polish pass after all hardening was complete:
+
+- **Push notification toggle hardened:** Service worker fixed (removed TypeScript syntax + broken cache preload), 30s stuck loading timeout, VAPID key configuration validation, proper permission checks, real error toasts instead of silent failures
+- **Footer restyled:** Full black background (`#000`), no animations (was causing layout jump on page load)
+- **Email change with verification flow:** Send verification code to new email address, verify before saving, rate-limited to prevent abuse
+- **Studio logo in community discussion:** Community comments now show the author's own studio logo instead of the game's studio logo
+- **Auto-refresh (30s intervals):** Feed, game stats (followers/wishlists/comments), roadmap items, devlog listing, and notification dropdown all auto-refresh via TanStack Query `refetchInterval: 30000`
+- **Comment ordering:** Newest comments appear at bottom (chronological), like button uses optimistic update for instant feedback
+- **Delete permissions hardening:** Only studio OWNER/ADMIN/MODERATOR or global ADMIN can delete comments, devlogs, roadmap items
+- **Avatar upload fix:** Changed `MaxLength(500)` → `MaxLength(5000000)` (was rejecting valid uploads with a 5MB cap); avatar section centered with larger preview; Settings link added to header user dropdown
+- **Welcome notification bot:** New users receive a welcome notification on first login
+- **Real-time notifications:** SSE-based with auto-refresh, mark-all-read functionality, responsive mobile design
+
+Updated: STATUS.md, docs/STATUS-verified.md (Round 7), docs/handoff/session-15-complete.md, AGENTS.md, CHANGELOG.md
+
 ### Session 15 (continued) — Production Hardening, Principal Audit Fixes (2026-07-23)
 
 After the comprehensive audit, executed all 5 critical fixes + 10 quality/security improvements:
@@ -273,7 +290,8 @@ A comprehensive 13-item double-check verifying every claimed accomplishment from
 - Session 10 — Evidence-First Hardening & Enterprise Readiness (CSRF, tests, etc.)
 - Session 11 — CI Reconciliation & Test Suite Green
 - Session 12 — Professionalization Audit
-- Session 13 (this session) — All remaining work items resolved
+- Session 13 — All remaining work items resolved
+- Session 15 — Enterprise hardening, SEO, design system, final polish
 
 **Done This Session**
 
