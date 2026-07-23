@@ -30,6 +30,6 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(500)
+  @MaxLength(5_000_000)
   avatarUrl?: string;
 }
