@@ -37,14 +37,22 @@ export function middleware(request: NextRequest) {
   // Reduce referrer leakage
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-  // Nonce-based CSP — removes 'unsafe-inline' for scripts.
-  // 'unsafe-inline' retained for style-src: Tailwind injects inline styles
-  // at build time and there's no nonce mechanism for <style> tags in Next.js.
+  // Nonce-based CSP — removes 'unsafe-inline' for scripts in production.
+  // In development, Next.js HMR + React DevTools inject inline scripts without
+  // nonces, so we add 'unsafe-inline' as a fallback (CSP L3 ignores it when
+  // a nonce is present, but older browsers may still honor it).
+  const isDev = process.env.NODE_ENV === 'development';
+  const scriptSrc = [
+    "'self'",
+    `'nonce-${nonce}'`,
+    'https://plausible.io',
+    ...(isDev ? ["'unsafe-inline'", "'unsafe-eval'"] : []),
+  ].join(' ');
   response.headers.set(
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      `script-src 'self' 'nonce-${nonce}' https://plausible.io`,
+      `script-src ${scriptSrc}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https: http://localhost:*",
       "font-src 'self' https://fonts.gstatic.com",
