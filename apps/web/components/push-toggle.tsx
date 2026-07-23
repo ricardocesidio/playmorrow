@@ -28,20 +28,42 @@ export function PushNotificationToggle() {
 
   const toggleSubscription = async () => {
     if (loading || !supported) return;
+
+    if (!subscribed && Notification.permission === 'denied') {
+      toast.error('Notifications blocked. Enable them in your browser settings.');
+      return;
+    }
+
     setLoading(true);
+    // Safety timeout — never get stuck in loading state
+    const timeout = setTimeout(() => setLoading(false), 10000);
 
     try {
-      const registration = await navigator.serviceWorker.ready;
+      let registration: ServiceWorkerRegistration;
+      try {
+        registration = await navigator.serviceWorker.ready;
+      } catch {
+        toast.error('Service worker not available. Try reloading the page.');
+        clearTimeout(timeout);
+        setLoading(false);
+        return;
+      }
 
       if (subscribed) {
         const sub = await registration.pushManager.getSubscription();
         if (sub) {
-          await api.delete('/me/push-subscriptions', { endpoint: sub.endpoint });
+          await api.delete('/me/push-subscriptions', { endpoint: sub.endpoint }).catch(() => {});
           await sub.unsubscribe();
         }
         setSubscribed(false);
       } else {
-        const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BPP0mLF9MwYi2YWivQfqAjGJbXFoX9YFQW4rsSEb-9ivFMoDxsQjzL8vWl7PJgv5D5jHNBgU6hVp8QBmm80k_LA';
+        const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!publicKey) {
+          toast.error('Push notifications not configured (VAPID key missing).');
+          clearTimeout(timeout);
+          setLoading(false);
+          return;
+        }
         const sub = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(publicKey) as unknown as BufferSource,
@@ -54,11 +76,13 @@ export function PushNotificationToggle() {
         });
 
         setSubscribed(true);
+        toast.success('Push notifications enabled!');
       }
     } catch (err) {
-      const msg = err instanceof ApiError ? String((err.body as any)?.message || err.message) : 'Push notification error';
+      const msg = err instanceof Error ? err.message : 'Push notification error';
       toast.error(msg);
     } finally {
+      clearTimeout(timeout);
       setLoading(false);
     }
   };
