@@ -107,7 +107,12 @@ function CreateDevlogForm() {
           ? await Promise.all(screenshots.map(async (f, i) => {
               const formData = new FormData();
               formData.append('file', f);
-              const res = await fetch('/api/upload', { method: 'POST', body: formData, credentials: 'include' });
+              const csrfMatch = document.cookie.match(/(?:^|;\s*)playmorrow_csrf=([^;]*)/);
+              const csrfToken = csrfMatch?.[1] ? decodeURIComponent(csrfMatch[1]) : null;
+              const res = await fetch('/api/upload', {
+                method: 'POST', body: formData, credentials: 'include',
+                headers: csrfToken ? { 'X-CSRF-Token': csrfToken } as Record<string, string> : undefined,
+              });
               if (!res.ok) throw new Error('Upload failed');
               const data = await res.json();
               return { url: data.url, order: i };
