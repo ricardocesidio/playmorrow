@@ -61,7 +61,7 @@ export function NotificationDropdown() {
   const handleOpen = useCallback(() => {
     setOpen((prev) => {
       if (!prev && unreadCount > 0) {
-        markAllRead.mutate();
+        markAllRead.mutate('');
       }
       return !prev;
     });
@@ -97,7 +97,7 @@ export function NotificationDropdown() {
                 <span className="pm-micro text-coral">{unreadCount} unread</span>
               )}
               <button
-                onClick={() => markAllRead.mutate()}
+                onClick={() => markAllRead.mutate('')}
                 className="pm-micro flex items-center gap-1 text-muted-foreground hover:text-cyan transition-colors cursor-pointer"
                 aria-label="Mark all as read"
               >
