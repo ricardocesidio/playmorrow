@@ -22,10 +22,8 @@ export function PushNotificationToggle() {
       setSupported(true);
       navigator.serviceWorker.register('/sw.js').then((reg) => {
         reg.pushManager.getSubscription().then((sub) => setSubscribed(!!sub));
-        setSupported(true);
       }).catch((err) => {
-        console.warn('SW registration failed:', err);
-        setSupported(false);
+        console.warn('Push: SW registration failed (will retry on next load):', err);
       });
     }
   }, []);
