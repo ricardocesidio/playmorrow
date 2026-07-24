@@ -15,7 +15,6 @@ import {
   HudLinkLogo,
   HudPanel,
 } from '@/components/playmorrow/hud';
-import { PostLoginTransition } from '@/components/loading/PostLoginTransition';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,22 +24,26 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showTransition, setShowTransition] = useState(false);
-  const [pendingPath, setPendingPath] = useState('/dashboard');
   const searchParams = useSearchParams();
 
-  // Show error from redirect (e.g. from OAuth or old flow)
   useEffect(() => {
     const err = searchParams.get('error');
     if (err) setError(decodeURIComponent(err));
   }, [searchParams]);
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated && !showTransition) router.replace('/dashboard');
-  }, [authLoading, isAuthenticated, router, showTransition]);
+    if (!authLoading && isAuthenticated) router.replace('/dashboard');
+  }, [authLoading, isAuthenticated, router]);
 
-  // If already logged in, redirect immediately (don't show loading spinner)
-  if (isAuthenticated && !authLoading) return <div className="flex min-h-screen items-center justify-center bg-black"><div className="size-6 animate-spin border border-cyan border-t-transparent" /></div>;
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background pm-circuit-bg">
+        <div className="size-6 animate-spin border border-cyan border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (isAuthenticated) return null;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background px-5 pb-8 text-foreground sm:px-8 lg:px-10">
@@ -80,8 +83,7 @@ export default function LoginPage() {
                 setLoading(true);
                 try {
                   await login(emailOrUsername, password);
-                  setPendingPath('/dashboard');
-                  setShowTransition(true);
+                  router.replace('/dashboard');
                 } catch (err: unknown) {
                   if (err instanceof EmailNotVerifiedError) {
                     router.push(`/verify-email?email=${encodeURIComponent(err.email)}&from=login`);
@@ -193,9 +195,6 @@ export default function LoginPage() {
           </HudPanel>
         </div>
       </main>
-      {showTransition && (
-        <PostLoginTransition onDone={() => router.replace(pendingPath)} />
-      )}
     </div>
   );
 }
