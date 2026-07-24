@@ -14,7 +14,7 @@ export function PlaymorrowLogo({ className = '', style, cutout = false, showText
       <span className="relative block shrink-0" style={{ width: size, height: size, color: 'inherit', filter: 'inherit' }}>
         <svg viewBox="0 0 40 40" aria-hidden className="size-full">
           <path fill="currentColor" d="M5 4h21.2L35 12.8v7.1L25.4 29.5H13.2V36H5V22.5h17l5.3-5.3v-1.7L22 10.2H5V4Z" />
-          {cutout && <path fill="#02070b" d="M5 14.2h14.5l3.5 3.5-3.5 3.5H5v-7Z" />}
+          {cutout && <path fill="transparent" d="M5 14.2h14.5l3.5 3.5-3.5 3.5H5v-7Z" />}
         </svg>
       </span>
       {showText && (
