@@ -15,6 +15,7 @@ import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { EventBus } from '../common/event-bus';
 import { CreateRoadmapItemDto } from './dto/create-roadmap-item.dto';
 import { UpdateRoadmapItemDto } from './dto/update-roadmap-item.dto';
 import { RoadmapItemsService } from './roadmap-items.service';
@@ -22,7 +23,10 @@ import { RoadmapItemsService } from './roadmap-items.service';
 @ApiTags('roadmap')
 @Controller()
 export class RoadmapItemsController {
-  constructor(private readonly roadmapService: RoadmapItemsService) {}
+  constructor(
+    private readonly roadmapService: RoadmapItemsService,
+    private readonly eventBus: EventBus,
+  ) {}
 
   @Post('games/:gameSlug/roadmap')
   @UseGuards(SessionAuthGuard)
@@ -32,7 +36,9 @@ export class RoadmapItemsController {
     @Param('gameSlug') gameSlug: string,
     @Body() dto: CreateRoadmapItemDto,
   ) {
-    return this.roadmapService.create(user.id, gameSlug, dto);
+    const item = await this.roadmapService.create(user.id, gameSlug, dto);
+    this.eventBus.emit({ type: 'roadmap_updated', actorId: user.id, gameId: item.game?.id, studioId: item.studio?.id, targetType: 'ROADMAP_ITEM', targetId: item.id });
+    return item;
   }
 
   @Get('games/:gameSlug/roadmap')
@@ -49,7 +55,9 @@ export class RoadmapItemsController {
     @Param('gameSlug') gameSlug: string,
     @Body() body: { items: { id: string; position: number }[] },
   ) {
-    return this.roadmapService.reorder(user.id, gameSlug, body.items);
+    const result = await this.roadmapService.reorder(user.id, gameSlug, body.items);
+    this.eventBus.emit({ type: 'roadmap_updated', actorId: user.id, gameId: (result as any)?.gameId, targetType: 'ROADMAP' });
+    return result;
   }
 
   @Get('roadmap-items/:id')
@@ -70,7 +78,9 @@ export class RoadmapItemsController {
     @Param('id') id: string,
     @Body() dto: UpdateRoadmapItemDto,
   ) {
-    return this.roadmapService.update(user.id, id, dto);
+    const item = await this.roadmapService.update(user.id, id, dto);
+    this.eventBus.emit({ type: 'roadmap_updated', actorId: user.id, gameId: item.game?.id, studioId: item.studio?.id, targetType: 'ROADMAP_ITEM', targetId: item.id });
+    return item;
   }
 
   @Delete('roadmap-items/:id')
@@ -78,6 +88,8 @@ export class RoadmapItemsController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Roadmap item deleted.' })
   async remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
-    return this.roadmapService.remove(user.id, id);
+    const result = await this.roadmapService.remove(user.id, id);
+    this.eventBus.emit({ type: 'roadmap_updated', actorId: user.id, targetType: 'ROADMAP_ITEM', targetId: id });
+    return result;
   }
 }

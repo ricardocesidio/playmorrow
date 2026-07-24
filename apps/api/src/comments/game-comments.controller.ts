@@ -4,12 +4,16 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { EventBus } from '../common/event-bus';
 import { CommentsService } from './comments.service';
 
 @ApiTags('game-comments')
 @Controller()
 export class GameCommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(
+    private readonly commentsService: CommentsService,
+    private readonly eventBus: EventBus,
+  ) {}
 
   @Get('games/:slug/comments')
   @UseGuards(OptionalSessionGuard)
@@ -24,7 +28,9 @@ export class GameCommentsController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a comment on a game' })
   async create(@Param('slug') slug: string, @Body('body') body: string, @CurrentUser() user: { id: string }) {
-    return this.commentsService.createForGame(slug, user.id, body);
+    const comment = await this.commentsService.createForGame(slug, user.id, body);
+    this.eventBus.emit({ type: 'comment_created', actorId: user.id, targetType: 'COMMENT', targetId: comment.id, gameId: comment.gameId ?? undefined });
+    return comment;
   }
 
   @Post('game-comments/:commentId/reactions')

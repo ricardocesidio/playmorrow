@@ -16,6 +16,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { EventBus } from '../common/event-bus';
 import { HelpService } from './help.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -28,7 +29,10 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 @UseGuards(SessionAuthGuard, RolesGuard)
 @Roles('ADMIN')
 export class AdminHelpController {
-  constructor(private readonly helpService: HelpService) {}
+  constructor(
+    private readonly helpService: HelpService,
+    private readonly eventBus: EventBus,
+  ) {}
 
   @Get('articles')
   @ApiOkResponse({ description: 'Paginated list of all articles (including drafts).' })
@@ -71,8 +75,12 @@ export class AdminHelpController {
   @Patch('articles/:id/publish')
   @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @ApiOkResponse({ description: 'Article publish status toggled.' })
-  async togglePublish(@Param('id') id: string) {
-    return this.helpService.togglePublish(id);
+  async togglePublish(@CurrentUser() user: { id: string }, @Param('id') id: string) {
+    const article = await this.helpService.togglePublish(id);
+    if ((article as any)?.isPublished) {
+      this.eventBus.emit({ type: 'help_article_published', actorId: user.id, targetType: 'HELP_ARTICLE', targetId: id });
+    }
+    return article;
   }
 
   @Post('categories')

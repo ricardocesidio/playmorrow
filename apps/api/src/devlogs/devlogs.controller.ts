@@ -20,6 +20,7 @@ import { ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/sw
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
+import { EventBus } from '../common/event-bus';
 import { CreateDevlogDto } from './dto/create-devlog.dto';
 import { UpdateDevlogDto } from './dto/update-devlog.dto';
 import { DevlogsService } from './devlogs.service';
@@ -27,7 +28,10 @@ import { DevlogsService } from './devlogs.service';
 @ApiTags('devlogs')
 @Controller()
 export class DevlogsController {
-  constructor(private readonly devlogsService: DevlogsService) {}
+  constructor(
+    private readonly devlogsService: DevlogsService,
+    private readonly eventBus: EventBus,
+  ) {}
 
   @Post('games/:gameSlug/devlogs')
   @UseGuards(SessionAuthGuard)
@@ -37,7 +41,11 @@ export class DevlogsController {
     @Param('gameSlug') gameSlug: string,
     @Body() dto: CreateDevlogDto,
   ) {
-    return this.devlogsService.create(user.id, gameSlug, dto);
+    const result = await this.devlogsService.create(user.id, gameSlug, dto);
+    if (dto.isPublished || dto.status === 'PUBLISHED') {
+      this.eventBus.emit({ type: 'devlog_published', actorId: user.id, gameId: result.game?.id, targetType: 'DEVLOG', targetId: result.id, studioId: result.studio?.id, metadata: { title: result.title } });
+    }
+    return result;
   }
 
   @Get('games/:gameSlug/devlogs')

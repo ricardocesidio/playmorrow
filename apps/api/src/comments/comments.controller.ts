@@ -14,6 +14,7 @@ import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
+import { EventBus } from '../common/event-bus';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -21,7 +22,10 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 @ApiTags('comments')
 @Controller()
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(
+    private readonly commentsService: CommentsService,
+    private readonly eventBus: EventBus,
+  ) {}
 
   @Post('devlogs/:devlogId/comments')
   @Throttle({ default: { ttl: 60_000, limit: 20 } }) // anti-spam (#3)
@@ -32,7 +36,9 @@ export class CommentsController {
     @Param('devlogId') devlogId: string,
     @Body() dto: CreateCommentDto,
   ) {
-    return this.commentsService.create(user.id, devlogId, dto);
+    const comment = await this.commentsService.create(user.id, devlogId, dto);
+    this.eventBus.emit({ type: 'comment_created', actorId: user.id, targetType: 'COMMENT', targetId: comment.id });
+    return comment;
   }
 
   @Get('devlogs/:devlogId/comments')

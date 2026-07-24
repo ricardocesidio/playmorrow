@@ -15,6 +15,7 @@ import { ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/sw
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { EventBus } from '../common/event-bus';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
 import { QueryTicketsDto } from './dto/query-tickets.dto';
@@ -23,7 +24,10 @@ import { SupportService } from './support.service';
 @ApiTags('support')
 @Controller('support')
 export class SupportController {
-  constructor(private readonly supportService: SupportService) {}
+  constructor(
+    private readonly supportService: SupportService,
+    private readonly eventBus: EventBus,
+  ) {}
 
   @Post('tickets')
   @Throttle({ default: { ttl: 60_000, limit: 20 } })
@@ -33,7 +37,9 @@ export class SupportController {
     @CurrentUser() user: { id: string },
     @Body() dto: CreateTicketDto,
   ): Promise<any> {
-    return this.supportService.createTicket(user.id, dto);
+    const ticket = await this.supportService.createTicket(user.id, dto);
+    this.eventBus.emit({ type: 'support_ticket_created', actorId: user.id, targetType: 'SUPPORT_TICKET', targetId: ticket.id });
+    return ticket;
   }
 
   @Get('tickets')

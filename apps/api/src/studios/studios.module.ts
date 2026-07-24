@@ -5,13 +5,17 @@ import { AuthModule } from '../auth/auth.module';
 import { AuditLogModule } from '../audit-log/audit-log.module';
 import { StudioChatModule } from '../studio-chat/studio-chat.module';
 import { FeedModule } from '../feed/feed.module';
+import { StudioHealthModule } from '../health/studio-health.module';
+import { GoalsModule } from '../goals/goals.module';
+import { StudioAchievementsModule } from '../achievements/studio-achievements.module';
+import { WeeklyReportsModule } from '../reports/weekly-reports.module';
 import { StudiosController } from './studios.controller';
 import { StudiosService } from './studios.service';
 import { StudioXpService } from './studio-xp.service';
 import { StudioRolesGuard } from './guards/studio-roles.guard';
 
 @Module({
-  imports: [PrismaModule, AuthModule, AuditLogModule, StudioChatModule, FeedModule],
+  imports: [PrismaModule, AuthModule, AuditLogModule, StudioChatModule, FeedModule, StudioHealthModule, GoalsModule, StudioAchievementsModule, WeeklyReportsModule],
   controllers: [StudiosController],
   providers: [StudiosService, StudioXpService, StudioRolesGuard],
   exports: [StudiosService, StudioXpService],
