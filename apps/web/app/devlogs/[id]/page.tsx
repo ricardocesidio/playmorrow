@@ -418,6 +418,11 @@ export default function DevlogDetailPage() {
                   </div>
                 );
               })()}
+
+              {/* Reactions */}
+              <div>
+                <DevlogReactions devlogId={id} />
+              </div>
             </aside>
 
             {/* ── RIGHT COLUMN — CONTENT ── */}
