@@ -185,7 +185,7 @@ export function SiteHeader() {
                 <div className="absolute right-0 top-full z-50 mt-1 w-40 border border-border bg-background shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-150">
                   <Link href="/dashboard" className="block px-4 py-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan transition">Dashboard</Link>
                   <Link href="/settings/profile" className="block px-4 py-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan transition">Settings</Link>
-                  <button onClick={() => { logout(); window.location.href = '/'; }} className="block w-full cursor-pointer px-4 py-2 text-left text-xs font-mono uppercase tracking-widest text-muted-foreground hover:bg-coral/10 hover:text-coral transition">Sign out</button>
+                  <button onClick={async () => { await logout(); window.location.href = '/'; }} className="block w-full cursor-pointer px-4 py-2 text-left text-xs font-mono uppercase tracking-widest text-muted-foreground hover:bg-coral/10 hover:text-coral transition">Sign out</button>
                 </div>
               </div>
             </>
@@ -248,7 +248,7 @@ export function SiteHeader() {
                 <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="px-3 py-2 font-mono text-xs uppercase tracking-widest text-cyan">
                   Dashboard
                 </Link>
-                <button onClick={() => { logout(); window.location.href = '/'; setMobileOpen(false); }} className="px-3 py-2 text-left font-mono text-xs uppercase tracking-widest text-coral">
+                <button onClick={async () => { await logout(); window.location.href = '/'; setMobileOpen(false); }} className="px-3 py-2 text-left font-mono text-xs uppercase tracking-widest text-coral">
                   Sign out
                 </button>
               </>
