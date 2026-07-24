@@ -17,6 +17,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { AnalyticsService } from '../analytics/analytics.service';
+import { EventBus } from '../common/event-bus';
 import { PrismaService } from '../prisma/prisma.service';
 import { FollowsService } from './follows.service';
 
@@ -27,6 +28,7 @@ export class FollowsController {
     private readonly followsService: FollowsService,
     private readonly analyticsService: AnalyticsService,
     private readonly prisma: PrismaService,
+    private readonly eventBus: EventBus,
   ) {}
 
   @Post('studios/:slug/follow')
@@ -43,6 +45,7 @@ export class FollowsController {
       ip: req.ip,
       userAgent: req.headers['user-agent'],
     }).catch(() => {});
+    this.eventBus.emit({ type: 'studio_followed', actorId: user.id, studioId: result.targetId, targetType: 'STUDIO', targetId: result.targetId });
     return result;
   }
 
@@ -60,6 +63,7 @@ export class FollowsController {
       ip: req.ip,
       userAgent: req.headers['user-agent'],
     }).catch(() => {});
+    this.eventBus.emit({ type: 'studio_unfollowed', actorId: user.id, studioId: result.targetId, targetType: 'STUDIO', targetId: result.targetId });
     return result;
   }
 
@@ -79,6 +83,7 @@ export class FollowsController {
       ip: req.ip,
       userAgent: req.headers['user-agent'],
     }).catch(() => {});
+    this.eventBus.emit({ type: 'game_followed', actorId: user.id, gameId: result.targetId, studioId: game?.studioId, targetType: 'GAME', targetId: result.targetId });
     return result;
   }
 
@@ -98,6 +103,7 @@ export class FollowsController {
       ip: req.ip,
       userAgent: req.headers['user-agent'],
     }).catch(() => {});
+    this.eventBus.emit({ type: 'game_unfollowed', actorId: user.id, gameId: result.targetId, studioId: game?.studioId, targetType: 'GAME', targetId: result.targetId });
     return result;
   }
 

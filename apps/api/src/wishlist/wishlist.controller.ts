@@ -6,6 +6,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { AnalyticsService } from '../analytics/analytics.service';
+import { EventBus } from '../common/event-bus';
 import { PrismaService } from '../prisma/prisma.service';
 import { WishlistService } from './wishlist.service';
 
@@ -16,6 +17,7 @@ export class WishlistController {
     private readonly wishlistService: WishlistService,
     private readonly analyticsService: AnalyticsService,
     private readonly prisma: PrismaService,
+    private readonly eventBus: EventBus,
   ) {}
 
   @Post('games/:slug/wishlist')
@@ -33,6 +35,7 @@ export class WishlistController {
         ip: req.ip,
         userAgent: req.headers['user-agent'],
       }).catch(() => {});
+      this.eventBus.emit({ type: 'game_wishlisted', actorId: user.id, gameId: game.id, studioId: game.studioId, targetType: 'GAME', targetId: game.id });
     }
     return result;
   }
@@ -52,6 +55,7 @@ export class WishlistController {
         ip: req.ip,
         userAgent: req.headers['user-agent'],
       }).catch(() => {});
+      this.eventBus.emit({ type: 'wishlist_removed', actorId: user.id, gameId: game.id, studioId: game.studioId, targetType: 'GAME', targetId: game.id });
     }
     return result;
   }

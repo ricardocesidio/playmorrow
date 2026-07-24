@@ -26,11 +26,21 @@ import { StudioRolesGuard } from './guards/studio-roles.guard';
 import { CreateStudioDto } from './dto/create-studio.dto';
 import { UpdateStudioDto } from './dto/update-studio.dto';
 import { StudiosService } from './studios.service';
+import { GoalsService } from '../goals/goals.service';
+import { StudioAchievementsService } from '../achievements/studio-achievements.service';
+import { StudioHealthService } from '../health/studio-health.service';
+import { WeeklyReportsService } from '../reports/weekly-reports.service';
 
 @ApiTags('studios')
 @Controller('studios')
 export class StudiosController {
-  constructor(private readonly studiosService: StudiosService) {}
+  constructor(
+    private readonly studiosService: StudiosService,
+    private readonly goalsService: GoalsService,
+    private readonly studioAchievementsService: StudioAchievementsService,
+    private readonly studioHealthService: StudioHealthService,
+    private readonly weeklyReportsService: WeeklyReportsService,
+  ) {}
 
   @Post()
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
@@ -153,6 +163,49 @@ export class StudiosController {
       throw new NotFoundException('Studio not found');
     }
     return this.studiosService.getDashboardStats(studio.id);
+  }
+
+  @Get(':slug/goals')
+  @ApiOkResponse({ description: 'Studio goals with progress.' })
+  async getGoals(@Param('slug') slug: string): Promise<any> {
+    const studio = await this.studiosService.findBySlug(slug);
+    if (!studio) throw new NotFoundException('Studio not found');
+    return this.goalsService.getGoals(studio.id);
+  }
+
+  @Get(':slug/achievements')
+  @ApiOkResponse({ description: 'Studio achievements.' })
+  async getAchievements(@Param('slug') slug: string): Promise<any> {
+    const studio = await this.studiosService.findBySlug(slug);
+    if (!studio) throw new NotFoundException('Studio not found');
+    return this.studioAchievementsService.getAchievements(studio.id);
+  }
+
+  @Get(':slug/health')
+  @ApiOkResponse({ description: 'Studio health score.' })
+  async getHealth(@Param('slug') slug: string): Promise<any> {
+    const studio = await this.studiosService.findBySlug(slug);
+    if (!studio) throw new NotFoundException('Studio not found');
+    const existing = await this.studioHealthService.getHealth(studio.id);
+    if (existing) return existing;
+    return this.studioHealthService.calculate(studio.id);
+  }
+
+  @Post(':slug/health/refresh')
+  @UseGuards(SessionAuthGuard)
+  @ApiOkResponse({ description: 'Studio health score recalculated.' })
+  async refreshHealth(@Param('slug') slug: string): Promise<any> {
+    const studio = await this.studiosService.findBySlug(slug);
+    if (!studio) throw new NotFoundException('Studio not found');
+    return this.studioHealthService.calculate(studio.id);
+  }
+
+  @Get(':slug/reports/weekly')
+  @ApiOkResponse({ description: 'Weekly reports for a studio.' })
+  async getWeeklyReports(@Param('slug') slug: string): Promise<any> {
+    const studio = await this.studiosService.findBySlug(slug);
+    if (!studio) throw new NotFoundException('Studio not found');
+    return this.weeklyReportsService.getReports(studio.id);
   }
 
   @Post(':slug/transfer')

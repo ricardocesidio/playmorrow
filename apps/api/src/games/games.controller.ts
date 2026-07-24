@@ -22,6 +22,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { Throttle } from '@nestjs/throttler';
 import { AnalyticsService } from '../analytics/analytics.service';
+import { EventBus } from '../common/event-bus';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GamesService } from './games.service';
@@ -32,6 +33,7 @@ export class GamesController {
   constructor(
     private readonly gamesService: GamesService,
     private readonly analyticsService: AnalyticsService,
+    private readonly eventBus: EventBus,
   ) {}
 
   @Post('studios/:studioSlug/games')
@@ -43,7 +45,12 @@ export class GamesController {
     @Param('studioSlug') studioSlug: string,
     @Body() dto: CreateGameDto,
   ) {
-    return this.gamesService.create(user.id, studioSlug, dto);
+    const game = await this.gamesService.create(user.id, studioSlug, dto);
+    if (dto.status === 'RELEASED') {
+      this.eventBus.emit({ type: 'game_published', actorId: user.id, gameId: game.id, studioId: game.studio?.id, targetType: 'GAME', targetId: game.id, metadata: { title: game.title } });
+    }
+    this.eventBus.emit({ type: 'game_updated', actorId: user.id, gameId: game.id, studioId: game.studio?.id, targetType: 'GAME', targetId: game.id });
+    return game;
   }
 
   @Get('studios/:studioSlug/games')
@@ -95,6 +102,8 @@ export class GamesController {
       referrer: req.headers['referer'],
     }).catch(() => {});
 
+    this.eventBus.emit({ type: 'game_view', gameId: game.id, studioId: (game as any).studio?.id, targetType: 'GAME', targetId: game.id });
+
     return game;
   }
 
@@ -107,7 +116,12 @@ export class GamesController {
     @Param('slug') slug: string,
     @Body() dto: UpdateGameDto,
   ) {
-    return this.gamesService.update(user.id, slug, dto);
+    const game = await this.gamesService.update(user.id, slug, dto);
+    if (dto.status === 'RELEASED' && game.status === 'RELEASED') {
+      this.eventBus.emit({ type: 'game_published', actorId: user.id, gameId: game.id, studioId: game.studio?.id, targetType: 'GAME', targetId: game.id, metadata: { title: game.title } });
+    }
+    this.eventBus.emit({ type: 'game_updated', actorId: user.id, gameId: game.id, studioId: game.studio?.id, targetType: 'GAME', targetId: game.id, metadata: { trailerUrl: dto.trailerUrl, screenshotCount: dto.media?.length } });
+    return game;
   }
 
   @Delete('games/:slug')

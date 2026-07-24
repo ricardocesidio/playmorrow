@@ -297,4 +297,54 @@ export class NotificationsService {
     const comment = await this.prisma.comment.findUnique({ where: { id: commentId } });
     return comment?.authorId ?? null;
   }
+
+  // ── Intelligent notification helpers ─────────────────────────────────
+
+  async sendMilestoneNotification(studioId: string, title: string, body: string): Promise<void> {
+    const adminIds = await this.resolveStudioAdminIdsForStudio(studioId);
+    if (adminIds.length === 0) return;
+    await this.createManyDeduped(
+      adminIds.map((recipientId) => ({
+        recipientId,
+        actorId: null,
+        type: 'STUDIO_MILESTONE',
+        title,
+        body,
+        targetType: 'STUDIO',
+        targetId: studioId,
+      })),
+    );
+  }
+
+  async sendWeeklyReportNotification(studioId: string, reportId: string): Promise<void> {
+    const adminIds = await this.resolveStudioAdminIdsForStudio(studioId);
+    if (adminIds.length === 0) return;
+    await this.createManyDeduped(
+      adminIds.map((recipientId) => ({
+        recipientId,
+        actorId: null,
+        type: 'WEEKLY_REPORT',
+        title: 'Weekly Report Ready',
+        body: 'Your weekly studio analytics report is available.',
+        targetType: 'STUDIO',
+        targetId: studioId,
+      })),
+    );
+  }
+
+  async sendAchievementNotification(studioId: string, achievement: string): Promise<void> {
+    const adminIds = await this.resolveStudioAdminIdsForStudio(studioId);
+    if (adminIds.length === 0) return;
+    await this.createManyDeduped(
+      adminIds.map((recipientId) => ({
+        recipientId,
+        actorId: null,
+        type: 'ACHIEVEMENT_UNLOCKED',
+        title: `Achievement Unlocked: ${achievement}`,
+        body: `Your studio earned the "${achievement}" achievement!`,
+        targetType: 'STUDIO',
+        targetId: studioId,
+      })),
+    );
+  }
 }

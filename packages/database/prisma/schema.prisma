@@ -235,7 +235,11 @@ model Studio {
   invitations  StudioInvitation[]
   auditLogs    AuditLog[]
   xpEvents     StudioXpEvent[]
-  chatMessages StudioChatMessage[]
+  chatMessages      StudioChatMessage[]
+  goals             StudioGoal[]
+  achievements      StudioAchievement[]
+  healthScores      StudioHealthScore[]
+  weeklyReports     StudioWeeklyReport[]
 
   @@map("studios")
 }
@@ -860,6 +864,114 @@ model PasswordResetToken {
   @@index([userId])
   @@index([expiresAt])
   @@map("password_reset_tokens")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Activity Timeline — centralized event log
+// ──────────────────────────────────────────────────────────────────────────
+
+model ActivityEvent {
+  id        String   @id @default(cuid())
+  eventType String
+  actorId   String?
+  targetId  String?
+  targetType String?
+  studioId  String?
+  gameId    String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([studioId, createdAt])
+  @@index([gameId, createdAt])
+  @@index([eventType, createdAt])
+  @@index([createdAt])
+  @@map("activity_events")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Studio Goals — auto-tracked milestones
+// ──────────────────────────────────────────────────────────────────────────
+
+model StudioGoal {
+  id          String   @id @default(cuid())
+  studioId    String
+  goalId      String
+  title       String
+  description String?
+  category    String
+  requirement Int
+  progress    Int      @default(0)
+  isCompleted Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+
+  @@unique([studioId, goalId])
+  @@index([studioId, isCompleted])
+  @@map("studio_goals")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Studio Achievements
+// ──────────────────────────────────────────────────────────────────────────
+
+model StudioAchievement {
+  id             String   @id @default(cuid())
+  studioId       String
+  achievementId  String
+  title          String
+  description    String?
+  icon           String?
+  unlockedAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+
+  @@unique([studioId, achievementId])
+  @@index([studioId])
+  @@map("studio_achievements")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Studio Health Score snapshots
+// ──────────────────────────────────────────────────────────────────────────
+
+model StudioHealthScore {
+  id          String   @id @default(cuid())
+  studioId    String
+  score       Int
+  level       String   // EXCELLENT | GOOD | NEEDS_ATTENTION | INCOMPLETE
+  breakdown   Json?    // per-category scores
+  recommendations Json?
+  calculatedAt DateTime @default(now())
+
+  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+
+  @@index([studioId, calculatedAt])
+  @@map("studio_health_scores")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Weekly Reports
+// ──────────────────────────────────────────────────────────────────────────
+
+model StudioWeeklyReport {
+  id          String   @id @default(cuid())
+  studioId    String
+  weekStart   DateTime
+  weekEnd     DateTime
+  data        Json     // full report data
+  isDelivered Boolean  @default(false)
+  deliveredAt DateTime?
+  createdAt   DateTime @default(now())
+
+  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+
+  @@index([studioId, weekStart])
+  @@map("studio_weekly_reports")
 }
 
 // ──────────────────────────────────────────────────────────────────────────

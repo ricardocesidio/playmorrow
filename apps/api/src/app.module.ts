@@ -10,6 +10,7 @@ import { CsrfGuard } from './common/csrf.guard';
 // Removed default Nest scaffolding (AppController / AppService) per 2026-07-09 audit.
 // The API is fully prefixed under /api and served by feature modules.
 import { CsrfService } from './common/csrf.service';
+import { EventBusModule } from './common/event-bus.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { CommentsModule } from './comments/comments.module';
@@ -39,6 +40,11 @@ import { HelpModule } from './help/help.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { CspController } from './common/csp.controller';
 import { CountersService } from './common/counters.service';
+import { ActivityModule } from './activity/activity.module';
+import { GoalsModule } from './goals/goals.module';
+import { StudioAchievementsModule } from './achievements/studio-achievements.module';
+import { StudioHealthModule } from './health/studio-health.module';
+import { WeeklyReportsModule } from './reports/weekly-reports.module';
 
 @Module({
   imports: [
@@ -78,6 +84,12 @@ import { CountersService } from './common/counters.service';
     SupportModule,
     HelpModule,
     AnalyticsModule,
+    ActivityModule,
+    GoalsModule,
+    StudioAchievementsModule,
+    StudioHealthModule,
+    WeeklyReportsModule,
+    EventBusModule,
   ],
   controllers: [CspController],
   providers: [
