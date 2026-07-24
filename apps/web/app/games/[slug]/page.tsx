@@ -749,7 +749,7 @@ function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
           >
             {dl.screenshots && dl.screenshots.length > 0 && (
               <div className="aspect-[2/1] overflow-hidden">
-                <img src={dl.screenshots[0].url} alt="" className="size-full object-cover transition duration-300 group-hover:scale-[1.03]" />
+                <img src={dl.screenshots[0]!.url} alt="" className="size-full object-cover transition duration-300 group-hover:scale-[1.03]" />
               </div>
             )}
             <div className="p-3.5">
