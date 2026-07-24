@@ -15,6 +15,7 @@ import {
   HudLinkLogo,
   HudPanel,
 } from '@/components/playmorrow/hud';
+import { PostLoginTransition } from '@/components/loading/PostLoginTransition';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,6 +25,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showTransition, setShowTransition] = useState(false);
+  const [pendingPath, setPendingPath] = useState('/dashboard');
   const searchParams = useSearchParams();
 
   // Show error from redirect (e.g. from OAuth or old flow)
@@ -84,8 +87,8 @@ export default function LoginPage() {
                 setLoading(true);
                 try {
                   await login(emailOrUsername, password);
-                  // Success: the useEffect will redirect to /dashboard once isAuthenticated updates
-                  router.replace('/dashboard');
+                  setPendingPath('/dashboard');
+                  setShowTransition(true);
                 } catch (err: unknown) {
                   if (err instanceof EmailNotVerifiedError) {
                     router.push(`/verify-email?email=${encodeURIComponent(err.email)}&from=login`);
@@ -197,6 +200,9 @@ export default function LoginPage() {
           </HudPanel>
         </div>
       </main>
+      {showTransition && (
+        <PostLoginTransition onDone={() => router.replace(pendingPath)} />
+      )}
     </div>
   );
 }

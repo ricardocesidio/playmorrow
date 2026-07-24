@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Check, Gamepad2, Building2, Heart, User, AtSign, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { HudPanel } from '@/components/playmorrow/hud';
 import { Input } from '@/components/ui/input';
 import { API } from '@/lib/api/client';
+import { PostLoginTransition } from '@/components/loading/PostLoginTransition';
 
 const PLAYER_STEPS = ['Account Type', 'Username', 'Profile', 'Review', 'Follow Studios', 'Wishlist Games'];
 const STUDIO_STEPS = ['Account Type', 'Username', 'Profile', 'Review'];
@@ -40,6 +41,7 @@ const COUNTRIES = [
 ];
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const provider = searchParams.get('provider');
   const email = searchParams.get('email') || '';
@@ -61,6 +63,8 @@ export default function OnboardingPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showTransition, setShowTransition] = useState(false);
+  const [pendingPath, setPendingPath] = useState('/dashboard');
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [selectedStudioSlugs, setSelectedStudioSlugs] = useState<string[]>([]);
   const [wishlistedGameSlugs, setWishlistedGameSlugs] = useState<string[]>([]);
@@ -180,7 +184,8 @@ export default function OnboardingPage() {
         document.cookie = `playmorrow_csrf=${data.csrfToken}; path=/; max-age=86400; SameSite=Lax`;
       }
       setSuccess(true);
-      window.location.href = '/dashboard';
+      setPendingPath('/dashboard');
+      setShowTransition(true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to complete setup');
     } finally { setLoading(false); }
@@ -192,20 +197,6 @@ export default function OnboardingPage() {
         e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Home' || e.key === 'End') return;
     if (!allowed.test(e.key)) e.preventDefault();
   };
-
-  if (success) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="size-12 rounded-full border-2 border-cyan bg-cyan/10 flex items-center justify-center">
-            <Check className="size-6 text-cyan" />
-          </div>
-          <p className="font-display text-lg font-semibold text-foreground">Account created!</p>
-          <p className="text-sm text-muted-foreground">Redirecting to your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
@@ -492,6 +483,19 @@ export default function OnboardingPage() {
           </div>
         </HudPanel>
       </div>
+      {showTransition ? (
+        <PostLoginTransition onDone={() => router.replace(pendingPath)} />
+      ) : success ? (
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <div className="flex flex-col items-center gap-4">
+            <div className="size-12 rounded-full border-2 border-cyan bg-cyan/10 flex items-center justify-center">
+              <Check className="size-6 text-cyan" />
+            </div>
+            <p className="font-display text-lg font-semibold text-foreground">Account created!</p>
+            <p className="text-sm text-muted-foreground">Redirecting to your dashboard...</p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

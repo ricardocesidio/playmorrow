@@ -1,3 +1,5 @@
+export { PlaymorrowLogo } from '@/components/brand/logo';
+
 interface LogoIconProps {
   className?: string;
 }
