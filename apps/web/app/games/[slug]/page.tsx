@@ -199,7 +199,7 @@ function PremiumGameDetail({
               <AboutPanel game={game} slug={slug} />
               <InfoLinksPanel game={game} slug={slug} />
               <RoadmapPanel roadmap={roadmap} />
-              <CommunityPanel slug={slug} user={user} game={game} />
+              <CommunityPanel slug={slug} />
             </aside>
           </section>
         </div>
@@ -846,7 +846,7 @@ function InfoLinksPanel({ game, slug }: { game: Game; slug: string }) {
   );
 }
 
-function CommunityPanel({ slug, user, game }: { slug: string; user: { id: string; role: string } | null; game: { studio?: { slug: string } } | null }) {
+function CommunityPanel({ slug }: { slug: string }) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const { data: commentsData, isLoading } = useGameComments(slug);

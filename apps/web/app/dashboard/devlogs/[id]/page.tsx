@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent, useEffect, useRef } from 'react';
+import { useState, type FormEvent, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -8,8 +8,7 @@ import { SiteHeader } from '@/components/site-header';
 import { MarkdownEditor } from '@/components/md-editor';
 
 import { Button } from '@/components/ui/button';
-import { api, ApiError } from '@/lib/api/client';
-import { ArrowLeft, FileText, ExternalLink, X, Calendar, Trash2 } from 'lucide-react';
+import { ApiError } from '@/lib/api/client';import { ArrowLeft, FileText, ExternalLink, X, Calendar, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/api/auth-context';
 import { useDevlog, useUpdateDevlog, useDeleteDevlog } from '@/lib/api/hooks';

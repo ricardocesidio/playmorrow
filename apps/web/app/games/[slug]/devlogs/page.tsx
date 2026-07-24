@@ -7,7 +7,6 @@ import { ArrowLeft, FileText, Flame, MessageCircle } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { HudPanel, CircuitFrame, HudStatusRail } from '@/components/playmorrow/hud';
-import { StatusBadge } from '@/components/status-badge';
 import { useGame, useGameDevlogs } from '@/lib/api/hooks';
 
 const PAGE_SIZE = 5;
