@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { AnalyticsModule } from '../analytics/analytics.module';
 import { AuthModule } from '../auth/auth.module';
 import { GamesModule } from '../games/games.module';
 import { PlayerXpModule } from '../player-xp/player-xp.module';
@@ -9,7 +10,7 @@ import { WishlistController } from './wishlist.controller';
 import { WishlistService } from './wishlist.service';
 
 @Module({
-  imports: [PrismaModule, AuthModule, GamesModule, StudiosModule, PlayerXpModule],
+  imports: [PrismaModule, AuthModule, GamesModule, StudiosModule, PlayerXpModule, AnalyticsModule],
   controllers: [WishlistController],
   providers: [WishlistService],
 })

@@ -12,13 +12,16 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import type { Request } from 'express';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { Throttle } from '@nestjs/throttler';
+import { AnalyticsService } from '../analytics/analytics.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GamesService } from './games.service';
@@ -26,7 +29,10 @@ import { GamesService } from './games.service';
 @ApiTags('games')
 @Controller()
 export class GamesController {
-  constructor(private readonly gamesService: GamesService) {}
+  constructor(
+    private readonly gamesService: GamesService,
+    private readonly analyticsService: AnalyticsService,
+  ) {}
 
   @Post('studios/:studioSlug/games')
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
@@ -73,11 +79,22 @@ export class GamesController {
 
   @Get('games/:slug')
   @ApiOkResponse({ description: 'Game profile.' })
-  async findBySlug(@Param('slug') slug: string) {
+  async findBySlug(@Param('slug') slug: string, @Req() req: Request) {
     const game = await this.gamesService.findBySlug(slug);
     if (!game) {
       throw new NotFoundException('Game not found');
     }
+
+    this.analyticsService.track({
+      eventType: 'game_view',
+      gameId: game.id,
+      studioId: (game as any).studio?.id,
+      sessionId: (req as any).sessionId,
+      ip: req.ip,
+      userAgent: req.headers['user-agent'],
+      referrer: req.headers['referer'],
+    }).catch(() => {});
+
     return game;
   }
 
