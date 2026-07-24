@@ -60,34 +60,35 @@ export default function GameDevlogsPage() {
             </HudPanel>
           ) : (
             <>
-              <div className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2">
                 {devlogs.map((dl) => (
                   <Link
                     key={dl.id}
                     href={`/devlogs/${dl.id}`}
-                    className="clip-corner group block border border-border/70 bg-[#050b0f]/80 p-5 shadow transition hover:border-cyan/50"
+                    className="clip-corner group block overflow-hidden border border-border/70 bg-[#050b0f]/80 transition hover:border-cyan/50"
                   >
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      {dl.screenshots && dl.screenshots.length > 0 ? (
-                        <div className="w-full sm:w-48 h-40 sm:h-28 overflow-hidden rounded border border-border/40 shrink-0">
-                          <img src={dl.screenshots[0]!.url} alt="" className="size-full object-cover" />
-                        </div>
-                      ) : null}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-2 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground mb-1">
-                          <StatusBadge status={dl.status} />
-                          {dl.publishedAt && <span>{new Date(dl.publishedAt).toLocaleDateString()}</span>}
-                          {dl.category && <span className="border border-violet/30 bg-violet/5 px-1 py-0.5 text-[0.5rem] text-violet">{dl.category}</span>}
-                        </div>
-                        <h2 className="font-display text-lg font-black uppercase tracking-tight text-white group-hover:text-cyan">{dl.title}</h2>
-                        {dl.subtitle && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{dl.subtitle}</p>}
-                        {dl.body && <p className="mt-1 text-xs text-muted-foreground line-clamp-3">{dl.body.replace(/[#*`_]/g, ' ').substring(0, 180)}...</p>}
-                        <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
-                          {dl.author && <span>by {dl.author.displayName || dl.author.username}</span>}
-                          <span className="inline-flex items-center gap-1"><Flame className="size-3" />{dl.reactionsCount ?? 0}</span>
-                          <span className="inline-flex items-center gap-1"><MessageCircle className="size-3" />{dl.commentsCount ?? 0}</span>
-                          {dl.readingTimeMin && <span>{dl.readingTimeMin} min</span>}
-                        </div>
+                    {dl.screenshots && dl.screenshots.length > 0 ? (
+                      <div className="aspect-[2/1] overflow-hidden">
+                        <img src={dl.screenshots[0]!.url} alt="" className="size-full object-cover transition duration-300 group-hover:scale-[1.03]" />
+                      </div>
+                    ) : (
+                      <div className="aspect-[2/1] flex items-center justify-center bg-[#050b0f]">
+                        <FileText className="size-10 text-muted-foreground/20" />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <div className="flex flex-wrap items-center gap-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-2">
+                        {dl.publishedAt && <span>{new Date(dl.publishedAt).toLocaleDateString()}</span>}
+                        {dl.category && <span className="border border-violet/30 bg-violet/5 px-1.5 py-0.5 text-[8px] text-violet">{dl.category}</span>}
+                        <span>·</span>
+                        <span>{dl.readingTimeMin || 1} min read</span>
+                      </div>
+                      <h2 className="font-display text-lg font-bold text-foreground group-hover:text-cyan transition-colors leading-snug">{dl.title}</h2>
+                      {dl.subtitle && <p className="mt-1 text-sm text-muted-foreground/70 line-clamp-2">{dl.subtitle}</p>}
+                      <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground/60">
+                        {dl.author && <span>by {dl.author.displayName || dl.author.username}</span>}
+                        <span className="inline-flex items-center gap-1"><Flame className="size-3" />{dl.reactionsCount ?? 0}</span>
+                        <span className="inline-flex items-center gap-1"><MessageCircle className="size-3" />{dl.commentsCount ?? 0}</span>
                       </div>
                     </div>
                   </Link>
