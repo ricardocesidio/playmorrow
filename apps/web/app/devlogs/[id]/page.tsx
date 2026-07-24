@@ -378,10 +378,16 @@ export default function DevlogDetailPage() {
 
         <div className="relative mx-auto grid max-w-6xl gap-10 px-5 pb-16 sm:px-8 lg:px-10 lg:grid-cols-[320px_1fr] xl:grid-cols-[380px_1fr]">
             {/* ── LEFT SIDEBAR ── */}
-            <aside className="space-y-6">
+             <aside className="space-y-6">
+              {/* Reactions at top */}
+              <div>
+                <DevlogReactions devlogId={id} />
+              </div>
+
               {/* Hero image */}
               {devlog.screenshots?.[0] && (
-                <div className="clip-corner-sm overflow-hidden border border-cyan/40 cursor-pointer shadow-[0_0_16px_rgb(62_231_255_/_0.12)]"
+                <div className="clip-corner-sm overflow-hidden cursor-pointer"
+                  style={{ border: '2px solid rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}
                   onClick={() => { setLightboxOpen(true); setLightboxIndex(0); }}>
                   <img src={devlog.screenshots[0].url} alt="" className="w-full object-cover" />
                 </div>
@@ -406,7 +412,7 @@ export default function DevlogDetailPage() {
                     <h3 className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Screenshots</h3>
                     <div className="grid grid-cols-2 gap-2">
                       {screenshots.slice(1).map((s, i) => (
-                        <img key={s.id} src={s.url} alt={s.caption ?? ''} className="w-full clip-corner-sm border border-cyan/30 object-cover cursor-pointer hover:border-cyan/70 transition shadow-[0_0_12px_rgb(62_231_255_/_0.1)]"
+                        <img key={s.id} src={s.url} alt={s.caption ?? ''} className="w-full clip-corner-sm object-cover cursor-pointer" style={{ border: '2px solid rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}
                           onClick={() => { setLightboxOpen(true); setLightboxIndex(i + 1); }} />
                       ))}
                     </div>

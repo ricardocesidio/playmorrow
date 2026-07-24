@@ -64,6 +64,11 @@
   100% { transform: translateX(100%);  }
 }
 
+@keyframes neonBorder {
+  0%, 100% { border-color: rgb(62 231 255); box-shadow: 0 0 8px rgb(62 231 255 / 0.3), inset 0 0 8px rgb(62 231 255 / 0.05); }
+  50%      { border-color: rgb(255 87 77); box-shadow: 0 0 12px rgb(255 87 77 / 0.4), inset 0 0 12px rgb(255 87 77 / 0.08); }
+}
+
 @keyframes logoColorShift {
   0%, 100% { color: rgb(255 87 77); filter: drop-shadow(0 0 20px rgb(255 87 77 / 0.45)); }
   35%      { color: rgb(62 231 255); filter: drop-shadow(0 0 20px rgb(62 231 255 / 0.5)); }
