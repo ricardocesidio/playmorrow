@@ -8,6 +8,7 @@ import { SiteHeader } from '@/components/site-header';
 import { MarkdownEditor } from '@/components/md-editor';
 
 import { Button } from '@/components/ui/button';
+import { api, ApiError } from '@/lib/api/client';
 import { ArrowLeft, FileText, ExternalLink, X, Calendar, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/api/auth-context';
@@ -192,7 +193,7 @@ export default function EditDevlogPage() {
                   </div>
                 ))}
                 {screenshots.length < 10 && (
-                  <label className="flex size-24 cursor-pointer items-center justify-center border border-dashed border-cyan/40 bg-cyan/5 text-cyan hover:bg-cyan/10 transition">
+                  <label className="flex w-full min-h-[96px] cursor-pointer items-center justify-center border border-dashed border-cyan/40 bg-cyan/5 text-cyan hover:bg-cyan/10 transition">
                     <span className="text-2xl leading-none">+</span>
                     <input type="file" accept="image/png,image/jpeg" className="hidden" multiple
                       onChange={async (e) => {
@@ -204,13 +205,14 @@ export default function EditDevlogPage() {
                           const form = new FormData();
                           form.append('file', file);
                           try {
-                            const csrfMatch = document.cookie.match(/(?:^|;\s*)playmorrow_csrf=([^;]*)/);
-                            const csrfToken = csrfMatch?.[1] ? decodeURIComponent(csrfMatch[1]) : null;
-                            const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include', headers: csrfToken ? { 'X-CSRF-Token': csrfToken } as Record<string, string> : undefined });
-                            if (!res.ok) continue;
+                            const res = await fetch('/api/upload', {
+                              method: 'POST', body: form, credentials: 'include',
+                              headers: { 'X-CSRF-Token': (() => { const m = document.cookie.match(/(?:^|;\s*)playmorrow_csrf=([^;]*)/); return m?.[1] ? decodeURIComponent(m[1]) : ''; })() } as Record<string, string>,
+                            });
+                            if (!res.ok) { const t = await res.text().catch(() => ''); console.error('Upload failed:', res.status, t); continue; }
                             const data = await res.json();
                             setScreenshots((prev) => [...prev, { id: '', url: data.url, order: prev.length }]);
-                          } catch { /* skip failed uploads */ }
+                          } catch (e) { console.error('Upload error:', e); }
                         }
                         e.target.value = '';
                       }}
