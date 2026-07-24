@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -297,6 +297,19 @@ export default function DevlogDetailPage() {
   const { data: commentReactions } = useDevlogCommentReactions(id, token ?? undefined);
   const createComment = useCreateComment();
   const [newComment, setNewComment] = useState('');
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxOpen(false);
+      if (e.key === 'ArrowLeft') setLightboxIndex((i) => { const all = (devlog?.screenshots ?? []).map((s) => s.url); return i > 0 ? i - 1 : all.length - 1; });
+      if (e.key === 'ArrowRight') setLightboxIndex((i) => { const all = (devlog?.screenshots ?? []).map((s) => s.url); return i < all.length - 1 ? i + 1 : 0; });
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [lightboxOpen, devlog?.screenshots]);
 
   const handlePostComment = async () => {
     if (!newComment.trim() || !token) return;
@@ -369,7 +382,8 @@ export default function DevlogDetailPage() {
             <aside className="space-y-6">
               {/* Hero image */}
               {devlog.screenshots?.[0] && (
-                <div className="clip-corner overflow-hidden border border-border/60">
+                <div className="clip-corner overflow-hidden border border-border/60 cursor-pointer"
+                  onClick={() => { setLightboxOpen(true); setLightboxIndex(0); }}>
                   <img src={devlog.screenshots[0].url} alt="" className="w-full object-cover" />
                 </div>
               )}
@@ -396,7 +410,12 @@ export default function DevlogDetailPage() {
                 return (
                   <div className="space-y-3 pt-2 border-t border-border/30">
                     <h3 className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Screenshots</h3>
-                    <LightboxGallery images={screenshots.map((s) => s.url)} />
+                    <div className="grid grid-cols-2 gap-2">
+                      {screenshots.slice(1).map((s, i) => (
+                        <img key={s.id} src={s.url} alt={s.caption ?? ''} className="w-full border border-border/40 object-cover cursor-pointer hover:border-cyan/60 transition"
+                          onClick={() => { setLightboxOpen(true); setLightboxIndex(i + 1); }} />
+                      ))}
+                    </div>
                   </div>
                 );
               })()}
@@ -499,43 +518,23 @@ export default function DevlogDetailPage() {
           </section>
             </div>
           </div>
+
+          {/* Global lightbox */}
+          {lightboxOpen && (() => {
+            const all = (devlog.screenshots ?? []).map((s) => s.url);
+            return (
+              <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95" onClick={() => setLightboxOpen(false)}>
+                <button onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i > 0 ? i - 1 : all.length - 1)); }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 grid size-12 place-items-center text-white/60 hover:text-white text-3xl cursor-pointer z-10">‹</button>
+                <img src={all[lightboxIndex]} alt="" className="max-h-[90vh] max-w-[90vw] object-contain" onClick={(e) => e.stopPropagation()} />
+                <button onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i < all.length - 1 ? i + 1 : 0)); }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 grid size-12 place-items-center text-white/60 hover:text-white text-3xl cursor-pointer z-10">›</button>
+                <button onClick={() => setLightboxOpen(false)} className="absolute top-4 right-4 grid size-10 place-items-center text-white/60 hover:text-white text-xl cursor-pointer z-10">✕</button>
+                <div className="absolute bottom-6 left-0 right-0 text-center text-sm text-white/50 font-mono">{lightboxIndex + 1} / {all.length}</div>
+              </div>
+            );
+          })()}
       </main>
-    </>
-  );
-}
-
-function LightboxGallery({ images }: { images: string[] }) {
-  const [open, setOpen] = useState(false);
-  const [index, setIndex] = useState(0);
-
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') setOpen(false);
-    if (e.key === 'ArrowLeft') setIndex((i) => (i > 0 ? i - 1 : images.length - 1));
-    if (e.key === 'ArrowRight') setIndex((i) => (i < images.length - 1 ? i + 1 : 0));
-  }, [images.length]);
-
-  return (
-    <>
-      <div className="grid grid-cols-2 gap-2">
-        {images.map((url, i) => (
-          <img key={i} src={url} alt="" className="w-full border border-border/40 object-cover cursor-pointer hover:border-cyan/60 transition"
-            onClick={() => { setIndex(i); setOpen(true); }} />
-        ))}
-      </div>
-      {open && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90" onClick={() => setOpen(false)} role="dialog" aria-modal="true"
-          onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false); }}
-          tabIndex={-1}
-        >
-          <button onClick={(e) => { e.stopPropagation(); setIndex((i) => (i > 0 ? i - 1 : images.length - 1)); }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 grid size-12 place-items-center text-white/60 hover:text-white text-3xl cursor-pointer z-10">‹</button>
-          <img src={images[index]} alt="" className="max-h-[90vh] max-w-[90vw] object-contain" onClick={(e) => e.stopPropagation()} />
-          <button onClick={(e) => { e.stopPropagation(); setIndex((i) => (i < images.length - 1 ? i + 1 : 0)); }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 grid size-12 place-items-center text-white/60 hover:text-white text-3xl cursor-pointer z-10">›</button>
-          <button onClick={() => setOpen(false)} className="absolute top-4 right-4 grid size-10 place-items-center text-white/60 hover:text-white text-xl cursor-pointer z-10">✕</button>
-          <div className="absolute bottom-6 left-0 right-0 text-center text-sm text-white/50 font-mono">{index + 1} / {images.length}</div>
-        </div>
-      )}
     </>
   );
 }
