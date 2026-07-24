@@ -21,6 +21,7 @@ import {
   Link as LinkIcon,
   Lock,
   Monitor,
+  FileText,
   Pencil,
   Play,
   Plus,
@@ -747,26 +748,39 @@ function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
             href={`/devlogs/${dl.id}`}
             className="group block clip-corner overflow-hidden border border-border/60 bg-[#050b0f]/60 transition hover:border-cyan/60"
           >
-            {dl.screenshots && dl.screenshots.length > 0 && (
-              <div className="aspect-[2/1] overflow-hidden">
-                <img src={dl.screenshots[0]!.url} alt="" className="size-full object-cover transition duration-300 group-hover:scale-[1.03]" />
-              </div>
-            )}
-            <div className="p-3.5">
-              <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-2">
-                {dl.publishedAt && <span>{new Date(dl.publishedAt).toLocaleDateString()}</span>}
-                <span>·</span>
-                <span>{dl.readingTimeMin || 1} min read</span>
-              </div>
-              <h3 className="font-display text-base font-bold text-foreground group-hover:text-cyan transition-colors leading-snug">{dl.title}</h3>
-              {dl.subtitle && <p className="mt-1 text-xs text-muted-foreground/70 line-clamp-1">{dl.subtitle}</p>}
-              {dl.body && <p className="mt-1.5 text-xs text-muted-foreground/50 line-clamp-2">{dl.body.replace(/[#*`_]/g, ' ').substring(0, 150)}...</p>}
-              {dl.author && (
-                <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground/60">
-                  <span>by {dl.author.displayName || dl.author.username}</span>
+            {/* Image with title overlay */}
+            <div className="relative">
+              {dl.screenshots && dl.screenshots.length > 0 ? (
+                <div className="aspect-[2/1] overflow-hidden">
+                  <img src={dl.screenshots[0]!.url} alt="" className="size-full object-cover transition duration-300 group-hover:scale-[1.03]" />
+                </div>
+              ) : (
+                <div className="aspect-[2/1] flex items-center justify-center bg-[#050b0f]">
+                  <FileText className="size-10 text-muted-foreground/20" />
                 </div>
               )}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050b0f] via-[#050b0f]/40 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-widest text-cyan/70 mb-1">
+                  {dl.publishedAt && <span>{new Date(dl.publishedAt).toLocaleDateString()}</span>}
+                  <span>·</span>
+                  <span>{dl.readingTimeMin || 1} min read</span>
+                </div>
+                <h3 className="font-display text-lg font-bold text-white drop-shadow-[0_2px_8px_rgb(0_0_0_/_0.8)] group-hover:text-cyan transition-colors">{dl.title}</h3>
+                {dl.subtitle && <p className="mt-0.5 text-sm text-white/70 line-clamp-1 drop-shadow-[0_2px_4px_rgb(0_0_0_/_0.6)]">{dl.subtitle}</p>}
+              </div>
             </div>
+            {/* Preview text below */}
+            {dl.body && (
+              <div className="px-4 py-3">
+                <p className="text-xs text-muted-foreground/60 line-clamp-2">{dl.body.replace(/[#*`_]/g, ' ').substring(0, 150)}...</p>
+                {dl.author && (
+                  <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground/50">
+                    <span>by {dl.author.displayName || dl.author.username}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </Link>
         ))}
       </div>
