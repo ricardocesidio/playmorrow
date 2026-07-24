@@ -160,13 +160,11 @@ export class HelpService {
     ]);
 
     return {
-      data: articles,
-      meta: {
-        total,
-        page,
-        pageSize,
-        totalPages: Math.ceil(total / pageSize),
-      },
+      items: articles,
+      total,
+      page,
+      pageSize,
+      hasMore: page * pageSize < total,
     };
   }
 

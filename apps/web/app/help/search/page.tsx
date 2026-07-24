@@ -37,8 +37,8 @@ export default function HelpSearchPage() {
     setError('');
     setSelectedIdx(-1);
     try {
-      const data = await api.get<PaginatedHelpArticles>(`/help/articles/search?q=${encodeURIComponent(q)}`);
-      setResults(data.items);
+      const data = await api.get<HelpArticle[] | PaginatedHelpArticles>(`/help/articles/search?q=${encodeURIComponent(q)}`);
+      setResults(Array.isArray(data) ? data : data.items);
     } catch (err) {
       if (err instanceof ApiError) {
         setError('Search failed.');
