@@ -84,7 +84,7 @@ function DevlogReactions({ devlogId }: { devlogId: string }) {
   if (isLoading) return <div className="mb-8 h-8 animate-pulse rounded-lg bg-muted" />;
 
   return (
-    <div className="mb-8 flex flex-wrap items-center gap-2">
+    <div className="mb-8 flex justify-between gap-1">
       {Object.entries(counts).map(([type, count]) => (
         <ReactionButton
           key={type}
