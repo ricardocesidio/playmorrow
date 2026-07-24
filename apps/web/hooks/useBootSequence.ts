@@ -28,9 +28,9 @@ function getVisitTier(): VisitTier {
 function getDuration(tier: VisitTier, reducedMotion: boolean): number {
   if (reducedMotion) return 100;
   switch (tier) {
-    case 'first-ever': return 2200;
-    case 'returning-same-day': return 1000;
-    case 'returning-later': return 500;
+    case 'first-ever': return 3000;
+    case 'returning-same-day': return 2000;
+    case 'returning-later': return 1500;
   }
 }
 
