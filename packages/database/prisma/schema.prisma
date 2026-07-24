@@ -199,6 +199,8 @@ model User {
    supportTicketsAssigned   SupportTicket[] @relation("SupportTicketsAssigned")
    supportReplies          SupportReply[]
    supportTicketHistory    SupportTicketHistory[] @relation("SupportHistoryActor")
+   helpArticles            HelpArticle[]
+   helpFeedback            HelpArticleFeedback[]
 
    @@index([role])
    @@map("users")
@@ -858,6 +860,70 @@ model PasswordResetToken {
   @@index([userId])
   @@index([expiresAt])
   @@map("password_reset_tokens")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Help Center — articles, categories, feedback, guides
+// ──────────────────────────────────────────────────────────────────────────
+
+model HelpCategory {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  icon        String?
+  position    Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  articles HelpArticle[]
+
+  @@index([position])
+  @@map("help_categories")
+}
+
+model HelpArticle {
+  id            String      @id @default(cuid())
+  slug          String      @unique
+  title         String
+  description   String?
+  body          String      @db.Text
+  categoryId    String?
+  tags          String[]
+  authorId      String
+  isPublished   Boolean     @default(false)
+  isFeatured    Boolean     @default(false)
+  publishedAt   DateTime?
+  readingTimeMin Int?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  category HelpCategory?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  author    User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  feedback  HelpArticleFeedback[]
+
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([isPublished])
+  @@index([isFeatured])
+  @@index([publishedAt])
+  @@map("help_articles")
+}
+
+model HelpArticleFeedback {
+  id        String   @id @default(cuid())
+  articleId String
+  userId    String
+  helpful   Boolean
+  comment   String?
+  createdAt DateTime @default(now())
+
+  article HelpArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, userId])
+  @@map("help_article_feedback")
 }
 
 // ──────────────────────────────────────────────────────────────────────────

@@ -31,6 +31,7 @@ export function SiteFooter() {
           <Link href="/about" className="hover:text-foreground">About</Link>
           <Link href="/contact" className="hover:text-foreground">Contact</Link>
           <Link href="/support" className="hover:text-foreground">Support</Link>
+          <Link href="/help" className="hover:text-foreground">Help Center</Link>
         </div>
 
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground/50">
