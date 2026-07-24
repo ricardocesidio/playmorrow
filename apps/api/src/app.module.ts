@@ -35,6 +35,7 @@ import { PushNotificationsModule } from './push-notifications/push-notifications
 import { AchievementModule } from './achievements/achievement.module';
 import { PlayerXpModule } from './player-xp/player-xp.module';
 import { SupportModule } from './support/support.module';
+import { HelpModule } from './help/help.module';
 import { CspController } from './common/csp.controller';
 import { CountersService } from './common/counters.service';
 
@@ -74,6 +75,7 @@ import { CountersService } from './common/counters.service';
     AchievementModule,
     PlayerXpModule,
     SupportModule,
+    HelpModule,
   ],
   controllers: [CspController],
   providers: [
