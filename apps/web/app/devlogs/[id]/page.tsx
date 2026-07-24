@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -390,16 +390,16 @@ export default function DevlogDetailPage() {
               </div>
 
               {/* Remaining screenshots gallery */}
-              {devlog.screenshots?.length > 1 && (
-                <div className="space-y-3 pt-2 border-t border-border/30">
-                  <h3 className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Screenshots</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {devlog.screenshots.slice(1).map((s) => (
-                      <img key={s.id} src={s.url} alt={s.caption ?? ''} className="w-full border border-border/40 object-cover cursor-pointer hover:border-cyan/60 transition" />
-                    ))}
+              {(() => {
+                const screenshots = devlog.screenshots ?? [];
+                if (screenshots.length <= 1) return null;
+                return (
+                  <div className="space-y-3 pt-2 border-t border-border/30">
+                    <h3 className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Screenshots</h3>
+                    <LightboxGallery images={screenshots.map((s) => s.url)} />
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </aside>
 
             {/* ── RIGHT COLUMN — CONTENT ── */}
@@ -419,27 +419,29 @@ export default function DevlogDetailPage() {
                 </div>
               )}
 
-              {/* Author bar */}
-              <div className="flex items-center gap-3 pb-4 border-b border-border/40 mb-6">
-                {devlog.author?.avatarUrl && (
-                  <img src={devlog.author.avatarUrl} alt="" className="size-8 rounded-full border border-border/50 object-cover" />
-                )}
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-foreground">{devlog.author?.displayName}</span>
-                    {devlog.author?.role && devlog.author.role !== 'PLAYER' && (
-                      <span className="clip-corner border border-cyan/30 bg-cyan/5 px-1.5 py-0.5 font-mono text-[0.45rem] uppercase tracking-widest text-cyan">{devlog.author.role.toLowerCase()}</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground/60">
-                    <Link href={`/games/${devlog.game.slug}`} className="text-cyan/70 hover:text-cyan transition-colors">{devlog.game.title}</Link>
-                    {devlog.editedAt && <span>· Edited {new Date(devlog.editedAt).toLocaleDateString()}</span>}
-                  </div>
-                </div>
-                {isAuthenticated && (
-                  <Link href={`/dashboard/devlogs/${devlog.id}`} className="ml-auto clip-corner border border-cyan/40 bg-cyan/5 px-3 py-1 font-mono text-[0.5rem] uppercase tracking-widest text-cyan hover:bg-cyan/10 transition-colors">Edit</Link>
+          {/* Author bar */}
+          <div className="flex items-center gap-3 pb-4 border-b border-border/40 mb-6">
+            {devlog.author?.avatarUrl && (
+              <img src={devlog.author.avatarUrl} alt="" className="size-8 rounded-full border border-border/50 object-cover" />
+            )}
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-sm text-foreground">{devlog.author?.displayName}</span>
+                {devlog.author?.role && devlog.author.role !== 'PLAYER' && (
+                  <span className="clip-corner border border-cyan/30 bg-cyan/5 px-1.5 py-0.5 font-mono text-[0.45rem] uppercase tracking-widest text-cyan">{devlog.author.role.toLowerCase()}</span>
                 )}
               </div>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground/60">
+                <Link href={`/games/${devlog.game.slug}`} className="text-cyan/70 hover:text-cyan transition-colors">{devlog.game.title}</Link>
+                {devlog.editedAt && <span>· Edited {new Date(devlog.editedAt).toLocaleDateString()}</span>}
+              </div>
+            </div>
+            {isAuthenticated && (
+              <Link href={`/dashboard/devlogs/${devlog.id}`} className="ml-auto clip-corner border border-coral/60 bg-coral/10 px-4 py-2 font-mono text-xs uppercase tracking-widest text-coral hover:bg-coral hover:text-coral-foreground transition-colors shadow-[0_0_16px_rgb(255_87_77_/_0.2)]">
+                Edit devlog
+              </Link>
+            )}
+          </div>
 
               {/* Blog body */}
               <article className="prose prose-invert prose-lg max-w-none">
@@ -498,6 +500,42 @@ export default function DevlogDetailPage() {
             </div>
           </div>
       </main>
+    </>
+  );
+}
+
+function LightboxGallery({ images }: { images: string[] }) {
+  const [open, setOpen] = useState(false);
+  const [index, setIndex] = useState(0);
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') setOpen(false);
+    if (e.key === 'ArrowLeft') setIndex((i) => (i > 0 ? i - 1 : images.length - 1));
+    if (e.key === 'ArrowRight') setIndex((i) => (i < images.length - 1 ? i + 1 : 0));
+  }, [images.length]);
+
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-2">
+        {images.map((url, i) => (
+          <img key={i} src={url} alt="" className="w-full border border-border/40 object-cover cursor-pointer hover:border-cyan/60 transition"
+            onClick={() => { setIndex(i); setOpen(true); }} />
+        ))}
+      </div>
+      {open && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90" onClick={() => setOpen(false)} role="dialog" aria-modal="true"
+          onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false); }}
+          tabIndex={-1}
+        >
+          <button onClick={(e) => { e.stopPropagation(); setIndex((i) => (i > 0 ? i - 1 : images.length - 1)); }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 grid size-12 place-items-center text-white/60 hover:text-white text-3xl cursor-pointer z-10">‹</button>
+          <img src={images[index]} alt="" className="max-h-[90vh] max-w-[90vw] object-contain" onClick={(e) => e.stopPropagation()} />
+          <button onClick={(e) => { e.stopPropagation(); setIndex((i) => (i < images.length - 1 ? i + 1 : 0)); }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 grid size-12 place-items-center text-white/60 hover:text-white text-3xl cursor-pointer z-10">›</button>
+          <button onClick={() => setOpen(false)} className="absolute top-4 right-4 grid size-10 place-items-center text-white/60 hover:text-white text-xl cursor-pointer z-10">✕</button>
+          <div className="absolute bottom-6 left-0 right-0 text-center text-sm text-white/50 font-mono">{index + 1} / {images.length}</div>
+        </div>
+      )}
     </>
   );
 }
