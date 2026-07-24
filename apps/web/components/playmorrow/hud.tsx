@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { PlaymorrowLogo } from '@/components/brand/logo';
 
 export function PlaymorrowMark({ className }: { className?: string }) {
-  return <PlaymorrowLogo className={cn(className)} cutout showText />;
+  return <PlaymorrowLogo className={cn('text-coral', className)} cutout showText />;
 }
 
 export function HudLinkLogo() {
