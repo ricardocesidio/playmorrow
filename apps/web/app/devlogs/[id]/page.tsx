@@ -416,7 +416,7 @@ export default function DevlogDetailPage() {
               {devlog.editedAt && (
                 <span className="text-xs text-muted-foreground/50">Edited {new Date(devlog.editedAt).toLocaleDateString()}</span>
               )}
-              {(user?.id === devlog.author?.id || user?.role === 'ADMIN') && (
+              {isAuthenticated && (
                 <Link
                   href={`/dashboard/devlogs/${devlog.id}`}
                   className="clip-corner border border-cyan/40 bg-cyan/5 px-3 py-1 font-mono text-[0.5rem] uppercase tracking-widest text-cyan hover:bg-cyan/10 transition-colors"
