@@ -24,6 +24,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -140,7 +141,7 @@ export default function LoginPage() {
 
                 <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
                   <label className="inline-flex items-center gap-3 text-muted-foreground">
-                    <input type="checkbox" className="size-4 appearance-none border border-border-bright bg-background checked:border-cyan checked:bg-cyan" />
+                    <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="size-4 appearance-none border border-border-bright bg-background checked:border-cyan checked:bg-cyan" />
                     Remember me
                   </label>
                   <Link href="/forgot-password" className="text-cyan hover:text-cyan/80">Forgot password?</Link>
