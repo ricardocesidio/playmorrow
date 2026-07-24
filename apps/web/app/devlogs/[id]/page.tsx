@@ -354,15 +354,7 @@ export default function DevlogDetailPage() {
       <main className="relative min-h-screen bg-[#020609]">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
         
-        {/* Blog-style hero with cover image */}
-        {devlog.screenshots?.[0] && (
-          <div className="relative h-[320px] sm:h-[420px] overflow-hidden">
-            <img src={devlog.screenshots[0].url} alt="" className="size-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#020609] via-[#020609]/40 to-transparent" />
-          </div>
-        )}
-
-        <div className="relative mx-auto max-w-3xl px-5 pb-16 sm:px-8 lg:px-10">
+        <div className="relative mx-auto max-w-6xl px-5 pb-16 sm:px-8 lg:px-10">
           {/* Back link */}
           <div className="pt-6 pb-4">
             <Link
@@ -373,79 +365,90 @@ export default function DevlogDetailPage() {
             </Link>
           </div>
 
-          {/* Category & date */}
-          <div className="flex items-center gap-3 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground mb-4">
-            <span className="clip-corner border border-cyan/60 px-2 py-0.5 text-cyan">Devlog</span>
-            {devlog.category && <span className="clip-corner border border-violet/40 bg-violet/5 px-2 py-0.5 text-violet">{devlog.category}</span>}
-            {devlog.publishedAt && <span>{new Date(devlog.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>}
-            {devlog.readingTimeMin && <span className="text-muted-foreground/60">· {devlog.readingTimeMin} min read</span>}
-          </div>
+          <div className="grid gap-10 lg:grid-cols-[320px_1fr] xl:grid-cols-[380px_1fr]">
+            {/* ── LEFT SIDEBAR ── */}
+            <aside className="space-y-6">
+              {/* Hero image */}
+              {devlog.screenshots?.[0] && (
+                <div className="clip-corner overflow-hidden border border-border/60">
+                  <img src={devlog.screenshots[0].url} alt="" className="w-full object-cover" />
+                </div>
+              )}
 
-          {/* Title */}
-          <h1 className="font-display text-4xl sm:text-5xl font-black leading-[1.05] text-white mb-3">{devlog.title}</h1>
-          {devlog.subtitle && (
-            <p className="text-lg text-muted-foreground/80 mb-6">{devlog.subtitle}</p>
-          )}
+              {/* Category & date */}
+              <div className="flex flex-wrap items-center gap-2 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
+                <span className="clip-corner border border-cyan/60 px-2 py-0.5 text-cyan">Devlog</span>
+                {devlog.category && <span className="clip-corner border border-violet/40 bg-violet/5 px-2 py-0.5 text-violet">{devlog.category}</span>}
+              </div>
+              {devlog.publishedAt && (
+                <p className="font-mono text-xs text-muted-foreground">{new Date(devlog.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              )}
+              {devlog.readingTimeMin && <p className="font-mono text-xs text-muted-foreground">{devlog.readingTimeMin} min read</p>}
 
-          {/* Tags */}
-          {(devlog.tags?.length ?? 0) > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
-              {devlog.tags.map((tag) => (
-                <span key={tag} className="clip-corner border border-cyan/30 bg-cyan/5 px-2.5 py-1 font-mono text-[0.5rem] uppercase tracking-widest text-cyan/80">{tag}</span>
-              ))}
-            </div>
-          )}
+              {/* Reactions */}
+              <div className="pt-2 border-t border-border/30">
+                <DevlogReactions devlogId={id} />
+              </div>
 
-          {/* Author bar */}
-          <div className="flex items-center gap-3 pb-6 border-b border-border/40 mb-8">
-            {devlog.author?.avatarUrl && (
-              <img src={devlog.author.avatarUrl} alt="" className="size-9 rounded-full border border-border/50 object-cover" />
-            )}
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm text-foreground">{devlog.author?.displayName}</span>
-                {devlog.author?.role && devlog.author.role !== 'PLAYER' && (
-                  <span className="clip-corner border border-cyan/30 bg-cyan/5 px-1.5 py-0.5 font-mono text-[0.45rem] uppercase tracking-widest text-cyan">{devlog.author.role.toLowerCase()}</span>
+              {/* Remaining screenshots gallery */}
+              {devlog.screenshots?.length > 1 && (
+                <div className="space-y-3 pt-2 border-t border-border/30">
+                  <h3 className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Screenshots</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {devlog.screenshots.slice(1).map((s) => (
+                      <img key={s.id} src={s.url} alt={s.caption ?? ''} className="w-full border border-border/40 object-cover cursor-pointer hover:border-cyan/60 transition" />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </aside>
+
+            {/* ── RIGHT COLUMN — CONTENT ── */}
+            <div className="min-w-0">
+              {/* Title */}
+              <h1 className="font-display text-3xl sm:text-4xl font-black leading-[1.05] text-white mb-2">{devlog.title}</h1>
+              {devlog.subtitle && (
+                <p className="text-base text-muted-foreground/80 mb-4">{devlog.subtitle}</p>
+              )}
+
+              {/* Tags */}
+              {(devlog.tags?.length ?? 0) > 0 && (
+                <div className="flex flex-wrap gap-2 mb-5">
+                  {devlog.tags.map((tag) => (
+                    <span key={tag} className="clip-corner border border-cyan/30 bg-cyan/5 px-2 py-0.5 font-mono text-[0.5rem] uppercase tracking-widest text-cyan/80">{tag}</span>
+                  ))}
+                </div>
+              )}
+
+              {/* Author bar */}
+              <div className="flex items-center gap-3 pb-4 border-b border-border/40 mb-6">
+                {devlog.author?.avatarUrl && (
+                  <img src={devlog.author.avatarUrl} alt="" className="size-8 rounded-full border border-border/50 object-cover" />
+                )}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm text-foreground">{devlog.author?.displayName}</span>
+                    {devlog.author?.role && devlog.author.role !== 'PLAYER' && (
+                      <span className="clip-corner border border-cyan/30 bg-cyan/5 px-1.5 py-0.5 font-mono text-[0.45rem] uppercase tracking-widest text-cyan">{devlog.author.role.toLowerCase()}</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground/60">
+                    <Link href={`/games/${devlog.game.slug}`} className="text-cyan/70 hover:text-cyan transition-colors">{devlog.game.title}</Link>
+                    {devlog.editedAt && <span>· Edited {new Date(devlog.editedAt).toLocaleDateString()}</span>}
+                  </div>
+                </div>
+                {isAuthenticated && (
+                  <Link href={`/dashboard/devlogs/${devlog.id}`} className="ml-auto clip-corner border border-cyan/40 bg-cyan/5 px-3 py-1 font-mono text-[0.5rem] uppercase tracking-widest text-cyan hover:bg-cyan/10 transition-colors">Edit</Link>
                 )}
               </div>
-              <Link href={`/games/${devlog.game.slug}`} className="text-xs text-cyan/70 hover:text-cyan transition-colors">
-                {devlog.game.title}
-              </Link>
-            </div>
-            <div className="ml-auto flex items-center gap-3">
-              {devlog.editedAt && (
-                <span className="text-xs text-muted-foreground/50">Edited {new Date(devlog.editedAt).toLocaleDateString()}</span>
-              )}
-              {isAuthenticated && (
-                <Link
-                  href={`/dashboard/devlogs/${devlog.id}`}
-                  className="clip-corner border border-cyan/40 bg-cyan/5 px-3 py-1 font-mono text-[0.5rem] uppercase tracking-widest text-cyan hover:bg-cyan/10 transition-colors"
-                >
-                  Edit
-                </Link>
-              )}
-            </div>
-          </div>
 
-          {/* Reaction bar */}
-          <DevlogReactions devlogId={id} />
+              {/* Blog body */}
+              <article className="prose prose-invert prose-lg max-w-none">
+                <SanitizedMarkdown source={devlog.body} />
+              </article>
 
-          {/* Blog body */}
-          <article className="prose prose-invert prose-lg max-w-none">
-            <SanitizedMarkdown source={devlog.body} />
-          </article>
-
-          {/* Remaining screenshots gallery */}
-          {devlog.screenshots?.length > 1 && (
-            <div className="mt-12 grid gap-4 sm:grid-cols-2">
-              {devlog.screenshots.slice(1).map((s) => (
-                <img key={s.id} src={s.url} alt={s.caption ?? ''} className="w-full border border-border/40 object-cover" />
-              ))}
-            </div>
-          )}
-
-          {/* Comments */}
-          <section className="mt-16">
+              {/* Comments */}
+              <section className="mt-12">
             <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-black uppercase tracking-tight text-white">
               <MessageSquare className="size-4 text-cyan" />
               Comments {comments ? `(${countAllComments(comments)})` : ''}
