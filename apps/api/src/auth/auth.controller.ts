@@ -93,7 +93,7 @@ export class AuthController {
     const csrfToken = this.csrfService.generateToken(user.id);
     res.setHeader('X-CSRF-Token', csrfToken);
 
-    return { id: user.id, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER', csrfToken };
+    return { id: user.id, username: user.username, displayName: user.displayName, role: user.role, accountType: user.accountType ?? 'PLAYER', isOnboardingCompleted: user.isOnboardingCompleted ?? false, csrfToken };
   }
 
   @Post('session/logout')
