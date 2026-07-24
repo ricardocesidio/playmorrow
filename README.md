@@ -86,7 +86,7 @@ pnpm install
 pnpm dev
 ```
 
-Open http://localhost:3000. Demo login: `dev@playmorrow.example` / `Demo123!@`
+Open http://localhost:3000.
 
 ---
 

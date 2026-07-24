@@ -85,7 +85,7 @@ function DevlogReactions({ devlogId }: { devlogId: string }) {
       } else {
         await reactMut.mutateAsync({ devlogId, type, token: token || '' });
       }
-    } catch (e) { toast.error('Something went wrong. Please try again.') }
+    } catch { toast.error('Something went wrong. Please try again.') }
   };
 
   if (isLoading) return <div className="mb-8 h-8 animate-pulse rounded-lg bg-muted" />;
@@ -130,7 +130,7 @@ function CommentReactions({
       } else {
         await reactMut.mutateAsync({ commentId, devlogId, type, token: token || '' });
       }
-    } catch (e) { toast.error('Something went wrong. Please try again.') }
+    } catch { toast.error('Something went wrong. Please try again.') }
   };
 
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
@@ -188,7 +188,7 @@ function CommentItem({
       await createComment.mutateAsync({ devlogId, body: replyBody.trim(), parentId: comment.id, token: token || '' });
       setReplyBody('');
       setReplying(false);
-    } catch (e) { toast.error('Failed to post reply.'); }
+    } catch { toast.error('Failed to post reply.'); }
   };
 
   const handleEdit = async () => {
@@ -196,13 +196,13 @@ function CommentItem({
     try {
       await updateComment.mutateAsync({ devlogId, commentId: comment.id, body: editBody.trim(), token: token || '' });
       setEditing(false);
-    } catch (e) { toast.error('Failed to edit comment.'); }
+    } catch { toast.error('Failed to edit comment.'); }
   };
 
   const handleDelete = async () => {
     try {
       await deleteComment.mutateAsync({ devlogId, commentId: comment.id, token: token || '' });
-    } catch (e) { toast.error('Failed to delete comment.'); }
+    } catch { toast.error('Failed to delete comment.'); }
   };
 
   return (
@@ -322,7 +322,7 @@ export default function DevlogDetailPage() {
     try {
       await createComment.mutateAsync({ devlogId: id, body: newComment.trim(), token: token || '' });
       setNewComment('');
-    } catch (e) { toast.error('Failed to post comment.'); }
+    } catch { toast.error('Failed to post comment.'); }
   };
 
   const countAllComments = (items: Comment[]): number =>

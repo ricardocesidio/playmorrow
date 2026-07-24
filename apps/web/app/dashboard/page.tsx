@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { PlayerDashboard } from '@/components/dashboard/PlayerDashboard';
 import { StudioDashboard } from '@/components/dashboard/StudioDashboard';
 import { useAuth } from '@/lib/api/auth-context';

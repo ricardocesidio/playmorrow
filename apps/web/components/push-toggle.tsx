@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Bell, BellOff } from 'lucide-react';
 import { toast } from 'sonner';
-import { api, ApiError } from '@/lib/api/client';
+import { api } from '@/lib/api/client';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
