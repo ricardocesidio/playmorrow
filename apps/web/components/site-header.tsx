@@ -19,7 +19,7 @@ const NAV_LINKS = [
 export function SiteHeader() {
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
-  const { data: invitations } = useMyInvitations();
+  const { data: invitations } = useMyInvitations(isAuthenticated);
   const pendingCount = invitations?.length ?? 0;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
