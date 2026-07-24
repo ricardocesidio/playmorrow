@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventBusModule } from '../common/event-bus.module';
 import { AuthModule } from '../auth/auth.module';
 import { CommentsModule } from '../comments/comments.module';
 import { DevlogsModule } from '../devlogs/devlogs.module';
@@ -49,6 +50,7 @@ describe('Security — auth enforcement (e2e)', () => {
         ReactionsModule,
         ReportsModule,
         NotificationsModule,
+        EventBusModule,
         MockEmailModule,
         ScheduleModule.forRoot(),
       ],
@@ -62,8 +64,9 @@ describe('Security — auth enforcement (e2e)', () => {
   });
 
   afterAll(async () => {
-    // Cleanup test users
-    await prisma.user.deleteMany({ where: { email: { in: [EMAIL_A, EMAIL_B] } } }).catch(() => {});
+    if (prisma) {
+      await prisma.user.deleteMany({ where: { email: { in: [EMAIL_A, EMAIL_B] } } }).catch(() => {});
+    }
     await app.close();
   });
 

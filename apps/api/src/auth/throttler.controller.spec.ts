@@ -12,6 +12,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersModule } from '../users/users.module';
 import { createTestApp } from '../test/create-test-app';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { MockEmailModule } from '../test/mock-email-service';
 
 /**
@@ -33,6 +34,7 @@ describe('Rate limiting (#3)', () => {
           PrismaModule,
           UsersModule,
           AuthModule,
+          NotificationsModule,
           MockEmailModule,
         ],
         providers: [{ provide: APP_GUARD, useClass: CustomThrottlerGuard }],

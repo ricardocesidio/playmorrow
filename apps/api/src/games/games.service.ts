@@ -133,7 +133,7 @@ export class GamesService {
       metadata: { title: game.title },
     });
 
-    this.feedEngine.emit('GAME_CREATED', {
+    this.feedEngine.emit('GAME_PUBLISHED', {
       studioId: studio.id,
       gameId: game.id,
       actorId: userId,
@@ -336,7 +336,7 @@ export class GamesService {
       } else if (dto.status === 'RELEASED') {
         await this.studioXpService.award(game.studio.id, 'GAME_RELEASE', undefined, game.id);
       }
-      this.feedEngine.emit('GAME_STATUS_CHANGED', {
+      this.feedEngine.emit('GAME_PUBLISHED', {
         studioId: game.studioId,
         gameId: game.id,
         actorId: userId,

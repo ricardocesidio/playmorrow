@@ -11,8 +11,11 @@ export function PlaymorrowMark({ className }: { className?: string }) {
 
 export function HudLinkLogo() {
   return (
-    <Link href="/" className="inline-flex items-center">
+    <Link href="/" className="inline-flex items-center gap-2">
       <PlaymorrowMark />
+      <span className="rounded border border-coral/40 px-1.5 py-0.5 font-mono text-[0.5rem] font-semibold uppercase tracking-widest text-coral/70">
+        Beta
+      </span>
     </Link>
   );
 }

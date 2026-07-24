@@ -4,7 +4,9 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from '../auth/auth.module';
+import { EventBusModule } from '../common/event-bus.module';
 import { GamesModule } from '../games/games.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { PrismaModule } from '../prisma/prisma.module';
@@ -44,8 +46,10 @@ describe('FollowsController (e2e)', () => {
           StudiosModule,
           GamesModule,
           FollowsModule,
+          EventBusModule,
           NotificationsModule,
           MockEmailModule,
+          ScheduleModule.forRoot(),
         ],
       }),
     );

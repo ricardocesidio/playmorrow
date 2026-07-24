@@ -50,7 +50,7 @@ export class PushNotificationsService {
       return;
     }
 
-    webpush.setVapidDetails('mailto:notifications@playmorrow.com', vapidPublic, vapidPrivate);
+    webpush.setVapidDetails('mailto:playmorrow@hotmail.com', vapidPublic, vapidPrivate);
     await webpush.sendNotification(
       { endpoint, keys: { p256dh, auth } },
       JSON.stringify(payload),
