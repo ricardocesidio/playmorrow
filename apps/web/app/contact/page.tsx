@@ -4,30 +4,32 @@ import Link from 'next/link';
 
 import { SiteHeader } from '@/components/site-header';
 
+const EMAIL = 'playmorrow@hotmail.com';
+
 const channels = [
   {
     title: 'Support',
-    email: 'support@playmorrow.com',
+    subject: 'Support Inquiry',
     description: 'Account issues, login problems, or technical questions.',
   },
   {
     title: 'Press & Media',
-    email: 'press@playmorrow.com',
+    subject: 'Press / Media Inquiry',
     description: 'Press kits, interview requests, and media inquiries.',
   },
   {
     title: 'Partnerships',
-    email: 'partners@playmorrow.com',
+    subject: 'Partnership Inquiry',
     description: 'Studio partnerships, platform integrations, and business development.',
   },
   {
     title: 'Security',
-    email: 'security@playmorrow.com',
+    subject: 'Security Report',
     description: 'Responsible disclosure of security vulnerabilities.',
   },
   {
     title: 'Legal',
-    email: 'legal@playmorrow.com',
+    subject: 'Legal Inquiry',
     description: 'DMCA takedown requests, legal inquiries, and data privacy requests.',
   },
 ];
@@ -43,7 +45,7 @@ export default function ContactPage() {
       <div className="relative px-5 sm:px-8 lg:px-10">
 
         <main className="relative z-10 mx-auto mt-8 max-w-3xl pb-16">
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-6 sm:p-8 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border-2 bg-[#050b0f]/80 p-6 sm:p-8 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]" style={{ borderColor: 'rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}>
             <h1 className="font-display font-black uppercase tracking-tight text-white text-2xl sm:text-3xl">Contact Us</h1>
             <p className="mt-2 text-sm text-muted-foreground">We would love to hear from you.</p>
 
@@ -58,10 +60,10 @@ export default function ContactPage() {
                   <h2 className="font-display text-base text-foreground">{channel.title}</h2>
                   <p className="mt-1">{channel.description}</p>
                   <a
-                    href={`mailto:${channel.email}`}
+                    href={`mailto:${EMAIL}?subject=${encodeURIComponent(channel.subject)}`}
                     className="mt-1 inline-block text-cyan hover:text-cyan/80 underline underline-offset-2"
                   >
-                    {channel.email}
+                    {EMAIL}
                   </a>
                 </div>
               ))}

@@ -15,7 +15,7 @@ export default function PrivacyPage() {
       <div className="relative px-5 sm:px-8 lg:px-10">
 
         <main className="relative z-10 mx-auto mt-8 max-w-3xl pb-16">
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-6 sm:p-8 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border-2 bg-[#050b0f]/80 p-6 sm:p-8 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]" style={{ borderColor: 'rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}>
             <h1 className="font-display font-black uppercase tracking-tight text-white text-2xl sm:text-3xl">Privacy Policy</h1>
             <p className="mt-2 text-sm text-muted-foreground">Last updated: June 2026</p>
 
@@ -41,7 +41,7 @@ export default function PrivacyPage() {
 
               <h2 className="font-display text-base text-foreground">4. Data Sharing</h2>
               <p>
-                We do not sell your personal information. We may share data with trusted service providers who help us operate the platform, and as required by law. Where allowed, we may share limited information with partners for marketing and advertising based on your preferences.
+                We do not sell your personal information. We may share data with trusted service providers who help us operate the platform, and as required by law.
               </p>
 
               <h2 className="font-display text-base text-foreground">5. Data Retention</h2>
@@ -61,7 +61,7 @@ export default function PrivacyPage() {
 
               <h2 className="font-display text-base text-foreground">8. Your Rights</h2>
               <p>
-                You have the right to access, correct, or delete your personal data. You may also opt out of marketing communications at any time. Contact us at support@playmorrow.com to exercise your rights.
+                You have the right to access, correct, or delete your personal data. You may also opt out of marketing communications at any time. Contact us at playmorrow@hotmail.com to exercise your rights.
               </p>
 
               <h2 className="font-display text-base text-foreground">9. Policy Updates</h2>
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
 
               <h2 className="font-display text-base text-foreground">10. Contact</h2>
               <p>
-                For questions about this Privacy Policy, please contact us at support@playmorrow.com.
+                For questions about this Privacy Policy, please contact us at playmorrow@hotmail.com.
               </p>
             </div>
 

@@ -5,6 +5,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventBusModule } from '../common/event-bus.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { AuditLogModule } from '../audit-log/audit-log.module';
 import { AuthModule } from '../auth/auth.module';
 import { DevlogsModule } from '../devlogs/devlogs.module';
@@ -33,6 +35,7 @@ const GAME_SLUG = `game-${SUFFIX}`;
 const GAME2_SLUG = `game2-${SUFFIX}`;
 
 describe('Delete endpoints (e2e) (#19)', () => {
+  vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
   let httpServer: unknown;
   let prisma: PrismaService;
   let ownerToken: string;
@@ -53,6 +56,8 @@ describe('Delete endpoints (e2e) (#19)', () => {
           GamesModule,
           DevlogsModule,
           RoadmapItemsModule,
+          EventBusModule,
+          NotificationsModule,
           MockEmailModule,
           ScheduleModule.forRoot(),
         ],

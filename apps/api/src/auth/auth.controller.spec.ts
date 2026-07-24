@@ -7,6 +7,7 @@ import request from 'supertest';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersModule } from '../users/users.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { AuthModule } from './auth.module';
 import { MockEmailModule } from '../test/mock-email-service';
 import { registerTestUser } from '../test/register-test-user';
@@ -35,6 +36,7 @@ describe('AuthController (e2e)', () => {
         PrismaModule,
         UsersModule,
         AuthModule,
+        NotificationsModule,
         MockEmailModule,
       ],
     }).compile();

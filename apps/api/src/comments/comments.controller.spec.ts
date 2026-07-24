@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventBusModule } from '../common/event-bus.module';
 import { AuditLogModule } from '../audit-log/audit-log.module';
 import { AuthModule } from '../auth/auth.module';
 import { CommentsModule } from './comments.module';
@@ -61,6 +62,7 @@ describe('CommentsController (e2e)', () => {
           CommentsModule,
           FeedModule,
           FollowsModule,
+          EventBusModule,
           NotificationsModule,
           MockEmailModule,
           ScheduleModule.forRoot(),
@@ -246,7 +248,7 @@ describe('CommentsController (e2e)', () => {
     expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
 
-  it('DELETE /api/comments/:id allows author', async () => {
+  it('DELETE /api/comments/:id rejects author (only studio admins can delete)', async () => {
     // Create a new comment as author
     const tempRes = await request(httpServer)
       .post(`/api/devlogs/${devlogId}/comments`)
@@ -254,10 +256,11 @@ describe('CommentsController (e2e)', () => {
       .send({ body: 'Temp comment' });
     const tempId = tempRes.body.id;
 
+    // Author is not a studio admin — deletion is forbidden
     const res = await request(httpServer)
       .delete(`/api/comments/${tempId}`)
       .set('Cookie', `playmorrow_session=${secondToken}`);
-    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.status).toBe(HttpStatus.FORBIDDEN);
   });
 
   it('DELETE /api/comments/:id allows global ADMIN', async () => {
@@ -283,7 +286,7 @@ describe('CommentsController (e2e)', () => {
   });
 
   it('DELETE /api/comments/:id soft deletes rather than hard deletes', async () => {
-    // Create comment, delete it, then check DB
+    // Create comment as author, delete as studio OWNER
     const tempRes = await request(httpServer)
       .post(`/api/devlogs/${devlogId}/comments`)
       .set('Cookie', `playmorrow_session=${secondToken}`)
@@ -292,12 +295,12 @@ describe('CommentsController (e2e)', () => {
 
     await request(httpServer)
       .delete(`/api/comments/${tempId}`)
-      .set('Cookie', `playmorrow_session=${secondToken}`);
+      .set('Cookie', `playmorrow_session=${ownerToken}`);
 
     const dbComment = await prisma.comment.findUnique({ where: { id: tempId } });
     expect(dbComment).toBeDefined();
     expect(dbComment!.deletedAt).toBeTruthy();
-    expect(dbComment!.body).toBe('Soft delete test'); // body preserved in DB
+    expect(dbComment!.body).toBe('Soft delete test');
   });
 
   // ── GET ────────────────────────────────────────────────────────────────

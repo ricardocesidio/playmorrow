@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventBusModule } from '../common/event-bus.module';
 import { AuthModule } from '../auth/auth.module';
 import { CommentsModule } from '../comments/comments.module';
 import { DevlogsModule } from '../devlogs/devlogs.module';
@@ -52,6 +53,7 @@ describe('ReactionsController (e2e)', () => {
           CommentsModule,
           ReactionsModule,
           NotificationsModule,
+          EventBusModule,
           MockEmailModule,
           ScheduleModule.forRoot(),
         ],

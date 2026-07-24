@@ -15,7 +15,7 @@ export default function TermsPage() {
       <div className="relative px-5 sm:px-8 lg:px-10">
 
         <main className="relative z-10 mx-auto mt-8 max-w-3xl pb-16">
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-6 sm:p-8 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border-2 bg-[#050b0f]/80 p-6 sm:p-8 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]" style={{ borderColor: 'rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}>
             <h1 className="font-display font-black uppercase tracking-tight text-white text-2xl sm:text-3xl">Terms of Service</h1>
             <p className="mt-2 text-sm text-muted-foreground">Last updated: June 2026</p>
 
@@ -66,7 +66,7 @@ export default function TermsPage() {
 
               <h2 className="font-display text-base text-foreground">9. Contact</h2>
               <p>
-                For questions about these Terms, please contact us at support@playmorrow.com.
+                For questions about these Terms, please contact us at playmorrow@hotmail.com.
               </p>
             </div>
 

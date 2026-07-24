@@ -382,3 +382,20 @@ Full platform documentation rewrite and code cleanup. No new features — pure a
 **Updated:** README.md, STATUS.md, AGENTS.md
 **Created:** SECURITY.md, ARCHITECTURE.md, docs/PROJECT_CONSOLIDATION_REPORT.md
 **Commits:** 821
+
+### Session 17 (continued) — UI Polish, Email Fix, Test Suite Green, Beta Badge (2026-07-24)
+
+Post-consolidation fixes and polish:
+
+- **Duplicated footer fixed:** Removed `<SiteFooter />` from 10 pages that already inherited it from root layout
+- **Neon border animation (cyan↔coral):** Added to About, Contact, Terms, Privacy, Cookie Policy, Community Guidelines pages
+- **Email consolidation:** Replaced all `@playmorrow.com` (6 files) with `playmorrow@hotmail.com` with subject-based routing
+- **Privacy policy cleanup:** Removed contradictory "marketing partners" clause
+- **Knowledge Base link fixed:** Support page `#` → `/help`
+- **Test suite green:** Added `EventBusModule`/`NotificationsModule`/`ScheduleModule.forRoot()` to 15 failing test files. 258 pass, 1 skip, 0 failures.
+- **Beta badge:** Subtle coral `Beta` pill added next to logo in header
+- **Build:** Typecheck 6/6, lint 0 errors
+
+**Updated:** All 8 policy/info pages, support page, site-header, AGENTS.md, STATUS.md
+**Created:** docs/handoff/session-17-complete.md
+**Commits:** 822

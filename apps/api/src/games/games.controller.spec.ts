@@ -4,12 +4,15 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from '../auth/auth.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersModule } from '../users/users.module';
 import { GamesModule } from './games.module';
 import { StudiosModule } from '../studios/studios.module';
+import { EventBusModule } from '../common/event-bus.module';
 import { MockEmailModule } from '../test/mock-email-service';
 import { registerTestUser } from '../test/register-test-user';
 import { createTestApp } from '../test/create-test-app';
@@ -44,7 +47,10 @@ describe('GamesController (e2e)', () => {
           PrismaModule,
           UsersModule,
           AuthModule,
+          EventBusModule,
+          NotificationsModule,
           MockEmailModule,
+          ScheduleModule.forRoot(),
           StudiosModule,
           GamesModule,
         ],

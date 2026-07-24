@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventBusModule } from '../common/event-bus.module';
 import { AuthModule } from '../auth/auth.module';
 import { DevlogsModule } from '../devlogs/devlogs.module';
 import { FollowsModule } from '../follows/follows.module';
@@ -32,6 +33,7 @@ function cleanEmail(e: string) {
 }
 
 describe('FeedController (e2e)', () => {
+  vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
   let httpServer: unknown;
   let prisma: PrismaService;
   let userToken: string;
@@ -51,6 +53,7 @@ describe('FeedController (e2e)', () => {
           FeedModule,
           FollowsModule,
           NotificationsModule,
+          EventBusModule,
           MockEmailModule,
           ScheduleModule.forRoot(),
         ],

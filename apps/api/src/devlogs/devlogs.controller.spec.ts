@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventBusModule } from '../common/event-bus.module';
 import { AuthModule } from '../auth/auth.module';
 import { DevlogsModule } from './devlogs.module';
 import { GamesModule } from '../games/games.module';
@@ -12,6 +13,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudiosModule } from '../studios/studios.module';
 import { UsersModule } from '../users/users.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { MockEmailModule } from '../test/mock-email-service';
 import { registerTestUser } from '../test/register-test-user';
 import { createTestApp } from '../test/create-test-app';
@@ -54,6 +56,8 @@ describe('DevlogsController (e2e)', () => {
           StudiosModule,
           GamesModule,
           DevlogsModule,
+          EventBusModule,
+          NotificationsModule,
           MockEmailModule,
           ScheduleModule.forRoot(),
         ],

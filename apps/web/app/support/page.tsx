@@ -33,12 +33,12 @@ const CATEGORIES = [
 const QUICK_ACTIONS = [
   { icon: Ticket, label: 'Create Ticket', desc: 'Submit a new support request', href: '/support/new' },
   { icon: BookOpen, label: 'My Tickets', desc: 'View your existing tickets', href: '/support/tickets' },
-  { icon: LifeBuoy, label: 'Knowledge Base', desc: 'Guides & documentation', href: '#' },
+  { icon: LifeBuoy, label: 'Knowledge Base', desc: 'Guides & documentation', href: '/help' },
   { icon: Activity, label: 'System Status', desc: 'Check platform health', href: '#' },
 ];
 
 const CONTACT_CHANNELS = [
-  { icon: Mail, label: 'Email', value: 'support@playmorrow.com' },
+  { icon: Mail, label: 'Email', value: 'playmorrow@hotmail.com' },
   { icon: MessageSquare, label: 'Discord', value: 'discord.gg/playmorrow' },
 ];
 
