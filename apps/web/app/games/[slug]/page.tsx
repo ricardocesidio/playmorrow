@@ -164,7 +164,7 @@ function PremiumGameDetail({
         throw new Error(`${patchRes.status}: ${errBody}`);
       }
       setCoverSaved(true);
-      queryClient.setQueryData(['game', slug], (old: any) => old ? { ...old, coverUrl: coverToSave } : old);
+      queryClient.setQueryData(['game', slug], (old: any) => old ? { ...old, coverUrl: coverToSave } : old); // eslint-disable-line @typescript-eslint/no-explicit-any
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to save cover.');
     }
@@ -916,7 +916,7 @@ function CommunityPanel({ slug }: { slug: string }) {
         <div className="grid gap-2.5">
           {(comments ?? []).map((comment) => {
             const author = comment.author ?? { displayName: '?', avatarUrl: null };
-            const avatarUrl = (comment as any).studioLogoUrl || author.avatarUrl;
+            const avatarUrl = (comment as any).studioLogoUrl || author.avatarUrl; // eslint-disable-line @typescript-eslint/no-explicit-any
             return (
             <div key={comment.id} className="grid grid-cols-[32px_1fr_auto] gap-3">
               {avatarUrl ? (
