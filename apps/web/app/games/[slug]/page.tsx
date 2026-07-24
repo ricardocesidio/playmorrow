@@ -737,7 +737,7 @@ function RoadmapNode({ state }: { state: string }) {
 }
 
 function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
-  const items = devlogs.slice(0, 3);
+  const items = devlogs.slice(0, 2);
 
   return (
     <TechPanel title="Latest Devlogs" action="View all" actionHref={`/games/${slug}/devlogs`} className="h-full">
