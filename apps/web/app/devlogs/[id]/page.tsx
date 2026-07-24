@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MessageSquare, ThumbsUp, Heart, Zap, Lightbulb, Link as LinkIcon, Twitter } from 'lucide-react';
+import { ArrowLeft, MessageSquare, ThumbsUp, Heart, Zap, Lightbulb, Link as LinkIcon } from 'lucide-react';
 
 import { SanitizedMarkdown } from '@/components/sanitized-markdown';
 
@@ -423,17 +423,17 @@ export default function DevlogDetailPage() {
                   className="clip-corner flex items-center justify-center border border-cyan/40 px-2 py-2 text-cyan hover:bg-cyan/10 transition-colors cursor-pointer" title="Copy link">
                   <LinkIcon className="size-4" />
                 </button>
-                <a href={typeof window !== 'undefined' ? `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(devlog?.title ?? '')}` : '#'} target="_blank" rel="noopener noreferrer"
-                  className="clip-corner flex items-center justify-center border border-sky-500/40 px-2 py-2 text-sky-400 hover:bg-sky-500/10 transition-colors" title="Share on X">
-                  <Twitter className="size-4" />
+                <a href={typeof window !== 'undefined' ? `https://x.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(devlog?.title ?? '')}` : '#'} target="_blank" rel="noopener noreferrer"
+                  className="clip-corner flex items-center justify-center border border-neutral-400/40 px-2 py-2 text-neutral-400 hover:bg-neutral-400/10 transition-colors" title="Share on X">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="size-4"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                 </a>
                 <a href={typeof window !== 'undefined' ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}` : '#'} target="_blank" rel="noopener noreferrer"
                   className="clip-corner flex items-center justify-center border border-blue-600/40 px-2 py-2 text-blue-500 hover:bg-blue-600/10 transition-colors" title="Share on Facebook">
                   <svg viewBox="0 0 24 24" fill="currentColor" className="size-4"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
                 </a>
                 <a href={typeof window !== 'undefined' ? `https://www.reddit.com/submit?url=${encodeURIComponent(window.location.href)}&title=${encodeURIComponent(devlog?.title ?? '')}` : '#'} target="_blank" rel="noopener noreferrer"
-                  className="clip-corner flex items-center justify-center border border-orange-500/40 px-2 py-2 text-orange-400 hover:bg-orange-500/10 transition-colors" title="Share on Reddit">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="size-4"><circle cx="17" cy="12" r="1.5"/><circle cx="7" cy="12" r="1.5"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13c-.55.55-1.34.82-2.13.68-.79-.14-1.45-.71-1.73-1.46-.29.75-.95 1.32-1.74 1.46-.79.14-1.58-.13-2.13-.68-.31-.31-.31-.82 0-1.13.31-.31.82-.31 1.13 0 .43.43 1.15.51 1.67.19.52-.32.73-.94.56-1.52-.18-.57-.7-.98-1.29-1.03h-1.18c-.59.06-1.11.47-1.29 1.03-.17.58.04 1.2.56 1.52.52.32 1.24.24 1.67-.19.31-.31.82-.31 1.13 0 .31.31.31.82 0 1.13z"/></svg>
+                  className="clip-corner flex items-center justify-center border border-orange-500/40 px-2 py-2 text-orange-500 hover:bg-orange-500/10 transition-colors" title="Share on Reddit">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="size-4"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.928 6.768a1.752 1.752 0 0 1 1.704 2.256 1.752 1.752 0 0 1-.888 1.032c.024.168.048.336.048.504 0 3.36-3.84 6.096-8.592 6.096S1.608 13.92 1.608 10.56c0-.168.024-.336.048-.504a1.776 1.776 0 0 1-.6-.6 1.752 1.752 0 0 1 .6-2.4 1.752 1.752 0 0 1 2.352.36 1.752 1.752 0 0 1 .144 1.92A7.284 7.284 0 0 1 7.2 8.712c.12-.12.264-.216.408-.336a4.307 4.307 0 0 1-.12-1.032 2.16 2.16 0 0 1 2.16-2.16 2.16 2.16 0 0 1 1.848 1.056c.384-.024.768-.048 1.152-.048.576 0 1.152.024 1.704.072a2.138 2.138 0 0 1 1.8-1.08 2.16 2.16 0 0 1 2.16 2.16c0 .36-.096.696-.264.984.144.12.288.24.408.36a7.284 7.284 0 0 1 2.448 1.656c.264-.24.6-.36.96-.36a1.752 1.752 0 0 1 1.752 1.752 1.752 1.752 0 0 1-.888 1.536c0 .168.024.312.024.48 0 2.808-2.832 5.088-6.336 5.568a1.8 1.8 0 0 1 .072.528 1.728 1.728 0 0 1-1.728 1.728 1.728 1.728 0 0 1-1.56-.96 8.242 8.242 0 0 1-3 .024 1.704 1.704 0 0 1-1.488.936 1.728 1.728 0 0 1-1.728-1.728c0-.24.048-.48.144-.696-3.264-.696-5.808-2.88-5.808-5.4 0-.144.024-.288.024-.432a1.752 1.752 0 0 1-.6-.6 1.752 1.752 0 0 1 .6-2.4 1.77 1.77 0 0 1 2.256.288A7.054 7.054 0 0 1 7.56 7.632a2.108 2.108 0 0 1-.072-.528 2.16 2.16 0 0 1 2.16-2.16c.816 0 1.512.456 1.872 1.128.36-.024.72-.048 1.08-.048.48 0 .96.024 1.416.072a2.16 2.16 0 0 1 1.848-1.152 2.16 2.16 0 0 1 2.064 1.656 7.224 7.224 0 0 1 2.472 1.56 1.77 1.77 0 0 1 1.944-.36z"/></svg>
                 </a>
               </div>
 
