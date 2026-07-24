@@ -34,6 +34,7 @@ import { UsersModule } from './users/users.module';
 import { PushNotificationsModule } from './push-notifications/push-notifications.module';
 import { AchievementModule } from './achievements/achievement.module';
 import { PlayerXpModule } from './player-xp/player-xp.module';
+import { SupportModule } from './support/support.module';
 import { CspController } from './common/csp.controller';
 import { CountersService } from './common/counters.service';
 
@@ -72,6 +73,7 @@ import { CountersService } from './common/counters.service';
     PushNotificationsModule,
     AchievementModule,
     PlayerXpModule,
+    SupportModule,
   ],
   controllers: [CspController],
   providers: [

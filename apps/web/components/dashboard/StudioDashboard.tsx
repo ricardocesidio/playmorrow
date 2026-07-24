@@ -270,6 +270,7 @@ function StudioSidebar({ unreadCount, studioSlug }: { unreadCount: number; studi
           <SidebarLink href="/dashboard/notifications" icon={<MessageSquare className="size-4" />} label="Activity" count={unreadCount} />
           <SidebarLink href={`/dashboard/studios/${studioSlug}/team`} icon={<ShieldCheck className="size-4" />} label="Team" />
           <SidebarLink href={`/dashboard/studios/${studioSlug}`} icon={<Settings className="size-4" />} label="Settings" />
+          <SidebarLink href="/support/tickets" icon={<MessageSquare className="size-4" />} label="Support" />
         </nav>
         <div className="mt-5 overflow-hidden border border-border/70 p-3">
           <div className="relative min-h-24">

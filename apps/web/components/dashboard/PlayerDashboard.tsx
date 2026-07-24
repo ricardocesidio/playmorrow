@@ -115,6 +115,7 @@ export function PlayerDashboard() {
               <SidebarLink href="/dashboard/notifications" icon={<Bell className="size-4" />} label="Notifications" count={unreadCount} />
               <SidebarLink href="/games" icon={<Gamepad2 className="size-4" />} label="Browse Games" />
               <SidebarLink href="/settings/profile" icon={<Settings className="size-4" />} label="Settings" />
+              <SidebarLink href="/support/tickets" icon={<MessageSquare className="size-4" />} label="Support" />
               <button
                 onClick={() => { logout(); router.push('/'); }}
                 className="flex w-full cursor-pointer items-center gap-3 rounded-none px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground transition hover:bg-coral/10 hover:text-coral"

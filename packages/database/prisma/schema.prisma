@@ -192,12 +192,16 @@ model User {
   emailVerificationCodes  EmailVerificationCode[]
   passwordResetTokens     PasswordResetToken[]
   wishlistItems         WishlistItem[]
-  auditLogs             AuditLog[]
-  xpEvents              PlayerXpEvent[]
-  achievements          Achievement[]
+   auditLogs             AuditLog[]
+   xpEvents              PlayerXpEvent[]
+   achievements          Achievement[]
+   supportTicketsAuthored   SupportTicket[] @relation("SupportTicketsAuthored")
+   supportTicketsAssigned   SupportTicket[] @relation("SupportTicketsAssigned")
+   supportReplies          SupportReply[]
+   supportTicketHistory    SupportTicketHistory[] @relation("SupportHistoryActor")
 
-  @@index([role])
-  @@map("users")
+   @@index([role])
+   @@map("users")
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -854,6 +858,158 @@ model PasswordResetToken {
   @@index([userId])
   @@index([expiresAt])
   @@map("password_reset_tokens")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Support Ecosystem — tickets, replies, categories, attachments, history
+// ──────────────────────────────────────────────────────────────────────────
+
+enum SupportTicketStatus {
+  OPEN
+  WAITING_SUPPORT
+  WAITING_CUSTOMER
+  INVESTIGATING
+  ESCALATED
+  RESOLVED
+  CLOSED
+  ARCHIVED
+  SPAM
+}
+
+enum SupportTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+  SECURITY
+  EMERGENCY
+}
+
+enum SupportDepartment {
+  GENERAL
+  TECHNICAL
+  ACCOUNTS
+  STUDIO
+  PUBLISHING
+  MODERATION
+  COMMUNITY
+  BUG_REPORT
+  FEATURE_REQUEST
+  DMCA
+  COPYRIGHT
+  LEGAL
+  SECURITY
+}
+
+model SupportCategory {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  department  SupportDepartment @default(GENERAL)
+  position    Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tickets SupportTicket[]
+
+  @@map("support_categories")
+}
+
+model SupportTicket {
+  id             String                 @id @default(cuid())
+  ticketNumber   String                 @unique
+  title          String
+  body           String                 @db.Text
+  status         SupportTicketStatus    @default(OPEN)
+  priority       SupportTicketPriority  @default(MEDIUM)
+  department     SupportDepartment      @default(GENERAL)
+  categoryId     String?
+  authorId       String
+  assignedToId   String?
+  assignedAt     DateTime?
+  resolvedAt     DateTime?
+  closedAt       DateTime?
+  reopenedAt     DateTime?
+  isInternal     Boolean                @default(false)
+  metadata       Json?
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  author      User               @relation("SupportTicketsAuthored", fields: [authorId], references: [id], onDelete: Cascade)
+  assignedTo  User?              @relation("SupportTicketsAssigned", fields: [assignedToId], references: [id], onDelete: SetNull)
+  category    SupportCategory?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  replies     SupportReply[]
+  attachments SupportAttachment[]
+  history     SupportTicketHistory[]
+
+  @@index([authorId])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([priority])
+  @@index([department])
+  @@index([createdAt])
+  @@index([ticketNumber])
+  @@map("support_tickets")
+}
+
+model SupportReply {
+  id         String   @id @default(cuid())
+  ticketId   String
+  authorId   String
+  body       String   @db.Text
+  isInternal Boolean  @default(false)
+  isStaff    Boolean  @default(false)
+  editedAt   DateTime?
+  createdAt  DateTime @default(now())
+
+  ticket      SupportTicket         @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author      User                  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  attachments SupportAttachment[]
+
+  @@index([ticketId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("support_replies")
+}
+
+model SupportAttachment {
+  id          String @id @default(cuid())
+  ticketId    String?
+  replyId     String?
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  url         String
+  createdAt   DateTime @default(now())
+
+  ticket SupportTicket? @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  reply  SupportReply?  @relation(fields: [replyId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([replyId])
+  @@map("support_attachments")
+}
+
+model SupportTicketHistory {
+  id        String   @id @default(cuid())
+  ticketId  String
+  actorId   String
+  action    String
+  fromValue String?
+  toValue   String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  actor  User          @relation("SupportHistoryActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("support_ticket_history")
 }
 
 // ──────────────────────────────────────────────────────────────────────────
