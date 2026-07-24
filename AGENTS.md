@@ -218,6 +218,20 @@ Final UX polish pass after all hardening was complete:
 
 Updated: STATUS.md, docs/STATUS-verified.md (Round 7), docs/handoff/session-15-complete.md, AGENTS.md, CHANGELOG.md
 
+### Session 16 — Devlog Blog Redesign & Final UI Polish (2026-07-24)
+
+Complete devlog redesign into blog-style layout. Major changes:
+- **Devlog detail page**: Two-column blog layout (sidebar: hero image, metadata, screenshots gallery with neon animated cyan↔coral borders, reaction buttons with per-type colors (blue/red/green/yellow), 4 icon-only share buttons (Copy/X/Facebook/Reddit). Right column: title, subtitle, tags, author bar with coral Edit button, article body, comments.)
+- **Devlog cards**: Game detail page's "Latest Devlogs" section redesigned to blog cards with hero image overlay, title on image. Devlog listing page: 2-column grid of blog cards.
+- **Devlog editor**: Screenshots section moved between title and body, upload working with image previews. Backend now handles screenshot updates.
+- **Screenshots lightbox**: Full-screen viewer with keyboard navigation (arrow keys, Escape), global state management. Hero and gallery images clickable.
+- **Devlog comments**: Fixed broken `token` check (was always null, blocking all operations). Now fully functional with create, edit, delete, reply, reactions.
+- **Login fixes**: `isOnboardingCompleted` now returned in login response. Email and avatarUrl included. Remember-me checkbox default checked. Logout race condition fixed (await logout before navigation).
+- **UI polish**: Footer full black bg. Cursor glow removed. Dashboard quick nav removed. Search returns coverUrl/logoUrl. Upload rate limit 5→20/min. "You must be signed in" errors removed.
+- **Typecheck**: 6/6, **Lint**: 4 pre-existing (0 new). **Commits**: 812.
+
+**Updated:** STATUS.md, AGENTS.md, CHANGELOG.md, docs/handoff/
+
 ### Session 15 (audit remediation) — Professional Audit, CSP Verification, All Findings Fixed (2026-07-24)
 
 Full professional audit across 7 domains. Key findings and fixes:

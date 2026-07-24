@@ -1,9 +1,52 @@
 # Playmorrow — Session 15 Handoff
 
-**Date:** 2026-07-23
-**Status:** 🟢 All hardening + design system + final polish complete
-**Commits:** 755
-**Engineering score:** 82/100 (from 68/100)
+**Date:** 2026-07-24
+**Status:** 🟢 Devlog blog redesign, share buttons, reactions, lightbox, login fixes
+**Commits:** 812
+**Engineering score:** 84/100 (from 68/100)
+
+---
+
+## Session 16 — Devlog Blog Redesign & Final UI Polish
+
+### Devlog Detail Page (Blog Layout)
+- Two-column grid: 320px sidebar + content area
+- **Left sidebar**: Hero image (animated neon border, cyan↔coral), metadata (Devlog badge, category, date, reading time), reaction buttons with per-type colors (blue/red/green/yellow), 4 icon-only share buttons (Copy Link, X, Facebook, Reddit), max 2 screenshot thumbnails (square) with "View all X screenshots" button
+- **Right column**: Title, subtitle, tags, author bar (coral Edit button for studio members), article body (SanitizedMarkdown), comments section
+- Reactions: LIKE=blue, LOVE=red, HYPE=green, INSIGHTFUL=yellow when active
+- Share buttons open proper sharing URLs with encoded title + URL
+- Screenshots lightbox: click hero or thumbnails → full-screen overlay with keyboard nav (arrows, Escape), close on backdrop click, image counter
+
+### Devlog Cards
+- Game detail page "Latest Devlogs": blog-style cards with hero image overlay, title on image, gradient fade, date/read-time header, preview text below, limited to 2 cards
+- Devlogs listing page (`/games/:slug/devlogs`): 2-column grid of blog cards with same design, pagination
+
+### Devlog Editor
+- Screenshots moved between title and body (was at bottom)
+- Upload button: 100% width, uploads to `/api/upload` with CSRF token
+- Backend: screenshot update handler added (delete old + create new on save)
+- Upload rate limit: 5→20/min
+
+### Login Fixes
+- `isOnboardingCompleted` added to login response (was missing, causing all users to redirect to onboarding)
+- `email`, `avatarUrl`, `bio` added to login response (settings page was showing empty fields)
+- Remember-me checkbox: now defaults to checked, controlled React state
+- Logout race condition: `await logout()` before `window.location.href` (was navigating before session cleared)
+- `token` from `useAuth()` never set (always null) — removed `!token` checks blocking all comment operations
+
+### Other Fixes
+- Footer: full `bg-black`, no animations
+- Cursor glow: removed from layout
+- Dashboard quick navigation bar: removed
+- Search: returns `coverUrl` for games and `logoUrl` for studios
+- "You must be signed in" error: removed dead `token` checks
+- Devlog comment permissions: backend enforces studio membership for delete
+
+### Build
+- `pnpm typecheck`: 6/6, 0 errors
+- `pnpm lint`: 4 pre-existing errors, 0 new
+- `pnpm build`: 4/4 packages
+- Commits: 812
 
 ---
 
