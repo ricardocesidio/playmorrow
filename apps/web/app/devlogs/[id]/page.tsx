@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MessageSquare, ThumbsUp, Heart, Zap, Lightbulb, Link as LinkIcon, Twitter, Share2 } from 'lucide-react';
+import { ArrowLeft, MessageSquare, ThumbsUp, Heart, Zap, Lightbulb, Link as LinkIcon, Twitter } from 'lucide-react';
 
 import { SanitizedMarkdown } from '@/components/sanitized-markdown';
 
@@ -418,14 +418,22 @@ export default function DevlogDetailPage() {
               </div>
 
               {/* Share buttons */}
-              <div className="flex gap-2 pt-2 border-t border-border/30">
+              <div className="grid grid-cols-4 gap-1 pt-2 border-t border-border/30">
                 <button onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link copied!'); }}
-                  className="clip-corner inline-flex items-center gap-1.5 border border-cyan/40 px-3 py-1.5 font-mono text-[0.5rem] uppercase tracking-widest text-cyan hover:bg-cyan/10 transition-colors cursor-pointer">
-                  <LinkIcon className="size-3" /> Copy
+                  className="clip-corner flex items-center justify-center border border-cyan/40 px-2 py-2 text-cyan hover:bg-cyan/10 transition-colors cursor-pointer" title="Copy link">
+                  <LinkIcon className="size-4" />
                 </button>
                 <a href={typeof window !== 'undefined' ? `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(devlog?.title ?? '')}` : '#'} target="_blank" rel="noopener noreferrer"
-                  className="clip-corner inline-flex items-center gap-1.5 border border-sky-500/40 px-3 py-1.5 font-mono text-[0.5rem] uppercase tracking-widest text-sky-400 hover:bg-sky-500/10 transition-colors">
-                  <Twitter className="size-3" /> Tweet
+                  className="clip-corner flex items-center justify-center border border-sky-500/40 px-2 py-2 text-sky-400 hover:bg-sky-500/10 transition-colors" title="Share on X">
+                  <Twitter className="size-4" />
+                </a>
+                <a href={typeof window !== 'undefined' ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}` : '#'} target="_blank" rel="noopener noreferrer"
+                  className="clip-corner flex items-center justify-center border border-blue-600/40 px-2 py-2 text-blue-500 hover:bg-blue-600/10 transition-colors" title="Share on Facebook">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="size-4"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                </a>
+                <a href={typeof window !== 'undefined' ? `https://www.reddit.com/submit?url=${encodeURIComponent(window.location.href)}&title=${encodeURIComponent(devlog?.title ?? '')}` : '#'} target="_blank" rel="noopener noreferrer"
+                  className="clip-corner flex items-center justify-center border border-orange-500/40 px-2 py-2 text-orange-400 hover:bg-orange-500/10 transition-colors" title="Share on Reddit">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="size-4"><circle cx="17" cy="12" r="1.5"/><circle cx="7" cy="12" r="1.5"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13c-.55.55-1.34.82-2.13.68-.79-.14-1.45-.71-1.73-1.46-.29.75-.95 1.32-1.74 1.46-.79.14-1.58-.13-2.13-.68-.31-.31-.31-.82 0-1.13.31-.31.82-.31 1.13 0 .43.43 1.15.51 1.67.19.52-.32.73-.94.56-1.52-.18-.57-.7-.98-1.29-1.03h-1.18c-.59.06-1.11.47-1.29 1.03-.17.58.04 1.2.56 1.52.52.32 1.24.24 1.67-.19.31-.31.82-.31 1.13 0 .31.31.31.82 0 1.13z"/></svg>
                 </a>
               </div>
 
