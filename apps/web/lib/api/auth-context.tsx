@@ -82,6 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Hydrate session on mount
   useEffect(() => {
     fetchMe();
+    // Safety timeout: never stay in loading state longer than 10s
+    const timeout = setTimeout(() => setIsLoading(false), 10000);
+    return () => clearTimeout(timeout);
   }, [fetchMe]);
 
   const login = useCallback(async (emailOrUsername: string, password: string) => {
