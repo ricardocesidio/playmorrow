@@ -266,11 +266,6 @@ function CommentItem({
               </div>
               </div>
               )}
-
-              {/* Reactions */}
-              <div className="pt-2 border-t border-border/30">
-                <DevlogReactions devlogId={id} />
-              </div>
         </>
       )}
       {(comment.replies?.length ?? 0) > 0 && depth < 5 && (
