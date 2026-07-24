@@ -398,16 +398,23 @@ export default function DevlogDetailPage() {
               {/* Remaining screenshots gallery */}
               {(() => {
                 const screenshots = devlog.screenshots ?? [];
-                if (screenshots.length <= 1) return null;
+                const remaining = screenshots.slice(1);
+                if (remaining.length === 0) return null;
                 return (
                   <div className="space-y-3 pt-2 border-t border-border/30">
                     <h3 className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Screenshots</h3>
                     <div className="grid grid-cols-2 gap-2">
-                      {screenshots.slice(1).map((s, i) => (
+                      {remaining.slice(0, 2).map((s, i) => (
                         <img key={s.id} src={s.url} alt={s.caption ?? ''} className="w-full clip-corner-sm object-cover cursor-pointer" style={{ border: '2px solid rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}
                           onClick={() => { setLightboxOpen(true); setLightboxIndex(i + 1); }} />
                       ))}
                     </div>
+                    {remaining.length > 2 && (
+                      <button onClick={() => { setLightboxOpen(true); setLightboxIndex(1); }}
+                        className="w-full clip-corner border border-cyan/40 bg-cyan/5 py-2 font-mono text-[0.5rem] uppercase tracking-widest text-cyan hover:bg-cyan/10 transition-colors cursor-pointer">
+                        View all {remaining.length} screenshots
+                      </button>
+                    )}
                   </div>
                 );
               })()}
