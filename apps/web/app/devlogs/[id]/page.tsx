@@ -352,20 +352,19 @@ export default function DevlogDetailPage() {
     <>
       <SiteHeader />
       <main className="relative min-h-screen bg-[#020609]">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]"></div>
         
-        <div className="relative mx-auto max-w-6xl px-5 pb-16 sm:px-8 lg:px-10">
-          {/* Back link */}
-          <div className="pt-6 pb-4">
-            <Link
-              href={`/games/${devlog.game.slug}`}
-              className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-cyan transition-colors"
-            >
-              <ArrowLeft className="size-3.5" /> {devlog.game.title}
-            </Link>
-          </div>
+        {/* Back link */}
+        <div className="relative mx-auto max-w-6xl px-5 pt-6 pb-4 sm:px-8 lg:px-10">
+          <Link
+            href={`/games/${devlog.game.slug}`}
+            className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-cyan transition-colors"
+          >
+            <ArrowLeft className="size-3.5" /> {devlog.game.title}
+          </Link>
+        </div>
 
-          <div className="grid gap-10 lg:grid-cols-[320px_1fr] xl:grid-cols-[380px_1fr]">
+        <div className="relative mx-auto grid max-w-6xl gap-10 px-5 pb-16 sm:px-8 lg:px-10 lg:grid-cols-[320px_1fr] xl:grid-cols-[380px_1fr]">
             {/* ── LEFT SIDEBAR ── */}
             <aside className="space-y-6">
               {/* Hero image */}
@@ -496,7 +495,8 @@ export default function DevlogDetailPage() {
               <p className="font-mono text-[0.6rem] text-muted-foreground">No comments yet.</p>
             )}
           </section>
-        </div>
+            </div>
+          </div>
       </main>
     </>
   );
