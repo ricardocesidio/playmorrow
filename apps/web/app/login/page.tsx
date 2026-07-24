@@ -36,7 +36,7 @@ export default function LoginPage() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated) router.replace('/dashboard');
+    if (!authLoading && isAuthenticated && !showTransition) router.replace('/dashboard');
   }, [authLoading, isAuthenticated, router]);
 
   if (authLoading) {
