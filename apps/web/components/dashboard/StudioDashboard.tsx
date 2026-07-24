@@ -271,6 +271,10 @@ function StudioSidebar({ unreadCount, studioSlug }: { unreadCount: number; studi
           <SidebarLink href="/dashboard/reports" icon={<LineChart className="size-4" />} label="Reports" />
           <SidebarLink href="/dashboard/notifications" icon={<MessageSquare className="size-4" />} label="Activity" count={unreadCount} />
           <SidebarLink href={`/dashboard/studios/${studioSlug}/team`} icon={<ShieldCheck className="size-4" />} label="Team" />
+          <SidebarLink href={`/dashboard/studios/${studioSlug}/company-profile`} icon={<FileText className="size-4" />} label="Company Profile" />
+          <SidebarLink href={`/dashboard/studios/${studioSlug}/press-kit`} icon={<Download className="size-4" />} label="Press Kit" />
+          <SidebarLink href={`/dashboard/studios/${studioSlug}/brand-kit`} icon={<MonitorPlay className="size-4" />} label="Brand Kit" />
+          <SidebarLink href={`/dashboard/studios/${studioSlug}/verification`} icon={<BadgeCheck className="size-4" />} label="Verification" />
           <SidebarLink href={`/dashboard/studios/${studioSlug}`} icon={<Settings className="size-4" />} label="Settings" />
           <SidebarLink href="/support/tickets" icon={<MessageSquare className="size-4" />} label="Support" />
         </nav>
