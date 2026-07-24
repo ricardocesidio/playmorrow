@@ -14,6 +14,7 @@ import {
   HudLinkLogo,
   HudPanel,
 } from '@/components/playmorrow/hud';
+import { PostLoginTransition } from '@/components/loading/PostLoginTransition';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -28,6 +29,8 @@ export default function RegisterPage() {
   const [partnerMarketingOptIn, setPartnerMarketingOptIn] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showTransition, setShowTransition] = useState(false);
+  const [pendingPath, setPendingPath] = useState('/dashboard');
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) router.replace('/dashboard');
@@ -82,7 +85,8 @@ export default function RegisterPage() {
         const params = new URLSearchParams({ email: result.email, accountType });
         router.push(`/verify-email?${params.toString()}`);
       } else {
-        router.push(accountType === 'STUDIO' ? '/onboarding' : '/dashboard');
+        setPendingPath(accountType === 'STUDIO' ? '/onboarding' : '/dashboard');
+        setShowTransition(true);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Registration failed';
@@ -273,6 +277,9 @@ export default function RegisterPage() {
           </HudPanel>
         </div>
       </main>
+      {showTransition && (
+        <PostLoginTransition onDone={() => router.replace(pendingPath)} />
+      )}
     </div>
   );
 }

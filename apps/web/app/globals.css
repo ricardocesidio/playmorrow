@@ -169,12 +169,6 @@
   to   { opacity: 1; transform: scale(1); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .playmorrow-splash * {
-    animation-duration: 0.01ms !important;
-  }
-}
-
 @custom-variant dark (&:is(.dark *));
 
 /* ── Playmorrow design system v2 ───────────────────────────────────────
@@ -231,6 +225,13 @@
   --font-family-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
   --font-family-body: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-family-mono: var(--font-body), ui-monospace, SFMono-Regular, monospace;
+
+  --motion-fast: 150ms;
+  --motion-medium: 300ms;
+  --motion-slow: 600ms;
+  --motion-boot: 5000ms;
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 @theme inline {

@@ -3,7 +3,7 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { PlayMorrowSplash } from './PlayMorrowSplash';
 
-const STORAGE_KEY = 'playmorrow:splash-seen';
+const STORAGE_KEY = 'playmorrow:visit-history';
 
 export function SplashProvider({ children }: { children: ReactNode }) {
   const [showSplash, setShowSplash] = useState(true);
@@ -11,7 +11,7 @@ export function SplashProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setHydrated(true);
-    const seen = sessionStorage.getItem(STORAGE_KEY);
+    const seen = localStorage.getItem(STORAGE_KEY);
     if (seen) {
       setShowSplash(false);
     }
