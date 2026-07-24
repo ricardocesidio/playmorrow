@@ -351,83 +351,88 @@ export default function DevlogDetailPage() {
   return (
     <>
       <SiteHeader />
-      <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+      <main className="relative min-h-screen bg-[#020609]">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
-        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
         
-        <div className="relative mx-auto w-full max-w-3xl">
-          <Link
-            href={`/games/${devlog.game.slug}`}
-            className="mb-6 clip-corner inline-flex items-center gap-1.5 border border-border/60 px-3 py-1.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan"
-          >
-            <ArrowLeft className="size-4" /> {devlog.game.title}
-          </Link>
+        {/* Blog-style hero with cover image */}
+        {devlog.screenshots?.[0] && (
+          <div className="relative h-[320px] sm:h-[420px] overflow-hidden">
+            <img src={devlog.screenshots[0].url} alt="" className="size-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#020609] via-[#020609]/40 to-transparent" />
+          </div>
+        )}
 
-          {/* Header */}
-          <div className="clip-corner mb-8 border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] sm:p-7">
-            <div className="flex items-center gap-2 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
-              <span className="clip-corner border border-cyan/60 px-1.5 py-0.5 text-cyan">Devlog</span>
-              {devlog.publishedAt && <span className="normal-case">{new Date(devlog.publishedAt).toLocaleDateString()}</span>}
+        <div className="relative mx-auto max-w-3xl px-5 pb-16 sm:px-8 lg:px-10">
+          {/* Back link */}
+          <div className="pt-6 pb-4">
+            <Link
+              href={`/games/${devlog.game.slug}`}
+              className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-cyan transition-colors"
+            >
+              <ArrowLeft className="size-3.5" /> {devlog.game.title}
+            </Link>
+          </div>
+
+          {/* Category & date */}
+          <div className="flex items-center gap-3 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground mb-4">
+            <span className="clip-corner border border-cyan/60 px-2 py-0.5 text-cyan">Devlog</span>
+            {devlog.category && <span className="clip-corner border border-violet/40 bg-violet/5 px-2 py-0.5 text-violet">{devlog.category}</span>}
+            {devlog.publishedAt && <span>{new Date(devlog.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>}
+            {devlog.readingTimeMin && <span className="text-muted-foreground/60">· {devlog.readingTimeMin} min read</span>}
+          </div>
+
+          {/* Title */}
+          <h1 className="font-display text-4xl sm:text-5xl font-black leading-[1.05] text-white mb-3">{devlog.title}</h1>
+          {devlog.subtitle && (
+            <p className="text-lg text-muted-foreground/80 mb-6">{devlog.subtitle}</p>
+          )}
+
+          {/* Tags */}
+          {(devlog.tags?.length ?? 0) > 0 && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              {devlog.tags.map((tag) => (
+                <span key={tag} className="clip-corner border border-cyan/30 bg-cyan/5 px-2.5 py-1 font-mono text-[0.5rem] uppercase tracking-widest text-cyan/80">{tag}</span>
+              ))}
             </div>
+          )}
 
-            <h1 className="mt-3 font-display text-3xl font-black uppercase tracking-tight text-white">{devlog.title}</h1>
-            {devlog.subtitle && (
-              <p className="mt-1 font-mono text-sm text-muted-foreground">{devlog.subtitle}</p>
+          {/* Author bar */}
+          <div className="flex items-center gap-3 pb-6 border-b border-border/40 mb-8">
+            {devlog.author?.avatarUrl && (
+              <img src={devlog.author.avatarUrl} alt="" className="size-9 rounded-full border border-border/50 object-cover" />
             )}
-
-            {(devlog.status || devlog.category || (devlog.tags?.length ?? 0) > 0) && (
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                {devlog.status && devlog.status !== 'PUBLISHED' && (
-                  <span className={`clip-corner px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-widest ${
-                    devlog.status === 'SCHEDULED' ? 'border border-amber/40 bg-amber/5 text-amber' : 'border border-border/40 bg-background/30 text-muted-foreground'
-                  }`}>
-                    {devlog.status === 'DRAFT' ? 'Draft' : 'Scheduled'}
-                  </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-sm text-foreground">{devlog.author?.displayName}</span>
+                {devlog.author?.role && devlog.author.role !== 'PLAYER' && (
+                  <span className="clip-corner border border-cyan/30 bg-cyan/5 px-1.5 py-0.5 font-mono text-[0.45rem] uppercase tracking-widest text-cyan">{devlog.author.role.toLowerCase()}</span>
                 )}
-                {devlog.category && (
-                  <span className="clip-corner border border-violet/40 bg-violet/5 px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-widest text-violet">{devlog.category}</span>
-                )}
-                {devlog.tags?.map((tag) => (
-                  <span key={tag} className="clip-corner border border-cyan/30 bg-cyan/5 px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-widest text-cyan/80">{tag}</span>
-                ))}
               </div>
-            )}
-
-            {devlog.screenshots?.length > 0 && (
-              <div className="mt-4 flex gap-2 overflow-x-auto">
-                {devlog.screenshots.map((s) => (
-                  <img key={s.id} src={s.url} alt={s.caption ?? ''} className="h-32 border border-border/50 object-cover" />
-                ))}
-              </div>
-            )}
-
-            <div className="mt-3 flex flex-wrap items-center gap-3 font-mono text-[0.6rem] text-muted-foreground">
-              {devlog.author?.avatarUrl && (
-                <img src={devlog.author.avatarUrl} alt="" className="size-6 rounded-full border border-border/50" />
-              )}
-              {devlog.author && <span className="font-semibold text-foreground">{devlog.author.displayName}</span>}
-              {devlog.author?.role && devlog.author.role !== 'PLAYER' && (
-                <span className="clip-corner border border-cyan/30 bg-cyan/5 px-1.5 py-0.5 font-mono text-[0.5rem] uppercase tracking-widest text-cyan">{devlog.author.role.toLowerCase()}</span>
-              )}
-              <span>·</span>
-              <Link href={`/games/${devlog.game.slug}`} className="text-cyan underline-offset-2 hover:underline">
+              <Link href={`/games/${devlog.game.slug}`} className="text-xs text-cyan/70 hover:text-cyan transition-colors">
                 {devlog.game.title}
               </Link>
-              {devlog.readingTimeMin && <span className="text-muted-foreground/60">· {devlog.readingTimeMin} min read</span>}
-              {devlog.editedAt && <span className="text-muted-foreground/60">· edited {new Date(devlog.editedAt).toLocaleDateString()}</span>}
             </div>
+            {devlog.editedAt && (
+              <span className="ml-auto text-xs text-muted-foreground/50">Edited {new Date(devlog.editedAt).toLocaleDateString()}</span>
+            )}
           </div>
 
           {/* Reaction bar */}
           <DevlogReactions devlogId={id} />
 
-          {/* Content */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] sm:p-7">
-            <SanitizedMarkdown
-              source={devlog.body}
-              className="prose prose-invert max-w-none font-mono text-[0.6rem]"
-            />
-          </div>
+          {/* Blog body */}
+          <article className="prose prose-invert prose-lg max-w-none">
+            <SanitizedMarkdown source={devlog.body} />
+          </article>
+
+          {/* Remaining screenshots gallery */}
+          {devlog.screenshots?.length > 1 && (
+            <div className="mt-12 grid gap-4 sm:grid-cols-2">
+              {devlog.screenshots.slice(1).map((s) => (
+                <img key={s.id} src={s.url} alt={s.caption ?? ''} className="w-full border border-border/40 object-cover" />
+              ))}
+            </div>
+          )}
 
           {/* Comments */}
           <section className="mt-16">
