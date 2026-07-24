@@ -740,28 +740,32 @@ function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
 
   return (
     <TechPanel title="Latest Devlogs" action="View all" actionHref={`/games/${slug}/devlogs`} className="h-full">
-      <div className="space-y-3">
+      <div className="grid gap-4">
         {items.map((dl) => (
           <Link
             key={dl.id}
             href={`/devlogs/${dl.id}`}
-            className="group block clip-corner border border-border/60 bg-[#050b0f]/60 p-3 transition hover:border-cyan/60"
+            className="group block clip-corner overflow-hidden border border-border/60 bg-[#050b0f]/60 transition hover:border-cyan/60"
           >
-            <div className="flex gap-3">
-              {dl.screenshots && dl.screenshots.length > 0 ? (
-                <div className="size-12 shrink-0 overflow-hidden rounded border border-border/40">
-                  <img src={dl.screenshots[0]?.url ?? ''} alt={`${dl.title} screenshot`} className="size-full object-cover" />
-                </div>
-              ) : null}
-              <div className="min-w-0 flex-1">
-                <div className="font-mono text-xs font-bold text-foreground group-hover:text-cyan">{dl.title}</div>
-                {dl.subtitle && <div className="mt-0.5 line-clamp-1 text-[10px] text-muted-foreground">{dl.subtitle}</div>}
-                {dl.body && <div className="mt-0.5 text-[9px] text-muted-foreground line-clamp-2">{dl.body.replace(/[#*`_]/g, ' ').substring(0, 120)}...</div>}
-                <div className="mt-1 text-[10px] text-muted-foreground">
-                  {dl.author && `by ${dl.author.displayName || dl.author.username} · `}
-                  {dl.publishedAt ? new Date(dl.publishedAt).toLocaleDateString() : ''} · {dl.readingTimeMin || 1} min
-                </div>
+            {dl.screenshots && dl.screenshots.length > 0 && (
+              <div className="aspect-[2/1] overflow-hidden">
+                <img src={dl.screenshots[0].url} alt="" className="size-full object-cover transition duration-300 group-hover:scale-[1.03]" />
               </div>
+            )}
+            <div className="p-3.5">
+              <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-2">
+                {dl.publishedAt && <span>{new Date(dl.publishedAt).toLocaleDateString()}</span>}
+                <span>·</span>
+                <span>{dl.readingTimeMin || 1} min read</span>
+              </div>
+              <h3 className="font-display text-base font-bold text-foreground group-hover:text-cyan transition-colors leading-snug">{dl.title}</h3>
+              {dl.subtitle && <p className="mt-1 text-xs text-muted-foreground/70 line-clamp-1">{dl.subtitle}</p>}
+              {dl.body && <p className="mt-1.5 text-xs text-muted-foreground/50 line-clamp-2">{dl.body.replace(/[#*`_]/g, ' ').substring(0, 150)}...</p>}
+              {dl.author && (
+                <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground/60">
+                  <span>by {dl.author.displayName || dl.author.username}</span>
+                </div>
+              )}
             </div>
           </Link>
         ))}
