@@ -57,12 +57,10 @@ export default function EditDevlogPage() {
     setError('');
     setSuccess(false);
     if (!title.trim()) { setError('Title is required'); return; }
-    if (!token) { setError('You must be signed in'); return; }
-
     try {
       await updateDevlog.mutateAsync({
         id,
-        token,
+        token: token || '',
         body: {
           title: title.trim(),
           body: body.trim(),
@@ -300,9 +298,8 @@ export default function EditDevlogPage() {
             </div>
             <Button type="button"
               onClick={async () => {
-                if (!token) return;
                 try {
-                  await deleteDevlog.mutateAsync({ id, token });
+                  await deleteDevlog.mutateAsync({ id, token: token || '' });
                   router.push('/dashboard');
                 } catch { /* ignore */ }
               }}
