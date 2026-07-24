@@ -7,7 +7,7 @@ import { CookieConsent } from '@/components/cookie-consent';
 import { Analytics } from '@/components/analytics';
 import { BackToTop } from '@/components/back-to-top';
 import { SiteFooter } from '@/components/site-footer';
-import { CursorGlow } from '@/components/cursor-glow';
+
 
 const display = Space_Grotesk({
   subsets: ['latin'],
@@ -84,7 +84,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }),
           }}
         />
-        <CursorGlow />
         <Providers>
           <div className="relative flex min-h-screen flex-col z-10">
             {children}
