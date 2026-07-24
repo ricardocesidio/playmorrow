@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Globe, Monitor, Gamepad2, Clipboard } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
+import { SanitizedMarkdown } from '@/components/sanitized-markdown';
 import { HudPanel, CircuitFrame, HudStatusRail } from '@/components/playmorrow/hud';
 import { useGame, useGameRoadmap } from '@/lib/api/hooks';
 import { LoadingSkeleton } from '@/components/loading-skeleton';
@@ -46,11 +47,7 @@ export default function GameReadmePage() {
 
   const title = game.title;
   const heroImage = game.bannerUrl || game.coverUrl || '/demo/games/neon-warden/hero.svg';
-  const readmeLines = game.readme
-    ? game.readme.split('\n')
-    : (game.description
-      ? game.description.split('\n')
-      : [`${title.toUpperCase()} is a tactical stealth game set in a dystopian cyberpunk city where corporate control and surveillance dictate every move.`]);
+  const readmeContent = game.readme || game.description || null;
   const roadmapItems = roadmap ?? [];
   const platforms = game.platformLinks?.length
     ? game.platformLinks
@@ -91,15 +88,11 @@ export default function GameReadmePage() {
               {/* Full readme content */}
               <HudPanel className="p-6" accent="muted">
                 <h2 className="pm-micro text-foreground mb-4">About</h2>
-                <div className="space-y-3 text-xs leading-6 text-muted-foreground">
-                  {readmeLines.map((line, index) => (
-                    line.trim() ? (
-                      <p key={index}>{line}</p>
-                    ) : (
-                      <br key={index} />
-                    )
-                  ))}
-                </div>
+                {readmeContent ? (
+                  <SanitizedMarkdown source={readmeContent} className="text-xs leading-6 text-muted-foreground [&_h1]:text-lg [&_h1]:font-bold [&_h1]:text-white [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-white [&_h3]:font-medium [&_h3]:text-white [&_strong]:text-white [&_a]:text-cyan [&_a]:underline [&_code]:bg-muted [&_code]:px-1" />
+                ) : (
+                  <p className="text-xs text-muted-foreground">No README content yet.</p>
+                )}
               </HudPanel>
 
               {/* Features */}

@@ -187,7 +187,7 @@ function CommentItem({
   const handleEdit = async () => {
     if (!editBody.trim() || !token) return;
     try {
-      await updateComment.mutateAsync({ commentId: comment.id, body: editBody.trim(), token });
+      await updateComment.mutateAsync({ devlogId, commentId: comment.id, body: editBody.trim(), token });
       setEditing(false);
     } catch (e) { toast.error('Something went wrong. Please try again.') }
   };
@@ -195,7 +195,7 @@ function CommentItem({
   const handleDelete = async () => {
     if (!token) return;
     try {
-      await deleteComment.mutateAsync({ commentId: comment.id, token });
+      await deleteComment.mutateAsync({ devlogId, commentId: comment.id, token });
     } catch (e) { toast.error('Something went wrong. Please try again.') }
   };
 

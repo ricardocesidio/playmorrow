@@ -143,27 +143,7 @@ export function HudStatusRail({ className }: { className?: string }) {
   );
 }
 
-export function HudButton({
-  children,
-  className,
-  variant = 'primary',
-  ...props
-}: ComponentProps<'button'> & { variant?: 'primary' | 'outline' }) {
-  return (
-    <button
-      className={cn(
-        'clip-corner inline-flex h-14 items-center justify-center gap-3 px-7 pm-display text-sm transition disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
-        variant === 'primary'
-          ? 'border border-coral bg-coral text-coral-foreground shadow-[0_0_30px_rgb(255_87_77_/_0.24)] hover:bg-[#ff6a61]'
-          : 'border border-border-bright bg-background/50 text-muted-foreground hover:border-cyan hover:text-cyan',
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-}
+
 
 const collageTiles = [
   { src: '/playmorrow/neon-warden.png', alt: 'Neon Warden cyberpunk key art', className: 'left-0 top-0 h-[35%] w-[47%]' },

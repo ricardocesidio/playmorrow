@@ -1,3 +1,4 @@
+import { Throttle } from '@nestjs/throttler';
 import {
   Body,
   Controller,
@@ -25,6 +26,7 @@ export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Post('reports')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @UseGuards(SessionAuthGuard)
   @ApiCreatedResponse({ description: 'Report created.' })
   async create(@CurrentUser() user: { id: string }, @Body() dto: CreateReportDto) {

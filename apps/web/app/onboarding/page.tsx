@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ArrowRight, Check, Gamepad2, Building2, Heart, User, AtSign, Upload } from 'lucide-react';
-import { HudButton, HudPanel } from '@/components/playmorrow/hud';
+import { Button } from '@/components/ui/button';
+import { HudPanel } from '@/components/playmorrow/hud';
 import { Input } from '@/components/ui/input';
 import { API } from '@/lib/api/client';
 
@@ -484,9 +485,9 @@ export default function OnboardingPage() {
                 Continue <ArrowRight className="ml-1 inline size-3" />
               </button>
             ) : (
-              <HudButton onClick={handleFinish} disabled={loading}>
+              <Button onClick={handleFinish} disabled={loading} variant="destructive" size="lg">
                 {loading ? 'Completing setup...' : accountType === 'PLAYER' ? 'Complete Setup' : 'Finish Setup'}
-              </HudButton>
+              </Button>
             )}
           </div>
         </HudPanel>

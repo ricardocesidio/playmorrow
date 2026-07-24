@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { StudioRole } from '@playmorrow/database';
 import type { Prisma } from '@playmorrow/database';
 
+import { sanitizeHtml } from '../common/sanitize-html';
 import { assertStudioAccess } from '../common/studio-permissions';
 import { CountersService } from '../common/counters.service';
 import { logger } from '../common/logger';
@@ -85,7 +86,8 @@ export class GamesService {
         studioId: studio.id,
         createdBy: userId,
         tagline: dto.tagline,
-        description: dto.description,
+        description: dto.description ? sanitizeHtml(dto.description) : dto.description,
+        readme: dto.readme ? sanitizeHtml(dto.readme) : undefined,
         status: dto.status ?? 'IN_DEVELOPMENT',
         releaseDate: dto.releaseDate ? new Date(dto.releaseDate) : undefined,
         expectedReleaseText: dto.expectedReleaseText,
@@ -262,10 +264,11 @@ export class GamesService {
 
     if (dto.title !== undefined) data.title = dto.title;
     if (dto.tagline !== undefined) data.tagline = dto.tagline;
-    if (dto.description !== undefined) data.description = dto.description;
+    if (dto.description !== undefined) data.description = dto.description ? sanitizeHtml(dto.description) : dto.description;
     if (dto.coverUrl !== undefined) data.coverUrl = dto.coverUrl;
     if (dto.bannerUrl !== undefined) data.bannerUrl = dto.bannerUrl;
     if (dto.trailerUrl !== undefined) data.trailerUrl = dto.trailerUrl;
+    if (dto.readme !== undefined) data.readme = dto.readme ? sanitizeHtml(dto.readme) : null;
 
     if (!isMember) {
       if (dto.status !== undefined) data.status = dto.status as never;

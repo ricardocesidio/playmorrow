@@ -7,9 +7,9 @@ import Link from 'next/link';
 import { ArrowUpRight, Mail } from 'lucide-react';
 
 import { useAuth } from '@/lib/api/auth-context';
+import { Button } from '@/components/ui/button';
 import {
   CircuitFrame,
-  HudButton,
   HudLinkLogo,
   HudPanel,
 } from '@/components/playmorrow/hud';
@@ -149,10 +149,10 @@ function VerifyEmailInner() {
                 {error && <p className="pm-micro text-coral">{error}</p>}
                 {resendMessage && <p className="pm-micro text-cyan">{resendMessage}</p>}
 
-                <HudButton type="submit" disabled={loading || code.length !== 6} className="w-full">
+                <Button type="submit" disabled={loading || code.length !== 6} variant="destructive" size="lg" className="w-full">
                   {loading ? 'Verifying...' : 'Verify email'}
                   <ArrowUpRight className="ml-auto size-5" />
-                </HudButton>
+                </Button>
               </form>
             )}
 

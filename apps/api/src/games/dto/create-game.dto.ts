@@ -130,4 +130,10 @@ export class CreateGameDto {
   @IsArray()
   @IsString({ each: true })
   tags?: string[];
+
+  @ApiPropertyOptional({ example: '# Echoes of the Deep\n\nFull README content here...' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50000)
+  readme?: string;
 }

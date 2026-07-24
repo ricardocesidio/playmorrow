@@ -122,7 +122,7 @@ function RoadmapContent() {
     setError('');
     try {
       await updateItem.mutateAsync({
-        id: editingId, token,
+        gameSlug, id: editingId, token,
         body: { title: editTitle.trim(), description: editDescription.trim() || null, status: editStatus },
       });
       setEditingId(null);
@@ -295,7 +295,7 @@ function RoadmapContent() {
                           <button
                             onClick={async () => {
                               if (!token) return;
-                              try { await deleteItem.mutateAsync({ id: item.id, token }); } catch { /* ignore */ }
+                              try { await deleteItem.mutateAsync({ gameSlug, id: item.id, token }); } catch { /* ignore */ }
                             }}
                             disabled={deleteItem.isPending}
                             className="clip-corner cursor-pointer border border-border/40 bg-background/30 p-1.5 text-muted-foreground transition hover:border-coral/50 hover:text-coral disabled:opacity-30 disabled:cursor-not-allowed" title="Delete">

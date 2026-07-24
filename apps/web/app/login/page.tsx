@@ -8,10 +8,10 @@ import { ArrowUpRight, Chrome, Eye, EyeOff, Github, Lock, User } from 'lucide-re
 import { useAuth, EmailNotVerifiedError } from '@/lib/api/auth-context';
 import { API } from '@/lib/api/client';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   AuthArtCollage,
   CircuitFrame,
-  HudButton,
   HudLinkLogo,
   HudPanel,
 } from '@/components/playmorrow/hud';
@@ -150,10 +150,10 @@ export default function LoginPage() {
 
                 {error && <p className="pm-micro text-coral">{error}</p>}
 
-                <HudButton type="submit" disabled={loading} className="w-full">
+                <Button type="submit" disabled={loading} variant="destructive" size="lg" className="w-full">
                   {loading ? 'Signing in...' : 'Sign in'}
                   <ArrowUpRight className="ml-auto size-5" />
-                </HudButton>
+                </Button>
               </form>
 
               <div className="my-9 grid grid-cols-[1fr_auto_1fr] items-center gap-5">
