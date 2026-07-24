@@ -14,8 +14,7 @@ export function BrandLoaderShell({ children, fadeOut }: { children: ReactNode; f
       aria-label="Loading PlayMorrow"
     >
       <div className="pointer-events-none absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(62,231,255,0.06) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
-      <div className="pointer-events-none absolute left-1/4 top-1/4 size-80 rounded-full" style={{ background: 'radial-gradient(circle, rgba(62,231,255,0.15) 0%, transparent 70%)' }} />
-      <div className="pointer-events-none absolute bottom-1/4 right-1/4 size-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,87,77,0.15) 0%, transparent 70%)' }} />
+
       {children}
       <div className="pointer-events-none absolute left-4 top-4 size-8 border-l border-t border-border-bright/40" />
       <div className="pointer-events-none absolute right-4 top-4 size-8 border-r border-t border-border-bright/40" />
