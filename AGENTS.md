@@ -218,6 +218,20 @@ Final UX polish pass after all hardening was complete:
 
 Updated: STATUS.md, docs/STATUS-verified.md (Round 7), docs/handoff/session-15-complete.md, AGENTS.md, CHANGELOG.md
 
+### Session 15 (audit remediation) — Professional Audit, CSP Verification, All Findings Fixed (2026-07-24)
+
+Full professional audit across 7 domains. Key findings and fixes:
+- **1.1 CSP**: middleware.ts verified working (nonce-based, security headers, confirmed live)
+- **2.1 Design system**: HudButton removed, auth forms use shared Button
+- **2.2 RBAC**: audit completed — no vulnerabilities, dual pattern documented
+- **2.3 Sanitization**: sanitizeHtml added to game/studio content fields
+- **2.4 README**: now full Markdown (editor + SanitizedMarkdown renderer)
+- **2.5 Rate limits**: added to reports + invitations
+- **3.1 TanStack Query**: cache keys fixed, personal feed auto-refresh, optimistic rollback
+- **3.2-3.8**: N+1 verified clean, OAuth correct, uploads validated, SEO all present, pagination consistent, product flows end-to-end
+- **Typecheck**: 6/6, **Lint**: 4 pre-existing errors (0 new)
+- **Updated**: STATUS.md, AGENTS.md, CHANGELOG.md, docs/handoff/
+
 ### Session 15 (continued) — Production Hardening, Principal Audit Fixes (2026-07-23)
 
 After the comprehensive audit, executed all 5 critical fixes + 10 quality/security improvements:
