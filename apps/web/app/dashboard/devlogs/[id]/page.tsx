@@ -13,7 +13,6 @@ import { ArrowLeft, FileText, ExternalLink, X, Calendar, Trash2 } from 'lucide-r
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/api/auth-context';
 import { useDevlog, useUpdateDevlog, useDeleteDevlog } from '@/lib/api/hooks';
-import { ApiError } from '@/lib/api/client';
 
 export default function EditDevlogPage() {
   const { id } = useParams<{ id: string }>();
