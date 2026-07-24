@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Check, Gamepad2, Building2, Heart, User, AtSign, Upload } from 'lucide-react';
+import { useAuth } from '@/lib/api/auth-context';
 import { Button } from '@/components/ui/button';
 import { HudPanel } from '@/components/playmorrow/hud';
 import { Input } from '@/components/ui/input';
 import { API } from '@/lib/api/client';
-import { PostLoginTransition } from '@/components/loading/PostLoginTransition';
+
 
 const PLAYER_STEPS = ['Account Type', 'Username', 'Profile', 'Review', 'Follow Studios', 'Wishlist Games'];
 const STUDIO_STEPS = ['Account Type', 'Username', 'Profile', 'Review'];
@@ -45,6 +46,11 @@ export default function OnboardingPage() {
   const searchParams = useSearchParams();
   const provider = searchParams.get('provider');
   const email = searchParams.get('email') || '';
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user?.isOnboardingCompleted) router.replace('/dashboard');
+  }, [user, router]);
 
   const [step, setStep] = useState(0);
   const [accountType, setAccountType] = useState<'PLAYER' | 'STUDIO' | null>(null);
@@ -63,8 +69,7 @@ export default function OnboardingPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [showTransition, setShowTransition] = useState(false);
-  const [pendingPath, setPendingPath] = useState('/dashboard');
+
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [selectedStudioSlugs, setSelectedStudioSlugs] = useState<string[]>([]);
   const [wishlistedGameSlugs, setWishlistedGameSlugs] = useState<string[]>([]);
@@ -184,8 +189,7 @@ export default function OnboardingPage() {
         document.cookie = `playmorrow_csrf=${data.csrfToken}; path=/; max-age=86400; SameSite=Lax`;
       }
       setSuccess(true);
-      setPendingPath('/dashboard');
-      setShowTransition(true);
+      router.replace('/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to complete setup');
     } finally { setLoading(false); }
@@ -483,9 +487,7 @@ export default function OnboardingPage() {
           </div>
         </HudPanel>
       </div>
-      {showTransition ? (
-        <PostLoginTransition onDone={() => router.replace(pendingPath)} />
-      ) : success ? (
+      {success ? (
         <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="flex flex-col items-center gap-4">
             <div className="size-12 rounded-full border-2 border-cyan bg-cyan/10 flex items-center justify-center">
