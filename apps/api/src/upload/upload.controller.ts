@@ -27,7 +27,7 @@ export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
   @Post()
-  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @UseGuards(SessionAuthGuard)
   @UseInterceptors(
     FileInterceptor('file', {
