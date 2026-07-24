@@ -83,7 +83,7 @@ export default function LoginPage() {
                 setLoading(true);
                 try {
                   await login(emailOrUsername, password);
-                  router.replace('/dashboard');
+                  // useEffect will redirect when auth state updates
                 } catch (err: unknown) {
                   if (err instanceof EmailNotVerifiedError) {
                     router.push(`/verify-email?email=${encodeURIComponent(err.email)}&from=login`);
