@@ -179,6 +179,21 @@ export default function EditDevlogPage() {
                 className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
             <div className="mb-4">
+              <h4 className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground mb-2">Screenshots</h4>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {screenshots.map((s, i) => (
+                  <div key={s.url} className="relative size-20 border border-border overflow-hidden group">
+                    <img src={s.url} alt={s.caption ?? ''} className="size-full object-cover" />
+                    <button type="button" onClick={() => setScreenshots(screenshots.filter((_, j) => j !== i))}
+                      className="absolute top-1 right-1 grid size-4 place-items-center rounded-full bg-background/80 text-coral cursor-pointer opacity-0 group-hover:opacity-100 transition">
+                      <X className="size-2.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <p className="font-mono text-[0.5rem] text-muted-foreground/60">Screenshots are managed from the create form.</p>
+            </div>
+            <div>
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Body</label>
               <MarkdownEditor value={body} onChange={setBody} />
             </div>
@@ -244,24 +259,6 @@ export default function EditDevlogPage() {
                   className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
               </div>
             )}
-          </div>
-
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
-            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Screenshots</h3>
-            <div className="flex flex-wrap gap-2">
-              {screenshots.map((s, i) => (
-                <div key={s.url} className="relative size-16 border border-border overflow-hidden group">
-                  <img src={s.url} alt={s.caption ?? ''} className="size-full object-cover" />
-                  <button type="button" onClick={() => setScreenshots(screenshots.filter((_, j) => j !== i))}
-                    className="absolute top-1 right-1 grid size-4 place-items-center rounded-full bg-background/80 text-coral cursor-pointer opacity-0 group-hover:opacity-100 transition">
-                    <X className="size-2.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <p className="mt-1.5 font-mono text-[0.5rem] text-muted-foreground">
-              To add screenshots, create a new devlog or upload images in the create form.
-            </p>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
