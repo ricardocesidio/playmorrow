@@ -37,17 +37,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!authLoading && isAuthenticated && !showTransition) router.replace('/dashboard');
-  }, [authLoading, isAuthenticated, router]);
+  }, [authLoading, isAuthenticated, router, showTransition]);
 
-  if (authLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background pm-circuit-bg">
-        <div className="size-6 animate-spin border border-cyan border-t-transparent" />
-      </div>
-    );
-  }
-
-  if (isAuthenticated) return <div className="flex min-h-screen items-center justify-center bg-black"><div className="size-6 animate-spin border border-cyan border-t-transparent" /></div>;
+  // If already logged in, redirect immediately (don't show loading spinner)
+  if (isAuthenticated && !authLoading) return <div className="flex min-h-screen items-center justify-center bg-black"><div className="size-6 animate-spin border border-cyan border-t-transparent" /></div>;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background px-5 pb-8 text-foreground sm:px-8 lg:px-10">
