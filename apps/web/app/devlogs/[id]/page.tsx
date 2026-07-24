@@ -379,11 +379,6 @@ export default function DevlogDetailPage() {
         <div className="relative mx-auto grid max-w-6xl gap-10 px-5 pb-16 sm:px-8 lg:px-10 lg:grid-cols-[320px_1fr] xl:grid-cols-[380px_1fr]">
             {/* ── LEFT SIDEBAR ── */}
              <aside className="space-y-6">
-              {/* Reactions at top */}
-              <div>
-                <DevlogReactions devlogId={id} />
-              </div>
-
               {/* Hero image */}
               {devlog.screenshots?.[0] && (
                 <div className="clip-corner-sm overflow-hidden cursor-pointer"
@@ -392,16 +387,6 @@ export default function DevlogDetailPage() {
                   <img src={devlog.screenshots[0].url} alt="" className="w-full object-cover" />
                 </div>
               )}
-
-              {/* Category & date */}
-              <div className="flex flex-wrap items-center gap-2 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
-                <span className="clip-corner border border-cyan/60 px-2 py-0.5 text-cyan">Devlog</span>
-                {devlog.category && <span className="clip-corner border border-violet/40 bg-violet/5 px-2 py-0.5 text-violet">{devlog.category}</span>}
-              </div>
-              {devlog.publishedAt && (
-                <p className="font-mono text-xs text-muted-foreground">{new Date(devlog.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-              )}
-              {devlog.readingTimeMin && <p className="font-mono text-xs text-muted-foreground">{devlog.readingTimeMin} min read</p>}
 
               {/* Remaining screenshots gallery */}
               {(() => {
@@ -424,6 +409,17 @@ export default function DevlogDetailPage() {
               <div>
                 <DevlogReactions devlogId={id} />
               </div>
+
+              {/* Category & date */}
+              <div className="flex flex-wrap items-center gap-2 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
+                <span className="clip-corner border border-cyan/60 px-2 py-0.5 text-cyan">Devlog</span>
+                {devlog.category && <span className="clip-corner border border-violet/40 bg-violet/5 px-2 py-0.5 text-violet">{devlog.category}</span>}
+              </div>
+              {devlog.publishedAt && (
+                <p className="font-mono text-xs text-muted-foreground">{new Date(devlog.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              )}
+              {devlog.readingTimeMin && <p className="font-mono text-xs text-muted-foreground">{devlog.readingTimeMin} min read</p>}
+
             </aside>
 
             {/* ── RIGHT COLUMN — CONTENT ── */}
