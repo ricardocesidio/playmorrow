@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MessageSquare, ThumbsUp, Heart, Zap, Lightbulb } from 'lucide-react';
+import { ArrowLeft, MessageSquare, ThumbsUp, Heart, Zap, Lightbulb, Link as LinkIcon, Twitter, Share2 } from 'lucide-react';
 
 import { SanitizedMarkdown } from '@/components/sanitized-markdown';
 
@@ -32,6 +32,13 @@ const REACTION_ICONS: Record<string, React.ReactNode> = {
   INSIGHTFUL: <Lightbulb className="size-3.5" />,
 };
 
+const ACTIVE_STYLES: Record<string, string> = {
+  LIKE: 'border-blue-500/60 bg-blue-500/10 text-blue-400',
+  LOVE: 'border-red-500/60 bg-red-500/10 text-red-400',
+  HYPE: 'border-green-500/60 bg-green-500/10 text-green-400',
+  INSIGHTFUL: 'border-yellow-500/60 bg-yellow-500/10 text-yellow-400',
+};
+
 function ReactionButton({
   type,
   count,
@@ -51,7 +58,7 @@ function ReactionButton({
       disabled={disabled}
       className={`clip-corner inline-flex items-center gap-1 border px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors cursor-pointer ${
          active
-           ? 'border-cyan bg-cyan/10 text-cyan'
+           ? (ACTIVE_STYLES[type] ?? 'border-cyan bg-cyan/10 text-cyan')
            : 'border-border/60 text-muted-foreground hover:border-cyan/40 hover:text-cyan'
        } disabled:opacity-40 cursor-pointer`}
     >
@@ -408,6 +415,18 @@ export default function DevlogDetailPage() {
               {/* Reactions */}
               <div>
                 <DevlogReactions devlogId={id} />
+              </div>
+
+              {/* Share buttons */}
+              <div className="flex gap-2 pt-2 border-t border-border/30">
+                <button onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link copied!'); }}
+                  className="clip-corner inline-flex items-center gap-1.5 border border-cyan/40 px-3 py-1.5 font-mono text-[0.5rem] uppercase tracking-widest text-cyan hover:bg-cyan/10 transition-colors cursor-pointer">
+                  <LinkIcon className="size-3" /> Copy
+                </button>
+                <a href={typeof window !== 'undefined' ? `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(devlog?.title ?? '')}` : '#'} target="_blank" rel="noopener noreferrer"
+                  className="clip-corner inline-flex items-center gap-1.5 border border-sky-500/40 px-3 py-1.5 font-mono text-[0.5rem] uppercase tracking-widest text-sky-400 hover:bg-sky-500/10 transition-colors">
+                  <Twitter className="size-3" /> Tweet
+                </a>
               </div>
 
               {/* Category & date */}
