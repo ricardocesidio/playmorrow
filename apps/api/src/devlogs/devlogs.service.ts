@@ -265,6 +265,16 @@ export class DevlogsService {
       data.slug = newSlug;
     }
 
+    // Handle screenshots (delete old ones, create new ones if provided)
+    if (dto.screenshots !== undefined) {
+      await this.prisma.devlogScreenshot.deleteMany({ where: { devlogId: id } });
+      if (dto.screenshots.length > 0) {
+        await this.prisma.devlogScreenshot.createMany({
+          data: dto.screenshots.map((s) => ({ devlogId: id, url: s.url, order: s.order, caption: s.caption })),
+        });
+      }
+    }
+
     const updated = await this.prisma.devlog.update({
       where: { id },
       data: { ...data, editedAt: new Date() },
