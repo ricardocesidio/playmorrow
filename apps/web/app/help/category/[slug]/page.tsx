@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { ArrowLeft, Clock, FileText, BookOpen } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/error-state';
 import { api, ApiError } from '@/lib/api/client';
@@ -72,8 +71,7 @@ export default function HelpCategoryPage() {
           </Link>
           <ErrorState message={error} onRetry={fetchData} />
         </main>
-        <SiteFooter />
-      </div>
+              </div>
     );
   }
 
@@ -182,7 +180,6 @@ export default function HelpCategoryPage() {
         )}
       </main>
 
-      <SiteFooter />
     </div>
   );
 }

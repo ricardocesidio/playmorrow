@@ -7,7 +7,6 @@ import { ArrowLeft, Clock, User, Calendar, Share2, Copy, ThumbsUp, ThumbsDown, C
 import { toast } from 'sonner';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/error-state';
 import { SanitizedMarkdown } from '@/components/sanitized-markdown';
@@ -111,8 +110,7 @@ export default function HelpArticlePage() {
             </div>
           </div>
         </main>
-        <SiteFooter />
-      </div>
+              </div>
     );
   }
 
@@ -130,8 +128,7 @@ export default function HelpArticlePage() {
           </Link>
           <ErrorState message={error} onRetry={fetchArticle} />
         </main>
-        <SiteFooter />
-      </div>
+              </div>
     );
   }
 
@@ -263,7 +260,6 @@ export default function HelpArticlePage() {
         </div>
       </main>
 
-      <SiteFooter />
     </div>
   );
 }

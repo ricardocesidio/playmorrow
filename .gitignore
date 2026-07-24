@@ -40,6 +40,9 @@ pnpm-debug.log*
 
 # misc
 .cache/
+
+# uploads (dev artifacts)
+apps/api/uploads/
 storybook-static
 .vercel
 .env*

@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { ShieldAlert, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { useAdminReports } from '@/lib/api/hooks';
 
 const TABS = [
@@ -111,7 +110,6 @@ export default function AdminReportsPage() {
           )}
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }

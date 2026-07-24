@@ -1,7 +1,5 @@
 'use client';
 
-// TODO (Performance audit): Evaluate Server Components for public read-heavy parts of this page (filters, static content) to reduce client JS.
-
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Search, X } from 'lucide-react';
