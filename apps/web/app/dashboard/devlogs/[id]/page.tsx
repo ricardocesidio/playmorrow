@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent, useEffect } from 'react';
+import { useState, type FormEvent, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -75,6 +75,7 @@ export default function EditDevlogPage() {
           scheduledFor: status === 'SCHEDULED' && scheduledDate ? new Date(scheduledDate).toISOString() : null,
           category: category.trim() || null,
           tags: tags.length ? tags : null,
+          screenshots: screenshots.map((s, i) => ({ url: s.url, order: i })),
         },
       });
       setSuccess(true);
@@ -179,19 +180,44 @@ export default function EditDevlogPage() {
                 className="h-11 shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
             </div>
             <div className="mb-4">
-              <h4 className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground mb-2">Screenshots</h4>
-              <div className="flex flex-wrap gap-2 mb-2">
+              <h4 className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground mb-2">Screenshots ({screenshots.length}/10)</h4>
+              <div className="flex flex-wrap gap-3 mb-3">
                 {screenshots.map((s, i) => (
-                  <div key={s.url} className="relative size-20 border border-border overflow-hidden group">
+                  <div key={s.url} className="relative size-24 border border-border overflow-hidden group">
                     <img src={s.url} alt={s.caption ?? ''} className="size-full object-cover" />
                     <button type="button" onClick={() => setScreenshots(screenshots.filter((_, j) => j !== i))}
-                      className="absolute top-1 right-1 grid size-4 place-items-center rounded-full bg-background/80 text-coral cursor-pointer opacity-0 group-hover:opacity-100 transition">
-                      <X className="size-2.5" />
+                      className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-coral/80 text-white cursor-pointer opacity-0 group-hover:opacity-100 transition text-xs">
+                      ✕
                     </button>
                   </div>
                 ))}
+                {screenshots.length < 10 && (
+                  <label className="flex size-24 cursor-pointer items-center justify-center border border-dashed border-cyan/40 bg-cyan/5 text-cyan hover:bg-cyan/10 transition">
+                    <span className="text-2xl leading-none">+</span>
+                    <input type="file" accept="image/png,image/jpeg" className="hidden" multiple
+                      onChange={async (e) => {
+                        const files = Array.from(e.target.files || []);
+                        if (screenshots.length + files.length > 10) return;
+                        for (const file of files) {
+                          if (!['image/png', 'image/jpeg'].includes(file.type)) continue;
+                          if (file.size > 10 * 1024 * 1024) continue;
+                          const form = new FormData();
+                          form.append('file', file);
+                          try {
+                            const csrfMatch = document.cookie.match(/(?:^|;\s*)playmorrow_csrf=([^;]*)/);
+                            const csrfToken = csrfMatch?.[1] ? decodeURIComponent(csrfMatch[1]) : null;
+                            const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include', headers: csrfToken ? { 'X-CSRF-Token': csrfToken } as Record<string, string> : undefined });
+                            if (!res.ok) continue;
+                            const data = await res.json();
+                            setScreenshots((prev) => [...prev, { id: '', url: data.url, order: prev.length }]);
+                          } catch { /* skip failed uploads */ }
+                        }
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                )}
               </div>
-              <p className="font-mono text-[0.5rem] text-muted-foreground/60">Screenshots are managed from the create form.</p>
             </div>
             <div>
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Body</label>
