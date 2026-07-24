@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { Button } from '@/components/ui/button';
 
 const CATEGORIES = [
@@ -176,7 +175,6 @@ export default function SupportPage() {
         </section>
       </main>
 
-      <SiteFooter />
     </div>
   );
 }

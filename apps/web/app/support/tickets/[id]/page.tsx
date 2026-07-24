@@ -7,7 +7,6 @@ import { ArrowLeft, Send, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
 import { api, ApiError } from '@/lib/api/client';
@@ -117,7 +116,6 @@ export default function TicketDetailPage() {
             <Button variant="outline">Back to tickets</Button>
           </Link>
         </main>
-        <SiteFooter />
       </div>
     );
   }
@@ -284,7 +282,6 @@ export default function TicketDetailPage() {
         </form>
       </main>
 
-      <SiteFooter />
     </div>
   );
 }

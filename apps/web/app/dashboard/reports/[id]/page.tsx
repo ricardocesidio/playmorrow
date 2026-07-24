@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check, X } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { useAdminReport, useUpdateReport } from '@/lib/api/hooks';
 
 const STATUS_STYLES: Record<string, string> = {
@@ -48,7 +47,6 @@ export default function ReportDetailPage() {
             </div>
           </div>
         </main>
-        <SiteFooter />
       </>
     );
   }
@@ -66,7 +64,6 @@ export default function ReportDetailPage() {
             </div>
           </div>
         </main>
-        <SiteFooter />
       </>
     );
   }
@@ -140,7 +137,6 @@ export default function ReportDetailPage() {
           )}
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }

@@ -356,3 +356,29 @@ A comprehensive 13-item double-check verifying every claimed accomplishment from
 | Payments (full) | Stripe integration — only needed when going to market |
 
 All previous high-priority items from Sessions 9–12 (registration, CSRF, auth guards, dashboard navigation, legal pages, repo files, Sentry, branch protection, etc.) are now resolved or verified.
+
+### Session 17 — Documentation Consolidation, Code Cleanup & Enterprise Documentation (2026-07-24)
+
+Full platform documentation rewrite and code cleanup. No new features — pure audit, cleanup, and documentation.
+
+**Documentation rewrites (3 files):**
+- **README.md** (105→432 lines): Enterprise-grade rewrite with complete feature catalog, architecture diagram, auth flow, monorepo structure, 27-module API table, database schema catalog, full environment variable reference, security overview, legal footer
+- **STATUS.md** (472→~350 lines): Rewritten with 821 commits, 84/100 engineering score, 15-category feature inventory, known issues, remaining work, deployment info, env var tables, engineering scores
+- **SECURITY.md** (new, 150 lines): Covers all 10 protection domains (CSRF HMAC, CSP nonce, rate limiting 60/req min, argon2id, DOMPurify sanitization, upload validation, cookie security, session management, input validation, HSTS), reporting process, dependency scanning, production env vars
+
+**New documentation (2 files):**
+- **ARCHITECTURE.md** (525 lines): 6 Mermaid diagrams (architecture flow, auth flow, event bus flow, module relationships, deployment), full frontend/backend architecture covering 27+ NestJS modules, 30+ page routes, database schema, auth flow, API design, notification system, uploads, support, verification, analytics, deployment
+- **docs/PROJECT_CONSOLIDATION_REPORT.md**: Complete project audit with engineering scores (10 categories, 84/100 overall), module inventory, 21 known issues, strategic roadmap, technical debt register
+
+**Code cleanup:**
+- Removed 2 stale TODO comments from `page.tsx` and `games/page.tsx` (performance audit completed in Sessions 12/15)
+- Confirmed: No console.log in production code, no storybook files, all scripts legitimate, June security docs already archived
+
+**Build verification:**
+- Typecheck: 6/6 (0 errors)
+- Lint: 0 errors, 49 warnings (all pre-existing `token` unused-var warnings, unchanged)
+- No new features, no regression risk
+
+**Updated:** README.md, STATUS.md, AGENTS.md
+**Created:** SECURITY.md, ARCHITECTURE.md, docs/PROJECT_CONSOLIDATION_REPORT.md
+**Commits:** 821

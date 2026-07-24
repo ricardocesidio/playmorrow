@@ -7,7 +7,6 @@ import { ArrowLeft, Send, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/api/auth-context';
@@ -209,7 +208,6 @@ export default function NewTicketPage() {
         </form>
       </main>
 
-      <SiteFooter />
     </div>
   );
 }

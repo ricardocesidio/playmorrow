@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Search, ArrowLeft, Clock, FileText, Loader2 } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/error-state';
 import { api, ApiError } from '@/lib/api/client';
@@ -179,7 +178,6 @@ export default function HelpSearchPage() {
         )}
       </main>
 
-      <SiteFooter />
     </div>
   );
 }
