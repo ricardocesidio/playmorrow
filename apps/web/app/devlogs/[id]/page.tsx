@@ -412,9 +412,19 @@ export default function DevlogDetailPage() {
                 {devlog.game.title}
               </Link>
             </div>
-            {devlog.editedAt && (
-              <span className="ml-auto text-xs text-muted-foreground/50">Edited {new Date(devlog.editedAt).toLocaleDateString()}</span>
-            )}
+            <div className="ml-auto flex items-center gap-3">
+              {devlog.editedAt && (
+                <span className="text-xs text-muted-foreground/50">Edited {new Date(devlog.editedAt).toLocaleDateString()}</span>
+              )}
+              {(user?.id === devlog.author?.id || user?.role === 'ADMIN') && (
+                <Link
+                  href={`/dashboard/devlogs/${devlog.id}`}
+                  className="clip-corner border border-cyan/40 bg-cyan/5 px-3 py-1 font-mono text-[0.5rem] uppercase tracking-widest text-cyan hover:bg-cyan/10 transition-colors"
+                >
+                  Edit
+                </Link>
+              )}
+            </div>
           </div>
 
           {/* Reaction bar */}
