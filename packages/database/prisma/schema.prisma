@@ -201,6 +201,7 @@ model User {
    supportTicketHistory    SupportTicketHistory[] @relation("SupportHistoryActor")
    helpArticles            HelpArticle[]
    helpFeedback            HelpArticleFeedback[]
+   reviewedVerifications   StudioVerificationRequest[] @relation("VerificationReviewer")
 
    @@index([role])
    @@map("users")
@@ -209,6 +210,15 @@ model User {
 // ──────────────────────────────────────────────────────────────────────────
 // Studios
 // ──────────────────────────────────────────────────────────────────────────
+
+enum StudioVerificationStatus {
+  UNVERIFIED
+  EMAIL_VERIFIED
+  BASIC_VERIFIED
+  OFFICIAL_STUDIO
+  PARTNER_STUDIO
+  FEATURED_STUDIO
+}
 
 model Studio {
   id          String   @id @default(cuid())
@@ -222,26 +232,108 @@ model Studio {
   location    String?
   foundedYear Int?
   isVerified      Boolean  @default(false)
-  followersCount  Int      @default(0)
-  gamesCount      Int      @default(0)
-  level           Int      @default(1)
-  xp              Int      @default(0)
+  verificationStatus StudioVerificationStatus @default(UNVERIFIED)
+  trustScore        Int      @default(0)
+  followersCount    Int      @default(0)
+  gamesCount        Int      @default(0)
+  level             Int      @default(1)
+  xp                Int      @default(0)
+
+  // Company profile (Milestone 4)
+  legalName        String?
+  companySize      String?
+  businessEmail    String?
+  supportEmail     String?
+  pressContact     String?
+  mission          String?
+  vision           String?
+  discord          String?
+  twitter          String?
+  github           String?
+  linkedin         String?
+  steamUrl         String?
+  epicUrl          String?
+  itchUrl          String?
+  engine           String?
+  platforms        String?
+  businessDesc     String?
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  members      StudioMember[]
-  games        Game[]
-  followers    Follow[]
-  invitations  StudioInvitation[]
-  auditLogs    AuditLog[]
-  xpEvents     StudioXpEvent[]
-  chatMessages      StudioChatMessage[]
-  goals             StudioGoal[]
-  achievements      StudioAchievement[]
-  healthScores      StudioHealthScore[]
-  weeklyReports     StudioWeeklyReport[]
+  members          StudioMember[]
+  games            Game[]
+  followers        Follow[]
+  invitations      StudioInvitation[]
+  auditLogs        AuditLog[]
+  xpEvents         StudioXpEvent[]
+  chatMessages     StudioChatMessage[]
+  goals            StudioGoal[]
+  achievements     StudioAchievement[]
+  healthScores     StudioHealthScore[]
+  weeklyReports    StudioWeeklyReport[]
+  verificationReqs  StudioVerificationRequest[]
+  brandKit          BrandKit?
+  pressKit          StudioPressKit?
 
   @@map("studios")
+}
+
+model StudioVerificationRequest {
+  id              String                    @id @default(cuid())
+  studioId        String
+  requestedLevel  StudioVerificationStatus
+  status          String                    @default("PENDING") // PENDING | APPROVED | REJECTED | MORE_INFO
+  documents       Json?
+  notes           String?
+  reviewedById    String?
+  reviewedAt      DateTime?
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  studio    Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  reviewedBy User?  @relation("VerificationReviewer", fields: [reviewedById], references: [id])
+
+  @@index([studioId])
+  @@index([status])
+  @@map("studio_verification_requests")
+}
+
+model BrandKit {
+  id          String   @id @default(cuid())
+  studioId    String   @unique
+  primaryLogo String?
+  darkLogo    String?
+  lightLogo   String?
+  colors      Json?
+  typography  String?
+  brandRules  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+
+  @@map("brand_kits")
+}
+
+model StudioPressKit {
+  id            String   @id @default(cuid())
+  studioId      String   @unique
+  headline      String?
+  factSheet     Json?
+  awards        String?
+  pressContacts Json?
+  history       String?
+  logos         Json?
+  keyArt        String?
+  trailerUrl    String?
+  downloads     Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+
+  @@map("studio_press_kits")
 }
 
 model StudioXpEvent {

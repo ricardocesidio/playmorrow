@@ -3,6 +3,7 @@ import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from '@tansta
 import { toast } from 'sonner';
 import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile, type Report, type CreateReportDto } from './client';
 import type { StudioAnalytics, GameAnalytics } from './analytics-types';
+import type { StudioVerificationRequest, TrustScore, CompanyProfile, StudioPressKit, BrandKit, AdminVerificationItem } from './verification-types';
 import { revalidateFeed, revalidateHomepage, revalidateGame } from '@/actions/revalidate';
 
 // ── Infinite scroll helpers ─────────────────────────────────────────────
@@ -700,6 +701,135 @@ export function useDeleteStudio() {
       toast.success('Studio deleted');
     },
     onError: () => toast.error('Failed to delete studio'),
+  });
+}
+
+// ── Studio Verification & Trust ──────────────────────────────────────────
+
+export function useStudioVerification(slug: string) {
+  return useQuery({
+    queryKey: ['studioVerification', slug],
+    queryFn: () => api.get<StudioVerificationRequest>(`/studios/${slug}/verification`),
+    enabled: !!slug,
+  });
+}
+
+export function useRequestVerification() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; requestedLevel: string; documents?: { name: string; url: string; type: string }[] }) => {
+      const { slug, ...body } = data;
+      return api.post<StudioVerificationRequest>(`/studios/${slug}/verification`, body);
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['studioVerification', vars.slug] });
+      toast.success('Verification request submitted');
+    },
+    onError: () => toast.error('Failed to submit verification request'),
+  });
+}
+
+export function useTrustScore(slug: string) {
+  return useQuery({
+    queryKey: ['trustScore', slug],
+    queryFn: () => api.get<TrustScore>(`/studios/${slug}/trust-score`),
+    enabled: !!slug,
+  });
+}
+
+// ── Company Profile ─────────────────────────────────────────────────────
+
+export function useCompanyProfile(slug: string) {
+  return useQuery({
+    queryKey: ['companyProfile', slug],
+    queryFn: () => api.get<CompanyProfile>(`/studios/${slug}/company-profile`),
+    enabled: !!slug,
+  });
+}
+
+export function useUpdateCompanyProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; body: Partial<CompanyProfile> }) => {
+      return api.patch<CompanyProfile>(`/studios/${data.slug}/company-profile`, data.body);
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['companyProfile', vars.slug] });
+      toast.success('Company profile updated');
+    },
+    onError: () => toast.error('Failed to update company profile'),
+  });
+}
+
+// ── Studio Press Kit ────────────────────────────────────────────────────
+
+export function useStudioPressKit(slug: string) {
+  return useQuery({
+    queryKey: ['studioPressKit', slug],
+    queryFn: () => api.get<StudioPressKit>(`/studios/${slug}/press-kit`),
+    enabled: !!slug,
+  });
+}
+
+export function useSaveStudioPressKit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; body: Partial<StudioPressKit> }) => {
+      return api.post<StudioPressKit>(`/studios/${data.slug}/press-kit`, data.body);
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['studioPressKit', vars.slug] });
+      toast.success('Press kit saved');
+    },
+    onError: () => toast.error('Failed to save press kit'),
+  });
+}
+
+// ── Studio Brand Kit ────────────────────────────────────────────────────
+
+export function useStudioBrandKit(slug: string) {
+  return useQuery({
+    queryKey: ['studioBrandKit', slug],
+    queryFn: () => api.get<BrandKit>(`/studios/${slug}/brand-kit`),
+    enabled: !!slug,
+  });
+}
+
+export function useSaveStudioBrandKit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string; body: Partial<BrandKit> }) => {
+      return api.post<BrandKit>(`/studios/${data.slug}/brand-kit`, data.body);
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['studioBrandKit', vars.slug] });
+      toast.success('Brand kit saved');
+    },
+    onError: () => toast.error('Failed to save brand kit'),
+  });
+}
+
+// ── Admin Verification ──────────────────────────────────────────────────
+
+export function useAdminVerificationRequests(status?: string) {
+  const params = status && status !== 'all' ? `?status=${status}` : '';
+  return useQuery({
+    queryKey: ['adminVerificationRequests', status],
+    queryFn: () => api.get<{ items: AdminVerificationItem[]; total: number }>(`/admin/verification${params}`),
+  });
+}
+
+export function useReviewVerificationRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { id: string; status: string; reviewerNotes?: string }) => {
+      return api.patch(`/admin/verification/${data.id}`, { status: data.status, reviewerNotes: data.reviewerNotes });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['adminVerificationRequests'] });
+      toast.success('Verification request updated');
+    },
+    onError: () => toast.error('Failed to update verification request'),
   });
 }
 

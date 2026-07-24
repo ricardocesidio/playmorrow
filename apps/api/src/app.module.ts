@@ -45,6 +45,10 @@ import { GoalsModule } from './goals/goals.module';
 import { StudioAchievementsModule } from './achievements/studio-achievements.module';
 import { StudioHealthModule } from './health/studio-health.module';
 import { WeeklyReportsModule } from './reports/weekly-reports.module';
+import { VerificationModule } from './verification/verification.module';
+import { TrustModule } from './trust/trust.module';
+import { StudioProfileModule } from './studio-profile/studio-profile.module';
+import { StudioPressKitModule } from './press-kit/studio-press-kit.module';
 
 @Module({
   imports: [
@@ -90,6 +94,10 @@ import { WeeklyReportsModule } from './reports/weekly-reports.module';
     StudioHealthModule,
     WeeklyReportsModule,
     EventBusModule,
+    VerificationModule,
+    TrustModule,
+    StudioProfileModule,
+    StudioPressKitModule,
   ],
   controllers: [CspController],
   providers: [
