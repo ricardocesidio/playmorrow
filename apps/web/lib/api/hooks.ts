@@ -1086,10 +1086,11 @@ export function useStudioInvitations(slug: string) {
   });
 }
 
-export function useMyInvitations() {
+export function useMyInvitations(enabled?: boolean) {
   return useQuery({
     queryKey: ['myInvitations'],
     queryFn: () => api.get<Invitation[]>('/me/invitations'),
+    enabled: enabled ?? true,
   });
 }
 
