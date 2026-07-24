@@ -405,8 +405,10 @@ export default function DevlogDetailPage() {
                     <h3 className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Screenshots</h3>
                     <div className="grid grid-cols-2 gap-2">
                       {remaining.slice(0, 2).map((s, i) => (
-                        <img key={s.id} src={s.url} alt={s.caption ?? ''} className="w-full clip-corner-sm object-cover cursor-pointer" style={{ border: '2px solid rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}
-                          onClick={() => { setLightboxOpen(true); setLightboxIndex(i + 1); }} />
+                        <div key={s.id} className="aspect-square clip-corner-sm overflow-hidden cursor-pointer" style={{ border: '2px solid rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}
+                          onClick={() => { setLightboxOpen(true); setLightboxIndex(i + 1); }}>
+                          <img src={s.url} alt={s.caption ?? ''} className="size-full object-cover" />
+                        </div>
                       ))}
                     </div>
                     {remaining.length > 2 && (
