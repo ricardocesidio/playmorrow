@@ -13,7 +13,7 @@ export function PlayMorrowSplash({ onDone }: { onDone: () => void }) {
     <BrandLoaderShell fadeOut={fadeOut}>
       <div className="relative z-10 flex flex-col items-center gap-8">
         <div className="flex animate-[fadeScaleIn_1.2s_ease-out] flex-col items-center gap-2">
-          <div style={{ animation: 'logoColorShift 3s ease-in-out forwards' }}>
+          <div style={{ animation: 'logoColorShift 3s ease-in-out forwards', color: 'rgb(255 87 77)', filter: 'drop-shadow(0 0 20px rgb(255 87 77 / 0.45))' }}>
             <PlaymorrowLogo cutout size={56} />
           </div>
           <span className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.5em] text-[#eef2f2] drop-shadow-[0_0_10px_rgb(255_255_255_/_0.12)]">PLAYMORROW</span>
