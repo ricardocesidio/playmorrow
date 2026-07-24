@@ -264,8 +264,13 @@ function CommentItem({
                 </Button>
                 <Button onClick={() => setReplying(false)} variant="outline" size="sm">Cancel</Button>
               </div>
-            </div>
-          )}
+              </div>
+              )}
+
+              {/* Reactions */}
+              <div className="pt-2 border-t border-border/30">
+                <DevlogReactions devlogId={id} />
+              </div>
         </>
       )}
       {(comment.replies?.length ?? 0) > 0 && depth < 5 && (
@@ -396,11 +401,6 @@ export default function DevlogDetailPage() {
                 <p className="font-mono text-xs text-muted-foreground">{new Date(devlog.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
               )}
               {devlog.readingTimeMin && <p className="font-mono text-xs text-muted-foreground">{devlog.readingTimeMin} min read</p>}
-
-              {/* Reactions */}
-              <div className="pt-2 border-t border-border/30">
-                <DevlogReactions devlogId={id} />
-              </div>
 
               {/* Remaining screenshots gallery */}
               {(() => {
