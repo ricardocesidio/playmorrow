@@ -863,6 +863,51 @@ model PasswordResetToken {
 }
 
 // ──────────────────────────────────────────────────────────────────────────
+// Analytics — event tracking, aggregations, studio metrics
+// ──────────────────────────────────────────────────────────────────────────
+
+model AnalyticsEvent {
+  id          String   @id @default(cuid())
+  eventType   String
+  gameId      String?
+  studioId    String?
+  userId      String?
+  sessionId   String?
+  metadata    Json?
+  ip          String?
+  country     String?
+  referrer    String?
+  userAgent   String?
+  locale      String?
+  timestamp   DateTime @default(now())
+
+  @@index([eventType])
+  @@index([gameId, eventType, timestamp])
+  @@index([studioId, eventType, timestamp])
+  @@index([timestamp])
+  @@index([gameId, timestamp])
+  @@index([studioId, timestamp])
+  @@map("analytics_events")
+}
+
+model AnalyticsDailyAggregate {
+  id        String   @id @default(cuid())
+  date      DateTime
+  gameId    String?
+  studioId  String?
+  eventType String
+  count     Int      @default(0)
+  uniqueCount Int    @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, gameId, studioId, eventType])
+  @@index([gameId, date])
+  @@index([studioId, date])
+  @@index([eventType, date])
+  @@map("analytics_daily_aggregates")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
 // Help Center — articles, categories, feedback, guides
 // ──────────────────────────────────────────────────────────────────────────
 

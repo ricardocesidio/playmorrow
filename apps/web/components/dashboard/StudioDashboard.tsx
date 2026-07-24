@@ -151,17 +151,18 @@ export function StudioDashboard() {
               <StatCard icon={<CalendarDays className="size-5" />} label="Since Joined" value={formatMonthYear(studio.createdAt)} tone="muted" />
             </div>
 
-            {/* E1: Basic studio analytics stub */}
-            <DashboardPanel className="p-3 mb-3">
-              <p className="mb-3 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-foreground">Analytics (Beta Stub)</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-                <div>Followers this week: <span className="text-cyan">{ds?.stats.followsThisWeek ?? 0}</span></div>
-                <div>Views this week: <span className="text-cyan">{ds?.stats.viewsThisWeek ?? 0}</span></div>
-                <div>Wishlists this week: <span className="text-cyan">{ds?.stats.wishlistsThisWeek ?? 0}</span></div>
-                <div>Engagement: <span className="text-cyan">{`+${ds?.stats.commentsThisMonth ?? 0}`}</span> comments/mo</div>
-              </div>
-              <p className="mt-2 text-[0.5rem] text-muted-foreground">Full analytics coming soon. Data from studio dashboard.</p>
-            </DashboardPanel>
+            <Link href="/dashboard/analytics" className="mx-3 mb-3 block">
+              <DashboardPanel className="group flex items-center justify-between p-4 transition hover:border-cyan/50">
+                <div className="flex items-center gap-4">
+                  <BarChart3 className="size-6 text-cyan drop-shadow-[0_0_12px_rgb(62_231_255_/_0.35)]" />
+                  <div>
+                    <p className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-foreground group-hover:text-cyan transition-colors">Analytics Dashboard</p>
+                    <p className="mt-0.5 text-[0.62rem] text-muted-foreground">Views, followers, wishlists, traffic sources & more</p>
+                  </div>
+                </div>
+                <ArrowRight className="size-5 text-muted-foreground group-hover:text-cyan group-hover:translate-x-0.5 transition-all" />
+              </DashboardPanel>
+            </Link>
 
             <DashboardPanel className="p-3">
               <p className="mb-3 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-foreground">Quick Actions</p>
@@ -266,6 +267,7 @@ function StudioSidebar({ unreadCount, studioSlug }: { unreadCount: number; studi
           <SidebarLink href="/dashboard/games" icon={<Gamepad2 className="size-4" />} label="My Games" />
           <SidebarLink href="/dashboard/devlogs" icon={<FileText className="size-4" />} label="Devlogs" />
           <SidebarLink href="/dashboard/roadmap" icon={<Workflow className="size-4" />} label="Roadmap" />
+          <SidebarLink href="/dashboard/analytics" icon={<BarChart3 className="size-4" />} label="Analytics" />
           <SidebarLink href="/dashboard/reports" icon={<LineChart className="size-4" />} label="Reports" />
           <SidebarLink href="/dashboard/notifications" icon={<MessageSquare className="size-4" />} label="Activity" count={unreadCount} />
           <SidebarLink href={`/dashboard/studios/${studioSlug}/team`} icon={<ShieldCheck className="size-4" />} label="Team" />

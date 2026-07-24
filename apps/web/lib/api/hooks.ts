@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile, type Report, type CreateReportDto } from './client';
+import type { StudioAnalytics, GameAnalytics } from './analytics-types';
 import { revalidateFeed, revalidateHomepage, revalidateGame } from '@/actions/revalidate';
 
 // ── Infinite scroll helpers ─────────────────────────────────────────────
@@ -504,6 +505,57 @@ export function useStudioDashboard(slug: string) {
     queryKey: ['studioDashboard', slug],
     queryFn: () => api.get<StudioDashboardStats>(`/studios/${slug}/dashboard`),
     enabled: !!slug,
+  });
+}
+
+// ── Analytics ───────────────────────────────────────────────────────────
+
+export function useStudioAnalytics(slug: string) {
+  return useQuery({
+    queryKey: ['studioAnalytics', slug],
+    queryFn: () => api.get<StudioAnalytics>(`/studios/${slug}/analytics`),
+    enabled: !!slug,
+    refetchInterval: 30_000,
+  });
+}
+
+export function useGameAnalytics(slug: string) {
+  return useQuery({
+    queryKey: ['gameAnalytics', slug],
+    queryFn: () => api.get<GameAnalytics>(`/games/${slug}/analytics`),
+    enabled: !!slug,
+    refetchInterval: 30_000,
+  });
+}
+
+export function useGameAnalyticsTimeSeries(slug: string, eventType: string, days: number) {
+  return useQuery({
+    queryKey: ['gameAnalyticsTimeSeries', slug, eventType, days],
+    queryFn: () => api.get<{ date: string; count: number }[]>(`/games/${slug}/analytics/timeseries?eventType=${eventType}&days=${days}`),
+    enabled: !!slug,
+  });
+}
+
+export function useGameAnalyticsTraffic(slug: string) {
+  return useQuery({
+    queryKey: ['gameAnalyticsTraffic', slug],
+    queryFn: () => api.get<{ source: string; count: number; percentage: number }[]>(`/games/${slug}/analytics/traffic`),
+    enabled: !!slug,
+  });
+}
+
+export function useGameAnalyticsCountries(slug: string) {
+  return useQuery({
+    queryKey: ['gameAnalyticsCountries', slug],
+    queryFn: () => api.get<{ country: string; count: number }[]>(`/games/${slug}/analytics/countries`),
+    enabled: !!slug,
+  });
+}
+
+export function useTrackAnalyticsEvent() {
+  return useMutation({
+    mutationFn: (data: { eventType: string; targetType: string; targetId: string; metadata?: Record<string, unknown> }) =>
+      api.post('/analytics/track', data),
   });
 }
 
