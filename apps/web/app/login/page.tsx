@@ -47,7 +47,7 @@ export default function LoginPage() {
     );
   }
 
-  if (isAuthenticated) return null;
+  if (isAuthenticated) return <div className="flex min-h-screen items-center justify-center bg-black"><div className="size-6 animate-spin border border-cyan border-t-transparent" /></div>;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background px-5 pb-8 text-foreground sm:px-8 lg:px-10">
