@@ -49,11 +49,11 @@ function ReactionButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`clip-corner inline-flex items-center gap-1 border px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors ${
-        active
-          ? 'border-cyan bg-cyan/10 text-cyan'
-          : 'border-border/60 text-muted-foreground hover:border-cyan/40 hover:text-cyan'
-      } disabled:opacity-40`}
+      className={`clip-corner inline-flex items-center gap-1 border px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors cursor-pointer ${
+         active
+           ? 'border-cyan bg-cyan/10 text-cyan'
+           : 'border-border/60 text-muted-foreground hover:border-cyan/40 hover:text-cyan'
+       } disabled:opacity-40 cursor-pointer`}
     >
       {REACTION_ICONS[type]}
       <span>{count}</span>
@@ -74,9 +74,9 @@ function DevlogReactions({ devlogId }: { devlogId: string }) {
     const isActive = viewerReactions.includes(type);
     try {
       if (isActive) {
-        await unreactMut.mutateAsync({ devlogId, type, token: token! });
+        await unreactMut.mutateAsync({ devlogId, type, token: token || '' });
       } else {
-        await reactMut.mutateAsync({ devlogId, type, token: token! });
+        await reactMut.mutateAsync({ devlogId, type, token: token || '' });
       }
     } catch (e) { toast.error('Something went wrong. Please try again.') }
   };
@@ -119,9 +119,9 @@ function CommentReactions({
     const isActive = viewerReactions.includes(type);
     try {
       if (isActive) {
-        await unreactMut.mutateAsync({ commentId, devlogId, type, token: token! });
+        await unreactMut.mutateAsync({ commentId, devlogId, type, token: token || '' });
       } else {
-        await reactMut.mutateAsync({ commentId, devlogId, type, token: token! });
+        await reactMut.mutateAsync({ commentId, devlogId, type, token: token || '' });
       }
     } catch (e) { toast.error('Something went wrong. Please try again.') }
   };
@@ -176,27 +176,26 @@ function CommentItem({
   const isAuthor = currentUserId && comment.author?.id === currentUserId;
 
   const handleReply = async () => {
-    if (!replyBody.trim() || !token) return;
+    if (!replyBody.trim()) return;
     try {
-      await createComment.mutateAsync({ devlogId, body: replyBody.trim(), parentId: comment.id, token });
+      await createComment.mutateAsync({ devlogId, body: replyBody.trim(), parentId: comment.id, token: token || '' });
       setReplyBody('');
       setReplying(false);
-    } catch (e) { toast.error('Something went wrong. Please try again.') }
+    } catch (e) { toast.error('Failed to post reply.'); }
   };
 
   const handleEdit = async () => {
-    if (!editBody.trim() || !token) return;
+    if (!editBody.trim()) return;
     try {
-      await updateComment.mutateAsync({ devlogId, commentId: comment.id, body: editBody.trim(), token });
+      await updateComment.mutateAsync({ devlogId, commentId: comment.id, body: editBody.trim(), token: token || '' });
       setEditing(false);
-    } catch (e) { toast.error('Something went wrong. Please try again.') }
+    } catch (e) { toast.error('Failed to edit comment.'); }
   };
 
   const handleDelete = async () => {
-    if (!token) return;
     try {
-      await deleteComment.mutateAsync({ devlogId, commentId: comment.id, token });
-    } catch (e) { toast.error('Something went wrong. Please try again.') }
+      await deleteComment.mutateAsync({ devlogId, commentId: comment.id, token: token || '' });
+    } catch (e) { toast.error('Failed to delete comment.'); }
   };
 
   return (
@@ -312,11 +311,11 @@ export default function DevlogDetailPage() {
   }, [lightboxOpen, devlog?.screenshots]);
 
   const handlePostComment = async () => {
-    if (!newComment.trim() || !token) return;
+    if (!newComment.trim()) return;
     try {
-      await createComment.mutateAsync({ devlogId: id, body: newComment.trim(), token });
+      await createComment.mutateAsync({ devlogId: id, body: newComment.trim(), token: token || '' });
       setNewComment('');
-    } catch (e) { toast.error('Something went wrong. Please try again.') }
+    } catch (e) { toast.error('Failed to post comment.'); }
   };
 
   const countAllComments = (items: Comment[]): number =>
