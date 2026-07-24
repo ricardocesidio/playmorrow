@@ -8,6 +8,7 @@ import { ArrowLeft, Save, ExternalLink, Gamepad2, Milestone, FileText, ScrollTex
 
 import { SiteHeader } from '@/components/site-header';
 import { Input } from '@/components/ui/input';
+import { MarkdownEditor } from '@/components/md-editor';
 import { useAuth } from '@/lib/api/auth-context';
 import { useGame, useUpdateGame, useDeleteGame } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
@@ -47,6 +48,7 @@ export default function EditGamePage() {
   const [title, setTitle] = useState('');
   const [tagline, setTagline] = useState('');
   const [description, setDescription] = useState('');
+  const [readme, setReadme] = useState('');
   const [status, setStatus] = useState('');
   const [releaseDate, setReleaseDate] = useState('');
   const [expectedReleaseText, setExpectedReleaseText] = useState('');
@@ -73,6 +75,7 @@ export default function EditGamePage() {
       setTitle(game.title ?? '');
       setTagline(game.tagline ?? '');
       setDescription(game.description ?? '');
+      setReadme(game.readme ?? '');
       setStatus(game.status ?? '');
       setReleaseDate(game.releaseDate ? game.releaseDate.slice(0, 10) : '');
       setExpectedReleaseText(game.expectedReleaseText ?? '');
@@ -145,6 +148,7 @@ export default function EditGamePage() {
           title: title.trim(),
           tagline: tagline.trim() || null,
           description: description.trim() || null,
+          readme: readme.trim() || null,
           status,
           releaseDate: releaseDate ? `${releaseDate}T00:00:00.000Z` : null,
           expectedReleaseText: expectedReleaseText.trim() || null,
@@ -341,6 +345,12 @@ export default function EditGamePage() {
                 })}
               </div>
             </div>
+          </div>
+
+          {/* README */}
+          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Full README</h3>
+            <MarkdownEditor value={readme} onChange={setReadme} minHeight={400} />
           </div>
 
           {/* Trailer */}

@@ -8,6 +8,7 @@ import { ArrowLeft, Plus, Trash2, Gamepad2, Upload, Loader2 } from 'lucide-react
 import DOMPurify from 'dompurify';
 import { SiteHeader } from '@/components/site-header';
 import { Input } from '@/components/ui/input';
+import { MarkdownEditor } from '@/components/md-editor';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyStudios, useCreateGame } from '@/lib/api/hooks';
 import { ApiError } from '@/lib/api/client';
@@ -299,8 +300,7 @@ function CreateGameForm() {
 
             <div className="mt-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Full README</label>
-              <textarea id="readme" rows={10} value={readme} onChange={(e) => setReadme(e.target.value)} placeholder="Write the full game README here..."
-                className="clip-corner w-full resize-none border border-input bg-background/80 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan focus:shadow-[0_0_20px_rgb(62_231_255_/_0.15)]" />
+              <MarkdownEditor value={readme} onChange={setReadme} minHeight={400} />
             </div>
           </div>
 

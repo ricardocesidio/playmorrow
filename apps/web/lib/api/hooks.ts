@@ -55,6 +55,7 @@ export function usePersonalFeed(type: string, page: number, pageSize: number, to
     queryFn: () => api.get<Paginated<FeedItem>>(`/me/feed?${params}`),
     enabled: true,
     placeholderData: (prev) => prev,
+    refetchInterval: 30_000,
   });
 }
 
@@ -219,10 +220,10 @@ export function useCreateComment() {
 export function useUpdateComment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { commentId: string; body: string; token: string }) =>
+    mutationFn: (data: { devlogId: string; commentId: string; body: string; token: string }) =>
       api.patch<Comment>(`/comments/${data.commentId}`, { body: data.body }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['devlogComments'] });
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['devlogComments', vars.devlogId] });
     },
   });
 }
@@ -230,10 +231,10 @@ export function useUpdateComment() {
 export function useDeleteComment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { commentId: string; token: string }) =>
+    mutationFn: (data: { devlogId: string; commentId: string; token: string }) =>
       api.delete(`/comments/${data.commentId}`),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['devlogComments'] });
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['devlogComments', vars.devlogId] });
     },
   });
 }
@@ -307,8 +308,8 @@ export function useCreateRoadmapItem() {
       const { gameSlug, token: _token, ...body } = data;
       return api.post<RoadmapItem>(`/games/${gameSlug}/roadmap`, body);
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['gameRoadmap'] });
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['gameRoadmap', vars.gameSlug] });
     },
   });
 }
@@ -316,11 +317,11 @@ export function useCreateRoadmapItem() {
 export function useUpdateRoadmapItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { id: string; body: Record<string, unknown>; token: string }) => {
+    mutationFn: (data: { gameSlug: string; id: string; body: Record<string, unknown>; token: string }) => {
       return api.patch<RoadmapItem>(`/roadmap-items/${data.id}`, data.body);
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['gameRoadmap'] });
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['gameRoadmap', vars.gameSlug] });
     },
   });
 }
@@ -328,10 +329,10 @@ export function useUpdateRoadmapItem() {
 export function useDeleteRoadmapItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { id: string; token: string }) =>
+    mutationFn: (data: { gameSlug: string; id: string; token: string }) =>
       api.delete(`/roadmap-items/${data.id}`),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['gameRoadmap'] });
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['gameRoadmap', vars.gameSlug] });
     },
   });
 }
@@ -345,8 +346,8 @@ export function useReorderRoadmapItems() {
         { items: data.items },
       );
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['gameRoadmap'] });
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['gameRoadmap', vars.gameSlug] });
     },
   });
 }
@@ -375,8 +376,8 @@ export function useUpsertPressKit() {
       const { gameSlug, token: _token, ...body } = data;
       return api.put<PressKit>(`/games/${gameSlug}/press-kit`, body);
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['gamePressKit'] });
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['gamePressKit', vars.gameSlug] });
     },
   });
 }
@@ -942,24 +943,26 @@ export function useReactToGameComment() {
       api.post(`/game-comments/${commentId}/reactions`, { type }),
     onMutate: async ({ commentId, type }) => {
       await qc.cancelQueries({ queryKey: ['gameComments'] });
-      qc.setQueriesData({ queryKey: ['gameComments'] }, (old: any) => {
+      const previous = qc.getQueriesData({ queryKey: ['gameComments'] });
+      qc.setQueriesData({ queryKey: ['gameComments'] }, (old: Record<string, unknown>) => {
         if (!old?.items) return old;
-        return {
-          ...old,
-          items: old.items.map((c: any) =>
-            c.id === commentId
-              ? {
-                  ...c,
-                  reactions: { ...c.reactions, [type]: (c.reactions?.[type] ?? 0) + 1 },
-                  viewerReactions: [...(c.viewerReactions ?? []), type],
-                }
-              : c,
-          ),
-        };
+        const items = (old.items as Array<Record<string, unknown>>).map((c) =>
+          c.id === commentId
+            ? {
+                ...c,
+                reactions: { ...(c.reactions as Record<string, number>), [type]: ((c.reactions as Record<string, number>)?.[type] ?? 0) + 1 },
+                viewerReactions: [...((c.viewerReactions as string[]) ?? []), type],
+              }
+            : c,
+        );
+        return { ...old, items };
       });
+      return { previous };
     },
-    onError: () => {
-      qc.invalidateQueries({ queryKey: ['gameComments'] });
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        context.previous.forEach(([key, data]) => qc.setQueryData(key, data));
+      }
     },
   });
 }
@@ -971,24 +974,26 @@ export function useRemoveGameCommentReaction() {
       api.delete(`/game-comments/${commentId}/reactions`, { type }),
     onMutate: async ({ commentId, type }) => {
       await qc.cancelQueries({ queryKey: ['gameComments'] });
-      qc.setQueriesData({ queryKey: ['gameComments'] }, (old: any) => {
+      const previous = qc.getQueriesData({ queryKey: ['gameComments'] });
+      qc.setQueriesData({ queryKey: ['gameComments'] }, (old: Record<string, unknown>) => {
         if (!old?.items) return old;
-        return {
-          ...old,
-          items: old.items.map((c: any) =>
-            c.id === commentId
-              ? {
-                  ...c,
-                  reactions: { ...c.reactions, [type]: Math.max(0, (c.reactions?.[type] ?? 1) - 1) },
-                  viewerReactions: (c.viewerReactions ?? []).filter((r: string) => r !== type),
-                }
-              : c,
-          ),
-        };
+        const items = (old.items as Array<Record<string, unknown>>).map((c) =>
+          c.id === commentId
+            ? {
+                ...c,
+                reactions: { ...(c.reactions as Record<string, number>), [type]: Math.max(0, ((c.reactions as Record<string, number>)?.[type] ?? 1) - 1) },
+                viewerReactions: ((c.viewerReactions as string[]) ?? []).filter((r: string) => r !== type),
+              }
+            : c,
+        );
+        return { ...old, items };
       });
+      return { previous };
     },
-    onError: () => {
-      qc.invalidateQueries({ queryKey: ['gameComments'] });
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        context.previous.forEach(([key, data]) => qc.setQueryData(key, data));
+      }
     },
   });
 }
@@ -1016,7 +1021,10 @@ export function useUpdateMemberRole() {
   return useMutation({
     mutationFn: (data: { slug: string; userId: string; role?: string; title?: string }) =>
       api.patch(`/studios/${data.slug}/members/${data.userId}`, { role: data.role, title: data.title }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['studio'] }); },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['studio'] });
+      qc.invalidateQueries({ queryKey: ['studioMembers', vars.slug] });
+    },
   });
 }
 
@@ -1025,7 +1033,10 @@ export function useRemoveMember() {
   return useMutation({
     mutationFn: (data: { slug: string; userId: string }) =>
       api.delete(`/studios/${data.slug}/members/${data.userId}`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['studio'] }); },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['studio'] });
+      qc.invalidateQueries({ queryKey: ['studioMembers', vars.slug] });
+    },
   });
 }
 
@@ -1042,7 +1053,10 @@ export function useTransferOwnership() {
   return useMutation({
     mutationFn: (data: { slug: string; targetUserId: string }) =>
       api.post(`/studios/${data.slug}/transfer`, { targetUserId: data.targetUserId }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['studio'] }); },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['studio'] });
+      qc.invalidateQueries({ queryKey: ['studioMembers', vars.slug] });
+    },
   });
 }
 
@@ -1108,7 +1122,10 @@ export function useApproveJoinRequest() {
   return useMutation({
     mutationFn: (data: { slug: string; userId: string }) =>
       api.post(`/studios/${data.slug}/join-requests/${data.userId}/approve`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['studioInvitations'] }); },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['studioInvitations'] });
+      qc.invalidateQueries({ queryKey: ['studioMembers', vars.slug] });
+    },
   });
 }
 
@@ -1117,7 +1134,10 @@ export function useRejectJoinRequest() {
   return useMutation({
     mutationFn: (data: { slug: string; userId: string }) =>
       api.post(`/studios/${data.slug}/join-requests/${data.userId}/reject`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['studioInvitations'] }); },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['studioInvitations'] });
+      qc.invalidateQueries({ queryKey: ['studioMembers', vars.slug] });
+    },
   });
 }
 

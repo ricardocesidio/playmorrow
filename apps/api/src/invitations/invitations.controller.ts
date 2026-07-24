@@ -1,3 +1,4 @@
+import { Throttle } from '@nestjs/throttler';
 import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
@@ -21,6 +22,7 @@ export class InvitationsController {
   ) {}
 
   @Post('studios/:slug/invitations')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Invitation created.' })
   async create(

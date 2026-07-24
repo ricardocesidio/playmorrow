@@ -7,10 +7,10 @@ import { ArrowUpRight, Eye, EyeOff, Lock, Mail, User, Gamepad2, Building2 } from
 
 import { useAuth } from '@/lib/api/auth-context';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   AuthArtCollage,
   CircuitFrame,
-  HudButton,
   HudLinkLogo,
   HudPanel,
 } from '@/components/playmorrow/hud';
@@ -252,10 +252,10 @@ export default function RegisterPage() {
 
                 {error && <p className="pm-micro text-coral">{error}</p>}
 
-                <HudButton type="submit" disabled={loading} className="w-full">
+                <Button type="submit" disabled={loading} variant="destructive" size="lg" className="w-full">
                   {loading ? 'Creating...' : 'Create account'}
                   <ArrowUpRight className="ml-auto size-5" />
-                </HudButton>
+                </Button>
               </form>
 
               <p className="mt-10 text-center text-sm text-muted-foreground">

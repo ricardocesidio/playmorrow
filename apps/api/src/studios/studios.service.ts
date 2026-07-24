@@ -1,3 +1,4 @@
+import { sanitizeHtml } from '../common/sanitize-html';
 import { logger } from '../common/logger';
 import {
   BadRequestException,
@@ -46,8 +47,8 @@ export class StudiosService {
       data: {
         name: dto.name,
         slug,
-        tagline: dto.tagline,
-        description: dto.description,
+        tagline: dto.tagline ? sanitizeHtml(dto.tagline) : dto.tagline,
+        description: dto.description ? sanitizeHtml(dto.description) : dto.description,
         location: dto.location,
         websiteUrl: dto.websiteUrl,
         logoUrl: dto.logoUrl,
@@ -168,8 +169,8 @@ export class StudiosService {
       where: { id: studio.id },
       data: {
         ...(dto.name !== undefined && { name: dto.name }),
-        ...(dto.tagline !== undefined && { tagline: dto.tagline }),
-        ...(dto.description !== undefined && { description: dto.description }),
+        ...(dto.tagline !== undefined && { tagline: dto.tagline ? sanitizeHtml(dto.tagline) : dto.tagline }),
+        ...(dto.description !== undefined && { description: dto.description ? sanitizeHtml(dto.description) : dto.description }),
         ...(dto.location !== undefined && { location: dto.location }),
         ...(dto.websiteUrl !== undefined && { websiteUrl: dto.websiteUrl }),
         ...(dto.logoUrl !== undefined && { logoUrl: dto.logoUrl }),
