@@ -70,8 +70,51 @@ O último teste percorre 46+ páginas e retorna **910/910 items** — 100% dos d
 
 ---
 
-## O Que Permanece Pendente
+## Integração com a UI
 
-- **Railway env vars:** requer acesso ao dashboard
-- **Staging environment:** Railway preview — requer decisão de billing
-- **M5/M6 consolidação total:** remover FeedEngine (~6h)
+A UI do feed (`/feed`) usa `usePublicFeed` — feed público, não personalizado. O hook `usePersonalFeed` (e o novo `usePersonalFeedCursor`) existem na camada de API mas **nenhum componente de UI os consome atualmente**.
+
+**Status real do C2 para o usuário:** a UI não foi afetada pelo bug (o feed público nunca teve cap de 500 — ele sempre usou `take: cappedSize * 2`). O endpoint cursor-based existe para quem chamar a API diretamente ou para quando um componente de feed personalizado for construído. Isso é uma melhoria de plataforma (API completa sem perda de dados), não uma correção de bug visível ao usuário.
+
+---
+
+## Certificação Final — Pronto para Revisão Humana
+
+### Críticos (C1-C4): todos resolvidos e verificados
+
+| Item | Status | Evidência |
+|------|--------|-----------|
+| **C1** — Test suite | ✅ Fixed | 17/17 files, 263 pass, 1 skip, 0 failures (Postgres local e Neon) |
+| **C2** — Feed pagination | ✅ Fixed (API) | Cursor-based pagination implementada. Teste: 910/910 items alcançáveis. UI do feed público nunca foi afetada. |
+| **C3** — SEO metadata | ✅ Fixed | `generateMetadata` + JSON-LD em 3 rotas. `robots.ts` dinâmico. OG image comprovada com dados reais. |
+| **C4** — MEMBER delete | ✅ Fixed | Delete: OWNER/ADMIN/MODERATOR. Confirmado no código. |
+
+### Médios (M1-M11): resolvidos ou com POC aceito
+
+| Item | Status |
+|------|--------|
+| M1 — Settings pages | ✅ 3 páginas |
+| M2 — CSRF maxAge | ✅ 7 dias alinhado |
+| M3 — Analytics N+1 | ✅ groupBy batched |
+| M4 — STATUS.md | ✅ Números reais |
+| M5 — EventBus ephemeral | ⚠️ POC concluído, persistência não implementada |
+| M6 — Dual event system | ⚠️ POC concluído, consolidação não concluída |
+| M7 — Press kit naming | ✅ `press-kit/` → `studio-press-kit/` |
+| M8 — Exception filter | ✅ GlobalFilter |
+| M9 — adminOnly endpoint | ✅ Removido |
+| M10 — TOCTOU | ✅ DB constraint |
+| M11 — Auth ordering | ✅ assertStudioAccess movido |
+
+### Build
+- Typecheck: 6/6 ✅
+- Lint: 0 errors, 50 warnings (pre-existing) ✅
+
+### Pendente de ação humana (não é código)
+- **Railway env vars:** `COOKIE_DOMAIN`, `VAPID_*`, `AWS_*` — requer acesso ao dashboard
+- **Staging environment:** Railway preview deployments — requer decisão de billing
+- **M5/M6 consolidação total:** remover FeedEngine — ~6h, decisão de roadmap
+
+### Para o revisor humano decidir
+1. **Aprovar merge** de `fix/phase1-final-verification` → `main`
+2. **Priorizar UI do feed personalizado** — o backend/hook `usePersonalFeedCursor` existe mas nenhuma UI o consome. Decidir se um componente de feed personalizado entra no Phase 2 ou antes.
+3. **Priorizar M5/M6** — EventBus persistence + FeedEngine removal para o próximo milestone
