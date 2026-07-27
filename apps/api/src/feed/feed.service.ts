@@ -23,6 +23,7 @@ export interface FeedResult {
   page: number;
   pageSize: number;
   hasMore: boolean;
+  truncated: boolean;
 }
 
 const DEVLOG_FEED_INCLUDE = {
@@ -77,13 +78,13 @@ export class FeedService {
     ]);
 
     if (allGameIds.size === 0) {
-      return { items: [], total: 0, page, pageSize: cappedSize, hasMore: false };
+      return { items: [], total: 0, page, pageSize: cappedSize, hasMore: false, truncated: false };
     }
 
     const gameIdArray = Array.from(allGameIds);
 
     if (gameIdArray.length === 0) {
-      return { items: [], total: 0, page, pageSize: cappedSize, hasMore: false };
+      return { items: [], total: 0, page, pageSize: cappedSize, hasMore: false, truncated: false };
     }
 
     // Fetch devlogs and roadmap items. Scales with page depth up to a fixed cap.
@@ -165,12 +166,17 @@ export class FeedService {
     const start = (page - 1) * cappedSize;
     const paged = feedItems.slice(start, start + cappedSize);
 
+    const truncated =
+      (type === 'all' || type === 'devlogs') && devlogs.length >= perTypeLimit
+      || (type === 'all' || type === 'roadmap') && roadmapItems.length >= perTypeLimit;
+
     return {
       items: paged,
       total,
       page,
       pageSize: cappedSize,
       hasMore: start + cappedSize < total,
+      truncated,
     };
   }
 
@@ -252,12 +258,18 @@ export class FeedService {
     const start = (page - 1) * cappedSize;
     const paged = feedItems.slice(start, start + cappedSize);
 
+    const perTypeTake = type === 'all' ? cappedSize * 2 : cappedSize;
+    const truncated =
+      (type === 'all' || type === 'devlogs') && devlogs.length >= perTypeTake
+      || (type === 'all' || type === 'roadmap') && roadmapItems.length >= perTypeTake;
+
     return {
       items: paged,
       total,
       page,
       pageSize: cappedSize,
       hasMore: start + cappedSize < total,
+      truncated,
     };
   }
 
