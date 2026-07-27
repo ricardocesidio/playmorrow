@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
+/** Studio-level press kits — CRUD for press kit data attached to studios (branding, logos, history, awards, press contacts, etc.) */
 export class StudioPressKitService {
   constructor(private readonly prisma: PrismaService) {}
 

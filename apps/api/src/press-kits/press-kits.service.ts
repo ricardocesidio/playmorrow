@@ -46,6 +46,7 @@ const GAME_INCLUDE_FOR_PRESS_KIT = {
 } satisfies Prisma.GameInclude;
 
 @Injectable()
+/** Game-level press kits — CRUD for press kit data attached to games. Emits PRESS_KIT_UPDATED feed events. */
 export class PressKitsService {
   constructor(
     private readonly prisma: PrismaService,

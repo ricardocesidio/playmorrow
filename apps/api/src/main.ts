@@ -18,6 +18,8 @@ import * as crypto from 'node:crypto';
 import * as Sentry from '@sentry/node';
 import { logger, logRequest, createContextLogger } from './common/logger';
 
+import { GlobalExceptionFilter } from './common/exception.filter';
+
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -157,6 +159,9 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+
+  // Consistent error responses for all exceptions
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   // Raw Express health endpoints — respond immediately, no NestJS dependency.
   // Railway's deploy health check pings /health (configurable) and needs a 200

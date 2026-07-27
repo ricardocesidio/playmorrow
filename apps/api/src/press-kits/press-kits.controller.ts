@@ -16,6 +16,7 @@ import { PressKitsService } from './press-kits.service';
 
 @ApiTags('press-kits')
 @Controller()
+/** Game-level press kits — manages press kit data attached to a game (headline, fact sheet, media, etc.) */
 export class PressKitsController {
   constructor(private readonly pressKitsService: PressKitsService) {}
 
