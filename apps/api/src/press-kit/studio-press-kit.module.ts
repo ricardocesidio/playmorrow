@@ -8,4 +8,5 @@ import { StudioPressKitService } from './studio-press-kit.service';
   providers: [StudioPressKitService],
   exports: [StudioPressKitService],
 })
+/** Studio-level press kits */
 export class StudioPressKitModule {}

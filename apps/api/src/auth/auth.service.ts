@@ -405,9 +405,6 @@ export class AuthService {
     const usernameLowercase = username.toLowerCase();
     const email = dto.email.toLowerCase();
 
-    const existingByUsername = await this.prisma.user.findFirst({ where: { usernameLowercase } });
-    if (existingByUsername && existingByUsername.email !== email) throw new ConflictException('Username already taken');
-
     const existingEmail = await this.prisma.user.findUnique({ where: { email } });
     if (existingEmail?.isOnboardingCompleted) {
       throw new ConflictException('Email already registered');
@@ -418,80 +415,90 @@ export class AuthService {
       if (!STUDIO_SLUG_PATTERN.test(studioSlug) || studioSlug.length < 3 || studioSlug.length > 40) {
         throw new BadRequestException('Studio slug must be 3-40 lowercase letters, numbers, or hyphens.');
       }
-      const slugExists = await this.prisma.studio.findUnique({ where: { slug: studioSlug } });
-      if (slugExists) throw new ConflictException('Studio slug already taken');
     }
 
     const now = new Date();
-    const user = await this.prisma.$transaction(async (tx) => {
-      const data = {
-        email,
-        username,
-        usernameLowercase,
-        displayName: (dto.displayName || username).trim(),
-        avatarUrl: dto.avatarUrl || null,
-        bio: dto.bio || null,
-        country: dto.country || null,
-        accountType,
-        role: accountType === 'STUDIO' ? 'PUBLISHER' as const : 'PLAYER' as const,
-        emailVerifiedAt: now,
-        isVerified: true,
-        isOnboardingCompleted: true,
-        termsAcceptedAt: existingEmail?.termsAcceptedAt ?? now,
-        privacyAcceptedAt: existingEmail?.privacyAcceptedAt ?? now,
-        communityGuidelinesAcceptedAt: existingEmail?.communityGuidelinesAcceptedAt ?? now,
-        termsVersion: existingEmail?.termsVersion ?? CURRENT_TERMS_VERSION,
-        privacyVersion: existingEmail?.privacyVersion ?? CURRENT_PRIVACY_VERSION,
-        communityGuidelinesVersion: existingEmail?.communityGuidelinesVersion ?? CURRENT_COMMUNITY_GUIDELINES_VERSION,
-      };
+    let user: User;
+    try {
+      user = await this.prisma.$transaction(async (tx) => {
+        const data = {
+          email,
+          username,
+          usernameLowercase,
+          displayName: (dto.displayName || username).trim(),
+          avatarUrl: dto.avatarUrl || null,
+          bio: dto.bio || null,
+          country: dto.country || null,
+          accountType,
+          role: accountType === 'STUDIO' ? 'PUBLISHER' as const : 'PLAYER' as const,
+          emailVerifiedAt: now,
+          isVerified: true,
+          isOnboardingCompleted: true,
+          termsAcceptedAt: existingEmail?.termsAcceptedAt ?? now,
+          privacyAcceptedAt: existingEmail?.privacyAcceptedAt ?? now,
+          communityGuidelinesAcceptedAt: existingEmail?.communityGuidelinesAcceptedAt ?? now,
+          termsVersion: existingEmail?.termsVersion ?? CURRENT_TERMS_VERSION,
+          privacyVersion: existingEmail?.privacyVersion ?? CURRENT_PRIVACY_VERSION,
+          communityGuidelinesVersion: existingEmail?.communityGuidelinesVersion ?? CURRENT_COMMUNITY_GUIDELINES_VERSION,
+        };
 
-      const completedUser = existingEmail
-        ? await tx.user.update({ where: { id: existingEmail.id }, data })
-        : await tx.user.create({ data: { ...data, passwordHash: null } });
+        const completedUser = existingEmail
+          ? await tx.user.update({ where: { id: existingEmail.id }, data })
+          : await tx.user.create({ data: { ...data, passwordHash: null } });
 
-      if (accountType === 'STUDIO') {
-        await tx.studio.create({
-          data: {
-            slug: (dto.studioSlug || username).trim().toLowerCase(),
-            name: (dto.studioName || dto.displayName || username).trim(),
-            tagline: dto.studioBio || null,
-            description: dto.studioBio || null,
-            logoUrl: dto.studioLogoUrl || dto.avatarUrl || null,
-            websiteUrl: dto.websiteUrl || null,
-            location: dto.location || null,
-            isVerified: false,
-            members: { create: { userId: completedUser.id, role: 'OWNER' } },
-          },
-        });
-      }
+        if (accountType === 'STUDIO') {
+          await tx.studio.create({
+            data: {
+              slug: (dto.studioSlug || username).trim().toLowerCase(),
+              name: (dto.studioName || dto.displayName || username).trim(),
+              tagline: dto.studioBio || null,
+              description: dto.studioBio || null,
+              logoUrl: dto.studioLogoUrl || dto.avatarUrl || null,
+              websiteUrl: dto.websiteUrl || null,
+              location: dto.location || null,
+              isVerified: false,
+              members: { create: { userId: completedUser.id, role: 'OWNER' } },
+            },
+          });
+        }
 
-      if (accountType === 'PLAYER') {
-        const followSlugs = dto.followStudioSlugs ?? [];
-        const wishlistSlugs = dto.wishlistGameSlugs ?? [];
+        if (accountType === 'PLAYER') {
+          const followSlugs = dto.followStudioSlugs ?? [];
+          const wishlistSlugs = dto.wishlistGameSlugs ?? [];
 
-        if (followSlugs.length > 0) {
-          const studios = await tx.studio.findMany({ where: { slug: { in: followSlugs } }, select: { id: true } });
-          if (studios.length > 0) {
-            await tx.follow.createMany({
-              data: studios.map((s) => ({ userId: completedUser.id, targetType: 'STUDIO', studioId: s.id })),
-              skipDuplicates: true,
-            });
+          if (followSlugs.length > 0) {
+            const studios = await tx.studio.findMany({ where: { slug: { in: followSlugs } }, select: { id: true } });
+            if (studios.length > 0) {
+              await tx.follow.createMany({
+                data: studios.map((s) => ({ userId: completedUser.id, targetType: 'STUDIO', studioId: s.id })),
+                skipDuplicates: true,
+              });
+            }
+          }
+
+          if (wishlistSlugs.length > 0) {
+            const games = await tx.game.findMany({ where: { slug: { in: wishlistSlugs } }, select: { id: true } });
+            if (games.length > 0) {
+              await tx.wishlistItem.createMany({
+                data: games.map((g) => ({ userId: completedUser.id, gameId: g.id })),
+                skipDuplicates: true,
+              });
+            }
           }
         }
 
-        if (wishlistSlugs.length > 0) {
-          const games = await tx.game.findMany({ where: { slug: { in: wishlistSlugs } }, select: { id: true } });
-          if (games.length > 0) {
-            await tx.wishlistItem.createMany({
-              data: games.map((g) => ({ userId: completedUser.id, gameId: g.id })),
-              skipDuplicates: true,
-            });
-          }
+        return completedUser;
+      });
+    } catch (err: any) {
+      if (err?.code === 'P2002') {
+        const target = err?.meta?.target as string[] | undefined;
+        if (target?.includes('slug')) {
+          throw new ConflictException('Studio slug already taken');
         }
+        throw new ConflictException('Username already taken');
       }
-
-      return completedUser;
-    });
+      throw err;
+    }
 
     return { user };
   }

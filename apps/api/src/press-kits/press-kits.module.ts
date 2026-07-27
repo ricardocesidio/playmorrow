@@ -12,4 +12,5 @@ import { PressKitsService } from './press-kits.service';
   controllers: [PressKitsController],
   providers: [PressKitsService],
 })
+/** Game-level press kits */
 export class PressKitsModule {}

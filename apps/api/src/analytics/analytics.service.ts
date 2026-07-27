@@ -210,26 +210,29 @@ export class AnalyticsService {
 
     const gameIds = games.map((g) => g.id);
 
-    const topGamesData = await Promise.all(
-      games.map(async (g) => {
-        const views = await this.prisma.analyticsEvent.count({
+    const viewCounts = gameIds.length > 0
+      ? await this.prisma.analyticsEvent.groupBy({
+          by: ['gameId'],
           where: {
-            gameId: g.id,
+            gameId: { in: gameIds },
             eventType: 'game_view',
             ...(currentStart ? { timestamp: { gte: currentStart } } : {}),
           },
-        });
-        return {
-          id: g.id,
-          title: g.title,
-          slug: g.slug,
-          coverUrl: g.coverUrl,
-          views,
-          followers: g.followersCount,
-          wishlists: g.wishlistsCount,
-        };
-      }),
-    );
+          _count: { id: true },
+        })
+      : [];
+
+    const viewCountMap = new Map(viewCounts.map((v) => [v.gameId, v._count.id]));
+
+    const topGamesData = games.map((g) => ({
+      id: g.id,
+      title: g.title,
+      slug: g.slug,
+      coverUrl: g.coverUrl,
+      views: viewCountMap.get(g.id) ?? 0,
+      followers: g.followersCount,
+      wishlists: g.wishlistsCount,
+    }));
 
     topGamesData.sort((a, b) => b.views - a.views);
 
@@ -356,18 +359,26 @@ export class AnalyticsService {
       _count: true,
     });
 
+    const allDistinctSessions = eventTypes.length > 0
+      ? await this.prisma.analyticsEvent.findMany({
+          where: {
+            timestamp: { gte: startOfDay, lt: endOfDay },
+            sessionId: { not: null },
+          },
+          select: { eventType: true, gameId: true, studioId: true, sessionId: true },
+          distinct: ['eventType', 'gameId', 'studioId', 'sessionId'],
+        })
+      : [];
+
+    const uniqueCountMap = new Map<string, number>();
+    for (const row of allDistinctSessions) {
+      const key = `${row.eventType}:${row.gameId ?? ''}:${row.studioId ?? ''}`;
+      uniqueCountMap.set(key, (uniqueCountMap.get(key) ?? 0) + 1);
+    }
+
     for (const group of eventTypes) {
-      const uniqueSessions = await this.prisma.analyticsEvent.findMany({
-        where: {
-          eventType: group.eventType,
-          gameId: group.gameId ?? undefined,
-          studioId: group.studioId ?? undefined,
-          timestamp: { gte: startOfDay, lt: endOfDay },
-          sessionId: { not: null },
-        },
-        select: { sessionId: true },
-        distinct: ['sessionId'],
-      });
+      const key = `${group.eventType}:${group.gameId ?? ''}:${group.studioId ?? ''}`;
+      const uniqueCount = uniqueCountMap.get(key) ?? 0;
 
       await this.prisma.analyticsDailyAggregate.upsert({
         where: {
@@ -384,11 +395,11 @@ export class AnalyticsService {
           studioId: group.studioId,
           eventType: group.eventType,
           count: group._count,
-          uniqueCount: uniqueSessions.length,
+          uniqueCount,
         },
         update: {
           count: group._count,
-          uniqueCount: uniqueSessions.length,
+          uniqueCount,
         },
       });
     }
