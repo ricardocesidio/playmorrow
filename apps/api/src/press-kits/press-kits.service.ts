@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import type { UpsertPressKitDto } from './dto/upsert-press-kit.dto';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { FeedEngineService } from '../feed/feed-events.service';
+import { EventBus } from '../common/event-bus';
 
 export interface PressKitResponse {
   id: string;
@@ -52,6 +53,7 @@ export class PressKitsService {
     private readonly prisma: PrismaService,
     private readonly auditLog: AuditLogService,
     private readonly feedEngine: FeedEngineService,
+    private readonly eventBus: EventBus,
   ) {}
 
   async upsert(userId: string, gameSlug: string, dto: UpsertPressKitDto): Promise<PressKitResponse> {
@@ -98,6 +100,8 @@ export class PressKitsService {
       actorId: userId,
       payload: { title: game.title },
     }).catch((err) => logger.error({ err }));
+
+    this.eventBus.emit({ type: 'press_kit_updated', actorId: userId, targetType: 'PRESS_KIT', targetId: game.id, gameId: game.id, studioId: game.studioId });
 
     return this.findByGameSlug(gameSlug);
   }
