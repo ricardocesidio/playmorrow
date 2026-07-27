@@ -314,7 +314,7 @@ export class DevlogsService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    assertStudioAccess({ id: userId, role: user.role }, devlog.game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
+    assertStudioAccess({ id: userId, role: user.role }, devlog.game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR]);
 
     await this.audit.log({
       studioId: devlog.game.studioId,

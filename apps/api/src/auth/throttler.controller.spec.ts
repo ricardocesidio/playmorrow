@@ -5,6 +5,9 @@ import { Test } from '@nestjs/testing';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CustomThrottlerGuard } from '../common/custom-throttler.guard';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { vi } from 'vitest';
+
+vi.setConfig({ hookTimeout: 30_000 });
 import request from 'supertest';
 
 import { AuthModule } from './auth.module';

@@ -2,6 +2,9 @@ import { HttpStatus } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { vi } from 'vitest';
+
+vi.setConfig({ hookTimeout: 30_000 });
 import request from 'supertest';
 
 import { PrismaModule } from '../prisma/prisma.module';

@@ -184,9 +184,12 @@ export class RoadmapItemsService {
       targetId: id,
     });
 
+    const gameId = item.gameId;
+    const studioId = item.game.studioId;
+
     await this.prisma.roadmapItem.delete({ where: { id } });
 
-    return { success: true };
+    return { success: true, gameId, studioId };
   }
 
   async reorder(userId: string, gameSlug: string, items: { id: string; position: number }[]) {
@@ -214,7 +217,7 @@ export class RoadmapItemsService {
       ),
     );
 
-    return { reordered: items.length };
+    return { reordered: items.length, gameId: game.id, studioId: game.studioId };
   }
 
   private toResponse(
