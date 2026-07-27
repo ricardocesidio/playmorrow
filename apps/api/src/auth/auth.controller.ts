@@ -68,15 +68,6 @@ export class AuthController {
     return this.authService.getProfile(user.id);
   }
 
-  @Get('admin-only')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Admin-only test route.' })
-  adminOnly() {
-    return { message: 'Welcome, admin.' };
-  }
-
   // ── Session-based endpoints (secure) ─────────────────────────────────
 
   @Post('session/login')
