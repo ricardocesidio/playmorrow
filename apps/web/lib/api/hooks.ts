@@ -61,6 +61,21 @@ export function usePersonalFeed(type: string, page: number, pageSize: number, to
   });
 }
 
+/** Cursor-based personal feed — sem cap, todos os dados alcançáveis */
+export function usePersonalFeedCursor(
+  type: string, pageSize: number, cursor?: { createdAt: string; id: string } | null,
+) {
+  const params = new URLSearchParams({ pageSize: String(pageSize) });
+  if (type !== 'all') params.set('type', type);
+  if (cursor) params.set('cursor', JSON.stringify(cursor));
+  return useQuery({
+    queryKey: ['personalFeedCursor', type, pageSize, cursor],
+    queryFn: () => api.get<Paginated<FeedItem> & { nextCursor?: { createdAt: string; id: string } | null }>(`/me/feed/cursor?${params}`),
+    placeholderData: (prev) => prev,
+    refetchInterval: 30_000,
+  });
+}
+
 export function useInfinitePersonalFeed(type: string, pageSize: number, _token?: string) {
   return useInfiniteQuery({
     queryKey: ['infinitePersonalFeed', type, pageSize],

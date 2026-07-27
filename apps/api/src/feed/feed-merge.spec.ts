@@ -150,8 +150,22 @@ describe('FeedService merge pagination — unbalanced types', () => {
     expect(result.truncated).toBe(true);
   });
 
-  it('should report truncated=false within small data', async () => {
-    const result = await feedService.getPersonalFeed(userId, 1, 20, 'all');
-    expect(result.truncated).toBe(true);
+  it('CURSOR-BASED: should reach ALL 900 devlogs + 10 roadmaps without truncation', async () => {
+    let totalItems = 0;
+    let cursor: { createdAt: string; id: string } | null = null;
+    let pages = 0;
+    const MAX_PAGES = 100;
+
+    while (pages < MAX_PAGES) {
+      const result = await feedService.getPersonalFeedCursor(userId, 20, 'all', cursor);
+      totalItems += result.items.length;
+      pages++;
+      if (!result.nextCursor) break;
+      cursor = result.nextCursor;
+    }
+
+    expect(pages).toBeGreaterThan(40); // ~46 pages for 910 items
+    expect(totalItems).toBe(910); // ALL 900 devlogs + ALL 10 roadmaps
+    expect(totalItems).toBeGreaterThan(900); // all data reachable
   });
 });
