@@ -19,7 +19,7 @@ export class FeedController {
 
   @Get('me/feed')
   @UseGuards(SessionAuthGuard)
-  @ApiOkResponse({ description: 'Personalized feed for current user.' })
+  @ApiOkResponse({ description: 'Personalized feed for current user. Use cursor for complete pagination.' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'pageSize', required: false })
   @ApiQuery({ name: 'type', required: false, enum: ['all', 'devlogs', 'roadmap'] })
@@ -30,6 +30,25 @@ export class FeedController {
     @Query('type', new DefaultValuePipe('all')) type: 'all' | 'devlogs' | 'roadmap',
   ): Promise<FeedResult> {
     return this.feedService.getPersonalFeed(user.id, page, pageSize, type);
+  }
+
+  @Get('me/feed/cursor')
+  @UseGuards(SessionAuthGuard)
+  @ApiOkResponse({ description: 'Cursor-based feed pagination — no cap, all data reachable.' })
+  @ApiQuery({ name: 'cursor', required: false, description: 'JSON: {"createdAt":"ISO","id":"string"}' })
+  @ApiQuery({ name: 'pageSize', required: false })
+  @ApiQuery({ name: 'type', required: false, enum: ['all', 'devlogs', 'roadmap'] })
+  async getPersonalFeedCursor(
+    @CurrentUser() user: { id: string },
+    @Query('cursor') cursorRaw: string | undefined,
+    @Query('pageSize', new DefaultValuePipe(20), ParseIntPipe) pageSize: number,
+    @Query('type', new DefaultValuePipe('all')) type: 'all' | 'devlogs' | 'roadmap',
+  ): Promise<FeedResult> {
+    let cursor: { createdAt: string; id: string } | null = null;
+    if (cursorRaw) {
+      try { cursor = JSON.parse(cursorRaw); } catch { /* invalid cursor — start from top */ }
+    }
+    return this.feedService.getPersonalFeedCursor(user.id, pageSize, type, cursor);
   }
 
   @Get('feed/public')

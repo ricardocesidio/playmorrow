@@ -24,6 +24,7 @@ export interface FeedResult {
   pageSize: number;
   hasMore: boolean;
   truncated: boolean;
+  nextCursor?: { createdAt: string; id: string } | null;
 }
 
 const DEVLOG_FEED_INCLUDE = {
@@ -197,6 +198,140 @@ export class FeedService {
       pageSize: cappedSize,
       hasMore: start + cappedSize < total,
       truncated,
+    };
+  }
+
+  /**
+   * Cursor-based feed pagination — busca infinita sem perda de dados.
+   * Aceita um cursor { createdAt, id } e retorna os próximos pageSize items.
+   * Quando cursor é null, retorna os items mais recentes (primeira página).
+   */
+  async getPersonalFeedCursor(
+    userId: string,
+    pageSize: number,
+    type: 'all' | 'devlogs' | 'roadmap',
+    cursor?: { createdAt: string; id: string } | null,
+  ): Promise<FeedResult> {
+    const cappedSize = Math.min(pageSize, 50);
+
+    // Resolve followed studio IDs and game IDs
+    const follows = await this.prisma.follow.findMany({
+      where: { userId },
+      select: { targetType: true, studioId: true, gameId: true },
+    });
+
+    const followedStudioIds = follows
+      .filter((f) => f.targetType === 'STUDIO' && f.studioId)
+      .map((f) => f.studioId!);
+
+    const followedGameIds = follows
+      .filter((f) => f.targetType === 'GAME' && f.gameId)
+      .map((f) => f.gameId!);
+
+    const studioGames = followedStudioIds.length > 0
+      ? await this.prisma.game.findMany({
+          where: { studioId: { in: followedStudioIds } },
+          select: { id: true },
+        })
+      : [];
+
+    const allGameIds = new Set([
+      ...followedGameIds,
+      ...studioGames.map((g) => g.id),
+    ]);
+
+    if (allGameIds.size === 0) {
+      return { items: [], total: 0, page: 1, pageSize: cappedSize, hasMore: false, truncated: false, nextCursor: null };
+    }
+
+    const gameIdArray = Array.from(allGameIds);
+    const limit = cappedSize + 1;
+
+    // Build where clause: se cursor existe, busca items ANTES dele
+    const buildWhere = (prefix: string) => {
+      const base = prefix === 'devlogs'
+        ? { gameId: { in: gameIdArray }, isPublished: true }
+        : { gameId: { in: gameIdArray } };
+      if (!cursor) return base;
+      return {
+        ...base,
+        OR: [
+          { createdAt: { lt: new Date(cursor.createdAt) } },
+          { createdAt: new Date(cursor.createdAt), id: { lt: cursor.id } },
+        ],
+      } as any;
+    };
+
+    const [devlogs, roadmapItems] = await Promise.all([
+      type !== 'roadmap'
+        ? this.prisma.devlog.findMany({
+            where: buildWhere('devlogs'),
+            include: DEVLOG_FEED_INCLUDE,
+            orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+            take: limit,
+          })
+        : Promise.resolve([]),
+      type !== 'devlogs'
+        ? this.prisma.roadmapItem.findMany({
+            where: buildWhere('roadmap'),
+            include: ROADMAP_FEED_INCLUDE,
+            orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+            take: limit,
+          })
+        : Promise.resolve([]),
+    ]);
+
+    // Resolve studio info
+    const gameIdSet = new Set<string>();
+    for (const d of devlogs) gameIdSet.add(d.gameId);
+    for (const r of roadmapItems) gameIdSet.add(r.gameId);
+
+    const gamesWithStudio = gameIdSet.size > 0
+      ? await this.prisma.game.findMany({
+          where: { id: { in: Array.from(gameIdSet) } },
+          select: { id: true, studio: { select: { id: true, name: true, slug: true, logoUrl: true } } },
+        })
+      : [];
+    const studioMap = new Map(gamesWithStudio.map((g) => [g.id, g.studio]));
+
+    // Build + merge + sort (small — at most 2*(pageSize+1) items)
+    const merged: FeedItem[] = [];
+
+    for (const d of devlogs) {
+      const studio = studioMap.get(d.gameId);
+      merged.push({
+        id: d.id, type: 'DEVLOG', createdAt: d.createdAt.toISOString(),
+        publishedAt: d.publishedAt?.toISOString() ?? null,
+        title: d.title, summary: d.body.length > 200 ? `${d.body.slice(0, 200)}...` : d.body,
+        game: { id: d.game.id, title: d.game.title, slug: d.game.slug, coverUrl: d.game.coverUrl },
+        studio: studio ?? { id: d.game.studioId, name: '', slug: '', logoUrl: null },
+        target: { kind: 'DEVLOG', id: d.id },
+      });
+    }
+    for (const r of roadmapItems) {
+      const studio = studioMap.get(r.gameId);
+      merged.push({
+        id: r.id, type: 'ROADMAP_ITEM', createdAt: r.createdAt.toISOString(),
+        publishedAt: null, title: r.title, summary: r.description ?? '',
+        status: r.status, targetDate: r.targetDate?.toISOString() ?? null,
+        game: { id: r.game.id, title: r.game.title, slug: r.game.slug, coverUrl: r.game.coverUrl },
+        studio: studio ?? { id: r.game.studioId, name: '', slug: '', logoUrl: null },
+        target: { kind: 'ROADMAP_ITEM', id: r.id },
+      });
+    }
+
+    merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const hasMore = merged.length > cappedSize;
+    const items = merged.slice(0, cappedSize);
+    const lastItem = items[items.length - 1];
+    const nextCursor = hasMore && lastItem
+      ? { createdAt: lastItem.createdAt, id: lastItem.id }
+      : null;
+
+    return {
+      items, total: 0, page: 1, pageSize: cappedSize,
+      hasMore, truncated: false, nextCursor,
     };
   }
 
