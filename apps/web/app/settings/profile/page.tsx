@@ -10,6 +10,7 @@ import { PushNotificationToggle } from '@/components/push-toggle';
 import { api, ApiError } from '@/lib/api/client';
 import { SiteHeader } from '@/components/site-header';
 import { Input } from '@/components/ui/input';
+import { SettingsNav } from '@/components/settings-nav';
 
 interface FormData {
   username: string;
@@ -130,7 +131,8 @@ export default function ProfileSettingsPage() {
           <ArrowLeft className="size-4" /> Back to dashboard
         </Link>
 
-        <h1 className="mb-8 mt-6 font-display text-3xl font-black uppercase tracking-tight text-white">Profile Settings</h1>
+        <h1 className="mb-2 mt-6 font-display text-3xl font-black uppercase tracking-tight text-white">Profile Settings</h1>
+        <SettingsNav />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
