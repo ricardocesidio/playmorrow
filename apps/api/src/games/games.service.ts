@@ -257,6 +257,8 @@ export class GamesService {
       throw new NotFoundException('User not found');
     }
 
+    assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
+
     const memberRole = game.studio.members.find((m) => m.userId === userId)?.role;
     const isMember = memberRole === StudioRole.MEMBER;
 
@@ -283,8 +285,6 @@ export class GamesService {
         data.publishedAt = new Date();
       }
     }
-
-    assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [StudioRole.OWNER, StudioRole.ADMIN, StudioRole.MODERATOR, StudioRole.MEMBER]);
 
     if (dto.media !== undefined) {
       await this.prisma.gameMedia.deleteMany({ where: { gameId: game.id } });

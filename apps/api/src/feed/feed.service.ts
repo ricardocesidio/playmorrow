@@ -86,13 +86,15 @@ export class FeedService {
       return { items: [], total: 0, page, pageSize: cappedSize, hasMore: false };
     }
 
-    // Fetch devlogs and roadmap items
+    // Fetch devlogs and roadmap items (bounded — page * size + buffer per type)
+    const perTypeLimit = (page + 1) * cappedSize * 3;
     const [devlogs, roadmapItems] = await Promise.all([
       type !== 'roadmap'
         ? this.prisma.devlog.findMany({
             where: { gameId: { in: gameIdArray }, isPublished: true },
             include: DEVLOG_FEED_INCLUDE,
             orderBy: { publishedAt: 'desc' },
+            take: perTypeLimit,
           })
         : Promise.resolve([]),
       type !== 'devlogs'
@@ -100,6 +102,7 @@ export class FeedService {
             where: { gameId: { in: gameIdArray } },
             include: ROADMAP_FEED_INCLUDE,
             orderBy: { updatedAt: 'desc' },
+            take: perTypeLimit,
           })
         : Promise.resolve([]),
     ]);
