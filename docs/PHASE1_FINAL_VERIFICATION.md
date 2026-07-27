@@ -114,6 +114,32 @@ A UI do feed (`/feed`) usa `usePublicFeed` — feed público, não personalizado
 - **Staging environment:** Railway preview deployments — requer decisão de billing
 - **M5/M6 consolidação total:** remover FeedEngine — ~6h, decisão de roadmap
 
+## Verificação Final de Integração (última checagem antes do sign-off)
+
+```bash
+# Grep 1: uso de usePersonalFeed em apps/web/app/ e components/
+$ grep -rn "usePersonalFeed" apps/web/app/ apps/web/components/
+→ 0 matches (nenhum componente usa o hook)
+
+# Grep 2: uso de getPersonalFeed / /feed/cursor / me/feed em apps/web/app/
+$ grep -rn "getPersonalFeed\|/feed/cursor\|me/feed" apps/web/app/
+→ 0 matches (nenhuma página chama o endpoint)
+
+# Grep 3: uso de usePersonalFeedCursor em apps/web/ (definição vs consumo)
+$ grep -rn "usePersonalFeedCursor" apps/web/
+→ apps/web/lib/api/hooks.ts:65 (apenas definição, nenhum componente importa)
+
+# Typecheck (executado agora, pós todas as mudanças)
+$ pnpm typecheck
+→ Tasks: 6 successful, 6 total ✅
+
+# Lint (executado agora, pós todas as mudanças)
+$ pnpm --filter @playmorrow/web lint
+→ 0 errors, 50 warnings (mesmo baseline pré-remediação) ✅
+```
+
+**Conclusão:** Nenhuma mudança necessária na UI. O hook `usePersonalFeed` e o novo `usePersonalFeedCursor` são API-only. O feed page usa `usePublicFeed`, que nunca foi afetado pelo bug C2. O backend cursor-based está completo e testado; a conexão com a UI acontecerá quando um componente de feed personalizado for construído (fora do escopo desta Fase 1).
+
 ### Para o revisor humano decidir
 1. **Aprovar merge** de `fix/phase1-final-verification` → `main`
 2. **Priorizar UI do feed personalizado** — o backend/hook `usePersonalFeedCursor` existe mas nenhuma UI o consome. Decidir se um componente de feed personalizado entra no Phase 2 ou antes.
