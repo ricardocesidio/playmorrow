@@ -74,6 +74,7 @@ describe('FeedService merge pagination — unbalanced types', () => {
       slug: `merge-dl-${SUFFIX}-${i}`,
       body: `Body ${i}`,
       isPublished: true,
+      tags: [],
       publishedAt: new Date(now - i * 60_000),
       createdAt: new Date(now - i * 60_000),
       readingTimeMin: 1,
