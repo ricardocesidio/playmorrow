@@ -16,6 +16,7 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 import { StudioXpService } from './studio-xp.service';
 import { StudioChatService } from '../studio-chat/studio-chat.service';
 import { FeedEngineService } from '../feed/feed-events.service';
+import { EventBus } from '../common/event-bus';
 import type { CreateStudioDto } from './dto/create-studio.dto';
 import type { UpdateStudioDto } from './dto/update-studio.dto';
 
@@ -33,6 +34,7 @@ export class StudiosService {
     private readonly auditLog: AuditLogService,
     private readonly studioChatService: StudioChatService,
     private readonly feedEngine: FeedEngineService,
+    private readonly eventBus: EventBus,
   ) {}
 
   async create(userId: string, dto: CreateStudioDto) {
@@ -73,6 +75,8 @@ export class StudiosService {
       actorId: userId,
       payload: { name: studio.name, slug: studio.slug },
     }).catch((err) => logger.error({ err }));
+
+    this.eventBus.emit({ type: 'studio_created', actorId: userId, targetType: 'STUDIO', targetId: studio.id });
 
     return this.toResponse(studio);
   }
@@ -261,6 +265,8 @@ export class StudiosService {
         actorId,
         payload: { userId: targetUserId, oldRole: targetMember.role, newRole: dto.role },
       }).catch((err) => logger.error({ err }));
+
+      this.eventBus.emit({ type: 'role_changed', actorId, targetType: 'STUDIO_MEMBER', targetId: targetUserId, studioId: studio.id });
     }
     if (dto.title !== undefined && dto.title !== targetMember.title) {
       await this.auditLog.log({
