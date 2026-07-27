@@ -109,10 +109,15 @@ A UI do feed (`/feed`) usa `usePublicFeed` — feed público, não personalizado
 - Typecheck: 6/6 ✅
 - Lint: 0 errors, 50 warnings (pre-existing) ✅
 
-### Pendente de ação humana (não é código)
-- **Railway env vars:** `COOKIE_DOMAIN`, `VAPID_*`, `AWS_*` — requer acesso ao dashboard
-- **Staging environment:** Railway preview deployments — requer decisão de billing
-- **M5/M6 consolidação total:** remover FeedEngine — ~6h, decisão de roadmap
+## Itens Restantes (após merge em main)
+
+| Item | Status | Quem faz |
+|------|--------|----------|
+| `REDACTED_AWS_KEY` / `REDACTED_AWS_SECRET` | ❌ Não setados | **Humano** — preciso das credenciais AWS |
+| FeedEngine → EventBus: todos os 5 módulos | ✅ **Feito** | press-kits, studios, games, devlogs, scheduler — todos em dual-emit |
+| Railway VAPID keys (prod + staging) | ✅ **Setados** | Gerados e configurados |
+| Railway staging env | ✅ **Linkado + vars clonadas** | |
+| Test DB isolation | ✅ Postgres.app local | `TEST_DATABASE_URL` configurado
 
 ## Verificação Final de Integração (última checagem antes do sign-off)
 
