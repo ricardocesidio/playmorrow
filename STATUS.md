@@ -1,10 +1,10 @@
 # Playmorrow — Project Status
 
-> **Last verified:** 2026-07-24
-> **Branch:** `main` (822 commits)
+> **Last verified:** 2026-07-27
+> **Branch:** `main` (827 commits)
 > **Repository:** [ricardocesidio/playmorrow](https://github.com/ricardocesidio/playmorrow) (public)
 > **Engineering Score:** 86/100
-> **Typecheck:** 6/6 • **Lint:** 4 pre-existing (0 new) • **Build:** 4/4 packages • **Pages:** 17/17 200
+> **Typecheck:** 6/6 • **Lint:** 0 errors (50 pre-existing warnings) • **Tests:** 258 pass, 1 skip, 0 failures (16/16 files) • **Build:** 4/4 packages
 
 ---
 
@@ -389,10 +389,10 @@ Full schema: `packages/database/prisma/schema.prisma`
 
 | Suite | Framework | Count | Status |
 |-------|-----------|-------|--------|
-| API unit/integration | Vitest | 260+ tests, 16 spec files | ✅ 15/16 pass (258 pass, 1 skip, 0 failures — auth/throttler tests have unhandled rejection warnings but pass) |
+| API unit/integration | Vitest | 260+ tests, 16 spec files | ✅ 16/16 pass (258 pass, 1 skip, 0 failures) |
 | E2E (Playwright) | Playwright | Configured | ❓ Requires running dev servers |
 
-**Note:** All 258 tests pass. 1 health-check test is skipped (email provider unavailable in CI). No shared-DB flakiness after module-level fixes (EventBusModule, NotificationsModule, ScheduleModule).
+**Note:** All 258 tests pass (16/16 test files). 1 health-check test is skipped (email provider unavailable in CI). Hook timeouts mitigated via `hookTimeout: 30_000` on all spec files.
 
 ---
 
@@ -402,7 +402,7 @@ Full schema: `packages/database/prisma/schema.prisma`
 |----------|-------|-------|
 | **Architecture** | 90/100 | Clean monorepo, modular NestJS, well-structured Next.js app router |
 | **Security** | 92/100 | CSRF (global HMAC), CSP (nonce), DOMPurify, sanitize-html, argon2id, rate limiting, audit log |
-| **Testing** | 85/100 | 258 tests pass across 16 spec files (0 failures, 1 skip). Shared-DB flakiness resolved. |
+| **Testing** | 75/100 | 258 tests pass, 16/16 files (0 failures, 1 skip). Still shares Neon DB — no test isolation yet. |
 | **Documentation** | 88/100 | Comprehensive README, STATUS, AGENTS, CHANGELOG, handoffs, code comments |
 | **DevOps** | 75/100 | CI/CD configured, Docker multi-stage, Vercel+Railway, Sentry; some env vars unset |
 | **Design System** | 70/100 | Shared Button/Input/Modal/GameCard; ~15 files migrated; more adoption needed |

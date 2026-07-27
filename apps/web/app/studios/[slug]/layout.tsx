@@ -37,7 +37,7 @@ export default async function StudioLayout({
     const res = await fetch(`${API}/studios/${slug}`, { next: { revalidate: 3600 } });
     if (res.ok) studio = await res.json();
   } catch {
-    // swallow
+    void 0 // fetch failure — JSON-LD just won't render
   }
 
   return (
