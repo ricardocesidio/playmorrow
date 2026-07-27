@@ -38,7 +38,7 @@ export default async function DevlogLayout({
     const res = await fetch(`${API}/devlogs/${id}`, { next: { revalidate: 3600 } });
     if (res.ok) devlog = await res.json();
   } catch {
-    // swallow
+    void 0 // fetch failure — JSON-LD just won't render
   }
 
   return (

@@ -37,7 +37,7 @@ export default async function GameLayout({
     const res = await fetch(`${API}/games/${slug}`, { next: { revalidate: 3600 } });
     if (res.ok) game = await res.json();
   } catch {
-    // swallow — JSON-LD just won't render
+    void 0 // fetch failure — JSON-LD just won't render
   }
 
   return (

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Bell, BellOff, Save } from 'lucide-react';
+import { ArrowLeft, Bell, BellOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useAuth } from '@/lib/api/auth-context';
@@ -45,7 +45,7 @@ function loadPrefs(): NotificationPreferences {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return { ...defaultPrefs, ...JSON.parse(raw) };
-  } catch {}
+  } catch { /* localStorage not available */ }
   return defaultPrefs;
 }
 
@@ -105,7 +105,7 @@ export default function NotificationsSettingsPage() {
       const next = { ...prev, [key]: !prev[key] };
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      } catch {}
+      } catch { /* localStorage not available */ }
       return next;
     });
   }, []);
@@ -197,7 +197,7 @@ export default function NotificationsSettingsPage() {
               setPrefs(defaultPrefs);
               try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultPrefs));
-              } catch {}
+              } catch { /* localStorage not available */ }
               toast.success('Preferences reset to defaults.');
             }}
             className="clip-corner inline-flex cursor-pointer items-center gap-2 border border-border/50 bg-background/30 px-4 py-2 font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground transition hover:text-foreground"
