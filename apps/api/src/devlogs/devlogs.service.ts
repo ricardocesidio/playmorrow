@@ -7,6 +7,7 @@ import { sanitizeHtml } from '../common/sanitize-html';
 import { PrismaService } from '../prisma/prisma.service';
 import { StudioXpService } from '../studios/studio-xp.service';
 import { FeedEngineService } from '../feed/feed-events.service';
+import { EventBus } from '../common/event-bus';
 import { logger } from '../common/logger';
 import type { CreateDevlogDto } from './dto/create-devlog.dto';
 import type { UpdateDevlogDto } from './dto/update-devlog.dto';
@@ -26,6 +27,7 @@ export class DevlogsService {
     private readonly xp: StudioXpService,
     private readonly audit: AuditLogService,
     private readonly feedEngine: FeedEngineService,
+    private readonly eventBus: EventBus,
   ) {}
 
   async create(userId: string, gameSlug: string, dto: CreateDevlogDto) {
@@ -89,6 +91,8 @@ export class DevlogsService {
         gameTitle: game.title,
       });
       feedEventId = (feedEvent as { id: string }).id;
+
+      this.eventBus.emit({ type: 'devlog_published', actorId: userId, gameId: game.id, studioId: game.studioId, targetType: 'DEVLOG', targetId: devlog.id });
     }
 
     await this.audit.log({

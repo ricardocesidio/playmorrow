@@ -11,6 +11,7 @@ import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateGameDto } from './dto/create-game.dto';
 import type { UpdateGameDto } from './dto/update-game.dto';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { EventBus } from '../common/event-bus';
 import { FeedEngineService } from '../feed/feed-events.service';
 
 const GAME_INCLUDE = {
@@ -39,6 +40,7 @@ export class GamesService {
     private readonly studioXpService: StudioXpService,
     private readonly auditLog: AuditLogService,
     private readonly feedEngine: FeedEngineService,
+    private readonly eventBus: EventBus,
     private readonly countersService: CountersService,
   ) {}
 
@@ -139,6 +141,8 @@ export class GamesService {
       actorId: userId,
       payload: { title: game.title, slug: game.slug },
     }).catch((err) => logger.error({ err }));
+
+    this.eventBus.emit({ type: 'game_published', actorId: userId, gameId: game.id, studioId: studio.id, targetType: 'GAME', targetId: game.id });
 
     logger.info({ msg: 'game created', gameId: game.id, studioId: studio.id, userId });
 
@@ -342,6 +346,8 @@ export class GamesService {
         actorId: userId,
         payload: { title: game.title, status: dto.status, previousStatus: game.status },
       }).catch((err) => logger.error({ err }));
+
+      this.eventBus.emit({ type: 'game_published', actorId: userId, gameId: game.id, studioId: game.studioId, targetType: 'GAME', targetId: game.id });
     }
 
     if (dto.trailerUrl !== undefined && dto.trailerUrl !== game.trailerUrl) {
@@ -351,6 +357,8 @@ export class GamesService {
         actorId: userId,
         payload: { title: game.title, trailerUrl: dto.trailerUrl },
       }).catch((err) => logger.error({ err }));
+
+      this.eventBus.emit({ type: 'trailer_updated', actorId: userId, gameId: game.id, studioId: game.studioId, targetType: 'GAME', targetId: game.id });
     }
 
     await this.auditLog.log({

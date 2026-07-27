@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { FeedEngineService } from '../feed/feed-events.service';
+import { EventBus } from '../common/event-bus';
 
 @Injectable()
 export class DevlogsSchedulerService {
@@ -10,6 +11,7 @@ export class DevlogsSchedulerService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly feedEngine: FeedEngineService,
+    private readonly eventBus: EventBus,
   ) {}
 
   @Cron('*/5 * * * *')
@@ -54,6 +56,8 @@ export class DevlogsSchedulerService {
           },
           gameTitle: devlog.game.title,
         });
+
+        this.eventBus.emit({ type: 'devlog_published', actorId: devlog.authorId, gameId: devlog.game.id, studioId: devlog.game.studioId, targetType: 'DEVLOG', targetId: devlog.id });
 
         this.logger.log(`Published: ${devlog.title} (${devlog.slug})`);
       } catch (error) {
