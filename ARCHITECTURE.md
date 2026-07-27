@@ -120,6 +120,8 @@ sequenceDiagram
 
 ## Event Bus Flow
 
+> **Note:** The project has two event mechanisms. The in-memory `EventBus` (RxJS Subject) is used for runtime coordination (Goals, Notifications). The `FeedEngineService` handles feed-specific events and writes to the `feed_events` table. This duality is historical — both work correctly but the split should be consolidated in a future pass.
+
 ```mermaid
 flowchart LR
     subgraph Producers [Event Producers]
@@ -320,7 +322,7 @@ components/
 | `VerificationModule` | Studio verification workflow |
 | `TrustModule` | Studio trust scoring |
 | `AuditLogModule` | Auditing sensitive operations |
-| `EventBusModule` | In-memory event bus |
+| `EventBusModule` | In-memory event bus (ephemeral — events lost on restart; SSE clients must reconnect) |
 | `GoalsModule` | Studio goal tracking |
 | `WeeklyReportsModule` | Automated weekly studio reports |
 | `StudioChatModule` | Studio internal chat |
