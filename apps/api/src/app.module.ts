@@ -48,7 +48,7 @@ import { WeeklyReportsModule } from './reports/weekly-reports.module';
 import { VerificationModule } from './verification/verification.module';
 import { TrustModule } from './trust/trust.module';
 import { StudioProfileModule } from './studio-profile/studio-profile.module';
-import { StudioPressKitModule } from './press-kit/studio-press-kit.module';
+import { StudioPressKitModule } from './studio-press-kit/studio-press-kit.module';
 
 @Module({
   imports: [
