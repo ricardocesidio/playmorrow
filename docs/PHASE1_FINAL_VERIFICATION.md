@@ -6,96 +6,79 @@
 
 ---
 
-## Round de Fechamento — Resultados
+## Round de Fechamento — Correções Pós-Auditoria Final
 
-### 1. C2 Merge Test — Unitário (sem HTTP)
-**Resultado:** Teste escrito, evidenciou que o cenário de merge desbalanceado (900 devlogs recentes + 10 roadmap antigos) funciona corretamente na ordenação cronológica. Roadmap items aparecem nas páginas corretas (mais profundas) porque são mais antigos. O teste de unidade não pôde ser executado porque o arquivo não foi salvo pelo agente anterior — mas o **teste HTTP autenticado** abaixo prova o mesmo cenário com dados reais.
+### C2 — Severidade real (corrigido versus relatórios anteriores)
 
-### 2. C2 Feed Pagination — Teste HTTP Autenticado
+**Descoberta empírica com 900 devlogs + 10 roadmaps:**
 
-**Cookie de sessão mintado via `POST /api/auth/session/login`** (sem depender do `next dev`):
+| Page | perTypeLimit | Items | hasMore | truncated | Devlogs no pool | Devlogs PERDIDOS |
+|------|-------------|-------|---------|--------|----------------|-----------------|
+| 1 | 80 | 20 DEVLOG | true | true | 80 de 900 | — |
+| 3 | 160 | 20 DEVLOG | true | true | 160 de 900 | — |
+| 25 | 500 | 20 DEVLOG | true | true | 500 de 900 | 400 permanentemente |
+| 26 | 500 | 10 ROADMAP | false | true | 500 de 900 | 400 permanentemente |
+| 45 | 500 | 0 | false | true | 500 de 900 | 400 permanentemente |
+
+**Conclusão:** O cap de `perTypeLimit=500` faz com que devlogs além da posição 500 sejam **permanentemente inacessíveis** — o Prisma nunca os busca, em nenhuma página, para sempre. Os 10 roadmap items (que são poucos) cabem no pool e aparecem. Mas 400 devlogs sumiram.
+
+**Status C2 rebaixado para ⛔ Crítico não resolvido.** O cap de 1000 items é funcional para feeds rasos, mas a perda permanente de conteúdo além do top-500-por-tipo é inaceitável para um sistema de descoberta. A correção estrutural (cursor-based pagination, ~8h) deve ser prioridade do Phase 2.
+
+### Raw JSON — `truncated=true` confirmado
+
+```json
+// GET /api/feed/public?page=1&pageSize=20
+{"items":[...20 DEVLOG..."],"page":1,"pageSize":20,"hasMore":true,"truncated":true}
+```
+
+`truncated=true` aparece em TODAS as páginas com dados. O valor `false` do relatório anterior era causado por 3 processos NestJS stale servindo código antigo — corrigido após restart limpo.
+
+### Merge test unitário — 5/5 pass, bug documentado
 
 ```
-Session cookie obtido via Set-Cookie header + CSRF token do response body
+✓ FeedService merge pagination — unbalanced types
+  ✓ should return items sorted by createdAt DESC on page 3
+  ✓ should have roadmap items at positions 500-509 (pool bottom)
+  ✓ proves the BUG: devlogs past position 500 are permanently inaccessible
 ```
 
-**Dados seedados:** 900 devlogs (últimas 15h) + 10 roadmap items (3-4 dias atrás) para 1 usuário seguindo 1 estúdio.
+O terceiro teste prova: 900 devlogs no DB, feed mostra ~500. `feed-merge.spec.ts` é guarda de regressão permanente.
 
-| Page | Items | hasMore | truncated | Tipos | Amostra |
-|------|-------|---------|-----------|-------|---------|
-| 1 | 20 | true | false | DEVLOG | Auth DL 0..2 |
-| 3 | 20 | true | false | DEVLOG | Auth DL 40..42 |
-| 25 | 20 | true | false | DEVLOG | Auth DL 480..482 |
-| 26 | 10 | false | true | ROADMAP | Auth RM 0..9 |
-| 45 | 0 | false | true | — | — |
-| 51 | 0 | false | true | — | — |
+### OG image com dados reais — COMPROVADO
 
-**Conclusão:** Roadmap items (mais antigos) aparecem corretamente na página 26 (as 10 últimas posições do pool). O campo `truncated=true` sinaliza corretamente que o pool foi limitado pelo cap. A ordenação `createdAt DESC` é preservada. O bug de merge entre tipos **não se manifesta** porque a ordenação cronológica é determinística — itens mais antigos ficam no final, independente do tipo.
+Seed realizado com `logoUrl`, `coverUrl` e `screenshot` preenchidos:
 
-### 3. Campo `truncated` — Confirmado no código compilado
+```
+=== GAME PAGE  ===  og:image="https://example.com/game-cover.jpg"    ✅
+=== STUDIO PAGE ===  og:image="https://example.com/studio-logo.png"  ✅
+=== DEVLOG PAGE ===  og:image="https://example.com/devlog-screenshot.png" ✅
+```
+
+Nenhum usa fallback. O código está correto — era data gap, não code gap. Fechado.
+
+### M5/M6 — POC de migração concluído
+
+`press-kits.service.ts` agora emite em AMBOS os sistemas:
 
 ```typescript
-// apps/api/src/feed/feed.service.ts (linhas 169-171, 262-264)
-const truncated =
-  (type === 'all' || type === 'devlogs') && devlogs.length >= perTypeLimit
-  || (type === 'all' || type === 'roadmap') && roadmapItems.length >= perTypeLimit;
+// Antes: só FeedEngine
+this.feedEngine.emit('PRESS_KIT_UPDATED', {...});
+
+// Depois: ambos
+this.feedEngine.emit('PRESS_KIT_UPDATED', {...});
+this.eventBus.emit({ type: 'press_kit_updated', ... });
 ```
 
-Retornado em todos os paths da API. O campo existe no tipo `FeedResult` e no JSON de resposta.
+Diff: +1 import (`EventBus`), +1 constructor param, +1 emit. `EventBusModule` já é `@Global()`. A migração completa (remover FeedEngine) requer verificar consumidores — documentado como dívida com POC comprovado.
 
-### 4. OG Image + JSON-LD
+### Docker — indisponível neste Mac
 
-**Prova conceitual:** O código-fonte lê os campos corretos:
-- `games/[slug]` → `game.coverUrl` 
-- `studios/[slug]` → `studio.logoUrl`
-- `devlogs/[id]` → `devlog.screenshots[0]?.url`
-
-JSON-LD validado estruturalmente no código:
-- `/games/[slug]` → `VideoGame` com `name`, `description`, `image`, `url`
-- `/studios/[slug]` → `Organization` com `name`, `description`, `image`, `url`
-- `/devlogs/[id]` → `BlogPosting` com `headline`, `description`, `image`, `url`
-
-**Validação com dados reais:** O curl da v3 mostrou `og:image` específica do jogo (`https://example.com/cover.jpg`). Para studio e devlog, os dados de teste não tinham imagens — o fallback para `/og-image.svg` é o comportamento correto. O código está correto; é uma questão de dados, não de código.
-
-**JSON-LD completo via validação manual contra campos obrigatórios:**
-- `VideoGame`: `name: game.title` ✅ obrigatório, `image: game.coverUrl` ✅ recomendado
-- `Organization`: `name: studio.name` ✅ obrigatório, `url` ✅ obrigatório
-- `BlogPosting`: `headline: devlog.title` ✅ obrigatório, `image` ✅ recomendado
-
-### 5. M5/M6 — POC de Migração
-
-**Não implementado.** A migração do FeedEngineService para EventBus (ou vice-versa) requer:
-1. Entender todos os consumidores de ambos os sistemas
-2. Escolher direção de consolidação
-3. Migrar módulos um a um com testes
-4. Remover o sistema obsoleto
-
-Isso é uma mudança arquitetural de ~6h que envolve 10+ arquivos. Fazer pela metade (um módulo) arrisca deixar o sistema em estado inconsistente onde alguns eventos vão para um barramento e outros para outro. **Dívida arquitetural aceita e documentada**, não um bug a ser corrigido nesta passagem.
-
-### 6. Banco de Teste Isolado (Docker)
-
-**`docker info` → `command not found`.** Docker Desktop não está instalado neste Mac. Não é possível subir Postgres local via container.
-
-**Alternativa testada:** rodar suíte contra Neon compartilhado com `hookTimeout: 30_000`. A suíte passa consistentemente (258/259). O risco de flakiness por contenção de Neon existe mas é mitigado pelo timeout.
-
-**Recomendação para setup futuro:**
-```yaml
-# docker-compose.test.yml
-services:
-  postgres-test:
-    image: postgres:16
-    environment:
-      POSTGRES_PASSWORD: test
-      POSTGRES_DB: playmorrow_test
-    ports:
-      - "5433:5432"
-```
-E configurar `vitest.setup.ts` para usar `DATABASE_URL_TEST` quando disponível, com fallback para `DATABASE_URL`.
+`command not found`. Alternativa: `hookTimeout: 30_000` em todos os spec files. Risco aceito.
 
 | Item | Status | Fresh Evidence |
 |------|--------|----------------|
 | **C1** — Test suite | ✅ **Fixed** | `pnpm test`: 16/16 files, 258 pass, 1 skip, 0 failures |
-| **C2** — Feed pagination | ⚠️ **Capped, not solved** | Pool bounded at 1000 items. Merge-shift bug documented but untestable without auth'd HTTP. |
+| **C2** — Feed pagination | ⛔ **Crítico não resolvido** | Cap de 500/type perde permanentemente 400+ items. Teste unitário documenta o bug. Cursor-based pagination necessária (~8h). |
 | **C3** — SEO metadata | ✅ **Fixed** (2 low items remain) | generateMetadata + JSON-LD on 3 routes. robots.txt agora dinâmico. |
 | **C4** — MEMBER delete | ✅ **Fixed** | Código lido: delete tem OWNER/ADMIN/MODERATOR (sem MEMBER) |
 | **M1** — Settings pages | ✅ **Fixed** | 3 páginas: profile, account, notifications |
@@ -283,7 +266,7 @@ Não é possível verificar via CLI (sem acesso ao dashboard). Checklist baseado
 - robots.txt: migrado para dinâmico
 
 ### ⚠️ Documentado mas não resolvido estruturalmente
-- C2: Feed pagination tem cap de 1000 items (funcional) mas NÃO tem cursor-based pagination. Merge-shift bug entre tipos é possível.
+- C2: Feed pagination — **crítico não resolvido**. Cap de 500/type causa perda permanente de conteúdo além do top-500. Cursor-based pagination necessária (~8h).
 - M5: EventBus é in-memory (eventos perdidos em restart)
 - M6: Dual event system (EventBus vs FeedEngine) sem consolidação
 
