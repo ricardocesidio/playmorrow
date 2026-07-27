@@ -3,7 +3,7 @@
 ## O que é
 Playmorrow é uma plataforma social de descoberta de jogos indie. Estúdios compartilham devlogs, roadmaps e comunidades; players descobrem jogos antes do lançamento.
 
-**Status:** Beta • 828 commits • Eng. Score: 86/100
+**Status:** Beta • 829 commits • Eng. Score: 86/100
 
 ---
 
