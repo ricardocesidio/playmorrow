@@ -7,12 +7,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   try {
     const res = await fetch(`${API}/devlogs/${id}`, { next: { revalidate: 3600 } });
-    if (!res.ok) return { title: 'Devlog Not Found · Playmorrow' };
+    if (!res.ok) return { title: 'Devlog Not Found' };
     const devlog = await res.json();
     const screenshotUrl = devlog.screenshots?.[0]?.url;
     const ogImage = screenshotUrl || '/og-image.svg';
     return {
-      title: `${devlog.title} · Playmorrow`,
+      title: devlog.title,
       description: devlog.excerpt || devlog.body?.slice(0, 160) || 'Read this devlog on Playmorrow',
       openGraph: {
         title: devlog.title,
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       },
     };
   } catch {
-    return { title: 'Devlog · Playmorrow' };
+    return { title: 'Devlog' };
   }
 }
 
