@@ -86,8 +86,12 @@ export class FeedService {
       return { items: [], total: 0, page, pageSize: cappedSize, hasMore: false };
     }
 
-    // Fetch devlogs and roadmap items (bounded — page * size + buffer per type)
-    const perTypeLimit = (page + 1) * cappedSize * 3;
+    // Fetch devlogs and roadmap items (fixed overfetch — page-independent, always bounded)
+    const perTypeLimit = cappedSize * 2;
+    // Note: this is a fixed cap regardless of page depth. At deep pages with heavily
+    // unbalanced data (e.g., 1000 devlogs and 2 roadmap items), items from the
+    // underrepresented type may be missed. Cursor-based pagination would fix this
+    // but requires an API contract change. Tradeoff: constant query cost vs precision.
     const [devlogs, roadmapItems] = await Promise.all([
       type !== 'roadmap'
         ? this.prisma.devlog.findMany({
