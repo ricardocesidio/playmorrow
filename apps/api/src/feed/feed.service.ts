@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import type { Prisma } from '@playmorrow/database';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -40,6 +40,8 @@ const ROADMAP_FEED_INCLUDE = {
 
 @Injectable()
 export class FeedService {
+  private readonly logger = new Logger(FeedService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async getPersonalFeed(
@@ -87,17 +89,28 @@ export class FeedService {
       return { items: [], total: 0, page, pageSize: cappedSize, hasMore: false, truncated: false };
     }
 
-    // Fetch devlogs and roadmap items. Scales with page depth up to a fixed cap.
-    // Not cursor-based (which would require API contract change + frontend update),
-    // but bounded at ~1000 items max regardless of page depth or data size.
-    const perTypeLimit = Math.min((page + 1) * cappedSize * 2, 500);
+    // Count actual data per type (cheap count queries) for proportional limit allocation
+    const [devlogTotal, roadmapTotal] = await Promise.all([
+      type !== 'roadmap'
+        ? this.prisma.devlog.count({ where: { gameId: { in: gameIdArray }, isPublished: true } })
+        : Promise.resolve(0),
+      type !== 'devlogs'
+        ? this.prisma.roadmapItem.count({ where: { gameId: { in: gameIdArray } } })
+        : Promise.resolve(0),
+    ]);
+
+    // Per-type cap: allocate the pool budget proportionally, ensure minority type has room
+    const basePerTypeLimit = Math.min((page + 1) * cappedSize * 2, 500);
+    const devlogLimit = type === 'roadmap' ? 0 : Math.min(basePerTypeLimit, Math.max(devlogTotal || 50, 50));
+    const roadmapLimit = type === 'devlogs' ? 0 : Math.min(basePerTypeLimit, Math.max(roadmapTotal || 50, 50));
+
     const [devlogs, roadmapItems] = await Promise.all([
       type !== 'roadmap'
         ? this.prisma.devlog.findMany({
             where: { gameId: { in: gameIdArray }, isPublished: true },
             include: DEVLOG_FEED_INCLUDE,
             orderBy: { publishedAt: 'desc' },
-            take: perTypeLimit,
+            take: devlogLimit,
           })
         : Promise.resolve([]),
       type !== 'devlogs'
@@ -105,10 +118,17 @@ export class FeedService {
             where: { gameId: { in: gameIdArray } },
             include: ROADMAP_FEED_INCLUDE,
             orderBy: { updatedAt: 'desc' },
-            take: perTypeLimit,
+            take: roadmapLimit,
           })
         : Promise.resolve([]),
     ]);
+
+    if (devlogs.length >= devlogLimit) {
+      this.logger.warn({ devlogLimit, devlogTotal }, 'Feed devlog cap reached — data may be truncated');
+    }
+    if (roadmapItems.length >= roadmapLimit) {
+      this.logger.warn({ roadmapLimit, roadmapTotal }, 'Feed roadmap cap reached — data may be truncated');
+    }
 
     // Resolve studio info for all unique game IDs
     const gameIds = new Set<string>();
@@ -167,8 +187,8 @@ export class FeedService {
     const paged = feedItems.slice(start, start + cappedSize);
 
     const truncated =
-      (type === 'all' || type === 'devlogs') && devlogs.length >= perTypeLimit
-      || (type === 'all' || type === 'roadmap') && roadmapItems.length >= perTypeLimit;
+      (type === 'all' || type === 'devlogs') && devlogs.length >= devlogLimit
+      || (type === 'all' || type === 'roadmap') && roadmapItems.length >= roadmapLimit;
 
     return {
       items: paged,
