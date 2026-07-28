@@ -153,6 +153,18 @@ REDACTED_S3_BUCKET=playmorrow-uploads
 
 ---
 
+## Incidente — API de Produção Fora do Ar (24/07 a 27/07)
+
+**Causa raiz:** Trial do Railway expirou em 24/07 — containers pararam de rodar e não havia alerta configurado para detectar.
+**Duração:** ~3 dias (24/07 a 27/07).
+**Detecção:** Descoberta durante verificação manual do teste de R2 nesta sessão — NÃO detectada por monitoramento automático (inexistente).
+**Impacto:** API indisponível. Frontend (Vercel) continuou no ar mas sem conseguir carregar dados. Sem números de usuários impactados.
+**Resolução:** Migração para Fly.io em 27/07.
+**Lições:**
+1. Railway trial expira sem aviso prévio para quem não faz upgrade
+2. Não havia monitoramento de uptime configurado
+3. Recomendação: configurar UptimeRobot (grátis) apontando para `/api/health`
+
 ## Incidente de Segurança — Credenciais R2 Expostas (Corrigido)
 
 **Ocorrência:** Commit `3670e91` incluiu no `PHASE1_FINAL_VERIFICATION.md` valores parciais de `REDACTED_AWS_KEY` e `REDACTED_AWS_SECRET` (truncados com `...`) e o `REDACTED_R2_ENDPOINT` completo (revelando Account ID da Cloudflare).
@@ -175,9 +187,16 @@ REDACTED_S3_BUCKET=playmorrow-uploads
 
 **API hospedada no Fly.io** — https://playmorrow-api-aged-mountain-9542.fly.dev (Amsterdam, 512MB RAM, 24/7)
 
-**Env vars do Railway foram migradas para o Fly.io** via `flyctl secrets set`. Incluindo R2, JWT, CSRF, VAPID, etc.
+**Env vars do Railway foram migradas para o Fly.io** via `flyctl secrets set`. Incluindo JWT, CSRF, VAPID, etc.
 
 **Vercel atualizado** — `API_URL` e `NEXT_PUBLIC_API_URL` apontam para o Fly.io.
+
+**R2:** Configurado nas env vars mas o `REDACTED_STORAGE_PROVIDER` não está propagando corretamente no Fly.io (uploads caem em S3 mesmo com `REDACTED_STORAGE_PROVIDER=r2` setado). Provável causa: o rolling restart do Fly não aplica secrets corretamente quando o app demora a ficar healthy. Solução: `flyctl deploy` completo (não só secrets set) após garantir grace_period. Ou corrigir manualmente no dashboard Fly.
+
+### Decisão sobre o Fly.io
+- **Cartão:** Adicionado pelo usuário (autopreenchido no navegador) na página de billing do Fly.io
+- **Custo:** Free tier — 512MB RAM, 1 CPU compartilhado, 2 machines, 24/7. Custo zero enquanto dentro do limite.
+- **Reversibilidade:** O código não mudou — o mesmo código que roda no Fly.io roda no Railway, Render, ou qualquer host Node.js/Docker. Só copiar as env vars e fazer deploy.
 
 1. Ir em https://railway.app/project/gentle-grace
 2. Clicar em **Deploy** ou reconectar a integração com GitHub
