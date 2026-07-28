@@ -15,8 +15,7 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       { protocol: 'https', hostname: '**.vercel.app' },
-      { protocol: 'https', hostname: '**.railway.app' },
-      { protocol: 'https', hostname: '**.railway.internal' },
+      { protocol: 'https', hostname: '**.r2.dev' },
       { protocol: 'https', hostname: '**.neon.tech' },
       { protocol: 'https', hostname: 'github.com' },
       { protocol: 'https', hostname: '**.githubusercontent.com' },
