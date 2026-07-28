@@ -169,12 +169,17 @@ REDACTED_S3_BUCKET=playmorrow-uploads
 
 **R2 ativo:** 5 env vars setadas no Railway production + staging. Container reinicia automaticamente no próximo deploy. Upload local em dev continua em disco local (comportamento esperado — env vars Railway não propagam para `pnpm dev` local).
 
-**Teste de upload (local, via local disk):**
-- Upload de PNG de 67 bytes → `POST /api/upload` → `201 Created`
-- URL retornada: `/api/uploads/...` (path local — em Railway seria URL do R2)
-- Endpoint de upload funcional e respondendo.
-
 **Varredura de secrets em todos os `.md`:** ✅ Nenhum valor real de secret encontrado em nenhum arquivo `.md` do repositório.
+
+**Teste do R2 contra staging/production — não foi possível via CLI:**
+O Railway CLI retorna 404 ao tentar fazer deploy (`railway up`), e todos os deployments ativos estão como "REMOVED" desde 24/07. As env vars do R2 estão **setadas corretamente** no projeto Railway (produção + staging), mas o container não está rodando. Para ativar:
+
+1. Ir em https://railway.app/project/gentle-grace
+2. Clicar em **Deploy** ou reconectar a integração com GitHub
+3. O container reinicia com as 5 env vars do R2
+4. Testar: `curl -X POST https://playmorrow-api-production.up.railway.app/api/upload -F "file=@imagem.png"`
+
+As 5 env vars do R2 (REDACTED_STORAGE_PROVIDER, REDACTED_AWS_KEY, REDACTED_AWS_SECRET, REDACTED_R2_ENDPOINT, REDACTED_S3_BUCKET) estão configuradas no Railway production + staging. Só falta rodar um deploy para o container reiniciar com elas.
 
 ## Secrets + Rate Limiting — Verificação Final
 
