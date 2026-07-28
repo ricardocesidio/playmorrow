@@ -142,15 +142,30 @@ O serviço detecta `REDACTED_STORAGE_PROVIDER === 'r2'`, configura o `S3Client` 
 
 **Decisão:** ✅ **R2 ativo** — Cloudflare R2 configurado e funcional em produção e staging.
 
-```env
+```
+Variáveis setadas no Railway (valores não documentados aqui — ver dashboard):
 REDACTED_STORAGE_PROVIDER=r2
-REDACTED_AWS_KEY=58ab2bd3...
-REDACTED_AWS_SECRET=53943e33...
-REDACTED_R2_ENDPOINT=https://6b62141bc0748171281c4ca9cbc53c4d.r2.cloudflarestorage.com
+REDACTED_AWS_KEY=<setado no Railway>
+REDACTED_AWS_SECRET=<setado no Railway>
+REDACTED_R2_ENDPOINT=<setado no Railway>
 REDACTED_S3_BUCKET=playmorrow-uploads
 ```
 
 ---
+
+## Incidente de Segurança — Credenciais R2 Expostas (Corrigido)
+
+**Ocorrência:** Commit `3670e91` incluiu no `PHASE1_FINAL_VERIFICATION.md` valores parciais de `REDACTED_AWS_KEY` e `REDACTED_AWS_SECRET` (truncados com `...`) e o `REDACTED_R2_ENDPOINT` completo (revelando Account ID da Cloudflare).
+
+**Ações tomadas:**
+1. **Token antigo revogado** — deletado no dashboard Cloudflare (R2 → Manage API Tokens)
+2. **Novo token gerado** — Access Key + Secret Key substituídos
+3. **Railway atualizado** — novas credenciais setadas em produção e staging
+4. **Arquivo limpo** — valores substituídos por `<setado no Railway>`
+
+**Histórico do git:** Commit `3670e91` contém os valores truncados + endpoint completo. Como as chaves foram rotacionadas (token antigo revogado, novo ativo), o valor no histórico não é mais válido. Repositório é privado (ricardocesidio/playmorrow no GitHub).
+
+**Regra adicionada ao `CLAUDE.md`:** Nenhum relatório ou documento deve conter valores reais de secret, nem truncados. Sempre usar placeholder.
 
 ## Secrets + Rate Limiting — Verificação Final
 

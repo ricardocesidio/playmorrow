@@ -152,6 +152,10 @@ playmorrow/
 - **M11 — Auth ordering:** `assertStudioAccess()` movido antes da lógica de negócio
 - **Infra pendente:** staging environment, env vars Railway, test DB isolado
 
+## Regra de Segurança — Secrets
+
+**Nenhum documento, relatório ou resposta deve conter valores reais de secret.** Nem truncados, nem parciais. Sempre usar placeholder (`<setado no Railway>`, `<redacted>`) e referenciar onde o valor real está armazenado (Railway dashboard, gerenciador de senhas). Secrets incluem: `JWT_SECRET`, `SESSION_SECRET`, `CSRF_SECRET`, `REDACTED_AWS_KEY`, `REDACTED_AWS_SECRET`, `REDACTED_R2_ENDPOINT`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `SENTRY_DSN`, `RESEND_API_KEY`.
+
 ## Para Desenvolvimento Local
 
 ```bash
