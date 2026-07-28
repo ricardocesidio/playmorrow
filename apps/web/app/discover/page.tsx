@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
 import { api } from '@/lib/api/client';
 import { Loader2, TrendingUp, Star, Flame, Gamepad2, ArrowRight } from 'lucide-react';
 
@@ -31,7 +30,7 @@ export default function DiscoverPage() {
     Promise.all(
       SECTIONS_CONFIG.map(async (cfg) => {
         try {
-          const res = await api.get<any>(cfg.endpoint);
+          const res = await api.get<{ items?: GameItem[]; games?: { items?: GameItem[] } }>(cfg.endpoint);
           const items = res.items || res.games?.items || [];
           return { ...cfg, games: items.slice(0, 6) };
         } catch {
@@ -102,7 +101,6 @@ export default function DiscoverPage() {
           )}
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }
