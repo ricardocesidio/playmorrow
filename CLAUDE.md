@@ -1,6 +1,6 @@
 # Playmorrow — Project Overview for Claude
 
-**Status:** Beta • 852+ commits • Enterprise Audit: 76/100 • Milestone 5 ✅
+**Status:** Beta • 852+ commits • Enterprise Audit: 76/100 • M5 entregue (272 tests)
 **Frontend:** https://playmorrow.vercel.app (Vercel) — ✅ Monitorado via UptimeRobot (5min)
 **Backend:** https://playmorrow-api-aged-mountain-9542.fly.dev/api/health (Fly.io) — ✅ Monitorado via UptimeRobot (5min)
 **Storage:** Cloudflare R2 (uploads públicos)
