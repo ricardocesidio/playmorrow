@@ -1,23 +1,38 @@
 name: Uptime Check
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          for url in \
-            "https://playmorrow.vercel.app" \
-            "https://playmorrow-api-production.up.railway.app/health" \
-            "https://playmorrow-api-temp-staging.up.railway.app/health"; do
-            status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$url")
-            if [ "$status" != "200" ]; then
-              echo "FAIL: $url (HTTP $status)"
-              exit 1
-            else
-              echo "OK:   $url"
-            fi
-          done
+      - name: Check Frontend
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://playmorrow.vercel.app")
+          if [ "$status" != "200" ]; then
+            echo "FAIL: Frontend (HTTP $status)"
+            exit 1
+          fi
+          echo "OK: Frontend (HTTP $status)"
+
+      - name: Check API Health
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://playmorrow-api-aged-mountain-9542.fly.dev/api/health")
+          if [ "$status" != "200" ]; then
+            echo "FAIL: API Health (HTTP $status)"
+            exit 1
+          fi
+          echo "OK: API Health (HTTP $status)"
+
+      - name: Check API Games Endpoint
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://playmorrow-api-aged-mountain-9542.fly.dev/api/games")
+          body=$(curl -s --max-time 15 "https://playmorrow-api-aged-mountain-9542.fly.dev/api/games")
+          count=$(echo "$body" | grep -o '"id"' | wc -l)
+          if [ "$status" != "200" ]; then
+            echo "FAIL: API Games (HTTP $status)"
+            exit 1
+          fi
+          echo "OK: API Games (HTTP $status, $count games)"
