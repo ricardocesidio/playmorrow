@@ -129,11 +129,11 @@ Nada que exija `git revert`. Os 3 itens acima foram verificados e estão seguros
 **Situação atual:** Uploads salvos em disco local (`UPLOADS_DIR`). Funciona mas dados são perdidos no restart do container Railway.
 
 **Código já preparado para Cloudflare R2** (`upload.service.ts`):
-```env
+```
 REDACTED_STORAGE_PROVIDER=r2
-REDACTED_AWS_KEY=<r2-access-key-id>
-REDACTED_AWS_SECRET=<r2-secret-access-key>
-REDACTED_R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+REDACTED_AWS_KEY=<setado no Railway>
+REDACTED_AWS_SECRET=<setado no Railway>
+REDACTED_R2_ENDPOINT=<setado no Railway, domínio Cloudflare R2>
 REDACTED_S3_BUCKET=playmorrow-uploads
 ```
 O serviço detecta `REDACTED_STORAGE_PROVIDER === 'r2'`, configura o `S3Client` com endpoint R2, e faz upload diretamente. Quando as credenciais não existem, cai em local disk com warning.
@@ -167,7 +167,14 @@ REDACTED_S3_BUCKET=playmorrow-uploads
 
 **Regra adicionada ao `CLAUDE.md`:** Nenhum relatório ou documento deve conter valores reais de secret, nem truncados. Sempre usar placeholder.
 
-**R2 ativo:** 5 env vars setadas no Railway production + staging. Container reinicia automaticamente no próximo deploy. Upload local em dev continua em disco local (comportamento esperado).
+**R2 ativo:** 5 env vars setadas no Railway production + staging. Container reinicia automaticamente no próximo deploy. Upload local em dev continua em disco local (comportamento esperado — env vars Railway não propagam para `pnpm dev` local).
+
+**Teste de upload (local, via local disk):**
+- Upload de PNG de 67 bytes → `POST /api/upload` → `201 Created`
+- URL retornada: `/api/uploads/...` (path local — em Railway seria URL do R2)
+- Endpoint de upload funcional e respondendo.
+
+**Varredura de secrets em todos os `.md`:** ✅ Nenhum valor real de secret encontrado em nenhum arquivo `.md` do repositório.
 
 ## Secrets + Rate Limiting — Verificação Final
 
@@ -175,9 +182,9 @@ REDACTED_S3_BUCKET=playmorrow-uploads
 
 | Secret | Status | Evidência |
 |--------|--------|-----------|
-| `JWT_SECRET` | ✅ Pre-existente | `f7c05b5783...` — idêntico ao listado na Sessão 13 |
-| `SESSION_SECRET` | ✅ Pre-existente | `6f00533ef8...` — idêntico ao listado na Sessão 13 |
-| `CSRF_SECRET` | ✅ Pre-existente | `9d7eabf9dc...` — idêntico ao listado na Sessão 13 |
+| `JWT_SECRET` | ✅ Pre-existente | Confirmado idêntico ao valor da Sessão 13 (comparação feita, valor não exposto) |
+| `SESSION_SECRET` | ✅ Pre-existente | Confirmado idêntico ao valor da Sessão 13 (comparação feita, valor não exposto) |
+| `CSRF_SECRET` | ✅ Pre-existente | Confirmado idêntico ao valor da Sessão 13 (comparação feita, valor não exposto) |
 
 Nenhum dos 3 foi gerado ou alterado durante esta remediação. Foram apenas **confirmados como existentes** no Railway. Zero impacto em sessões ativas, tokens JWT, ou formulários com CSRF em andamento.
 
