@@ -561,12 +561,12 @@ export default function DevlogDetailPage() {
             const all = (devlog.screenshots ?? []).map((s) => s.url);
             return (
               <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95" onClick={() => setLightboxOpen(false)}>
-                <button onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i > 0 ? i - 1 : all.length - 1)); }}
+                <button aria-label="Previous screenshot" onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i > 0 ? i - 1 : all.length - 1)); }}
                   className="absolute left-4 top-1/2 -translate-y-1/2 grid size-12 place-items-center text-white/60 hover:text-white text-3xl cursor-pointer z-10">‹</button>
                 <img src={all[lightboxIndex]} alt="" className="max-h-[90vh] max-w-[90vw] object-contain" onClick={(e) => e.stopPropagation()} />
-                <button onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i < all.length - 1 ? i + 1 : 0)); }}
+                <button aria-label="Next screenshot" onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i < all.length - 1 ? i + 1 : 0)); }}
                   className="absolute right-4 top-1/2 -translate-y-1/2 grid size-12 place-items-center text-white/60 hover:text-white text-3xl cursor-pointer z-10">›</button>
-                <button onClick={() => setLightboxOpen(false)} className="absolute top-4 right-4 grid size-10 place-items-center text-white/60 hover:text-white text-xl cursor-pointer z-10">✕</button>
+                <button aria-label="Close lightbox" onClick={() => setLightboxOpen(false)} className="absolute top-4 right-4 grid size-10 place-items-center text-white/60 hover:text-white text-xl cursor-pointer z-10">✕</button>
                 <div className="absolute bottom-6 left-0 right-0 text-center text-sm text-white/50 font-mono">{lightboxIndex + 1} / {all.length}</div>
               </div>
             );

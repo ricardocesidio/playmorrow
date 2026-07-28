@@ -291,8 +291,8 @@ export default function OnboardingPage() {
 
               {/* Country dropdown */}
               <div className="space-y-1">
-                <label className="pm-micro text-muted-foreground">Country *</label>
-                <select value={country} onChange={e => { setCountry(e.target.value); setTouched(prev => ({ ...prev, country: true })); }}
+                <label htmlFor="onboarding-country" className="pm-micro text-muted-foreground">Country *</label>
+                <select id="onboarding-country" value={country} onChange={e => { setCountry(e.target.value); setTouched(prev => ({ ...prev, country: true })); }}
                   className={`clip-corner h-12 w-full border bg-background/80 px-4 text-sm text-foreground outline-none focus:border-cyan cursor-pointer ${touched.country && !country ? 'border-coral' : 'border-input'}`}>
                   <option value="">Select your country</option>
                   {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -301,8 +301,8 @@ export default function OnboardingPage() {
 
               {/* Bio */}
               <div className="space-y-1">
-                <label className="pm-micro text-muted-foreground">Bio *</label>
-                <textarea value={bio} onChange={e => { setBio(e.target.value); setTouched(prev => ({ ...prev, bio: true })); }} rows={3}
+                <label htmlFor="onboarding-bio" className="pm-micro text-muted-foreground">Bio *</label>
+                <textarea id="onboarding-bio" value={bio} onChange={e => { setBio(e.target.value); setTouched(prev => ({ ...prev, bio: true })); }} rows={3}
                   className={`clip-corner h-24 w-full border bg-background/80 px-4 py-3 text-sm text-foreground outline-none focus:border-cyan resize-none ${touched.bio && !bio.trim() ? 'border-coral' : 'border-input'}`}
                   placeholder="Tell us about yourself (max 500)" maxLength={500} />
               </div>
