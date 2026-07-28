@@ -1,24 +1,23 @@
 # Playmorrow — Project Overview for Claude
 
-**Status:** Beta • 852+ commits • Enterprise Audit: 76/100 • M5 entregue (272 tests)
-**Frontend:** https://playmorrow.vercel.app (Vercel) — ✅ Monitorado via UptimeRobot (5min)
-**Backend:** https://playmorrow-api-aged-mountain-9542.fly.dev/api/health (Fly.io) — ✅ Monitorado via UptimeRobot (5min)
+**Status:** Beta • 822+ commits • M5 code entregue • 272 tests (19 files)
+**Frontend:** https://playmorrow.vercel.app (Vercel) — ✅ UptimeRobot (5min)
+**Backend:** https://playmorrow-api-aged-mountain-9542.fly.dev/api/health (Fly.io) — ✅ UptimeRobot (5min)
 **Storage:** Cloudflare R2 (uploads públicos)
 **DB:** PostgreSQL (Neon)
 
+**⚠️ NOT enterprise-certified.** `docs/ENTERPRISE_AUDIT.md` veredito: 76/100, 4 itens críticos não resolvidos. Não usar claim "76/100" como selo de aprovação.
+
 ---
 
-## Evidências de Verificação (última rodada)
+## Pendências Críticas
 
-```bash
-# CSP confirmado — sem Railway, com Fly.io
-$ curl -sI https://playmorrow.vercel.app/ | grep content-security-policy
-content-security-policy: ... connect-src 'self' https://playmorrow-api-aged-mountain-9542.fly.dev ...
-
-# UptimeRobot — ambos Up
-# - https://playmorrow.vercel.app → 200, checking every 5min
-# - https://playmorrow-api-aged-mountain-9542.fly.dev/api/health → 200, checking every 5min
-```
+| # | Item | Status | Quem faz |
+|---|------|--------|----------|
+| 1 | **Domínio próprio** (playmorrow.com) — Blocking for public launch | 🔴 Não comprado | Equipe |
+| 2 | **E2E Tests** — 7 spec files, build timeout nesta máquina | 🟡 Não executado | Equipe (CI) |
+| 3 | **3670e91 no git** — R2 env vars ainda no histórico | 🟡 Não reescrito | Equipe (git-filter-repo) |
+| 4 | **Secrets scanning em CI** — gitleaks workflow criado | 🟡 Não testado | Equipe |
 
 ---
 
@@ -45,18 +44,18 @@ content-security-policy: ... connect-src 'self' https://playmorrow-api-aged-moun
 | M3 | Studio Analytics | ✅ |
 | M3.5 | Intelligence (Event Bus, Goals) | ✅ |
 | M4 | Verification (6 tiers, Trust Score) | ✅ |
-| **M5** | **Discovery Platform** | **✅ Entregue** |
+| **M5** | **Discovery Platform** | **✅ Código entregue** |
 
-### Milestone 5 — Discovery Platform (Novo)
+### Milestone 5 — Discovery Platform
 
 | Sub-fase | Entregue | Detalhes |
 |----------|----------|----------|
 | 5.1 — Recommendation Engine | ✅ | 5 scorers (tag, follow, trending, wishlist, interaction), API com cursor pagination, explainability, cache in-memory Redis-ready |
 | 5.2 — Search 2.0 | ✅ | 6 filtros (genre, status, tag, engine, isFree), 4 sorts, full-text |
 | 5.3 — Discover Page | ✅ | 3 seções (Trending, Popular, Newest) com dados reais da API |
-| 5.4 — Similar Games + Homepage | ✅ | Similar Games na game detail, Trending Now na homepage, Feed com filtros |
+| 5.4 — Similar Games + Homepage | ✅ | Similar Games na game detail, Trending Now convertido para Server Component (SSR), Feed com filtros |
 
-Verificação: 22 arquivos criados, typecheck 6/6, lint 0 errors, tests 263/263.
+Verificação completa: `docs/MILESTONE5_VERIFICATION_v2.md`
 
 ## Estrutura do Monorepo
 
@@ -71,15 +70,15 @@ playmorrow/
 │           ├── auth/, common/, games/, studios/, devlogs/,
 │           ├── feed/, comments/, notifications/, analytics/,
 │           ├── goals/, support/, help/, verification/,
-│           ├── recommendations/  # Novo M5: Recommendation Engine
+│           ├── recommendations/  # M5: Recommendation Engine
 │           ├── upload/ (R2)
-│           └── search/  # Atualizado M5: Search 2.0
+│           └── search/  # M5: Search 2.0
 ├── packages/
 │   └── database/     # Prisma schema (51 modelos)
 └── docs/
-    ├── ENTERPRISE_AUDIT.md   # Auditoria final (76/100)
-    ├── PHASE1_FINAL_VERIFICATION_v3.md
-    └── MILESTONE5_VERIFICATION.md  # Evidências do M5
+    ├── ENTERPRISE_AUDIT.md   # Auditoria — NOT enterprise-certified
+    ├── MILESTONE5_VERIFICATION_v2.md
+    └── PHASE1_FINAL_VERIFICATION_v3.md
 ```
 
 ## URLs Públicas
@@ -101,11 +100,8 @@ Todas as variáveis no Fly.io secrets. Rotacionadas em 28/07 após incidente.
 - **Rate limit:** 60/min global, 5/min register, 10/min login ✅
 - **Upload:** MIME + magic bytes + dimensão (4096px) + 20MB ✅
 - **Pre-commit hook:** Bloqueia `JWT_SECRET=`, `SESSION_SECRET=`, `CSRF_SECRET=`, `REDACTED_AWS_SECRET=` em texto claro ✅
+- **Secrets scanning (CI):** Workflow gitleaks criado (`.github/workflows/gitleaks.yml`) — não testado
 - **Monitoramento:** UptimeRobot (API + Frontend, 5min) ✅
-
-## Features (5 Milestones)
-
-M1: Suporte | M2: Help Center | M3: Analytics | M3.5: Intelligence (Event Bus, Goals) | M4: Verification (6 tiers, Trust Score)
 
 ## Para Desenvolvimento Local
 
@@ -113,5 +109,5 @@ M1: Suporte | M2: Help Center | M3: Analytics | M3.5: Intelligence (Event Bus, G
 pnpm install && pnpm dev
 pnpm typecheck        # 6/6
 pnpm --filter @playmorrow/web lint  # 0 errors
-pnpm --filter @playmorrow/api test  # 263 pass, requer TEST_DATABASE_URL
+pnpm --filter @playmorrow/api test  # 272 pass, requer TEST_DATABASE_URL
 ```

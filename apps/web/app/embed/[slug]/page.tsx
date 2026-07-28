@@ -1,4 +1,4 @@
-const API = process.env.API_URL || 'https://playmorrow-api-production.up.railway.app/api';
+const API = process.env.API_URL || 'https://playmorrow-api-aged-mountain-9542.fly.dev/api';
 
 async function getGame(slug: string) {
   try {

@@ -612,7 +612,7 @@ model Devlog {
   scheduledFor   DateTime?
   editedAt       DateTime?
   category       String?
-  tags           String[]
+  tags           String[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
