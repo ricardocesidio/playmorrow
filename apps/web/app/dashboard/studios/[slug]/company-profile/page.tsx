@@ -62,7 +62,7 @@ export default function CompanyProfilePage() {
       await updateProfile.mutateAsync({ slug, body: form });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    } catch { console.warn("error") }
+    } catch { console.warn("Failed to save") }
   };
 
   if (isLoading) {

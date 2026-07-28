@@ -68,7 +68,7 @@ export default function BrandKitPage() {
       });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    } catch { console.warn("error") }
+    } catch { console.warn("Failed to save") }
   };
 
   if (isLoading) {

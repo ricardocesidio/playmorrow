@@ -63,28 +63,16 @@ export default function StudioDetailPage() {
   const [requestSent, setRequestSent] = useState(false);
 
   if (isLoading) {
-    return (
-      <>
-        <SiteHeader />
-        <main className="relative min-h-screen overflow-hidden bg-[#020609] px-5 pb-24 pt-4 sm:px-8 lg:px-10">
-          <LoadingSkeleton count={6} height="h-16" />
-        </main>
-      </>
-    );
+    return <PageShell><main className="relative min-h-screen overflow-hidden bg-[#020609] px-5 pb-24 pt-4 sm:px-8 lg:px-10"><LoadingSkeleton count={6} height="h-16" /></main></PageShell>;
   }
 
   if (error || !studio) {
-    return (
-      <>
-        <SiteHeader />
-        <main className="relative min-h-screen overflow-hidden bg-[#020609] px-5 pb-24 pt-4 sm:px-8 lg:px-10">
-          <ErrorState message="Studio not found." />
-          <div className="mt-4 text-center">
-            <Link href="/studios" className="font-mono text-xs uppercase tracking-widest text-cyan underline">Back to studios</Link>
-          </div>
-        </main>
-      </>
-    );
+    return <PageShell><main className="relative min-h-screen overflow-hidden bg-[#020609] px-5 pb-24 pt-4 sm:px-8 lg:px-10">
+      <ErrorState message="Studio not found." />
+      <div className="mt-4 text-center">
+        <Link href="/studios" className="font-mono text-xs uppercase tracking-widest text-cyan underline">Back to studios</Link>
+      </div>
+    </main></PageShell>;
   }
 
   const members = membersData?.members ?? [];
@@ -112,8 +100,7 @@ export default function StudioDetailPage() {
   ];
 
   return (
-    <>
-      <SiteHeader />
+    <PageShell>
       <main className="relative min-h-screen overflow-hidden bg-[#020609] pb-32">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
         <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
@@ -608,8 +595,12 @@ export default function StudioDetailPage() {
         {/* Similar Studios */}
         <SimilarStudios currentSlug={slug} />
       </main>
-    </>
+    </PageShell>
   );
+}
+
+function PageShell({ children }: { children: React.ReactNode }) {
+  return <><SiteHeader />{children}</>;
 }
 
 /* ── Verification Badge ─────────────────────────────────────────────── */
