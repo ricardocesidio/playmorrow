@@ -168,4 +168,11 @@ $ for i in $(seq 1 75); do curl ... /api/auth/register ...; done
 
 5 registros bem-sucedidos, 6º bloqueado por rate limit (429). Comportamento correto.
 
+**Teste manual — login (limite documentado: 10/min):**
+```bash
+$ for i in $(seq 1 15); do curl ... /api/auth/login ...; done
+401 401 401 401 401 401 401 401 401 401 429 429 429 429 429
+```
+10×401 (credenciais inválidas) + 5×429 (rate limited). **Bate com o limite documentado de 10/min.** Login protegido contra força bruta.
+
 **Ação:** Comentário do teste atualizado para referenciar o teste de throttler existente. Nenhuma correção necessária.
