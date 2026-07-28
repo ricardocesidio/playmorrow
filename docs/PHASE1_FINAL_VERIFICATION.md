@@ -70,3 +70,43 @@
 - Typecheck: 6/6 ✅
 - Lint: 0 errors, 50 warnings ✅
 - Testes: 17/17 files, 263 pass, 1 skip ✅
+
+---
+
+## Verificação Pós-Merge (urgente — produção está rodando)
+
+### 1. Duplicação de eventos — NÃO há
+
+**Consumidores do EventBus:**
+- `goals.service.ts` — escuta `game_published`, `devlog_published`, `roadmap_updated`, `game_updated` para progresso de metas
+- `studio-achievements.service.ts` — escuta `goal_completed`
+- `activity.service.ts` — escuta TODOS os tipos (genérico) para activity timeline
+
+**Consumidores do FeedEngine:**
+- `devlogs.service.ts` — chama `onDevlogPublished()` que escreve em `feed_events`
+- `devlogs-scheduler.service.ts` — mesma coisa para devlogs agendados
+
+**Análise:** Os consumidores dos dois barramentos são **completamente disjuntos**. EventBus alimenta goals/achievements/activity. FeedEngine alimenta o feed social. Mesmo para o mesmo evento (`devlog_published`), o fluxo é:
+
+```
+Emit EventBus → goals.service.ts (progresso de meta)
+Emit FeedEngine → feed_events table (item no feed social)
+```
+
+São processamentos diferentes, sem duplicação de notificação, feed item, ou contagem. **Zero risco de duplicação em produção.**
+
+### 2. Chaves VAPID — geradas novas, 1 subscription afetada
+
+**Histórico:** As chaves VAPID **não existiam no Railway antes desta sessão**. Foram geradas agora via `npx web-push generate-vapid-keys`.
+
+**Impacto:** 1 push subscription existente no banco (usuário `cmr9apm2x`, desde 23/07/2026 — provavelmente dev/test). Essa subscription foi invalidada pela troca de chaves.
+
+**Recomendação:** Impacto mínimo (1 subscription, provavelmente dev). Se houver usuários reais com push ativo no futuro, a troca de chaves deve ser comunicada com aviso prévio.
+
+### 3. `COOKIE_DOMAIN` — não foi alterado
+
+Valor atual: `.vercel.app` — **idêntico ao que já existia antes do merge**. Não foi tocado neste round. Bate com o domínio do frontend (`playmorrow.vercel.app`). Login/logout não foram afetados.
+
+### 4. Reversão necessária? **NÃO**
+
+Nada que exija `git revert`. Os 3 itens acima foram verificados e estão seguros em produção.
