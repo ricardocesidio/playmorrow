@@ -13,6 +13,7 @@ import { CsrfService } from './common/csrf.service';
 import { EventBusModule } from './common/event-bus.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
+import { RecommendationsModule } from './recommendations/recommendations.module';
 import { CommentsModule } from './comments/comments.module';
 import { DevlogsModule } from './devlogs/devlogs.module';
 import { ReactionsModule } from './reactions/reactions.module';
@@ -94,6 +95,7 @@ import { StudioPressKitModule } from './studio-press-kit/studio-press-kit.module
     StudioHealthModule,
     WeeklyReportsModule,
     EventBusModule,
+    RecommendationsModule,
     VerificationModule,
     TrustModule,
     StudioProfileModule,
