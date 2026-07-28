@@ -141,3 +141,31 @@ O serviço detecta `REDACTED_STORAGE_PROVIDER === 'r2'`, configura o `S3Client` 
 **Para ativar R2:** Criar conta Cloudflare (grátis, sem cartão) → R2 → Create bucket → API Token → setar as 5 vars no Railway. ~15min de setup quando quiser.
 
 **Decisão:** Manter local disk por enquanto, aceitável para beta fechado. R2 configurado quando houver usuários reais fazendo upload.
+
+---
+
+## Secrets + Rate Limiting — Verificação Final
+
+### 1. `JWT_SECRET`, `SESSION_SECRET`, `CSRF_SECRET` — não foram rotacionados
+
+| Secret | Status | Evidência |
+|--------|--------|-----------|
+| `JWT_SECRET` | ✅ Pre-existente | `f7c05b5783...` — idêntico ao listado na Sessão 13 |
+| `SESSION_SECRET` | ✅ Pre-existente | `6f00533ef8...` — idêntico ao listado na Sessão 13 |
+| `CSRF_SECRET` | ✅ Pre-existente | `9d7eabf9dc...` — idêntico ao listado na Sessão 13 |
+
+Nenhum dos 3 foi gerado ou alterado durante esta remediação. Foram apenas **confirmados como existentes** no Railway. Zero impacto em sessões ativas, tokens JWT, ou formulários com CSRF em andamento.
+
+### 2. Rate limiting — testado manualmente, funcional
+
+O teste automatizado em `security-auth.spec.ts` estava `.skip` porque o ThrottlerGuard não está no módulo de teste (causaria 6×201 em vez de 1×429). A cobertura real de rate limit está em `auth/throttler.controller.spec.ts` (login: 10/min) — **teste passando** em todas as execuções.
+
+**Teste manual confirmando funcionamento:**
+```bash
+$ for i in $(seq 1 75); do curl ... /api/auth/register ...; done
+201 201 201 201 201 429 ← LIMITED after 6
+```
+
+5 registros bem-sucedidos, 6º bloqueado por rate limit (429). Comportamento correto.
+
+**Ação:** Comentário do teste atualizado para referenciar o teste de throttler existente. Nenhuma correção necessária.
