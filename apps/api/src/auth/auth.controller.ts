@@ -16,6 +16,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { AuthService } from './auth.service';
 import { SessionService } from '../session/session.service';
 import { CsrfService } from '../common/csrf.service';
+import { SkipCsrf } from '../common/skip-csrf.decorator';
 import { SESSION_COOKIE, setSessionCookie, clearSessionCookie } from '../common/cookie-helper';
 
 @ApiTags('auth')
@@ -88,6 +89,7 @@ export class AuthController {
   }
 
   @Post('session/logout')
+  @SkipCsrf()
   @HttpCode(HttpStatus.OK)
   async sessionLogout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const raw = req.cookies?.[SESSION_COOKIE];

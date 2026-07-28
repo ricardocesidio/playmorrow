@@ -1,11 +1,23 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { CsrfService } from './csrf.service';
+import { SKIP_CSRF_KEY } from './skip-csrf.decorator';
 
 @Injectable()
 export class CsrfGuard implements CanActivate {
-  constructor(private readonly csrf: CsrfService) {}
+  constructor(
+    private readonly csrf: CsrfService,
+    private readonly reflector: Reflector,
+  ) {}
 
   canActivate(context: ExecutionContext): boolean {
+    // Skip CSRF if route has @SkipCsrf() decorator
+    const skipCsrf = this.reflector.getAllAndOverride<boolean>(SKIP_CSRF_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (skipCsrf) return true;
+
     const request = context.switchToHttp().getRequest();
 
     // Read-only methods don't need CSRF
