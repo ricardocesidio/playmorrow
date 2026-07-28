@@ -91,11 +91,14 @@ curl -X POST https://playmorrow-api-aged-mountain-9542.fly.dev/api/upload \
 
 A URL contém `r2.cloudflarestorage.com` (não `s3.amazonaws.com`).
 
-### Bucket público
+### Bucket público — ✅ Ativo
 
-O bucket R2 precisa de acesso público ativado no dashboard Cloudflare:
-1. Cloudflare Dashboard → R2 → bucket `playmorrow-uploads` → Settings → Public Access → **Enable**
-2. Depois: `curl -I <url-do-r2>` deve retornar 200 (não 400)
+```bash
+curl -I https://pub-8e4503584d934d1b8cd18803fdc34ecc.r2.dev/uploads/1785240096038-ahh3pb.png
+# → 200 OK, Content-Type: image/png
+```
+
+O bucket está público e acessível sem autenticação. CDN_URL configurado no Fly.io para usar o domínio público do R2.
 
 ---
 
