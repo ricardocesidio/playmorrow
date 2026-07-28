@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
     const apiDest = process.env.API_URL || (
       process.env.NODE_ENV === 'development'
         ? 'http://localhost:4000/api'
-        : 'https://playmorrow-api-production.up.railway.app/api'
+        : 'https://playmorrow-api-aged-mountain-9542.fly.dev/api'
     );
     return [
       {
