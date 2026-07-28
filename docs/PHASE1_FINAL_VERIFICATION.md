@@ -167,6 +167,8 @@ REDACTED_S3_BUCKET=playmorrow-uploads
 
 **Regra adicionada ao `CLAUDE.md`:** Nenhum relatório ou documento deve conter valores reais de secret, nem truncados. Sempre usar placeholder.
 
+**R2 ativo:** 5 env vars setadas no Railway production + staging. Container reinicia automaticamente no próximo deploy. Upload local em dev continua em disco local (comportamento esperado).
+
 ## Secrets + Rate Limiting — Verificação Final
 
 ### 1. `JWT_SECRET`, `SESSION_SECRET`, `CSRF_SECRET` — não foram rotacionados
