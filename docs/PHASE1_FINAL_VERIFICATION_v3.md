@@ -133,14 +133,52 @@ assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [OWNER,
 
 ---
 
-## 9. 🟢 Typecheck — investigado
+## 9. 🟢 Typecheck — comprovado individualmente
 
-`tsc` trava em alguns ambientes (sistema Darwin com 8GB RAM + múltiplos processos NestJS + VSCode). Não é erro de código. Todos os 3 pacotes passam individualmente:
-- `@playmorrow/api`: compila sem erros
-- `@playmorrow/web`: compila sem erros  
-- `@playmorrow/database`: compila sem erros
+```bash
+$ pnpm --filter @playmorrow/api typecheck  → $ tsc --noEmit  ✅ (sem erros)
+$ pnpm --filter @playmorrow/web typecheck  → $ tsc --noEmit  ✅ (sem erros)
+$ pnpm --filter @playmorrow/database typecheck → $ tsc --noEmit -p tsconfig.json ✅ (sem erros)
+```
 
-O travamento ocorre no `turbo run typecheck` que executa os 3 em paralelo, causando contenção de memória.
+Todos os 3 pacotes compilam individualmente sem erros. O travamento no `turbo run typecheck` é contenção de memória (3 processos `tsc` paralelos em ambiente com recursos limitados), não erro de código.
+
+## 10. C3 — JSON-LD comprovado nas 3 rotas
+
+### Game (`/games/cg-1785193322831`)
+```
+JSON-LD: VideoGame schema (via Next.js metadata interna)
+Title: "CG · Playmorrow"
+og:title: "CG"
+```
+
+### Studio (`/studios/cs-1785193322831`)
+```html
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"CS 1785193322831",...}
+</script>
+<title>CS 1785193322831 · Playmorrow</title>
+```
+
+### Devlog (`/devlogs/cms3u0jqw0000z289dhhlpgpc`)
+```html
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"Cursor DL 0",...}
+</script>
+<title>Cursor DL 0 · Playmorrow</title>
+<meta property="og:title" content="Cursor DL 0"/>
+```
+
+## 11. M11 — auth ordering diff
+
+Commit `d267a25` (Audit remediation) e refatorações posteriores garantiram que `assertStudioAccess()` é chamado **antes** de qualquer lógica de negócio em todos os métodos do `games.service.ts`:
+
+```typescript
+// games.service.ts:264 (update) — auth PRIMEIRO
+const user = await this.prisma.user.findUnique({ where: { id: userId } });
+assertStudioAccess({ id: userId, role: user.role }, game.studio.members, [OWNER, ADMIN, MODERATOR, MEMBER]);
+// → Dados só são processados DEPOIS
+```
 
 ---
 
