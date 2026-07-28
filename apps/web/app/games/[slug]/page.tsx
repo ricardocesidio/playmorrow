@@ -37,6 +37,7 @@ import { ErrorState } from '@/components/error-state';
 import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { useAuth } from '@/lib/api/auth-context';
+import { api } from '@/lib/api/client';
 import { formatFollowers, formatPrice, formatRelativeTime } from '@/lib/format';
 import type { Devlog, Game, RoadmapItem } from '@/lib/api/client';
 import {
@@ -204,6 +205,7 @@ function PremiumGameDetail({
           </section>
         </div>
         <HudStatusRail />
+        <SimilarGamesSection gameId={game?.id} slug={slug} />
       </main>
     </>
   );
@@ -1084,6 +1086,48 @@ function formatReleaseDate(dateStr: string | null | undefined): string {
 function getCsrfToken(): string | null {
   const match = document.cookie.match(/(?:^|;\s*)playmorrow_csrf=([^;]*)/);
   return match?.[1] ? decodeURIComponent(match[1]) : null;
+}
+
+function SimilarGamesSection({ gameId, slug }: { gameId: string | undefined; slug: string }) {
+  const [games, setGames] = useState<{ id: string; title: string; slug: string; coverUrl: string | null }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!gameId) return;
+    api.get<{ items: { gameId: string; score: number; reasons: string[] }[] }>(`/recommendations?type=similar-games&gameId=${gameId}&limit=6`)
+      .then(async (res) => {
+        if (!res.items?.length) { setLoading(false); return; }
+        const ids = res.items.map(i => i.gameId);
+        const gamesRes = await api.get<{ items: { id: string; title: string; slug: string; coverUrl: string | null }[] }>(`/games?ids=${ids.join(',')}&pageSize=6`);
+        setGames(gamesRes.items || []);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [gameId]);
+
+  if (loading || games.length === 0) return null;
+
+  return (
+    <section className="mx-auto mt-12 max-w-6xl px-5 sm:px-8 lg:px-10">
+      <h2 className="mb-6 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Similar Games</h2>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        {games.map(game => (
+          <Link key={game.id} href={`/games/${game.slug}`}
+            className="group clip-corner border border-border/40 bg-[#050b0f]/50 overflow-hidden transition hover:border-cyan/30">
+            <div className="aspect-[3/4] bg-border/10 flex items-center justify-center">
+              {game.coverUrl ? <img src={game.coverUrl} alt={game.title} className="size-full object-cover" />
+                : <Gamepad2 className="size-8 text-muted-foreground/30" />}
+            </div>
+            <div className="p-3">
+              <p className="truncate font-mono text-[0.6rem] font-semibold uppercase tracking-wider text-foreground group-hover:text-cyan transition">
+                {game.title}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 function ManageDropdown({ slug, onCoverUploaded }: { slug: string; onCoverUploaded?: (url: string) => void }) {
