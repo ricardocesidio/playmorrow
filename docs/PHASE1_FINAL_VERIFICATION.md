@@ -110,3 +110,34 @@ Valor atual: `.vercel.app` — **idêntico ao que já existia antes do merge**. 
 ### 4. Reversão necessária? **NÃO**
 
 Nada que exija `git revert`. Os 3 itens acima foram verificados e estão seguros em produção.
+
+---
+
+## Infraestrutura — Itens de Fechamento
+
+### 1. `COOKIE_DOMAIN` — corrigido
+
+**Antes:** `.vercel.app` — inválido (sufixo público, rejeitado por navegadores)
+**Depois:** Removido — cookie agora é host-only (`domain: undefined`)
+**Código:** `cookie-helper.ts:11` — `domain: isProduction ? process.env.COOKIE_DOMAIN || undefined : undefined`
+**Staging:** Já estava correto (sem a variável)
+**Produção:** ✅ Removido via `railway variables delete COOKIE_DOMAIN`
+**Teste:** Nenhum domínio próprio configurado no Vercel (`vercel domains ls` → 0 domínios). Apenas `*.vercel.app`. Cookie host-only é o comportamento correto.
+
+### 2. Storage de uploads — local disk (consciente), código pronto para R2
+
+**Situação atual:** Uploads salvos em disco local (`UPLOADS_DIR`). Funciona mas dados são perdidos no restart do container Railway.
+
+**Código já preparado para Cloudflare R2** (`upload.service.ts`):
+```env
+REDACTED_STORAGE_PROVIDER=r2
+REDACTED_AWS_KEY=<r2-access-key-id>
+REDACTED_AWS_SECRET=<r2-secret-access-key>
+REDACTED_R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+REDACTED_S3_BUCKET=playmorrow-uploads
+```
+O serviço detecta `REDACTED_STORAGE_PROVIDER === 'r2'`, configura o `S3Client` com endpoint R2, e faz upload diretamente. Quando as credenciais não existem, cai em local disk com warning.
+
+**Para ativar R2:** Criar conta Cloudflare (grátis, sem cartão) → R2 → Create bucket → API Token → setar as 5 vars no Railway. ~15min de setup quando quiser.
+
+**Decisão:** Manter local disk por enquanto, aceitável para beta fechado. R2 configurado quando houver usuários reais fazendo upload.
