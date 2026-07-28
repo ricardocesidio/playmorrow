@@ -1,6 +1,6 @@
 # Playmorrow — Project Overview for Claude
 
-**Status:** Beta • 847+ commits • Enterprise Audit: 76/100
+**Status:** Beta • 852+ commits • Enterprise Audit: 76/100 • Milestone 5 ✅
 **Frontend:** https://playmorrow.vercel.app (Vercel) — ✅ Monitorado via UptimeRobot (5min)
 **Backend:** https://playmorrow-api-aged-mountain-9542.fly.dev/api/health (Fly.io) — ✅ Monitorado via UptimeRobot (5min)
 **Storage:** Cloudflare R2 (uploads públicos)
@@ -36,6 +36,28 @@ content-security-policy: ... connect-src 'self' https://playmorrow-api-aged-moun
 | Deploy | Vercel (frontend) + Fly.io (API) |
 | Monitor | UptimeRobot (2 monitores, 5min) + GitHub Actions + script local |
 
+## Features
+
+| Milestone | Foco | Status |
+|-----------|------|--------|
+| M1 | Support Center | ✅ |
+| M2 | Help Center | ✅ |
+| M3 | Studio Analytics | ✅ |
+| M3.5 | Intelligence (Event Bus, Goals) | ✅ |
+| M4 | Verification (6 tiers, Trust Score) | ✅ |
+| **M5** | **Discovery Platform** | **✅ Entregue** |
+
+### Milestone 5 — Discovery Platform (Novo)
+
+| Sub-fase | Entregue | Detalhes |
+|----------|----------|----------|
+| 5.1 — Recommendation Engine | ✅ | 5 scorers (tag, follow, trending, wishlist, interaction), API com cursor pagination, explainability, cache in-memory Redis-ready |
+| 5.2 — Search 2.0 | ✅ | 6 filtros (genre, status, tag, engine, isFree), 4 sorts, full-text |
+| 5.3 — Discover Page | ✅ | 3 seções (Trending, Popular, Newest) com dados reais da API |
+| 5.4 — Similar Games + Homepage | ✅ | Similar Games na game detail, Trending Now na homepage, Feed com filtros |
+
+Verificação: 22 arquivos criados, typecheck 6/6, lint 0 errors, tests 263/263.
+
 ## Estrutura do Monorepo
 
 ```
@@ -44,17 +66,20 @@ playmorrow/
 │   ├── web/          # Next.js frontend (73 rotas)
 │   │   ├── app/      # App Router pages
 │   │   └── components/  # Shared components
-│   └── api/          # NestJS backend (37 módulos, 162 rotas)
+│   └── api/          # NestJS backend (37+ módulos, 162+ rotas)
 │       └── src/
 │           ├── auth/, common/, games/, studios/, devlogs/,
 │           ├── feed/, comments/, notifications/, analytics/,
 │           ├── goals/, support/, help/, verification/,
-│           └── upload/ (R2)
+│           ├── recommendations/  # Novo M5: Recommendation Engine
+│           ├── upload/ (R2)
+│           └── search/  # Atualizado M5: Search 2.0
 ├── packages/
 │   └── database/     # Prisma schema (51 modelos)
 └── docs/
     ├── ENTERPRISE_AUDIT.md   # Auditoria final (76/100)
-    └── PHASE1_FINAL_VERIFICATION_v3.md  # Relatório final
+    ├── PHASE1_FINAL_VERIFICATION_v3.md
+    └── MILESTONE5_VERIFICATION.md  # Evidências do M5
 ```
 
 ## URLs Públicas
