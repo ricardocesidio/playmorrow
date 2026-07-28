@@ -1,6 +1,6 @@
 # Playmorrow — Project Overview for Claude
 
-**Status:** Beta • 822+ commits • M5 code entregue • 272 tests (19 files)
+**Status:** Beta • 911+ commits • M5 code entregue • 272 tests (19 files)
 **Frontend:** https://playmorrow.vercel.app (Vercel) — ✅ UptimeRobot (5min)
 **Backend:** https://playmorrow-api-aged-mountain-9542.fly.dev/api/health (Fly.io) — ✅ UptimeRobot (5min)
 **Storage:** Cloudflare R2 (uploads públicos)
@@ -15,8 +15,8 @@
 | # | Item | Status | Quem faz |
 |---|------|--------|----------|
 | 1 | **Domínio próprio** (playmorrow.com) — Blocking for public launch | 🔴 Não comprado | Equipe |
-| 2 | **E2E Tests** — 7 spec files, build timeout nesta máquina | 🟡 Não executado | Equipe (CI) |
-| 3 | **3670e91 no git** — R2 env vars ainda no histórico | 🟡 Não reescrito | Equipe (git-filter-repo) |
+| 2 | **E2E Tests** — 7 spec files, build timeout nesta máquina | 🔴 Não executado | Equipe (CI) |
+| 3 | **3670e91 no git** — R2 env vars ainda no histórico (já rotacionadas, sem risco ativo) | 🔴 Não reescrito | Equipe (git-filter-repo) |
 | 4 | **Secrets scanning em CI** — gitleaks workflow criado | 🟡 Não testado | Equipe |
 
 ---

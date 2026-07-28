@@ -13,11 +13,10 @@ import { resolve } from 'path';
  * Pass --yes for non-interactive (CI/automation).
  *
  * IMPORTANT: Only loads .env when no DATABASE_URL is already present in env
- * (respects railway run, docker-compose postgres-test, TEST_DATABASE_URL in CI).
+ * (respects platform run, docker-compose postgres-test, TEST_DATABASE_URL in CI).
  *
  * Usage:
  *   pnpm --filter @playmorrow/api exec tsx apps/api/src/scripts/cleanup-test-artifacts.ts
- *   railway run --service playmorrow-api pnpm --filter @playmorrow/api exec tsx apps/api/src/scripts/cleanup-test-artifacts.ts --apply --yes
  */
 async function main() {
   const args = process.argv.slice(2);
@@ -25,7 +24,7 @@ async function main() {
   const forceYes = args.includes('--yes');
 
   // Load .env *only* as fallback. Never override DATABASE_URL when running
-  // under railway (prod DB injected), docker test service, or CI with TEST_DATABASE_URL.
+  // under the platform (prod DB injected), docker test service, or CI with TEST_DATABASE_URL.
   if (!process.env.DATABASE_URL) {
     const envPath = resolve(process.cwd(), '.env');
     if (fs.existsSync(envPath)) {

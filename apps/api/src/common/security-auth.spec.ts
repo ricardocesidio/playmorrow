@@ -180,7 +180,5 @@ describe('Security — auth enforcement (e2e)', () => {
 
   // ── Rate limiting ──────────────────────────────────────────────────
 
-  // Rate limiting on auth is tested end-to-end in auth/throttler.controller.spec.ts (login: 10/min).
-  // This register test requires a per-route @Throttle({ default: { limit: 5 } }) — not currently configured.
-  // Confirmed working via manual curl test against local API: 5×201 + 1×429 = rate limiting operational.
+  // Rate limiting on auth is tested in auth/throttler.controller.spec.ts (login: 10/min, register: 5/min).
 });

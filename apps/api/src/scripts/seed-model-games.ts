@@ -2,7 +2,7 @@ import { PrismaClient } from '@playmorrow/database';
 import * as fs from 'node:fs';
 import { resolve } from 'path';
 
-// Load .env only as fallback (never override when DATABASE_URL provided by railway / docker test / CI)
+// Load .env only as fallback (never override when DATABASE_URL provided by platform / docker test / CI)
 if (!process.env.DATABASE_URL) {
   const envPath = resolve(process.cwd(), '.env');
   if (fs.existsSync(envPath)) {

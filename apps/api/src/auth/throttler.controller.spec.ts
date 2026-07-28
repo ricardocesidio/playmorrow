@@ -64,4 +64,26 @@ describe('Rate limiting (#3)', () => {
     expect(statuses[0]).not.toBe(HttpStatus.TOO_MANY_REQUESTS);
     expect(statuses[10]).toBe(HttpStatus.TOO_MANY_REQUESTS);
   });
+
+  it('POST /api/auth/register returns 429 after the per-route limit (5/min)', async () => {
+    const SUFFIX = `rt-${Date.now()}`;
+    const statuses: number[] = [];
+
+    // 5 allowed (each creates a user → 201), 6th is blocked at the guard → 429.
+    for (let i = 0; i < 6; i++) {
+      const res = await request(httpServer).post('/api/auth/register').send({
+        email: `rate_${i}_${SUFFIX}@example.com`,
+        password: 'StrongPass123!',
+        acceptedTerms: true,
+        acceptedPrivacy: true,
+      });
+      statuses.push(res.status);
+    }
+
+    expect(statuses[0]).toBe(HttpStatus.CREATED);
+    expect(statuses[5]).toBe(HttpStatus.TOO_MANY_REQUESTS);
+
+    // Cleanup created users
+    await prisma.user.deleteMany({ where: { email: { contains: SUFFIX } } }).catch(() => {});
+  });
 });

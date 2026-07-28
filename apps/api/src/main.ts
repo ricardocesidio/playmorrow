@@ -24,12 +24,12 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   // Start a minimal health-check server BEFORE NestJS loads.
-  // Railway's deploy health check needs a 200 within the timeout window,
+  // The deploy health check needs a 200 within the timeout window,
   // but NestFactory.create() can take minutes on cold start (free tier).
   // This pre-server responds to /health and /api/health immediately,
   // then shuts down when NestJS is ready to take over the port.
   const preServer = http.createServer((req, res) => {
-    // Respond 200 to ANY health check path Railway might ping
+    // Respond 200 to ANY health check path the platform might ping
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: 'ok', service: 'playmorrow-api' }));
   });
@@ -39,7 +39,7 @@ async function bootstrap() {
   await new Promise<void>((resolve) => preServer.listen(port, resolve));
   logger.info(`[pre-server] Health check server listening on port ${port}`);
 
-  // NestJS startup (may take 30-120s on Railway free tier)
+  // NestJS startup (may take 30-120s on free tier)
   const app = await NestFactory.create(AppModule);
 
   // Shut down pre-server now that NestJS is ready
@@ -63,11 +63,11 @@ async function bootstrap() {
   if (isProd) {
     const missing = requiredInProd.filter((key) => !config.get<string>(key));
     if (missing.length > 0) {
-      // Log clearly and exit so Railway shows the real problem immediately.
+      // Log clearly and exit so the platform shows the real problem immediately.
        
       console.error('❌ FATAL: Missing required production environment variables:', missing.join(', '));
        
-      console.error('   Set them in the Railway dashboard and redeploy.');
+      console.error('   Set them in the production environment and redeploy.');
       process.exit(1);
     }
 
@@ -164,7 +164,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter());
 
   // Raw Express health endpoints — respond immediately, no NestJS dependency.
-  // Railway's deploy health check pings /health (configurable) and needs a 200
+  // The deploy health check pings /health (configurable) and needs a 200
   // before NestJS finishes initializing all modules + database connection.
   app.use('/api/health', (_req: any, res: any) => res.json({ status: 'ok', service: 'playmorrow-api' }));
   app.use('/health', (_req: any, res: any) => res.json({ status: 'ok', service: 'playmorrow-api' }));
