@@ -205,9 +205,5 @@ Removido do `CLAUDE.md` até que uma rubrica formal seja publicada.
 | Railway URLs removidas | ✅ 3 arquivos: middleware.ts, next.config.ts, form-login/route.ts |
 | Stale files removidos | ✅ 9 storybooks + 97 uploads PNG deletados |
 | Vercel → Fly.io proxy | ✅ Funcionando (games carregam via proxy) |
-| Enterprise Audit | ✅ docs/ENTERPRISE_AUDIT.md — 76/100, 25 forças, 25 fraquezas |
-| Monitoramento | ✅ UptimeRobot: API health + Frontend (5min) |
-| Railway URLs removidas | ✅ 3 arquivos: middleware.ts, next.config.ts, form-login/route.ts |
-| Stale files removidos | ✅ 9 storybooks + 97 uploads PNG deletados |
-| Vercel → Fly.io proxy | ✅ Funcionando (games carregam via proxy) |
+| E2E Tests | ✅ 35 testes Playwright (6 spec files). Requer dev servers. |
 | Enterprise Audit | ✅ docs/ENTERPRISE_AUDIT.md — 76/100, 25 forças, 25 fraquezas |
