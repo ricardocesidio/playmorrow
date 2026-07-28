@@ -140,7 +140,15 @@ O serviço detecta `REDACTED_STORAGE_PROVIDER === 'r2'`, configura o `S3Client` 
 
 **Para ativar R2:** Criar conta Cloudflare (grátis, sem cartão) → R2 → Create bucket → API Token → setar as 5 vars no Railway. ~15min de setup quando quiser.
 
-**Decisão:** Manter local disk por enquanto, aceitável para beta fechado. R2 configurado quando houver usuários reais fazendo upload.
+**Decisão:** ✅ **R2 ativo** — Cloudflare R2 configurado e funcional em produção e staging.
+
+```env
+REDACTED_STORAGE_PROVIDER=r2
+REDACTED_AWS_KEY=58ab2bd3...
+REDACTED_AWS_SECRET=53943e33...
+REDACTED_R2_ENDPOINT=https://6b62141bc0748171281c4ca9cbc53c4d.r2.cloudflarestorage.com
+REDACTED_S3_BUCKET=playmorrow-uploads
+```
 
 ---
 
