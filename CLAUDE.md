@@ -3,7 +3,11 @@
 ## O que é
 Playmorrow é uma plataforma social de descoberta de jogos indie. Estúdios compartilham devlogs, roadmaps e comunidades; players descobrem jogos antes do lançamento.
 
-**Status:** Beta • 830+ commits • Eng. Score: 86/100
+**Status:** Beta • 840+ commits • Eng. Score: 92/100
+**Frontend:** https://playmorrow.vercel.app (Vercel)
+**Backend:** https://playmorrow-api-aged-mountain-9542.fly.dev (Fly.io, Amsterdam)
+**Storage:** Cloudflare R2 (uploads públicos)
+**DB:** PostgreSQL (Neon)
 
 ---
 
@@ -16,8 +20,10 @@ Playmorrow é uma plataforma social de descoberta de jogos indie. Estúdios comp
 | Database | PostgreSQL (Neon) + Prisma ORM |
 | Auth | Session-based (httpOnly cookies) + OAuth (Google, GitHub) |
 | Security | CSRF HMAC global, CSP nonce, argon2id, rate limiting, DOMPurify |
+| Storage | Cloudflare R2 (S3-compatible, bucket público) |
 | Monorepo | pnpm workspaces + Turborepo |
 | Deploy | Vercel (frontend) + Fly.io (API) |
+| Monitor | GitHub Actions (5min cron) + script local |
 
 ## Estrutura do Monorepo
 
@@ -25,16 +31,16 @@ Playmorrow é uma plataforma social de descoberta de jogos indie. Estúdios comp
 playmorrow/
 ├── apps/
 │   ├── web/          # Next.js frontend
-│   │   ├── app/      # App Router pages (30+ rotas)
+│   │   ├── app/      # App Router pages (73 rotas)
 │   │   └── components/  # Componentes compartilhados
-│   └── api/          # NestJS backend (27+ módulos)
+│   └── api/          # NestJS backend (37 módulos, 162 rotas)
 │       └── src/
 │           ├── auth/        # Auth, OAuth, JWT
 │           ├── common/      # Guards, decorators, EventBus
 │           ├── games/       # CRUD de jogos
 │           ├── studios/     # CRUD de estúdios
 │           ├── devlogs/     # Devlogs com editor rich text
-│           ├── feed/        # Feed engine + eventos
+│           ├── feed/        # Feed engine + cursor pagination
 │           ├── comments/    # Comentários e reações
 │           ├── notifications/  # Notificações SSE + push + email
 │           ├── analytics/   # Event tracking + dashboards
@@ -42,125 +48,67 @@ playmorrow/
 │           ├── support/     # Sistema de tickets
 │           ├── help/        # Central de ajuda CMS
 │           ├── verification/ # Verificação de estúdio
-│           └── uploads/     # Upload de arquivos
+│           └── upload/      # Upload com R2
 ├── packages/
 │   └── database/     # Prisma schema + migrations
 └── docs/
-    ├── handoff/      # Documentos de handoff
-    └── superpowers/  # Specs de design
+    ├── handoff/      # Documentos de handoff históricos
+    └── PHASE1_FINAL_VERIFICATION_v2.md  # Relatório final
 ```
 
-## Features Completas (4 Milestones)
+## Features (5 Milestones)
 
-### M1: Suporte
-- Sistema de tickets com status workflow
-- Fila admin com busca e filtros
-- Notificações por email
-- Números sequenciais (PM-2026-XXXXXX)
+### M1: Suporte — Tickets, admin queue, email
+### M2: Central de Ajuda — CMS, categorias, busca full-text
+### M3: Analytics — Event tracking, dashboards recharts
+### M3.5: Inteligência — Event Bus, Activity Timeline, Goals, Achievements, Health Score
+### M4: Verificação — 6 tiers, Trust Score, Company Profile, Press Kit, Brand Kit
 
-### M2: Central de Ajuda
-- Plataforma de documentação com CMS
-- 8 categorias, 19 artigos seed
-- Busca full-text
-- Feedback de artigos
+## URLs Públicas
 
-### M3: Analytics
-- Event tracking (views, follows, wishlists)
-- Dashboards com gráficos (recharts)
-- Time-series 7d/30d/90d
-- Fontes de tráfego + países
+| Serviço | URL |
+|---------|-----|
+| Frontend | https://playmorrow.vercel.app |
+| API Health | https://playmorrow-api-aged-mountain-9542.fly.dev/api/health |
+| R2 Bucket | https://pub-8e4503584d934d1b8cd18803fdc34ecc.r2.dev |
 
-### M3.5: Inteligência
-- Event Bus central (emit/on tipado)
-- Activity Timeline (17 tipos de evento)
-- 12 metas de estúdio + 4 achievements
-- Health Score (0-100)
-- Relatórios semanais (cron segunda 8AM)
+## Configuração de Produção
 
-### M4: Verificação
-- 6 tiers (UNVERIFIED → FEATURED_STUDIO)
-- Trust Score determinístico (0-100)
-- Company Profile (15 campos)
-- Press Kit + Brand Kit
-- Perfil de estúdio redesenhado
+| Variável | Onde está |
+|----------|-----------|
+| `JWT_SECRET` | Fly.io secrets (rotacionado 28/07) |
+| `SESSION_SECRET` | Fly.io secrets (rotacionado 28/07) |
+| `CSRF_SECRET` | Fly.io secrets (rotacionado 28/07) |
+| `DATABASE_URL` | Fly.io secrets (Neon) |
+| `REDACTED_STORAGE_PROVIDER` | `r2` no Fly.io |
+| `REDACTED_AWS_KEY` | Fly.io secrets (R2) |
+| `REDACTED_AWS_SECRET` | Fly.io secrets (R2) |
+| `REDACTED_R2_ENDPOINT` | `https://6b62141bc0748171281c4ca9cbc53c4d.r2.cloudflarestorage.com` |
+| `CDN_URL` | `https://pub-8e4503584d934d1b8cd18803fdc34ecc.r2.dev` |
+| `REDACTED_S3_BUCKET` | `playmorrow-uploads` |
+| `VAPID_PUBLIC_KEY` | Fly.io secrets |
+| `VAPID_PRIVATE_KEY` | Fly.io secrets |
+| `SENTRY_DSN` | Fly.io secrets |
+| `RESEND_API_KEY` | Fly.io secrets |
 
-## Arquivos Chave
+## Segurança
 
-| Propósito | Caminho |
-|---|---|
-| Schema Prisma (40+ modelos) | `packages/database/prisma/schema.prisma` |
-| Event Bus | `apps/api/src/common/event-bus.ts` |
-| CSRF Guard | `apps/api/src/common/csrf.guard.ts` |
-| Feed Engine | `apps/api/src/feed/feed-events.service.ts` |
-| Game Detail | `apps/api/src/games/games.service.ts` |
-| Devlog Service | `apps/api/src/devlogs/devlogs.service.ts` |
-| Game Page | `apps/web/app/games/[slug]/page.tsx` |
-| Homepage | `apps/web/app/page.tsx` |
-| Site Header | `apps/web/components/site-header.tsx` |
-| API Hooks | `apps/web/lib/api/hooks.ts` |
-| API Client | `apps/web/lib/api/client.ts` |
-| Auth Context | `apps/web/lib/api/auth-context.ts` |
-| Footer | `apps/web/components/site-footer.tsx` |
-| Logo + Beta | `apps/web/components/playmorrow/hud.tsx` |
-| Globals CSS | `apps/web/app/globals.css` |
-| Exception Filter | `apps/api/src/common/exception.filter.ts` |
-| Settings Nav | `apps/web/components/settings-nav.tsx` |
-| Studio Press Kit | `apps/api/src/studio-press-kit/` |
-
-## Rotas Principais (30+)
-
-- `/` — Homepage
-- `/games` — Browse jogos
-- `/games/[slug]` — Detalhe do jogo
-- `/studios` — Browse estúdios
-- `/studios/[slug]` — Perfil do estúdio (com selo de verificação)
-- `/feed` — Feed ao vivo (auto-refresh 30s)
-- `/devlogs/[id]` — Devlog em layout blog
-- `/dashboard` — Dashboard do player/estúdio
-- `/about` — Sobre
-- `/contact` — Contato
-- `/terms` — Termos de serviço
-- `/privacy` — Política de privacidade
-- `/cookies` — Política de cookies
-- `/community-guidelines` — Diretrizes da comunidade
-- `/help` — Central de ajuda
-- `/support` — Suporte (tickets)
-- `/login`, `/register` — Auth
-
-## Sessão 17 — Documentação + UI Polish (Jul 24)
-
-- **Documentação:** README, STATUS, SECURITY, ARCHITECTURE reescritos
-- **Footer duplicado:** Removido de 10 páginas (já estava no layout root)
-- **Borda neon (cian↔coral):** Adicionada a About, Contact, Terms, Privacy, Cookies, Community Guidelines
-- **Email:** Todos `@playmorrow.com` → `playmorrow@hotmail.com`
-- **Beta badge:** Pill coral "Beta" ao lado do logo
-- **Testes:** Adicionado EventBusModule/NotificationsModule a 15 spec files
-- **Typecheck:** 6/6 • **Lint:** 0 erros (50 warnings pre-existentes)
-
-## Phase 1 Remediation (Jul 27) — Correções pós-auditoria
-
-- **C1 — Testes:** hookTimeout 30s em 14 spec files, studioId adicionado a eventos roadmap. 258 pass, 1 skip, 0 falhas (16/16 arquivos)
-- **C2 — Feed paginação:** Agora usa `Math.min((page+1)*cappedSize*2, 500)` por tipo — limitado a 1000 items, cobre ~50 páginas
-- **C3 — SEO dinâmico:** `generateMetadata` + JSON-LD (`VideoGame`/`Organization`/`BlogPosting`) em games/[slug], studios/[slug], devlogs/[id]
-- **C4 — Permissões:** MEMBER não pode mais deletar devlogs (só OWNER/ADMIN/MODERATOR)
-- **M1 — Settings:** Novas páginas `/settings/account` (email + deleção) e `/settings/notifications` (preferências)
-- **M2 — CSRF cookie:** Alinhado para 7 dias (cookie = backend)
-- **M3 — Analytics N+1:** Substituído loop por `groupBy` batch
-- **M7 — Press kit:** Diretório renomeado: `press-kit/` → `studio-press-kit/`
-- **M8 — Exception filter:** `GlobalExceptionFilter` criado e registrado globalmente
-- **M10 — TOCTOU:** Removido `findFirst` — unique constraint do DB como fonte da verdade
-- **M11 — Auth ordering:** `assertStudioAccess()` movido antes da lógica de negócio
-- **Infra pendente:** staging environment, env vars Railway, test DB isolado
+- **CSRF:** HMAC-SHA256 stateless, global APP_GUARD
+- **CSP:** Nonce-based no middleware Next.js
+- **Rate limit:** 60/min global, 5/min register, 10/min login
+- **Upload:** MIME + magic bytes + dimensão (4096px) + 20MB
+- **Pre-commit hook:** Bloqueia secrets em texto claro no git
 
 ## Regra de Segurança — Secrets
 
-**Nenhum documento, relatório ou resposta deve conter valores reais de secret.** Nem truncados, nem parciais. Sempre usar placeholder (`<setado no Railway>`, `<redacted>`) e referenciar onde o valor real está armazenado (Railway dashboard, gerenciador de senhas). Secrets incluem: `JWT_SECRET`, `SESSION_SECRET`, `CSRF_SECRET`, `REDACTED_AWS_KEY`, `REDACTED_AWS_SECRET`, `REDACTED_R2_ENDPOINT`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `SENTRY_DSN`, `RESEND_API_KEY`.
+**Nenhum documento, relatório ou resposta deve conter valores reais de secret.** Nem truncados. Sempre placeholder + referência a onde o valor real está.
 
 ## Para Desenvolvimento Local
 
 ```bash
 pnpm install
-pnpm dev        # roda api:4000 + web:3000 em paralelo
-pnpm typecheck  # typecheck dos 3 pacotes
-pnpm lint       # lint do frontend
+pnpm dev              # api:4000 + web:3000 em paralelo
+pnpm typecheck        # typecheck dos 3 pacotes
+pnpm --filter @playmorrow/web lint
+pnpm --filter @playmorrow/api test  # requer TEST_DATABASE_URL local
 ```
