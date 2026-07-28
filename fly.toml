@@ -2,7 +2,7 @@ app = "playmorrow-api"
 primary_region = "ams"
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = "apps/api/Dockerfile"
 
 [http_service]
   internal_port = 4000
