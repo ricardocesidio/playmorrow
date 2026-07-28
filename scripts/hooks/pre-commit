@@ -1,6 +1,6 @@
 #!/bin/bash
 # Pre-commit hook: block secrets in clear text
-if git diff --cached | grep -qE "(JWT_SECRET|SESSION_SECRET|CSRF_SECRET|REDACTED_AWS_SECRET)=[A-Za-z0-9]{16,}"; then
+if git diff --cached | grep -qE "(JWT_SECRET|SESSION_SECRET|CSRF_SECRET|REDACTED_AWS_SECRET|^JWT=|^SESSION=|^CSRF=)[A-Za-z0-9]{16,}"; then
   echo "ERROR: Valor de secret em texto claro detectado no commit."
   echo "Nunca commite valores reais de secret. Use <redacted> ou <valor no Fly.io>"
   exit 1

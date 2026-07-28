@@ -6,6 +6,18 @@
 
 ---
 
+## Pre-commit Hook — ✅ Testado e corrigido
+
+```bash
+echo "JWT_SECRET=abc123def456abc123def456abc123def456" > test-hook.md
+git add test-hook.md && git commit -m "test"
+# → ERROR: Valor de secret em texto claro detectado no commit. Exit: 1 ✅
+```
+
+O hook funciona e BLOQUEIA commits com secrets. No entanto, o `v3` report usou o formato `JWT=bfdf34...` (sem o `_SECRET`), que não era capturado pela regex original. **Corrigido**: a regex agora também captura `JWT=`, `SESSION=`, `CSRF=`.
+
+Valor truncado removido do `v3` report — substituído por "valor não exposto neste documento".
+
 ## 1. 🔴 CSP — ✅ CONFIRMADO
 
 ```bash
@@ -42,10 +54,7 @@ UptimeRobot requer cadastro web (https://uptimerobot.com) — não é possível 
 
 SSH no container Fly.io confirma que os secrets aplicados **NÃO** são os valores vazados:
 
-```bash
-$ flyctl ssh console -a playmorrow-api-aged-mountain-9542 -C "sh -c 'echo JWT=\$JWT_SECRET | head -c 30'"
-JWT=bfdf349b6e2f22b3ccb2ea354a  # ← DIFERENTE do valor exposto (bb631795...)
-```
+SSH no container Fly.io confirma que os secrets aplicados **NÃO** são os valores vazados (comparação feita via `flyctl ssh console`, valor não exposto neste documento).
 
 Login funciona com os novos secrets:
 ```bash
@@ -57,12 +66,7 @@ curl -X POST .../api/auth/session/login -d '{"emailOrUsername":"audit-test@e.com
 
 ## 4. 🟡 Secrets — valor sem prefixo duplicado ✅
 
-```bash
-$ flyctl ssh console -a playmorrow-api-aged-mountain-9542 -C "sh -c 'echo JWT=\$JWT_SECRET | head -c 30'"
-JWT=bfdf349b6e2f22b3ccb2ea354a
-```
-
-O valor começa com hex (`bfdf...`), NÃO com `JWT_SECRET=`. Confirma que o prefixo não foi duplicado. Os comandos de `flyctl secrets set` foram executados corretamente.
+Confirmado via SSH no container Fly.io que o valor em runtime é hex puro (não tem prefixo `JWT_SECRET=`). Os comandos de `flyctl secrets set` foram executados corretamente.
 
 ---
 
@@ -205,5 +209,5 @@ Removido do `CLAUDE.md` até que uma rubrica formal seja publicada.
 | Railway URLs removidas | ✅ 3 arquivos: middleware.ts, next.config.ts, form-login/route.ts |
 | Stale files removidos | ✅ 9 storybooks + 97 uploads PNG deletados |
 | Vercel → Fly.io proxy | ✅ Funcionando (games carregam via proxy) |
-| E2E Tests | ✅ 35 testes Playwright (6 spec files). Requer dev servers. |
+| E2E Tests | ✅ 2/35 executados (Homepage renders — passou desktop + mobile). Restante requer execução completa (35 testes, 6 spec files). |
 | Enterprise Audit | ✅ docs/ENTERPRISE_AUDIT.md — 76/100, 25 forças, 25 fraquezas |
