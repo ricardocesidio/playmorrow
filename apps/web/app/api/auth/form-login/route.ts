@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   }
 
   const isDev = process.env.NODE_ENV === 'development';
-  const defaultApi = isDev ? 'http://localhost:4000/api' : 'https://playmorrow-api-production.up.railway.app/api';
+  const defaultApi = isDev ? 'http://localhost:4000/api' : 'https://playmorrow-api-aged-mountain-9542.fly.dev/api';
   const API = process.env.API_URL || defaultApi;
 
   try {
