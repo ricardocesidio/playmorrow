@@ -179,7 +179,23 @@ O Railway CLI retorna 404 ao tentar fazer deploy (`railway up`), e todos os depl
 3. O container reinicia com as 5 env vars do R2
 4. Testar: `curl -X POST https://playmorrow-api-production.up.railway.app/api/upload -F "file=@imagem.png"`
 
-As 5 env vars do R2 (REDACTED_STORAGE_PROVIDER, REDACTED_AWS_KEY, REDACTED_AWS_SECRET, REDACTED_R2_ENDPOINT, REDACTED_S3_BUCKET) estão configuradas no Railway production + staging. Só falta rodar um deploy para o container reiniciar com elas.
+As 5 env vars do R2 (REDACTED_STORAGE_PROVIDER, REDACTED_AWS_KEY, REDACTED_AWS_SECRET, REDACTED_R2_ENDPOINT, REDACTED_S3_BUCKET) estão configuradas e serão ativadas no primeiro deploy no Fly.io.
+
+**Railway:** Trial expirou em 24/07. API offline desde então. Mantido como backup de env vars.
+
+**Fly.io:** API será hospedada aqui (grátis, 512MB RAM, nunca dorme). Deploy manual via CLI:
+```bash
+# 1. Autenticar (só uma vez)
+flyctl auth login
+
+# 2. Deploy
+cd apps/api && flyctl deploy
+
+# 3. Setar env vars
+flyctl secrets set DATABASE_URL="..."
+flyctl secrets set JWT_SECRET="..."
+# ... (todas as vars do Railway)
+```
 
 ## Secrets + Rate Limiting — Verificação Final
 
