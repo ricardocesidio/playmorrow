@@ -161,8 +161,9 @@ export class UploadService {
         ContentType: file.mimetype,
         CacheControl: 'public, max-age=31536000, immutable',
       }));
-      const r2Endpoint = this.configService.get('REDACTED_R2_ENDPOINT');
-      const publicUrl = this.configService.get('CDN_URL')
+      const r2Endpoint = process.env.REDACTED_R2_ENDPOINT || this.configService.get<string>('REDACTED_R2_ENDPOINT');
+      const cdnUrl = process.env.CDN_URL || this.configService.get<string>('CDN_URL');
+      const publicUrl = cdnUrl
         || (REDACTED_STORAGE_PROVIDER === 'r2' && r2Endpoint ? `${r2Endpoint}/${this.s3Bucket}` : `https://${this.s3Bucket}.s3.amazonaws.com`);
       return {
         url: `${publicUrl}/${key}`,
