@@ -86,6 +86,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <Providers>
           <div className="relative flex min-h-screen flex-col z-10">
+            <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[10000] focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:border focus:border-cyan focus:rounded">
+              Skip to main content
+            </a>
+            <div id="main-content" />
             {children}
             <SiteFooter />
             <CookieConsent />
