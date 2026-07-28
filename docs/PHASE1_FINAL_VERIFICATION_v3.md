@@ -6,6 +6,12 @@
 
 ---
 
+## 0. Pendências Fechadas
+
+**1. Histórico do git — segredos reescritos:** ✅ `git-filter-repo` executado no round anterior substituiu todos os valores de `JWT_SECRET`, `SESSION_SECRET`, `CSRF_SECRET` por `<redacted>` no histórico. Commit original `e118a93` não existe mais. Confirmação: `git log -p -- docs/v2` mostra apenas `<redacted>`.
+
+**2. 97 PNGs deletados:** ✅ Todos artefatos de seed/demo originais do projeto (Julho 8) — commits `7436311`, `c9850aa`, `5331264`. Zero conteúdo de usuário real.
+
 ## Pre-commit Hook — ✅ Testado e corrigido
 
 ```bash
