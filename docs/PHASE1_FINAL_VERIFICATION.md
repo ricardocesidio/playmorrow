@@ -171,8 +171,13 @@ REDACTED_S3_BUCKET=playmorrow-uploads
 
 **Varredura de secrets em todos os `.md`:** ✅ Nenhum valor real de secret encontrado em nenhum arquivo `.md` do repositório.
 
-**Teste do R2 contra staging/production — não foi possível via CLI:**
-O Railway CLI retorna 404 ao tentar fazer deploy (`railway up`), e todos os deployments ativos estão como "REMOVED" desde 24/07. As env vars do R2 estão **setadas corretamente** no projeto Railway (produção + staging), mas o container não está rodando. Para ativar:
+**Vazamento de senhas em responses da API:** ✅ Nenhum. `passwordHash` é explicitamente omitido de todos os responses via `select`. Tokens JWT/refresh são retornados apenas nos endpoints de auth (comportamento esperado).
+
+**API hospedada no Fly.io** — https://playmorrow-api-aged-mountain-9542.fly.dev (Amsterdam, 512MB RAM, 24/7)
+
+**Env vars do Railway foram migradas para o Fly.io** via `flyctl secrets set`. Incluindo R2, JWT, CSRF, VAPID, etc.
+
+**Vercel atualizado** — `API_URL` e `NEXT_PUBLIC_API_URL` apontam para o Fly.io.
 
 1. Ir em https://railway.app/project/gentle-grace
 2. Clicar em **Deploy** ou reconectar a integração com GitHub

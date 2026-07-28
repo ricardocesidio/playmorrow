@@ -17,7 +17,7 @@ Playmorrow é uma plataforma social de descoberta de jogos indie. Estúdios comp
 | Auth | Session-based (httpOnly cookies) + OAuth (Google, GitHub) |
 | Security | CSRF HMAC global, CSP nonce, argon2id, rate limiting, DOMPurify |
 | Monorepo | pnpm workspaces + Turborepo |
-| Deploy | Vercel (frontend) + Railway (API) |
+| Deploy | Vercel (frontend) + Fly.io (API) |
 
 ## Estrutura do Monorepo
 
