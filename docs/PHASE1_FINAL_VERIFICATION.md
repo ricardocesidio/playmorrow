@@ -89,16 +89,25 @@ curl -X POST https://playmorrow-api-aged-mountain-9542.fly.dev/api/upload \
 # → URL: https://6b62141bc0748171281c4ca9cbc53c4d.r2.cloudflarestorage.com/playmorrow-uploads/uploads/...
 ```
 
-A URL contém `r2.cloudflarestorage.com` (não `s3.amazonaws.com`).
-
-### Bucket público — ✅ Ativo
+### Teste combinado — URL pública confirmada ✅
 
 ```bash
-curl -I https://pub-8e4503584d934d1b8cd18803fdc34ecc.r2.dev/uploads/1785240096038-ahh3pb.png
-# → 200 OK, Content-Type: image/png
+# 1. Upload → API retorna URL pública
+$ curl -X POST https://playmorrow-api-aged-mountain-9542.fly.dev/api/upload \
+  -F "file=@test.png" \
+  -H "Cookie: playmorrow_session=..." \
+  -H "X-CSRF-Token: ..."
+# → {"url":"https://pub-8e4503584d934d1b8cd18803fdc34ecc.r2.dev/uploads/1785240650508-q4wsb5.png","size":67,"mimeType":"image/png"}
+
+# 2. Mesma URL, sem auth → 200 OK
+$ curl -I https://pub-8e4503584d934d1b8cd18803fdc34ecc.r2.dev/uploads/1785240650508-q4wsb5.png
+# → HTTP/1.1 200 OK
+# → Content-Type: image/png
+# → Content-Length: 67
+# → Cache-Control: public, max-age=31536000, immutable
 ```
 
-O bucket está público e acessível sem autenticação. CDN_URL configurado no Fly.io para usar o domínio público do R2.
+**Conclusão:** Upload → URL pública → acessível sem autenticação. Cadeia completa funcionando.
 
 ---
 
