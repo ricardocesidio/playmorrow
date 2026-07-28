@@ -201,8 +201,13 @@ Removido do `CLAUDE.md` até que uma rubrica formal seja publicada.
 | M11 diff | ✅ `assertStudioAccess` antes da lógica |
 | M5/M6 tabela | ✅ 5 módulos, 6 serviços, nomes de eventos corretos |
 | Auditoria código | ✅ 73 páginas, 37 módulos, 162 rotas — 1 médio + 5 baixos (corrigidos) |
+| Monitoramento | ✅ UptimeRobot: API health + Frontend (5min) |
 | Railway URLs removidas | ✅ 3 arquivos: middleware.ts, next.config.ts, form-login/route.ts |
 | Stale files removidos | ✅ 9 storybooks + 97 uploads PNG deletados |
 | Vercel → Fly.io proxy | ✅ Funcionando (games carregam via proxy) |
 | Enterprise Audit | ✅ docs/ENTERPRISE_AUDIT.md — 76/100, 25 forças, 25 fraquezas |
-| Monitoramento | ⚠️ GitHub Actions + script local. UptimeRobot manual. |
+| Monitoramento | ✅ UptimeRobot: API health + Frontend (5min) |
+| Railway URLs removidas | ✅ 3 arquivos: middleware.ts, next.config.ts, form-login/route.ts |
+| Stale files removidos | ✅ 9 storybooks + 97 uploads PNG deletados |
+| Vercel → Fly.io proxy | ✅ Funcionando (games carregam via proxy) |
+| Enterprise Audit | ✅ docs/ENTERPRISE_AUDIT.md — 76/100, 25 forças, 25 fraquezas |
