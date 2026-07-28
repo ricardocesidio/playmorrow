@@ -230,6 +230,6 @@ curl -X POST https://playmorrow-api-aged-mountain-9542.fly.dev/api/auth/session/
 
 | Item | Ação | Prioridade |
 |------|------|-----------|
-| Rotacionar secrets no Fly.io | Rodar `flyctl secrets set JWT_SECRET=... SESSION_SECRET=... CSRF_SECRET=...` | Alta |
+| ~~Rotacionar secrets no Fly.io~~ | ✅ **Feito** — 3 secrets rotacionados, login confirmado | Alta |
 | Conta UptimeRobot | Criar em uptimerobot.com, adicionar 2 endpoints + alerta email | Média |
 | JWT_SECRET legacy cleanup | Confirmar se `JwtAuthGuard`/`RolesGuard` ainda usam JWT — remover código morto se não | Baixa |
