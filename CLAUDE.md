@@ -111,6 +111,7 @@ Todas as variáveis no Fly.io secrets. Rotacionadas em 28/07 após incidente.
 - **Pre-commit hook:** Bloqueia secrets em texto claro ✅
 - **Secrets scanning (CI):** `.github/workflows/gitleaks.yml` — testado localmente, detecta `AWS_SECRET_ACCESS_KEY` ✅
 - **Git history:** `3670e91` reescrito via `git-filter-repo` (29/07) — secrets removidos do histórico ✅
+- **Docker:** `.dockerignore` criado — evita vazamento de `.env` no build ✅
 - **Monitoramento:** UptimeRobot (API + Frontend, 5min) ✅
 
 ## Release Process

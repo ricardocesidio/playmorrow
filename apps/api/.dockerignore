@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+node_modules/
+.git
+.gitignore
+*.md
+dist/
+.next/
+.turbo/
+coverage/
+test-results/
+playwright-report/
+*.log
+.gitattributes
