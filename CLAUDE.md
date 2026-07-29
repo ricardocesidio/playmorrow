@@ -113,6 +113,9 @@ Todas as variáveis no Fly.io secrets. Rotacionadas em 28/07 após incidente.
 - **CodeQL:** `.github/workflows/codeql.yml` — SAST scanning semanal + PRs ✅
 - **npm audit:** Incluído no CI (`ci.yml`) — audit-level high ✅
 - **Incident Response:** `docs/security/INCIDENT_RESPONSE.md` — playbook completo com severidades, procedimentos, templates ✅
+- **Semgrep (SAST):** `.github/workflows/semgrep.yml` — regras automáticas da comunidade, toda PR ✅
+- **Trivy (container + deps):** `.github/workflows/trivy.yml` — scan de filesystem em toda PR ✅
+- **SBOM:** `.github/workflows/sbom.yml` — CycloneDX gerado em cada push para main ✅
 - **Secrets scanning (CI):** `.github/workflows/gitleaks.yml` — testado localmente, detecta `AWS_SECRET_ACCESS_KEY` ✅
 - **Git history:** `3670e91` reescrito via `git-filter-repo` (29/07) — secrets removidos do histórico ✅
 - **Docker:** `.dockerignore` criado — evita vazamento de `.env` no build ✅

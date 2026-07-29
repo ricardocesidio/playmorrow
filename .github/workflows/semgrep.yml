@@ -1,0 +1,19 @@
+name: Semgrep SAST
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 8 * * 1'
+
+jobs:
+  semgrep:
+    name: Scan
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: semgrep --config=auto --error --exclude='*.spec.ts' --exclude='node_modules' --exclude='.next' --exclude='dist' --exclude='.turbo'
