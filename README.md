@@ -76,7 +76,7 @@ Playmorrow is a social discovery platform connecting indie game studios with pla
 - **Dependabot** — Automated dependency updates
 - **Sentry** — Error tracking for both frontend and backend
 - **Monitoring** — Health endpoint (`/health`) with database and email provider status
-- **Docker** — Multi-stage Dockerfile for Railway deployment
+- **Docker** — Multi-stage Dockerfile for Fly.io deployment
 - **SEO** — OG images, canonical URLs, JSON-LD structured data (WebSite, VideoGame, Organization, BlogPosting), dynamic sitemap
 
 ---
@@ -104,7 +104,7 @@ Playmorrow is a social discovery platform connecting indie game studios with pla
              │ HTTPS
              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   Railway (Backend)                          │
+│                   Fly.io (Backend)                          │
 │  NestJS REST API                                             │
 │  - Controllers (26 modules)                                  │
 │  - CsrfGuard (global, HMAC-SHA256)                           │
@@ -170,7 +170,7 @@ Playmorrow is a social discovery platform connecting indie game studios with pla
 | **Error Tracking** | Sentry (frontend + backend) |
 | **Logging** | Pino (structured JSON logging) |
 | **Cron** | @nestjs/schedule (5-min devlog publishing interval) |
-| **Deployment** | Vercel (frontend), Railway (backend) |
+| **Deployment** | Vercel (frontend), Fly.io (backend) |
 | **Containerization** | Docker (multi-stage build) |
 
 ---

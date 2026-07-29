@@ -51,15 +51,11 @@ TEST_DATABASE_URL=postgresql://... pnpm --filter @playmorrow/api test
 - Markdown rendering must be sanitized with DOMPurify.
 - All mutations must include a CSRF token (`X-CSRF-Token` header).
 
-## Staging Environment
+## Deploying
 
-A Railway staging environment exists (`railway environment staging`). To use it:
-
-1. **Get a separate Neon DB** — Create a new branch in Neon dashboard, copy its connection string
-2. **Set the DB** — `railway environment staging` → `railway variables --set DATABASE_URL=<staging-neon-url>`
-3. **Deploy** — Push to `staging` branch on GitHub; Railway auto-deploys
-
-Vercel preview deployments work automatically for any PR branch.
+1. **Frontend:** Push to `main` → Vercel auto-deploys.
+2. **Backend:** Run `flyctl deploy` from the repo root.
+3. **Preview:** Vercel preview deployments work automatically for any PR branch.
 
 ## Commit Style
 
