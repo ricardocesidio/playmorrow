@@ -382,4 +382,85 @@ Playmorrow has a **Strong** security posture for a pre-launch platform:
 
 ---
 
+## Security Maturity (CMMI-Style)
+
+| Domain | Level | Description |
+|--------|-------|-------------|
+| Identity & Access Management | 4/5 | RBAC, seat limits, OAuth, session management, account lockout, CSRF. Managed + Measured. |
+| Application Security | 4/5 | CSP, DOMPurify, argon2id, input validation, output encoding. Defined + Managed. |
+| DevSecOps | 3/5 | Gitleaks CI, Dependabot, 3 GH workflows. Defined but gaps in SAST, pre-commit, DAST. |
+| Supply Chain Security | 2/5 | Dependabot only. Repeatable. Needs CodeQL, Semgrep, Trivy, SBOM, Dependency Review. |
+| Cloud Security | 4/5 | HTTPS, HSTS, CSP, secure cookies, Fly.io + Vercel + Neon hardened. Managed. |
+| Incident Response | 2/5 | Secrets rotated post-incident. Repeatable. No formal playbook, no RTO/RPO defined. |
+| Monitoring & Observability | 3/5 | Sentry wired, UptimeRobot, health checks, structured logging. Defined. No APM yet. |
+| Privacy & Compliance | 3/5 | Cookie consent, GDPR alignment, data minimization. Defined. No DPO, no formal DPIA. |
+
+**Overall Maturity: Level 3/5** — Defined processes with monitoring. Gaps in proactive detection and automation (DevSecOps, Supply Chain).
+
+---
+
+## Security KPIs
+
+| KPI | Current | Target | Measurement |
+|-----|---------|--------|-------------|
+| Mean Time To Detect (MTTD) | ⏳ Not measured | < 1 hour | Sentry alert response time |
+| Mean Time To Respond (MTTR) | ⏳ Not measured | < 4 hours | Incident response tracking |
+| Critical vulnerabilities | 0 | 0 | Dependabot alerts |
+| High vulnerabilities | 2 (fixed) | 0 | Security audit findings |
+| Secrets leaked in git history | 2 (rewritten) | 0 | Gitleaks CI |
+| Security incidents (30d) | 0 | 0 | Incident log |
+| False positive rate | ⏳ Not measured | < 10% | SAST/Semgrep tuning |
+| Time to patch critical deps | ⏳ Not measured | < 7 days | Dependabot → merge time |
+| Patch compliance | ⏳ Not measured | > 90% | Dependency freshness scan |
+| Dependency freshness | ⏳ Not measured | > 80% | SBOM + npm audit |
+
+**Note:** KPIs marked ⏳ are not yet tracked. Recommendation: begin tracking after Security Phase 2 tooling is in place.
+
+---
+
+## Responsibility Matrix
+
+| Area | Primary Owner | Supporting |
+|------|---------------|------------|
+| Authentication | Backend Team | Security |
+| Authorization | Backend Team | Security |
+| API Security | Backend Team | QA |
+| Frontend Security | Frontend Team | Security |
+| CI/CD Security | DevOps | Backend |
+| Infrastructure Security | Platform/DevOps | Security |
+| Secrets Management | DevOps | All teams |
+| Supply Chain Security | DevOps | Backend |
+| Privacy & Compliance | Product | Legal |
+| Incident Response | Security | All teams |
+| Monitoring & Observability | DevOps | Backend |
+| Disaster Recovery | Platform/DevOps | Backend |
+| Security Training | Security | All teams |
+
+---
+
+## Operational Documents
+
+The certification report is an executive view. Detailed operational documentation is maintained separately:
+
+| Document | Purpose | Location |
+|----------|---------|----------|
+| **BACKUP.md** | Database backup strategy, R2 backup, retention, restore runbook | `docs/BACKUP.md` |
+| **Incident Response** | Security incident playbook | ⏳ To be created → `docs/security/INCIDENT_RESPONSE.md` |
+| **Runbook** | Operational procedures, deploy, rollback, health checks | ⏳ To be created → `docs/security/RUNBOOK.md` |
+| **Backup Restore** | Step-by-step database restore procedure | ⏳ To be created → `docs/security/BACKUP_RESTORE.md` |
+| **Access Control** | Who has access to what, how to grant/revoke | ⏳ To be created → `docs/security/ACCESS_CONTROL.md` |
+| **Secret Rotation** | How to rotate each of the 17 secrets | ⏳ To be created → `docs/security/SECRET_ROTATION.md` |
+| **Security Baseline** | Minimum security requirements for all systems | ⏳ To be created → `docs/security/SECURITY_BASELINE.md` |
+| **Threat Model** | Full threat model with trust boundaries and mitigations | ⏳ To be created → `docs/security/THREAT_MODEL.md` |
+
+---
+
+## Auditor's Final Statement
+
+> *Security Certification v1.1 is technically consistent, evidence-based, and appropriately scoped. The report accurately reflects the current implementation of the Playmorrow platform. Remaining findings are operational improvements rather than critical security deficiencies. The platform is suitable to proceed to Phase 3 while executing the documented Security Phase 2 roadmap.*
+>
+> *The 84/100 score is conservative and appropriate. Artificial inflation to 90+ would not be justified while DevSecOps tooling, Supply Chain automation, documented runbooks, and disaster recovery testing remain incomplete. When CodeQL, Semgrep, Trivy, Dependency Review, SBOM generation, restore tests, and incident response runbooks are in place, a score of 90–92/100 would be fully justified.*
+
+---
+
 *Audit performed on 2026-07-29. Patch v1.1 applied same day. This certification is valid for 90 days or until the next significant architecture change, whichever comes first.*
