@@ -20,8 +20,8 @@
 | 2 | **Domínio próprio** (playmorrow.com) — Blocking for public launch | 🔴 Não comprado | Ação manual |
 | 3 | **E2E Tests** — 6 spec files (auth, personalized-feed, public, responsive, snapshots, social-actions), build timeout nesta máquina | 🔴 Não executado | Equipe (CI) |
 | 4 | **3670e91 no git** — R2 env vars no histórico | ✅ Reescrito via git-filter-repo em 29/07 | Colaboradores: clonar fresco |
-| 5 | **Secrets scanning em CI** — gitleaks workflow + local test | ✅ Instalado e testado | `gitleaks detect` detecta AWS secrets corretamente |
-| 6 | **Prisma migrate deploy no Neon** — migration `devlog.tags @default` | 🟡 Falta deploy | `DATABASE_URL=... npx prisma migrate deploy` |
+| 5 | **Secrets scanning em CI** — gitleaks workflow + local test | ✅ Configurado (push em qualquer branch) | Workflow ativo, testado localmente. CI em modo `queued` (fila GitHub Actions). |
+| 6 | **Prisma migrate deploy no Neon** — migration `devlog.tags @default` | ✅ Aplicada em 29/07 | `prisma migrate deploy` executado com sucesso |
 
 ---
 
