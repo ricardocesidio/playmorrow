@@ -18,6 +18,18 @@ export class ModerationController {
 
   @UseGuards(SessionAuthGuard, RolesGuard)
   @Roles('ADMIN', 'MODERATOR')
+  @Post('strike')
+  @Throttle({ default: { ttl: 60_000, limit: 30 } })
+  @ApiOperation({ summary: 'Give a strike to a user (3 strikes = auto-suspend)' })
+  async giveStrike(
+    @CurrentUser() admin: { id: string; role: string },
+    @Body() body: { userId: string; reason: string },
+  ) {
+    return this.mod.giveStrike(admin.id, body.userId, body.reason);
+  }
+
+  @UseGuards(SessionAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MODERATOR')
   @Post('suspend')
   @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @ApiOperation({ summary: 'Suspend a user for a duration' })

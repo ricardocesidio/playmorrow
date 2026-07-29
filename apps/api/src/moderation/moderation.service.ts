@@ -17,6 +17,34 @@ export class ModerationService {
     }
   }
 
+  async giveStrike(adminId: string, targetUserId: string, reason: string) {
+    await this.requireAdminOrModerator(adminId);
+    const user = await this.prisma.user.findUnique({ where: { id: targetUserId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const newCount = (user.strikeCount || 0) + 1;
+    const updateData: any = { strikeCount: newCount, lastStrikeAt: new Date() };
+
+    // Auto-suspend on 3rd strike (24h)
+    if (newCount >= 3) {
+      updateData.suspendedUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    }
+
+    await this.prisma.user.update({ where: { id: targetUserId }, data: updateData });
+
+    logger.info({ action: 'strike_given', moderatorId: adminId, targetId: targetUserId, reason, strikeCount: newCount }, 'Moderation: strike given');
+
+    this.eventBus.emit({
+      type: 'strike_given',
+      actorId: adminId,
+      targetType: 'USER',
+      targetId: targetUserId,
+      metadata: { reason, strikeCount: newCount, autoSuspended: newCount >= 3 },
+    });
+
+    return { strikeCount: newCount, autoSuspended: newCount >= 3, reason };
+  }
+
   async suspendUser(adminId: string, userId: string, reason: string, durationHours: number) {
     await this.requireAdminOrModerator(adminId);
     const user = await this.prisma.user.findUnique({ where: { id: userId } });

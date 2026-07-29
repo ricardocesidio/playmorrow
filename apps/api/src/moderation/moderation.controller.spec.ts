@@ -122,6 +122,27 @@ describe('Moderation — API + Service', () => {
   // ── Service-level Tests ──────────────────────────────────────────
 
   describe('ModerationService', () => {
+    it('giveStrike adds strike and auto-suspends on 3rd', async () => {
+      const r1 = await modService.giveStrike(adminId, targetUserId, 'Spam');
+      expect(r1.strikeCount).toBe(1);
+      expect(r1.autoSuspended).toBe(false);
+
+      const r2 = await modService.giveStrike(adminId, targetUserId, 'Spam again');
+      expect(r2.strikeCount).toBe(2);
+
+      const r3 = await modService.giveStrike(adminId, targetUserId, 'Third strike');
+      expect(r3.strikeCount).toBe(3);
+      expect(r3.autoSuspended).toBe(true); // 3 strikes → auto-suspend
+
+      const user = await prisma.user.findUnique({ where: { id: targetUserId } });
+      expect(user?.suspendedUntil).toBeDefined();
+    });
+
+    it('giveStrike throws FORBIDDEN for non-admin', async () => {
+      const regular = await prisma.user.findUnique({ where: { email: REGULAR_EMAIL } });
+      await expect(modService.giveStrike(regular!.id, targetUserId, 'test')).rejects.toThrow('Only ADMIN or MODERATOR');
+    });
+
     it('suspendUser suspends a target user', async () => {
       const result = await modService.suspendUser(adminId, targetUserId, 'Spam test', 24);
       expect(result.suspended).toBe(true);

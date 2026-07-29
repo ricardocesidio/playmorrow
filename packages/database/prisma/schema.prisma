@@ -175,6 +175,8 @@ model User {
   suspendedUntil      DateTime?
   shadowBanned        Boolean     @default(false)
   appealCount         Int         @default(0)
+  strikeCount         Int         @default(0)
+  lastStrikeAt        DateTime?
 
   studioMemberships     StudioMember[]
   studioInvitationsSent     StudioInvitation[] @relation("StudioInvitationsSent")

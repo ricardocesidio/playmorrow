@@ -1,3 +1,4 @@
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://playmorrow.co';
 const API = process.env.API_URL || 'https://playmorrow-api-aged-mountain-9542.fly.dev/api';
 
 async function getGame(slug: string) {
@@ -33,7 +34,7 @@ export default async function EmbedPage({ params }: { params: Promise<{ slug: st
         `}</style>
       </head>
       <body>
-        <a href={`https://playmorrow.vercel.app/games/${slug}`} target="_blank" rel="noopener">
+        <a href={`${SITE_URL}/games/${slug}`} target="_blank" rel="noopener">
           <div className="card">
             {game.coverUrl && <img src={game.coverUrl} alt="" className="cover" />}
             <div className="info">
