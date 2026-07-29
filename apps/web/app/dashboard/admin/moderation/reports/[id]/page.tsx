@@ -6,7 +6,7 @@ import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/api/auth-context';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, AlertTriangle, Shield, CheckCircle, XCircle,
+  ArrowLeft, AlertTriangle, Shield, CheckCircle, XCircle, Eye,
   MessageSquare, User, FileText, Clock, Send,
 } from 'lucide-react';
 
