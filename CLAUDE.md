@@ -16,7 +16,7 @@
 |---|------|--------|---------|
 | 1 | **M5 backend não deployado** — `/api/recommendations` 404 em produção | 🔴 Quebra ativa | `flyctl deploy` necessário (não disponível nesta máquina). Search 2.0 funciona. |
 | 2 | **Domínio próprio** (playmorrow.com) — Blocking for public launch | 🔴 Não comprado | Ação manual |
-| 3 | **E2E Tests** — 7 spec files, build timeout nesta máquina | 🔴 Não executado | Equipe (CI) |
+| 3 | **E2E Tests** — 6 spec files (auth, personalized-feed, public, responsive, snapshots, social-actions), build timeout nesta máquina | 🔴 Não executado | Equipe (CI) |
 | 4 | **3670e91 no git** — R2 env vars no histórico (rotacionadas, sem risco ativo) | 🔴 Não reescrito | Equipe (git-filter-repo) |
 | 5 | **Secrets scanning em CI** — gitleaks workflow criado | 🟡 Não testado | Equipe |
 

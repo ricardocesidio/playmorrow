@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 
 const API = process.env.API_URL || 'https://playmorrow-api-aged-mountain-9542.fly.dev/api';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://playmorrow.vercel.app';
@@ -32,6 +33,7 @@ export default async function GameLayout({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const nonce = (await headers()).get('x-nonce') || undefined;
   let game: { title: string; slug: string; tagline: string | null; description: string | null; coverUrl: string | null } | null = null;
   try {
     const res = await fetch(`${API}/games/${slug}`, { next: { revalidate: 3600 } });
@@ -44,6 +46,7 @@ export default async function GameLayout({
     <>
       {game && (
         <script
+          nonce={nonce}
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
