@@ -17,7 +17,7 @@
 | # | Item | Status | Detalhe |
 |---|------|--------|---------|
 | 1 | **M5 backend** — `/api/recommendations` e `/api/search` | ✅ Deployado e funcionando | `flyctl deploy` executado em 29/07. Trending, Similar Games, Search OK. |
-| 2 | **Domínio próprio** (playmorrow.com) — Blocking for public launch | 🔴 Não comprado | Ação manual |
+| 2 | **Domínio próprio** (playmorrow.co) | 🟡 Configurado no Vercel + Fly.io | Pendente: apontar DNS no Namecheap |
 | 3 | **E2E Tests** — 6 spec files + 301 unit/integration | 🔴 Não executado (E2E) | `next build` timeout local — executar em CI |
 | 4 | **3670e91 no git** — R2 env vars no histórico | ✅ Reescrito via git-filter-repo em 29/07 | Colaboradores: clonar fresco |
 | 5 | **Secrets scanning em CI** — gitleaks workflow | ✅ Configurado (`on: [push, pull_request]`) | Testado localmente + workflow ativo. CI em fila (free tier). |
