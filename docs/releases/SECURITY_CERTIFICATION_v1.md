@@ -26,6 +26,9 @@ Playmorrow underwent a complete enterprise-grade security audit covering 18 phas
 | GitHub Exposure | 78/100 | C+ |
 | Secrets Management | 76/100 | C+ |
 | DevSecOps | 70/100 | C |
+| Supply Chain Security | 65/100 | C- |
+| Disaster Recovery | 60/100 | C- |
+| Business Continuity | 55/100 | D |
 | Privacy & Compliance | 75/100 | C |
 | Observability | 72/100 | C |
 | **Overall** | **84/100** | **B** |
@@ -150,14 +153,18 @@ Playmorrow underwent a complete enterprise-grade security audit covering 18 phas
 | H1 | **Corrupted env var names** | 🔴 Critical | Uploads broken, fallback to local disk | Certain | Restored `REDACTED_*` → correct names | ✅ FIXED |
 | H2 | **Sentry not wired to exception filter** | 🟡 High | Production errors invisible | High | Added `Sentry.captureException()` for 5xx | ✅ FIXED |
 
-### Medium (4) — Accepted
+### Medium (8) — 4 Accepted, 4 New in Security Phase 2
 
 | ID | Finding | Risk | Recommendation | Effort | Status |
 |----|---------|------|---------------|--------|--------|
-| M1 | Rate limits per-instance (no Redis) | 🟡 Medium | 2 Fly.io machines = 2x effective limit. Add Redis for global rate limiting. | 4h | ⏳ Accepted |
-| M2 | No pre-commit hook | 🟡 Medium | Gitleaks CI catches at PR time. Add `.husky/pre-commit` for local protection. | 1h | ⏳ Accepted |
-| M3 | No CodeQL/SAST | 🟡 Medium | Dependency count is low. Manual review sufficient for beta. | 2h | ⏳ Accepted |
-| M4 | Missing `.npmignore` | 🟡 Medium | Package not published to npm. Low risk. | 15min | ⏳ Accepted |
+| M1 | Rate limits per-instance (no Redis) | 🟡 Medium | 2 Fly.io machines = 2x effective limit. Add Redis for global rate limiting. | 4h | ⏳ Phase 3 d1-30 |
+| M2 | No pre-commit hook | 🟡 Medium | Add `.husky/pre-commit` with `gitleaks detect` | 1h | ⏳ Phase 3 d1-30 |
+| M3 | No SAST scanning | 🟡 Medium | Add CodeQL or Semgrep to CI | 3h | ⏳ Phase 3 d1-30 |
+| M4 | Missing `.npmignore` | 🟡 Medium | Package not published to npm | 15min | ⏳ Accepted |
+| M5 | No container scanning | 🟡 Medium | Add Trivy to CI for Docker + dependency scanning | 3h | ✅ New — Security P2 |
+| M6 | No Dependency Review | 🟡 Medium | Block dangerous deps at PR time via GitHub Action | 1h | ✅ New — Security P2 |
+| M7 | No SBOM generation | 🟡 Medium | Generate CycloneDX SBOM in release pipeline | 2h | ✅ New — Security P2 |
+| M8 | No npm audit in CI | 🟡 Medium | Add `pnpm audit --audit-level=high` to CI | 1h | ✅ New — Security P2 |
 
 ### Low (5) — Accepted
 
@@ -237,6 +244,114 @@ All 17 secrets:
 
 ---
 
+## Supply Chain Security
+
+| Control | Status | Recommendation |
+|---------|--------|---------------|
+| **Dependabot** | ✅ Active | Auto-creates PRs for vulnerable dependencies |
+| **CodeQL** | ❌ Not configured | Add `.github/workflows/codeql.yml` — 2h |
+| **Semgrep** | ❌ Not configured | Strong SAST alternative to CodeQL. Add to CI — 3h |
+| **Trivy** | ❌ Not configured | Scans dependencies, containers, filesystem. Add to CI — 3h |
+| **Dependency Review** | ❌ Not configured | Block dangerous deps at PR time. Native GitHub Action available — 1h |
+| **SBOM** (CycloneDX) | ❌ Not generated | `cyclonedx-bom` or `syft` in release pipeline — 2h |
+| **Signed builds** (Sigstore/Cosign) | ❌ Not configured | Sign release artifacts with keyless signing — 4h |
+| **Build provenance** | ❌ Not configured | SLSA Level 1 achievable via GitHub Actions attestations — 2h |
+| **npm audit** | ❌ Not in CI | Add `pnpm audit --audit-level=high` to CI — 1h |
+| **OWASP Dependency Check** | ❌ Not configured | Comprehensive OSS vulnerability scanner — 3h |
+
+**Supply Chain Security Score: 65/100**
+
+### Recommended CI Pipeline (ideal state)
+
+```
+Every Pull Request:
+  ├── Typecheck (6/6)
+  ├── Lint (0 errors)
+  ├── Unit + Integration tests (273)
+  ├── Playwright E2E
+  ├── CodeQL
+  ├── Semgrep
+  ├── Gitleaks
+  ├── Dependency Review
+  ├── npm audit
+  ├── SBOM generation
+  ├── Build
+  ├── Lighthouse
+  ├── Accessibility (axe-core)
+  └── Performance Budget
+```
+
+---
+
+## Disaster Recovery
+
+| Item | Status | Notes |
+|------|--------|-------|
+| **Database backups** | ✅ Automated | Neon 7-day PITR, daily automated backups |
+| **Manual backup script** | ✅ Documented | `pg_dump` command in `docs/BACKUP.md` |
+| **Restore test** | ❌ Never performed | Must test restore to a branch at least once |
+| **RTO (Recovery Time Objective)** | ❌ Not defined | Estimated: ~30min (deploy from latest image + restore DB) |
+| **RPO (Recovery Point Objective)** | ❌ Not defined | Estimated: ~5min (Neon PITR granularity) |
+| **Failover procedure** | ❌ Not documented | Fly.io has multiple regions, procedure needs documentation |
+| **R2 backup** | ❌ Not configured | R2 has no versioning on free plan. Manual sync needed. |
+| **Deployment rollback** | 🟡 Documented | `flyctl deploy` re-deploys previous image. Vercel auto-rollback. |
+| **Infrastructure as Code** | ❌ Partial | `fly.toml` committed. No Terraform/Pulumi. |
+
+**Disaster Recovery Score: 60/100**
+
+### Recommended Recovery Runbook
+
+```bash
+# 1. Database restore (Neon)
+#    Dashboard → Branches → Restore from point-in-time
+#    Get new DATABASE_URL
+
+# 2. Update secrets
+flyctl secrets set DATABASE_URL=<new-url>
+
+# 3. Redeploy
+flyctl deploy
+
+# 4. Verify
+curl https://playmorrow-api...fly.dev/api/health
+curl https://playmorrow...fly.dev/api/games?pageSize=1
+```
+
+---
+
+## Business Continuity
+
+| Item | Status | Notes |
+|------|--------|-------|
+| **Alert recipients** | ❌ Not defined | Who receives UptimeRobot alerts? Document in `docs/BACKUP.md` |
+| **Production access** | ❌ Not documented | Who has Fly.io/Vercel/Neon access? How to revoke? |
+| **Secret rotation** | ✅ Documented | List of 17 secrets in Fly.io. Process described. |
+| **Access revocation** | ❌ Not documented | No offboarding procedure |
+| **Incident response plan** | ❌ Not documented | No playbook for security incidents |
+| **Compromised account procedure** | ❌ Not documented | Steps to contain, investigate, recover |
+| **Communication plan** | ❌ Not documented | Who notifies users? How? |
+| **Post-mortem process** | ❌ Not documented | No template for incident review |
+
+**Business Continuity Score: 55/100**
+
+---
+
+## Phase 2 Security Automation Roadmap
+
+| Priority | Tool | Phase | Effort |
+|----------|------|-------|--------|
+| 🔴 High | CodeQL | P2 Sprint 1 | 2h |
+| 🔴 High | Semgrep (SAST) | P2 Sprint 1 | 3h |
+| 🔴 High | Trivy (containers + deps) | P2 Sprint 1 | 3h |
+| 🟡 Medium | Dependency Review | P2 Sprint 1 | 1h |
+| 🟡 Medium | SBOM (CycloneDX) | P2 Sprint 2 | 2h |
+| 🟡 Medium | npm audit in CI | P2 Sprint 2 | 1h |
+| 🟢 Low | Sigstore/Cosign | P2 Sprint 3 | 4h |
+| 🟢 Low | OWASP ZAP (DAST) | P2 Sprint 3 | 4h |
+| 🟢 Low | Falco (runtime) | P2 Sprint 3 | 8h |
+
+---
+
 ## Final Verdict
 
 ### Certification Decision
@@ -245,16 +360,26 @@ All 17 secrets:
 
 Playmorrow is **certified** to exit the Security Hardening Sprint and begin Phase 3 (Operations & Growth).
 
+The CTO and Lead Security Engineer approve this report with the following observation:
+
+> *"Approved for Phase 3, subject to the remediation plan already documented. The four medium-severity items must be addressed within 30 days. Security Phase 2 (automation tooling) is strongly recommended before scaling. This certification is valid for 90 days or until the next significant architecture change."*
+
 ### Conditions
 
-The following 4 medium-severity items must be addressed within the first 30 days of Phase 3:
+The following 3 medium-severity items must be addressed within the first 30 days of Phase 3:
 
-1. Add Redis for global rate limiting (M1)
-2. Add pre-commit hook with gitleaks (M2)
-3. Configure CodeQL or SAST scanning (M3)
-4. Add `.npmignore` (M4)
+1. **Add Redis for global rate limiting** — Without Redis, rate limits are per-instance (2 Fly.io machines = 2x effective limit). Required for horizontal scaling.
+2. **Add pre-commit hook** — `gitleaks detect` as local gate. Gitleaks CI catches at PR time but local prevention saves cycles.
+3. **Configure SAST scanning** — CodeQL or Semgrep in CI. Dependency count is currently low, but will grow.
 
-### Production Readiness
+### Recommended (Phase 2 Security Automation — next 60 days)
+
+4. **Trivy** — Scan containers + deps in CI
+5. **Dependency Review** — Block dangerous deps at PR time
+6. **SBOM generation** — CycloneDX in release pipeline
+7. **npm audit in CI**
+8. **Define RTO/RPO** — Document disaster recovery targets
+9. **Document incident response plan** — Who gets alerts, who rotates secrets, compromised account procedure
 
 Playmorrow has a **Strong** security posture for a pre-launch platform:
 - ✅ No secrets committed to repository
