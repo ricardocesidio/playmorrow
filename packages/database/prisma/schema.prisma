@@ -193,6 +193,7 @@ model User {
   chatMessages          StudioChatMessage[]
   pushSubscriptions     PushSubscription[]
   emailVerificationCodes  EmailVerificationCode[]
+  emailPreference         EmailPreference?
   passwordResetTokens     PasswordResetToken[]
   wishlistItems         WishlistItem[]
    auditLogs             AuditLog[]
@@ -1348,6 +1349,55 @@ model WishlistItem {
   @@index([userId, createdAt])
   @@index([gameId])
   @@map("wishlist_items")
+}
+
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  subject   String
+  bodyHtml  String
+  variables String[]
+  category  String   @default("transactional")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("email_templates")
+}
+
+model EmailLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  email      String
+  templateId String?
+  status     String   @default("pending")
+  error      String?
+  openedAt   DateTime?
+  clickedAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([status])
+  @@map("email_logs")
+}
+
+model EmailPreference {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  marketingOptIn       Boolean  @default(false)
+  digestFrequency      String   @default("weekly")
+  devlogNotifications  Boolean  @default(true)
+  wishlistNotifications Boolean @default(true)
+  releaseNotifications  Boolean @default(true)
+  followNotifications  Boolean @default(true)
+  unsubscribeToken     String   @unique
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_preferences")
 }
 
 model GameView {

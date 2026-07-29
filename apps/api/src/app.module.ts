@@ -51,6 +51,7 @@ import { TrustModule } from './trust/trust.module';
 import { StudioProfileModule } from './studio-profile/studio-profile.module';
 import { StudioPressKitModule } from './studio-press-kit/studio-press-kit.module';
 import { CollectionsModule } from './collections/collections.module';
+import { EmailTemplatesModule } from './email-templates/email-templates.module';
 import { ModerationModule } from './moderation/moderation.module';
 
 @Module({
@@ -104,6 +105,7 @@ import { ModerationModule } from './moderation/moderation.module';
     StudioPressKitModule,
     CollectionsModule,
     ModerationModule,
+    EmailTemplatesModule,
   ],
   controllers: [CspController],
   providers: [
