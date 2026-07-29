@@ -1,0 +1,23 @@
+name: E2E Tests
+
+on: [push, pull_request]
+
+jobs:
+  e2e:
+    name: Playwright (chromium)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm --filter @playmorrow/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @playmorrow/web dev &
+      - run: npx wait-on http://localhost:3099
+      - run: npx playwright test --project=chromium
+        working-directory: apps/web

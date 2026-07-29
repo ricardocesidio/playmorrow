@@ -1,6 +1,6 @@
 # Playmorrow — Project Overview for Claude
 
-**Status:** Beta • 930+ commits • M5: **backend deployado e funcional** • 273 tests (19 files)
+**Status:** Beta • 930+ commits • M5: **em progresso (9/15 itens verificados — ver MILESTONE5_STATUS.md)** • 273 tests (19 files)
 **Frontend:** https://playmorrow.vercel.app (Vercel) — ✅ UptimeRobot (5min)
 **Backend:** https://playmorrow-api-aged-mountain-9542.fly.dev/api/health (Fly.io) — ✅ UptimeRobot (5min)
 **Storage:** Cloudflare R2 (uploads públicos)
@@ -48,16 +48,20 @@
 | M3 | Studio Analytics | ✅ |
 | M3.5 | Intelligence (Event Bus, Goals) | ✅ |
 | M4 | Verification (6 tiers, Trust Score) | ✅ |
-| **M5** | **Discovery Platform** | **✅ Deployado e funcional** |
+| **M5** | **Discovery Platform** | **🟡 Em progresso (9/15)** |
 
 ### Milestone 5 — Discovery Platform
 
+Status real: `docs/MILESTONE5_STATUS.md` — 9/15 itens implementados.
+
 | Sub-fase | Status | Detalhes |
 |----------|--------|----------|
-| 5.1 — Recommendation Engine | ✅ Deployado | 5 scorers (tag, follow, trending, wishlist, interaction), cursor pagination, explainability, cache |
-| 5.2 — Search 2.0 | ✅ | 6 filtros, 4 sorts, full-text. Confirmado via curl produção. |
-| 5.3 — Discover Page | ✅ | 3 seções (Trending, Popular, Newest) — Popular e Newest via `/api/games`, Trending via `/api/recommendations` |
-| 5.4 — Similar Games + Homepage | ✅ | Similar Games, Trending SSR, Feed com filtros. Feed independente de recommendations. |
+| 5.1 — Recommendation Engine | ✅ | 9 scorers (tag, follow, trending, wishlist, interaction, hidden-gems, similar-studios, recently-updated, latest-releases) |
+| 5.2 — Search 2.0 | ✅ | 6 filtros, 4 sorts, full-text |
+| 5.3 — Discover Page | ✅ | SSR, 4 seções (Featured, Trending, Popular, Newest) |
+| 5.4 — Similar Games + Homepage | ✅ | Similar Games, Trending SSR, Feed com filtros |
+| 5.5 — Collections | ✅ | 5 coleções dinâmicas (top-wishlisted, in-development, free, verified, released) |
+| 5.6 — SEO Landing Pages | ✅ | `/discover/[tag]` com generateMetadata + JSON-LD |
 
 Verificação: `docs/MILESTONE5_VERIFICATION_v2.md` | Status real: `docs/PHASE1_FINAL_VERIFICATION_v6.md`
 

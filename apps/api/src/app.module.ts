@@ -50,6 +50,7 @@ import { VerificationModule } from './verification/verification.module';
 import { TrustModule } from './trust/trust.module';
 import { StudioProfileModule } from './studio-profile/studio-profile.module';
 import { StudioPressKitModule } from './studio-press-kit/studio-press-kit.module';
+import { CollectionsModule } from './collections/collections.module';
 
 @Module({
   imports: [
@@ -100,6 +101,7 @@ import { StudioPressKitModule } from './studio-press-kit/studio-press-kit.module
     TrustModule,
     StudioProfileModule,
     StudioPressKitModule,
+    CollectionsModule,
   ],
   controllers: [CspController],
   providers: [

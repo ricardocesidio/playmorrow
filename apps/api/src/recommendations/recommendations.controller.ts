@@ -19,14 +19,20 @@ export class RecommendationsController {
   @Get('recommendations')
   @UseGuards(OptionalSessionGuard)
   @ApiOkResponse({ description: 'Recommendations for the current user or public.' })
-  @ApiQuery({ name: 'type', required: false, enum: ['for-you', 'trending', 'similar-games'] })
+  @ApiQuery({ name: 'type', required: false, enum: [
+    'for-you', 'trending', 'similar-games', 'hidden-gems',
+    'similar-studios', 'recently-updated', 'latest-releases',
+  ]})
   @ApiQuery({ name: 'gameId', required: false })
+  @ApiQuery({ name: 'studioId', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'cursor', required: false, description: 'JSON: {"score":0.5,"gameId":"..."}' })
   async getRecommendations(
     @CurrentUser() user: { id: string } | undefined,
-    @Query('type', new DefaultValuePipe('for-you')) type: 'for-you' | 'trending' | 'similar-games',
+    @Query('type', new DefaultValuePipe('for-you'))
+    type: 'for-you' | 'trending' | 'similar-games' | 'hidden-gems' | 'similar-studios' | 'recently-updated' | 'latest-releases',
     @Query('gameId') gameId: string | undefined,
+    @Query('studioId') studioId: string | undefined,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Query('cursor') cursorRaw: string | undefined,
   ): Promise<RecommendationResult> {
@@ -34,6 +40,6 @@ export class RecommendationsController {
     if (cursorRaw) {
       try { cursor = JSON.parse(cursorRaw); } catch { /* invalid cursor — start from top */ }
     }
-    return this.recs.getRecommendations(user?.id || null, type, gameId, limit, cursor);
+    return this.recs.getRecommendations(user?.id || null, type, gameId, studioId, limit, cursor);
   }
 }

@@ -1,0 +1,22 @@
+name: Accessibility
+
+on: [push, pull_request]
+
+jobs:
+  a11y:
+    name: axe-core scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm --filter @playmorrow/web dev &
+      - run: npx wait-on http://localhost:3099
+      - run: npm install -g @axe-core/cli
+      - run: axe http://localhost:3099 --exit
