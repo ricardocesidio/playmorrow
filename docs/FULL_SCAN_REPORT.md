@@ -4,6 +4,17 @@
 **Role:** Full-Stack Engineering Audit (35+ years experience)
 **Methodology:** Every endpoint tested, every flow verified, every build check run.
 
+> **⚠️ NOTÍCIA IMPORTANTE:** Este relatório é uma **auditoria operacional** (o sistema funciona hoje?)
+> e não uma auditoria de enterprise readiness. Ele NÃO substitui o
+> [`docs/ENTERPRISE_AUDIT.md`](ENTERPRISE_AUDIT.md) (76/100) para decisões de produção escalável.
+>
+> Números usados neste documento (263/17 testes) são anteriores ao M5 e não refletem
+> o estado atual (273/19 testes, 911+ commits).
+>
+> **Item "Domínio próprio" classificado como "Phase 2, short-term" — contradiz
+> `ENTERPRISE_AUDIT.md` que o classifica como bloqueante para lançamento público.
+> A classificação do `ENTERPRISE_AUDIT.md` é a correta e deve ser seguida.**
+
 ---
 
 ## Executive Summary
