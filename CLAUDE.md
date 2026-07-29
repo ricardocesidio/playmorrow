@@ -82,7 +82,7 @@ Ver módulo completo em `apps/api/src/moderation/` + frontend em `apps/web/app/d
 | Unsubscribe (token-based) | ✅ | `POST/GET /api/unsubscribe/:token` |
 | Weekly Digest (cron) | ✅ | `@Cron('0 12 * * 1')` — Monday 12:00 UTC |
 | Admin Dashboard UI | ✅ | `/dashboard/admin/email-templates/` |
-| Tests | ✅ | 298 (24 files) |
+| Tests | ✅ | 301 (24 files) |
 
 DB models: `EmailTemplate`, `EmailLog`, `EmailPreference`. Módulos em `apps/api/src/email-templates/`, `apps/api/src/email/`, `apps/api/src/email-preferences/`, `apps/api/src/digest/`.
 
@@ -111,7 +111,7 @@ playmorrow/
 │                      # goals, support, help, verification,
 │                      # recommendations (M5), search (M5), upload
 ├── packages/
-│   └── database/     # Prisma schema (51 modelos)
+│   └── database/     # Prisma schema (54 modelos)
 ├── docs/
     ├── releases/                   # 11 certificações + relatórios
     │   ├── PHASE2_CERTIFICATION.md
@@ -126,7 +126,7 @@ playmorrow/
     │   ├── SOFTWARE_ENGINEERING_CERTIFICATION_v1.md
     │   └── FINAL_RELEASE_CERTIFICATION.md
     ├── MILESTONE5_STATUS.md
-    ├── security/                   # 8 runbooks operacionais
+    ├── security/                   # 7 runbooks + 2 docs complementares
     ├── handoff/                    # Histórico de sessões
     ├── archive/                    # Docs antigos (superseded)
     ├── ENTERPRISE_AUDIT.md
