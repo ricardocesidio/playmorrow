@@ -1,7 +1,7 @@
 # Playmorrow — Project Overview for Claude
 
 **Status:** Beta • 970+ commits • M1-M5 ✅ • M8 ✅ • M9 ✅ • **301 tests (24 files)**
-**Frontend:** https://playmorrow.vercel.app (Vercel) — ✅ UptimeRobot (5min)
+**Frontend:** https://playmorrow.co (Vercel) — ✅ UptimeRobot (5min)
 **Backend:** https://playmorrow-api-aged-mountain-9542.fly.dev/api/health (Fly.io) — ✅ UptimeRobot (5min)
 **Storage:** Cloudflare R2 (uploads públicos)
 **DB:** PostgreSQL (Neon)
@@ -138,7 +138,7 @@ playmorrow/
 
 | Serviço | URL |
 |---------|-----|
-| Frontend | https://playmorrow.vercel.app |
+| Frontend | https://playmorrow.co |
 | API Health | https://playmorrow-api-aged-mountain-9542.fly.dev/api/health |
 | API Search | https://playmorrow-api-aged-mountain-9542.fly.dev/api/search?q=void (✅ funciona) |
 | API Recommendations | https://playmorrow-api-aged-mountain-9542.fly.dev/api/recommendations?type=trending&limit=3 (✅ funciona) |
