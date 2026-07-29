@@ -1,12 +1,16 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { EventBus } from '../common/event-bus';
 import type { CreateReportDto } from './dto/create-report.dto';
 import type { UpdateReportDto } from './dto/update-report.dto';
 
 @Injectable()
 export class ReportsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventBus: EventBus,
+  ) {}
 
   async create(userId: string, dto: CreateReportDto) {
     // Validate target exists
@@ -29,6 +33,14 @@ export class ReportsService {
         details: dto.details,
       },
       include: { reporter: { select: { id: true, username: true } } },
+    });
+
+    this.eventBus.emit({
+      type: 'report_created',
+      actorId: userId,
+      targetType: 'REPORT',
+      targetId: report.id,
+      metadata: { reason: dto.reason, targetType: dto.targetType },
     });
 
     return {
@@ -122,6 +134,14 @@ export class ReportsService {
         resolutionNote: reopening ? null : dto.resolutionNote,
       },
       include: { reporter: { select: { id: true, username: true } } },
+    });
+
+    this.eventBus.emit({
+      type: 'report_resolved',
+      actorId: resolvedById,
+      targetType: 'REPORT',
+      targetId: id,
+      metadata: { status: dto.status },
     });
 
     return {

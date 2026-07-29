@@ -13,7 +13,7 @@ export function assertStudioAccess(
   members: { userId: string; role: string }[],
   allowedRoles: StudioRole[],
 ): void {
-  if (user.role === 'ADMIN') return;
+  if (user.role === 'ADMIN' || user.role === 'MODERATOR') return;
 
   const membership = members.find((m) => m.userId === user.id);
   if (!membership) {
