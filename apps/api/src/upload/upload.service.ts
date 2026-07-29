@@ -8,7 +8,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { logger } from '../common/logger';
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR || join(__dirname, '..', '..', 'uploads');
-const REDACTED_STORAGE_PROVIDER = process.env.REDACTED_STORAGE_PROVIDER || 'local';
+const STORAGE_PROVIDER = process.env.STORAGE_PROVIDER || 'local';
 
 export interface UploadedFileInfo {
   url: string;
@@ -24,30 +24,30 @@ export class UploadService {
 
   constructor(private configService: ConfigService) {
     const region = this.configService.get('AWS_REGION') || 'us-east-1';
-    const accessKeyId = this.configService.get('REDACTED_AWS_KEY');
-    const secretAccessKey = this.configService.get('REDACTED_AWS_SECRET');
-    this.s3Bucket = this.configService.get('REDACTED_S3_BUCKET') || 'playmorrow-uploads';
+    const accessKeyId = this.configService.get('AWS_ACCESS_KEY_ID');
+    const secretAccessKey = this.configService.get('AWS_SECRET_ACCESS_KEY');
+    this.s3Bucket = this.configService.get('S3_BUCKET') || 'playmorrow-uploads';
 
-    if (REDACTED_STORAGE_PROVIDER === 's3' || REDACTED_STORAGE_PROVIDER === 'r2') {
+    if (STORAGE_PROVIDER === 's3' || STORAGE_PROVIDER === 'r2') {
       if (accessKeyId && secretAccessKey) {
         this.s3Client = new S3Client({
           region,
           credentials: { accessKeyId, secretAccessKey },
-          ...(REDACTED_STORAGE_PROVIDER === 'r2' ? { endpoint: this.configService.get('REDACTED_R2_ENDPOINT') } : {}),
+          ...(STORAGE_PROVIDER === 'r2' ? { endpoint: this.configService.get('R2_ENDPOINT') } : {}),
         });
       } else {
-        logger.warn('REDACTED_AWS_KEY or REDACTED_AWS_SECRET not set — S3/R2 uploads will fail. Falling back to local.');
+        logger.warn('AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY not set — S3/R2 uploads will fail. Falling back to local.');
       }
     }
   }
 
   /**
-   * Returns multer storage engine based on REDACTED_STORAGE_PROVIDER env.
+   * Returns multer storage engine based on STORAGE_PROVIDER env.
    * Supports 'local' (default), 's3', 'r2'.
    * For S3/R2, we use memoryStorage in controller and handle in storeFile.
    */
   getMulterStorage() {
-    if (REDACTED_STORAGE_PROVIDER === 'local') {
+    if (STORAGE_PROVIDER === 'local') {
       return diskStorage({
         destination: UPLOADS_DIR,
         filename: (_req, file, cb) => {
@@ -132,13 +132,13 @@ export class UploadService {
 
   /**
    * Main entry to store the file.
-   * Supports local disk and stub for S3/R2 (configurable via REDACTED_STORAGE_PROVIDER).
+   * Supports local disk and stub for S3/R2 (configurable via STORAGE_PROVIDER).
    * For real S3/R2: install @aws-sdk/client-s3, configure credentials, upload buffer, return CDN URL.
    */
   async storeFile(file: Express.Multer.File): Promise<UploadedFileInfo> {
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${extname(file.originalname)}`;
 
-    if (REDACTED_STORAGE_PROVIDER === 'local') {
+    if (STORAGE_PROVIDER === 'local') {
       const filePath = join(UPLOADS_DIR, filename);
       await writeFile(filePath, file.buffer);
       return {
@@ -149,9 +149,9 @@ export class UploadService {
       };
     }
 
-    if (REDACTED_STORAGE_PROVIDER === 's3' || REDACTED_STORAGE_PROVIDER === 'r2') {
+    if (STORAGE_PROVIDER === 's3' || STORAGE_PROVIDER === 'r2') {
       if (!this.s3Client) {
-        throw new Error(`S3/R2 credentials not configured. Set REDACTED_AWS_KEY and REDACTED_AWS_SECRET env vars.`);
+        throw new Error(`S3/R2 credentials not configured. Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars.`);
       }
       const key = `uploads/${filename}`;
       await this.s3Client.send(new PutObjectCommand({
@@ -161,10 +161,10 @@ export class UploadService {
         ContentType: file.mimetype,
         CacheControl: 'public, max-age=31536000, immutable',
       }));
-      const r2Endpoint = process.env.REDACTED_R2_ENDPOINT || this.configService.get<string>('REDACTED_R2_ENDPOINT');
+      const r2Endpoint = process.env.R2_ENDPOINT || this.configService.get<string>('R2_ENDPOINT');
       const cdnUrl = process.env.CDN_URL || this.configService.get<string>('CDN_URL');
       const publicUrl = cdnUrl
-        || (REDACTED_STORAGE_PROVIDER === 'r2' && r2Endpoint ? `${r2Endpoint}/${this.s3Bucket}` : `https://${this.s3Bucket}.s3.amazonaws.com`);
+        || (STORAGE_PROVIDER === 'r2' && r2Endpoint ? `${r2Endpoint}/${this.s3Bucket}` : `https://${this.s3Bucket}.s3.amazonaws.com`);
       return {
         url: `${publicUrl}/${key}`,
         filename,
@@ -173,6 +173,6 @@ export class UploadService {
       };
     }
 
-    throw new Error(`Unknown REDACTED_STORAGE_PROVIDER=${REDACTED_STORAGE_PROVIDER}. Set REDACTED_STORAGE_PROVIDER=local for local disk storage.`);
+    throw new Error(`Unknown STORAGE_PROVIDER=${STORAGE_PROVIDER}. Set STORAGE_PROVIDER=local for local disk storage.`);
   }
 }

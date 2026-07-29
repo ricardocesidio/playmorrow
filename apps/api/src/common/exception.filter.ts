@@ -1,5 +1,6 @@
 import { Catch, ExceptionFilter, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Response, Request } from 'express';
+import * as Sentry from '@sentry/node';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -11,6 +12,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const status = exception instanceof HttpException
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    // Send 5xx errors to Sentry
+    if (status >= 500) {
+      Sentry.captureException(exception);
+    }
 
     const message = exception instanceof HttpException
       ? exception.getResponse()

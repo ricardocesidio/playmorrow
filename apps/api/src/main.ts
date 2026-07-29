@@ -58,7 +58,22 @@ async function bootstrap() {
     'CSRF_SECRET',      // required for global HMAC CSRF
     'RESEND_API_KEY',   // email verification & invites
     'WEB_ORIGIN',
+    'STORAGE_PROVIDER', // 'local' or 'r2'
+    'S3_BUCKET',        // R2 bucket name
+    'CDN_URL',          // public CDN URL for uploads
   ];
+
+  // Conditional: if STORAGE_PROVIDER is r2 or s3, require cloud credentials
+  const storageProvider = config.get<string>('STORAGE_PROVIDER');
+  if (isProd && (storageProvider === 'r2' || storageProvider === 's3')) {
+    const storageRequired = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'R2_ENDPOINT'];
+    const missingStorage = storageRequired.filter((key) => !config.get<string>(key));
+    if (missingStorage.length > 0) {
+      console.error('❌ FATAL: Missing R2/S3 storage env vars:', missingStorage.join(', '));
+      console.error('   Required when STORAGE_PROVIDER is', storageProvider);
+      process.exit(1);
+    }
+  }
 
   if (isProd) {
     const missing = requiredInProd.filter((key) => !config.get<string>(key));
