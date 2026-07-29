@@ -1,243 +1,63 @@
 @import "tailwindcss";
 
-/* ── Page animations ──────────────────────────────────────────────────── */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulseGlow {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.7; }
-}
-
-/* ── Cyberpunk v3 keyframes ─────────────────────────────────────────── */
-@keyframes scanTop {
-  0%, 100% { transform: translateX(-100%); }
-  50%      { transform: translateX(100%);  }
-}
-
-@keyframes scanSide {
-  0%, 100% { transform: translateY(-100%); }
-  50%      { transform: translateY(100%);  }
-}
-
-@keyframes scanHighlight {
-  0%   { top: 0%; }
-  100% { top: 100%; }
-}
-
-@keyframes glitchRGB {
-  0%, 90%, 96%, 98%, 100% { transform: translate(0); opacity: 0; }
-  1%, 3%, 5% { transform: translate(1px, 0); opacity: 1; }
-  92% { transform: translate(-3px, 1px); }
-  94% { transform: translate(2px, -1px); }
-}
-
-@keyframes glitchSparse {
-  0%, 6%, 10%, 27%, 33%, 45%, 100% { clip-path: inset(0 0 0 0); }
-  5%  { clip-path: inset(40% 0 55% 0); }
-  25% { clip-path: inset(10% 0 30% 0); }
-  44% { clip-path: inset(80% 0 5% 0); }
-}
-
-@keyframes flickerText {
-  0%, 92%, 94%, 96%, 98%, 100% { opacity: 1; }
-  93% { opacity: 0.2; }
-  95% { opacity: 0.6; }
-  97% { opacity: 0.3; }
-  99% { opacity: 1; }
-}
-
-@keyframes blinkCursor {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0; }
-}
-
-@keyframes glowPulse {
-  0%, 100% { text-shadow: 0 0 12px currentColor; }
-  50%      { text-shadow: 0 0 24px currentColor, 0 0 48px currentColor; }
-}
-
-@keyframes shimmerScan {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(100%);  }
-}
-
-@keyframes neonBorder {
-  0%, 100% { border-color: rgb(62 231 255); box-shadow: 0 0 8px rgb(62 231 255 / 0.3), inset 0 0 8px rgb(62 231 255 / 0.05); }
-  50%      { border-color: rgb(255 87 77); box-shadow: 0 0 12px rgb(255 87 77 / 0.4), inset 0 0 12px rgb(255 87 77 / 0.08); }
-}
-
-@keyframes logoColorShift {
-  0%, 100% { color: rgb(255 87 77); filter: drop-shadow(0 0 20px rgb(255 87 77 / 0.45)); }
-  35%      { color: rgb(62 231 255); filter: drop-shadow(0 0 20px rgb(62 231 255 / 0.5)); }
-  60%      { color: rgb(62 231 255); filter: drop-shadow(0 0 30px rgb(62 231 255 / 0.65)); }
-  80%      { color: rgb(255 87 77); filter: drop-shadow(0 0 20px rgb(255 87 77 / 0.45)); }
-}
-
-@utility animate-fadeIn {
-  animation: fadeIn 0.5s ease-out both;
-}
-
-@utility animate-pulse-glow {
-  animation: pulseGlow 4s ease-in-out infinite;
-}
-
-@utility animate-scan-top {
-  position: relative;
-  overflow: hidden;
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; height: 0.5px;
-    background: linear-gradient(90deg, transparent 0%, var(--cyan) 40%, var(--cyan) 60%, transparent 100%);
-    animation: scanTop 3s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 5;
-  }
-}
-
-@utility animate-scan-highlight {
-  position: relative;
-  overflow: hidden;
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0; right: 0; height: 4px;
-    background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--cyan) 25%, transparent) 20%, color-mix(in srgb, var(--cyan) 25%, transparent) 80%, transparent 100%);
-    animation: scanHighlight 4s ease-in-out infinite;
-    pointer-events: none;
-  }
-}
-
-@utility animate-glitch-rgb {
-  position: relative;
-  &::before,
-  &::after {
-    content: attr(data-text);
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-  }
-  &::before {
-    color: var(--cyan);
-    animation: glitchRGB 0.3s infinite;
-    clip-path: inset(0 0 50% 0);
-  }
-  &::after {
-    color: var(--coral);
-    animation: glitchRGB 0.3s infinite reverse;
-    clip-path: inset(50% 0 0 0);
-  }
-}
-
-@utility animate-glitch-sparse {
-  animation: glitchSparse 6s infinite;
-}
-
-@utility animate-flicker {
-  animation: flickerText 3s ease-in-out infinite;
-}
-
-@utility animate-blink {
-  animation: blinkCursor 1s step-end infinite;
-}
-
-@utility animate-glow-pulse {
-  animation: glowPulse 3s ease-in-out infinite;
-}
-
-@utility shimmer {
-  position: relative;
-  overflow: hidden;
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--cyan) 4%, transparent) 40%, color-mix(in srgb, var(--cyan) 6%, transparent) 50%, color-mix(in srgb, var(--cyan) 4%, transparent) 60%, transparent 100%);
-    animation: shimmerScan 1.5s ease-in-out infinite;
-    pointer-events: none;
-  }
-}
-
-@utility img-glitch-hover {
-  transition: filter 0.3s;
-  &:hover {
-    filter: drop-shadow(2px 0 1px color-mix(in srgb, var(--cyan) 40%, transparent))
-            drop-shadow(-1px 0 1px color-mix(in srgb, var(--coral) 40%, transparent));
-  }
-}
-
-@utility glass {
-  background: color-mix(in srgb, var(--background) 88%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-/* ── Splash screen animations ─────────────────────────────────────────── */
-@keyframes fadeScaleIn {
-  from { opacity: 0; transform: scale(0.92); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-@custom-variant dark (&:is(.dark *));
-
-/* ── Playmorrow design system v2 ───────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════════════════════
+   PLAYMOORROW DESIGN SYSTEM v2
    Direction: obsidian-black surfaces, restrained glow, technical framing,
-   geometric typography, cyan/coral/violet/amber accent palette. */
+   geometric typography, cyan/coral/violet/amber accent palette.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Design Tokens ────────────────────────────────────────────────────── */
 
 :root {
   --radius: 0;
 
+  /* Surfaces */
   --background: #02070b;
   --foreground: #f2f5f4;
-
   --elevated: #071117;
   --elevated-foreground: #f2f5f4;
-
   --card: #09161d;
   --card-foreground: #e6eceb;
-
   --popover: #09161d;
   --popover-foreground: #f2f5f4;
 
+  /* Accent palette */
   --cyan: #3ee7ff;
   --cyan-foreground: #021014;
-
   --coral: #ff574d;
   --coral-foreground: #120302;
-
   --violet: #a65cff;
   --violet-foreground: #f6efff;
-
   --amber: #e4a83b;
   --amber-foreground: #120b02;
 
+  /* Semantic */
   --success: #70ff9b;
   --error: #ff574d;
 
+  /* Interactive states */
   --muted: #0d1a22;
   --muted-foreground: #8c969b;
-
   --accent: #10222b;
   --accent-foreground: #dce7e7;
-
   --border: #1b3038;
   --border-bright: #51666d;
   --input: #263940;
   --ring: var(--cyan);
 
+  /* HUD */
   --hud-line: #24414b;
   --hud-line-bright: #789099;
   --hud-shadow: 0 20px 80px rgb(0 0 0 / 0.5);
   --glow-cyan: 0 0 18px rgb(62 231 255 / 0.34);
   --glow-coral: 0 0 20px rgb(255 87 77 / 0.32);
 
+  /* Typography */
   --font-family-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
   --font-family-body: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-family-mono: var(--font-body), ui-monospace, SFMono-Regular, monospace;
 
+  /* Motion */
   --motion-fast: 150ms;
   --motion-medium: 300ms;
   --motion-slow: 600ms;
@@ -245,6 +65,8 @@
   --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --motion-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
+
+/* ── Tailwind Theme Mapping ───────────────────────────────────────────── */
 
 @theme inline {
   --color-background: var(--background);
@@ -278,7 +100,12 @@
   --font-mono: var(--font-family-mono);
 }
 
-/* ── Base layer ──────────────────────────────────────────────────────── */
+@custom-variant dark (&:is(.dark *));
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE LAYER
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 @layer base {
   * {
@@ -298,13 +125,11 @@
     letter-spacing: 0;
   }
 
-  /* Selection */
   ::selection {
     background: oklch(0.75 0.12 200 / 0.3);
     color: var(--foreground);
   }
 
-  /* Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -320,7 +145,6 @@
     background: var(--border-bright);
   }
 
-  /* Focus ring — stronger for accessibility (audit) */
   :focus-visible {
     outline: 2px solid var(--cyan);
     outline-offset: 3px;
@@ -337,7 +161,225 @@
   }
 }
 
-/* ── Utility classes ─────────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Page transitions ─────────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeScaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Glow & pulse ─────────────────────────────────────────────────────── */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { text-shadow: 0 0 12px currentColor; }
+  50%      { text-shadow: 0 0 24px currentColor, 0 0 48px currentColor; }
+}
+
+/* ── Scan lines ───────────────────────────────────────────────────────── */
+@keyframes scanTop {
+  0%, 100% { transform: translateX(-100%); }
+  50%      { transform: translateX(100%);  }
+}
+
+@keyframes scanSide {
+  0%, 100% { transform: translateY(-100%); }
+  50%      { transform: translateY(100%);  }
+}
+
+@keyframes scanHighlight {
+  0%   { top: 0%; }
+  100% { top: 100%; }
+}
+
+@keyframes shimmerScan {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%);  }
+}
+
+/* ── Glitch effects ───────────────────────────────────────────────────── */
+@keyframes glitchRGB {
+  0%, 90%, 96%, 98%, 100% { transform: translate(0); opacity: 0; }
+  1%, 3%, 5% { transform: translate(1px, 0); opacity: 1; }
+  92% { transform: translate(-3px, 1px); }
+  94% { transform: translate(2px, -1px); }
+}
+
+@keyframes glitchSparse {
+  0%, 6%, 10%, 27%, 33%, 45%, 100% { clip-path: inset(0 0 0 0); }
+  5%  { clip-path: inset(40% 0 55% 0); }
+  25% { clip-path: inset(10% 0 30% 0); }
+  44% { clip-path: inset(80% 0 5% 0); }
+}
+
+/* ── Text effects ─────────────────────────────────────────────────────── */
+@keyframes flickerText {
+  0%, 92%, 94%, 96%, 98%, 100% { opacity: 1; }
+  93% { opacity: 0.2; }
+  95% { opacity: 0.6; }
+  97% { opacity: 0.3; }
+  99% { opacity: 1; }
+}
+
+@keyframes blinkCursor {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+@keyframes neonBorder {
+  0%, 100% { border-color: rgb(62 231 255); box-shadow: 0 0 8px rgb(62 231 255 / 0.3), inset 0 0 8px rgb(62 231 255 / 0.05); }
+  50%      { border-color: rgb(255 87 77); box-shadow: 0 0 12px rgb(255 87 77 / 0.4), inset 0 0 12px rgb(255 87 77 / 0.08); }
+}
+
+@keyframes logoColorShift {
+  0%, 100% { color: rgb(255 87 77); filter: drop-shadow(0 0 20px rgb(255 87 77 / 0.45)); }
+  35%      { color: rgb(62 231 255); filter: drop-shadow(0 0 20px rgb(62 231 255 / 0.5)); }
+  60%      { color: rgb(62 231 255); filter: drop-shadow(0 0 30px rgb(62 231 255 / 0.65)); }
+  80%      { color: rgb(255 87 77); filter: drop-shadow(0 0 20px rgb(255 87 77 / 0.45)); }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CUSTOM UTILITIES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Animation utilities ──────────────────────────────────────────────── */
+
+@utility animate-fadeIn {
+  animation: fadeIn 0.5s ease-out both;
+}
+
+@utility animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+@utility animate-flicker {
+  animation: flickerText 3s ease-in-out infinite;
+}
+
+@utility animate-blink {
+  animation: blinkCursor 1s step-end infinite;
+}
+
+@utility animate-glow-pulse {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+/* ── Scan & shimmer utilities ─────────────────────────────────────────── */
+
+@utility animate-scan-top {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 0.5px;
+    background: linear-gradient(90deg, transparent 0%, var(--cyan) 40%, var(--cyan) 60%, transparent 100%);
+    animation: scanTop 3s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 5;
+  }
+}
+
+@utility animate-scan-highlight {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--cyan) 25%, transparent) 20%, color-mix(in srgb, var(--cyan) 25%, transparent) 80%, transparent 100%);
+    animation: scanHighlight 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+}
+
+@utility shimmer {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--cyan) 4%, transparent) 40%, color-mix(in srgb, var(--cyan) 6%, transparent) 50%, color-mix(in srgb, var(--cyan) 4%, transparent) 60%, transparent 100%);
+    animation: shimmerScan 1.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+}
+
+/* ── Glitch utilities ─────────────────────────────────────────────────── */
+
+@utility animate-glitch-rgb {
+  position: relative;
+  &::before, &::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  &::before {
+    color: var(--cyan);
+    animation: glitchRGB 0.3s infinite;
+    clip-path: inset(0 0 50% 0);
+  }
+  &::after {
+    color: var(--coral);
+    animation: glitchRGB 0.3s infinite reverse;
+    clip-path: inset(50% 0 0 0);
+  }
+}
+
+@utility animate-glitch-sparse {
+  animation: glitchSparse 6s infinite;
+}
+
+/* ── Image utilities ──────────────────────────────────────────────────── */
+
+@utility img-glitch-hover {
+  transition: filter 0.3s;
+  &:hover {
+    filter: drop-shadow(2px 0 1px color-mix(in srgb, var(--cyan) 40%, transparent))
+            drop-shadow(-1px 0 1px color-mix(in srgb, var(--coral) 40%, transparent));
+  }
+}
+
+/* ── Glass & glow utilities ───────────────────────────────────────────── */
+
+@utility glass {
+  background: color-mix(in srgb, var(--background) 88%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+@utility glow-cyan {
+  box-shadow: var(--glow-cyan);
+}
+
+@utility glow-coral {
+  box-shadow: var(--glow-coral);
+}
+
+@utility glow-text-cyan {
+  text-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 30%, transparent);
+}
+
+@utility glow-border {
+  box-shadow: 0 0 16px color-mix(in srgb, var(--cyan) 10%, transparent);
+}
+
+/* ── Typography utilities ─────────────────────────────────────────────── */
 
 @utility text-technical {
   font-family: var(--font-family-mono);
@@ -345,6 +387,8 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+
+/* ── Clip utilities ───────────────────────────────────────────────────── */
 
 @utility clip-corner {
   clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
@@ -358,7 +402,7 @@
   clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);
 }
 
-/* ── Technical panel ─────────────────────────────────────────────────── */
+/* ── Surface utilities ────────────────────────────────────────────────── */
 
 @utility panel {
   @apply border border-border bg-elevated;
@@ -375,7 +419,22 @@
   border-left-color: var(--cyan);
 }
 
-/* ── Signal indicator ────────────────────────────────────────────────── */
+/* ── Interactive utilities ────────────────────────────────────────────── */
+
+@utility card-hover {
+  transition: all 0.3s ease;
+  &:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--cyan) 50%, transparent);
+    box-shadow: 0 0 30px color-mix(in srgb, var(--cyan) 8%, transparent), 0 8px 32px rgb(0 0 0 / 0.4);
+  }
+}
+
+@utility transition-smooth {
+  transition: all 0.25s ease;
+}
+
+/* ── Signal & HUD utilities ───────────────────────────────────────────── */
 
 @utility signal-dot {
   display: inline-block;
@@ -385,8 +444,6 @@
   background: var(--cyan);
   box-shadow: var(--glow-cyan);
 }
-
-/* ── Circuit decoration ──────────────────────────────────────────────── */
 
 @utility circuit-h {
   position: relative;
@@ -414,24 +471,10 @@
   }
 }
 
-/* ── Glow effects ────────────────────────────────────────────────────── */
 
-@utility glow-cyan {
-  box-shadow: var(--glow-cyan);
-}
-
-@utility glow-coral {
-  box-shadow: var(--glow-coral);
-}
-
-/* ── Reduced motion ──────────────────────────────────────────────────── */
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEGACY CSS CLASSES (for components still using .pm-*)
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .pm-display {
   font-family: var(--font-family-display);
@@ -452,14 +495,13 @@
   position: relative;
   isolation: isolate;
 }
-
 .pm-scanline::after {
   content: "";
-    position: absolute;
-    left: 0; right: 0;
-    top: 50%;
-    height: 1px;
-    transform: translateY(-50%);
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  height: 1px;
+  transform: translateY(-50%);
   pointer-events: none;
   z-index: 1;
   background-image: linear-gradient(rgb(255 255 255 / 0.025) 1px, transparent 1px);
@@ -474,25 +516,14 @@
   background-size: 72px 72px;
 }
 
-/* ── Polish utilities ────────────────────────────────────────────────── */
 
-@utility card-hover {
-  transition: all 0.3s ease;
-  &:hover {
-    transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--cyan) 50%, transparent);
-    box-shadow: 0 0 30px color-mix(in srgb, var(--cyan) 8%, transparent), 0 8px 32px rgb(0 0 0 / 0.4);
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBILITY
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
-}
-
-@utility transition-smooth {
-  transition: all 0.25s ease;
-}
-
-@utility glow-text-cyan {
-  text-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 30%, transparent);
-}
-
-@utility glow-border {
-  box-shadow: 0 0 16px color-mix(in srgb, var(--cyan) 10%, transparent);
 }
