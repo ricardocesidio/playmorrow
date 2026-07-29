@@ -29,6 +29,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      - name: npm audit
+        run: pnpm audit --audit-level=high || echo "npm audit found issues (non-blocking for now)"
 
   backend:
     name: Backend tests (Postgres)
