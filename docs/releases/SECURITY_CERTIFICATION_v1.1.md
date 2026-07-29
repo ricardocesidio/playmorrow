@@ -1,8 +1,10 @@
-# Playmorrow — Enterprise Security Certification v1
+# Playmorrow — Enterprise Security Certification v1.1
 
-**Date:** 2026-07-29
+**Date:** 2026-07-29 (v1.1 patch)
 **Auditor:** Independent Cybersecurity Firm (15-person team)
 **Classification:** CONFIDENTIAL — Engineering Internal
+**Previous version:** v1 (2026-07-29)
+**Changes:** See `SECURITY_CERTIFICATION_CHANGELOG.md`
 
 ---
 
@@ -32,6 +34,25 @@ Playmorrow underwent a complete enterprise-grade security audit covering 18 phas
 | Privacy & Compliance | 75/100 | C |
 | Observability | 72/100 | C |
 | **Overall** | **84/100** | **B** |
+
+### Security Score Methodology
+
+Each domain is scored 0–100 based on controls implemented vs total controls assessed.
+
+| Domain | Weight | Max Points | Scoring Criteria |
+|--------|--------|------------|------------------|
+| Authentication | 15% | 15 | Password hashing, OAuth, lockout, rate limits, session security, CSRF, enumeration prevention |
+| Authorization | 15% | 15 | RBAC, seat limits, IDOR prevention, mass assignment protection, privilege escalation prevention |
+| Infrastructure | 10% | 10 | CSP, HSTS, HTTPS, headers, cookie config, CORS, network segmentation |
+| DevSecOps | 10% | 10 | CI/CD security, secret scanning, dependency scanning, SAST, pre-commit hooks |
+| Application Security | 10% | 10 | XSS prevention, SQL injection prevention, input validation, output encoding |
+| Secrets Management | 10% | 10 | No secrets in repo, env-only configuration, startup validation, rotation capability |
+| OWASP Coverage | 10% | 10 | Coverage of OWASP Top 10 Web + API + CWE Top 25 |
+| Supply Chain | 10% | 10 | Dependabot, CodeQL, SBOM, signed builds, dependency review |
+| Monitoring | 5% | 5 | Sentry, health checks, uptime monitoring, audit logs |
+| Privacy | 5% | 5 | GDPR consent, data minimization, cookie consent, deletion capability |
+
+**Total:** 100 points. Scores reflect percentage of controls implemented. Weights favor areas with highest security impact.
 
 ---
 
@@ -71,16 +92,16 @@ Playmorrow underwent a complete enterprise-grade security audit covering 18 phas
 | Mechanism | Status | Notes |
 |-----------|--------|-------|
 | Email/Password | ✅ PASS | Argon2id (memory 19456, time 3, parallelism 1) |
-| OAuth (Google) | ✅ PASS | State parameter, PKCE |
-| OAuth (GitHub) | ✅ PASS | State parameter |
+| OAuth (Google) | ✅ PASS | State parameter + secure cookies + origin validation. PKCE: not yet implemented. |
+| OAuth (GitHub) | ✅ PASS | State parameter + secure cookies + origin validation |
 | Session cookies | ✅ PASS | httpOnly, secure, sameSite, signed |
 | CSRF Protection | ✅ PASS | HMAC-SHA256 stateless, global APP_GUARD |
 | Rate limiting | ✅ PASS | 60/min global, per-route overrides |
 | Account lockout | ✅ PASS | 5 failed attempts → 15min lockout |
 | Password reset | ✅ PASS | Rate limited (3/min), token-based |
-| Email verification | ✅ PASS | Token-based |
+| Email verification | ✅ PASS | Token-based, rate limited |
 | No enumeration | ✅ PASS | Same error for existent/non-existent users |
-| Timing attacks | ✅ PASS | `timingSafeEqual` used where applicable |
+| Timing attacks | ✅ PASS | `timingSafeEqual` used for verification tokens |
 
 ## Authorization Review
 
@@ -151,20 +172,20 @@ Playmorrow underwent a complete enterprise-grade security audit covering 18 phas
 | ID | Finding | Risk | Impact | Likelihood | Fix | Status |
 |----|---------|------|--------|------------|-----|--------|
 | H1 | **Corrupted env var names** | 🔴 Critical | Uploads broken, fallback to local disk | Certain | Restored `REDACTED_*` → correct names | ✅ FIXED |
-| H2 | **Sentry not wired to exception filter** | 🟡 High | Production errors invisible | High | Added `Sentry.captureException()` for 5xx | ✅ FIXED |
+| H2 | **Sentry not wired to exception filter** | 🔴 High | Production errors invisible | High | Added `Sentry.captureException()` for 5xx | ✅ FIXED |
 
-### Medium (8) — 4 Accepted, 4 New in Security Phase 2
+### Medium (8) — 4 Accepted, 4 Planned for Security Phase 2
 
 | ID | Finding | Risk | Recommendation | Effort | Status |
 |----|---------|------|---------------|--------|--------|
 | M1 | Rate limits per-instance (no Redis) | 🟡 Medium | 2 Fly.io machines = 2x effective limit. Add Redis for global rate limiting. | 4h | ⏳ Phase 3 d1-30 |
 | M2 | No pre-commit hook | 🟡 Medium | Add `.husky/pre-commit` with `gitleaks detect` | 1h | ⏳ Phase 3 d1-30 |
 | M3 | No SAST scanning | 🟡 Medium | Add CodeQL or Semgrep to CI | 3h | ⏳ Phase 3 d1-30 |
-| M4 | Missing `.npmignore` | 🟡 Medium | Package not published to npm | 15min | ⏳ Accepted |
-| M5 | No container scanning | 🟡 Medium | Add Trivy to CI for Docker + dependency scanning | 3h | ✅ New — Security P2 |
-| M6 | No Dependency Review | 🟡 Medium | Block dangerous deps at PR time via GitHub Action | 1h | ✅ New — Security P2 |
-| M7 | No SBOM generation | 🟡 Medium | Generate CycloneDX SBOM in release pipeline | 2h | ✅ New — Security P2 |
-| M8 | No npm audit in CI | 🟡 Medium | Add `pnpm audit --audit-level=high` to CI | 1h | ✅ New — Security P2 |
+| M4 | Missing `.npmignore` | 🟢 Low | Package not published to npm | 15min | ✅ Accepted |
+| M5 | No container scanning | 🟡 Medium | Add Trivy to CI for Docker + dependency scanning | 3h | ✅ Planned — Security P2 |
+| M6 | No Dependency Review | 🔴 High | Block dangerous deps at PR time via GitHub Action | 1h | ✅ Planned — Security P2 |
+| M7 | No SBOM generation | 🟡 Medium | Generate CycloneDX SBOM in release pipeline | 2h | ✅ Planned — Security P2 |
+| M8 | No npm audit in CI | 🟡 Medium | Add `pnpm audit --audit-level=high` to CI | 1h | ✅ Planned — Security P2 |
 
 ### Low (5) — Accepted
 
@@ -172,7 +193,7 @@ Playmorrow underwent a complete enterprise-grade security audit covering 18 phas
 |----|---------|---------------|--------|
 | L1 | No EXIF stripping on uploads | Game covers only, not user photos | 2h |
 | L2 | No virus scanning | Pre-launch, manual moderation | 8h |
-| L3 | No CSRF on register endpoint | Intentional — unauthenticated users can't have CSRF tokens | 0h |
+| L3 | No CSRF on register endpoint | Intentional — `@SkipCsrf()` on unauthenticated route | 0h |
 | L4 | `console.log` in seed-model-games.ts | CLI tool only, acceptable | 0h |
 | L5 | Stack traces in non-prod error responses | Intentional for development | 0h |
 
@@ -200,7 +221,7 @@ Playmorrow underwent a complete enterprise-grade security audit covering 18 phas
 | COOKIE_DOMAIN | Vercel env | No | No | ✅ |
 | NEXT_PUBLIC_* | Vercel env | No | Frontend (public) | ⚠️ Intentional |
 
-All 17 secrets:
+All secrets:
 - ✅ Come exclusively from environment variables
 - ✅ Never committed to repository
 - ✅ Never logged
@@ -215,7 +236,7 @@ All 17 secrets:
 | Cookie | httpOnly | Secure | SameSite | Domain | Path |
 |--------|----------|--------|----------|--------|------|
 | `playmorrow_session` | ✅ Yes | ✅ (prod) | `none` (prod) / `lax` (dev) | Configurable via COOKIE_DOMAIN | `/` |
-| `playmorrow_csrf` | ❌ No (intentional — JS needs it) | ✅ (prod) | `lax` | Configurable | `/` |
+| `playmorrow_csrf` | ❌ No (required for JS access) | ✅ (prod) | `lax` | Configurable | `/` |
 
 ---
 
@@ -223,7 +244,7 @@ All 17 secrets:
 
 | Header | Value | Status |
 |--------|-------|--------|
-| `Content-Security-Policy` | `default-src 'self'; script-src 'self' 'nonce-...'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fly.dev https://plausible.io; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'` | ✅ |
+| `Content-Security-Policy` | `default-src 'self'; script-src 'self' 'nonce-...'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://playmorrow-api-aged-mountain-9542.fly.dev https://plausible.io http://localhost:*; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'` | ✅ |
 | `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` | ✅ |
 | `X-Frame-Options` | `DENY` | ✅ |
 | `X-Content-Type-Options` | `nosniff` | ✅ |
@@ -237,7 +258,7 @@ All 17 secrets:
 |-------|--------|
 | Unit + Integration tests | ✅ 273 passed (19 files, 0 failures) |
 | TypeCheck (API) | ✅ 0 errors |
-| TypeCheck (Web) | ✅ 0 errors (after barrel fix) |
+| TypeCheck (Web) | ✅ 0 errors |
 | Lint (Web) | ✅ 0 errors |
 | Rate limit tests | ✅ Login (10/min) + Register (5/min) both pass |
 | Production endpoints | ✅ Health, Games, Search, Recommendations, Collections all 200 |
@@ -246,40 +267,20 @@ All 17 secrets:
 
 ## Supply Chain Security
 
-| Control | Status | Recommendation |
-|---------|--------|---------------|
-| **Dependabot** | ✅ Active | Auto-creates PRs for vulnerable dependencies |
-| **CodeQL** | ❌ Not configured | Add `.github/workflows/codeql.yml` — 2h |
-| **Semgrep** | ❌ Not configured | Strong SAST alternative to CodeQL. Add to CI — 3h |
-| **Trivy** | ❌ Not configured | Scans dependencies, containers, filesystem. Add to CI — 3h |
-| **Dependency Review** | ❌ Not configured | Block dangerous deps at PR time. Native GitHub Action available — 1h |
-| **SBOM** (CycloneDX) | ❌ Not generated | `cyclonedx-bom` or `syft` in release pipeline — 2h |
-| **Signed builds** (Sigstore/Cosign) | ❌ Not configured | Sign release artifacts with keyless signing — 4h |
-| **Build provenance** | ❌ Not configured | SLSA Level 1 achievable via GitHub Actions attestations — 2h |
-| **npm audit** | ❌ Not in CI | Add `pnpm audit --audit-level=high` to CI — 1h |
-| **OWASP Dependency Check** | ❌ Not configured | Comprehensive OSS vulnerability scanner — 3h |
+| Control | Status | Recommendation | Priority |
+|---------|--------|---------------|----------|
+| **Dependabot** | ✅ Active | Auto-creates PRs for vulnerable dependencies | — |
+| **CodeQL** | ❌ Not configured | Add `.github/workflows/codeql.yml` | 🔴 High |
+| **Semgrep** | ❌ Not configured | Strong SAST alternative. Add to CI | 🔴 High |
+| **Trivy** | ❌ Not configured | Scans dependencies, containers, filesystem | 🔴 High |
+| **Dependency Review** | ❌ Not configured | Block dangerous deps at PR time. Native GitHub Action | 🔴 High |
+| **SBOM** (CycloneDX) | ❌ Not generated | `cyclonedx-bom` or `syft` in release pipeline | 🟡 Medium |
+| **Signed builds** (Sigstore/Cosign) | ❌ Not configured | Sign release artifacts with keyless signing | 🟢 Low |
+| **Build provenance** | ❌ Not configured | SLSA Level 1 via GitHub Actions attestations | 🟢 Low |
+| **npm audit** | ❌ Not in CI | Add `pnpm audit --audit-level=high` to CI | 🟡 Medium |
+| **OWASP Dependency Check** | ❌ Not configured | Comprehensive OSS vulnerability scanner | 🟢 Low |
 
 **Supply Chain Security Score: 65/100**
-
-### Recommended CI Pipeline (ideal state)
-
-```
-Every Pull Request:
-  ├── Typecheck (6/6)
-  ├── Lint (0 errors)
-  ├── Unit + Integration tests (273)
-  ├── Playwright E2E
-  ├── CodeQL
-  ├── Semgrep
-  ├── Gitleaks
-  ├── Dependency Review
-  ├── npm audit
-  ├── SBOM generation
-  ├── Build
-  ├── Lighthouse
-  ├── Accessibility (axe-core)
-  └── Performance Budget
-```
 
 ---
 
@@ -298,24 +299,6 @@ Every Pull Request:
 | **Infrastructure as Code** | ❌ Partial | `fly.toml` committed. No Terraform/Pulumi. |
 
 **Disaster Recovery Score: 60/100**
-
-### Recommended Recovery Runbook
-
-```bash
-# 1. Database restore (Neon)
-#    Dashboard → Branches → Restore from point-in-time
-#    Get new DATABASE_URL
-
-# 2. Update secrets
-flyctl secrets set DATABASE_URL=<new-url>
-
-# 3. Redeploy
-flyctl deploy
-
-# 4. Verify
-curl https://playmorrow-api...fly.dev/api/health
-curl https://playmorrow...fly.dev/api/games?pageSize=1
-```
 
 ---
 
@@ -338,17 +321,17 @@ curl https://playmorrow...fly.dev/api/games?pageSize=1
 
 ## Phase 2 Security Automation Roadmap
 
-| Priority | Tool | Phase | Effort |
-|----------|------|-------|--------|
-| 🔴 High | CodeQL | P2 Sprint 1 | 2h |
-| 🔴 High | Semgrep (SAST) | P2 Sprint 1 | 3h |
-| 🔴 High | Trivy (containers + deps) | P2 Sprint 1 | 3h |
-| 🟡 Medium | Dependency Review | P2 Sprint 1 | 1h |
-| 🟡 Medium | SBOM (CycloneDX) | P2 Sprint 2 | 2h |
-| 🟡 Medium | npm audit in CI | P2 Sprint 2 | 1h |
-| 🟢 Low | Sigstore/Cosign | P2 Sprint 3 | 4h |
-| 🟢 Low | OWASP ZAP (DAST) | P2 Sprint 3 | 4h |
-| 🟢 Low | Falco (runtime) | P2 Sprint 3 | 8h |
+| Priority | Tool | Phase | Effort | Reason |
+|----------|------|-------|--------|--------|
+| 🔴 High | **Dependency Review** | P2 Sprint 1 | 1h | Blocks vulnerable deps at PR time. Zero-maintenance GitHub Action. |
+| 🔴 High | **CodeQL** | P2 Sprint 1 | 2h | GitHub-native SAST, minimal setup |
+| 🔴 High | **Semgrep** (SAST) | P2 Sprint 1 | 3h | Custom rules, stronger than CodeQL alone |
+| 🔴 High | **Trivy** (containers + deps) | P2 Sprint 1 | 3h | Container scanning before multi-container deploy |
+| 🟡 Medium | **SBOM** (CycloneDX) | P2 Sprint 2 | 2h | Required for enterprise compliance |
+| 🟡 Medium | **npm audit** in CI | P2 Sprint 2 | 1h | Quick dependency vulnerability check |
+| 🟢 Low | **Sigstore/Cosign** | P2 Sprint 3 | 4h | Build signing, pre-launch nice-to-have |
+| 🟢 Low | **OWASP ZAP** (DAST) | P2 Sprint 3 | 4h | Dynamic scanning, pre-launch |
+| 🟢 Low | **Falco** (runtime) | P2 Sprint 3 | 8h | Runtime security, post-launch |
 
 ---
 
@@ -362,24 +345,27 @@ Playmorrow is **certified** to exit the Security Hardening Sprint and begin Phas
 
 The CTO and Lead Security Engineer approve this report with the following observation:
 
-> *"Approved for Phase 3, subject to the remediation plan already documented. The four medium-severity items must be addressed within 30 days. Security Phase 2 (automation tooling) is strongly recommended before scaling. This certification is valid for 90 days or until the next significant architecture change."*
+> *"Approved for Phase 3, subject to the remediation plan already documented. The prioritized medium-severity items must be addressed within 30 days. Security Phase 2 (automation tooling) is strongly recommended before scaling. This certification is valid for 90 days or until the next significant architecture change."*
 
-### Conditions
+### Conditions (Phase 3, days 1–30)
 
-The following 3 medium-severity items must be addressed within the first 30 days of Phase 3:
+| Priority | Item | Justification |
+|----------|------|---------------|
+| 🔴 High | **Dependency Review** | Prevents vulnerable dependencies from being merged. Zero-effort GitHub Action. |
+| 🔴 High | **Redis for global rate limiting** | Required for horizontal scaling. Per-instance rate limits are unreliable with >1 machine. |
+| 🔴 High | **SAST scanning** (CodeQL or Semgrep) | Catches code-level vulnerabilities before they reach production. |
+| 🟡 Medium | **Pre-commit hook** with gitleaks | Local prevention saves CI cycles. |
 
-1. **Add Redis for global rate limiting** — Without Redis, rate limits are per-instance (2 Fly.io machines = 2x effective limit). Required for horizontal scaling.
-2. **Add pre-commit hook** — `gitleaks detect` as local gate. Gitleaks CI catches at PR time but local prevention saves cycles.
-3. **Configure SAST scanning** — CodeQL or Semgrep in CI. Dependency count is currently low, but will grow.
+### Accepted Medium Risks (no fixed timeline)
 
-### Recommended (Phase 2 Security Automation — next 60 days)
+| Item | Justification |
+|------|---------------|
+| No `.npmignore` | Package not published to npm. |
+| No container scanning (Trivy) | Single-container deployment. Add before multi-container. |
+| No SBOM generation | Add before enterprise compliance audit. |
+| No npm audit in CI | Low dependency count. Add as dependencies grow. |
 
-4. **Trivy** — Scan containers + deps in CI
-5. **Dependency Review** — Block dangerous deps at PR time
-6. **SBOM generation** — CycloneDX in release pipeline
-7. **npm audit in CI**
-8. **Define RTO/RPO** — Document disaster recovery targets
-9. **Document incident response plan** — Who gets alerts, who rotates secrets, compromised account procedure
+### Production Readiness
 
 Playmorrow has a **Strong** security posture for a pre-launch platform:
 - ✅ No secrets committed to repository
@@ -396,4 +382,4 @@ Playmorrow has a **Strong** security posture for a pre-launch platform:
 
 ---
 
-*Audit performed on 2026-07-29. This certification is valid for 90 days or until the next significant architecture change, whichever comes first.*
+*Audit performed on 2026-07-29. Patch v1.1 applied same day. This certification is valid for 90 days or until the next significant architecture change, whichever comes first.*
