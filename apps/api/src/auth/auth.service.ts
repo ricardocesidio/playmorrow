@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException, Optional } from '@nestjs/common';
 import { logger } from '../common/logger';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -73,6 +73,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly tokenService: TokenService,
     private readonly emailService: EmailService,
+    @Optional() private readonly emailSender?: EmailSenderService,
     private readonly notificationsService: NotificationsService,
   ) {
     this.refreshSecret = this.configService.getOrThrow<string>('JWT_SECRET');
@@ -127,6 +128,10 @@ export class AuthService {
         // Log but swallow — registration succeeded. Code is in DB.
         logger.error({ msg: 'Failed to send verification email during register (code stored for resend)', err });
       }
+      this.emailSender?.sendRaw(user.email, 'Your Playmorrow verification code',
+        `<p>Your verification code is: <strong style="font-size:24px;color:#3ee7ff">${raw}</strong></p><p>This code expires in 15 minutes.</p>`,
+        user.id,
+      ).catch(() => {});
 
       // Send welcome notification
       this.notificationsService.create({
@@ -136,6 +141,12 @@ export class AuthService {
         title: 'Welcome to Playmorrow!',
         body: 'Discover indie games, follow studios, and be part of the journey. Browse games, create wishlists, and join the community discussion. Your adventure starts now!',
       }).catch((err) => logger.error({ msg: 'Failed to send welcome notification', err }));
+
+      // Send welcome email via template
+      this.emailSender?.sendTemplate(user.email, 'welcome', {
+        username: user.displayName,
+        siteUrl: this.configService.get<string>('WEB_ORIGIN', 'http://localhost:3000'),
+      }, user.id).catch(() => {});
 
       return {
         requiresEmailVerification: true,
@@ -350,6 +361,10 @@ export class AuthService {
     });
 
     this.emailService.sendPasswordResetEmail(user.email, token.raw).catch((err) => logger.error({ msg: 'Failed to send password reset email', err }));
+    this.emailSender?.sendTemplate(user.email, 'password-reset', {
+      username: user.displayName,
+      resetUrl: `${this.configService.get<string>('WEB_ORIGIN', 'http://localhost:3000')}/reset-password?token=${token.raw}`,
+    }, user.id).catch(() => {});
   }
 
   async resetPassword(rawToken: string, newPassword: string) {
