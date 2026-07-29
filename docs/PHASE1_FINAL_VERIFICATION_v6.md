@@ -39,12 +39,26 @@ cd apps/api && flyctl deploy
 
 ### Impacto em produção
 
-| Funcionalidade | Impacto |
-|----------------|---------|
-| Homepage — Trending Now | ❌ Não aparece (server component recebe 404, retorna null) |
-| Discover Page — Trending/Popular/Newest | 🟡 Newest funciona (via `/games`), Trending/Popular vazios |
-| Game Detail — Similar Games | ❌ Não aparece |
-| Search 2.0 | ✅ Funciona normalmente |
+```bash
+# Confirmado: /api/games?sortBy=followersCount funciona (endpoint independente)
+$ curl -s "https://playmorrow-api-aged-mountain-9542.fly.dev/api/games?sortBy=followersCount&pageSize=6"
+# Status: OK, Items: 6, Total: 13
+
+# Confirmado: Feed page carrega com filtros (usa /api/feed/public, não recommendations)
+$ curl -s "https://playmorrow.vercel.app/feed" | grep "Live Feed"
+# Title: "Live Feed · Playmorrow"
+```
+
+| Funcionalidade | Impacto | Endpoint |
+|----------------|---------|----------|
+| Homepage — Trending Now | ❌ Não aparece | `/api/recommendations` 404 |
+| Homepage — Live Feed | ✅ Funciona | `/api/feed/public` ✅ |
+| Discover — Trending | ❌ Vazio | `/api/recommendations` 404 |
+| Discover — Popular | ✅ Funciona | `/api/games?sortBy=followersCount` ✅ |
+| Discover — Newest | ✅ Funciona | `/api/games` ✅ |
+| Game Detail — Similar Games | ❌ Não aparece | `/api/recommendations` 404 |
+| Search 2.0 | ✅ Funciona | `/api/search` ✅ |
+| Feed com filtros (5.4) | ✅ Funciona | `/api/feed/public` + client-side state ✅ |
 
 ---
 
