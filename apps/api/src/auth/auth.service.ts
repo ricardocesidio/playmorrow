@@ -11,6 +11,7 @@ import { hashToken, generateRefreshToken } from '../common/crypto-utils';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { EmailService } from '../email/email.service';
+import { EmailSenderService } from '../email/email-sender.service';
 import { TokenService } from './token.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import type { LoginDto } from './dto/login.dto';
@@ -73,8 +74,8 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly tokenService: TokenService,
     private readonly emailService: EmailService,
+    @Optional()     private readonly notificationsService: NotificationsService,
     @Optional() private readonly emailSender?: EmailSenderService,
-    private readonly notificationsService: NotificationsService,
   ) {
     this.refreshSecret = this.configService.getOrThrow<string>('JWT_SECRET');
   }

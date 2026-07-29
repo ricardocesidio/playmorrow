@@ -53,6 +53,7 @@ import { StudioPressKitModule } from './studio-press-kit/studio-press-kit.module
 import { CollectionsModule } from './collections/collections.module';
 import { EmailTemplatesModule } from './email-templates/email-templates.module';
 import { EmailPreferencesModule } from './email-preferences/email-preferences.module';
+import { DigestModule } from './digest/digest.module';
 import { ModerationModule } from './moderation/moderation.module';
 
 @Module({
@@ -108,6 +109,7 @@ import { ModerationModule } from './moderation/moderation.module';
     ModerationModule,
     EmailTemplatesModule,
     EmailPreferencesModule,
+    DigestModule,
   ],
   controllers: [CspController],
   providers: [
