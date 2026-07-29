@@ -25,6 +25,7 @@ import { ModerationService } from './moderation.service';
 const SUFFIX = `mod-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 const TEST_EMAIL = `test_${SUFFIX}@example.com`;
 const ADMIN_EMAIL = `admin_${SUFFIX}@example.com`;
+const REGULAR_EMAIL = `regular_${SUFFIX}@example.com`;
 const PASSWORD = 'StrongPass123!';
 
 describe('Moderation — API + Service', () => {
@@ -77,11 +78,45 @@ describe('Moderation — API + Service', () => {
       },
     });
     targetUserId = user.id;
+
+    // Create regular (non-admin, non-moderator) user for 403 tests
+    await prisma.user.create({
+      data: {
+        email: REGULAR_EMAIL, username: `regular_${SUFFIX}`, displayName: 'Regular',
+        passwordHash: '$argon2id$v=19$m=19456,t=3,p=1$salt$hash', role: 'PLAYER',
+        emailVerifiedAt: new Date(),
+      },
+    });
   });
 
   afterAll(async () => {
-    await prisma.user.deleteMany({ where: { email: { in: [TEST_EMAIL, ADMIN_EMAIL] } } }).catch(() => {});
+    await prisma.user.deleteMany({ where: { email: { in: [TEST_EMAIL, ADMIN_EMAIL, REGULAR_EMAIL] } } }).catch(() => {});
     await prisma.$disconnect();
+  });
+
+  // ── RBAC Bypass Test (CRITICAL) ──────────────────────────────────
+
+  describe('RBAC — MODERATOR bypass prevention', () => {
+    it('suspendUser throws FORBIDDEN for non-admin/non-moderator user', async () => {
+      const regular = await prisma.user.findUnique({ where: { email: REGULAR_EMAIL } });
+      await expect(
+        modService.suspendUser(regular!.id, targetUserId, 'test', 1),
+      ).rejects.toThrow('Only ADMIN or MODERATOR');
+    });
+
+    it('unsuspendUser throws FORBIDDEN for non-admin/non-moderator user', async () => {
+      const regular = await prisma.user.findUnique({ where: { email: REGULAR_EMAIL } });
+      await expect(
+        modService.unsuspendUser(regular!.id, targetUserId),
+      ).rejects.toThrow('Only ADMIN or MODERATOR');
+    });
+
+    it('shadowBanUser throws FORBIDDEN for non-admin/non-moderator user', async () => {
+      const regular = await prisma.user.findUnique({ where: { email: REGULAR_EMAIL } });
+      await expect(
+        modService.shadowBanUser(regular!.id, targetUserId),
+      ).rejects.toThrow('Only ADMIN or MODERATOR');
+    });
   });
 
   // ── Service-level Tests ──────────────────────────────────────────

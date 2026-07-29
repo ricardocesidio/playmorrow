@@ -5,58 +5,60 @@ import {
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { ModerationService } from './moderation.service';
 
-// CSRF is intentionally NOT skipped here. Admin/moderator endpoints must be
-// CSRF-protected because they use session cookies for auth (not API tokens).
-// The SessionAuthGuard + CsrfGuard combination ensures that mutations require
-// a valid CSRF token from the login response, preventing CSRF attacks.
 @ApiTags('admin/moderation')
 @Controller('admin/moderation')
 export class ModerationController {
   constructor(private readonly mod: ModerationService) {}
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MODERATOR')
   @Post('suspend')
   @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @ApiOperation({ summary: 'Suspend a user for a duration' })
   async suspend(
-    @CurrentUser() admin: { id: string },
+    @CurrentUser() admin: { id: string; role: string },
     @Body() body: { userId: string; reason: string; durationHours: number },
   ) {
     return this.mod.suspendUser(admin.id, body.userId, body.reason, body.durationHours);
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MODERATOR')
   @Post('unsuspend')
   @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @ApiOperation({ summary: 'Remove a suspension from a user' })
   async unsuspend(
-    @CurrentUser() admin: { id: string },
+    @CurrentUser() admin: { id: string; role: string },
     @Body() body: { userId: string },
   ) {
     return this.mod.unsuspendUser(admin.id, body.userId);
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MODERATOR')
   @Post('shadow-ban')
   @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @ApiOperation({ summary: 'Shadow ban a user' })
   async shadowBan(
-    @CurrentUser() admin: { id: string },
+    @CurrentUser() admin: { id: string; role: string },
     @Body() body: { userId: string },
   ) {
     return this.mod.shadowBanUser(admin.id, body.userId);
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MODERATOR')
   @Post('remove-shadow-ban')
   @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @ApiOperation({ summary: 'Remove shadow ban from a user' })
   async removeShadowBan(
-    @CurrentUser() admin: { id: string },
+    @CurrentUser() admin: { id: string; role: string },
     @Body() body: { userId: string },
   ) {
     return this.mod.removeShadowBan(admin.id, body.userId);
@@ -80,7 +82,8 @@ export class ModerationController {
     return this.mod.fileAppeal(user.id, body.reportId, body.reason);
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MODERATOR')
   @Get('appeals')
   @ApiOperation({ summary: 'List all users with active appeals' })
   async listAppeals(
@@ -90,12 +93,13 @@ export class ModerationController {
     return this.mod.listAppeals(page, pageSize);
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MODERATOR')
   @Patch('appeals/:userId')
   @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @ApiOperation({ summary: 'Resolve an appeal (APPROVED or DENIED)' })
   async resolveAppeal(
-    @CurrentUser() admin: { id: string },
+    @CurrentUser() admin: { id: string; role: string },
     @Param('userId') userId: string,
     @Body() body: { resolution: 'APPROVED' | 'DENIED'; notes?: string },
   ) {

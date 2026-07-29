@@ -1,6 +1,6 @@
 # Playmorrow — Project Overview for Claude
 
-**Status:** Beta • 970+ commits • M5 ✅ • M6 ✅ • M7 ✅ • M8 ✅ • M9 ✅ • **298 tests (24 files)**
+**Status:** Beta • 970+ commits • M1-M5 ✅ • M8 ✅ • M9 ✅ • **301 tests (24 files)**
 **Frontend:** https://playmorrow.vercel.app (Vercel) — ✅ UptimeRobot (5min)
 **Backend:** https://playmorrow-api-aged-mountain-9542.fly.dev/api/health (Fly.io) — ✅ UptimeRobot (5min)
 **Storage:** Cloudflare R2 (uploads públicos)
@@ -18,7 +18,7 @@
 |---|------|--------|---------|
 | 1 | **M5 backend** — `/api/recommendations` e `/api/search` | ✅ Deployado e funcionando | `flyctl deploy` executado em 29/07. Trending, Similar Games, Search OK. |
 | 2 | **Domínio próprio** (playmorrow.com) — Blocking for public launch | 🔴 Não comprado | Ação manual |
-| 3 | **E2E Tests** — 6 spec files + 298 unit/integration | 🔴 Não executado (E2E) | `next build` timeout local — executar em CI |
+| 3 | **E2E Tests** — 6 spec files + 301 unit/integration | 🔴 Não executado (E2E) | `next build` timeout local — executar em CI |
 | 4 | **3670e91 no git** — R2 env vars no histórico | ✅ Reescrito via git-filter-repo em 29/07 | Colaboradores: clonar fresco |
 | 5 | **Secrets scanning em CI** — gitleaks workflow | ✅ Configurado (`on: [push, pull_request]`) | Testado localmente + workflow ativo. CI em fila (free tier). |
 | 6 | **Prisma migrate deploy no Neon** | ✅ Aplicada em 29/07 | `devlog.tags @default` no ar |
@@ -49,8 +49,6 @@
 | M3.5 | Intelligence (Event Bus, Goals) | ✅ |
 | M4 | Verification (6 tiers, Trust Score) | ✅ |
 | M5 | Discovery Platform | ✅ |
-| M6 | Email Automation | ⬜ Phase 3 |
-| M7 | Marketing Platform | ⬜ Phase 3 |
 | **M8** | **Moderation Center** | **✅ Complete** |
 | **M9** | **Email Automation Platform** | **✅ Complete** |
 
@@ -67,7 +65,7 @@
 | Moderation Dashboard UI | ✅ | `/dashboard/admin/moderation/` |
 | Report Detail UI | ✅ | `/dashboard/admin/moderation/reports/[id]` |
 | User Detail UI | ✅ | `/dashboard/admin/moderation/users/[id]` |
-| Tests | ✅ | 282 (273 + 9 novos) |
+| Tests | ✅ | 301 (12 moderation + 16 email + 273 base) |
 
 Ver módulo completo em `apps/api/src/moderation/` + frontend em `apps/web/app/dashboard/admin/moderation/`.
 
@@ -114,12 +112,24 @@ playmorrow/
 │                      # recommendations (M5), search (M5), upload
 ├── packages/
 │   └── database/     # Prisma schema (51 modelos)
-└── docs/
+├── docs/
+    ├── releases/                   # 11 certificações + relatórios
+    │   ├── PHASE2_CERTIFICATION.md
+    │   ├── PHASE3_ROADMAP.md
+    │   ├── PHASE3_PREFLIGHT_CERTIFICATION.md
+    │   ├── PHASE3_COMPLETION_REPORT.md
+    │   ├── PHASE3_VERIFICATION.md
+    │   ├── SECURITY_CERTIFICATION_v1.1.md
+    │   ├── SECURITY_HARDENING.md
+    │   ├── SOFTWARE_ENGINEERING_CERTIFICATION_v1.md
+    │   ├── FINAL_RELEASE_CERTIFICATION.md
+    │   └── MILESTONE5_STATUS.md
+    ├── security/                   # 8 runbooks operacionais
+    ├── handoff/                    # Histórico de sessões
+    ├── archive/                    # Docs antigos (superseded)
     ├── ENTERPRISE_AUDIT.md
-    ├── FULL_SCAN_REPORT.md       # 92/100 — operacional (sistema funciona)
-    ├── ENTERPRISE_AUDIT_FOLLOWUP.md
     ├── MILESTONE5_VERIFICATION_v2.md
-    └── PHASE1_FINAL_VERIFICATION_v6.md
+    └── BACKUP.md
 ```
 
 ## URLs Públicas
@@ -140,7 +150,7 @@ Todas as variáveis no Fly.io secrets. Rotacionadas em 28/07 após incidente.
 
 - **CSRF:** HMAC-SHA256 stateless, global APP_GUARD ✅
 - **CSP:** Nonce-based, `connect-src` aponta para Fly.io (sem Railway) ✅
-- **Rate limit:** 60/min global, 5/min register, 10/min login ✅ (testado: 273/273)
+- **Rate limit:** 60/min global, 5/min register, 10/min login ✅ (testado: 301/301)
 - **Upload:** MIME + magic bytes + dimensão (4096px) + 20MB ✅
 - **Pre-commit hook:** Bloqueia secrets em texto claro ✅
 - **Dependency Review:** `.github/workflows/dependency-review.yml` — bloqueia dependências vulneráveis em PRs ✅
@@ -171,5 +181,5 @@ Phase 2 Certification: [`docs/releases/PHASE2_CERTIFICATION.md`](docs/releases/P
 pnpm install && pnpm dev
 pnpm typecheck        # 6/6
 pnpm --filter @playmorrow/web lint  # 0 errors
-pnpm --filter @playmorrow/api test  # 273 pass, requer TEST_DATABASE_URL
+pnpm --filter @playmorrow/api test  # 301 pass, requer TEST_DATABASE_URL
 ```

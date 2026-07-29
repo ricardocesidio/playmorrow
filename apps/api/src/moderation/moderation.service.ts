@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventBus } from '../common/event-bus';
 import { logger } from '../common/logger';
@@ -10,7 +10,15 @@ export class ModerationService {
     private readonly eventBus: EventBus,
   ) {}
 
+  private async requireAdminOrModerator(userId: string) {
+    const admin = await this.prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    if (!admin || (admin.role !== 'ADMIN' && admin.role !== 'MODERATOR')) {
+      throw new ForbiddenException('Only ADMIN or MODERATOR can perform this action');
+    }
+  }
+
   async suspendUser(adminId: string, userId: string, reason: string, durationHours: number) {
+    await this.requireAdminOrModerator(adminId);
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
     if (user.role === 'ADMIN') throw new BadRequestException('Cannot suspend an admin');
@@ -36,6 +44,7 @@ export class ModerationService {
   }
 
   async unsuspendUser(adminId: string, userId: string) {
+    await this.requireAdminOrModerator(adminId);
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
@@ -57,6 +66,7 @@ export class ModerationService {
   }
 
   async shadowBanUser(adminId: string, userId: string) {
+    await this.requireAdminOrModerator(adminId);
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
@@ -78,6 +88,7 @@ export class ModerationService {
   }
 
   async removeShadowBan(adminId: string, userId: string) {
+    await this.requireAdminOrModerator(adminId);
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
@@ -173,6 +184,7 @@ export class ModerationService {
   }
 
   async resolveAppeal(adminId: string, userId: string, resolution: 'APPROVED' | 'DENIED', notes?: string) {
+    await this.requireAdminOrModerator(adminId);
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
