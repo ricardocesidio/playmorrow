@@ -420,30 +420,39 @@ Run `pnpm test` for the full suite.
 
 ---
 
+## Release Process
+
+Every major release follows engineering validation. The **first public launch** requires completion of the mandatory Final Release Certification:
+
+📄 [`docs/releases/FINAL_RELEASE_CERTIFICATION.md`](docs/releases/FINAL_RELEASE_CERTIFICATION.md)
+
+This process validates the real production system end-to-end before launch — automated tests, manual QA, security audit, performance benchmarks, SEO validation, closed beta with real studios, and a final go/no-go decision.
+
+Phase 2 Certification: [`docs/releases/PHASE2_CERTIFICATION.md`](docs/releases/PHASE2_CERTIFICATION.md)
+
 ## Deployment
 
 ### Frontend (Vercel)
 
 The frontend automatically deploys from the `main` branch via Vercel's GitHub integration. Key configuration:
 
-- Root directory: `apps/web` (set in `vercel.json`)
-- Rewrites proxy `/api/*` to Railway backend
-- Server-side API fallback: `https://playmorrow-api-production.up.railway.app/api`
+- Root directory: `apps/web`
+- Rewrites proxy `/api/*` to Fly.io backend
 
 **Required Vercel env vars:** `API_URL`, `NEXT_PUBLIC_SITE_URL`
 
-### Backend (Railway)
+### Backend (Fly.io)
 
-The backend deploys via Docker from the repository root. The multi-stage Dockerfile builds all packages and runs the NestJS application.
+The backend deploys via `flyctl deploy` from the repository root. The Dockerfile (`apps/api/Dockerfile`) builds all packages and runs the NestJS application. Configuration is in `fly.toml`.
 
-**Required Railway env vars:** `DATABASE_URL`, `SESSION_SECRET`, `JWT_SECRET`, `WEB_ORIGIN`, `NODE_ENV`, `CSRF_SECRET`, `RESEND_API_KEY`
+**Required Fly.io secrets:** `DATABASE_URL`, `SESSION_SECRET`, `JWT_SECRET`, `WEB_ORIGIN`, `NODE_ENV`, `CSRF_SECRET`, `RESEND_API_KEY`, `SENTRY_DSN`
 
-Health check: `GET /health` → `{"status":"ok","uptimeSeconds":...}`
+Health check: `GET /api/health` → `{"status":"ok","service":"playmorrow-api"}`
 
 **Live URLs:**
 - Frontend: [https://playmorrow.vercel.app](https://playmorrow.vercel.app)
-- API: [https://playmorrow-api-production.up.railway.app](https://playmorrow-api-production.up.railway.app)
-- Health: `https://playmorrow-api-production.up.railway.app/health`
+- API: [https://playmorrow-api-aged-mountain-9542.fly.dev](https://playmorrow-api-aged-mountain-9542.fly.dev)
+- Health: `https://playmorrow-api-aged-mountain-9542.fly.dev/api/health`
 
 ---
 

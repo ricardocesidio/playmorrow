@@ -113,6 +113,16 @@ Todas as variáveis no Fly.io secrets. Rotacionadas em 28/07 após incidente.
 - **Git history:** `3670e91` reescrito via `git-filter-repo` (29/07) — secrets removidos do histórico ✅
 - **Monitoramento:** UptimeRobot (API + Frontend, 5min) ✅
 
+## Release Process
+
+Every major release follows engineering validation. The first public release requires completion of the **Final Release Certification**:
+
+📄 [`docs/releases/FINAL_RELEASE_CERTIFICATION.md`](docs/releases/FINAL_RELEASE_CERTIFICATION.md)
+
+This mandatory process validates the real production system (not just code) before launch. It includes: automated + manual testing, security audit, performance benchmarks, SEO validation, closed beta with real studios, and a final go/no-go decision.
+
+Phase 2 Certification: [`docs/releases/PHASE2_CERTIFICATION.md`](docs/releases/PHASE2_CERTIFICATION.md)
+
 ## Para Desenvolvimento Local
 
 ```bash
