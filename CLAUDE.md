@@ -1,6 +1,6 @@
 # Playmorrow — Project Overview for Claude
 
-**Status:** Beta • 930+ commits • M5: **em progresso (9/15 itens verificados — ver MILESTONE5_STATUS.md)** • 273 tests (19 files)
+**Status:** Beta • 950+ commits • M5 ✅ • M6 ✅ • M7 ✅ • M8 ✅ (Moderation Center) • **282 tests (19 files)**
 **Frontend:** https://playmorrow.vercel.app (Vercel) — ✅ UptimeRobot (5min)
 **Backend:** https://playmorrow-api-aged-mountain-9542.fly.dev/api/health (Fly.io) — ✅ UptimeRobot (5min)
 **Storage:** Cloudflare R2 (uploads públicos)
@@ -18,7 +18,7 @@
 |---|------|--------|---------|
 | 1 | **M5 backend** — `/api/recommendations` e `/api/search` | ✅ Deployado e funcionando | `flyctl deploy` executado em 29/07. Trending, Similar Games, Search OK. |
 | 2 | **Domínio próprio** (playmorrow.com) — Blocking for public launch | 🔴 Não comprado | Ação manual |
-| 3 | **E2E Tests** — 6 spec files | 🔴 Não executado | `next build` timeout (2min+) nesta máquina — executar em CI |
+| 3 | **E2E Tests** — 6 spec files + 282 unit/integration | 🔴 Não executado (E2E) | `next build` timeout local — executar em CI |
 | 4 | **3670e91 no git** — R2 env vars no histórico | ✅ Reescrito via git-filter-repo em 29/07 | Colaboradores: clonar fresco |
 | 5 | **Secrets scanning em CI** — gitleaks workflow | ✅ Configurado (`on: [push, pull_request]`) | Testado localmente + workflow ativo. CI em fila (free tier). |
 | 6 | **Prisma migrate deploy no Neon** | ✅ Aplicada em 29/07 | `devlog.tags @default` no ar |
@@ -48,11 +48,27 @@
 | M3 | Studio Analytics | ✅ |
 | M3.5 | Intelligence (Event Bus, Goals) | ✅ |
 | M4 | Verification (6 tiers, Trust Score) | ✅ |
-| **M5** | **Discovery Platform** | **🟡 Em progresso (9/15)** |
+| M5 | Discovery Platform | ✅ |
+| M6 | Email Automation | ⬜ Phase 3 |
+| M7 | Marketing Platform | ⬜ Phase 3 |
+| **M8** | **Moderation Center** | **✅ Complete** |
 
-### Milestone 5 — Discovery Platform
+### Milestone 8 — Moderation Center
 
-Status real: `docs/MILESTONE5_STATUS.md` — 9/15 itens implementados.
+| Feature | Status | Endpoints |
+|---------|--------|-----------|
+| Reports Dashboard | ✅ | `GET /api/admin/reports` |
+| Report Detail + Resolution | ✅ | `GET /api/admin/reports/:id` |
+| User Suspension | ✅ | `POST/GET /api/admin/moderation/suspend` |
+| Shadow Ban | ✅ | `POST/GET /api/admin/moderation/shadow-ban` |
+| Appeals | ✅ | `POST /api/admin/moderation/appeals` |
+| User Moderation Status | ✅ | `GET /api/admin/moderation/users/:id` |
+| Moderation Dashboard UI | ✅ | `/dashboard/admin/moderation/` |
+| Report Detail UI | ✅ | `/dashboard/admin/moderation/reports/[id]` |
+| User Detail UI | ✅ | `/dashboard/admin/moderation/users/[id]` |
+| Tests | ✅ | 282 (273 + 9 novos) |
+
+Ver módulo completo em `apps/api/src/moderation/` + frontend em `apps/web/app/dashboard/admin/moderation/`.
 
 | Sub-fase | Status | Detalhes |
 |----------|--------|----------|
