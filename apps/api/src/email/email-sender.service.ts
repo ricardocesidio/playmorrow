@@ -23,12 +23,34 @@ export class EmailSenderService {
     }
   }
 
+  async isBounced(email: string): Promise<boolean> {
+    const count = await this.prisma.emailLog.count({ where: { email, status: 'bounced' } });
+    return count > 0;
+  }
+
+  async markBounced(email: string): Promise<void> {
+    await this.prisma.emailLog.updateMany({
+      where: { email },
+      data: { status: 'bounced' },
+    }).catch(() => {});
+    // Create a bounced log entry if none exists
+    const existing = await this.prisma.emailLog.findFirst({ where: { email, status: 'bounced' } });
+    if (!existing) {
+      await this.prisma.emailLog.create({ data: { email, status: 'bounced' } }).catch(() => {});
+    }
+    logger.info({ email }, 'Email marked as bounced');
+  }
+
   async sendTemplate(
     email: string,
     templateSlug: string,
     variables: Record<string, string>,
     userId?: string,
   ): Promise<boolean> {
+    if (await this.isBounced(email)) {
+      logger.warn({ email, templateSlug }, 'Skipping email to bounced address');
+      return false;
+    }
     try {
       const rendered = await this.templates.render(templateSlug, variables);
       const template = await this.templates.findBySlug(templateSlug);

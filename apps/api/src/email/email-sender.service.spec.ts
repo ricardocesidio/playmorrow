@@ -43,6 +43,18 @@ describe('EmailSenderService', () => {
     await prisma.$disconnect();
   });
 
+  it('markBounced and isBounced works', async () => {
+    await service.markBounced('bounced@test.com');
+    const bounced = await service.isBounced('bounced@test.com');
+    expect(bounced).toBe(true);
+  });
+
+  it('sendTemplate skips bounced emails', async () => {
+    await service.markBounced('bounced2@test.com');
+    const result = await service.sendTemplate('bounced2@test.com', 'test-send', { name: 'Bounced', site: 'Test' });
+    expect(result).toBe(false); // skipped — no error, just bounce prevention
+  });
+
   it('sendTemplate renders + logs email', async () => {
     const result = await service.sendTemplate('test@example.com', 'test-send', { name: 'Alice', site: 'Playmorrow' });
     expect(result).toBe(true);
