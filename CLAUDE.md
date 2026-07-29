@@ -1,6 +1,6 @@
 # Playmorrow — Project Overview for Claude
 
-**Status:** Beta • 950+ commits • M5 ✅ • M6 ✅ • M7 ✅ • M8 ✅ (Moderation Center) • **282 tests (19 files)**
+**Status:** Beta • 970+ commits • M5 ✅ • M6 ✅ • M7 ✅ • M8 ✅ • M9 ✅ • **298 tests (24 files)**
 **Frontend:** https://playmorrow.vercel.app (Vercel) — ✅ UptimeRobot (5min)
 **Backend:** https://playmorrow-api-aged-mountain-9542.fly.dev/api/health (Fly.io) — ✅ UptimeRobot (5min)
 **Storage:** Cloudflare R2 (uploads públicos)
@@ -18,7 +18,7 @@
 |---|------|--------|---------|
 | 1 | **M5 backend** — `/api/recommendations` e `/api/search` | ✅ Deployado e funcionando | `flyctl deploy` executado em 29/07. Trending, Similar Games, Search OK. |
 | 2 | **Domínio próprio** (playmorrow.com) — Blocking for public launch | 🔴 Não comprado | Ação manual |
-| 3 | **E2E Tests** — 6 spec files + 282 unit/integration | 🔴 Não executado (E2E) | `next build` timeout local — executar em CI |
+| 3 | **E2E Tests** — 6 spec files + 298 unit/integration | 🔴 Não executado (E2E) | `next build` timeout local — executar em CI |
 | 4 | **3670e91 no git** — R2 env vars no histórico | ✅ Reescrito via git-filter-repo em 29/07 | Colaboradores: clonar fresco |
 | 5 | **Secrets scanning em CI** — gitleaks workflow | ✅ Configurado (`on: [push, pull_request]`) | Testado localmente + workflow ativo. CI em fila (free tier). |
 | 6 | **Prisma migrate deploy no Neon** | ✅ Aplicada em 29/07 | `devlog.tags @default` no ar |
@@ -52,6 +52,7 @@
 | M6 | Email Automation | ⬜ Phase 3 |
 | M7 | Marketing Platform | ⬜ Phase 3 |
 | **M8** | **Moderation Center** | **✅ Complete** |
+| **M9** | **Email Automation Platform** | **✅ Complete** |
 
 ### Milestone 8 — Moderation Center
 
@@ -69,6 +70,23 @@
 | Tests | ✅ | 282 (273 + 9 novos) |
 
 Ver módulo completo em `apps/api/src/moderation/` + frontend em `apps/web/app/dashboard/admin/moderation/`.
+
+### Milestone 9 — Email Automation Platform
+
+| Feature | Status | Endpoints/Pages |
+|---------|--------|-----------------|
+| Email Templates CRUD | ✅ | `GET/POST/PATCH /api/admin/email-templates` |
+| Email Render Engine | ✅ | `EmailTemplatesService.render()` |
+| Email Sender (Resend) | ✅ | `EmailSenderService.sendTemplate/Raw()` |
+| Email Logging | ✅ | `EmailLog` model + `getLogs()` |
+| Transactional Emails | ✅ | Welcome, verify, password-reset via templates |
+| Email Preferences API | ✅ | `GET/PATCH /api/email-preferences` |
+| Unsubscribe (token-based) | ✅ | `POST/GET /api/unsubscribe/:token` |
+| Weekly Digest (cron) | ✅ | `@Cron('0 12 * * 1')` — Monday 12:00 UTC |
+| Admin Dashboard UI | ✅ | `/dashboard/admin/email-templates/` |
+| Tests | ✅ | 298 (24 files) |
+
+DB models: `EmailTemplate`, `EmailLog`, `EmailPreference`. Módulos em `apps/api/src/email-templates/`, `apps/api/src/email/`, `apps/api/src/email-preferences/`, `apps/api/src/digest/`.
 
 | Sub-fase | Status | Detalhes |
 |----------|--------|----------|
