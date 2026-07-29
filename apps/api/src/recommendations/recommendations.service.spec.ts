@@ -7,6 +7,10 @@ import { FollowBasedScorer } from './scorers/follow-based.scorer';
 import { TrendingScorer } from './scorers/trending.scorer';
 import { WishlistSimilarityScorer } from './scorers/wishlist-similarity.scorer';
 import { InteractionHistoryScorer } from './scorers/interaction-history.scorer';
+import { HiddenGemsScorer } from './scorers/hidden-gems.scorer';
+import { SimilarStudiosScorer } from './scorers/similar-studios.scorer';
+import { RecentlyUpdatedScorer } from './scorers/recently-updated.scorer';
+import { LatestReleasesScorer } from './scorers/latest-releases.scorer';
 import { InMemoryCacheProvider } from './in-memory-cache';
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 
@@ -26,6 +30,10 @@ describe('RecommendationsService', () => {
         TrendingScorer,
         WishlistSimilarityScorer,
         InteractionHistoryScorer,
+        HiddenGemsScorer,
+        SimilarStudiosScorer,
+        RecentlyUpdatedScorer,
+        LatestReleasesScorer,
         InMemoryCacheProvider,
       ],
     }).compile();
