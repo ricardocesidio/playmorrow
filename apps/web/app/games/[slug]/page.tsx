@@ -11,14 +11,11 @@ import {
   Check,
   CircleDollarSign,
   Clipboard,
-  Disc3,
-  Facebook,
   Flame,
   Gamepad2,
   MessageCircle,
   Globe,
   Heart,
-  Link as LinkIcon,
   Lock,
   Monitor,
   FileText,
@@ -26,9 +23,7 @@ import {
   Play,
   Plus,
   Send,
-  Share2,
   Shield,
-  X,
 } from 'lucide-react';
 
 import { toast } from 'sonner';

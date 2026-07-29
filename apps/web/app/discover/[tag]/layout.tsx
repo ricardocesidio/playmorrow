@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 
-const API = process.env.API_URL || 'https://playmorrow-api-aged-mountain-9542.fly.dev/api';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://playmorrow.vercel.app';
 
 export async function generateMetadata({ params }: { params: Promise<{ tag: string }> }): Promise<Metadata> {

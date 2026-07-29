@@ -4,6 +4,11 @@ import { ArrowRight } from 'lucide-react';
 const API = process.env.API_URL || 'https://playmorrow-api-aged-mountain-9542.fly.dev/api';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://playmorrow.vercel.app';
 
+interface GameItem {
+  id: string; title: string; slug: string; coverUrl: string | null;
+  studio: { name: string } | null;
+}
+
 async function getGamesByTag(tag: string) {
   try {
     const res = await fetch(`${API}/games?tag=${encodeURIComponent(tag)}&pageSize=20`, { next: { revalidate: 120 } });
@@ -39,7 +44,7 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
         <p className="mt-8 font-mono text-sm text-muted-foreground">No games found with this tag.</p>
       ) : (
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {games.map((game: any) => (
+          {games.map((game: GameItem) => (
             <Link key={game.id} href={`/games/${game.slug}`}
               className="group clip-corner border border-border/40 bg-[#050b0f]/50 overflow-hidden transition hover:border-cyan/30">
               <div className="aspect-[3/4] bg-border/10 flex items-center justify-center">

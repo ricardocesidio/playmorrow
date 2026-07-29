@@ -2,6 +2,16 @@ import { SiteHeader } from '@/components/site-header';
 import { TrendingUp, Star, Flame, Gamepad2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
+interface GameItem {
+  id: string; title: string; slug: string; coverUrl: string | null;
+  tagline: string | null; followersCount: number; status: string;
+  studio: { name: string; slug: string } | null;
+}
+
+interface RecommendationItem {
+  gameId: string; score: number; reasons: string[];
+}
+
 const API = process.env.API_URL || 'https://playmorrow-api-aged-mountain-9542.fly.dev/api';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://playmorrow.vercel.app';
 
@@ -31,9 +41,9 @@ export default async function DiscoverPage() {
     fetchGames('/api/games?featured=true&pageSize=6'),
   ]);
 
-  const trendingGameIds = trendingRaw.map((i: any) => i.gameId);
+  const trendingGameIds = trendingRaw.map((i: RecommendationItem) => i.gameId);
   const trendingGames = trendingGameIds.length > 0
-    ? (await fetchGames(`/games?pageSize=6`)).filter((g: any) => trendingGameIds.includes(g.id)).slice(0, 6)
+    ? (await fetchGames(`/games?pageSize=6`)).filter((g: GameItem) => trendingGameIds.includes(g.id)).slice(0, 6)
     : [];
 
   return (
@@ -77,7 +87,7 @@ export default async function DiscoverPage() {
   );
 }
 
-function SectionGrid({ title, icon, games }: { title: string; icon: React.ReactNode; games: any[] }) {
+function SectionGrid({ title, icon, games }: { title: string; icon: React.ReactNode; games: GameItem[] }) {
   if (games.length === 0) return null;
 
   return (
@@ -87,7 +97,7 @@ function SectionGrid({ title, icon, games }: { title: string; icon: React.ReactN
         <h2 className="font-display text-lg font-black uppercase tracking-tight text-white">{title}</h2>
       </div>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        {games.map((game: any) => (
+        {games.map((game: GameItem) => (
           <Link key={game.id} href={`/games/${game.slug}`}
             className="group clip-corner border border-border/40 bg-[#050b0f]/50 overflow-hidden transition hover:border-cyan/30">
             <div className="aspect-[3/4] bg-border/10 flex items-center justify-center">
