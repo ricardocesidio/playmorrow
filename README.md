@@ -412,7 +412,7 @@ Open http://localhost:3000 (frontend) and http://localhost:4000/health (API).
 
 | Layer | Tool | Scope | Status |
 |-------|------|-------|--------|
-| **Unit/Integration** | Vitest | API controllers, services, guards | 260+ tests across 16 spec files |
+| **Unit/Integration** | Vitest | API controllers, services, guards | 301 tests across 24 spec files |
 | **E2E** | Playwright | Full browser flows | Configured, requires running servers |
 | **Load** | k6 | API performance baseline | Scripts available |
 

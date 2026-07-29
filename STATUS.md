@@ -4,7 +4,7 @@
 > **Branch:** `main` (827 commits)
 > **Repository:** [ricardocesidio/playmorrow](https://github.com/ricardocesidio/playmorrow) (public)
 > **Engineering Score:** 86/100
-> **Typecheck:** 6/6 • **Lint:** 0 errors (50 pre-existing warnings) • **Tests:** 258 pass, 1 skip, 0 failures (16/16 files) • **Build:** 4/4 packages
+> **Typecheck:** 6/6 • **Lint:** 0 errors (50 pre-existing warnings) • **Tests:** 301 pass, 0 failures (24/24 files) • **Build:** 4/4 packages
 
 ---
 
@@ -389,7 +389,7 @@ Full schema: `packages/database/prisma/schema.prisma`
 
 | Suite | Framework | Count | Status |
 |-------|-----------|-------|--------|
-| API unit/integration | Vitest | 260+ tests, 16 spec files | ✅ 16/16 pass (258 pass, 1 skip, 0 failures) |
+| API unit/integration | Vitest | 301 tests, 24 spec files | ✅ 24/24 pass (301 pass, 0 failures) |
 | E2E (Playwright) | Playwright | Configured | ❓ Requires running dev servers |
 
 **Note:** All 258 tests pass (16/16 test files). 1 health-check test is skipped (email provider unavailable in CI). Hook timeouts mitigated via `hookTimeout: 30_000` on all spec files.

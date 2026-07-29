@@ -120,10 +120,12 @@ playmorrow/
     │   ├── PHASE3_COMPLETION_REPORT.md
     │   ├── PHASE3_VERIFICATION.md
     │   ├── SECURITY_CERTIFICATION_v1.1.md
+    │   ├── SECURITY_CERTIFICATION_CHANGELOG.md
+    │   ├── SECURITY_CERTIFICATION_v1_AUDIT.md
     │   ├── SECURITY_HARDENING.md
     │   ├── SOFTWARE_ENGINEERING_CERTIFICATION_v1.md
-    │   ├── FINAL_RELEASE_CERTIFICATION.md
-    │   └── MILESTONE5_STATUS.md
+    │   └── FINAL_RELEASE_CERTIFICATION.md
+    ├── MILESTONE5_STATUS.md
     ├── security/                   # 8 runbooks operacionais
     ├── handoff/                    # Histórico de sessões
     ├── archive/                    # Docs antigos (superseded)
