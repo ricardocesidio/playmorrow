@@ -294,7 +294,7 @@ export class CommentsService {
 
   async findByGame(slug: string, page: number, pageSize: number, currentUserId?: string) {
     const game = await this.prisma.game.findUniqueOrThrow({ where: { slug }, select: { id: true } });
-    const where = { gameId: game.id, parentId: null, deletedAt: null };
+    const where = { gameId: game.id, parentId: null, deletedAt: null, author: { shadowBanned: false } };
     const [items, total] = await Promise.all([
       this.prisma.comment.findMany({
         where,

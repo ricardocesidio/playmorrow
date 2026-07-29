@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventBus } from '../common/event-bus';
+import { logger } from '../common/logger';
 
 @Injectable()
 export class ModerationService {
@@ -20,6 +21,8 @@ export class ModerationService {
       where: { id: userId },
       data: { suspendedUntil, appealCount: 0 },
     });
+
+    logger.info({ action: 'user_suspended', moderatorId: adminId, targetId: userId, reason, durationHours }, 'Moderation: user suspended');
 
     this.eventBus.emit({
       type: 'user_suspended',
@@ -41,6 +44,8 @@ export class ModerationService {
       data: { suspendedUntil: null },
     });
 
+    logger.info({ action: 'user_unsuspended', moderatorId: adminId, targetId: userId }, 'Moderation: user unsuspended');
+
     this.eventBus.emit({
       type: 'user_unsuspended',
       actorId: adminId,
@@ -60,6 +65,8 @@ export class ModerationService {
       data: { shadowBanned: true },
     });
 
+    logger.info({ action: 'user_shadow_banned', moderatorId: adminId, targetId: userId }, 'Moderation: shadow ban applied');
+
     this.eventBus.emit({
       type: 'user_shadow_banned',
       actorId: adminId,
@@ -78,6 +85,8 @@ export class ModerationService {
       where: { id: userId },
       data: { shadowBanned: false },
     });
+
+    logger.info({ action: 'user_shadow_ban_removed', moderatorId: adminId, targetId: userId }, 'Moderation: shadow ban removed');
 
     this.eventBus.emit({
       type: 'user_shadow_ban_removed',

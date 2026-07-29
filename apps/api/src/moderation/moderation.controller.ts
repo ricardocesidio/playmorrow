@@ -7,12 +7,14 @@ import { Throttle } from '@nestjs/throttler';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
-import { SkipCsrf } from '../common/skip-csrf.decorator';
 import { ModerationService } from './moderation.service';
 
+// CSRF is intentionally NOT skipped here. Admin/moderator endpoints must be
+// CSRF-protected because they use session cookies for auth (not API tokens).
+// The SessionAuthGuard + CsrfGuard combination ensures that mutations require
+// a valid CSRF token from the login response, preventing CSRF attacks.
 @ApiTags('admin/moderation')
 @Controller('admin/moderation')
-@SkipCsrf()
 export class ModerationController {
   constructor(private readonly mod: ModerationService) {}
 
