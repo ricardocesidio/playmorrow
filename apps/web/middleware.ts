@@ -43,15 +43,13 @@ export function middleware(request: NextRequest) {
   // the nonce AND unsafe-inline — CSP L3 ignores unsafe-inline when a nonce
   // is present, making the fallback useless.
   const isDev = process.env.NODE_ENV === 'development';
-  // Next.js 16.x deprecated the x-nonce middleware approach for inline scripts.
-  // Until we migrate to the new pattern, we use 'unsafe-inline' alongside the
-  // nonce. CSP L3 ignores unsafe-inline when a nonce is present, so we keep
-  // the nonce for scripts that support it while allowing Next.js inline scripts
-  // to execute. The nonce is still sent to support scripts that explicitly use it.
-  // TODO: Migrate to Next.js 16 native CSP support.
+  // Note: Next.js 16.x deprecated the x-nonce middleware approach. CSP L3 ignores
+  // 'unsafe-inline' when a nonce is present, so we use only 'unsafe-inline' here
+  // (no nonce) to allow Next.js inline scripts to execute.
+  // TODO: Migrate to Next.js 16 native CSP support via instrumentation.
   const scriptSrc = isDev
     ? ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://plausible.io'].join(' ')
-    : ["'self'", "'unsafe-inline'", `'nonce-${nonce}'`, 'https://plausible.io'].join(' ');
+    : ["'self'", "'unsafe-inline'", 'https://plausible.io'].join(' ');
   response.headers.set(
     'Content-Security-Policy',
     [
