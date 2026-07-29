@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@playmorrow/types'],
   typedRoutes: true,
+  experimental: {
+    serverActions: { bodySizeLimit: '5mb' },
+  },
   outputFileTracingRoot: path.join(process.cwd(), '..', '..'),
   images: {
     formats: ['image/avif', 'image/webp'],
