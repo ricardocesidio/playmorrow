@@ -24,6 +24,7 @@ import {
   Plus,
   Send,
   Shield,
+  X,
 } from 'lucide-react';
 
 import { toast } from 'sonner';
