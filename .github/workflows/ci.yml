@@ -29,8 +29,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
-      - name: npm audit
-        run: pnpm audit --audit-level=high || echo "npm audit found issues (non-blocking for now)"
+      - name: npm audit (production deps)
+        run: pnpm audit --prod --audit-level=critical || echo "::warning::Critical production dependency vulnerabilities found. Run pnpm update and pnpm audit --prod to verify."
 
   backend:
     name: Backend tests (Postgres)
