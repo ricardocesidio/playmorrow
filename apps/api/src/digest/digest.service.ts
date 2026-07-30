@@ -3,6 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailSenderService } from '../email/email-sender.service';
 import { logger } from '../common/logger';
+import * as Sentry from '@sentry/node';
 
 @Injectable()
 export class DigestService {
@@ -13,6 +14,7 @@ export class DigestService {
 
   @Cron('0 12 * * 1')
   async sendWeeklyDigests() {
+    await Sentry.withMonitor('playmorrow-weekly-digest', async () => {
     logger.info('[Digest] Starting weekly digest job');
     const prefs = await this.prisma.emailPreference.findMany({
       where: { digestFrequency: 'weekly', marketingOptIn: true },
@@ -22,6 +24,7 @@ export class DigestService {
     for (const pref of prefs) {
       await this.sendDigestForUser(pref.user.id, pref.user.email, pref.user.displayName, 'weekly');
     }
+    });
   }
 
   async sendDigestForUser(userId: string, email: string, displayName: string, frequency: 'daily' | 'weekly') {

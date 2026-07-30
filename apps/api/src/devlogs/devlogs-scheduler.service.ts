@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { FeedEngineService } from '../feed/feed-events.service';
 import { EventBus } from '../common/event-bus';
+import * as Sentry from '@sentry/node';
 
 @Injectable()
 export class DevlogsSchedulerService {
@@ -16,6 +17,7 @@ export class DevlogsSchedulerService {
 
   @Cron('*/5 * * * *')
   async publishScheduledDevlogs(): Promise<void> {
+    await Sentry.withMonitor('playmorrow-devlog-publisher', async () => {
     const now = new Date();
 
     const scheduled = await this.prisma.devlog.findMany({
@@ -64,5 +66,6 @@ export class DevlogsSchedulerService {
         this.logger.error(`Failed to publish devlog ${devlog.id} (${devlog.title}): ${error}`);
       }
     }
+    });
   }
 }

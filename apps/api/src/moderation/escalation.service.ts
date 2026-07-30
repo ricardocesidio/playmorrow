@@ -3,6 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventBus } from '../common/event-bus';
 import { logger } from '../common/logger';
+import * as Sentry from '@sentry/node';
 
 @Injectable()
 export class EscalationService {
@@ -13,6 +14,7 @@ export class EscalationService {
 
   @Cron('0 */2 * * *') // Every 2 hours
   async escalateStaleReports() {
+    await Sentry.withMonitor('playmorrow-report-escalation', async () => {
     const threshold = new Date(Date.now() - 48 * 60 * 60 * 1000); // 48 hours ago
 
     const staleReports = await this.prisma.moderationReport.findMany({
@@ -46,5 +48,6 @@ export class EscalationService {
     if (staleReports.length > 0) {
       logger.info(`Escalated ${staleReports.length} stale reports`);
     }
+    });
   }
 }
