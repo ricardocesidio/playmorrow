@@ -196,6 +196,7 @@ model User {
   pushSubscriptions     PushSubscription[]
   emailVerificationCodes  EmailVerificationCode[]
   emailPreference         EmailPreference?
+  apiKeys                 ApiKey[]
   passwordResetTokens     PasswordResetToken[]
   wishlistItems         WishlistItem[]
    auditLogs             AuditLog[]
@@ -1401,6 +1402,25 @@ model EmailPreference {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("email_preferences")
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  keyHash   String   @unique
+  keyPrefix String
+  scopes    String[] @default([])
+  lastUsedAt DateTime?
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([keyHash])
+  @@index([userId])
+  @@map("api_keys")
 }
 
 model GameView {
