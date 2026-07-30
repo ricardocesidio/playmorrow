@@ -5,9 +5,18 @@ import { PrismaService } from '../prisma/prisma.service';
 export class PublisherService {
   constructor(private prisma: PrismaService) {}
 
+  private async getStudioMemberIds(studioId: string): Promise<string[]> {
+    const members = await this.prisma.studioMember.findMany({
+      where: { studioId },
+      select: { userId: true },
+    });
+    return members.map((m) => m.userId);
+  }
+
   async getStudioRevenue(studioId: string) {
+    const memberIds = await this.getStudioMemberIds(studioId);
     const transactions = await this.prisma.transaction.findMany({
-      where: { sellerId: studioId, status: 'COMPLETED', type: 'PURCHASE' },
+      where: { sellerId: { in: memberIds }, status: 'COMPLETED', type: 'PURCHASE' },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -19,10 +28,11 @@ export class PublisherService {
   }
 
   async getStudioRevenueByPeriod(studioId: string, days = 30) {
+    const memberIds = await this.getStudioMemberIds(studioId);
     const since = new Date(Date.now() - days * 86400000);
     const transactions = await this.prisma.transaction.findMany({
       where: {
-        sellerId: studioId,
+        sellerId: { in: memberIds },
         status: 'COMPLETED',
         type: 'PURCHASE',
         createdAt: { gte: since },
