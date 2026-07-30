@@ -101,9 +101,14 @@ async function bootstrap() {
       dsn: sentryDsn,
       environment: nodeEnv,
       tracesSampleRate: isProd ? 0.15 : 1.0,
-      // Integrations can be added here later (e.g. Http, Prisma)
+      integrations: [
+        Sentry.prismaIntegration(),
+        Sentry.httpIntegration(),
+      ],
     });
-    logger.info('✅ Sentry initialized');
+    app.use(Sentry.Handlers.requestHandler());
+    app.use(Sentry.Handlers.errorHandler());
+    logger.info('✅ Sentry initialized with Prisma + HTTP integrations');
   } else if (isProd) {
     logger.warn('⚠️  SENTRY_DSN not set — production errors will have no visibility (see PRODUCTION.md)');
   }
