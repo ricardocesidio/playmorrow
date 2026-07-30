@@ -47,7 +47,12 @@ export default function ModerationDashboard() {
   const [suspendHours, setSuspendHours] = useState(24);
   const [suspendReason, setSuspendReason] = useState('');
 
-  const [metrics, setMetrics] = useState<any>(null);
+  interface DashboardMetrics {
+    openReports: number; escalatedReports: number; reportsToday: number;
+    reportsThisWeek: number; totalSuspended: number; totalShadowBanned: number;
+    totalStrikes: number; avgResolutionHours: number;
+  }
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [metricsLoading, setMetricsLoading] = useState(true);
 
   const PAGE_SIZE = 20;
