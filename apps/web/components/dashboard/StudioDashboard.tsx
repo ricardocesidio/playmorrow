@@ -14,6 +14,7 @@ import {
   FileText,
   Gamepad2,
   Gauge,
+  Gift,
   Heart,
   LineChart,
   MessageSquare,
@@ -273,6 +274,7 @@ function StudioSidebar({ unreadCount, studioSlug }: { unreadCount: number; studi
           <SidebarLink href="/dashboard/analytics" icon={<BarChart3 className="size-4" />} label="Analytics" />
           <SidebarLink href="/dashboard/revenue" icon={<DollarSign className="size-4" />} label="Revenue" />
           <SidebarLink href="/dashboard/reports" icon={<LineChart className="size-4" />} label="Reports" />
+          <SidebarLink href="/dashboard/creator" icon={<Gift className="size-4" />} label="Creator" />
           <SidebarLink href="/dashboard/notifications" icon={<MessageSquare className="size-4" />} label="Activity" count={unreadCount} />
           <SidebarLink href={`/dashboard/studios/${studioSlug}/team`} icon={<ShieldCheck className="size-4" />} label="Team" />
           <SidebarLink href={`/dashboard/studios/${studioSlug}/company-profile`} icon={<FileText className="size-4" />} label="Company Profile" />

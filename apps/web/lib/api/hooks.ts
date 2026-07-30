@@ -1428,6 +1428,20 @@ export function usePurchaseListing() {
   });
 }
 
+export function useReferralCode() {
+  return useQuery({
+    queryKey: ['referral-code'],
+    queryFn: () => api.get<{ id: string; userId: string; code: string }>('/creator/code'),
+  });
+}
+
+export function useReferralCommissions() {
+  return useQuery({
+    queryKey: ['referral-commissions'],
+    queryFn: () => api.get<{ code: string | null; commissions: any[]; totalEarned: number }>('/creator/commissions'),
+  });
+}
+
 export function useRevenue() {
   return useQuery({
     queryKey: ['revenue'],

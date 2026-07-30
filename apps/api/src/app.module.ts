@@ -60,6 +60,7 @@ import { MonitorModule } from './monitor/monitor.module';
 import { PaymentsModule } from './payments/payments.module';
 import { PublisherModule } from './publisher/publisher.module';
 import { MarketplaceModule } from './marketplace/marketplace.module';
+import { CreatorModule } from './creator/creator.module';
 import { ModerationModule } from './moderation/moderation.module';
 
 @Module({
@@ -122,6 +123,7 @@ import { ModerationModule } from './moderation/moderation.module';
     PaymentsModule,
     MarketplaceModule,
     PublisherModule,
+    CreatorModule,
   ],
   controllers: [CspController],
   providers: [

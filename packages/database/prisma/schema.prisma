@@ -212,6 +212,7 @@ model User {
    buyerTransactions       Transaction[]               @relation("BuyerTransactions")
    sellerTransactions      Transaction[]               @relation("SellerTransactions")
    purchasedLicenses       PurchasedLicense[]
+   referralCodes           ReferralCode[]
 
    @@index([role])
    @@map("users")
@@ -1552,4 +1553,16 @@ model PurchasedLicense {
   @@index([userId])
   @@index([listingId])
   @@map("purchased_licenses")
+}
+
+model ReferralCode {
+  id        String   @id @default(cuid())
+  userId    String
+  code      String   @unique
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("referral_codes")
 }
