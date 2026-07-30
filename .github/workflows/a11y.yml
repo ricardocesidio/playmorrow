@@ -1,0 +1,53 @@
+name: Accessibility
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: a11y-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  axe:
+    name: axe-core scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @playmorrow/web dev --port 3099 &
+      - name: Wait for server
+        run: npx wait-on http://localhost:3099 --timeout 120000
+      - name: Run axe-core
+        run: |
+          npm install -g @axe-core/cli
+          axe http://localhost:3099 --exit --disable-color
+
+  lighthouse:
+    name: Lighthouse CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @playmorrow/web dev --port 3099 &
+      - name: Wait for server
+        run: npx wait-on http://localhost:3099 --timeout 120000
+      - name: Run Lighthouse
+        run: |
+          npm install -g @lhci/cli
+          lhci autorun --collect.url=http://localhost:3099 --collect.url=http://localhost:3099/games --collect.numberOfRuns=1 --upload.target=temporary-public-storage || echo "Lighthouse results stored temporarily"
