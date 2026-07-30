@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 const STORAGE_KEY = 'playmorrow-cookies';
 const PLAUSIBLE_URL = process.env.NEXT_PUBLIC_PLAUSIBLE_URL || 'https://plausible.io';
-const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || 'playmorrow.vercel.app';
+const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || 'playmorrow.co';
 
 export function Analytics() {
   useEffect(() => {
