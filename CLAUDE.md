@@ -67,7 +67,7 @@
 | Moderation Dashboard UI | ✅ | `/dashboard/admin/moderation/` |
 | Report Detail UI | ✅ | `/dashboard/admin/moderation/reports/[id]` |
 | User Detail UI | ✅ | `/dashboard/admin/moderation/users/[id]` |
-| Tests | ✅ | 301 (12 moderation + 16 email + 273 base) |
+| Tests | ✅ | 318 (27 files) |
 
 Ver módulo completo em `apps/api/src/moderation/` + frontend em `apps/web/app/dashboard/admin/moderation/`.
 
@@ -84,7 +84,7 @@ Ver módulo completo em `apps/api/src/moderation/` + frontend em `apps/web/app/d
 | Unsubscribe (token-based) | ✅ | `POST/GET /api/unsubscribe/:token` |
 | Weekly Digest (cron) | ✅ | `@Cron('0 12 * * 1')` — Monday 12:00 UTC |
 | Admin Dashboard UI | ✅ | `/dashboard/admin/email-templates/` |
-| Tests | ✅ | 301 (24 files) |
+| Tests | ✅ | 318 (27 files) |
 
 DB models: `EmailTemplate`, `EmailLog`, `EmailPreference`. Módulos em `apps/api/src/email-templates/`, `apps/api/src/email/`, `apps/api/src/email-preferences/`, `apps/api/src/digest/`.
 
