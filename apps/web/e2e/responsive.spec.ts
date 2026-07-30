@@ -31,7 +31,7 @@ test.describe('Responsive layout', () => {
 
   test('No overflow on protected dashboard routes', async ({ page }) => {
     // Mock all endpoints the dashboard pages depend on
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/me', async (route) => {
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/session/me', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_USER) });
     });
     await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/studios/me', async (route) => {
