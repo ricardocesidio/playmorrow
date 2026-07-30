@@ -15,6 +15,7 @@ import {
   Gamepad2,
   Gauge,
   Gift,
+  Handshake,
   Heart,
   LineChart,
   MessageSquare,
@@ -269,6 +270,7 @@ function StudioSidebar({ unreadCount, studioSlug }: { unreadCount: number; studi
           <SidebarLink href="/dashboard" icon={<PanelLeft className="size-4" />} label="Overview" active />
           <SidebarLink href="/dashboard/games" icon={<Gamepad2 className="size-4" />} label="My Games" />
           <SidebarLink href="/dashboard/marketplace" icon={<Store className="size-4" />} label="Marketplace" />
+          <SidebarLink href="/dashboard/partners" icon={<Handshake className="size-4" />} label="Partners" />
           <SidebarLink href="/dashboard/devlogs" icon={<FileText className="size-4" />} label="Devlogs" />
           <SidebarLink href="/dashboard/roadmap" icon={<Workflow className="size-4" />} label="Roadmap" />
           <SidebarLink href="/dashboard/analytics" icon={<BarChart3 className="size-4" />} label="Analytics" />

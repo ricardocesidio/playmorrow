@@ -61,6 +61,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { PublisherModule } from './publisher/publisher.module';
 import { MarketplaceModule } from './marketplace/marketplace.module';
 import { CreatorModule } from './creator/creator.module';
+import { PartnerModule } from './partner/partner.module';
 import { ModerationModule } from './moderation/moderation.module';
 
 @Module({
@@ -124,6 +125,7 @@ import { ModerationModule } from './moderation/moderation.module';
     MarketplaceModule,
     PublisherModule,
     CreatorModule,
+    PartnerModule,
   ],
   controllers: [CspController],
   providers: [
