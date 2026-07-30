@@ -1,6 +1,6 @@
 # Playmorrow — Project Overview for Claude
 
-**Status:** Beta • 970+ commits • M1-M5 ✅ • M8 ✅ • M9 ✅ • **301 tests (24 files)**
+**Status:** Beta • 1000+ commits • M1-M5 ✅ • M8 ✅ • M9 ✅ • M11 ✅ • M12 ✅ • **318 tests (27 files)**
 **Frontend:** https://playmorrow.co (Vercel) — ✅ UptimeRobot (5min)
 **Backend:** https://playmorrow-api-aged-mountain-9542.fly.dev/api/health (Fly.io) — ✅ UptimeRobot (5min)
 **Storage:** Cloudflare R2 (uploads públicos)
@@ -18,7 +18,7 @@
 |---|------|--------|---------|
 | 1 | **M5 backend** — `/api/recommendations` e `/api/search` | ✅ Deployado e funcionando | `flyctl deploy` executado em 29/07. Trending, Similar Games, Search OK. |
 | 2 | **Domínio próprio** (playmorrow.co) | 🟡 Configurado no Vercel + Fly.io | Pendente: apontar DNS no Namecheap |
-| 3 | **E2E Tests** — 6 spec files + 301 unit/integration | 🔴 Não executado (E2E) | `next build` timeout local — executar em CI |
+| 3 | **E2E Tests** — 6 spec files + 318 unit/integration | 🔴 Não executado (E2E) | `next build` timeout local — executar em CI |
 | 4 | **3670e91 no git** — R2 env vars no histórico | ✅ Reescrito via git-filter-repo em 29/07 | Colaboradores: clonar fresco |
 | 5 | **Secrets scanning em CI** — gitleaks workflow | ✅ Configurado (`on: [push, pull_request]`) | Testado localmente + workflow ativo. CI em fila (free tier). |
 | 6 | **Prisma migrate deploy no Neon** | ✅ Aplicada em 29/07 | `devlog.tags @default` no ar |
@@ -51,6 +51,8 @@
 | M5 | Discovery Platform | ✅ |
 | **M8** | **Moderation Center** | **✅ Complete** |
 | **M9** | **Email Automation Platform** | **✅ Complete** |
+| **M11** | **Public API** | **✅ Complete** |
+| **M12** | **JavaScript SDK + CLI** | **✅ Complete** |
 
 ### Milestone 8 — Moderation Center
 
@@ -85,6 +87,34 @@ Ver módulo completo em `apps/api/src/moderation/` + frontend em `apps/web/app/d
 | Tests | ✅ | 301 (24 files) |
 
 DB models: `EmailTemplate`, `EmailLog`, `EmailPreference`. Módulos em `apps/api/src/email-templates/`, `apps/api/src/email/`, `apps/api/src/email-preferences/`, `apps/api/src/digest/`.
+
+### Milestone 11 — Public API
+
+| Feature | Status | Endpoints |
+|---------|--------|-----------|
+| API Key CRUD | ✅ | `POST/GET/DELETE /api/api-keys` |
+| Key Validation | ✅ | SHA-256 hash lookup |
+| Frontend Dashboard | ✅ | `/dashboard/api-keys/` |
+| Tests | ✅ | 5 tests |
+
+### Milestone 12 — JavaScript SDK + CLI
+
+| Package | Status | Description |
+|---------|--------|-------------|
+| `@playmorrow/sdk` | ✅ | `PlaymorrowClient` — games, studios, search, trending, collections |
+| `@playmorrow/cli` | ✅ | CLI: `playmorrow search`, `games`, `trending`, `collections` |
+
+### M8 Extra — Features Adicionais
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Strike System | ✅ | 3 strikes → auto-suspend 24h |
+| Bounce Handling | ✅ | `isBounced` check, `markBounced`, Resend webhook |
+| Delivery Analytics | ✅ | Open/click/bounce rates per template |
+| Escalation Workflow | ✅ | Auto-escalate reports after 48h (cron 2h) |
+| Spam Detection | ✅ | Keywords, short URLs, ALL CAPS, rate-limit |
+| Moderator Dashboard | ✅ | Metrics cards + recent reports |
+| DMCA Workflow | ✅ | Takedown filing + counter-notification + 14-day timer |
 
 | Sub-fase | Status | Detalhes |
 |----------|--------|----------|
@@ -152,7 +182,7 @@ Todas as variáveis no Fly.io secrets. Rotacionadas em 28/07 após incidente.
 
 - **CSRF:** HMAC-SHA256 stateless, global APP_GUARD ✅
 - **CSP:** Nonce-based, `connect-src` aponta para Fly.io (sem Railway) ✅
-- **Rate limit:** 60/min global, 5/min register, 10/min login ✅ (testado: 301/301)
+- **Rate limit:** 60/min global, 5/min register, 10/min login ✅ (testado: 318/318)
 - **Upload:** MIME + magic bytes + dimensão (4096px) + 20MB ✅
 - **Pre-commit hook:** Bloqueia secrets em texto claro ✅
 - **Dependency Review:** `.github/workflows/dependency-review.yml` — bloqueia dependências vulneráveis em PRs ✅
@@ -183,5 +213,5 @@ Phase 2 Certification: [`docs/releases/PHASE2_CERTIFICATION.md`](docs/releases/P
 pnpm install && pnpm dev
 pnpm typecheck        # 6/6
 pnpm --filter @playmorrow/web lint  # 0 errors
-pnpm --filter @playmorrow/api test  # 301 pass, requer TEST_DATABASE_URL
+pnpm --filter @playmorrow/api test  # 318 pass, requer TEST_DATABASE_URL
 ```
