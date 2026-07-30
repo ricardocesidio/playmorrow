@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { href: '/games', label: 'Games' },
   { href: '/studios', label: 'Studios' },
   { href: '/marketplace', label: 'Marketplace' },
+  { href: '/events', label: 'Events' },
   { href: '/feed', label: 'Live Feed' },
 ] as const;
 

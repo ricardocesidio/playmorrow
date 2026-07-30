@@ -1594,3 +1594,27 @@ model Partner {
   @@index([status])
   @@map("partners")
 }
+
+model Event {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  description     String?
+  startDate       DateTime
+  endDate         DateTime?
+  location        String?
+  virtual         Boolean   @default(false)
+  ticketPriceCents Int?
+  maxAttendees    Int?
+  bannerUrl       String?
+  organizerId     String?
+  status          String    @default("draft")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  organizer User? @relation(fields: [organizerId], references: [id])
+
+  @@index([status])
+  @@index([startDate])
+  @@map("events")
+}

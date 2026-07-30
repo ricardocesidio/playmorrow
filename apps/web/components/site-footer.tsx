@@ -20,6 +20,7 @@ export function SiteFooter() {
           <Link href="/games" className="hover:text-foreground">Games</Link>
           <Link href="/studios" className="hover:text-foreground">Studios</Link>
           <Link href="/marketplace" className="hover:text-foreground">Marketplace</Link>
+          <Link href="/events" className="hover:text-foreground">Events</Link>
           <Link href="/feed" className="hover:text-foreground">Feed</Link>
           <Link href="/search" className="hover:text-foreground">Search</Link>
           <a href="https://instagram.com/playmorrow" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">Instagram</a>

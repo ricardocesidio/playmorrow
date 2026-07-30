@@ -5,8 +5,6 @@ import { Handshake, ExternalLink } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/api/auth-context';
 import { api } from '@/lib/api/client';
 import { useQuery } from '@tanstack/react-query';
