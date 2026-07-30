@@ -401,4 +401,12 @@ export interface PurchaseIntent {
   clientSecret: string;
 }
 
+export interface StudioRevenue {
+  studio: { id: string; name: string; slug: string };
+  totalRevenue: number;
+  totalFees: number;
+  netRevenue: number;
+  totalSales: number;
+}
+
 export const api = USE_MOCKS ? createHybridClient() : createRealClient();

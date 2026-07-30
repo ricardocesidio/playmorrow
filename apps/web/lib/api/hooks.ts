@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile, type Report, type CreateReportDto, type MarketplaceListing, type PurchasedLicense, type PurchaseIntent } from './client';
+import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile, type Report, type CreateReportDto, type MarketplaceListing, type PurchasedLicense, type PurchaseIntent, type StudioRevenue } from './client';
 import type { StudioAnalytics, GameAnalytics } from './analytics-types';
 import type { StudioVerificationRequest, TrustScore, CompanyProfile, StudioPressKit, BrandKit, AdminVerificationItem } from './verification-types';
 import { revalidateFeed, revalidateHomepage, revalidateGame } from '@/actions/revalidate';
@@ -1425,6 +1425,13 @@ export function usePurchaseListing() {
     onError: (err: any) => {
       toast.error(err?.body?.message || err?.message || 'Purchase failed');
     },
+  });
+}
+
+export function useRevenue() {
+  return useQuery({
+    queryKey: ['revenue'],
+    queryFn: () => api.get<StudioRevenue[]>('/publisher/revenue'),
   });
 }
 

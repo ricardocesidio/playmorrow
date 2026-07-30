@@ -58,6 +58,7 @@ import { DmcaModule } from './dmca/dmca.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { MonitorModule } from './monitor/monitor.module';
 import { PaymentsModule } from './payments/payments.module';
+import { PublisherModule } from './publisher/publisher.module';
 import { MarketplaceModule } from './marketplace/marketplace.module';
 import { ModerationModule } from './moderation/moderation.module';
 
@@ -120,6 +121,7 @@ import { ModerationModule } from './moderation/moderation.module';
     MonitorModule,
     PaymentsModule,
     MarketplaceModule,
+    PublisherModule,
   ],
   controllers: [CspController],
   providers: [
