@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { CalendarDays, MapPin, Calendar } from 'lucide-react';
+import { MapPin, Calendar } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
@@ -63,10 +63,11 @@ export default function EventsPage() {
                       {event.location && <span className="flex items-center gap-1"><MapPin className="size-3" />{event.location}</span>}
                       {event.virtual && <span className="text-cyan">Virtual</span>}
                     </div>
-                    {event.ticketPriceCents != null && event.ticketPriceCents > 0 && (
+                    {event.ticketPriceCents != null && event.ticketPriceCents > 0 ? (
                       <p className="mt-1 font-mono text-xs text-cyan">{formatPrice(event.ticketPriceCents)}</p>
+                    ) : (
+                      <p className="mt-1 font-mono text-xs text-green-400">Free</p>
                     )}
-                    {event.ticketPriceCents === 0 && <p className="mt-1 font-mono text-xs text-green-400">Free</p>}
                   </div>
                   <Calendar className="size-4 self-center text-muted-foreground transition group-hover:text-cyan" />
                 </Link>

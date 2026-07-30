@@ -1,7 +1,8 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { CalendarDays, MapPin, Clock, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { CalendarDays, MapPin, ArrowLeft } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { ErrorState } from '@/components/error-state';
@@ -50,9 +51,9 @@ export default function EventDetailPage() {
       <main className="relative min-h-screen bg-[#020609] px-5 pb-28 pt-4 sm:px-8 lg:px-10">
         <CircuitFrame className="opacity-70" />
         <div className="relative z-10 mx-auto max-w-3xl">
-          <a href="/events" className="mb-4 flex items-center gap-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:text-cyan">
+          <Link href="/events" className="mb-4 flex items-center gap-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:text-cyan">
             <ArrowLeft className="size-3" /> Back to events
-          </a>
+          </Link>
 
           <HudPanel className="mb-3 px-4 py-3 sm:px-8 sm:py-4" accent="muted">
             <h1 className="font-display text-2xl font-black uppercase text-foreground">{event.title}</h1>

@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Param, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { EventsService } from './events.service';
 
 @Controller('events')
@@ -16,7 +17,9 @@ export class EventsController {
   }
 
   @Post()
-  async create(@Body() body: any) {
+  @UseGuards(SessionAuthGuard)
+  async create(@Body() body: { title: string; slug: string; startDate: string; description?: string; location?: string; virtual?: boolean; ticketPriceCents?: number; bannerUrl?: string }) {
+    if (!body.title || !body.slug || !body.startDate) throw new Error('title, slug, and startDate are required');
     return this.events.create(body);
   }
 }
