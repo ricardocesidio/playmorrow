@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile, type Report, type CreateReportDto } from './client';
+import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile, type Report, type CreateReportDto, type MarketplaceListing, type PurchasedLicense, type PurchaseIntent } from './client';
 import type { StudioAnalytics, GameAnalytics } from './analytics-types';
 import type { StudioVerificationRequest, TrustScore, CompanyProfile, StudioPressKit, BrandKit, AdminVerificationItem } from './verification-types';
 import { revalidateFeed, revalidateHomepage, revalidateGame } from '@/actions/revalidate';
@@ -1377,4 +1377,60 @@ export interface PlayerXpEvent {
 export interface Achievement {
   id: string; name: string; desc: string; icon: string; xpReward: number; category: string;
   unlocked: boolean; unlockedAt: string | null;
+}
+
+// ── Marketplace ──────────────────────────────────────────────────────────
+
+export function useMarketplaceListings(type?: string, page = 1, pageSize = 20) {
+  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  if (type) params.set('type', type);
+  return useQuery({
+    queryKey: ['marketplace', type, page, pageSize],
+    queryFn: () => api.get<Paginated<MarketplaceListing>>(`/marketplace?${params}`),
+  });
+}
+
+export function useMarketplaceListing(id: string) {
+  return useQuery({
+    queryKey: ['marketplace', id],
+    queryFn: () => api.get<MarketplaceListing>(`/marketplace/${id}`),
+    enabled: !!id,
+  });
+}
+
+export function useMyLicenses() {
+  return useQuery({
+    queryKey: ['my-licenses'],
+    queryFn: () => api.get<PurchasedLicense[]>('/marketplace/me/licenses'),
+  });
+}
+
+export function usePurchaseListing() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (listingId: string) =>
+      api.post<PurchaseIntent>(`/marketplace/${listingId}/purchase`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['my-licenses'] });
+      toast.success('Purchase initiated — complete payment in the Stripe dialog');
+    },
+    onError: (err: any) => {
+      toast.error(err?.body?.message || err?.message || 'Purchase failed');
+    },
+  });
+}
+
+export function useCreateListing() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      type: string; title: string; description?: string; priceCents: number;
+      fileUrl?: string; thumbnailUrl?: string; tags?: string[]; studioId: string; gameId?: string;
+    }) => api.post<MarketplaceListing>('/marketplace', data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['marketplace'] });
+      toast.success('Listing created');
+    },
+    onError: (err: any) => toast.error(err?.body?.message || 'Failed to create listing'),
+  });
 }

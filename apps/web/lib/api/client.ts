@@ -369,4 +369,36 @@ function createHybridClient(): ReturnType<typeof createRealClient> {
   };
 }
 
+export interface MarketplaceListing {
+  id: string;
+  type: string;
+  title: string;
+  description: string | null;
+  priceCents: number;
+  currency: string;
+  fileUrl: string | null;
+  thumbnailUrl: string | null;
+  tags: string[];
+  status: string;
+  studioId: string;
+  gameId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  studio: { id: string; name: string; slug: string; logoUrl: string | null };
+  game?: { id: string; title: string; slug: string } | null;
+}
+
+export interface PurchasedLicense {
+  id: string;
+  userId: string;
+  listingId: string;
+  purchasedAt: string;
+  active: boolean;
+  listing: MarketplaceListing;
+}
+
+export interface PurchaseIntent {
+  clientSecret: string;
+}
+
 export const api = USE_MOCKS ? createHybridClient() : createRealClient();
