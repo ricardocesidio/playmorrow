@@ -8,20 +8,19 @@ import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { Button } from '@/components/ui/button';
-import { useMyStudios } from '@/lib/api/hooks';
-import { useMarketplaceListings } from '@/lib/api/hooks';
+import { useMyStudios, useStudioListings } from '@/lib/api/hooks';
 import { useAuth } from '@/lib/api/auth-context';
 import { formatPrice, formatRelativeTime } from '@/lib/format';
+
+const TYPE_LABELS: Record<string, string> = {
+  ASSET: 'Asset', GAME: 'Game', SERVICE: 'Service', PLUGIN: 'Plugin',
+};
 
 export default function DashboardMarketplacePage() {
   const { user } = useAuth();
   const { data: studios } = useMyStudios();
   const studio = studios?.[0];
-  const { data, isLoading, error } = useMarketplaceListings(undefined, 1, 50);
-
-  if (!user) return null;
-
-  const myListings = data?.items.filter((l) => l.studioId === studio?.id) ?? [];
+  const { data: myListings, isLoading, error } = useStudioListings(studio?.id ?? '');
 
   return (
     <>
@@ -78,7 +77,7 @@ export default function DashboardMarketplacePage() {
                           {listing.status}
                         </span>
                         &middot; {formatPrice(listing.priceCents)}
-                        &middot; {listing.type}
+                        &middot; {TYPE_LABELS[listing.type] || listing.type}
                       </p>
                     </div>
                     <span className="font-mono text-[0.5rem] text-muted-foreground">

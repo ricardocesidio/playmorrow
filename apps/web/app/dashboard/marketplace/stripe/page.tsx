@@ -29,10 +29,9 @@ export default function StripeOnboardingPage() {
         refreshUrl: `${window.location.origin}/dashboard/marketplace/stripe`,
         returnUrl: `${window.location.origin}/dashboard/marketplace/stripe?success=1`,
       });
-      setOnboardingUrl(res.url);
       window.location.href = res.url;
-    } catch {
-      setOnboarded(true);
+    } catch (err: any) {
+      alert('Failed to connect Stripe: ' + (err?.body?.message || err?.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }

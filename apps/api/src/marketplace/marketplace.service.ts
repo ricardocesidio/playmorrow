@@ -77,6 +77,11 @@ export class MarketplaceService {
     });
     if (!stripeAccount?.onboarded) throw new Error('Studio not ready to receive payments');
 
+    const owner = await this.prisma.studioMember.findFirst({
+      where: { studioId: listing.studioId, role: 'OWNER' },
+    });
+    const sellerId = owner?.userId;
+
     const pi = await this.payments.createPaymentIntent(
       listing.priceCents,
       platformFeeCents,
@@ -89,13 +94,23 @@ export class MarketplaceService {
       amountCents: listing.priceCents,
       platformFeeCents,
       buyerId: userId,
-      sellerId: userId,
+      sellerId,
       listingId,
       stripePaymentIntentId: pi.id,
       description: `Purchase of ${listing.title}`,
     });
 
     return { clientSecret: pi.client_secret };
+  }
+
+  async getStudioListings(studioId: string) {
+    return this.prisma.marketplaceListing.findMany({
+      where: { studioId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        studio: { select: { id: true, name: true, slug: true, logoUrl: true } },
+      },
+    });
   }
 
   async getUserLicenses(userId: string) {

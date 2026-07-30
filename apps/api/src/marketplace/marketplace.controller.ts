@@ -30,7 +30,8 @@ export class MarketplaceController {
   @Post()
   @UseGuards(SessionAuthGuard)
   async create(@Body() body: any, @Req() req: any) {
-    return this.marketplace.createListing({ ...body, studioId: req.user.studioId });
+    if (!body.studioId) throw new Error('studioId is required');
+    return this.marketplace.createListing(body);
   }
 
   @Post(':id/purchase')
@@ -43,5 +44,11 @@ export class MarketplaceController {
   @UseGuards(SessionAuthGuard)
   async myLicenses(@Req() req: any) {
     return this.marketplace.getUserLicenses(req.user.id);
+  }
+
+  @Get('studio/:studioId')
+  @UseGuards(SessionAuthGuard)
+  async studioListings(@Param('studioId') studioId: string) {
+    return this.marketplace.getStudioListings(studioId);
   }
 }

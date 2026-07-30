@@ -1390,6 +1390,14 @@ export function useMarketplaceListings(type?: string, page = 1, pageSize = 20) {
   });
 }
 
+export function useStudioListings(studioId: string) {
+  return useQuery({
+    queryKey: ['studio-listings', studioId],
+    queryFn: () => api.get<MarketplaceListing[]>(`/marketplace/studio/${studioId}`),
+    enabled: !!studioId,
+  });
+}
+
 export function useMarketplaceListing(id: string) {
   return useQuery({
     queryKey: ['marketplace', id],

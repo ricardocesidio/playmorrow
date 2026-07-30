@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Store, ArrowRight, Search, X } from 'lucide-react';
+import { Store, ArrowRight } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
@@ -13,6 +13,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useMarketplaceListings } from '@/lib/api/hooks';
 import { formatPrice } from '@/lib/format';
+
+const TYPE_LABELS: Record<string, string> = {
+  ASSET: 'Asset', GAME: 'Game', SERVICE: 'Service', PLUGIN: 'Plugin',
+};
 
 const TABS = [
   { key: '', label: 'All' },
@@ -105,7 +109,7 @@ export default function MarketplacePage() {
                       )}
                       <div className="absolute left-2 top-2">
                         <span className="bg-cyan/90 px-2 py-0.5 font-mono text-[0.55rem] uppercase text-white">
-                          {listing.type}
+                          {TYPE_LABELS[listing.type] || listing.type}
                         </span>
                       </div>
                     </div>
