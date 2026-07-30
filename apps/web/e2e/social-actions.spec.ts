@@ -5,7 +5,7 @@ const API_ORIGIN = 'http://localhost:4000';
 
 test.describe('Follow interactions', () => {
   async function setupStudioMocks(page: Page, isFollowing = false, followerCount = 5) {
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/me', async (route) => {
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/session/me', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_USER) });
     });
 
@@ -38,7 +38,7 @@ test.describe('Follow interactions', () => {
   }
 
   test('Guest redirects to login on follow', async ({ page }) => {
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/me', async (route) => {
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/session/me', async (route) => {
       await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({}) });
     });
     await page.route((url) => url.origin === API_ORIGIN && !!url.pathname.match(/^\/api\/studios\/(?!me\b)[^/]+$/), async (route) => {

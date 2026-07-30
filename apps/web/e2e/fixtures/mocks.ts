@@ -75,7 +75,7 @@ export async function mockApi(page: Page) {
 
     try {
       // ── Auth ───────────────────────────────────────────────────────
-      if (path === '/api/auth/me') {
+      if (path === '/api/auth/session/me') {
         return await json(MOCK_USER);
       }
 

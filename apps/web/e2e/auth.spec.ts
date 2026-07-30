@@ -5,7 +5,7 @@ const API_ORIGIN = 'http://localhost:4000';
 
 test.describe('Authentication', () => {
   test('Login page renders', async ({ page }) => {
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/me', async (route) => {
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/session/me', async (route) => {
       await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({}) });
     });
     await page.goto('/login');
@@ -15,7 +15,7 @@ test.describe('Authentication', () => {
   });
 
   test('Register page renders', async ({ page }) => {
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/me', async (route) => {
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/session/me', async (route) => {
       await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({}) });
     });
     await page.goto('/register');
@@ -23,11 +23,12 @@ test.describe('Authentication', () => {
   });
 
   test('Login success stores token and redirects', async ({ page }) => {
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/me', async (route) => {
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/session/me', async (route) => {
       await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({}) });
     });
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/login', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user: MOCK_USER, accessToken: MOCK_TOKEN, refreshToken: 'mock-refresh' }) });
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/session/login', async (route) => {
+      const body = JSON.stringify({ user: MOCK_USER, accessToken: MOCK_TOKEN, refreshToken: 'mock-refresh' });
+      await route.fulfill({ status: 200, contentType: 'application/json', body });
     });
 
     await page.goto('/login');
@@ -43,10 +44,10 @@ test.describe('Authentication', () => {
   });
 
   test('Login failure shows error', async ({ page }) => {
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/me', async (route) => {
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/session/me', async (route) => {
       await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({}) });
     });
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/login', async (route) => {
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/session/login', async (route) => {
       await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ message: 'Invalid credentials' }) });
     });
 
@@ -60,7 +61,7 @@ test.describe('Authentication', () => {
   });
 
   test('Protected feed redirects to login when unauthenticated', async ({ page }) => {
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/me', async (route) => {
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/session/me', async (route) => {
       await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({}) });
     });
     await page.goto('/dashboard/feed');
@@ -69,7 +70,7 @@ test.describe('Authentication', () => {
 
   test('Authenticated feed renders', async ({ page }) => {
     // Mock all needed endpoints
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/me', async (route) => {
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/session/me', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_USER) });
     });
     await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/me/feed', async (route) => {

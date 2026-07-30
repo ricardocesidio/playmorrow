@@ -23,7 +23,7 @@ test.describe('Public pages', () => {
   test('Explore games search input works', async ({ page }) => {
     await page.goto('/games');
     const searchInput = page.getByLabel('Search games');
-    await expect(searchInput).toBeVisible();
+    await expect(searchInput.first()).toBeVisible();
     await searchInput.fill('Test');
     await searchInput.press('Enter');
     await expect(page.getByRole('link', { name: /Searched Game/i })).toBeVisible();

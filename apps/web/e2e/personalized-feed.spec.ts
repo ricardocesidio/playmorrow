@@ -34,7 +34,7 @@ test.describe('Personalized feed', () => {
   }
 
   async function setupCommonMocks(page: Page) {
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/me', async (route) => {
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/auth/session/me', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_USER) });
     });
     await page.route((url) => url.origin === API_ORIGIN && url.pathname === '/api/me/notifications/unread-count', async (route) => {
