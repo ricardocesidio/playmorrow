@@ -6,6 +6,9 @@ export const API = 'http://localhost:4000/api';
 export const MOCK_USER = {
   id: 'user-1', email: 'test@playmorrow.example', username: 'testuser',
   displayName: 'Test User', role: 'PLAYER', accountType: 'PLAYER',
+  avatarUrl: null, bio: null, location: null,
+  isOnboardingCompleted: true,
+  level: 1, xp: 0,
 };
 export const MOCK_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-token';
 
