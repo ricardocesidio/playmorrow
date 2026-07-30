@@ -55,7 +55,7 @@
     "@types/node": "^22.10.5",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
-    "eslint": "^9.17.0",
+    "eslint": "^10.8.0",
     "@next/bundle-analyzer": "^16.2.12",
     "web-vitals": "^4.0.0",
     "storybook": "10.4.6",
