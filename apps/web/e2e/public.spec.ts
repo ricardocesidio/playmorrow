@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { mockApi, API, API_ORIGIN } from './fixtures/mocks';
+import { mockApi } from './fixtures/mocks';
 
 test.beforeEach(async ({ page }) => {
   await mockApi(page);
@@ -42,11 +42,20 @@ test.describe('Public pages', () => {
   });
 
   test('Explore games error state', async ({ page }) => {
-    // Route must be registered as a glob pattern (not function) to match
-    // ahead of mockApi's **/* catch-all. The test navigates *before* setting
-    // up the route so mockApi's handlers load first, then the override applies.
-    await page.route(`${API}/games?*`, async (route) => {
-      await route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'Server error' }) });
+    // mockApi uses a **/* catch-all that wins over page.route overrides.
+    // Override fetch at the page level (before any JS runs) to guarantee
+    // the games API returns 500 regardless of Playwright route priority.
+    await page.addInitScript(() => {
+      const _fetch = window.fetch.bind(window);
+      window.fetch = (url, opts) => {
+        if (typeof url === 'string' && url.includes('/api/games')) {
+          return Promise.resolve(new Response(
+            JSON.stringify({ message: 'Server error' }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } },
+          ));
+        }
+        return _fetch(url, opts);
+      };
     });
     await page.goto('/games');
     await expect(page.getByText('Failed to load games.')).toBeVisible();
