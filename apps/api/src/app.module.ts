@@ -57,6 +57,8 @@ import { DigestModule } from './digest/digest.module';
 import { DmcaModule } from './dmca/dmca.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { MonitorModule } from './monitor/monitor.module';
+import { PaymentsModule } from './payments/payments.module';
+import { MarketplaceModule } from './marketplace/marketplace.module';
 import { ModerationModule } from './moderation/moderation.module';
 
 @Module({
@@ -116,6 +118,8 @@ import { ModerationModule } from './moderation/moderation.module';
     DmcaModule,
     ApiKeysModule,
     MonitorModule,
+    PaymentsModule,
+    MarketplaceModule,
   ],
   controllers: [CspController],
   providers: [

@@ -1434,3 +1434,116 @@ model GameView {
   @@index([gameId, createdAt])
   @@map("game_views")
 }
+
+enum TransactionType {
+  PURCHASE
+  REFUND
+  PAYOUT
+  REFERRAL_COMMISSION
+  PLEDGE
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum ListingType {
+  ASSET
+  GAME
+  SERVICE
+  PLUGIN
+}
+
+model StripeConnectAccount {
+  id            String   @id @default(cuid())
+  studioId      String   @unique
+  stripeAccountId String @unique
+  accountType   String   @default("express")
+  onboarded     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+
+  @@map("stripe_connect_accounts")
+}
+
+model Transaction {
+  id              String            @id @default(cuid())
+  type            TransactionType
+  amountCents     Int
+  platformFeeCents Int              @default(0)
+  currency        String            @default("usd")
+  buyerId         String?
+  sellerId        String?
+  listingId       String?
+  stripePaymentIntentId String?      @unique
+  status          TransactionStatus @default(PENDING)
+  description     String?
+  createdAt       DateTime          @default(now())
+
+  buyer  User?         @relation("BuyerTransactions", fields: [buyerId], references: [id])
+  seller User?         @relation("SellerTransactions", fields: [sellerId], references: [id])
+  listing MarketplaceListing? @relation(fields: [listingId], references: [id])
+
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+model ProcessedWebhookEvent {
+  id             String   @id @default(cuid())
+  stripeEventId  String   @unique
+  type           String
+  processedAt    DateTime @default(now())
+
+  @@map("processed_webhook_events")
+}
+
+model MarketplaceListing {
+  id          String     @id @default(cuid())
+  type        ListingType
+  title       String
+  description String?
+  priceCents  Int
+  currency    String     @default("usd")
+  fileUrl     String?
+  thumbnailUrl String?
+  tags        String[]
+  status      String     @default("draft") // draft, active, archived
+  studioId    String
+  gameId      String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  studio       Studio        @relation(fields: [studioId], references: [id])
+  game         Game?         @relation(fields: [gameId], references: [id])
+  transactions Transaction[]
+  licenses     PurchasedLicense[]
+
+  @@index([studioId])
+  @@index([status])
+  @@index([type])
+  @@map("marketplace_listings")
+}
+
+model PurchasedLicense {
+  id         String   @id @default(cuid())
+  userId     String
+  listingId  String
+  transactionId String
+  purchasedAt DateTime @default(now())
+  active     Boolean  @default(true)
+
+  user        User               @relation(fields: [userId], references: [id])
+  listing     MarketplaceListing @relation(fields: [listingId], references: [id])
+
+  @@unique([userId, listingId])
+  @@index([userId])
+  @@index([listingId])
+  @@map("purchased_licenses")
+}
