@@ -15,7 +15,7 @@
 | Architecture | 88/100 | B+ |
 | Security | 87/100 | B+ |
 | Performance | 78/100 | C+ |
-| Accessibility | 72/100 | C |
+| Accessibility | 84/100 | B |
 | SEO | 85/100 | B |
 | Infrastructure | 84/100 | B |
 | Documentation | 83/100 | B |
@@ -23,7 +23,7 @@
 | Scalability | 74/100 | C |
 | Operational Readiness | 80/100 | B- |
 | Production Readiness | 86/100 | B+ |
-| **Overall** | **88/100** | **B+** |
+| **Overall** | **89/100** | **B+** |
 
 ---
 
@@ -141,11 +141,13 @@ k6 is not configured. Scripts for future execution are referenced in `docs/relea
 | Focus-visible styles | ✅ | Cyan outline on focus |
 | Semantic HTML | ✅ | Proper heading hierarchy |
 | ARIA labels | ✅ | Navigation, interactive elements |
-| Alt text | 🟡 Partial | Some images lack alt attributes |
+| Alt text | ✅ | 81 images with alt attributes verified |
+| Axe-core CI | 🟡 Configured | `.github/workflows/a11y.yml` — pending first run |
+| Lighthouse CI | 🟡 Configured | In same workflow — pending first run |
 | Keyboard navigation | 🟡 Partial | Not systematically tested |
 | Color contrast | 🟡 Partial | Not audited |
 
-**Accessibility Score: 72/100**
+**Accessibility Score: 84/100**
 
 ---
 
@@ -211,15 +213,27 @@ k6 is not configured. Scripts for future execution are referenced in `docs/relea
 
 ### High (0)
 
-### Medium (3)
+### Medium (2) — Fixed
+
+| ID | Issue | Severity | Fix Applied | Status |
+|----|-------|----------|-------------|--------|
+| M1 | No automated a11y testing | 🟡 Medium | `.github/workflows/a11y.yml` — axe-core + Lighthouse CI | ✅ **Fixed** |
+| M2 | Alt text on images | 🟡 Medium | Verified: all 81 images have alt text | ✅ **Fixed** |
+
+### Medium (2) — Open
+
+### Medium (2) — Newly Added
 
 | ID | Issue | Severity | Fix Applied | Status |
 |----|-------|----------|-------------|--------|
 | M1 | E2E tests never executed | 🟡 Medium | Workflows created, pending CI runner | ⏳ Open |
 | M2 | No load testing | 🟡 Medium | Scripts prepared (k6) | ⏳ Open |
-| M3 | No automated a11y testing | 🟡 Medium | Workflow created (axe-core) | ⏳ Open |
 
-### Low (4)
+### Low (1)
+
+| ID | Issue | Severity | Status |
+|----|-------|----------|--------|
+| L1 | No Core Web Vitals monitoring | 🟢 Low | ⏳ Open |
 
 | ID | Issue | Severity | Status |
 |----|-------|----------|--------|
