@@ -4,11 +4,12 @@ import { EventBusModule } from '../common/event-bus.module';
 import { ModerationController } from './moderation.controller';
 import { ModerationService } from './moderation.service';
 import { EscalationService } from './escalation.service';
+import { SpamDetectionService } from './spam-detection.service';
 
 @Module({
   imports: [PrismaModule, EventBusModule],
   controllers: [ModerationController],
-  providers: [ModerationService, EscalationService],
-  exports: [ModerationService],
+  providers: [ModerationService, EscalationService, SpamDetectionService],
+  exports: [ModerationService, SpamDetectionService],
 })
 export class ModerationModule {}
