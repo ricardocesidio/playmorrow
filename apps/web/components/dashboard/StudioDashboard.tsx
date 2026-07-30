@@ -18,6 +18,7 @@ import {
   MessageSquare,
   MonitorPlay,
   PanelLeft,
+  Store,
   Rocket,
   Settings,
   ShieldCheck,
@@ -265,6 +266,7 @@ function StudioSidebar({ unreadCount, studioSlug }: { unreadCount: number; studi
         <nav className="mt-3 space-y-1">
           <SidebarLink href="/dashboard" icon={<PanelLeft className="size-4" />} label="Overview" active />
           <SidebarLink href="/dashboard/games" icon={<Gamepad2 className="size-4" />} label="My Games" />
+          <SidebarLink href="/dashboard/marketplace" icon={<Store className="size-4" />} label="Marketplace" />
           <SidebarLink href="/dashboard/devlogs" icon={<FileText className="size-4" />} label="Devlogs" />
           <SidebarLink href="/dashboard/roadmap" icon={<Workflow className="size-4" />} label="Roadmap" />
           <SidebarLink href="/dashboard/analytics" icon={<BarChart3 className="size-4" />} label="Analytics" />

@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { Upload, X } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/api/auth-context';
-import { useMyStudios, useCreateListing } from '@/lib/api/hooks';
+import { useMyStudios, useCreateListing, useUpload } from '@/lib/api/hooks';
 
 const LISTING_TYPES = [
   { value: 'ASSET', label: 'Asset' },
@@ -23,6 +24,7 @@ export default function NewListingPage() {
   const { data: studios } = useMyStudios();
   const studio = studios?.[0];
   const create = useCreateListing();
+  const upload = useUpload();
 
   const [type, setType] = useState('ASSET');
   const [title, setTitle] = useState('');
@@ -31,6 +33,15 @@ export default function NewListingPage() {
   const [fileUrl, setFileUrl] = useState('');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [tagsStr, setTagsStr] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const thumbInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (file: File | undefined, target: 'file' | 'thumbnail') => {
+    if (!file) return;
+    const result = await upload.mutateAsync(file);
+    if (target === 'file') setFileUrl(result.url);
+    else setThumbnailUrl(result.url);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,79 +75,68 @@ export default function NewListingPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
-                Type
-              </label>
+              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Type</label>
               <div className="flex gap-2">
                 {LISTING_TYPES.map((t) => (
-                  <button
-                    key={t.value}
-                    type="button"
-                    onClick={() => setType(t.value)}
+                  <button key={t.value} type="button" onClick={() => setType(t.value)}
                     className={`px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-wider transition ${
-                      type === t.value
-                        ? 'border border-cyan bg-cyan/10 text-cyan'
-                        : 'border border-border/60 text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {t.label}
-                  </button>
+                      type === t.value ? 'border border-cyan bg-cyan/10 text-cyan' : 'border border-border/60 text-muted-foreground hover:text-foreground'
+                    }`}>{t.label}</button>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
-                Title
-              </label>
+              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Title</label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="e.g., Cyberpunk Music Pack" />
             </div>
 
             <div>
-              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
-                Description
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
+              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Description</label>
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4}
                 className="clip-corner w-full border border-border-bright/50 bg-background/70 px-4 py-2 text-sm text-foreground outline-none transition-colors focus:border-cyan focus:ring-1 focus:ring-cyan"
-                placeholder="Describe what you're selling..."
-              />
+                placeholder="Describe what you're selling..." />
             </div>
 
             <div>
-              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
-                Price (cents)
-              </label>
-              <Input
-                type="number"
-                min={0}
-                value={priceCents}
-                onChange={(e) => setPriceCents(parseInt(e.target.value) || 0)}
-                required
-                placeholder="e.g., 1999 for $19.99"
-              />
+              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Price (cents)</label>
+              <Input type="number" min={0} value={priceCents} onChange={(e) => setPriceCents(parseInt(e.target.value) || 0)} required placeholder="e.g., 1999 = $19.99" />
             </div>
 
             <div>
-              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
-                File URL
-              </label>
-              <Input value={fileUrl} onChange={(e) => setFileUrl(e.target.value)} placeholder="https://..." />
+              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">File (asset to sell)</label>
+              <input ref={fileInputRef} type="file" className="hidden" onChange={(e) => handleFileUpload(e.target.files?.[0], 'file')} />
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={upload.isPending}>
+                  <Upload className="size-3" /> {upload.isPending ? 'Uploading...' : 'Upload file'}
+                </Button>
+                {fileUrl && (
+                  <span className="flex items-center gap-1 font-mono text-[0.5rem] text-cyan">
+                    File uploaded
+                    <button type="button" onClick={() => setFileUrl('')} className="text-coral"><X className="size-3" /></button>
+                  </span>
+                )}
+              </div>
             </div>
 
             <div>
-              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
-                Thumbnail URL
-              </label>
-              <Input value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} placeholder="https://..." />
+              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Thumbnail</label>
+              <input ref={thumbInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e.target.files?.[0], 'thumbnail')} />
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => thumbInputRef.current?.click()} disabled={upload.isPending}>
+                  <Upload className="size-3" /> {upload.isPending ? 'Uploading...' : 'Upload thumbnail'}
+                </Button>
+                {thumbnailUrl && (
+                  <span className="flex items-center gap-1 font-mono text-[0.5rem] text-cyan">
+                    Thumbnail uploaded
+                    <button type="button" onClick={() => setThumbnailUrl('')} className="text-coral"><X className="size-3" /></button>
+                  </span>
+                )}
+              </div>
             </div>
 
             <div>
-              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">
-                Tags (comma-separated)
-              </label>
+              <label className="mb-1 block font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Tags (comma-separated)</label>
               <Input value={tagsStr} onChange={(e) => setTagsStr(e.target.value)} placeholder="music, cyberpunk, synthwave" />
             </div>
 

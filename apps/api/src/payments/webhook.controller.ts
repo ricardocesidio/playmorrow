@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Headers, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PaymentsService } from './payments.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Controller('webhooks/stripe')
 export class WebhookController {
@@ -10,6 +11,7 @@ export class WebhookController {
   constructor(
     private config: ConfigService,
     private payments: PaymentsService,
+    private notifications: NotificationsService,
   ) {
     const key = this.config.get<string>('STRIPE_SECRET_KEY');
     if (key) {
@@ -58,7 +60,7 @@ export class WebhookController {
         : undefined;
 
       if (buyerId && amountCents > 0) {
-        await this.payments.processSuccessfulPayment(
+        const txn = await this.payments.processSuccessfulPayment(
           pi.id,
           buyerId,
           amountCents,
@@ -67,6 +69,17 @@ export class WebhookController {
           listingId,
         );
         this.logger.log(`Payment ${pi.id}: ${amountCents}usd processed`);
+
+        if (sellerId) {
+          this.notifications.create({
+            recipientId: sellerId,
+            type: 'NEW_SALE',
+            title: 'New sale!',
+            body: `You made a sale of $${(amountCents / 100).toFixed(2)} on the Marketplace.`,
+            targetType: 'STUDIO',
+            targetId: listingId || '',
+          }).catch((err) => this.logger.error('Failed to notify seller', err));
+        }
       }
     }
 

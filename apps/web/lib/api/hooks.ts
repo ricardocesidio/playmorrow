@@ -1434,3 +1434,16 @@ export function useCreateListing() {
     onError: (err: any) => toast.error(err?.body?.message || 'Failed to create listing'),
   });
 }
+
+export function useUpload() {
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('Upload failed');
+      return res.json() as Promise<{ url: string; filename: string; size: number; mimeType: string }>;
+    },
+    onError: () => toast.error('Upload failed — check file size and type'),
+  });
+}
