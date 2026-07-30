@@ -6,6 +6,11 @@ import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/lib/api/auth-context';
 import { SplashProvider } from '@/components/loading/SplashProvider';
+import { reportWebVitals } from '@/lib/web-vitals';
+
+if (typeof window !== 'undefined') {
+  reportWebVitals();
+}
 
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
