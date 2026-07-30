@@ -233,4 +233,65 @@ export class ModerationService {
 
     return { resolved: true, resolution };
   }
+
+  async getDashboardMetrics() {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAgo = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const [
+      totalReports, openReports, escalatedReports,
+      reportsToday, reportsThisWeek, totalSuspended,
+      totalShadowBanned, totalStrikes,
+      recentReports,
+    ] = await Promise.all([
+      this.prisma.moderationReport.count(),
+      this.prisma.moderationReport.count({ where: { status: 'OPEN' } }),
+      this.prisma.moderationReport.count({ where: { escalatedAt: { not: null } } }),
+      this.prisma.moderationReport.count({ where: { createdAt: { gte: todayStart } } }),
+      this.prisma.moderationReport.count({ where: { createdAt: { gte: weekAgo } } }),
+      this.prisma.user.count({ where: { suspendedUntil: { gt: now } } }),
+      this.prisma.user.count({ where: { shadowBanned: true } }),
+      this.prisma.user.count({ where: { strikeCount: { gt: 0 } } }),
+      this.prisma.moderationReport.findMany({
+        where: { createdAt: { gte: weekAgo } },
+        include: { reporter: { select: { id: true, username: true } } },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      }),
+    ]);
+
+    const avgResolutionTime = await this.prisma.moderationReport.findMany({
+      where: { status: { not: 'OPEN' }, resolvedAt: { not: null } },
+      select: { createdAt: true, resolvedAt: true },
+    });
+
+    let avgHours = 0;
+    if (avgResolutionTime.length > 0) {
+      const totalHours = avgResolutionTime.reduce((sum, r) => {
+        return sum + (r.resolvedAt!.getTime() - r.createdAt.getTime()) / (1000 * 60 * 60);
+      }, 0);
+      avgHours = Math.round(totalHours / avgResolutionTime.length);
+    }
+
+    return {
+      totalReports,
+      openReports,
+      escalatedReports,
+      reportsToday,
+      reportsThisWeek,
+      totalSuspended,
+      totalShadowBanned,
+      totalStrikes,
+      avgResolutionHours: avgHours,
+      recentReports: recentReports.map(r => ({
+        id: r.id,
+        reason: r.reason,
+        targetType: r.targetType,
+        status: r.status,
+        reporter: r.reporter,
+        createdAt: r.createdAt.toISOString(),
+      })),
+    };
+  }
 }

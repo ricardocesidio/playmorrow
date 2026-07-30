@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/api/auth-context';
 import { toast } from 'sonner';
 import {
   Shield, Search, AlertTriangle, Eye, Ban, UserX, CheckCircle,
-  Clock, ArrowRight, Filter, ChevronLeft, ChevronRight,
+  Clock, ArrowRight, Filter, ChevronLeft, ChevronRight, Flag, BarChart3,
 } from 'lucide-react';
 
 interface Report {
@@ -47,6 +47,9 @@ export default function ModerationDashboard() {
   const [suspendHours, setSuspendHours] = useState(24);
   const [suspendReason, setSuspendReason] = useState('');
 
+  const [metrics, setMetrics] = useState<any>(null);
+  const [metricsLoading, setMetricsLoading] = useState(true);
+
   const PAGE_SIZE = 20;
 
   useEffect(() => {
@@ -60,6 +63,14 @@ export default function ModerationDashboard() {
       .catch(() => toast.error('Failed to load reports'))
       .finally(() => setLoading(false));
   }, [page, statusFilter, isMod]);
+
+  useEffect(() => {
+    if (!isMod) return;
+    api.get('/api/admin/moderation/dashboard')
+      .then(setMetrics)
+      .catch(() => {})
+      .finally(() => setMetricsLoading(false));
+  }, [isMod]);
 
   const searchUser = async () => {
     if (!searchUserId) return;
@@ -131,6 +142,32 @@ export default function ModerationDashboard() {
         <Shield className="size-6 text-coral" />
         <h1 className="font-display text-2xl font-black uppercase tracking-tight text-white">Moderation Center</h1>
       </div>
+
+      {/* Metrics */}
+      {!metricsLoading && metrics && (
+        <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="clip-corner border border-coral/30 bg-coral/5 p-4">
+            <Flag className="size-5 text-coral" />
+            <p className="mt-2 font-display text-2xl font-black text-white">{metrics.openReports}</p>
+            <p className="font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground">Open Reports</p>
+          </div>
+          <div className="clip-corner border border-amber/30 bg-amber/5 p-4">
+            <AlertTriangle className="size-5 text-amber" />
+            <p className="mt-2 font-display text-2xl font-black text-white">{metrics.escalatedReports}</p>
+            <p className="font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground">Escalated</p>
+          </div>
+          <div className="clip-corner border border-cyan/30 bg-cyan/5 p-4">
+            <BarChart3 className="size-5 text-cyan" />
+            <p className="mt-2 font-display text-2xl font-black text-white">{metrics.reportsToday}</p>
+            <p className="font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground">Reports Today</p>
+          </div>
+          <div className="clip-corner border border-cyan/30 bg-cyan/5 p-4">
+            <Clock className="size-5 text-cyan" />
+            <p className="mt-2 font-display text-2xl font-black text-white">{metrics.avgResolutionHours}h</p>
+            <p className="font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground">Avg Resolution</p>
+          </div>
+        </div>
+      )}
 
       {/* User Lookup */}
       <section className="mb-8 clip-corner border border-border bg-[#09161d] p-5">

@@ -18,6 +18,14 @@ export class ModerationController {
 
   @UseGuards(SessionAuthGuard, RolesGuard)
   @Roles('ADMIN', 'MODERATOR')
+  @Get('dashboard')
+  @ApiOperation({ summary: 'Get moderation dashboard metrics' })
+  async getDashboard() {
+    return this.mod.getDashboardMetrics();
+  }
+
+  @UseGuards(SessionAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MODERATOR')
   @Post('strike')
   @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @ApiOperation({ summary: 'Give a strike to a user (3 strikes = auto-suspend)' })
