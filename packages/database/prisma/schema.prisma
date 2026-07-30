@@ -213,6 +213,7 @@ model User {
    sellerTransactions      Transaction[]               @relation("SellerTransactions")
    purchasedLicenses       PurchasedLicense[]
    referralCodes           ReferralCode[]
+   organizedEvents         Event[]
 
    @@index([role])
    @@map("users")
