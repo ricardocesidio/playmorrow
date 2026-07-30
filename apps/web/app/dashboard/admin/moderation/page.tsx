@@ -71,8 +71,8 @@ export default function ModerationDashboard() {
 
   useEffect(() => {
     if (!isMod) return;
-    api.get('/api/admin/moderation/dashboard')
-      .then(setMetrics)
+    api.get<DashboardMetrics>('/api/admin/moderation/dashboard')
+      .then(data => setMetrics(data))
       .catch(() => {})
       .finally(() => setMetricsLoading(false));
   }, [isMod]);

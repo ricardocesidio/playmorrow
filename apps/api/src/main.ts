@@ -106,8 +106,8 @@ async function bootstrap() {
         Sentry.httpIntegration(),
       ],
     });
-    app.use(Sentry.Handlers.requestHandler());
-    app.use(Sentry.Handlers.errorHandler());
+    app.use(Sentry.requestHandler());
+    app.use(Sentry.errorHandler());
     logger.info('✅ Sentry initialized with Prisma + HTTP integrations');
   } else if (isProd) {
     logger.warn('⚠️  SENTRY_DSN not set — production errors will have no visibility (see PRODUCTION.md)');

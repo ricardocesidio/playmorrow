@@ -62,5 +62,5 @@ const sentryWebpackPluginOptions = {
   disableLogger: true,
 };
 
-const withBundle = process.env.ANALYZE === 'true' ? withBundleAnalyzer({ enabled: true }) : (c: any) => c;
-export default withSentryConfig(withBundle(nextConfig) as any, sentryWebpackPluginOptions);
+const withBundle = process.env.ANALYZE === 'true' ? withBundleAnalyzer({ enabled: true }) : (c: NextConfig) => c;
+export default withSentryConfig(withBundle(nextConfig), sentryWebpackPluginOptions);

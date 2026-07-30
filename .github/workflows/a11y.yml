@@ -31,7 +31,7 @@ jobs:
       - name: Run axe-core
         run: |
           npm install -g @axe-core/cli
-          axe http://localhost:3099 --exit --disable-color
+          axe http://localhost:3099 --exit --no-color
 
   lighthouse:
     name: Lighthouse CI
