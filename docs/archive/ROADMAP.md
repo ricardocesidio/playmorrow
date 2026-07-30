@@ -1,3 +1,7 @@
+> **⚠️ SUPERSEDIDO** — Este documento não reflete o estado atual do projeto.
+> Consulte  [`CLAUDE.md` (../CLAUDE.md) e os documentos em  [`docs/releases/` (../docs/releases/) para informações atualizadas.
+> *Arquivado em 30/07/2026*
+>
 # Playmorrow — Enterprise Readiness Roadmap
 
 ✅ **Most items from previous audits RESOLVED in Session 13 (2026-07-10)**

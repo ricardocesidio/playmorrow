@@ -1,3 +1,7 @@
+> **⚠️ SUPERSEDIDO** — Este documento não reflete o estado atual do projeto.
+> Consulte  [`CLAUDE.md` (../CLAUDE.md) e os documentos em  [`docs/releases/` (../docs/releases/) para informações atualizadas.
+> *Arquivado em 30/07/2026*
+>
 # Playmorrow — Production Qualification & Deployment Checklist
 
 **Last updated:** 2026-07-09 (post audit hardening)
@@ -58,7 +62,8 @@ The API will now **exit(1) immediately on boot** with a clear message if critica
 curl -s https://playmorrow-api-production.up.railway.app/health
 
 # Login with bad creds (should 401, not 500)
-curl -s -o /dev/null -w "%{http_code}\n" \
+curl -s -o /dev/null -w "%{http_code}
+" \
   -X POST https://playmorrow.vercel.app/api/auth/session/login \
   -H "Content-Type: application/json" \
   -d '{"emailOrUsername":"test","password":"wrong"}'

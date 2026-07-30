@@ -1,3 +1,7 @@
+> **⚠️ SUPERSEDIDO** — Este documento não reflete o estado atual do projeto.
+> Consulte  [`CLAUDE.md` (../CLAUDE.md) e os documentos em  [`docs/releases/` (../docs/releases/) para informações atualizadas.
+> *Arquivado em 30/07/2026*
+>
 # Playmorrow — Project Status
 
 > **Last verified:** 2026-07-27
