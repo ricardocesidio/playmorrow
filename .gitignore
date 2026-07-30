@@ -25,6 +25,7 @@ coverage/
 playwright-report/
 test-results/
 .nyc_output/
+.lighthouseci/
 
 # logs
 *.log
