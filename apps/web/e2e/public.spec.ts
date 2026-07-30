@@ -42,23 +42,17 @@ test.describe('Public pages', () => {
   });
 
   test('Explore games error state', async ({ page }) => {
-    // mockApi uses a **/* catch-all that wins over page.route overrides.
-    // Override fetch at the page level (before any JS runs) to guarantee
-    // the games API returns 500 regardless of Playwright route priority.
-    await page.addInitScript(() => {
-      const _fetch = window.fetch.bind(window);
-      window.fetch = (url, opts) => {
-        if (typeof url === 'string' && url.includes('/api/games')) {
-          return Promise.resolve(new Response(
-            JSON.stringify({ message: 'Server error' }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } },
-          ));
-        }
-        return _fetch(url, opts);
-      };
+    // Register the route override BEFORE the fetch to guarantee winning.
+    // The empty-results + load-more tests also use `games*` and pass,
+    // confirming the LIFO order works for this pattern when the test's
+    // route is registered AFTER mockApi's beforeEach.
+    await page.route(`${API}/games*`, async (route) => {
+      await route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'Server error' }) });
     });
     await page.goto('/games');
-    await expect(page.getByText('Failed to load games.')).toBeVisible();
+    // React Query retries 3 times (exponential backoff ~14s total) before
+    // surfacing the error. The 15s expect timeout falls just short; use 30s.
+    await expect(page.getByText('Failed to load games.')).toBeVisible({ timeout: 30_000 });
   });
 
   test('Load more control appears with enough items', async ({ page }) => {
