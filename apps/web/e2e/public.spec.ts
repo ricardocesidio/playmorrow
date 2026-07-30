@@ -42,7 +42,10 @@ test.describe('Public pages', () => {
   });
 
   test('Explore games error state', async ({ page }) => {
-    await page.route((url) => url.origin === API_ORIGIN && url.pathname.startsWith('/api/games'), async (route) => {
+    // Route must be registered as a glob pattern (not function) to match
+    // ahead of mockApi's **/* catch-all. The test navigates *before* setting
+    // up the route so mockApi's handlers load first, then the override applies.
+    await page.route(`${API}/games?*`, async (route) => {
       await route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'Server error' }) });
     });
     await page.goto('/games');
