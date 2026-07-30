@@ -813,6 +813,7 @@ model ModerationReport {
   reason         ReportReason
   details        String?
   status         ReportStatus   @default(OPEN)
+  escalatedAt    DateTime?
   resolutionNote String?
   resolvedById   String?
   resolvedAt     DateTime?
