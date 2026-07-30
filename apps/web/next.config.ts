@@ -2,11 +2,16 @@ import path from 'node:path';
 
 import type { NextConfig } from 'next';
 import { withSentryConfig } from '@sentry/nextjs';
+import withBundleAnalyzer from '@next/bundle-analyzer';
 
 // Sentry integration added as part of elite audit (Observability section).
 // DSN controlled via NEXT_PUBLIC_SENTRY_DSN / SENTRY_DSN.
 
-const nextConfig: NextConfig = {
+const bundleAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+const nextConfig: NextConfig = bundleAnalyzer({
   reactStrictMode: true,
   transpilePackages: ['@playmorrow/types'],
   typedRoutes: true,
@@ -60,4 +65,4 @@ const sentryWebpackPluginOptions = {
   disableLogger: true,
 };
 
-export default withSentryConfig(nextConfig, sentryWebpackPluginOptions);
+export default withSentryConfig(nextConfig as any, sentryWebpackPluginOptions);
