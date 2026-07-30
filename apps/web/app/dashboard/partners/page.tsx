@@ -18,12 +18,11 @@ const TABS = [
 ];
 
 export default function PartnersPage() {
-  const { user } = useAuth();
   const [type, setType] = useState('');
 
   const { data, isLoading } = useQuery({
     queryKey: ['partners', type],
-    queryFn: () => api.get<{ items: any[]; total: number }>(`/partners${type ? `?type=${type}` : ''}`),
+    queryFn: () => api.get<{ items: { id: string; name: string; type: string; description?: string; websiteUrl?: string; logoUrl?: string; status: string }[]; total: number }>(`/partners${type ? `?type=${type}` : ''}`),
   });
 
   return (
@@ -54,7 +53,7 @@ export default function PartnersPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {data?.items.map((p: any) => (
+              {data?.items.map((p: { id: string; name: string; type: string; description?: string; websiteUrl?: string; status: string }) => (
                 <div key={p.id} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-4 transition hover:border-cyan/40">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">

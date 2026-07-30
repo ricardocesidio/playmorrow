@@ -73,6 +73,7 @@ export class WebhookController {
         if (sellerId) {
           this.notifications.create({
             recipientId: sellerId,
+            actorId: null,
             type: 'NEW_SALE',
             title: 'New sale!',
             body: `You made a sale of $${(amountCents / 100).toFixed(2)} on the Marketplace.`,

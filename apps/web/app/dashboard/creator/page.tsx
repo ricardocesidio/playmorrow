@@ -78,7 +78,7 @@ export default function CreatorDashboardPage() {
           {commissions && commissions.commissions.length > 0 && (
             <div className="mt-4 space-y-2">
               <h2 className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Commission History</h2>
-              {commissions.commissions.map((c: any) => (
+              {commissions.commissions.map((c: { id: string; createdAt: string; amountCents: number }) => (
                 <div key={c.id} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-3">
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-[0.55rem] text-muted-foreground">

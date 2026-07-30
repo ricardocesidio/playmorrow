@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Store, Download } from 'lucide-react';
+import { Download } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';

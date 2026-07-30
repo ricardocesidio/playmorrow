@@ -17,7 +17,7 @@ export default function EventDetailPage() {
 
   const { data: event, isLoading, error } = useQuery({
     queryKey: ['event', slug],
-    queryFn: () => api.get<any>(`/events/${slug}`),
+    queryFn: () => api.get<{ id: string; title: string; slug: string; description: string | null; startDate: string; location: string | null; virtual: boolean; ticketPriceCents: number | null }>(`/events/${slug}`),
     enabled: !!slug,
   });
 

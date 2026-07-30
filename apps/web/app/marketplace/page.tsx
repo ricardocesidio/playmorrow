@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Store, ArrowRight } from 'lucide-react';
@@ -9,8 +8,6 @@ import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { useMarketplaceListings } from '@/lib/api/hooks';
 import { formatPrice } from '@/lib/format';
 
@@ -30,7 +27,6 @@ export default function MarketplacePage() {
   const searchParams = useSearchParams();
   const type = searchParams.get('type') || '';
   const page = parseInt(searchParams.get('page') ?? '1');
-  const [search, setSearch] = useState('');
 
   const { data, isLoading, error } = useMarketplaceListings(type || undefined, page);
 

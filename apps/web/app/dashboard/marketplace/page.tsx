@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Store, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
@@ -9,7 +9,6 @@ import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { Button } from '@/components/ui/button';
 import { useMyStudios, useStudioListings } from '@/lib/api/hooks';
-import { useAuth } from '@/lib/api/auth-context';
 import { formatPrice, formatRelativeTime } from '@/lib/format';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -17,7 +16,6 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 export default function DashboardMarketplacePage() {
-  const { user } = useAuth();
   const { data: studios } = useMyStudios();
   const studio = studios?.[0];
   const { data: myListings = [], isLoading, error } = useStudioListings(studio?.id ?? '');

@@ -14,7 +14,7 @@ import { formatPrice } from '@/lib/format';
 export default function EventsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['events'],
-    queryFn: () => api.get<{ items: any[]; total: number }>('/events'),
+    queryFn: () => api.get<{ items: { id: string; title: string; slug: string; startDate: string; location: string | null; virtual: boolean; ticketPriceCents: number | null }[]; total: number }>('/events'),
   });
 
   return (
@@ -44,7 +44,7 @@ export default function EventsPage() {
 
           {!isLoading && data && data.items.length > 0 && (
             <div className="space-y-3">
-              {data.items.map((event: any) => (
+              {data.items.map((event: { id: string; title: string; slug: string; startDate: string; location: string | null; virtual: boolean; ticketPriceCents: number | null }) => (
                 <Link key={event.id} href={`/events/${event.slug}`}
                   className="group clip-corner flex border border-border/40 bg-[#050b0f]/30 p-4 transition hover:border-cyan/40">
                   <div className="mr-4 flex w-16 flex-col items-center justify-center border border-border bg-background/60 p-2">
