@@ -123,7 +123,7 @@ importers:
         specifier: ^7.8.1
         version: 7.8.2
       stripe:
-        specifier: ^17.7.0
+        specifier: ^17.4.0
         version: 17.7.0
       web-push:
         specifier: ^3.6.7

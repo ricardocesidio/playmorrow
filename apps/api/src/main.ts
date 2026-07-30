@@ -105,7 +105,8 @@ async function bootstrap() {
         Sentry.prismaIntegration(),
         Sentry.httpIntegration(),
       ],
-    });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
     logger.info('✅ Sentry initialized with Prisma + HTTP integrations');
   } else if (isProd) {
     logger.warn('⚠️  SENTRY_DSN not set — production errors will have no visibility (see PRODUCTION.md)');

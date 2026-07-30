@@ -209,6 +209,9 @@ model User {
    helpArticles            HelpArticle[]
    helpFeedback            HelpArticleFeedback[]
    reviewedVerifications   StudioVerificationRequest[] @relation("VerificationReviewer")
+   buyerTransactions       Transaction[]               @relation("BuyerTransactions")
+   sellerTransactions      Transaction[]               @relation("SellerTransactions")
+   purchasedLicenses       PurchasedLicense[]
 
    @@index([role])
    @@map("users")
@@ -282,6 +285,8 @@ model Studio {
   verificationReqs  StudioVerificationRequest[]
   brandKit          BrandKit?
   pressKit          StudioPressKit?
+  stripeConnectAccount StripeConnectAccount?
+  marketplaceListings  MarketplaceListing[]
 
   @@map("studios")
 }
@@ -528,6 +533,7 @@ model Game {
   followers     Follow[]
   wishlistItems WishlistItem[]
   views         GameView[]
+  marketplaceListings MarketplaceListing[]
 
   @@index([studioId])
   @@index([status])
