@@ -24,7 +24,7 @@ export default function GamesPage() {
   const { data, isLoading, error } =
     useGames(page, pageSize, searchQuery || undefined);
 
-  if (!data && !isLoading) {
+  if (!data && !isLoading && !error) {
     return (
       <main className="relative min-h-screen bg-[#020609] px-5 pb-28 pt-4">
         <div className="mx-auto max-w-7xl">
