@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { mockApi, API } from './fixtures/mocks';
+import { mockApi, API, API_ORIGIN } from './fixtures/mocks';
 
 test.beforeEach(async ({ page }) => {
   await mockApi(page);
@@ -22,7 +22,7 @@ test.describe('Public pages', () => {
 
   test('Explore games search input works', async ({ page }) => {
     await page.goto('/games');
-    const searchInput = page.getByLabel('Search games').first();
+    const searchInput = page.getByPlaceholder('Search games by name');
     await expect(searchInput).toBeVisible();
     await searchInput.fill('Test');
     await searchInput.press('Enter');
@@ -42,7 +42,7 @@ test.describe('Public pages', () => {
   });
 
   test('Explore games error state', async ({ page }) => {
-    await page.route(`${API}/games*`, async (route) => {
+    await page.route((url) => url.origin === API_ORIGIN && url.pathname.startsWith('/api/games'), async (route) => {
       await route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'Server error' }) });
     });
     await page.goto('/games');
