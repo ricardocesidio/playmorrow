@@ -98,6 +98,7 @@ export function useGames(page = 1, pageSize = 20, search?: string) {
   return useQuery({
     queryKey: ['games', page, pageSize, search],
     queryFn: () => api.get<Paginated<Game>>(`/games?${params}`),
+    retry: false,
   });
 }
 
