@@ -54,6 +54,7 @@ import { CollectionsModule } from './collections/collections.module';
 import { EmailTemplatesModule } from './email-templates/email-templates.module';
 import { EmailPreferencesModule } from './email-preferences/email-preferences.module';
 import { DigestModule } from './digest/digest.module';
+import { DmcaModule } from './dmca/dmca.module';
 import { ModerationModule } from './moderation/moderation.module';
 
 @Module({
@@ -110,6 +111,7 @@ import { ModerationModule } from './moderation/moderation.module';
     EmailTemplatesModule,
     EmailPreferencesModule,
     DigestModule,
+    DmcaModule,
   ],
   controllers: [CspController],
   providers: [
