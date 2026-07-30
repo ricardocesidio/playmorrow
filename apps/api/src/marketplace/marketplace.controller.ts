@@ -29,7 +29,7 @@ export class MarketplaceController {
 
   @Post()
   @UseGuards(SessionAuthGuard)
-  async create(@Body() body: any, @Req() req: any) {
+  async create(@Body() body: any) {
     if (!body.studioId) throw new Error('studioId is required');
     return this.marketplace.createListing(body);
   }

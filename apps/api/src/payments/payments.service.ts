@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
+import Stripe from 'stripe';
 
 @Injectable()
 export class PaymentsService {
@@ -13,8 +14,7 @@ export class PaymentsService {
   ) {
     const key = this.config.get<string>('STRIPE_SECRET_KEY');
     if (key) {
-      const Stripe = require('stripe');
-      this.stripe = new Stripe(key, { apiVersion: '2025-02-24.acacia' });
+      this.stripe = new Stripe(key, { apiVersion: '2025-02-24.acacia' as any });
     }
   }
 

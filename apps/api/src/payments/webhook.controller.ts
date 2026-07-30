@@ -2,6 +2,7 @@ import { Controller, Post, Body, Headers, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PaymentsService } from './payments.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import Stripe from 'stripe';
 
 @Controller('webhooks/stripe')
 export class WebhookController {
@@ -15,8 +16,7 @@ export class WebhookController {
   ) {
     const key = this.config.get<string>('STRIPE_SECRET_KEY');
     if (key) {
-      const Stripe = require('stripe');
-      this.stripe = new Stripe(key, { apiVersion: '2025-02-24.acacia' });
+      this.stripe = new Stripe(key, { apiVersion: '2025-02-24.acacia' as any });
     }
   }
 

@@ -20,7 +20,7 @@ export default function DashboardMarketplacePage() {
   const { user } = useAuth();
   const { data: studios } = useMyStudios();
   const studio = studios?.[0];
-  const { data: myListings, isLoading, error } = useStudioListings(studio?.id ?? '');
+  const { data: myListings = [], isLoading, error } = useStudioListings(studio?.id ?? '');
 
   return (
     <>
