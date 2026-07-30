@@ -129,4 +129,31 @@ ${content}
     ]);
     return { items, total, page, pageSize, hasMore: page * pageSize < total };
   }
+
+  async getDeliveryAnalytics() {
+    const [total, sent, bounced, opened, clicked, byTemplate] = await Promise.all([
+      this.prisma.emailLog.count(),
+      this.prisma.emailLog.count({ where: { status: 'sent' } }),
+      this.prisma.emailLog.count({ where: { status: 'bounced' } }),
+      this.prisma.emailLog.count({ where: { openedAt: { not: null } } }),
+      this.prisma.emailLog.count({ where: { clickedAt: { not: null } } }),
+      this.prisma.emailLog.groupBy({
+        by: ['templateId'],
+        _count: { id: true },
+        where: { templateId: { not: null } },
+      }),
+    ]);
+
+    return {
+      total,
+      sent,
+      bounced,
+      opened,
+      clicked,
+      openRate: sent > 0 ? Math.round((opened / sent) * 100) : 0,
+      clickRate: opened > 0 ? Math.round((clicked / opened) * 100) : 0,
+      bounceRate: sent > 0 ? Math.round((bounced / sent) * 100) : 0,
+      byTemplate,
+    };
+  }
 }

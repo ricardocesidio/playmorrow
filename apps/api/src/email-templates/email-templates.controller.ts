@@ -9,6 +9,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { SkipCsrf } from '../common/skip-csrf.decorator';
 import { EmailTemplatesService } from './email-templates.service';
+import { EmailSenderService } from '../email/email-sender.service';
 
 @ApiTags('admin/email-templates')
 @Controller('admin/email-templates')
@@ -16,7 +17,10 @@ import { EmailTemplatesService } from './email-templates.service';
 @Roles('ADMIN')
 @SkipCsrf()
 export class EmailTemplatesController {
-  constructor(private readonly svc: EmailTemplatesService) {}
+  constructor(
+    private readonly svc: EmailTemplatesService,
+    private readonly emailSender: EmailSenderService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'List all email templates' })
@@ -35,6 +39,12 @@ export class EmailTemplatesController {
 
   @Post()
   @Throttle({ default: { ttl: 60_000, limit: 30 } })
+  @Get('analytics/delivery')
+  @ApiOperation({ summary: 'Get delivery analytics (open/click/bounce rates)' })
+  async getDeliveryAnalytics() {
+    return this.emailSender.getDeliveryAnalytics();
+  }
+
   @ApiOperation({ summary: 'Create a new email template' })
   async create(@Body() body: { slug: string; name: string; subject: string; bodyHtml: string; variables: string[]; category?: string }) {
     return this.svc.create(body);

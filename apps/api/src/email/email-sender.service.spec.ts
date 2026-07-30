@@ -73,6 +73,18 @@ describe('EmailSenderService', () => {
     expect(log!.status).toBe('sent');
   });
 
+  it('getDeliveryAnalytics returns metrics', async () => {
+    const analytics = await service.getDeliveryAnalytics();
+    expect(analytics).toHaveProperty('total');
+    expect(analytics).toHaveProperty('sent');
+    expect(analytics).toHaveProperty('bounced');
+    expect(analytics).toHaveProperty('opened');
+    expect(analytics).toHaveProperty('clicked');
+    expect(analytics).toHaveProperty('openRate');
+    expect(analytics).toHaveProperty('bounceRate');
+    expect(analytics.sent).toBeGreaterThanOrEqual(2);
+  });
+
   it('getLogs returns paginated logs', async () => {
     const logs = await service.getLogs();
     expect(logs.items.length).toBeGreaterThanOrEqual(2);
