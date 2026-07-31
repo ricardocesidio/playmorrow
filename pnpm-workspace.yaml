@@ -24,3 +24,4 @@ allowBuilds:
   prisma: true
   sharp: true
   "@sentry/cli": true
+  simple-git-hooks: set this to true or false
