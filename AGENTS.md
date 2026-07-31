@@ -415,3 +415,31 @@ Post-consolidation fixes and polish:
 **Updated:** All 8 policy/info pages, support page, site-header, AGENTS.md, STATUS.md
 **Created:** docs/handoff/session-17-complete.md
 **Commits:** 822
+
+### Session 18 — Fase 5: Ecosystem (2026-07-30/31)
+
+Full marketplace + monetization ecosystem. 6 milestones:
+
+**M16 — Marketplace:** Stripe Connect Express accounts, PaymentIntent with application_fee_amount (platform commission), webhook idempotency via `processed_webhook_events` (UNIQUE on stripeEventId), Transaction model (PENDING→COMPLETED), PurchasedLicense. Backend: `apps/api/src/marketplace/` + `apps/api/src/payments/`. Frontend: `/marketplace`, `/marketplace/[id]`, `/me/licenses`, `/dashboard/marketplace`, `/dashboard/marketplace/new`, `/dashboard/marketplace/stripe`.
+
+**M17 — Publisher:** Revenue dashboard per studio. Backend: `apps/api/src/publisher/`. Frontend: `/dashboard/revenue`.
+
+**M18 — Funding:** Legal scope defined — reward-based crowdfunding (Kickstarter model). Equity/investment blocked. `docs/releases/M18_SCOPE_DECISION.md`.
+
+**M19 — Creator:** Referral codes + commission tracking (Transaction type: REFERRAL_COMMISSION). Backend: `apps/api/src/creator/`. Frontend: `/dashboard/creator`.
+
+**M20 — Partner:** B2B CRM (University, Publisher, Accelerator, Incubator, Studio, Event_Organizer). Backend: `apps/api/src/partner/`. Frontend: `/dashboard/partners`.
+
+**M21 — Events:** Events listing, detail, ticketing, upcomingOnly filter. Backend: `apps/api/src/events/`. Frontend: `/events`, `/events/[slug]`.
+
+**Engineering improvements:**
+- Pre-push hook: `pnpm verify` (lint + typecheck + build) via simple-git-hooks
+- Refactored `any`/`req: any` → `@CurrentUser()` + typed DTOs in all new controllers
+- IDOR protection: listing creation + revenue query check studio membership
+- Responsive overflow fix: header grid `minmax(0,1fr)`
+- Stripe rawBody: `NestFactory.create(AppModule, { rawBody: true })`
+- Dockerfile: CMD runs `prisma db deploy` before starting
+- CI: 0 lint errors, 318 backend tests, 64 E2E tests, Vercel green
+
+**Updated:** AGENTS.md, STATUS.md, docs/releases/PHASE5_FINAL_REPORT.md
+**Commits:** 876

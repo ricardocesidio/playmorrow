@@ -40,7 +40,7 @@ async function bootstrap() {
   logger.info(`[pre-server] Health check server listening on port ${port}`);
 
   // NestJS startup (may take 30-120s on free tier)
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
 
   // Shut down pre-server now that NestJS is ready
   await new Promise<void>((resolve) => preServer.close(() => resolve()));

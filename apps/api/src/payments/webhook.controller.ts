@@ -31,8 +31,13 @@ export class WebhookController {
 
     let event: any;
     try {
+      const rawBody = req.rawBody;
+      if (!rawBody) {
+        this.logger.error('Stripe webhook: rawBody not available — ensure NestFactory.create(AppModule, { rawBody: true })');
+        return { error: 'Webhook raw body unavailable' };
+      }
       event = this.stripe.webhooks.constructEvent(
-        req.rawBody ?? JSON.stringify(req.body),
+        rawBody instanceof Buffer ? rawBody : Buffer.from(rawBody),
         signature,
         secret,
       );
