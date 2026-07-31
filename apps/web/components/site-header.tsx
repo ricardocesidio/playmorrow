@@ -59,10 +59,10 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/45 glass">
-      <div className="mx-auto grid h-16 max-w-[1500px] grid-cols-[auto_1fr_auto] items-center gap-4 px-5 sm:px-8 lg:px-10">
+      <div className="mx-auto grid h-16 max-w-[1500px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-5 sm:px-8 lg:px-10">
         <HudLinkLogo />
 
-        <nav className="hidden items-center justify-center gap-12 md:flex" aria-label="Main navigation">
+        <nav className="hidden items-center justify-center gap-12 overflow-hidden md:flex" aria-label="Main navigation">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
