@@ -5,8 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "test": "vitest run"
+    "build": "tsc"
   },
   "dependencies": {
     "ofetch": "^1.4.0"
