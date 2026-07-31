@@ -1418,10 +1418,7 @@ export function usePurchaseListing() {
   return useMutation({
     mutationFn: (listingId: string) =>
       api.post<PurchaseIntent>(`/marketplace/${listingId}/purchase`),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['my-licenses'] });
-      toast.success('Purchase initiated — complete payment in the Stripe dialog');
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['my-licenses'] }); },
     onError: (err: unknown) => {
       const e = err as { body?: { message?: string }; message?: string };
       toast.error(e?.body?.message || e?.message || 'Purchase failed');

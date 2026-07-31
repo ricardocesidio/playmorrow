@@ -26,30 +26,13 @@ export class CreatorService {
     return { code: code.code, commissions, totalEarned };
   }
 
-  async applyReferral(buyerId: string, referralCode: string, purchaseAmountCents: number) {
-    const code = await this.prisma.referralCode.findUnique({ where: { code: referralCode } });
-    if (!code || code.userId === buyerId) return;
-
-    const alreadyCredited = await this.prisma.transaction.findFirst({
-      where: { type: 'REFERRAL_COMMISSION', sellerId: code.userId, buyerId },
+  async validateCode(code: string, userId: string) {
+    const rc = await this.prisma.referralCode.findUnique({
+      where: { code },
+      include: { user: { select: { id: true, username: true } } },
     });
-    if (alreadyCredited) return;
-
-    const commissionPercent = parseInt(process.env.REFERRAL_COMMISSION_PERCENT || '5', 10);
-    const commissionCents = Math.round(purchaseAmountCents * (commissionPercent / 100));
-    if (commissionCents <= 0) return;
-
-    await this.prisma.transaction.create({
-      data: {
-        type: 'REFERRAL_COMMISSION',
-        amountCents: commissionCents,
-        platformFeeCents: 0,
-        sellerId: code.userId,
-        buyerId,
-        description: `Referral commission from purchase`,
-        status: 'COMPLETED',
-      },
-    });
+    if (!rc || rc.userId === userId) return null;
+    return rc;
   }
 
   private generateCode(): string {

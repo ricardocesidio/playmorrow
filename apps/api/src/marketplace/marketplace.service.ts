@@ -37,7 +37,8 @@ export class MarketplaceService {
       },
     });
     if (!listing) throw new NotFoundException('Listing not found');
-    return listing;
+    const { fileUrl, ...safe } = listing;
+    return safe;
   }
 
   async createListing(data: {
@@ -105,11 +106,9 @@ export class MarketplaceService {
 
   async getStudioListings(studioId: string) {
     return this.prisma.marketplaceListing.findMany({
-      where: { studioId },
+      where: { studioId, status: 'active' },
       orderBy: { createdAt: 'desc' },
-      include: {
-        studio: { select: { id: true, name: true, slug: true, logoUrl: true } },
-      },
+      include: { studio: { select: { id: true, name: true, slug: true, logoUrl: true } } },
     });
   }
 

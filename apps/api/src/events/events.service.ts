@@ -5,6 +5,15 @@ import { PrismaService } from '../prisma/prisma.service';
 export class EventsService {
   constructor(private prisma: PrismaService) {}
 
+  async publish(slug: string, status?: string) {
+    const event = await this.prisma.event.findUnique({ where: { slug } });
+    if (!event) throw new NotFoundException('Event not found');
+    return this.prisma.event.update({
+      where: { slug },
+      data: { status: status || 'published' },
+    });
+  }
+
   async list(page = 1, pageSize = 20, upcomingOnly = false) {
     const where: any = { status: 'published' };
     if (upcomingOnly) where.startDate = { gte: new Date() };

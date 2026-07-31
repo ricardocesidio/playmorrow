@@ -1,4 +1,4 @@
-import { Controller, Post, Req, Headers, Logger } from '@nestjs/common';
+import { Controller, Post, Req, Headers, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PaymentsService } from './payments.service';
 import Stripe from 'stripe';

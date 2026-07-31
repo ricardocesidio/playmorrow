@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, NotFoundException, Logger } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PaymentsService } from './payments.service';
@@ -21,6 +21,11 @@ export class PaymentsController {
   ) {
     const { studioId, refreshUrl, returnUrl } = body;
     if (!studioId) throw new Error('Missing studioId');
+
+    const member = await this.prisma.studioMember.findFirst({
+      where: { studioId, userId: user.id, role: { in: ['OWNER', 'ADMIN'] } },
+    });
+    if (!member) throw new ForbiddenException('Only studio admins can connect Stripe');
 
     const dbUser = await this.prisma.user.findUnique({ where: { id: user.id } });
     if (!dbUser?.email) throw new NotFoundException('User email not found');

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Store, ArrowLeft, Download, Tag } from 'lucide-react';
 
@@ -7,6 +8,7 @@ import { SiteHeader } from '@/components/site-header';
 import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { Button } from '@/components/ui/button';
+import { StripePayment } from '@/components/stripe-payment';
 import { useMarketplaceListing, usePurchaseListing } from '@/lib/api/hooks';
 import { useAuth } from '@/lib/api/auth-context';
 import { formatPrice } from '@/lib/format';
@@ -17,10 +19,12 @@ export default function MarketplaceDetailPage() {
   const { user } = useAuth();
   const { data: listing, isLoading, error } = useMarketplaceListing(id);
   const purchase = usePurchaseListing();
+  const [clientSecret, setClientSecret] = useState('');
 
   const handlePurchase = async () => {
     if (!user) { router.push('/login'); return; }
-    await purchase.mutateAsync(id);
+    const result = await purchase.mutateAsync(id);
+    if (result?.clientSecret) setClientSecret(result.clientSecret);
   };
 
   if (isLoading) {
