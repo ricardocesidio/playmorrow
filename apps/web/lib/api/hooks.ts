@@ -1422,8 +1422,9 @@ export function usePurchaseListing() {
       qc.invalidateQueries({ queryKey: ['my-licenses'] });
       toast.success('Purchase initiated — complete payment in the Stripe dialog');
     },
-    onError: (err: any) => {
-      toast.error(err?.body?.message || err?.message || 'Purchase failed');
+    onError: (err: unknown) => {
+      const e = err as { body?: { message?: string }; message?: string };
+      toast.error(e?.body?.message || e?.message || 'Purchase failed');
     },
   });
 }
@@ -1438,7 +1439,7 @@ export function useReferralCode() {
 export function useReferralCommissions() {
   return useQuery({
     queryKey: ['referral-commissions'],
-    queryFn: () => api.get<{ code: string | null; commissions: any[]; totalEarned: number }>('/creator/commissions'),
+    queryFn: () => api.get<{ code: string | null; commissions: { id: string; createdAt: string; amountCents: number }[]; totalEarned: number }>('/creator/commissions'),
   });
 }
 
@@ -1460,7 +1461,10 @@ export function useCreateListing() {
       qc.invalidateQueries({ queryKey: ['marketplace'] });
       toast.success('Listing created');
     },
-    onError: (err: any) => toast.error(err?.body?.message || 'Failed to create listing'),
+    onError: (err: unknown) => {
+      const e = err as { body?: { message?: string }; message?: string };
+      toast.error(e?.body?.message || e?.message || 'Failed to create listing');
+    },
   });
 }
 
