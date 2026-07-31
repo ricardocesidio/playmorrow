@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Param, Body, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { MarketplaceService } from './marketplace.service';
 
 @Controller('marketplace')
@@ -29,21 +30,21 @@ export class MarketplaceController {
 
   @Post()
   @UseGuards(SessionAuthGuard)
-  async create(@Body() body: any) {
+  async create(@Body() body: { studioId: string; type: string; title: string; description?: string; priceCents: number; fileUrl?: string; thumbnailUrl?: string; tags?: string[]; gameId?: string }) {
     if (!body.studioId) throw new Error('studioId is required');
     return this.marketplace.createListing(body);
   }
 
   @Post(':id/purchase')
   @UseGuards(SessionAuthGuard)
-  async purchase(@Param('id') id: string, @Req() req: any) {
-    return this.marketplace.purchase(req.user.id, id);
+  async purchase(@Param('id') id: string, @CurrentUser() user: { id: string }) {
+    return this.marketplace.purchase(user.id, id);
   }
 
   @Get('me/licenses')
   @UseGuards(SessionAuthGuard)
-  async myLicenses(@Req() req: any) {
-    return this.marketplace.getUserLicenses(req.user.id);
+  async myLicenses(@CurrentUser() user: { id: string }) {
+    return this.marketplace.getUserLicenses(user.id);
   }
 
   @Get('studio/:studioId')

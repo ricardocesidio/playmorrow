@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Req, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PublisherService } from './publisher.service';
 
 @Controller('publisher')
@@ -8,8 +9,8 @@ export class PublisherController {
 
   @Get('revenue')
   @UseGuards(SessionAuthGuard)
-  async myRevenue(@Req() req: any, @Query('days') days?: string) {
-    return this.publisher.getUserRevenue(req.user.id);
+  async myRevenue(@CurrentUser() user: { id: string }) {
+    return this.publisher.getUserRevenue(user.id);
   }
 
   @Get('revenue/:studioId')

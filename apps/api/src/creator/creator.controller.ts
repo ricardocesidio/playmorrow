@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreatorService } from './creator.service';
 
 @Controller('creator')
@@ -8,14 +9,14 @@ export class CreatorController {
 
   @Get('code')
   @UseGuards(SessionAuthGuard)
-  async getCode(@Req() req: any) {
-    return this.creator.getOrCreateCode(req.user.id);
+  async getCode(@CurrentUser() user: { id: string }) {
+    return this.creator.getOrCreateCode(user.id);
   }
 
   @Get('commissions')
   @UseGuards(SessionAuthGuard)
-  async getCommissions(@Req() req: any) {
-    return this.creator.getMyReferrals(req.user.id);
+  async getCommissions(@CurrentUser() user: { id: string }) {
+    return this.creator.getMyReferrals(user.id);
   }
 
   @Post('apply')

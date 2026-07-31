@@ -1,5 +1,6 @@
-import { Controller, Post, Body, Req, UseGuards, NotFoundException, Logger } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, NotFoundException, Logger } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PaymentsService } from './payments.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -14,14 +15,17 @@ export class PaymentsController {
 
   @Post('stripe/onboarding')
   @UseGuards(SessionAuthGuard)
-  async getOnboardingLink(@Body() body: any, @Req() req: any) {
+  async getOnboardingLink(
+    @CurrentUser() user: { id: string },
+    @Body() body: { studioId: string; refreshUrl: string; returnUrl: string },
+  ) {
     const { studioId, refreshUrl, returnUrl } = body;
     if (!studioId) throw new Error('Missing studioId');
 
-    const user = await this.prisma.user.findUnique({ where: { id: req.user.id } });
-    if (!user?.email) throw new NotFoundException('User email not found');
+    const dbUser = await this.prisma.user.findUnique({ where: { id: user.id } });
+    if (!dbUser?.email) throw new NotFoundException('User email not found');
 
-    const account = await this.payments.getOrCreateConnectAccount(studioId, user.email);
+    const account = await this.payments.getOrCreateConnectAccount(studioId, dbUser.email);
     const link = await this.payments.getOnboardingLink(
       account.stripeAccountId,
       refreshUrl,
