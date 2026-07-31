@@ -1,12 +1,16 @@
-import { Controller, Get, Post, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Query, UseGuards, ForbiddenException } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { PrismaService } from '../prisma/prisma.service';
 import { MarketplaceService } from './marketplace.service';
 
 @Controller('marketplace')
 export class MarketplaceController {
-  constructor(private marketplace: MarketplaceService) {}
+  constructor(
+    private marketplace: MarketplaceService,
+    private prisma: PrismaService,
+  ) {}
 
   @Get()
   @UseGuards(OptionalSessionGuard)
@@ -30,8 +34,12 @@ export class MarketplaceController {
 
   @Post()
   @UseGuards(SessionAuthGuard)
-  async create(@Body() body: { studioId: string; type: string; title: string; description?: string; priceCents: number; fileUrl?: string; thumbnailUrl?: string; tags?: string[]; gameId?: string }) {
+  async create(@Body() body: { studioId: string; type: string; title: string; description?: string; priceCents: number; fileUrl?: string; thumbnailUrl?: string; tags?: string[]; gameId?: string }, @CurrentUser() user: { id: string }) {
     if (!body.studioId) throw new Error('studioId is required');
+    const member = await this.prisma.studioMember.findFirst({
+      where: { studioId: body.studioId, userId: user.id, role: { in: ['OWNER', 'ADMIN'] } },
+    });
+    if (!member) throw new ForbiddenException('You must be an admin of this studio to create listings');
     return this.marketplace.createListing(body);
   }
 

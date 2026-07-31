@@ -1,7 +1,6 @@
-import { Controller, Post, Body, Headers, Logger } from '@nestjs/common';
+import { Controller, Post, Req, Headers, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PaymentsService } from './payments.service';
-import { NotificationsService } from '../notifications/notifications.service';
 import Stripe from 'stripe';
 
 @Controller('webhooks/stripe')
@@ -12,7 +11,6 @@ export class WebhookController {
   constructor(
     private config: ConfigService,
     private payments: PaymentsService,
-    private notifications: NotificationsService,
   ) {
     const key = this.config.get<string>('STRIPE_SECRET_KEY');
     if (key) {
@@ -22,7 +20,7 @@ export class WebhookController {
 
   @Post()
   async handleWebhook(
-    @Body() body: any,
+    @Req() req: any,
     @Headers('stripe-signature') signature: string,
   ) {
     const secret = this.config.get<string>('STRIPE_WEBHOOK_SECRET');
@@ -34,7 +32,7 @@ export class WebhookController {
     let event: any;
     try {
       event = this.stripe.webhooks.constructEvent(
-        JSON.stringify(body),
+        req.rawBody ?? JSON.stringify(req.body),
         signature,
         secret,
       );
@@ -51,36 +49,15 @@ export class WebhookController {
 
     if (event.type === 'payment_intent.succeeded') {
       const pi = event.data.object;
-      const amountCents = pi.amount_received || pi.amount;
-      const platformFee = pi.application_fee_amount || 0;
       const buyerId = pi.metadata?.buyerId;
       const listingId = pi.metadata?.listingId;
-      const sellerId = pi.transfer_data?.destination
-        ? await this.resolveSellerId(pi.transfer_data.destination)
-        : undefined;
 
-      if (buyerId && amountCents > 0) {
-        const txn = await this.payments.processSuccessfulPayment(
-          pi.id,
-          buyerId,
-          amountCents,
-          platformFee,
-          sellerId,
-          listingId,
+      if (buyerId && listingId) {
+        await this.payments.processSuccessfulPayment(
+          pi.id, buyerId, pi.amount_received || pi.amount, pi.application_fee_amount || 0,
+          undefined, listingId,
         );
-        this.logger.log(`Payment ${pi.id}: ${amountCents}usd processed`);
-
-        if (sellerId) {
-          this.notifications.create({
-            recipientId: sellerId,
-            actorId: null,
-            type: 'NEW_SALE',
-            title: 'New sale!',
-            body: `You made a sale of $${(amountCents / 100).toFixed(2)} on the Marketplace.`,
-            targetType: 'STUDIO',
-            targetId: listingId || '',
-          }).catch((err) => this.logger.error('Failed to notify seller', err));
-        }
+        this.logger.log(`Payment ${pi.id} processed, license created`);
       }
     }
 
@@ -91,13 +68,5 @@ export class WebhookController {
 
     await this.payments.markWebhookProcessed(event.id, event.type);
     return { received: true };
-  }
-
-  private async resolveSellerId(stripeAccountId: string): Promise<string | undefined> {
-    const account = await this.payments['prisma'].stripeConnectAccount.findUnique({
-      where: { stripeAccountId },
-      include: { studio: { include: { members: { where: { role: 'OWNER' }, take: 1 } } } },
-    });
-    return account?.studio?.members?.[0]?.userId;
   }
 }

@@ -21,8 +21,9 @@ export class CreatorController {
 
   @Post('apply')
   @UseGuards(SessionAuthGuard)
-  async applyReferral(@Body() body: { code: string }) {
+  async applyReferral(@Body() body: { code: string; purchaseAmountCents?: number }, @CurrentUser() user: { id: string }) {
     if (!body.code) throw new Error('Referral code is required');
+    await this.creator.applyReferral(user.id, body.code, body.purchaseAmountCents ?? 0);
     return { applied: true };
   }
 }

@@ -76,7 +76,7 @@ export class PaymentsService {
     stripePaymentIntentId?: string;
     description?: string;
   }) {
-    return this.prisma.transaction.create({ data: { ...data, status: 'COMPLETED' } });
+    return this.prisma.transaction.create({ data: { ...data, status: 'PENDING' } });
   }
 
   async isWebhookProcessed(stripeEventId: string): Promise<boolean> {
@@ -100,29 +100,24 @@ export class PaymentsService {
     sellerId?: string,
     listingId?: string,
   ) {
-    const already = await this.prisma.transaction.findUnique({
+    const existing = await this.prisma.transaction.findUnique({
       where: { stripePaymentIntentId },
     });
-    if (already) return already;
+    if (!existing) return null; // no pending transaction
+
+    if (existing.status === 'COMPLETED') return existing; // already processed
 
     return this.prisma.$transaction(async (tx) => {
-      const txn = await tx.transaction.create({
-        data: {
-          type: 'PURCHASE',
-          amountCents,
-          platformFeeCents,
-          currency: 'usd',
-          buyerId,
-          sellerId,
-          listingId,
-          stripePaymentIntentId,
-          status: 'COMPLETED',
-        },
+      const txn = await tx.transaction.update({
+        where: { id: existing.id },
+        data: { status: 'COMPLETED' },
       });
 
       if (listingId && buyerId) {
-        await tx.purchasedLicense.create({
-          data: { userId: buyerId, listingId, transactionId: txn.id },
+        await tx.purchasedLicense.upsert({
+          where: { userId_listingId: { userId: buyerId, listingId } },
+          create: { userId: buyerId, listingId, transactionId: txn.id },
+          update: { active: true },
         });
       }
 
