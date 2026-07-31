@@ -380,7 +380,7 @@ model PlayerXpEvent {
 }
 
 model Achievement {
-  userId        String
+  userId    String   @unique
   achievementId String
   name          String
   unlockedAt    DateTime @default(now())
@@ -1547,8 +1547,8 @@ model PurchasedLicense {
   purchasedAt DateTime @default(now())
   active     Boolean  @default(true)
 
-  user        User               @relation(fields: [userId], references: [id])
-  listing     MarketplaceListing @relation(fields: [listingId], references: [id])
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing     MarketplaceListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
 
   @@unique([userId, listingId])
   @@index([userId])

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -6,7 +6,7 @@ export class CreatorService {
   constructor(private prisma: PrismaService) {}
 
   async getOrCreateCode(userId: string) {
-    const existing = await this.prisma.referralCode.findFirst({ where: { userId } });
+    const existing = await this.prisma.referralCode.findUnique({ where: { userId } });
     if (existing) return existing;
 
     const code = this.generateCode();
@@ -14,7 +14,7 @@ export class CreatorService {
   }
 
   async getMyReferrals(userId: string) {
-    const code = await this.prisma.referralCode.findFirst({ where: { userId } });
+    const code = await this.prisma.referralCode.findUnique({ where: { userId } });
     if (!code) return { code: null, commissions: [], totalEarned: 0 };
 
     const commissions = await this.prisma.transaction.findMany({
