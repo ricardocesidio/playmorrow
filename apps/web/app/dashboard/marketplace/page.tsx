@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { Plus } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
@@ -17,7 +18,8 @@ const TYPE_LABELS: Record<string, string> = {
 
 export default function DashboardMarketplacePage() {
   const { data: studios } = useMyStudios();
-  const studio = studios?.[0];
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const studio = studios?.[selectedIdx] ?? studios?.[0];
   const { data: myListings = [], isLoading, error } = useStudioListings(studio?.id ?? '');
 
   return (
@@ -33,7 +35,14 @@ export default function DashboardMarketplacePage() {
                   My Listings
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Manage your marketplace products.
+                  {studios && studios.length > 1 ? (
+                    <select value={selectedIdx} onChange={(e) => setSelectedIdx(parseInt(e.target.value))}
+                      className="ml-2 border border-border bg-background px-2 py-0.5 font-mono text-xs text-cyan">
+                      {studios.map((s, i) => <option key={s.id} value={i}>{s.name}</option>)}
+                    </select>
+                  ) : (
+                    'Manage your marketplace products.'
+                  )}
                 </p>
               </div>
               <Button asChild>

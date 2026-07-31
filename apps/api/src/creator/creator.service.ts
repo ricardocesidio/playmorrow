@@ -30,6 +30,11 @@ export class CreatorService {
     const code = await this.prisma.referralCode.findUnique({ where: { code: referralCode } });
     if (!code || code.userId === buyerId) return;
 
+    const alreadyCredited = await this.prisma.transaction.findFirst({
+      where: { type: 'REFERRAL_COMMISSION', sellerId: code.userId, buyerId },
+    });
+    if (alreadyCredited) return;
+
     const commissionPercent = parseInt(process.env.REFERRAL_COMMISSION_PERCENT || '5', 10);
     const commissionCents = Math.round(purchaseAmountCents * (commissionPercent / 100));
     if (commissionCents <= 0) return;
@@ -40,6 +45,7 @@ export class CreatorService {
         amountCents: commissionCents,
         platformFeeCents: 0,
         sellerId: code.userId,
+        buyerId,
         description: `Referral commission from purchase`,
         status: 'COMPLETED',
       },

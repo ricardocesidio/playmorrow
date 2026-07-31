@@ -5,8 +5,10 @@ import { PrismaService } from '../prisma/prisma.service';
 export class EventsService {
   constructor(private prisma: PrismaService) {}
 
-  async list(page = 1, pageSize = 20) {
-    const where = { status: 'published' };
+  async list(page = 1, pageSize = 20, upcomingOnly = false) {
+    const where: any = { status: 'published' };
+    if (upcomingOnly) where.startDate = { gte: new Date() };
+
     const [items, total] = await Promise.all([
       this.prisma.event.findMany({
         where, orderBy: { startDate: 'asc' },

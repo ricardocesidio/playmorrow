@@ -6,7 +6,7 @@ import Stripe from 'stripe';
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
-  private stripe: any = null;
+  private stripe: Stripe | null = null;
 
   constructor(
     private config: ConfigService,
@@ -14,7 +14,7 @@ export class PaymentsService {
   ) {
     const key = this.config.get<string>('STRIPE_SECRET_KEY');
     if (key) {
-      this.stripe = new Stripe(key, { apiVersion: '2025-02-24.acacia' as any });
+      this.stripe = new Stripe(key, { apiVersion: '2025-02-24.acacia' });
     }
   }
 
