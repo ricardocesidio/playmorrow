@@ -1,0 +1,55 @@
+# Render Blueprint — Playmorrow API
+# Free tier: 512MB RAM, 750hrs/month, auto-sleep after 15min inactivity
+# Kept alive by UptimeRobot ping (existing CI workflow)
+
+services:
+  - type: web
+    name: playmorrow-api
+    env: docker
+    dockerfilePath: apps/api/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8080"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: CSRF_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: WEB_ORIGIN
+        value: https://playmorrow.co
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STORAGE_PROVIDER
+        value: r2
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: S3_BUCKET
+        sync: false
+      - key: CDN_URL
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: COOKIE_DOMAIN
+        value: playmorrow.co
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: AI_PROVIDER
+        value: openai

@@ -3,7 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '../prisma/prisma.module';
 import { EventBusModule } from '../common/event-bus.module';
 import { AIController } from './controllers/ai.controller';
+import { RecommendationController } from './controllers/recommendation.controller';
 import { AIService } from './services/ai.service';
+import { RecommendationService } from './services/recommendation.service';
 import { AIConfig } from './config/ai.config';
 import { OpenAIProvider } from './providers/openai.provider';
 import { AnthropicProvider } from './providers/anthropic.provider';
@@ -19,7 +21,7 @@ import { AIMetricsService } from './observability/ai-metrics.service';
 @Global()
 @Module({
   imports: [ConfigModule, PrismaModule, EventBusModule],
-  controllers: [AIController],
+  controllers: [AIController, RecommendationController],
   providers: [
     AIConfig,
     OpenAIProvider,
@@ -33,6 +35,7 @@ import { AIMetricsService } from './observability/ai-metrics.service';
     ConversationMemory,
     StreamService,
     AIMetricsService,
+    RecommendationService,
   ],
   exports: [
     ProviderFactory,
@@ -45,6 +48,7 @@ import { AIMetricsService } from './observability/ai-metrics.service';
     ConversationMemory,
     StreamService,
     AIMetricsService,
+    RecommendationService,
   ],
 })
 export class AIModule {}

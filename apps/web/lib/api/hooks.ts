@@ -1500,6 +1500,30 @@ export function usePartners(type?: string, page?: number) {
   });
 }
 
+// ── Recommendations ──────────────────────────────────────────────────────
+
+export interface RecommendationResult {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  genres: string | null;
+  coverUrl: string | null;
+  studio: { id: string; name: string; slug: string };
+  explanation: string;
+}
+
+export function useRecommendations() {
+  return useQuery({
+    queryKey: ['recommendations'],
+    queryFn: () =>
+      api.get<{ recommendations: RecommendationResult[]; total: number; method: string; basedOnTags: string[] }>(
+        '/ai/recommendations',
+      ),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function useDeleteListing() {
   const qc = useQueryClient();
   return useMutation({
