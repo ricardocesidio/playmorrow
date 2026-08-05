@@ -1,4 +1,10 @@
-# Playmorrow — Project Overview for Claude
+# ARCHIVED — DO NOT USE
+# This document is superseded by docs/handoff/HANDOFF.md
+# Last updated: 2026-08-05
+# Reason: Contains obsolete infrastructure references (Fly.io), incorrect module counts (37+ vs actual 55+), incorrect model counts (54 vs actual 63), and references to deleted documents (PHASE2_CERTIFICATION.md).
+# Kept for historical reference only.
+
+# Playmorrow — Project Overview for Claude (ARCHIVED)
 
 **Status:** Beta • 1000+ commits • M1-M5 ✅ • M8 ✅ • M9 ✅ • M11 ✅ • M12 ✅ • **318 tests (27 files)**
 **Frontend:** https://playmorrow.co (Vercel) — ✅ UptimeRobot (5min)

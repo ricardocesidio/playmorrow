@@ -105,25 +105,19 @@ playmorrow/
 
 ---
 
-## 4. Certifications (Self-Certified — Now Retired)
+## 4. Current Status (v0.85-beta)
 
-Self-assigned certifications (Platinum, Gold, RC3.x) have been retired following independent audit. Replaced with honest status: v0.8-beta with 5 critical bugs resolved and M23 AI feature shipped.
+Self-assigned certifications have been retired. Current honest assessment:
 
-Previous self-certifications (for historical reference only):
-
-| Certification | Score | Date | Session |
-|---------------|-------|------|---------|
-| RC2 Certification | — | 2026-07-30 | RC2 |
-| RC3.1 GOLD | 88/100 | 2026-08-05 | Session 19 |
-| RC3.2 PLATINUM | 91/100 | 2026-08-05 | Session 20 |
-| Phase 5 Certification | 70/100 | 2026-07-31 | Session 18 |
-| Phase 5.1 Remediation | 84/100 | 2026-08-05 | Session 19 |
-| AI Foundation | — | 2026-08-05 | Session 22 |
-| AI Strategy | 92/100 | 2026-08-05 | Session 23 |
-| AI Governance | 94/100 | 2026-08-05 | Session 23 |
-| AI Execution | 91/100 | 2026-08-05 | Session 23 |
-| AI Product Architecture | 91/100 | 2026-08-05 | Session 23 |
-| QC Pass | 6/6 typecheck, 0 lint errors | Every session | — |
+| Dimension | Status | Notes |
+|-----------|--------|-------|
+| Phase 1-4 | ✅ Complete | Foundation, discovery, ops, automation |
+| Phase 5 | ✅ Complete | Backend + 11 integration tests. Needs E2E + pnpm db:deploy for TOTP migration |
+| Phase 6 | ⚠️ Started | M23 shipped (embedding-based recs), provider-agnostic fixed. M26/M25 pending |
+| Security | ✅ Strong | CSRF HMAC, CSP nonce, TOTP 2FA, GDPR export, PCI SAQ A |
+| Infrastructure | ⚠️ | Render free tier (prod + staging config). Starter upgrade + Redis pending |
+| Documentation | ⚠️ | Consolidated to HANDOFF.md + this document. Stale files archived |
+| Tests | ⚠️ | 368+ total. Phase 5: 50 unit + 11 integration. E2E + coverage thresholds pending |
 
 ---
 
@@ -151,10 +145,10 @@ Playmorrow has an unusually mature governance layer for a pre-AI-deployment plat
 The AI module (`apps/api/src/ai/`, 35 files) is **provider-agnostic by design**:
 
 - **Interface:** `AIProvider` with `chat()`, `embed()`, `moderate()` methods
-- **Implementations:** OpenAI (chat + embed + moderate), Anthropic (chat only — embed/moderate fallback needed)
-- **Factory pattern:** Swap via `AI_PROVIDER` env var
-- **M23 shipped:** Embedding-based recommendations via `EmbeddingService` → `ProviderFactory` → OpenAI. Cosine similarity scoring with tag-based fallback. First feature that exercises the real AI pipeline.
-- **Known gap:** Setting `AI_PROVIDER=anthropic` breaks `embed()` and `moderate()` — needs interface split or fallback chains.
+- **Implementations:** OpenAI (chat + embed + moderate), Anthropic (chat only)
+- **Fixed:** `getEmbeddingProvider()` and `getModerationProvider()` always route to OpenAI regardless of chat provider. Setting `AI_PROVIDER=anthropic` no longer breaks embed/moderation.
+- **Factory pattern:** Swap chat provider via `AI_PROVIDER` env var
+- **M23 shipped:** Embedding-based recommendations via `EmbeddingService` → `ProviderFactory` → OpenAI. Cosine similarity scoring with tag-based fallback.
 
 ### Capability Landscape
 

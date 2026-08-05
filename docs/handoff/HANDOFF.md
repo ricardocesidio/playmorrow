@@ -2,8 +2,8 @@
 
 **Prepared for:** Incoming senior engineering team  
 **Date:** 2026-08-05 (final)  
-**Current version:** v0.9  
-**Status:** Phase 5 complete. M23 shipped (embedding-based). 2FA + GDPR + provider-agnostic fix + staging config deployed.
+**Current version:** v0.85-beta
+**Status:** Phase 5 complete. M23 shipped (embedding-based). 2FA + GDPR + provider-agnostic fix + staging config deployed. Documentation consolidation in progress.
 
 ---
 
@@ -194,7 +194,7 @@ apps/api/src/ai/
 Browser → Vercel (playmorrow.co)
               │ /api/* rewrites
               ▼
-         Fly.io (playmorrow-api-aged-mountain-9542.fly.dev)
+         Render (playmorrow-api.onrender.com + playmorrow-api-staging.onrender.com)
               │ Prisma
               ▼
          Neon (PostgreSQL + pgvector)
@@ -208,7 +208,8 @@ Browser → Vercel (playmorrow.co)
 | Environment | Frontend | Backend | Database |
 |---|---|---|---|
 | Local | `localhost:3000` | `localhost:4000` | Neon dev (shared) |
-| Production | Vercel (playmorrow.co) | Fly.io (playmorrow-api-aged-mountain-9542.fly.dev) | Neon prod |
+| Production | Vercel (playmorrow.co) | Render (playmorrow-api.onrender.com) | Neon prod |
+| Staging | Vercel preview | Render (playmorrow-api-staging.onrender.com) | Neon staging |
 
 ### CI/CD — GitHub Actions (6 workflows)
 
@@ -242,7 +243,7 @@ Multi-stage Dockerfile for the API:
 - Build stage: install deps, generate Prisma client, compile NestJS
 - Production stage: minimal Node 20 image
 - CMD: `node apps/api/dist/main.js`
-- Fly.io deployment via `fly.toml`
+- Render deployment via `render.yaml` Blueprint (auto-deploys on push)
 
 ---
 
@@ -414,7 +415,7 @@ afterAll(async () => {
 | Gap | Impact | Recommendation |
 |---|---|---|
 | No Phase 5 E2E tests | UI regressions in marketplace/events undetected | Add 2–3 E2E specs for Phase 5 pages |
-| No Phase 5 integration tests | HTTP layer (guards, validation, error formatting) untested for Phase 5 | Add 1 integration spec per Phase 5 module |
+| No Phase 5 E2E tests | 11 integration tests exist (auth gating, pagination, 404 handling). Playwright E2E still needed for UI flows. |
 | No coverage thresholds | Coverage can silently regress | Add `thresholds` to vitest config + CI enforcement |
 | 27 integration tests need test DB | New contributors encounter safety guard error | Add `scripts/setup-test-db.sh` automation |
 
@@ -471,16 +472,16 @@ Subsequent requests:
 
 ### Known Security Gaps
 
-- No 2FA (multi-factor authentication)
 - No Redis-backed rate limiting (in-memory resets on restart)
-- GDPR export UI pending
 - Rate limiting not enforced on all mutation endpoints (only per-route overrides exist)
+- 2FA implemented (TOTP) — needs deployment + Prisma migration
+- GDPR export implemented — `/dashboard/gdpr` page ready
 
 ---
 
 ## 8. AI Governance Summary
 
-Phase 6 AI development is governed by a comprehensive, frozen governance framework. **No AI feature may be implemented without passing all 24 gates of the Decision Framework and complying with all 20 constitutional articles.**
+Phase 6 AI development is governed by a comprehensive, frozen governance framework. The active decision framework is the **8-gate v2** (simplified from 24-gate v1, archived). All AI features must comply with the 20 constitutional articles.
 
 ### Strategic Documents (28 total)
 
@@ -604,8 +605,7 @@ Build → Measure → Learn → Improve → Review → Repeat
 |---|---|---|
 | 1 | 137 `any` type warnings (pre-existing, legacy code) | Type safety erosion across codebase |
 | 2 | 27 integration test files need test DB to run locally | New contributors can't run full test suite without Docker setup |
-| 3 | No Phase 5 E2E tests (11 integration tests exist) | UI-level flows for marketplace/events/partners untested |
-| 4 | No 2FA | Major security gap for studios with financial operations |
+| 4 | No Phase 5 E2E tests (11 integration tests exist) | UI-level flows for marketplace/events/partners untested |
 
 ### Medium
 
@@ -626,8 +626,7 @@ Build → Measure → Learn → Improve → Review → Repeat
 | 12 | No DTOs for update operations in Phase 5 (UpdateListingDto, UpdateEventDto, etc.) |
 | 13 | `applyReferral` is read-only — validates code but doesn't persist relationship |
 | 14 | No seed scripts for test fixtures |
-| 15 | GDPR export UI not implemented |
-| 16 | Render free tier cold starts (mitigated by UptimeRobot keep-alive) |
+| 15 | Render free tier cold starts (mitigated by UptimeRobot keep-alive) |
 
 ### Resolved (Previously Critical/High)
 
@@ -639,27 +638,27 @@ Build → Measure → Learn → Improve → Review → Repeat
 | ✅ | Marketplace no rollback | Fixed — `cancelPaymentIntent()` compensating action on DB failure |
 | ✅ | /me/licenses auth gap | Fixed — `useEffect` redirect to `/login` |
 | ✅ | Dependabot paused | Re-enabled (limit 5) |
-| ✅ | Fly.io free tier | Migrated to Render free tier |
+| ✅ | Fly.io free tier | Migrated to Render; Starter upgrade still pending |
 
 ---
 
 ## 10. Open Decisions
 
-| # | Decision | Stakeholders | Context |
+| # | Decision | Stakeholders | Status |
 |---|---|---|---|
-| 1 | **M22 vs M23 build order** | CTO, Product | Strategic documents recommend M23 (Recommendation Engine) first, then M26 (Semantic Search), then M22 (Assistant). The original roadmap listed M22 first. Resolution needed before next sprint. |
-| 2 | **M18 Funding implementation** | Legal, Product, CTO | Reward-based crowdfunding model defined (Kickstarter style). Schema not designed. Needs legal counsel before implementation. |
-| 3 | **Fly.io paid tier upgrade timing** | CTO, Ops | $5/mo upgrade eliminates cold starts (Performance 71 → ~85+). Budget trivial. |
-| 4 | **Screen reader testing** | QA, Accessibility | NVDA/VoiceOver testing not yet performed. WCAG 2.2 AA certification based on automated Lighthouse + manual keyboard navigation. |
-| 5 | **Staging environment** | Ops | No staging env exists. Production deployment is single-path. |
-| 6 | **Test database strategy** | Engineering | Integration tests share Neon dev DB. Dedicated test DB recommended (Neon free branch or CI-only). |
-| 7 | **Redis adoption** | Engineering | Rate limiting + session cache would benefit from Redis. Not currently in architecture. |
+| 1 | **M22 vs M23 build order** | CTO, Product | ✅ RESOLVED — M23 shipped (embedding-based recs), M22 deferred |
+| 2 | **M18 Funding implementation** | Legal, Product, CTO | ⚠️ Reward-based crowdfunding model defined, no schema, needs legal |
+| 3 | **Render Starter upgrade** | CTO, Ops | ⚠️ $7/mo eliminates auto-sleep cold starts. Budget trivial. |
+| 4 | **Screen reader testing** | QA, Accessibility | ⚠️ NVDA/VoiceOver not yet performed |
+| 5 | **Staging environment** | Ops | ⚠️ Configured in render.yaml, not yet deployed — needs Neon branch + Stripe keys |
+| 6 | **Test database strategy** | Engineering | ⚠️ Integration tests share Neon dev DB |
+| 7 | **Redis adoption** | Engineering | ⚠️ Config + service wrapper created; Upstash not yet provisioned |
 
 ---
 
 ## 11. Required Environment Variables
 
-### Fly.io (Backend — `fly secrets set`)
+### Render (Backend — `render.yaml` env vars + Render dashboard secrets)
 
 | Variable | Required | Purpose |
 |---|---|---|
@@ -687,11 +686,11 @@ Build → Measure → Learn → Improve → Review → Repeat
 
 | Variable | Required | Purpose |
 |---|---|---|
-| `API_URL` | **Yes** | Backend API base URL (`https://playmorrow-api-aged-mountain-9542.fly.dev/api`) |
+| `API_URL` | **Yes** | Backend API base URL (`https://playmorrow-api.onrender.com/api`) |
 | `NEXT_PUBLIC_SITE_URL` | Recommended | Canonical URL for OG/sitemap (`https://playmorrow.co`) |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Optional | Push notification subscription (public key only) |
 
-### Optional AI (both Fly.io and Vercel — not required for operation)
+### Optional AI (Render secrets and Vercel env — not required for operation)
 
 | Variable | Where | Purpose |
 |---|---|---|
@@ -727,7 +726,7 @@ See Section 5 for local `.env` file setup. Local dev uses `.env` files in `apps/
 
 11. **CSRF global guard must never be bypassed** except on explicitly allowed endpoints. Any new mutation route `POST/PUT/PATCH/DELETE` automatically receives CSRF protection.
 12. **No `dangerouslySetInnerHTML` without DOMPurify sanitization.** Verified by professionalization audit.
-13. **Production env vars set via Fly.io secrets + Vercel dashboard** — never committed to repo.
+13. **Production env vars set via Render secrets + Vercel dashboard** — never committed to repo.
 14. **PCI SAQ A compliance:** Card details never touch the backend. Stripe.js frontend integration only.
 
 ### Documentation
@@ -786,10 +785,10 @@ The strategic documents (`AI_ROADMAP_V2.md`, `AI_BUSINESS_VALUE_MATRIX.md`) reco
 | Domain | playmorrow.co |
 | Email | playmorrow@hotmail.com |
 | Frontend (prod) | Vercel (playmorrow.co) |
-| API (prod) | Fly.io (playmorrow-api-aged-mountain-9542.fly.dev) |
+| API (prod) | Render (playmorrow-api.onrender.com) |
 | Database (prod) | Neon PostgreSQL |
 | CI/CD | GitHub Actions (`.github/workflows/`) |
-| Error tracking | Sentry (`SENTRY_DSN` on Fly.io) |
+| Error tracking | Sentry (`SENTRY_DSN` on Render) |
 | Uptime | UptimeRobot (frontend + API, 5min) |
 | Email service | Resend |
 | Uploads | Cloudflare R2 (prod) / Local disk (dev) |
