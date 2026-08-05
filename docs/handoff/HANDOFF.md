@@ -598,46 +598,48 @@ Build → Measure → Learn → Improve → Review → Repeat
 
 ## 9. Known Technical Debt
 
-### Critical
-
-| # | Issue | Location | Impact |
-|---|---|---|---|
-| 1 | StripePayment component never rendered | `apps/web/app/marketplace/[id]/page.tsx` | Card payment flow broken — marketplace purchases can't complete |
-| 2 | Register button on event detail has no onClick handler | `apps/web/app/events/[slug]/page.tsx` | Event registration dead — users can't register |
-| 3 | Events + Partners POST endpoints missing RBAC guards | `apps/api/src/events/`, `apps/api/src/partner/` | Any authenticated user can create/publish events and partners |
-
 ### High
 
 | # | Issue | Impact |
 |---|---|---|
-| 4 | 137 `any` type warnings (pre-existing, legacy code) | Type safety erosion across codebase |
-| 5 | 27 integration test files need test DB to run locally | New contributors can't run full test suite without Docker setup |
-| 6 | No Phase 5 integration/E2E tests | HTTP layer for marketplace/events/partners/creator/publisher untested |
-| 7 | Marketplace purchase flow has no transactional rollback | Orphaned PaymentIntents possible on failure |
-| 8 | `/me/licenses` not inside `/dashboard` layout | Lacks auth redirect gating |
-| 9 | No 2FA | Major security gap for studios with financial operations |
+| 1 | 137 `any` type warnings (pre-existing, legacy code) | Type safety erosion across codebase |
+| 2 | 27 integration test files need test DB to run locally | New contributors can't run full test suite without Docker setup |
+| 3 | No Phase 5 E2E tests (11 integration tests exist) | UI-level flows for marketplace/events/partners untested |
+| 4 | No 2FA | Major security gap for studios with financial operations |
 
 ### Medium
 
 | # | Issue | Impact |
 |---|---|---|
-| 10 | Lighthouse Performance 71 (Fly.io free tier cold starts) | Resolvable via $5/mo Fly.io upgrade in Phase 6 |
-| 11 | No Vitest coverage thresholds in CI | Coverage can silently regress |
-| 12 | Dependabot paused | Dependency updates not automated |
-| 13 | In-memory rate limiting (resets on restart) | Rate limits reset on deploy |
-| 14 | No Redis cache | No distributed caching; auth tokens checked against DB on every request |
-| 15 | Dual event system (EventBus + FeedEngine) | Architectural debt — should be consolidated |
+| 5 | No Vitest coverage thresholds in CI | Coverage can silently regress |
+| 6 | In-memory rate limiting (resets on restart) | Rate limits reset on deploy |
+| 7 | No Redis cache | No distributed caching; auth tokens checked against DB on every request |
+| 8 | Dual event system (EventBus + FeedEngine) | Architectural debt — should be consolidated |
+| 9 | Provider-agnostic AI incomplete (Anthropic: chat only) | embed()/moderate() fail with Anthropic |
 
 ### Low
 
 | # | Issue |
-|---|---|
-| 16 | Stripe Connect onboarding uses `alert()` instead of toast/ErrorState |
-| 17 | No pagination UI on marketplace/events/partners pages (API supports it) |
-| 18 | No DTOs for update operations in Phase 5 (UpdateListingDto, UpdateEventDto, etc.) |
-| 19 | `applyReferral` is read-only — validates code but doesn't persist relationship |
-| 20 | No seed scripts for test fixtures (tests create their own data in `beforeAll`) |
-| 21 | GDPR export UI not implemented |
+|---|-------|
+| 10 | Stripe Connect onboarding uses `alert()` instead of toast/ErrorState |
+| 11 | No pagination UI on marketplace/events/partners pages (API supports it) |
+| 12 | No DTOs for update operations in Phase 5 (UpdateListingDto, UpdateEventDto, etc.) |
+| 13 | `applyReferral` is read-only — validates code but doesn't persist relationship |
+| 14 | No seed scripts for test fixtures |
+| 15 | GDPR export UI not implemented |
+| 16 | Render free tier cold starts (mitigated by UptimeRobot keep-alive) |
+
+### Resolved (Previously Critical/High)
+
+| # | Issue | Resolution |
+|---|-------|-----------|
+| ✅ | StripePayment not rendered | Fixed — renders at `marketplace/[id]/page.tsx:102` |
+| ✅ | Register button dead | Fixed — onClick at `events/[slug]/page.tsx:82` |
+| ✅ | Missing RBAC on events/partners | Fixed — `@Roles('ADMIN','MODERATOR')` on both controllers |
+| ✅ | Marketplace no rollback | Fixed — `cancelPaymentIntent()` compensating action on DB failure |
+| ✅ | /me/licenses auth gap | Fixed — `useEffect` redirect to `/login` |
+| ✅ | Dependabot paused | Re-enabled (limit 5) |
+| ✅ | Fly.io free tier | Migrated to Render free tier |
 
 ---
 
@@ -707,7 +709,7 @@ See Section 5 for local `.env` file setup. Local dev uses `.env` files in `apps/
 
 ### AI Governance (Non-Negotiable)
 
-1. **No AI feature without passing the 24-gate Decision Framework.** All 24 checklist items require written answers. "Yes/No" without evidence is treated as failure.
+1. **No AI feature without passing the 8-gate Decision Framework** (v2, simplified from 24 gates). All 8 checklist items require written answers.
 2. **Provider-agnostic only.** Never call OpenAI, Anthropic, or any provider directly. Always use `ProviderFactory`. This is enforced by AI Constitution Article 6.
 3. **Every AI feature must be kill-switchable.** Feature flags required. Kill switches tested quarterly. Constitution Article 15.
 4. **Studios own their AI data.** Export and deletion endpoints must exist. Never publish as a studio without human approval. Constitution Article 18.
@@ -750,53 +752,11 @@ The strategic documents (`AI_ROADMAP_V2.md`, `AI_BUSINESS_VALUE_MATRIX.md`) reco
 
 ### Steps to Begin
 
-1. **Phase 0: Environment Setup (1 day)**
-   ```bash
-   # Set AI_PROVIDER + API keys on Fly.io
-   fly secrets set AI_PROVIDER=openai OPENAI_API_KEY=sk-...
-   
-   # Enable pgvector extension on Neon (if not already enabled)
-   # Run via Neon SQL editor: CREATE EXTENSION IF NOT EXISTS vector;
-   
-   # Apply pgvector migration (create embeddings column on games, studios)
-   pnpm --filter @playmorrow/database db:migrate
-   ```
+1. **M23 Recommendation Engine** (already shipped as MVP) — upgrade from tag-based scoring to full semantic embeddings. The current implementation (`recommendation.service.ts`) uses `EmbeddingService` → ProviderFactory for cosine similarity scoring, with tag-based fallback. Next: add pgvector persistence for embeddings, batch generation for all games, and LLM-generated "because you..." explanations.
 
-2. **Phase 1: Embedding Pipeline (Week 1)**
-   - Use existing `EmbeddingService` + `PgVectorStore` to generate embeddings for all games
-   - Create embedding refresh endpoint (triggered on `GAME_UPDATED` event)
-   - Build embedding freshness dashboard in `AIMetricsService`
+2. **M26 Semantic Search** — extend M23 embedding pipeline to power natural language search. Reuse `EmbeddingService` + `PgVectorStore`. Add hybrid search (keyword + semantic). Target: zero-result search rate <5%.
 
-3. **Phase 2: Baseline Metrics (Week 1–2)**
-   - Measure current recommendation KPIs (CTR, engagement, conversion) from existing 9 scorers
-   - Create A/B test infrastructure for M23 vs existing scorers
-   - Set up `AIMetricsService` dashboards for M23 KPIs
-
-4. **Phase 3: Collaborative Filtering Engine (Week 2–4)**
-   - Implement user-game interaction matrix from follows, wishlists, reactions, purchases
-   - Implement content-based similarity from game embeddings
-   - Build hybrid scoring: collaborative (60%) + content (30%) + trending (10%)
-
-5. **Phase 4: Explainability (Week 4–5)**
-   - Implement "because you..." explanation generation using PromptRegistry
-   - Every recommendation response includes `explanation` field
-
-6. **Phase 5: Rollout (Week 6–8)**
-   - 5% rollout → measure against baseline (Week 6)
-   - 25% rollout → stabilize (Week 7)
-   - 100% rollout → full migration (Week 8)
-
-### First AI Feature Scope Recommendation
-
-**Start with:** Store page embeddings + content-based similarity recommendations.
-
-This is the smallest complete loop that exercises the entire AI pipeline (embedding → vector store → similarity → recommendation → explanation → measurement) without the complexity of collaborative filtering. It provides immediate user value and validates the infrastructure end-to-end.
-
-```typescript
-// Proposed API endpoint for first AI feature:
-GET /api/recommendations/ai?gameId=xxx
-→ Response: {
-    recommendations: [{
+3. **M25 Studio Intelligence** — store page optimizer, wishlist forecaster, sentiment analyzer. Reuse M23/M26 infrastructure.
       game: { id, title, slug, coverUrl },
       score: 0.94,
       explanation: "Similar gameplay mechanics to [current game]"
