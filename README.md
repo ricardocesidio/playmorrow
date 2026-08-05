@@ -4,8 +4,10 @@
 
 [![CI](https://github.com/ricardocesidio/playmorrow/actions/workflows/ci.yml/badge.svg)](https://github.com/ricardocesidio/playmorrow/actions)
 ![License](https://img.shields.io/badge/license-proprietary-red)
-![Status](https://img.shields.io/badge/status-closed%20beta-blue)
-![Tests](https://img.shields.io/badge/tests-318%20passing-green)
+![Status](https://img.shields.io/badge/status-v1.0.0--platinum-gold)
+![Tests](https://img.shields.io/badge/tests-368%20total%20|%2082%20AI%20passing-green)
+![Score](https://img.shields.io/badge/engineering-91%2F100-brightgreen)
+![AI](https://img.shields.io/badge/AI-strategy%20frozen-blue)
 
 ---
 
