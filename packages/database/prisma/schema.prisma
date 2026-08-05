@@ -216,6 +216,7 @@ model User {
    sellerTransactions      Transaction[]               @relation("SellerTransactions")
    purchasedLicenses       PurchasedLicense[]
    referralCodes           ReferralCode[]
+   referralUsages          ReferralUsage[]
    organizedEvents         Event[]
 
    @@index([role])
@@ -1566,6 +1567,7 @@ model ReferralCode {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usages ReferralUsage[]
 
   @@map("referral_codes")
 }
