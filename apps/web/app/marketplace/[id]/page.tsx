@@ -103,7 +103,7 @@ export default function MarketplaceDetailPage() {
                 clientSecret={clientSecret}
                 onSuccess={() => {
                   setClientSecret('');
-                  router.push('/me/licenses');
+                  router.push('/dashboard/me/licenses');
                 }}
               />
             </HudPanel>
