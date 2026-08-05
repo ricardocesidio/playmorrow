@@ -32,11 +32,11 @@
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
-    "prettier": "^3.3.3",
+    "prettier": "^3.9.6",
     "simple-git-hooks": "^2.13.0",
     "superpowers": "github:obra/superpowers",
-    "tsx": "^4.22.4",
-    "turbo": "^2.3.3",
+    "tsx": "^4.23.4",
+    "turbo": "^2.10.8",
     "typescript": "^5.6.3"
   },
   "simple-git-hooks": {
