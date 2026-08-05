@@ -41,7 +41,7 @@ function CheckoutForm({ clientSecret, onSuccess }: { clientSecret: string; onSuc
       <button
         type="submit"
         disabled={!stripe || loading}
-        className="clip-corner inline-flex h-10 items-center gap-3 border border-cyan/70 bg-cyan px-5 font-mono text-xs text-white transition hover:bg-cyan/80 disabled:opacity-50"
+        className="clip-corner inline-flex h-10 items-center gap-3 border border-cyan/70 bg-cyan px-5 font-mono text-xs text-black transition hover:bg-cyan/80 disabled:opacity-50"
       >
         {loading ? 'Processing...' : 'Pay Now'}
       </button>

@@ -13,7 +13,7 @@ import { formatPrice } from '@/lib/format';
 
 export default function CreatorDashboardPage() {
   const { user } = useAuth();
-  const { data: codeData, isLoading: codeLoading } = useReferralCode();
+  const { data: codeData, isLoading: codeLoading, error: codeError } = useReferralCode();
   const { data: commissions, isLoading: commsLoading, error } = useReferralCommissions();
   const [copied, setCopied] = useState(false);
 
@@ -42,21 +42,23 @@ export default function CreatorDashboardPage() {
             <p className="mt-1 text-sm text-muted-foreground">Refer friends and earn commission on their purchases.</p>
           </HudPanel>
 
-          {error && !commsLoading && <ErrorState message="Failed to load creator data." />}
+          {(error || codeError) && !commsLoading && !codeLoading && (
+            <ErrorState message="Failed to load creator data." />
+          )}
 
           <HudPanel className="mb-3 px-4 py-3 sm:px-8 sm:py-4" accent="muted">
             <div className="flex items-center gap-3">
-              <Gift className="size-5 text-cyan" />
+              <Gift className="size-5 text-cyan" aria-hidden="true" />
               <div className="flex-1">
                 <p className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Your Referral Link</p>
                 {codeLoading ? (
-                  <div className="mt-1 h-5 w-48 animate-pulse bg-white/10" />
+                  <div className="mt-1 h-5 w-48 animate-pulse bg-white/10" role="status" aria-label="Loading referral link" />
                 ) : (
                   <p className="mt-1 font-mono text-sm text-cyan">{referralLink || 'Generating...'}</p>
                 )}
               </div>
-              <Button variant="outline" size="sm" onClick={copyLink} disabled={!referralLink}>
-                {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
+              <Button variant="outline" size="sm" onClick={copyLink} disabled={!referralLink} aria-label={copied ? 'Link copied' : 'Copy referral link'}>
+                {copied ? <Check className="size-3" aria-hidden="true" /> : <Copy className="size-3" aria-hidden="true" />}
                 {copied ? 'Copied!' : 'Copy'}
               </Button>
             </div>
@@ -64,12 +66,12 @@ export default function CreatorDashboardPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="clip-corner border border-border/60 bg-background/40 p-4">
-              <Users className="size-5 text-muted-foreground" />
+              <Users className="size-5 text-muted-foreground" aria-hidden="true" />
               <p className="mt-2 font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground">Referrals</p>
               <p className="mt-1 font-mono text-lg text-foreground">{commissions?.commissions.length || 0}</p>
             </div>
             <div className="clip-corner border border-border/60 bg-background/40 p-4">
-              <DollarSign className="size-5 text-cyan" />
+              <DollarSign className="size-5 text-cyan" aria-hidden="true" />
               <p className="mt-2 font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground">Earned</p>
               <p className="mt-1 font-mono text-lg text-cyan">{formatPrice(commissions?.totalEarned || 0)}</p>
             </div>

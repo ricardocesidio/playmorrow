@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Query, UseGuards, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Query, UseGuards, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -36,7 +36,7 @@ export class MarketplaceController {
   @Post()
   @UseGuards(SessionAuthGuard)
   async create(@Body() body: CreateListingDto, @CurrentUser() user: { id: string }) {
-    if (!body.studioId) throw new Error('studioId is required');
+    if (!body.studioId) throw new BadRequestException('studioId is required');
     const member = await this.prisma.studioMember.findFirst({
       where: { studioId: body.studioId, userId: user.id, role: { in: ['OWNER', 'ADMIN'] } },
     });

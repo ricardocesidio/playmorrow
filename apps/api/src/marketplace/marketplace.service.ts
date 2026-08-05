@@ -1,12 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PaymentsService } from '../payments/payments.service';
+import { EventBus } from '../common/event-bus';
 
 @Injectable()
 export class MarketplaceService {
   constructor(
     private prisma: PrismaService,
     private payments: PaymentsService,
+    private eventBus: EventBus,
   ) {}
 
   async listListings(type?: string, page = 1, pageSize = 20) {
@@ -63,12 +65,12 @@ export class MarketplaceService {
 
   async purchase(userId: string, listingId: string) {
     const listing = await this.getListing(listingId);
-    if (listing.status !== 'active') throw new Error('Listing is not active');
+    if (listing.status !== 'active') throw new BadRequestException('Listing is not active');
 
     const existingLicense = await this.prisma.purchasedLicense.findUnique({
       where: { userId_listingId: { userId, listingId } },
     });
-    if (existingLicense?.active) throw new Error('Already purchased');
+    if (existingLicense?.active) throw new ConflictException('Already purchased');
 
     const platformFeePercent = parseInt(process.env.PLATFORM_FEE_PERCENT || '10', 10);
     const platformFeeCents = Math.round(listing.priceCents * (platformFeePercent / 100));
@@ -76,7 +78,7 @@ export class MarketplaceService {
     const stripeAccount = await this.prisma.stripeConnectAccount.findUnique({
       where: { studioId: listing.studioId },
     });
-    if (!stripeAccount?.onboarded) throw new Error('Studio not ready to receive payments');
+    if (!stripeAccount?.onboarded) throw new BadRequestException('Studio not ready to receive payments');
 
     const owner = await this.prisma.studioMember.findFirst({
       where: { studioId: listing.studioId, role: 'OWNER' },
@@ -99,6 +101,19 @@ export class MarketplaceService {
       listingId,
       stripePaymentIntentId: pi.id,
       description: `Purchase of ${listing.title}`,
+    });
+
+    this.eventBus.emit({
+      type: 'MARKETPLACE_PURCHASE_INITIATED',
+      actorId: userId,
+      targetId: listingId,
+      targetType: 'marketplace_listing',
+      studioId: listing.studioId,
+      metadata: {
+        priceCents: listing.priceCents,
+        platformFeeCents,
+        listingTitle: listing.title,
+      },
     });
 
     return { clientSecret: pi.client_secret };

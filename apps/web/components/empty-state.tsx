@@ -11,11 +11,11 @@ interface EmptyStateProps {
 export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center gap-4 border border-border/60 bg-[#050b0f]/80 py-16 relative overflow-hidden">
-      <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground/50">
+      <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground/60">
         <span className="animate-blink inline-block w-2 h-3 bg-cyan mr-2 align-middle shadow-[0_0_6px_rgb(62_231_255_/_0.5)]" aria-hidden />
         NO DATA DETECTED
       </p>
-      {icon && <div className="text-muted-foreground/30">{icon}</div>}
+      {icon && <div className="text-muted-foreground/60" aria-hidden="true">{icon}</div>}
       <p className="font-display text-lg font-semibold text-foreground">{title}</p>
       {description && <p className="text-sm text-muted-foreground">{description}</p>}
       {action && (

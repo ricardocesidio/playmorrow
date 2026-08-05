@@ -5,10 +5,9 @@ import { Handshake, ExternalLink } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { ErrorState } from '@/components/error-state';
+import { EmptyState } from '@/components/empty-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
-import { useAuth } from '@/lib/api/auth-context';
-import { api } from '@/lib/api/client';
-import { useQuery } from '@tanstack/react-query';
+import { usePartners } from '@/lib/api/hooks';
 
 const TABS = [
   { key: '', label: 'All' },
@@ -21,10 +20,7 @@ const TABS = [
 export default function PartnersPage() {
   const [type, setType] = useState('');
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['partners', type],
-    queryFn: () => api.get<{ items: { id: string; name: string; type: string; description?: string; websiteUrl?: string; logoUrl?: string; status: string }[]; total: number }>(`/partners${type ? `?type=${type}` : ''}`),
-  });
+  const { data, isLoading, error } = usePartners(type || undefined);
 
   return (
     <>
@@ -37,17 +33,17 @@ export default function PartnersPage() {
             <p className="mt-1 text-sm text-muted-foreground">Universities, publishers, accelerators, and studios powering the ecosystem.</p>
           </HudPanel>
 
-          <div className="mb-4 flex gap-4 border-b border-border/40">
+          <div role="tablist" aria-label="Partner type filter" className="mb-4 flex gap-4 border-b border-border/40">
             {TABS.map((tab) => (
-              <button key={tab.key} onClick={() => setType(tab.key)}
-                className={`pb-2 font-mono text-[0.6rem] uppercase tracking-widest transition-colors ${
+              <button key={tab.key} onClick={() => setType(tab.key)} role="tab" aria-selected={type === tab.key}
+                className={`pb-2 font-mono text-[0.6rem] uppercase tracking-widest transition-colors focus-visible:ring-2 focus-visible:ring-cyan ${
                   type === tab.key ? 'border-b-2 border-cyan text-cyan' : 'text-muted-foreground hover:text-foreground'
                 }`}>{tab.label}</button>
             ))}
           </div>
 
           {isLoading ? (
-            <div className="space-y-3">
+            <div role="status" aria-busy="true" aria-live="polite" className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="clip-corner h-20 animate-pulse border border-border/40 bg-[#050b0f]/30" />
               ))}
@@ -56,12 +52,12 @@ export default function PartnersPage() {
             <ErrorState message="Failed to load partners." />
           ) : (
             <div className="space-y-3">
-              {data?.items.map((p: { id: string; name: string; type: string; description?: string; websiteUrl?: string; status: string }) => (
+              {data?.items.map((p) => (
                 <div key={p.id} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-4 transition hover:border-cyan/40">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="grid size-10 place-items-center border border-border bg-background/60">
-                        <Handshake className="size-5 text-cyan" />
+                        <Handshake aria-hidden="true" className="size-5 text-cyan" />
                       </div>
                       <div>
                         <h3 className="font-display text-sm font-black uppercase text-foreground">{p.name}</h3>
@@ -69,8 +65,8 @@ export default function PartnersPage() {
                       </div>
                     </div>
                     {p.websiteUrl && (
-                      <a href={p.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-cyan">
-                        <ExternalLink className="size-4" />
+                      <a href={p.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-cyan focus-visible:ring-2 focus-visible:ring-cyan" aria-label={`Visit ${p.name} website`}>
+                        <ExternalLink aria-hidden="true" className="size-4" />
                       </a>
                     )}
                   </div>
@@ -78,7 +74,7 @@ export default function PartnersPage() {
                 </div>
               ))}
               {data && data.items.length === 0 && (
-                <p className="py-12 text-center font-mono text-[0.55rem] text-muted-foreground">No partners found.</p>
+                <EmptyState title="No partners found" />
               )}
             </div>
           )}

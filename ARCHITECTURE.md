@@ -289,7 +289,7 @@ components/
 
 ## Backend Architecture
 
-### Module Organization (27 Modules)
+### Module Organization (41 Modules)
 
 | Module | Purpose |
 |---|---|
@@ -328,6 +328,12 @@ components/
 | `StudioChatModule` | Studio internal chat |
 | `StudioProfileModule` | Extended studio company profiles |
 | `StudioPressKitModule` | Studio-level press kits |
+| `MarketplaceModule` | Game asset marketplace listings, catalog, purchases |
+| `PaymentsModule` | Stripe Connect Express, PaymentIntent, webhook processing |
+| `PublisherModule` | Revenue dashboard per studio |
+| `CreatorModule` | Referral codes + commission tracking |
+| `PartnerModule` | B2B CRM (6 partner types: University, Publisher, etc.) |
+| `EventsModule` | Events listing, detail, ticketing, upcoming filter |
 
 ### Global Guards (registered in AppModule)
 

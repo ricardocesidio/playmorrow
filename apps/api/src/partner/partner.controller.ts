@@ -1,5 +1,7 @@
-import { Controller, Get, Post, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Query, UseGuards, BadRequestException } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { PartnerService } from './partner.service';
 import { CreatePartnerDto } from './dto/create-partner.dto';
 
@@ -18,9 +20,10 @@ export class PartnerController {
   }
 
   @Post()
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MODERATOR')
   async create(@Body() body: CreatePartnerDto) {
-    if (!body.type || !body.name || !body.slug) throw new Error('type, name, and slug are required');
+    if (!body.type || !body.name || !body.slug) throw new BadRequestException('type, name, and slug are required');
     return this.partner.create(body);
   }
 }

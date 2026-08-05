@@ -77,6 +77,11 @@
 - Session list accessible to user, with individual revocation support.
 - Sessions expire after 7 days of inactivity.
 
+### Marketplace Payments (Phase 5)
+- **PCI DSS SAQ A**: Card details never touch the backend — Stripe.js tokenizes on the frontend; backend receives only a `paymentMethodId`.
+- **Webhook signature verification**: Stripe webhook payloads are verified using `stripe.webhooks.constructEvent()` with the endpoint signing secret (`STRIPE_WEBHOOK_SECRET`).
+- **Idempotency**: `ProcessedWebhookEvent` table has a `UNIQUE` constraint on `stripeEventId`, preventing duplicate processing of retried webhooks.
+
 ### Data Protection
 - **Passwords**: argon2 hashed — never stored in plaintext.
 - **Tokens**: SHA-256 hashed before database storage (refresh tokens, verification tokens).

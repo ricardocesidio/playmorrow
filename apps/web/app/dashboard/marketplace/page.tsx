@@ -37,7 +37,7 @@ export default function DashboardMarketplacePage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   {studios && studios.length > 1 ? (
                     <select value={selectedIdx} onChange={(e) => setSelectedIdx(parseInt(e.target.value))}
-                      className="ml-2 border border-border bg-background px-2 py-0.5 font-mono text-xs text-cyan">
+                      className="ml-2 border border-border bg-background px-2 py-0.5 font-mono text-xs text-cyan" aria-label="Select studio">
                       {studios.map((s, i) => <option key={s.id} value={i}>{s.name}</option>)}
                     </select>
                   ) : (
@@ -47,7 +47,7 @@ export default function DashboardMarketplacePage() {
               </div>
               <Button asChild>
                 <Link href="/dashboard/marketplace/new">
-                  <Plus className="size-3" /> New Listing
+                  <Plus className="size-3" aria-hidden="true" /> New Listing
                 </Link>
               </Button>
             </div>
@@ -56,7 +56,7 @@ export default function DashboardMarketplacePage() {
           {error && !isLoading && <ErrorState message="Failed to load listings." />}
 
           {isLoading && (
-            <div className="space-y-3">
+            <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading listings">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="clip-corner h-20 animate-pulse border border-border/40 bg-[#050b0f]/30" />
               ))}

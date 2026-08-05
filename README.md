@@ -68,6 +68,14 @@ Playmorrow is a social discovery platform connecting indie game studios with pla
 - **JavaScript SDK** — `@playmorrow/sdk` with full API client
 - **CLI** — `playmorrow` command-line tool (search, games, trending, collections)
 
+### Marketplace & Ecosystem (M16-M21)
+- **Marketplace** — Game asset listings with Stripe Connect Express payouts, PaymentIntent purchases, license management
+- **Publisher** — Per-studio revenue dashboard with earnings, transactions, and payout history
+- **Funding** — Reward-based crowdfunding scope (Kickstarter model; equity/investment blocked)
+- **Creator** — Referral codes with commission tracking for affiliate earnings
+- **Partner** — B2B CRM with 6 partner types (University, Publisher, Accelerator, Incubator, Studio, Event Organizer)
+- **Events** — Event listings with detail pages, publish workflow, ticketing, and upcoming filter
+
 ### Security
 - **Session-based Auth** — httpOnly `playmorrow_session` cookie
 - **OAuth** — Google and GitHub authentication
@@ -97,8 +105,8 @@ Neon (PostgreSQL)
 
 **Key Components:**
 - **Frontend:** Next.js 15 App Router, React 19, Tailwind CSS v4, TanStack Query
-- **Backend:** NestJS with 49 modules, 47 controllers, 318 integration tests
-- **Database:** PostgreSQL on Neon — 54 models, 29 migrations, connection pooler
+- **Backend:** NestJS with 55 modules, 47 controllers, 318 integration tests
+- **Database:** PostgreSQL on Neon — 63 models, 29 migrations, connection pooler
 - **CI/CD:** GitHub Actions — lint, typecheck, 318 tests, security scans
 - **Monitoring:** Sentry error tracking, UptimeRobot health checks (5min)
 
@@ -112,7 +120,7 @@ Neon (PostgreSQL)
 | Styling | Tailwind CSS v4 |
 | Backend | NestJS + TypeScript |
 | Database | PostgreSQL (Neon with connection pooler) |
-| ORM | Prisma (54 models) |
+| ORM | Prisma (63 models) |
 | Auth | Session-based + OAuth (Google, GitHub) |
 | Security | CSRF HMAC, CSP, DOMPurify, Helmet, rate limiting |
 | Email | Resend (transactional + digests) |
@@ -150,7 +158,7 @@ See [Architecture docs](ARCHITECTURE.md) for detailed setup and deployment instr
 playmorrow/
 ├── apps/
 │   ├── web/          # Next.js frontend (82 routes)
-│   └── api/          # NestJS backend (49 modules)
+│   └── api/          # NestJS backend (55 modules)
 ├── packages/
 │   ├── database/     # Prisma schema + client
 │   ├── sdk/          # JavaScript SDK (@playmorrow/sdk)

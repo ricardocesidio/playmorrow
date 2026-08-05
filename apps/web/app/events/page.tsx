@@ -7,15 +7,11 @@ import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api/client';
+import { useEvents } from '@/lib/api/hooks';
 import { formatPrice } from '@/lib/format';
 
 export default function EventsPage() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['events'],
-    queryFn: () => api.get<{ items: { id: string; title: string; slug: string; startDate: string; location: string | null; virtual: boolean; ticketPriceCents: number | null }[]; total: number }>('/events'),
-  });
+  const { data, isLoading, error } = useEvents(true);
 
   return (
     <>
@@ -31,7 +27,7 @@ export default function EventsPage() {
           {error && !isLoading && <ErrorState message="Failed to load events." />}
 
           {isLoading && (
-            <div className="space-y-3">
+            <div role="status" aria-busy="true" aria-live="polite" className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="clip-corner h-24 animate-pulse border border-border/40 bg-[#050b0f]/30" />
               ))}
@@ -46,7 +42,7 @@ export default function EventsPage() {
             <div className="space-y-3">
               {data.items.map((event: { id: string; title: string; slug: string; startDate: string; location: string | null; virtual: boolean; ticketPriceCents: number | null }) => (
                 <Link key={event.id} href={`/events/${event.slug}`}
-                  className="group clip-corner flex border border-border/40 bg-[#050b0f]/30 p-4 transition hover:border-cyan/40">
+                  className="group clip-corner flex border border-border/40 bg-[#050b0f]/30 p-4 transition hover:border-cyan/40 focus-visible:ring-2 focus-visible:ring-cyan">
                   <div className="mr-4 flex w-16 flex-col items-center justify-center border border-border bg-background/60 p-2">
                     <span className="font-mono text-lg font-bold text-cyan">
                       {new Date(event.startDate).getDate()}
@@ -60,7 +56,7 @@ export default function EventsPage() {
                       {event.title}
                     </h3>
                     <div className="mt-1 flex flex-wrap gap-3 font-mono text-[0.5rem] text-muted-foreground">
-                      {event.location && <span className="flex items-center gap-1"><MapPin className="size-3" />{event.location}</span>}
+                      {event.location && <span className="flex items-center gap-1"><MapPin aria-hidden="true" className="size-3" />{event.location}</span>}
                       {event.virtual && <span className="text-cyan">Virtual</span>}
                     </div>
                     {event.ticketPriceCents != null && event.ticketPriceCents > 0 ? (
@@ -69,7 +65,7 @@ export default function EventsPage() {
                       <p className="mt-1 font-mono text-xs text-green-400">Free</p>
                     )}
                   </div>
-                  <Calendar className="size-4 self-center text-muted-foreground transition group-hover:text-cyan" />
+                  <Calendar aria-hidden="true" className="size-4 self-center text-muted-foreground transition group-hover:text-cyan" />
                 </Link>
               ))}
             </div>

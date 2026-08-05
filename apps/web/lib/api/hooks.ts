@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile, type Report, type CreateReportDto, type MarketplaceListing, type PurchasedLicense, type PurchaseIntent, type StudioRevenue } from './client';
+import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile, type Report, type CreateReportDto, type MarketplaceListing, type PurchasedLicense, type PurchaseIntent, type StudioRevenue, type Event, type Partner, type ReferralCodeInfo } from './client';
 import type { StudioAnalytics, GameAnalytics } from './analytics-types';
 import type { StudioVerificationRequest, TrustScore, CompanyProfile, StudioPressKit, BrandKit, AdminVerificationItem } from './verification-types';
 import { revalidateFeed, revalidateHomepage, revalidateGame } from '@/actions/revalidate';
@@ -1475,5 +1475,58 @@ export function useUpload() {
       return res.json() as Promise<{ url: string; filename: string; size: number; mimeType: string }>;
     },
     onError: () => toast.error('Upload failed — check file size and type'),
+  });
+}
+
+export function useEvents(upcoming?: boolean, page?: number) {
+  return useQuery({
+    queryKey: ['events', upcoming, page],
+    queryFn: () => api.get<Paginated<Event>>(`/events${upcoming ? '?upcoming=1' : ''}${page ? `&page=${page}` : ''}`),
+  });
+}
+
+export function useEvent(slug: string) {
+  return useQuery({
+    queryKey: ['event', slug],
+    queryFn: () => api.get<Event>(`/events/${slug}`),
+    enabled: !!slug,
+  });
+}
+
+export function usePartners(type?: string, page?: number) {
+  return useQuery({
+    queryKey: ['partners', type, page],
+    queryFn: () => api.get<Paginated<Partner>>(`/partners${type ? `?type=${type}` : ''}${page ? `&page=${page}` : ''}`),
+  });
+}
+
+export function useDeleteListing() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/marketplace/${id}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['marketplace'] });
+      toast.success('Listing deleted');
+    },
+    onError: (err: unknown) => {
+      const e = err as { body?: { message?: string }; message?: string };
+      toast.error(e?.body?.message || e?.message || 'Failed to delete listing');
+    },
+  });
+}
+
+export function useUpdateListing() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }: { id: string; status?: string; title?: string; description?: string; priceCents?: number; fileUrl?: string; thumbnailUrl?: string; tags?: string[] }) =>
+      api.patch<MarketplaceListing>(`/marketplace/${id}`, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['marketplace'] });
+      toast.success('Listing updated');
+    },
+    onError: (err: unknown) => {
+      const e = err as { body?: { message?: string }; message?: string };
+      toast.error(e?.body?.message || e?.message || 'Failed to update listing');
+    },
   });
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, BadRequestException, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PaymentsService } from './payments.service';
@@ -20,7 +20,7 @@ export class PaymentsController {
     @Body() body: { studioId: string; refreshUrl: string; returnUrl: string },
   ) {
     const { studioId, refreshUrl, returnUrl } = body;
-    if (!studioId) throw new Error('Missing studioId');
+    if (!studioId) throw new BadRequestException('Missing studioId');
 
     const member = await this.prisma.studioMember.findFirst({
       where: { studioId, userId: user.id, role: { in: ['OWNER', 'ADMIN'] } },

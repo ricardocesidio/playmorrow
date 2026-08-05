@@ -29,7 +29,7 @@ export function SiteFooter() {
           <a href="https://github.com/ricardocesidio/playmorrow" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">GitHub</a>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground/70">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground/80">
           <Link href="/about" className="hover:text-foreground">About</Link>
           <Link href="/contact" className="hover:text-foreground">Contact</Link>
           <Link href="/support" className="hover:text-foreground">Support</Link>

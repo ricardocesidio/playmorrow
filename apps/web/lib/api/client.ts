@@ -409,4 +409,43 @@ export interface StudioRevenue {
   totalSales: number;
 }
 
+export interface Event {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  startDate: string;
+  endDate: string | null;
+  location: string | null;
+  virtual: boolean;
+  ticketPriceCents: number | null;
+  maxAttendees: number | null;
+  bannerUrl: string | null;
+  organizerId: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Partner {
+  id: string;
+  type: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  websiteUrl: string | null;
+  logoUrl: string | null;
+  contactName: string | null;
+  contactEmail: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReferralCodeInfo {
+  id: string;
+  userId: string;
+  code: string;
+}
+
 export const api = USE_MOCKS ? createHybridClient() : createRealClient();

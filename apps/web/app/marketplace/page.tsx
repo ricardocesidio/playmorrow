@@ -50,12 +50,14 @@ export default function MarketplacePage() {
               </div>
             </div>
 
-            <div className="mt-4 flex gap-4 border-b border-border/40">
+            <div role="tablist" className="mt-4 flex gap-4 border-b border-border/40">
               {TABS.map((tab) => (
                 <Link
                   key={tab.key}
                   href={tab.key ? `/marketplace?type=${tab.key}` : '/marketplace'}
-                  className={`pb-2 font-mono text-[0.6rem] uppercase tracking-widest transition-colors ${
+                  role="tab"
+                  aria-selected={type === tab.key}
+                  className={`pb-2 font-mono text-[0.6rem] uppercase tracking-widest transition-colors focus-visible:ring-2 focus-visible:ring-cyan ${
                     type === tab.key
                       ? 'border-b-2 border-cyan text-cyan'
                       : 'text-muted-foreground hover:text-foreground'
@@ -67,11 +69,11 @@ export default function MarketplacePage() {
             </div>
           </HudPanel>
 
-          <div>
+          <div aria-live="polite">
             {error && !isLoading && <ErrorState message="Failed to load marketplace." />}
 
             {isLoading && (
-              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div role="status" aria-busy="true" aria-live="polite" className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="clip-corner border border-border/60 bg-background/60 p-3">
                     <div className="mb-3 h-28 animate-pulse bg-white/10" />
@@ -101,7 +103,7 @@ export default function MarketplacePage() {
                       {listing.thumbnailUrl ? (
                         <img src={listing.thumbnailUrl} alt={listing.title} className="size-full object-cover" />
                       ) : (
-                        <Store className="size-10 text-muted-foreground/30" />
+                        <Store aria-hidden="true" className="size-10 text-muted-foreground/30" />
                       )}
                       <div className="absolute left-2 top-2">
                         <span className="bg-cyan/90 px-2 py-0.5 font-mono text-[0.55rem] uppercase text-white">
@@ -120,7 +122,7 @@ export default function MarketplacePage() {
                         <span className="font-mono text-xs text-cyan">
                           {formatPrice(listing.priceCents)}
                         </span>
-                        <ArrowRight className="size-3 text-muted-foreground transition group-hover:text-cyan" />
+                        <ArrowRight aria-hidden="true" className="size-3 text-muted-foreground transition group-hover:text-cyan" />
                       </div>
                     </div>
                   </Link>

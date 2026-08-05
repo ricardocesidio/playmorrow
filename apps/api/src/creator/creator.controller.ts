@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, BadRequestException } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreatorService } from './creator.service';
@@ -22,7 +22,7 @@ export class CreatorController {
   @Post('apply')
   @UseGuards(SessionAuthGuard)
   async applyReferral(@Body() body: { code: string; listingId?: string }, @CurrentUser() user: { id: string }) {
-    if (!body.code) throw new Error('Referral code is required');
+    if (!body.code) throw new BadRequestException('Referral code is required');
     const stored = await this.creator.validateCode(body.code, user.id);
     return { valid: !!stored, creatorName: stored?.user?.username };
   }

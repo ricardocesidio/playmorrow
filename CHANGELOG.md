@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Phase 5 — Ecosystem (2026-07-31)
+- M16 Marketplace: Stripe Connect Express, PaymentIntent, listings, purchases, licenses
+- M17 Publisher: Revenue dashboard per studio
+- M18 Funding: Reward-based scope defined (equity blocked)
+- M19 Creator: Referral codes + commission tracking
+- M20 Partner: B2B CRM with 6 partner types
+- M21 Events: Listings, detail, publish, upcoming filter
+- 8 new Prisma models (63 total), 22 API endpoints, 12 frontend pages
+
 ### Added
 - Push notification toggle with VAPID key configuration, permission checks, and error toasts
 - Email change with verification flow (send code to new email, verify before saving)

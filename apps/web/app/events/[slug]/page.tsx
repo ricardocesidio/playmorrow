@@ -1,32 +1,28 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { CalendarDays, MapPin, ArrowLeft } from 'lucide-react';
+import { CalendarDays, MapPin, ArrowLeft, CheckCircle } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { Button } from '@/components/ui/button';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api/client';
+import { useEvent } from '@/lib/api/hooks';
 import { formatPrice } from '@/lib/format';
 
 export default function EventDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-
-  const { data: event, isLoading, error } = useQuery({
-    queryKey: ['event', slug],
-    queryFn: () => api.get<{ id: string; title: string; slug: string; description: string | null; startDate: string; location: string | null; virtual: boolean; ticketPriceCents: number | null }>(`/events/${slug}`),
-    enabled: !!slug,
-  });
+  const [registered, setRegistered] = useState(false);
+  const { data: event, isLoading, error } = useEvent(slug);
 
   if (isLoading) {
     return (
       <>
         <SiteHeader />
         <main className="flex min-h-screen items-center justify-center bg-[#020609]">
-          <div className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
+          <div role="status" aria-label="Loading event details" className="size-8 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
         </main>
       </>
     );
@@ -51,8 +47,8 @@ export default function EventDetailPage() {
       <main className="relative min-h-screen bg-[#020609] px-5 pb-28 pt-4 sm:px-8 lg:px-10">
         <CircuitFrame className="opacity-70" />
         <div className="relative z-10 mx-auto max-w-3xl">
-          <Link href="/events" className="mb-4 flex items-center gap-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:text-cyan">
-            <ArrowLeft className="size-3" /> Back to events
+          <Link href="/events" className="mb-4 flex items-center gap-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:text-cyan focus-visible:ring-2 focus-visible:ring-cyan">
+            <ArrowLeft aria-hidden="true" className="size-3" /> Back to events
           </Link>
 
           <HudPanel className="mb-3 px-4 py-3 sm:px-8 sm:py-4" accent="muted">
@@ -60,11 +56,11 @@ export default function EventDetailPage() {
 
             <div className="mt-4 flex flex-wrap gap-4 font-mono text-[0.55rem] text-muted-foreground">
               <span className="flex items-center gap-1">
-                <CalendarDays className="size-3 text-cyan" />
+                <CalendarDays aria-hidden="true" className="size-3 text-cyan" />
                 {startDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
               </span>
               {event.location && (
-                <span className="flex items-center gap-1"><MapPin className="size-3 text-cyan" />{event.location}</span>
+                <span className="flex items-center gap-1"><MapPin aria-hidden="true" className="size-3 text-cyan" />{event.location}</span>
               )}
               {event.virtual && <span className="text-cyan">Virtual Event</span>}
             </div>
@@ -78,7 +74,13 @@ export default function EventDetailPage() {
                 {event.ticketPriceCents == null ? 'Free' :
                   event.ticketPriceCents === 0 ? 'Free' : formatPrice(event.ticketPriceCents)}
               </span>
-              <Button>Register</Button>
+              {registered ? (
+                <span className="flex items-center gap-1.5 font-mono text-xs text-green-400">
+                  <CheckCircle aria-hidden="true" className="size-3.5" /> Registered
+                </span>
+              ) : (
+                <Button onClick={() => setRegistered(true)}>Register</Button>
+              )}
             </div>
           </HudPanel>
         </div>

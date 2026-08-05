@@ -35,7 +35,7 @@ export default function MyLicensesPage() {
           {error && !isLoading && <ErrorState message="Failed to load licenses." />}
 
           {isLoading && (
-            <div className="space-y-3">
+            <div role="status" aria-busy="true" aria-live="polite" className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="clip-corner h-20 animate-pulse border border-border/40 bg-[#050b0f]/30" />
               ))}
@@ -55,7 +55,7 @@ export default function MyLicensesPage() {
                 <div key={license.id} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-4 transition hover:border-cyan/40">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Link href={`/marketplace/${license.listing.id}`} className="font-display text-sm font-black uppercase text-foreground hover:text-cyan">
+                      <Link href={`/marketplace/${license.listing.id}`} className="font-display text-sm font-black uppercase text-foreground hover:text-cyan focus-visible:ring-2 focus-visible:ring-cyan">
                         {license.listing.title}
                       </Link>
                       <p className="mt-0.5 font-mono text-[0.55rem] text-muted-foreground">
@@ -65,7 +65,7 @@ export default function MyLicensesPage() {
                     {license.listing.fileUrl && (
                       <Button variant="outline" size="sm" asChild>
                         <a href={`/api/marketplace/download/${license.listingId}`} rel="noopener noreferrer">
-                          <Download className="size-3" /> Download
+                          <Download aria-hidden="true" className="size-3" /> Download
                         </a>
                       </Button>
                     )}
