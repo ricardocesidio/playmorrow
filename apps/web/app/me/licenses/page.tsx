@@ -64,7 +64,7 @@ export default function MyLicensesPage() {
                     </div>
                     {license.listing.fileUrl && (
                       <Button variant="outline" size="sm" asChild>
-                        <a href={license.listing.fileUrl} download>
+                        <a href={`/api/marketplace/download/${license.listingId}`} rel="noopener noreferrer">
                           <Download className="size-3" /> Download
                         </a>
                       </Button>

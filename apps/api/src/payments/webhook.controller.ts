@@ -41,9 +41,10 @@ export class WebhookController {
         signature,
         secret,
       );
-    } catch (err: any) {
-      this.logger.error(`Webhook signature verification failed: ${err.message}`);
-      return { error: 'Invalid signature' };
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      this.logger.error(`Webhook signature verification failed: ${e.message}`);
+      throw new BadRequestException('Invalid Stripe signature');
     }
 
     const alreadyProcessed = await this.payments.isWebhookProcessed(event.id);

@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { PartnerService } from './partner.service';
+import { CreatePartnerDto } from './dto/create-partner.dto';
 
 @Controller('partners')
 export class PartnerController {
@@ -18,7 +19,7 @@ export class PartnerController {
 
   @Post()
   @UseGuards(SessionAuthGuard)
-  async create(@Body() body: { type: string; name: string; slug: string; description?: string; websiteUrl?: string }) {
+  async create(@Body() body: CreatePartnerDto) {
     if (!body.type || !body.name || !body.slug) throw new Error('type, name, and slug are required');
     return this.partner.create(body);
   }

@@ -4,6 +4,7 @@ import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 import { MarketplaceService } from './marketplace.service';
+import { CreateListingDto } from './dto/create-listing.dto';
 
 @Controller('marketplace')
 export class MarketplaceController {
@@ -34,7 +35,7 @@ export class MarketplaceController {
 
   @Post()
   @UseGuards(SessionAuthGuard)
-  async create(@Body() body: { studioId: string; type: string; title: string; description?: string; priceCents: number; fileUrl?: string; thumbnailUrl?: string; tags?: string[]; gameId?: string }, @CurrentUser() user: { id: string }) {
+  async create(@Body() body: CreateListingDto, @CurrentUser() user: { id: string }) {
     if (!body.studioId) throw new Error('studioId is required');
     const member = await this.prisma.studioMember.findFirst({
       where: { studioId: body.studioId, userId: user.id, role: { in: ['OWNER', 'ADMIN'] } },
@@ -53,6 +54,12 @@ export class MarketplaceController {
   @UseGuards(SessionAuthGuard)
   async myLicenses(@CurrentUser() user: { id: string }) {
     return this.marketplace.getUserLicenses(user.id);
+  }
+
+  @Get('download/:listingId')
+  @UseGuards(SessionAuthGuard)
+  async download(@Param('listingId') listingId: string, @CurrentUser() user: { id: string }) {
+    return this.marketplace.getDownloadUrl(user.id, listingId);
   }
 
   @Get('studio/:studioId')

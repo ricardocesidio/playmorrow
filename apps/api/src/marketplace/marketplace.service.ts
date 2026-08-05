@@ -112,6 +112,16 @@ export class MarketplaceService {
     });
   }
 
+  async getDownloadUrl(userId: string, listingId: string) {
+    const license = await this.prisma.purchasedLicense.findUnique({
+      where: { userId_listingId: { userId, listingId } },
+    });
+    if (!license?.active) throw new NotFoundException('Purchase required to download');
+    const listing = await this.prisma.marketplaceListing.findUnique({ where: { id: listingId } });
+    if (!listing) throw new NotFoundException('Listing not found');
+    return { url: listing.fileUrl };
+  }
+
   async getUserLicenses(userId: string) {
     return this.prisma.purchasedLicense.findMany({
       where: { userId, active: true },

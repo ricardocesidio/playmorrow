@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards } from '@ne
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { EventsService } from './events.service';
+import { CreateEventDto } from './dto/create-event.dto';
 
 @Controller('events')
 export class EventsController {
@@ -19,7 +20,7 @@ export class EventsController {
 
   @Post()
   @UseGuards(SessionAuthGuard)
-  async create(@Body() body: { title: string; slug: string; startDate: string; description?: string; location?: string; virtual?: boolean; ticketPriceCents?: number; bannerUrl?: string }, @CurrentUser() _user: { id: string }) {
+  async create(@Body() body: CreateEventDto, @CurrentUser() _user: { id: string }) {
     if (!body.title || !body.slug || !body.startDate) throw new Error('title, slug, and startDate are required');
     return this.events.create(body);
   }

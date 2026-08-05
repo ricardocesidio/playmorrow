@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Handshake, ExternalLink } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
+import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { useAuth } from '@/lib/api/auth-context';
 import { api } from '@/lib/api/client';
@@ -20,7 +21,7 @@ const TABS = [
 export default function PartnersPage() {
   const [type, setType] = useState('');
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['partners', type],
     queryFn: () => api.get<{ items: { id: string; name: string; type: string; description?: string; websiteUrl?: string; logoUrl?: string; status: string }[]; total: number }>(`/partners${type ? `?type=${type}` : ''}`),
   });
@@ -51,6 +52,8 @@ export default function PartnersPage() {
                 <div key={i} className="clip-corner h-20 animate-pulse border border-border/40 bg-[#050b0f]/30" />
               ))}
             </div>
+          ) : error ? (
+            <ErrorState message="Failed to load partners." />
           ) : (
             <div className="space-y-3">
               {data?.items.map((p: { id: string; name: string; type: string; description?: string; websiteUrl?: string; status: string }) => (
