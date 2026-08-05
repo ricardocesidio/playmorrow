@@ -1,10 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { createHmac, randomBytes } from 'node:crypto';
+import { ConfigService } from '@nestjs/config';
+import { createHmac, randomBytes, createCipheriv, createDecipheriv, scryptSync } from 'node:crypto';
 
 @Injectable()
 export class TotpService {
   private readonly DIGITS = 6;
   private readonly PERIOD = 30;
+  private readonly encryptionKey: Buffer;
+
+  constructor(private readonly configService: ConfigService) {
+    const secret = this.configService.getOrThrow<string>('JWT_SECRET');
+    this.encryptionKey = scryptSync(secret, 'playmorrow-totp-salt', 32);
+  }
 
   generateSecret(): string {
     const bytes = randomBytes(20);
@@ -74,5 +81,23 @@ export class TotpService {
       }
     }
     return Buffer.from(output);
+  }
+
+  encryptSecret(plaintext: string): string {
+    const iv = randomBytes(16);
+    const cipher = createCipheriv('aes-256-gcm', this.encryptionKey, iv);
+    const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
+    const tag = cipher.getAuthTag();
+    return `${iv.toString('hex')}:${encrypted.toString('hex')}:${tag.toString('hex')}`;
+  }
+
+  decryptSecret(ciphertext: string): string {
+    const [ivHex, encryptedHex, tagHex] = ciphertext.split(':');
+    const iv = Buffer.from(ivHex!, 'hex');
+    const encrypted = Buffer.from(encryptedHex!, 'hex');
+    const tag = Buffer.from(tagHex!, 'hex');
+    const decipher = createDecipheriv('aes-256-gcm', this.encryptionKey, iv);
+    decipher.setAuthTag(tag);
+    return decipher.update(encrypted).toString('utf8') + decipher.final('utf8');
   }
 }
