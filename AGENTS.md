@@ -671,3 +671,27 @@ Strategic foundation defining Playmorrow AI's identity. No features — pure str
 - Studios own their AI data (opt-in tools only)
 
 **Verdict:** 🟢 AI Strategy certified — Phase 6 feature development governed by 15 principles + 24-gate framework.
+
+### Session 23 (continued) — AI Governance Freeze, North Star Sprint (2026-08-05)
+
+Strategic governance freeze before M22 implementation. Established permanent, binding AI identity.
+
+**North Star + Governance (5 documents):**
+- `docs/strategy/AI_NORTH_STAR.md` — Single-page strategic identity: "Playmorrow always finds the game I didn't even know I wanted"
+- `docs/strategy/AI_GOVERNANCE.md` — Permanent governance: document ownership, decision authority, review cadence, versioning, deprecation policy
+- `docs/strategy/AI_CONSTITUTION.md` — 20 immutable articles (Value Over Novelty, Never Manipulate, Always Explain, Respect Studio Ownership, Protect Privacy, Provider-Agnostic, Human Oversight, Fail Gracefully, etc.)
+- `docs/adr/ADR-001-AI-GOVERNANCE-FREEZE.md` — Architecture Decision Record freezing all AI strategy documents
+- `docs/releases/PHASE6_GOVERNANCE_FREEZE.md` — v1.1-ai-strategy milestone: governance frozen, M22 ready
+
+**Certification:**
+- `docs/releases/AI_GOVERNANCE_CERTIFICATION.md` — Governance Score 94/100. 16 strategic documents, 20 articles, 15 principles, 24-gate framework, 25 KPIs.
+
+**Key decisions:**
+- North Star: discovery > conversation. Playmorrow AI is the indie game expert.
+- All strategy documents frozen — modifications require ADR
+- 20 constitutional articles are binding and immutable
+- Every AI feature must be kill-switchable (Constitution Article 15)
+- Studios own their AI data (Constitution Article 18)
+- Provider independence is double-enforced (architecture + Constitution)
+
+**Verdict:** 🟢 AI Governance certified (94/100) — Phase 6 development may begin under permanent governance.
