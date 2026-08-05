@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-const API_BASE = process.env.API_URL || 'https://playmorrow-api.onrender.com/api';
+const API_BASE = process.env.API_URL || 'https://playmorrow-api-aged-mountain-9542.fly.dev/api';
 
 async function fetchGames(): Promise<{ slug: string; updatedAt: string }[]> {
   try {

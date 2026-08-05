@@ -19,7 +19,7 @@ jobs:
 
       - name: Check API Health
         run: |
-          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://playmorrow-api.onrender.com/api/health")
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://playmorrow-api-aged-mountain-9542.fly.dev/api/health")
           if [ "$status" != "200" ]; then
             echo "FAIL: API Health (HTTP $status)"
             exit 1
@@ -28,8 +28,8 @@ jobs:
 
       - name: Check API Games Endpoint
         run: |
-          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://playmorrow-api.onrender.com/api/games")
-          body=$(curl -s --max-time 15 "https://playmorrow-api.onrender.com/api/games")
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://playmorrow-api-aged-mountain-9542.fly.dev/api/games")
+          body=$(curl -s --max-time 15 "https://playmorrow-api-aged-mountain-9542.fly.dev/api/games")
           count=$(echo "$body" | grep -o '"id"' | wc -l)
           if [ "$status" != "200" ]; then
             echo "FAIL: API Games (HTTP $status)"

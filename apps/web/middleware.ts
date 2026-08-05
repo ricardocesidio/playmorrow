@@ -58,7 +58,7 @@ export function middleware(request: NextRequest) {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https: http://localhost:*",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://playmorrow-api.onrender.com https://plausible.io http://localhost:*",
+      "connect-src 'self' https://playmorrow-api-aged-mountain-9542.fly.dev https://plausible.io http://localhost:*",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",

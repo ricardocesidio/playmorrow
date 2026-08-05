@@ -41,7 +41,7 @@
 | Testing | Vitest + Supertest + Playwright | 2.x / 7.x / latest |
 | Monitoring | Sentry + Pino structured logging + UptimeRobot | — |
 | CI/CD | GitHub Actions (6 workflows) | — |
-| Deployment | Vercel (frontend) + Render (API, free tier) | — |
+| Deployment | Vercel (frontend) + Fly.io (API) | — |
 | Containerization | Docker (multi-stage) | — |
 | Pre-push hook | simple-git-hooks → `pnpm verify` (lint + typecheck + build) | — |
 

@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Health check
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://playmorrow-api.onrender.com/api/health")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://playmorrow-api-aged-mountain-9542.fly.dev/api/health")
           if [ "$STATUS" != "200" ]; then
             echo "❌ Health check failed: $STATUS"
             exit 1
@@ -21,7 +21,7 @@ jobs:
 
       - name: Games endpoint
         run: |
-          RESP=$(curl -s "https://playmorrow-api.onrender.com/api/games?pageSize=1")
+          RESP=$(curl -s "https://playmorrow-api-aged-mountain-9542.fly.dev/api/games?pageSize=1")
           TOTAL=$(echo "$RESP" | python3 -c "import sys,json; print(json.load(sys.stdin).get('total', 0))" 2>/dev/null)
           if [ -z "$TOTAL" ] || [ "$TOTAL" = "0" ]; then
             echo "❌ Games endpoint returned no items"
@@ -31,7 +31,7 @@ jobs:
 
       - name: Search endpoint
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://playmorrow-api.onrender.com/api/search?q=test")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://playmorrow-api-aged-mountain-9542.fly.dev/api/search?q=test")
           if [ "$STATUS" != "200" ]; then
             echo "❌ Search endpoint failed: $STATUS"
             exit 1
@@ -40,7 +40,7 @@ jobs:
 
       - name: Recommendations endpoint
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://playmorrow-api.onrender.com/api/recommendations?type=trending&limit=1")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://playmorrow-api-aged-mountain-9542.fly.dev/api/recommendations?type=trending&limit=1")
           if [ "$STATUS" != "200" ]; then
             echo "❌ Recommendations endpoint failed: $STATUS"
             exit 1
