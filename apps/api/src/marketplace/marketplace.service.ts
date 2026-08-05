@@ -92,16 +92,21 @@ export class MarketplaceService {
       { buyerId: userId, listingId, listingType: listing.type },
     );
 
-    await this.payments.recordTransaction({
-      type: 'PURCHASE',
-      amountCents: listing.priceCents,
-      platformFeeCents,
-      buyerId: userId,
-      sellerId,
-      listingId,
-      stripePaymentIntentId: pi.id,
-      description: `Purchase of ${listing.title}`,
-    });
+    try {
+      await this.payments.recordTransaction({
+        type: 'PURCHASE',
+        amountCents: listing.priceCents,
+        platformFeeCents,
+        buyerId: userId,
+        sellerId,
+        listingId,
+        stripePaymentIntentId: pi.id,
+        description: `Purchase of ${listing.title}`,
+      });
+    } catch (err) {
+      await this.payments.cancelPaymentIntent(pi.id);
+      throw new BadRequestException('Purchase failed — payment has been cancelled and not charged');
+    }
 
     this.eventBus.emit({
       type: 'MARKETPLACE_PURCHASE_INITIATED',

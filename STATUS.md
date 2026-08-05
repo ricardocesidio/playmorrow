@@ -3,37 +3,58 @@
 > **Last verified:** 2026-08-05
 > **Branch:** `main` (876+ commits)
 > **Repository:** [github.com/ricardocesidio/playmorrow](https://github.com/ricardocesidio/playmorrow) (public)
-> **Engineering Score:** 84/100
-> **Tests:** 318 pass, 0 failures (27 files) • **Typecheck:** 6/6 • **Lint:** 0 errors
+> **Engineering Score:** In progress (was 84/100 — self-certified, now retired)
+> **Tests:** 318 pass, 0 failures (27 files; Phase 5 modules unit/mocked only) • **Typecheck:** 6/6 • **Lint:** 0 errors
 > **Live:** https://playmorrow.co
+
+---
+
+## Honest Status (2026-08-05)
+
+Playmorrow is v0.8-beta, not v1.0 Platinum.
+
+What works:
+- Backend: 55 modules, 22 Phase 5 API endpoints
+- Frontend: 82 routes, all Phase 5 pages functional
+- Marketplace: Stripe Connect Express integrated
+- AI Module: 35 files, provider abstraction, 82 tests (all mocked)
+
+What needs work:
+- No Phase 5 integration tests (mocked only)
+- No staging environment
+- Fly.io free tier (512MB — inadequate)
+- AI governance exists but 0 AI features shipped
+- Self-certifications have been retired
+
+Current state: BLOCKED — awaiting integration tests + infrastructure hardening before Phase 6.
 
 ---
 
 ## Milestone Summary (21 Milestones)
 
-| Milestone | Focus | Status | Description |
-|-----------|-------|--------|-------------|
-| **M1** | Support Center | Complete | Support tickets, replies, admin queue, notifications |
-| **M2** | Help Center | Complete | Documentation platform with CMS, categories, search, article feedback |
-| **M3** | Studio Analytics | Complete | Real event tracking, daily aggregates, game & studio analytics dashboards |
-| **M4** | Verification & Trust | Complete | Tiered verification (6 levels), trust scoring, brand kits, press kits |
-| **M5** | Discovery Platform | Complete | Recommendations (9 scorers), Search 2.0, Dynamic Collections (5), Discover page, SEO landing pages |
-| **M6** | Performance & SEO | Complete | TanStack Query caching, 30s auto-refresh, OG images, canonical URLs, JSON-LD, dynamic sitemap |
-| **M7** | QA & CI/CD | Complete | 318 tests (27 files), GitHub Actions CI, pre-push hooks, lint + typecheck + build gating |
-| **M8** | Moderation Center | Complete | Reports, suspension, shadow ban, appeals, strikes, DMCA workflow, admin dashboard |
-| **M9** | Email Automation | Complete | Templates CRUD, transactional emails, weekly digest, bounce handling, delivery analytics |
-| **M10** | Security Hardening | Complete | Stateless HMAC CSRF (global), CSP nonce, DOMPurify, sanitize-html, argon2id, rate limiting, audit log |
-| **M11** | Public API | Complete | API keys with scoped access, programmatic access endpoints |
-| **M12** | SDK & CLI | Complete | `@playmorrow/sdk` (JS client), `playmorrow` CLI (search, games, trending) |
-| **M13** | Production Hardening | Complete | Dashboard restructure, OAuth cookie domain fix, CSP fixes, branch protection, Dependabot |
-| **M14** | Professionalization | Complete | Full project audit, enterprise readiness, repo files (CONTRIBUTING, SECURITY, CODE_OF_CONDUCT) |
-| **M15** | Final Polish & UI | Complete | Devlog blog redesign, push notifications, email verification, avatar upload, SSE notifications |
-| **M16** | Marketplace | Complete | Stripe Connect Express, PaymentIntent, listings, purchases, licenses (5 DB models) |
-| **M17** | Publisher | Complete | Per-studio revenue dashboard with earnings and payout history |
-| **M18** | Funding | Scope Defined | Reward-based crowdfunding (Kickstarter model); equity/investment blocked — implementation deferred |
-| **M19** | Creator | Complete | Referral codes + commission tracking via affiliate system |
-| **M20** | Partner | Complete | B2B CRM with 6 partner types (University, Publisher, Accelerator, Incubator, Studio, Event Organizer) |
-| **M21** | Events | Complete | Event listings, detail pages, publish workflow, ticketing, upcoming filter |
+| Milestone | Focus | Status | Tests | Description |
+|-----------|-------|--------|-------|-------------|
+| **M1** | Support Center | Complete | Integration | Support tickets, replies, admin queue, notifications |
+| **M2** | Help Center | Complete | Integration | Documentation platform with CMS, categories, search, article feedback |
+| **M3** | Studio Analytics | Complete | Integration | Real event tracking, daily aggregates, game & studio analytics dashboards |
+| **M4** | Verification & Trust | Complete | Integration | Tiered verification (6 levels), trust scoring, brand kits, press kits |
+| **M5** | Discovery Platform | Complete | Integration | Recommendations (9 scorers), Search 2.0, Dynamic Collections (5), Discover page, SEO landing pages |
+| **M6** | Performance & SEO | Complete | Integration | TanStack Query caching, 30s auto-refresh, OG images, canonical URLs, JSON-LD, dynamic sitemap |
+| **M7** | QA & CI/CD | Complete | Integration | 318 tests (27 files), GitHub Actions CI, pre-push hooks, lint + typecheck + build gating |
+| **M8** | Moderation Center | Complete | Integration | Reports, suspension, shadow ban, appeals, strikes, DMCA workflow, admin dashboard |
+| **M9** | Email Automation | Complete | Integration | Templates CRUD, transactional emails, weekly digest, bounce handling, delivery analytics |
+| **M10** | Security Hardening | Complete | Integration | Stateless HMAC CSRF (global), CSP nonce, DOMPurify, sanitize-html, argon2id, rate limiting, audit log |
+| **M11** | Public API | Complete | Integration | API keys with scoped access, programmatic access endpoints |
+| **M12** | SDK & CLI | Complete | Integration | `@playmorrow/sdk` (JS client), `playmorrow` CLI (search, games, trending) |
+| **M13** | Production Hardening | Complete | Integration | Dashboard restructure, OAuth cookie domain fix, CSP fixes, branch protection, Dependabot |
+| **M14** | Professionalization | Complete | Integration | Full project audit, enterprise readiness, repo files (CONTRIBUTING, SECURITY, CODE_OF_CONDUCT) |
+| **M15** | Final Polish & UI | Complete | Integration | Devlog blog redesign, push notifications, email verification, avatar upload, SSE notifications |
+| **M16** | Marketplace | Complete | Unit only (mocked) | Stripe Connect Express, PaymentIntent, listings, purchases, licenses (5 DB models) |
+| **M17** | Publisher | Complete | Unit only (mocked) | Per-studio revenue dashboard with earnings and payout history |
+| **M18** | Funding | Scope Defined | Not started | Reward-based crowdfunding (Kickstarter model); equity/investment blocked — implementation deferred |
+| **M19** | Creator | Complete | Unit only (mocked) | Referral codes + commission tracking via affiliate system |
+| **M20** | Partner | Complete | Unit only (mocked) | B2B CRM with 6 partner types (University, Publisher, Accelerator, Incubator, Studio, Event Organizer) |
+| **M21** | Events | Complete | Unit only (mocked) | Event listings, detail pages, publish workflow, ticketing, upcoming filter |
 
 ---
 

@@ -4,10 +4,12 @@
 
 [![CI](https://github.com/ricardocesidio/playmorrow/actions/workflows/ci.yml/badge.svg)](https://github.com/ricardocesidio/playmorrow/actions)
 ![License](https://img.shields.io/badge/license-proprietary-red)
-![Status](https://img.shields.io/badge/status-v1.0.0--platinum-gold)
+![Status](https://img.shields.io/badge/status-v0.8--beta-orange)
 ![Tests](https://img.shields.io/badge/tests-368%20total%20|%2082%20AI%20passing-green)
-![Score](https://img.shields.io/badge/engineering-91%2F100-brightgreen)
-![AI](https://img.shields.io/badge/AI-strategy%20frozen-blue)
+![Score](https://img.shields.io/badge/engineering-in--progress-yellow)
+![AI](https://img.shields.io/badge/AI-infra%20built%20(0%20features)-lightgrey)
+
+**Playmorrow is an active development project.** Phase 5 (ecosystem) backend is complete. Phase 6 (AI) infrastructure is built. Production hardening in progress. No external certification has been awarded.
 
 ---
 

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Audit Remediation (2026-08-05)
+- CR-04: Added transactional rollback (cancelPaymentIntent) to marketplace purchase
+- CR-05: Fixed /me/licenses auth redirect (now redirects to /login)
+- Retired self-certifications (Platinum, Gold, RC3.x)
+- Adopted honest labeling: v0.8-beta, not v1.0 Platinum
+
 ### v1.0.0-platinum (2026-08-05) — VERSION FREEZE
 
 Phase 6 Preparation — strategic AI vision defined, platform frozen.

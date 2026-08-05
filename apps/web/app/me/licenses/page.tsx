@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Download } from 'lucide-react';
 
@@ -13,7 +15,12 @@ import { Button } from '@/components/ui/button';
 
 export default function MyLicensesPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const { data: licenses, isLoading, error } = useMyLicenses();
+
+  useEffect(() => {
+    if (!user) router.push('/login');
+  }, [user, router]);
 
   if (!user) return null;
 

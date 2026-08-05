@@ -103,9 +103,9 @@ export class PaymentsService {
     const existing = await this.prisma.transaction.findUnique({
       where: { stripePaymentIntentId },
     });
-    if (!existing) return null; // no pending transaction
+    if (!existing) return null;
 
-    if (existing.status === 'COMPLETED') return existing; // already processed
+    if (existing.status === 'COMPLETED') return existing;
 
     return this.prisma.$transaction(async (tx) => {
       const txn = await tx.transaction.update({
@@ -123,5 +123,15 @@ export class PaymentsService {
 
       return txn;
     });
+  }
+
+  async cancelPaymentIntent(paymentIntentId: string) {
+    if (!this.stripe) return;
+    try {
+      await this.stripe.paymentIntents.cancel(paymentIntentId);
+      this.logger.log(`Cancelled orphaned PaymentIntent ${paymentIntentId}`);
+    } catch (err) {
+      this.logger.warn(`Failed to cancel PaymentIntent ${paymentIntentId}: ${(err as Error).message}`);
+    }
   }
 }
