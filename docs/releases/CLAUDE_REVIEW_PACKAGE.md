@@ -6,7 +6,7 @@ Briefing for external architectural audit. Read this in 10 minutes, then proceed
 
 ## 1. What Is Playmorrow?
 
-Playmorrow is a social discovery platform for indie games. It connects developers with players through game pages, devlogs, community features, a marketplace (Stripe Connect), and an AI intelligence layer (provider-agnostic, M23 MVP shipped).
+Playmorrow is a social discovery platform for indie games. It connects developers with players through game pages, devlogs, community features, a marketplace (Stripe Connect), and an AI intelligence layer (provider-agnostic, M23 shipped — embedding-based recommendations via EmbeddingService → ProviderFactory → OpenAI).
 
 **Tagline:** "Discover tomorrow's indie games today."
 
@@ -138,10 +138,11 @@ Playmorrow has an unusually mature governance layer for a pre-AI-deployment plat
 | `AI_CONSTITUTION.md` | 20 immutable articles (Assist Never Replace, Always Explain, Never Manipulate, etc.) |
 | `AI_GUIDING_PRINCIPLES.md` | 15 principles with compliance/violation examples |
 | `AI_GOVERNANCE.md` | Document ownership, review cadence, deprecation policy |
-| `AI_DECISION_FRAMEWORK.md` | 24-gate mandatory checklist for any AI feature |
+| `AI_DECISION_FRAMEWORK.md` | 24-gate checklist (archived v1) |
+| `AI_DECISION_FRAMEWORK_V2.md` | 8-gate simplified checklist (active) |
 | `AI_FEATURE_EVALUATION_MATRIX.md` | 10-dimension scoring (Priority Score formula) |
 | `AI_EXECUTION_FRAMEWORK.md` | 6-step cycle: Build → Measure → Learn → Improve → Review → Repeat |
-| `AI_CAPABILITY_MAP.md` | 69 capabilities across 7 domains |
+| `AI_CAPABILITY_MAP.md` | 69 capabilities across 7 domains (strategic reference, not build order) |
 | `ADR-001-AI-GOVERNANCE-FREEZE.md` | Architecture Decision Record freezing strategy |
 
 ### Architecture
@@ -149,11 +150,10 @@ Playmorrow has an unusually mature governance layer for a pre-AI-deployment plat
 The AI module (`apps/api/src/ai/`, 35 files) is **provider-agnostic by design**:
 
 - **Interface:** `AIProvider` with `chat()`, `embed()`, `moderate()` methods
-- **Implementations:** OpenAI, Anthropic
-- **Factory pattern:** Swap via `AI_PROVIDER` env var, zero code changes
-- **Constitutional reinforcement:** Article 8 mandates provider independence
-
-The governance isn't aspirational — it's architectural. Vendor lock-in is prevented at both the code and policy levels.
+- **Implementations:** OpenAI (chat + embed + moderate), Anthropic (chat only — embed/moderate fallback needed)
+- **Factory pattern:** Swap via `AI_PROVIDER` env var
+- **M23 shipped:** Embedding-based recommendations via `EmbeddingService` → `ProviderFactory` → OpenAI. Cosine similarity scoring with tag-based fallback. First feature that exercises the real AI pipeline.
+- **Known gap:** Setting `AI_PROVIDER=anthropic` breaks `embed()` and `moderate()` — needs interface split or fallback chains.
 
 ### Capability Landscape
 

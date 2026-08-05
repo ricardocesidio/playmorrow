@@ -1,9 +1,9 @@
 # Playmorrow — Engineering Handoff
 
 **Prepared for:** Incoming senior engineering team  
-**Date:** 2026-08-05 (updated post-audit remediation)  
-**Current version:** v0.8-beta (self-certifications retired)  
-**Status:** Active development — Phase 5 backend complete, Phase 6 AI started (M23 MVP shipped)
+**Date:** 2026-08-05 (updated post-audit remediation v2)  
+**Current version:** v0.8-beta  
+**Status:** Phase 5 complete. Phase 6: M23 shipped (embedding-based recommendations). 5 critical bugs resolved. Self-certifications retired.
 
 ---
 
@@ -29,7 +29,7 @@
 | State management | TanStack Query v5 (server state) + React context (UI state) | 5.x |
 | Backend | NestJS + Express + TypeScript | 10.x |
 | Database | PostgreSQL (Neon serverless with connection pooler) | 16 |
-| ORM | Prisma | 5.x |
+| ORM | Prisma | 6.x |
 | Auth | Session-based (httpOnly cookie) + OAuth (Google, GitHub) | — |
 | Real-time | SSE via RxJS Subject | — |
 | Email | Resend API | — |
