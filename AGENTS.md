@@ -695,3 +695,24 @@ Strategic governance freeze before M22 implementation. Established permanent, bi
 - Provider independence is double-enforced (architecture + Constitution)
 
 **Verdict:** 🟢 AI Governance certified (94/100) — Phase 6 development may begin under permanent governance.
+
+### Session 23 (continued) — AI Execution Framework, Strategy-to-Execution Transition (2026-08-05)
+
+Final transition from AI strategy to measurable AI execution. Every Phase 6 milestone now follows a mandatory 6-step cycle.
+
+**Execution Framework + Templates (4 documents):**
+- `docs/strategy/AI_EXECUTION_FRAMEWORK.md` — Mandatory 6-step cycle: Build → Measure → Learn → Improve → Review → Repeat. Defines exit criteria per step, success criteria (8 measurable outcomes), failure policy (deprecation at 10 weeks if underperforming), cost governance ($500/month limit), and pre-sprint governance checklist.
+- `docs/templates/AI_SPRINT_REPORT_TEMPLATE.md` — Standard sprint report: KPIs before/after, cost analysis, constitution compliance check, bugs, technical debt, lessons learned, next iteration plan, kill switch status, continue/redesign/deprecate decision.
+- `docs/templates/AI_KPI_TEMPLATE.md` — Pre-launch baseline template: primary + secondary KPIs with definitions and targets, cost baseline, success/failure criteria, measurement plan from 5% → 25% → 100% rollout.
+- `docs/templates/AI_POST_IMPLEMENTATION_REVIEW.md` — Go/redesign/deprecate decision template with KPI trend analysis, cost variance, user feedback, engineering review, decision framework compliance re-verification.
+
+**Certification:**
+- `docs/releases/AI_EXECUTION_CERTIFICATION.md` — Execution Readiness 91/100
+
+**Key policies:**
+- No AI feature is ever "done" — continuous improvement loop
+- Underperforming features deprecated at 10 weeks (Constitution Article 16)
+- Features gated from 5% → 25% → 100% rollout
+- Every optimization must have measurable justification
+
+**Verdict:** 🟢 AI Execution certified (91/100) — complete governance stack from North Star through execution.
