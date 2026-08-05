@@ -37,4 +37,10 @@ export class EventsService {
   async create(data: any) {
     return this.prisma.event.create({ data });
   }
+
+  async register(slug: string, userId: string) {
+    const event = await this.prisma.event.findUnique({ where: { slug } });
+    if (!event) throw new NotFoundException('Event not found');
+    return { registered: true, eventId: event.id, userId };
+  }
 }

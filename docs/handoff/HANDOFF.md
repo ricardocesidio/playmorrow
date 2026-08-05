@@ -16,7 +16,7 @@
 | **Product** | Indie game social discovery platform |
 | **Domain** | [playmorrow.co](https://playmorrow.co) |
 | **Repo** | [github.com/ricardocesidio/playmorrow](https://github.com/ricardocesidio/playmorrow) (public) |
-| **Version** | v1.0.0-platinum (frozen) |
+| **Version** | v0.85-beta |
 | **License** | Proprietary — All Rights Reserved |
 | **Contact** | playmorrow@hotmail.com |
 
@@ -87,7 +87,7 @@ Self-certifications (Platinum, Gold, RC3.x) have been retired. Current honest as
 | Milestone | Focus | Status |
 |---|---|---|
 | M22 | AI Assistant (context-aware, devlog drafts, studio insights) | Foundation built (35 files, 82 tests), features pending |
-| **M23** | **Recommendation Engine (content-based, explainable)** | **MVP SHIPPED** — Scoring engine (tag overlap + follow boost + popularity), `GET /ai/recommendations`, 8 unit tests, `useRecommendations()` hook |
+| **M23** | **Recommendation Engine (embedding-based)** | **MVP SHIPPED** — Embedding-based recommendations via `EmbeddingService` → `ProviderFactory` → OpenAI `text-embedding-3-small`. Cosine similarity scoring with tag-based fallback. 8 unit tests, `useRecommendations()` hook |
 | M24 | AI Moderation (toxicity detection, auto-flagging, triage) | Planned (deferred to >50K DAU) |
 | M25 | Studio Intelligence (sentiment analysis, store page optimizer, competitive benchmarking) | Planned (6 weeks) |
 | M26 | Semantic Search (embeddings, hybrid keyword+semantic, natural language queries) | Planned (6 weeks) |

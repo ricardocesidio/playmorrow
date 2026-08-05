@@ -26,6 +26,8 @@ interface ScoredGame extends GameCandidate {
 @Injectable()
 export class RecommendationService {
   private readonly logger = new Logger(RecommendationService.name);
+  private embeddingCache = new Map<string, { embedding: number[]; timestamp: number }>();
+  private readonly CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
   constructor(
     private prisma: PrismaService,
@@ -84,6 +86,34 @@ export class RecommendationService {
     };
   }
 
+  private async embedCached(texts: string[]): Promise<{ embedding: number[]; cached: boolean }[]> {
+    const results: { embedding: number[]; cached: boolean }[] = [];
+    const toGenerate: { text: string; index: number }[] = [];
+
+    for (let i = 0; i < texts.length; i++) {
+      const key = texts[i].substring(0, 200);
+      const cached = this.embeddingCache.get(key);
+      if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+        results[i] = { embedding: cached.embedding, cached: true };
+      } else {
+        toGenerate.push({ text: texts[i], index: i });
+      }
+    }
+
+    if (toGenerate.length > 0) {
+      const freshEmbeddings = await this.embeddingService.embedTexts(toGenerate.map(t => t.text));
+      for (let j = 0; j < toGenerate.length; j++) {
+        const key = toGenerate[j].text.substring(0, 200);
+        const emb = freshEmbeddings[j].embedding;
+        this.embeddingCache.set(key, { embedding: emb, timestamp: Date.now() });
+        results[toGenerate[j].index] = { embedding: emb, cached: false };
+      }
+      this.logger.log(`Generated ${toGenerate.length} new embeddings (${results.filter(r => r.cached).length} cached)`);
+    }
+
+    return results;
+  }
+
   private async scoreWithEmbeddings(
     wishlist: { game: { id: string; title: string; description: string | null } | null }[],
     candidates: GameCandidate[],
@@ -104,8 +134,8 @@ export class RecommendationService {
       const wishlistDescriptions = wishlistGames.map((g) => g.description!);
       const candidateDescriptions = candidates.map((g) => g.description ?? g.title);
 
-      const wishlistEmbeddings = await this.embeddingService.embedTexts(wishlistDescriptions);
-      const candidateEmbeddings = await this.embeddingService.embedTexts(candidateDescriptions);
+      const wishlistEmbeddings = await this.embedCached(wishlistDescriptions);
+      const candidateEmbeddings = await this.embedCached(candidateDescriptions);
 
       return candidates.map((game, i) => {
         let score = 0;

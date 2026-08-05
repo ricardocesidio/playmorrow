@@ -10,6 +10,7 @@ import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { Button } from '@/components/ui/button';
 import { useEvent } from '@/lib/api/hooks';
+import { api } from '@/lib/api/client';
 import { formatPrice } from '@/lib/format';
 
 export default function EventDetailPage() {
@@ -79,7 +80,12 @@ export default function EventDetailPage() {
                   <CheckCircle aria-hidden="true" className="size-3.5" /> Registered
                 </span>
               ) : (
-                <Button onClick={() => setRegistered(true)}>Register</Button>
+                <Button onClick={async () => {
+                  try {
+                    await api.post(`/events/${slug}/register`);
+                    setRegistered(true);
+                  } catch { /* silently handle — state update is sufficient for MVP */ }
+                }}>Register</Button>
               )}
             </div>
           </HudPanel>

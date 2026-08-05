@@ -34,4 +34,10 @@ export class EventsController {
   async update(@Param('slug') slug: string, @Body() body: { status?: string }) {
     return this.events.publish(slug, body.status);
   }
+
+  @Post(':slug/register')
+  @UseGuards(SessionAuthGuard)
+  async register(@Param('slug') slug: string, @CurrentUser() user: { id: string }) {
+    return this.events.register(slug, user.id);
+  }
 }
