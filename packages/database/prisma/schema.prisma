@@ -1621,3 +1621,13 @@ model Event {
   @@index([startDate])
   @@map("events")
 }
+
+model ReferralUsage {
+  id              String       @id @default(cuid())
+  referralCodeId  String
+  userId          String
+  createdAt       DateTime     @default(now())
+  referralCode    ReferralCode @relation(fields: [referralCodeId], references: [id])
+  user            User         @relation(fields: [userId], references: [id])
+  @@unique([referralCodeId, userId])
+}

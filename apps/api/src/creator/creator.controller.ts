@@ -23,7 +23,6 @@ export class CreatorController {
   @UseGuards(SessionAuthGuard)
   async applyReferral(@Body() body: { code: string; listingId?: string }, @CurrentUser() user: { id: string }) {
     if (!body.code) throw new BadRequestException('Referral code is required');
-    const stored = await this.creator.validateCode(body.code, user.id);
-    return { valid: !!stored, creatorName: stored?.user?.username };
+    return this.creator.applyReferral(body.code, user.id);
   }
 }

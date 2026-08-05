@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -33,6 +33,20 @@ export class CreatorService {
     });
     if (!rc || rc.userId === userId) return null;
     return rc;
+  }
+
+  async applyReferral(code: string, userId: string) {
+    const referralCode = await this.prisma.referralCode.findUnique({ where: { code } });
+    if (!referralCode) throw new BadRequestException('Invalid referral code');
+    if (referralCode.userId === userId) throw new BadRequestException('Cannot use your own referral code');
+
+    await this.prisma.referralUsage.upsert({
+      where: { referralCodeId_userId: { referralCodeId: referralCode.id, userId } },
+      create: { referralCodeId: referralCode.id, userId },
+      update: {},
+    });
+
+    return { applied: true, code: referralCode.code };
   }
 
   private generateCode(): string {

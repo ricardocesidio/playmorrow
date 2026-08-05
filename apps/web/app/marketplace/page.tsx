@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Store, ArrowRight } from 'lucide-react';
@@ -8,6 +9,7 @@ import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
+import { Button } from '@/components/ui/button';
 import { useMarketplaceListings } from '@/lib/api/hooks';
 import { formatPrice } from '@/lib/format';
 
@@ -26,7 +28,7 @@ const TABS = [
 export default function MarketplacePage() {
   const searchParams = useSearchParams();
   const type = searchParams.get('type') || '';
-  const page = parseInt(searchParams.get('page') ?? '1');
+  const [page, setPage] = useState(1);
 
   const { data, isLoading, error } = useMarketplaceListings(type || undefined, page);
 
@@ -92,42 +94,51 @@ export default function MarketplacePage() {
             )}
 
             {!isLoading && items.length > 0 && (
-              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {items.map((listing) => (
-                  <Link
-                    key={listing.id}
-                    href={`/marketplace/${listing.id}`}
-                    className="group panel relative flex min-h-[200px] flex-col overflow-hidden border-border/90 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.06),rgb(166_92_255_/_0.04),rgb(255_87_77_/_0.03))] transition duration-200 hover:border-cyan/70"
-                  >
-                    <div className="relative flex h-32 items-center justify-center bg-muted">
-                      {listing.thumbnailUrl ? (
-                        <img src={listing.thumbnailUrl} alt={listing.title} className="size-full object-cover" />
-                      ) : (
-                        <Store aria-hidden="true" className="size-10 text-muted-foreground/30" />
-                      )}
-                      <div className="absolute left-2 top-2">
-                        <span className="bg-cyan/90 px-2 py-0.5 font-mono text-[0.55rem] uppercase text-white">
-                          {TYPE_LABELS[listing.type] || listing.type}
-                        </span>
+              <>
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {items.map((listing) => (
+                    <Link
+                      key={listing.id}
+                      href={`/marketplace/${listing.id}`}
+                      className="group panel relative flex min-h-[200px] flex-col overflow-hidden border-border/90 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.06),rgb(166_92_255_/_0.04),rgb(255_87_77_/_0.03))] transition duration-200 hover:border-cyan/70"
+                    >
+                      <div className="relative flex h-32 items-center justify-center bg-muted">
+                        {listing.thumbnailUrl ? (
+                          <img src={listing.thumbnailUrl} alt={listing.title} className="size-full object-cover" />
+                        ) : (
+                          <Store aria-hidden="true" className="size-10 text-muted-foreground/30" />
+                        )}
+                        <div className="absolute left-2 top-2">
+                          <span className="bg-cyan/90 px-2 py-0.5 font-mono text-[0.55rem] uppercase text-white">
+                            {TYPE_LABELS[listing.type] || listing.type}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-1 flex-col border-t border-border/80 p-3">
-                      <h3 className="font-display text-sm font-black uppercase leading-none text-foreground transition-colors group-hover:text-cyan">
-                        {listing.title}
-                      </h3>
-                      <p className="mt-1 font-mono text-[0.5rem] text-muted-foreground">
-                        {listing.studio.name}
-                      </p>
-                      <div className="mt-auto flex items-center justify-between pt-2">
-                        <span className="font-mono text-xs text-cyan">
-                          {formatPrice(listing.priceCents)}
-                        </span>
-                        <ArrowRight aria-hidden="true" className="size-3 text-muted-foreground transition group-hover:text-cyan" />
+                      <div className="flex flex-1 flex-col border-t border-border/80 p-3">
+                        <h3 className="font-display text-sm font-black uppercase leading-none text-foreground transition-colors group-hover:text-cyan">
+                          {listing.title}
+                        </h3>
+                        <p className="mt-1 font-mono text-[0.5rem] text-muted-foreground">
+                          {listing.studio.name}
+                        </p>
+                        <div className="mt-auto flex items-center justify-between pt-2">
+                          <span className="font-mono text-xs text-cyan">
+                            {formatPrice(listing.priceCents)}
+                          </span>
+                          <ArrowRight aria-hidden="true" className="size-3 text-muted-foreground transition group-hover:text-cyan" />
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                    </Link>
+                  ))}
+                </div>
+                {data?.hasMore && (
+                  <div className="mt-6 text-center">
+                    <Button variant="outline" onClick={() => setPage(p => p + 1)} disabled={isLoading}>
+                      {isLoading ? 'Loading...' : 'Load More'}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
