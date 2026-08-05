@@ -1,9 +1,9 @@
 # Playmorrow — Engineering Handoff
 
 **Prepared for:** Incoming senior engineering team  
-**Date:** 2026-08-05  
-**Current version:** v1.0.0-platinum  
-**Engineering score:** 91/100 (RC3.2 Platinum Certified)
+**Date:** 2026-08-05 (updated post-audit remediation)  
+**Current version:** v0.8-beta (self-certifications retired)  
+**Status:** Active development — Phase 5 backend complete, Phase 6 AI started (M23 MVP shipped)
 
 ---
 
@@ -41,7 +41,7 @@
 | Testing | Vitest + Supertest + Playwright | 2.x / 7.x / latest |
 | Monitoring | Sentry + Pino structured logging + UptimeRobot | — |
 | CI/CD | GitHub Actions (6 workflows) | — |
-| Deployment | Vercel (frontend) + Fly.io (API) | — |
+| Deployment | Vercel (frontend) + Render (API, free tier) | — |
 | Containerization | Docker (multi-stage) | — |
 | Pre-push hook | simple-git-hooks → `pnpm verify` (lint + typecheck + build) | — |
 
@@ -49,16 +49,28 @@
 
 ## 2. Project Status
 
-### Overall Scores
+### Overall Status (Post-Audit, Honest)
 
-| Dimension | Score | Certification |
+Self-certifications (Platinum, Gold, RC3.x) have been retired. Current honest assessment:
+
+| Dimension | Assessment | Notes |
 |---|---|---|
-| Engineering | 91/100 | RC3.2 Platinum |
-| Security | 90/100 | HMAC CSRF, CSP nonce, argon2id, SAQ A |
-| QA | 88/100 | 33 test files, 368+ tests |
-| Accessibility | 92/100 (Lighthouse) | WCAG 2.2 AA (55 fixes on 11 pages) |
-| Production | 96/100 (Best Practices), 100/100 (SEO) | Lighthouse verified |
-| AI Foundation | 92/100 | Strategy, Governance, Product Architecture, Execution certified |
+| Phase 1-4 | Complete | Foundation, discovery, ops, automation |
+| Phase 5 (Ecosystem) | Backend complete, hardening in progress | 22 endpoints, 11 integration tests, needs E2E tests |
+| Phase 6 (AI) | Started — M23 MVP shipped | Content-based recommendations live; M22/M24/M25/M26 pending |
+| Infrastructure | Render free tier + Vercel + Neon | Zero cost; cold start latency |
+| Security | Strong fundamentals | CSRF HMAC, CSP nonce, 2FA pending |
+| Tests | 368+ total, 90 AI tests | Phase 5 needs E2E coverage |
+
+### Critical Bugs (All Resolved)
+
+| # | Bug | Status |
+|---|-----|--------|
+| CR-01 | StripePayment not rendered | ✅ Fixed (RC3) |
+| CR-02 | Register button dead | ✅ Fixed (RC3) |
+| CR-03 | Missing RBAC guards | ✅ Fixed (RC3) |
+| CR-04 | Marketplace no rollback | ✅ Fixed (cancelPaymentIntent) |
+| CR-05 | /me/licenses auth gap | ✅ Fixed (redirect to /login) |
 
 ### Completed Phases (1–5, 21 milestones)
 
@@ -70,12 +82,12 @@
 | **Phase 4 — Platform** | M10–M15 | Security hardening (global HMAC CSRF, CSP nonce, DOMPurify, rate limiting), Public API + SDK + CLI, production hardening, professionalization audit, final UI polish (devlog blog redesign, push notifications, SSE, avatar, email verification) |
 | **Phase 5 — Ecosystem** | M16–M21 | Marketplace (Stripe Connect, PaymentIntent, PCI SAQ A), Publisher (revenue dashboard), Funding (scope — crowdfunding model defined), Creator (referral codes + commissions), Partner (B2B CRM), Events (listings, ticketing) |
 
-### Phase 6 — AI & Platform Intelligence (Foundation built, features pending)
+### Phase 6 — AI & Platform Intelligence (Started — M23 MVP Shipped)
 
 | Milestone | Focus | Status |
 |---|---|---|
 | M22 | AI Assistant (context-aware, devlog drafts, studio insights) | Foundation built (35 files, 82 tests), features pending |
-| M23 | Recommendation Engine (collaborative filtering, embeddings, explainable) | Planned (8 weeks) |
+| **M23** | **Recommendation Engine (content-based, explainable)** | **MVP SHIPPED** — Scoring engine (tag overlap + follow boost + popularity), `GET /ai/recommendations`, 8 unit tests, `useRecommendations()` hook |
 | M24 | AI Moderation (toxicity detection, auto-flagging, triage) | Planned (deferred to >50K DAU) |
 | M25 | Studio Intelligence (sentiment analysis, store page optimizer, competitive benchmarking) | Planned (6 weeks) |
 | M26 | Semantic Search (embeddings, hybrid keyword+semantic, natural language queries) | Planned (6 weeks) |

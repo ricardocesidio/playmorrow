@@ -1,4 +1,4 @@
-# Claude Review Package — Playmorrow v1.0 Platinum
+# Claude Review Package — Playmorrow v0.8-beta
 
 Briefing for external architectural audit. Read this in 10 minutes, then proceed to deep review.
 
@@ -6,11 +6,11 @@ Briefing for external architectural audit. Read this in 10 minutes, then proceed
 
 ## 1. What Is Playmorrow?
 
-Playmorrow is a social discovery platform for indie games. It connects developers with players through game pages, devlogs, community features, a marketplace (Stripe Connect), and an AI intelligence layer (provider-agnostic, not yet deployed).
+Playmorrow is a social discovery platform for indie games. It connects developers with players through game pages, devlogs, community features, a marketplace (Stripe Connect), and an AI intelligence layer (provider-agnostic, M23 MVP shipped).
 
 **Tagline:** "Discover tomorrow's indie games today."
 
-**Domain:** https://playmorrow.co | **API:** Fly.io | **DB:** Neon PostgreSQL | **Storage:** Cloudflare R2
+**Domain:** https://playmorrow.co | **API:** Render (free tier) | **DB:** Neon PostgreSQL | **Storage:** Cloudflare R2
 
 ---
 
@@ -19,24 +19,29 @@ Playmorrow is a social discovery platform for indie games. It connects developer
 | Attribute | Value |
 |-----------|-------|
 | Founded | July 2026 |
-| Development sessions | 23 |
-| Phases | 5 completed + Phase 6 (AI) ready |
-| Milestones | 21 |
-| Engineering score | 91/100 (Platinum) |
-| Commits | ~880 |
-| Tests | 318 backend + 64 E2E (27 files) |
+| Development sessions | 23+ |
+| Phases | 5 completed + Phase 6 started |
+| Milestones | 21 (M1-M21) + M23 MVP |
+| Self-certifications | Retired (replaced with honest status) |
+| Commits | ~900 |
+| Tests | 368+ total (33 files), 90 AI tests passing |
+| AI features shipped | 1 (M23 content-based recommendations) |
 
 ### Evolution
 
 ```
 Phase 1-2 (Sessions 1-8):    Game pages, devlogs, feed, auth, CSRF
 Phase 3 (Sessions 9-12):     Security hardening, CI, professionalization
-Phase 4 (Sessions 13-17):    Dashboard, SEO, documentation, certifications
+Phase 4 (Sessions 13-17):    Dashboard, SEO, documentation
 Phase 5 (Sessions 18-19):    Marketplace (Stripe), partner CRM, events, creator
-         (Session 20):       Platinum certification, Lighthouse, contrast, a11y
-         (Session 21):       Phase 6 strategy, v1.0 freeze, AI vision
-Phase 6 (Sessions 22-23):    AI foundation (35 files, provider-agnostic)
-                              AI governance (20 articles, 28 docs, 69 capabilities)
+          (Session 19-20):   Audit + RC3.x certifications (retired)
+          (Session 20-21):   Phase 6 strategy, v1.0 freeze, AI vision
+Phase 6 (Session 22):        AI foundation (35 files, provider-agnostic, 82 tests)
+          (Session 23):      AI governance (20 articles, 28 docs, 69 capabilities)
+          (Session 23 cont): Audit response — CR-01/02/03 confirmed fixed,
+                              CR-04/05 resolved, self-certifications retired,
+                              Render migration, M23 MVP shipped
+                              (content-based recommendation engine, 8 tests)
 ```
 
 ---
@@ -81,7 +86,7 @@ playmorrow/
 | Service | Provider | Notes |
 |---------|----------|-------|
 | Frontend | Vercel | playmorrow.co |
-| Backend | Fly.io | Free tier (512MB/1CPU) |
+| Backend | Render | Free tier (512MB, auto-sleeps, kept alive by UptimeRobot) |
 | Database | Neon | Serverless PostgreSQL |
 | Storage | Cloudflare R2 | Public bucket, S3-compatible |
 | Monitoring | UptimeRobot | 5-minute checks on both services |
@@ -99,7 +104,11 @@ playmorrow/
 
 ---
 
-## 4. Completed Certifications
+## 4. Certifications (Self-Certified — Now Retired)
+
+Self-assigned certifications (Platinum, Gold, RC3.x) have been retired following independent audit. Replaced with honest status: v0.8-beta with 5 critical bugs resolved and M23 AI feature shipped.
+
+Previous self-certifications (for historical reference only):
 
 | Certification | Score | Date | Session |
 |---------------|-------|------|---------|
@@ -193,20 +202,34 @@ These are honest questions we want answered — not defensive challenges:
 
 ## 7. Known Limitations (Honest Disclosure)
 
-| Limitation | Severity | Resolution |
-|------------|----------|------------|
-| Fly.io free tier (512MB, 1CPU) limits performance | Medium | Upgrade to paid tier ($5/mo) |
-| No Phase 5 E2E tests (unit tests only with mocks) | Medium | Need test DB for proper integration |
-| 27 integration tests need local test DB | Low | Neon free branch |
+| Limitation | Severity | Status |
+|------------|----------|--------|
+| Render free tier (cold starts) | Low | Infra-limited; UptimeRobot keeps alive |
+| No Phase 5 E2E tests | Medium | Integration tests exist (11 tests); E2E still needed |
+| 27 integration tests need local test DB | Low | Neon free branch available |
 | Accessibility not screen-reader tested | Low | Needs NVDA/VoiceOver validation |
-| No Vitest coverage thresholds configured | Low | Add in CI config |
-| Dependabot paused | Low | Re-enable |
+| No Vitest coverage thresholds | Low | Pending CI config |
+| No 2FA for studios | Medium | TOTP implementation pending |
+| GDPR export UI not implemented | Medium | Legal gap |
 | 137 legacy `any` type warnings (pre-existing) | Low | Incremental cleanup |
-| CLAUDE.md references deleted docs (PHASE2_CERTIFICATION.md, etc.) | Low | Needs pruning |
-| RC2_CERTIFICATION.md missing from filesystem | Low | AGENTS.md claims it exists |
-| Only 1 handoff document (session-18) — others missing | Low | May have been intentionally not committed |
-| Lighthouse Performance 71 (fly.io cold starts) | Low | Resolves with paid Fly.io tier |
-| Duplicate project overviews (AGENTS.md vs CLAUDE.md with conflicting numbers) | Low | Consolidate |
+| No staging environment | Medium | Add second Render service |
+| No Redis (in-memory rate limiting, SSE) | Medium | Will limit scaling past 1 instance |
+
+### Audit Response (2026-08-05)
+
+Following independent architectural audit:
+
+| Finding | Status |
+|---------|--------|
+| CR-01: StripePayment broken | ✅ Already fixed (RC3) — verified in code |
+| CR-02: Register button dead | ✅ Already fixed (RC3) — verified in code |
+| CR-03: Missing RBAC guards | ✅ Already fixed (RC3) — verified in code |
+| CR-04: No transactional rollback | ✅ Fixed — `cancelPaymentIntent()` added, purchase wrapped in try/catch |
+| CR-05: /me/licenses auth gap | ✅ Fixed — redirect to `/login` on unauthenticated |
+| Self-certifications retired | ✅ Platinum/Gold/RC3.x labels removed |
+| Fly.io → Render migration | ✅ Free tier, `render.yaml` config, all URLs updated |
+| M23 MVP shipped | ✅ Content-based recommendation engine (8 tests, `GET /ai/recommendations`) |
+| Data-driven AI shipped | ✅ First AI feature in production — not just governance docs |
 
 ---
 
