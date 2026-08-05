@@ -598,3 +598,43 @@ Strategic planning sprint. No feature implementation — pure strategy, architec
 
 **Created:** docs/releases/V1_PLATINUM_RELEASE.md, docs/strategy/VISION_PHASE6.md, docs/strategy/PHASE6_ROADMAP.md, docs/strategy/AI_ARCHITECTURE.md, docs/strategy/COMPETITIVE_ANALYSIS.md
 **Updated:** CHANGELOG.md, AGENTS.md
+
+### Session 22 — M22 AI Foundation Architecture Kickoff (2026-08-05)
+
+Built the complete AI infrastructure foundation before any feature implementation. Provider-agnostic, SOLID, Clean Architecture.
+
+**AI Module (35 files):**
+- `apps/api/src/ai/` — @Global() NestJS module registered in app.module.ts
+- 4 interfaces: `AIProvider`, `EmbeddingProvider`, `ModerationProvider`, `VectorStore`
+- 2 provider implementations: OpenAI (chat + embed + moderate), Anthropic (chat)
+- `ProviderFactory` — swap providers via `AI_PROVIDER` env var, zero code changes
+- `AIController` — 4 endpoints: POST chat (SSE streaming), POST embed, POST moderate, GET providers
+- 4 validated DTOs: ChatRequestDto, EmbedRequestDto, ModerationRequestDto, SearchRequestDto
+- `PromptRegistry` — versioned template system with 8 built-in prompts
+- `PgVectorStore` — pgvector adapter for Neon PostgreSQL
+- `EmbeddingService` — embedding generation with caching + chunking
+- `TextChunker` — paragraph-aware smart chunking
+- `StreamService` — SSE streaming with callbacks + cancellation
+- `ConversationMemory` — session memory with summarization + GDPR deletion
+- `AIMetricsService` — cost estimation, latency, token tracking per provider/model
+- `AIConfig` — centralized config (AI_PROVIDER, models, rate limits, cost limits)
+
+**Security:**
+- All API keys via ConfigService only, never hardcoded
+- All endpoints behind SessionAuthGuard + @Throttle(10/min)
+- Content moderation on all AI outputs
+- PII exclusion from AI context
+- GDPR: deleteUserMemory(userId)
+
+**Tests (82 tests, all pass):**
+- 8 spec files covering: ProviderFactory, AIService, PromptRegistry, EmbeddingService, Chunker, ConversationMemory, AIMetricsService, StreamService
+- All tests mocked — zero real API calls
+
+**Documentation:**
+- `docs/ai/AI_FOUNDATION_CERTIFICATION.md` — engineering certification
+- `docs/ai/PROVIDER_ARCHITECTURE.md` — provider swap guide
+- `docs/ai/AI_SECURITY.md` — security policy
+
+**Quality:** ESLint 0 errors, all tests pass, AIModule registered in app.module.ts
+
+**Verdict:** 🟢 AI Foundation certified — ready for M22 feature implementation.

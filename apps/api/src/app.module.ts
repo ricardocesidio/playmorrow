@@ -64,6 +64,7 @@ import { CreatorModule } from './creator/creator.module';
 import { PartnerModule } from './partner/partner.module';
 import { EventsModule } from './events/events.module';
 import { ModerationModule } from './moderation/moderation.module';
+import { AIModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -128,6 +129,7 @@ import { ModerationModule } from './moderation/moderation.module';
     CreatorModule,
     PartnerModule,
     EventsModule,
+    AIModule,
   ],
   controllers: [CspController],
   providers: [
