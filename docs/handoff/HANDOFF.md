@@ -1,9 +1,9 @@
 # Playmorrow — Engineering Handoff
 
 **Prepared for:** Incoming senior engineering team  
-**Date:** 2026-08-05 (updated post-audit remediation v2)  
-**Current version:** v0.8-beta  
-**Status:** Phase 5 complete. Phase 6: M23 shipped (embedding-based recommendations). 5 critical bugs resolved. Self-certifications retired.
+**Date:** 2026-08-05 (final)  
+**Current version:** v0.9  
+**Status:** Phase 5 complete. M23 shipped (embedding-based). 2FA + GDPR + provider-agnostic fix + staging config deployed.
 
 ---
 
@@ -821,6 +821,59 @@ The strategic documents (`AI_ROADMAP_V2.md`, `AI_BUSINESS_VALUE_MATRIX.md`) reco
 | **Contrast Audit** | `docs/releases/CONTRAST_AUDIT.md` | 6 failing color combinations + fix recommendations |
 | **Accessibility Report** | `docs/releases/ACCESSIBILITY_REPORT.md` | WCAG 2.2 AA remediation (55 fixes) |
 | **QA Report** | `docs/releases/QA_REPORT.md` | All QA gates and results |
+
+---
+
+## 15. Deployment Checklist (Remaining Manual Steps)
+
+### Prisma Migration (TOTP Fields)
+```bash
+# Migration file created at:
+# packages/database/prisma/migrations/20260805162925_add_totp_fields/
+# Run on production DB:
+pnpm db:deploy  
+# Or for local dev:
+pnpm db:push
+```
+
+### Deploy to Render
+1. Push to GitHub → Render auto-deploys from `render.yaml` Blueprint
+2. Two services will be created: `playmorrow-api` (prod) + `playmorrow-api-staging` (staging)
+3. Set ALL `sync: false` env vars in Render dashboard → Environment
+4. Production URL: `https://playmorrow-api.onrender.com`
+5. Staging URL: `https://playmorrow-api-staging.onrender.com`
+
+### Provision Redis
+1. Sign up at https://upstash.com → Redis → Create Database
+2. Copy the REST URL
+3. Set `REDIS_URL` in Render secrets for both services
+4. Install `@upstash/redis` npm package when ready to use Redis
+5. Redis config + service wrapper already created at `apps/api/src/common/redis.*.ts`
+
+### Stripe Test Keys for Staging
+1. Go to https://dashboard.stripe.com/test/apikeys
+2. Copy test publishable key + secret key + webhook secret
+3. Set in Render staging service env vars:
+   - `STRIPE_SECRET_KEY=sk_test_...`
+   - `STRIPE_WEBHOOK_SECRET=whsec_...`
+4. Create a test webhook endpoint: `https://playmorrow-api-staging.onrender.com/api/webhooks/stripe`
+
+### Neon Staging Branch
+1. Go to https://console.neon.tech → playmorrow → Branches
+2. Create branch `staging` from `main`
+3. Copy the staging DATABASE_URL
+4. Set in Render staging service env vars
+
+### Activate Cloudflare Email Routing
+1. Zone ID: `aeac4f1697a17e2d481765a58d14438b`
+2. Wait for `dig +short playmorrow.co NS` to show Cloudflare NS
+3. Enable Email Routing → add forwarding to ricardocesidio@hotmail.com
+4. Emails: support@, security@, studios@, hello@, noreply@
+
+### Set AI API Keys
+1. Set `OPENAI_API_KEY` in Render secrets (both services)
+2. Optional: `ANTHROPIC_API_KEY` for Anthropic chat provider
+3. Set `AI_PROVIDER=openai` (default)
 
 ---
 

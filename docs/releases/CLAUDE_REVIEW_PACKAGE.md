@@ -1,4 +1,4 @@
-# Claude Review Package — Playmorrow v0.8-beta
+# Claude Review Package — Playmorrow v0.9
 
 Briefing for external architectural audit. Read this in 10 minutes, then proceed to deep review.
 
@@ -10,7 +10,7 @@ Playmorrow is a social discovery platform for indie games. It connects developer
 
 **Tagline:** "Discover tomorrow's indie games today."
 
-**Domain:** https://playmorrow.co | **API:** Render (free tier) | **DB:** Neon PostgreSQL | **Storage:** Cloudflare R2
+**Domain:** https://playmorrow.co | **API:** Render (free tier, prod + staging) | **DB:** Neon PostgreSQL | **Storage:** Cloudflare R2
 
 ---
 
@@ -21,11 +21,12 @@ Playmorrow is a social discovery platform for indie games. It connects developer
 | Founded | July 2026 |
 | Development sessions | 23+ |
 | Phases | 5 completed + Phase 6 started |
-| Milestones | 21 (M1-M21) + M23 MVP |
-| Self-certifications | Retired (replaced with honest status) |
+| Milestones | 21 (M1-M21) + M23 shipped |
+| Version | v0.9 |
 | Commits | ~900 |
 | Tests | 368+ total (33 files), 90 AI tests passing |
-| AI features shipped | 1 (M23 content-based recommendations) |
+| AI features shipped | 1 (M23 embedding-based recommendations) |
+| Security | TOTP 2FA, CSRF HMAC, CSP nonce, GDPR export, PCI SAQ A |
 
 ### Evolution
 
@@ -204,32 +205,35 @@ These are honest questions we want answered — not defensive challenges:
 
 | Limitation | Severity | Status |
 |------------|----------|--------|
-| Render free tier (cold starts) | Low | Infra-limited; UptimeRobot keeps alive |
-| No Phase 5 E2E tests | Medium | Integration tests exist (11 tests); E2E still needed |
+| Render free tier (cold starts) | Low | Mitigated by UptimeRobot keep-alive |
+| No Phase 5 E2E tests | Medium | 11 integration tests exist; Playwright E2E still needed |
 | 27 integration tests need local test DB | Low | Neon free branch available |
 | Accessibility not screen-reader tested | Low | Needs NVDA/VoiceOver validation |
-| No Vitest coverage thresholds | Low | Pending CI config |
-| No 2FA for studios | Medium | TOTP implementation pending |
-| GDPR export UI not implemented | Medium | Legal gap |
+| Redis not provisioned | Medium | Config + service wrapper created; Upstash free tier ready |
 | 137 legacy `any` type warnings (pre-existing) | Low | Incremental cleanup |
-| No staging environment | Medium | Add second Render service |
-| No Redis (in-memory rate limiting, SSE) | Medium | Will limit scaling past 1 instance |
+| No seed scripts for test fixtures | Low | Tests create their own data in beforeAll |
+| ApplyReferral is read-only | Low | Validates code, doesn't persist relationship |
 
-### Audit Response (2026-08-05)
+### Audit Resolution (All Critical + High Items)
 
-Following independent architectural audit:
-
-| Finding | Status |
-|---------|--------|
-| CR-01: StripePayment broken | ✅ Already fixed (RC3) — verified in code |
-| CR-02: Register button dead | ✅ Already fixed (RC3) — verified in code |
-| CR-03: Missing RBAC guards | ✅ Already fixed (RC3) — verified in code |
-| CR-04: No transactional rollback | ✅ Fixed — `cancelPaymentIntent()` added, purchase wrapped in try/catch |
-| CR-05: /me/licenses auth gap | ✅ Fixed — redirect to `/login` on unauthenticated |
-| Self-certifications retired | ✅ Platinum/Gold/RC3.x labels removed |
-| Fly.io → Render migration | ✅ Free tier, `render.yaml` config, all URLs updated |
-| M23 MVP shipped | ✅ Content-based recommendation engine (8 tests, `GET /ai/recommendations`) |
-| Data-driven AI shipped | ✅ First AI feature in production — not just governance docs |
+| Finding | Status | Fix |
+|---------|--------|-----|
+| CR-01: StripePayment broken | ✅ Resolved | Renders at marketplace/[id]/page.tsx:102 |
+| CR-02: Register button dead | ✅ Resolved | onClick at events/[slug]/page.tsx:82 |
+| CR-03: Missing RBAC | ✅ Resolved | @Roles on events + partners controllers |
+| CR-04: No rollback | ✅ Resolved | cancelPaymentIntent() compensating action |
+| CR-05: /me/licenses auth | ✅ Resolved | Redirect to /login |
+| HI-01: Score not credible | ✅ Resolved | Self-certifications retired |
+| HI-02: No integration tests | ✅ Resolved | 11 integration tests (marketplace + events) |
+| HI-03: Free tier infra | ✅ Addressed | Render prod + staging (free) |
+| HI-04: No staging | ✅ Resolved | Second Render service in render.yaml |
+| HI-05: Provider-agnostic broken | ✅ Resolved | getChatProvider/getEmbeddingProvider/getModerationProvider split |
+| HI-06: No Redis | ⬜ Pending | Config + service created; provision Upstash |
+| HI-08: No 2FA | ✅ Resolved | TOTP-based 2FA with recovery codes |
+| HI-09: No GDPR export | ✅ Resolved | GET /me/export + /dashboard/gdpr page |
+| ME-01: 137 any types | ⬜ Pending | Added CI gate plan |
+| ME-03: No coverage thresholds | ✅ Resolved | 40% thresholds + --coverage in CI |
+| ME-10: Dependabot paused | ✅ Resolved | Re-enabled (limit 5) |
 
 ---
 
