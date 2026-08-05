@@ -1558,13 +1558,12 @@ model PurchasedLicense {
 
 model ReferralCode {
   id        String   @id @default(cuid())
-  userId    String
+  userId    String   @unique
   code      String   @unique
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
   @@map("referral_codes")
 }
 
