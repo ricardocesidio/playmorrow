@@ -21,7 +21,7 @@ export class TotpService {
   }
 
   verifyToken(token: string, secret: string): boolean {
-    return verifySync({ secret, token });
+    return verifySync({ secret, token }) as unknown as boolean;
   }
 
   generateRecoveryCodes(): string[] {
