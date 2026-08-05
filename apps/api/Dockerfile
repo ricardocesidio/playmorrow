@@ -18,4 +18,4 @@ RUN mkdir -p apps/api/uploads
 
 ENV NODE_ENV=production
 EXPOSE 8080
-CMD pnpm --filter @playmorrow/database db:deploy && node apps/api/dist/main.js
+CMD node apps/api/dist/main.js
