@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { authenticator } from 'otplib';
+import { generateSecret, generateURI, verifySync } from 'otplib';
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
 
 @Injectable()
@@ -13,15 +13,15 @@ export class TotpService {
   }
 
   generateSecret(): string {
-    return authenticator.generateSecret();
+    return generateSecret();
   }
 
   generateKeyUri(email: string, secret: string): string {
-    return authenticator.keyuri(email, 'Playmorrow', secret);
+    return generateURI({ secret, label: email, issuer: 'Playmorrow' });
   }
 
   verifyToken(token: string, secret: string): boolean {
-    return authenticator.verify({ token, secret });
+    return verifySync({ secret, token });
   }
 
   generateRecoveryCodes(): string[] {
