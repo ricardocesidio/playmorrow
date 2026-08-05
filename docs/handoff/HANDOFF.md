@@ -694,9 +694,9 @@ Build → Measure → Learn → Improve → Review → Repeat
 
 | Variable | Where | Purpose |
 |---|---|---|
-| `AI_PROVIDER` | Fly.io | `openai` or `anthropic` — selects active AI provider |
-| `OPENAI_API_KEY` | Fly.io | OpenAI API key (required if `AI_PROVIDER=openai`) |
-| `ANTHROPIC_API_KEY` | Fly.io | Anthropic API key (required if `AI_PROVIDER=anthropic`) |
+| `AI_PROVIDER` | Render | `openai` or `anthropic` — selects active chat provider |
+| `OPENAI_API_KEY` | Render | OpenAI API key (required for embeddings, moderation, and if AI_PROVIDER=openai) |
+| `ANTHROPIC_API_KEY` | Render | Anthropic API key (required if AI_PROVIDER=anthropic) |
 
 ### Local Dev Only
 
