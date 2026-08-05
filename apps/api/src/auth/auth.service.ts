@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException, Optional } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException, NotFoundException, Optional } from '@nestjs/common';
 import { logger } from '../common/logger';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -13,6 +13,7 @@ import { UsersService } from '../users/users.service';
 import { EmailService } from '../email/email.service';
 import { EmailSenderService } from '../email/email-sender.service';
 import { TokenService } from './token.service';
+import { TotpService } from './totp.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import type { LoginDto } from './dto/login.dto';
 import type { RegisterDto } from './dto/register.dto';
@@ -73,6 +74,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly tokenService: TokenService,
+    private readonly totpService: TotpService,
     private readonly emailService: EmailService,
     @Optional()     private readonly notificationsService: NotificationsService,
     @Optional() private readonly emailSender?: EmailSenderService,
@@ -566,5 +568,135 @@ export class AuthService {
     const existing = await this.usersService.findByUsername(base);
     if (!existing) return base;
     return `pending_${randomBytes(8).toString('hex')}`;
+  }
+
+  async generateTotpSecret(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    if ((user as any).totpEnabled) throw new BadRequestException('2FA is already enabled');
+
+    const secret = this.totpService.generateSecret();
+    const encrypted = this.totpService.encryptSecret(secret);
+    const qrCodeUri = this.totpService.generateKeyUri(user.email, secret);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { totpSecret: encrypted } as any,
+    });
+
+    return { secret, qrCodeUri };
+  }
+
+  async enableTotp(userId: string, token: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    if ((user as any).totpEnabled) throw new BadRequestException('2FA is already enabled');
+    if (!(user as any).totpSecret) throw new BadRequestException('Generate a secret first via /auth/2fa/enable');
+
+    const secret = this.totpService.decryptSecret((user as any).totpSecret);
+    if (!this.totpService.verifyToken(token, secret)) {
+      throw new BadRequestException('Invalid verification code');
+    }
+
+    const recoveryCodes = this.totpService.generateRecoveryCodes();
+    const hashedCodes = recoveryCodes.map((code) => createHash('sha256').update(code).digest('hex'));
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { totpEnabled: true, recoveryCodes: hashedCodes } as any,
+    });
+
+    return recoveryCodes;
+  }
+
+  async disableTotp(userId: string, token: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    if (!(user as any).totpEnabled) throw new BadRequestException('2FA is not enabled');
+    if (!(user as any).totpSecret) throw new BadRequestException('TOTP not configured');
+
+    const secret = this.totpService.decryptSecret((user as any).totpSecret);
+    if (!this.totpService.verifyToken(token, secret)) {
+      throw new BadRequestException('Invalid verification code');
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { totpEnabled: false, totpSecret: null, recoveryCodes: [] } as any,
+    });
+  }
+
+  async getRecoveryCodes(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    if (!(user as any).totpEnabled || !(user as any).recoveryCodes?.length) {
+      throw new BadRequestException('2FA is not enabled');
+    }
+    return (user as any).recoveryCodes;
+  }
+
+  generateTotpLoginToken(userId: string): string {
+    const payload = { sub: userId, purpose: '2fa' };
+    return this.jwtService.sign(payload, { expiresIn: '5m' });
+  }
+
+  async verifyTotpLogin(token: string, code: string): Promise<string> {
+    let payload: { sub: string; purpose: string };
+    try {
+      payload = this.jwtService.verify<{ sub: string; purpose: string }>(token);
+      if (payload.purpose !== '2fa') throw new UnauthorizedException('Invalid token purpose');
+    } catch {
+      throw new UnauthorizedException('Invalid or expired 2FA token');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+    if (!user || !(user as any).totpEnabled || !(user as any).totpSecret) {
+      throw new UnauthorizedException('2FA not enabled');
+    }
+
+    const secret = this.totpService.decryptSecret((user as any).totpSecret);
+    if (!this.totpService.verifyToken(code, secret)) {
+      throw new UnauthorizedException('Invalid 2FA code');
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() } as any,
+    });
+
+    return user.id;
+  }
+
+  async verifyRecoveryCode(token: string, code: string): Promise<string> {
+    let payload: { sub: string; purpose: string };
+    try {
+      payload = this.jwtService.verify<{ sub: string; purpose: string }>(token);
+      if (payload.purpose !== '2fa') throw new UnauthorizedException('Invalid token purpose');
+    } catch {
+      throw new UnauthorizedException('Invalid or expired 2FA token');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+    if (!user || !(user as any).totpEnabled || !(user as any).recoveryCodes?.length) {
+      throw new UnauthorizedException('No recovery codes available');
+    }
+
+    const recoveryCodes: string[] = (user as any).recoveryCodes;
+    const codeHash = createHash('sha256').update(code).digest('hex');
+    const found = recoveryCodes.some((hashed) =>
+      timingSafeEqual(Buffer.from(hashed, 'hex'), Buffer.from(codeHash, 'hex')),
+    );
+    if (!found) throw new UnauthorizedException('Invalid recovery code');
+
+    const updatedCodes = recoveryCodes.filter(
+      (hashed) => !timingSafeEqual(Buffer.from(hashed, 'hex'), Buffer.from(codeHash, 'hex')),
+    );
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { recoveryCodes: updatedCodes, lastLoginAt: new Date() } as any,
+    });
+
+    return user.id;
   }
 }

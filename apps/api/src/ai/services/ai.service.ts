@@ -19,7 +19,7 @@ export class AIService {
     messages: ChatMessage[],
     options?: ChatOptions,
   ): Promise<ChatResponse> {
-    const provider = this.providerFactory.getProvider(
+    const provider = this.providerFactory.getChatProvider(
       options?.model?.startsWith('claude') ? 'anthropic' : undefined,
     );
     return provider.chat(messages, options);
@@ -29,7 +29,7 @@ export class AIService {
     messages: ChatMessage[],
     options?: ChatOptions,
   ): Promise<ChatResponse> {
-    const provider = this.providerFactory.getProvider();
+    const provider = this.providerFactory.getChatProvider();
     const chunks: ChatStreamChunk[] = [];
     for await (const chunk of provider.chatStream(messages, options)) {
       chunks.push(chunk);
@@ -48,7 +48,7 @@ export class AIService {
   }
 
   async moderate(text: string): Promise<ModerationResult> {
-    const provider = this.providerFactory.getProvider();
+    const provider = this.providerFactory.getModerationProvider();
     return provider.moderate(text);
   }
 
@@ -56,8 +56,8 @@ export class AIService {
     texts: string[],
     model?: string,
   ): Promise<EmbeddingResult[]> {
-    const provider = this.providerFactory.getProvider();
-    return provider.embed(texts, { model });
+      const provider = this.providerFactory.getEmbeddingProvider();
+    return provider.embedTexts(texts, { model });
   }
 
   getAvailableProviders(): {

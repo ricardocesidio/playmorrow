@@ -15,7 +15,21 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
       reportsDirectory: './coverage',
-      exclude: ['src/test/**', '**/*.spec.ts', '**/node_modules/**'],
+      thresholds: {
+        lines: 40,
+        branches: 30,
+        functions: 40,
+        statements: 40,
+      },
+      exclude: [
+        'node_modules/',
+        'dist/',
+        '**/*.spec.ts',
+        '**/*.dto.ts',
+        'src/test/',
+        'src/scripts/',
+        'src/main.ts',
+      ],
     },
   },
   plugins: [

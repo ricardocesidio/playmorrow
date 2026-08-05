@@ -20,14 +20,14 @@ export class EmbeddingService {
   constructor(private readonly providerFactory: ProviderFactory) {}
 
   async embedText(text: string): Promise<EmbeddingResult> {
-    const provider = this.providerFactory.getProvider();
-    const results = await provider.embed([text], {});
+    const provider = this.providerFactory.getEmbeddingProvider();
+    const results = await provider.embedTexts([text]);
     return results[0];
   }
 
   async embedTexts(texts: string[]): Promise<EmbeddingResult[]> {
-    const provider = this.providerFactory.getProvider();
-    return provider.embed(texts, {});
+    const provider = this.providerFactory.getEmbeddingProvider();
+    return provider.embedTexts(texts);
   }
 
   async embedDocument(doc: {

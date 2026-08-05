@@ -65,25 +65,25 @@ describe('ProviderFactory', () => {
   });
 
   it('should get OpenAI when explicitly requested', () => {
-    const provider = factory.getProvider('openai');
+    const provider = factory.getChatProvider('openai');
     expect(provider).toBeDefined();
     expect(provider.name).toBe('openai');
   });
 
   it('should get Anthropic when explicitly requested', () => {
-    const provider = factory.getProvider('anthropic');
+    const provider = factory.getChatProvider('anthropic');
     expect(provider).toBeDefined();
     expect(provider.name).toBe('anthropic');
   });
 
   it('should fall back to default for unknown provider name', () => {
-    const provider = factory.getProvider('nonexistent');
+    const provider = factory.getChatProvider('nonexistent');
     expect(provider).toBeDefined();
     expect(provider.name).toBe('openai');
   });
 
   it('should fall back to default when no provider name given', () => {
-    const provider = factory.getProvider();
+    const provider = factory.getChatProvider();
     expect(provider).toBeDefined();
     expect(provider.name).toBe('openai');
   });

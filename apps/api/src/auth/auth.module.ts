@@ -9,6 +9,7 @@ import { UsersModule } from '../users/users.module';
 import { SessionModule } from '../session/session.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { TotpService } from './totp.service';
 import { OAuthModule } from './oauth/oauth.module';
 import { RolesGuard } from './guards/roles.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -38,7 +39,7 @@ import { CsrfGuard } from '../common/csrf.guard';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RolesGuard, SessionAuthGuard, OptionalSessionGuard, TokenService, CsrfService, CsrfGuard],
-  exports: [JwtModule, JwtStrategy, RolesGuard, SessionAuthGuard, OptionalSessionGuard, TokenService, CsrfService, CsrfGuard],
+  providers: [AuthService, JwtStrategy, RolesGuard, SessionAuthGuard, OptionalSessionGuard, TokenService, TotpService, CsrfService, CsrfGuard],
+  exports: [JwtModule, JwtStrategy, RolesGuard, SessionAuthGuard, OptionalSessionGuard, TokenService, TotpService, CsrfService, CsrfGuard],
 })
 export class AuthModule {}

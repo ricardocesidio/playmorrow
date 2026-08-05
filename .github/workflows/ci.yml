@@ -73,7 +73,7 @@ jobs:
       - name: Apply migrations
         run: pnpm --filter @playmorrow/database db:deploy
       - name: Run backend tests
-        run: pnpm --filter @playmorrow/api test
+        run: pnpm --filter @playmorrow/api test -- --coverage
 
   e2e:
     name: E2E (Playwright desktop + mobile)

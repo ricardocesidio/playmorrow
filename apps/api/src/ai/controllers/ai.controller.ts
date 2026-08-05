@@ -51,7 +51,7 @@ export class AIController {
       res.setHeader('Connection', 'keep-alive');
       res.setHeader('X-Accel-Buffering', 'no');
 
-      const provider = this.factory.getProvider();
+      const provider = this.factory.getChatProvider();
       const stream = provider.chatStream(messages, {
         model: body.model,
         temperature: body.temperature,
@@ -66,7 +66,7 @@ export class AIController {
       return;
     }
 
-    const provider = this.factory.getProvider();
+    const provider = this.factory.getChatProvider();
     return provider.chat(messages, {
       model: body.model,
       temperature: body.temperature,

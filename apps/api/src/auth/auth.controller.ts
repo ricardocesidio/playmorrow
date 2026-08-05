@@ -10,6 +10,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { CompleteOnboardingDto } from './dto/complete-onboarding.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { EnableTotpDto, VerifyTotpDto, DisableTotpDto, TotpLoginDto } from './dto/totp.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { SessionAuthGuard } from './guards/session-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -76,6 +77,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async sessionLogin(@Body() dto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const user = await this.authService.validateUser(dto.emailOrUsername, dto.password);
+
+    if ((user as any).totpEnabled) {
+      const totpToken = this.authService.generateTotpLoginToken(user.id);
+      return { requires2fa: true, token: totpToken };
+    }
+
     const ua = (req.headers['user-agent'] ?? '').slice(0, 512);
     const ip = req.ip ?? req.socket?.remoteAddress;
 
@@ -192,5 +199,68 @@ export class AuthController {
       user: { id: result.user.id, username: result.user.username, displayName: result.user.displayName, role: result.user.role, accountType: result.user.accountType },
       csrfToken,
     };
+  }
+
+  @Post('2fa/enable')
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @UseGuards(SessionAuthGuard)
+  async enable2fa(@CurrentUser() user: { id: string; email: string }) {
+    const { secret, qrCodeUri } = await this.authService.generateTotpSecret(user.id);
+    return { secret, qrCodeUri };
+  }
+
+  @Post('2fa/verify')
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @UseGuards(SessionAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async verify2fa(@CurrentUser() user: { id: string }, @Body() dto: EnableTotpDto) {
+    const recoveryCodes = await this.authService.enableTotp(user.id, dto.token);
+    return { enabled: true, recoveryCodes };
+  }
+
+  @Post('2fa/login')
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @HttpCode(HttpStatus.OK)
+  async loginWith2fa(@Body() dto: TotpLoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const userId = await this.authService.verifyTotpLogin(dto.token, dto.code);
+    const ua = (req.headers['user-agent'] ?? '').slice(0, 512);
+    const ip = req.ip ?? req.socket?.remoteAddress;
+    const { raw, expiresAt } = await this.sessionService.create(userId, ip, ua);
+    setSessionCookie(res, raw, expiresAt);
+    const csrfToken = this.csrfService.generateToken(userId);
+    res.setHeader('X-CSRF-Token', csrfToken);
+    const profile = await this.authService.getProfile(userId);
+    return { ...profile, csrfToken };
+  }
+
+  @Post('2fa/disable')
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @UseGuards(SessionAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async disable2fa(@CurrentUser() user: { id: string }, @Body() dto: DisableTotpDto) {
+    await this.authService.disableTotp(user.id, dto.token);
+    return { disabled: true };
+  }
+
+  @Get('2fa/recovery-codes')
+  @UseGuards(SessionAuthGuard)
+  async getRecoveryCodes(@CurrentUser() user: { id: string }) {
+    const codes = await this.authService.getRecoveryCodes(user.id);
+    return { recoveryCodes: codes };
+  }
+
+  @Post('2fa/recovery')
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @HttpCode(HttpStatus.OK)
+  async loginWithRecoveryCode(@Body() body: { token: string; recoveryCode: string }, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const userId = await this.authService.verifyRecoveryCode(body.token, body.recoveryCode);
+    const ua = (req.headers['user-agent'] ?? '').slice(0, 512);
+    const ip = req.ip ?? req.socket?.remoteAddress;
+    const { raw, expiresAt } = await this.sessionService.create(userId, ip, ua);
+    setSessionCookie(res, raw, expiresAt);
+    const csrfToken = this.csrfService.generateToken(userId);
+    res.setHeader('X-CSRF-Token', csrfToken);
+    const profile = await this.authService.getProfile(userId);
+    return { ...profile, csrfToken };
   }
 }

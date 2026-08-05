@@ -1,4 +1,7 @@
 # Render Blueprint — Playmorrow API
+# Two services: production (playmorrow-api) and staging (playmorrow-api-staging).
+# Create a Neon database branch for staging data.
+# Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET to Stripe TEST keys for staging.
 # Free tier: 512MB RAM, 750hrs/month, auto-sleep after 15min inactivity
 # Kept alive by UptimeRobot ping (existing CI workflow)
 
@@ -53,3 +56,42 @@ services:
         sync: false
       - key: AI_PROVIDER
         value: openai
+  - type: web
+    name: playmorrow-api-staging
+    env: docker
+    dockerfilePath: apps/api/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: staging
+      - key: PORT
+        value: "8080"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: CSRF_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: WEB_ORIGIN
+        value: https://playmorrow.co
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: AI_PROVIDER
+        value: openai
+
+# Staging URLs:
+#   API:  https://playmorrow-api-staging.onrender.com
+#   Docs: https://playmorrow-api-staging.onrender.com/api/docs
+#   Health: https://playmorrow-api-staging.onrender.com/api/health

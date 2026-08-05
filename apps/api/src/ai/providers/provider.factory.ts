@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import type { AIProvider } from '../interfaces/ai-provider.interface';
 import type { EmbeddingProvider } from '../interfaces/embedding-provider.interface';
 import type { ModerationProvider } from '../interfaces/moderation-provider.interface';
@@ -40,7 +40,7 @@ export class ProviderFactory {
     }
   }
 
-  getProvider(name?: string): AIProvider {
+  getChatProvider(name?: string): AIProvider {
     const key = name ?? this.defaultProviderName();
     const provider = this.providers.get(key);
     if (provider) {
@@ -59,7 +59,7 @@ export class ProviderFactory {
   }
 
   getDefaultProvider(): AIProvider {
-    return this.getProvider(this.defaultProviderName());
+    return this.getChatProvider(this.defaultProviderName());
   }
 
   getEmbeddingProvider(): EmbeddingProvider {
@@ -67,12 +67,13 @@ export class ProviderFactory {
     if (openai && 'embedText' in openai) {
       return openai as unknown as EmbeddingProvider;
     }
-    const anthropic = this.providers.get('anthropic');
-    if (anthropic && 'embedText' in anthropic) {
-      return anthropic as unknown as EmbeddingProvider;
+    if (!this.openai.isConfigured()) {
+      this.logger.warn(
+        'No embedding provider available. OpenAI API key is required for embeddings.',
+      );
     }
-    throw new Error(
-      'No embedding provider available. Configure OPENAI_API_KEY or ANTHROPIC_API_KEY.',
+    throw new BadRequestException(
+      'Embedding is not available. OpenAI API key is required for embeddings.',
     );
   }
 
@@ -81,8 +82,8 @@ export class ProviderFactory {
     if (openai && 'moderate' in openai) {
       return openai as unknown as ModerationProvider;
     }
-    throw new Error(
-      'No moderation provider available. Configure OPENAI_API_KEY.',
+    throw new BadRequestException(
+      'Moderation is not available. OpenAI API key is required for moderation.',
     );
   }
 

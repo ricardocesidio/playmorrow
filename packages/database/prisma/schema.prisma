@@ -177,6 +177,9 @@ model User {
   appealCount         Int         @default(0)
   strikeCount         Int         @default(0)
   lastStrikeAt        DateTime?
+  totpSecret          String?    // AES-256-GCM encrypted TOTP secret
+  totpEnabled         Boolean    @default(false)
+  recoveryCodes       String[]   @default([]) // SHA-256 hashed recovery codes
 
   studioMemberships     StudioMember[]
   studioInvitationsSent     StudioInvitation[] @relation("StudioInvitationsSent")

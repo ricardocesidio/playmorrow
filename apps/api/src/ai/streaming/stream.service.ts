@@ -24,7 +24,7 @@ export class StreamService {
     callbacks: StreamCallbacks,
     options?: ChatOptions,
   ): Promise<ChatResponse> {
-    const provider = this.providerFactory.getProvider();
+    const provider = this.providerFactory.getChatProvider();
     const chunks: ChatStreamChunk[] = [];
 
     try {
