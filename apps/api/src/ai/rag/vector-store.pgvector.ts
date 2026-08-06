@@ -14,7 +14,6 @@ export class PgVectorStore implements VectorStore {
 
   constructor(
     private prisma: PrismaService,
-    private embedFn?: (text: string) => Promise<EmbeddingResult>,
   ) {}
 
   setEmbedFunction(fn: (text: string) => Promise<EmbeddingResult>): void {
