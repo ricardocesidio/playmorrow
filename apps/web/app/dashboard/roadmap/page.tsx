@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeft, Plus, Pencil, Trash2, ArrowUp, ArrowDown, Milestone, GripVertical } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
+import { ErrorState } from '@/components/error-state';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyStudios, useGameRoadmap, useCreateRoadmapItem, useUpdateRoadmapItem, useDeleteRoadmapItem, useReorderRoadmapItems } from '@/lib/api/hooks';
 import type { Game, RoadmapItem } from '@/lib/api/client';
@@ -39,7 +40,7 @@ function RoadmapContent() {
   const [games, setGames] = useState<Game[]>([]);
   const [selectedStudio, setSelectedStudio] = useState('');
   const [gameSlug, setGameSlug] = useState(searchParams.get('game') ?? '');
-  const { data: roadmap, isLoading: roadmapLoading } = useGameRoadmap(gameSlug);
+  const { data: roadmap, isLoading: roadmapLoading, error: roadmapQueryError } = useGameRoadmap(gameSlug);
   const createItem = useCreateRoadmapItem();
   const updateItem = useUpdateRoadmapItem();
   const deleteItem = useDeleteRoadmapItem();
@@ -212,6 +213,12 @@ function RoadmapContent() {
               </div>
             )}
 
+            {roadmapQueryError && !roadmapLoading && (
+              <ErrorState message="Failed to load roadmap items." />
+            )}
+
+            {!roadmapQueryError && (
+              <>
             {/* Create form */}
             <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] mb-8">
               <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-4 flex items-center gap-2"><Plus className="size-3.5" /> Add roadmap item</h3>
@@ -313,6 +320,8 @@ function RoadmapContent() {
                 <p className="font-mono text-[0.68rem] uppercase tracking-widest text-muted-foreground">No roadmap items yet.</p>
               </div>
             )}
+          </>
+          )}
           </>
         )}
       </div>

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Trophy, Award, Lock, Loader2, Shield, Crosshair, Bookmark, Compass, UserCheck, Zap, MessageSquare } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
+import { ErrorState } from '@/components/error-state';
 import { useAuth } from '@/lib/api/auth-context';
 import { useAchievements } from '@/lib/api/hooks';
 
@@ -19,7 +20,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export default function AchievementsPage() {
   const { user } = useAuth();
-  const { data: achievements, isLoading } = useAchievements();
+  const { data: achievements, isLoading, error } = useAchievements();
 
   if (!user) return null;
 
@@ -42,7 +43,9 @@ export default function AchievementsPage() {
             </p>
           </div>
 
-          {isLoading ? (
+          {error && !isLoading ? (
+            <ErrorState message="Failed to load achievements." />
+          ) : isLoading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="size-8 animate-spin text-cyan" />
             </div>

@@ -38,7 +38,7 @@ export function PostLoginTransition({ onDone }: { onDone: () => void }) {
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cyan/70">CONNECTING TO DASHBOARD</p>
         <div className="w-48 space-y-2">
           <div className="relative h-[2px] bg-border/40">
-            <div className="absolute inset-y-0 left-0 bg-cyan transition-all duration-[100ms] ease-linear shadow-[0_0_8px_rgb(62_231_255_/_0.5)]" style={{ width: `${progress}%` }} />
+            <div className="absolute inset-y-0 left-0 bg-cyan transition-all duration-fast ease-linear shadow-[0_0_8px_rgb(62_231_255_/_0.5)]" style={{ width: `${progress}%` }} />
           </div>
         </div>
       </div>

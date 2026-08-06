@@ -3,12 +3,13 @@
 import Link from 'next/link';
 import { FileText, Plus, ExternalLink, Clock, CheckCircle2, Loader2 } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
+import { ErrorState } from '@/components/error-state';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyDevlogs } from '@/lib/api/hooks';
 
 export default function MyDevlogsPage() {
   const { user, token } = useAuth();
-  const { data: devlogs, isLoading } = useMyDevlogs(token ?? undefined);
+  const { data: devlogs, isLoading, error } = useMyDevlogs(token ?? undefined);
 
   if (!user) return null;
 
@@ -28,7 +29,9 @@ export default function MyDevlogsPage() {
             </Link>
           </div>
 
-          {isLoading ? (
+          {error && !isLoading ? (
+            <ErrorState message="Failed to load devlogs." />
+          ) : isLoading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="size-8 animate-spin text-cyan" />
             </div>

@@ -6,13 +6,15 @@ import { ArrowLeft, MessageCircle, Heart } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { HudPanel, CircuitFrame, HudStatusRail } from '@/components/playmorrow/hud';
+import { ErrorState } from '@/components/error-state';
 import { useGame, useGameComments } from '@/lib/api/hooks';
 
 export default function GameCommentsPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { data: game } = useGame(slug);
-  const { data: commentsData, isLoading } = useGameComments(slug);
+  const { data: game, error: gameError } = useGame(slug);
+  const { data: commentsData, isLoading, error: commentsError } = useGameComments(slug);
   const comments = commentsData?.items ?? [];
+  const error = gameError || commentsError;
 
   return (
     <>
@@ -37,7 +39,9 @@ export default function GameCommentsPage() {
             </h1>
           </div>
 
-          {isLoading ? (
+          {error && !isLoading ? (
+            <ErrorState message="Failed to load comments." />
+          ) : isLoading ? (
             <div className="space-y-4" aria-label="Loading comments">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="animate-pulse clip-corner border border-border/70 panel p-5">

@@ -1,4 +1,5 @@
 import { SiteHeader } from '@/components/site-header';
+import { ErrorState } from '@/components/error-state';
 import { TrendingUp, Star, Flame, Gamepad2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -15,36 +16,39 @@ interface RecommendationItem {
 const API = process.env.API_URL || 'https://playmorrow-api-aged-mountain-9542.fly.dev/api';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://playmorrow.vercel.app';
 
-async function fetchSection(endpoint: string) {
+async function fetchSection(endpoint: string, errors: { count: number }) {
   try {
     const res = await fetch(`${API}${endpoint}`, { next: { revalidate: 120 } });
-    if (!res.ok) return [];
+    if (!res.ok) { errors.count++; return []; }
     const data = await res.json();
     return data.items || [];
-  } catch { return []; }
+  } catch { errors.count++; return []; }
 }
 
-async function fetchGames(endpoint: string) {
+async function fetchGames(endpoint: string, errors: { count: number }) {
   try {
     const res = await fetch(`${API}${endpoint}`, { next: { revalidate: 120 } });
-    if (!res.ok) return [];
+    if (!res.ok) { errors.count++; return []; }
     const data = await res.json();
     return data.items || [];
-  } catch { return []; }
+  } catch { errors.count++; return []; }
 }
 
 export default async function DiscoverPage() {
+  const errors = { count: 0 };
   const [trendingRaw, popular, newest, featured] = await Promise.all([
-    fetchSection('/api/recommendations?type=trending&limit=6'),
-    fetchGames('/api/games?sortBy=followersCount&pageSize=6'),
-    fetchGames('/api/games?sortBy=createdAt&pageSize=6'),
-    fetchGames('/api/games?featured=true&pageSize=6'),
+    fetchSection('/api/recommendations?type=trending&limit=6', errors),
+    fetchGames('/api/games?sortBy=followersCount&pageSize=6', errors),
+    fetchGames('/api/games?sortBy=createdAt&pageSize=6', errors),
+    fetchGames('/api/games?featured=true&pageSize=6', errors),
   ]);
 
   const trendingGameIds = trendingRaw.map((i: RecommendationItem) => i.gameId);
   const trendingGames = trendingGameIds.length > 0
-    ? (await fetchGames(`/games?pageSize=6`)).filter((g: GameItem) => trendingGameIds.includes(g.id)).slice(0, 6)
+    ? (await fetchGames(`/games?pageSize=6`, errors)).filter((g: GameItem) => trendingGameIds.includes(g.id)).slice(0, 6)
     : [];
+
+  const allEmpty = featured.length === 0 && trendingGames.length === 0 && popular.length === 0 && newest.length === 0;
 
   return (
     <>
@@ -69,6 +73,10 @@ export default async function DiscoverPage() {
             <p className="mt-2 font-mono text-sm text-muted-foreground">Your next favorite game starts here.</p>
           </div>
 
+          {allEmpty && errors.count > 0 ? (
+            <ErrorState message="Failed to load discover data. Please try again later." />
+          ) : (
+            <>
           {featured.length > 0 && <SectionGrid title="Featured Games" icon={<Star className="size-4 text-coral" />} games={featured} />}
           <SectionGrid title="Trending Today" icon={<Flame className="size-4 text-coral" />} games={trendingGames} />
           <SectionGrid title="Most Popular" icon={<Star className="size-4 text-amber" />} games={popular} />
@@ -80,6 +88,8 @@ export default async function DiscoverPage() {
                 Browse Collections <ArrowRight className="size-4" />
               </Link>
             </div>
+          )}
+            </>
           )}
         </div>
       </main>

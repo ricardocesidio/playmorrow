@@ -1,67 +1,22 @@
 import type { Metadata } from 'next';
-import { headers } from 'next/headers';
 
-const API = process.env.API_URL || 'https://playmorrow-api-aged-mountain-9542.fly.dev/api';
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://playmorrow.vercel.app';
+export const metadata: Metadata = {
+  title: 'Devlog — Playmorrow',
+  description: 'Read game development updates on Playmorrow.',
+  alternates: { canonical: 'https://playmorrow.co/devlogs' },
+  openGraph: {
+    title: 'Devlog — Playmorrow',
+    description: 'Read game development updates on Playmorrow.',
+    url: 'https://playmorrow.co/devlogs',
+    siteName: 'Playmorrow',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Devlog — Playmorrow',
+    description: 'Read game development updates on Playmorrow.',
+  },
+};
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params;
-  try {
-    const res = await fetch(`${API}/devlogs/${id}`, { next: { revalidate: 3600 } });
-    if (!res.ok) return { title: 'Devlog Not Found' };
-    const devlog = await res.json();
-    const screenshotUrl = devlog.screenshots?.[0]?.url;
-    const ogImage = screenshotUrl || '/og-image.svg';
-    return {
-      title: devlog.title,
-      description: devlog.excerpt || devlog.body?.slice(0, 160) || 'Read this devlog on Playmorrow',
-      openGraph: {
-        title: devlog.title,
-        description: devlog.excerpt || '',
-        images: [ogImage],
-      },
-    };
-  } catch {
-    return { title: 'Devlog' };
-  }
-}
-
-export default async function DevlogLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const nonce = (await headers()).get('x-nonce') || undefined;
-  let devlog: { title: string; excerpt: string | null; body: string | null; screenshots: { url: string }[]; game: { title: string; slug: string } } | null = null;
-  try {
-    const res = await fetch(`${API}/devlogs/${id}`, { next: { revalidate: 3600 } });
-    if (res.ok) devlog = await res.json();
-  } catch {
-    void 0 // fetch failure — JSON-LD just won't render
-  }
-
-  return (
-    <>
-      {devlog && (
-        <script
-          nonce={nonce}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'BlogPosting',
-              headline: devlog.title,
-              description: devlog.excerpt || devlog.body?.slice(0, 200) || '',
-              image: devlog.screenshots?.[0]?.url || `${SITE_URL}/og-image.svg`,
-              url: `${SITE_URL}/devlogs/${id}`,
-            }),
-          }}
-        />
-      )}
-      {children}
-    </>
-  );
+export default function DevlogLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

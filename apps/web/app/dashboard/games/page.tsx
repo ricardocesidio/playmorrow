@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Gamepad2, Plus, ExternalLink } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
+import { ErrorState } from '@/components/error-state';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyGames } from '@/lib/api/hooks';
 import type { Game, Studio } from '@/lib/api/client';
@@ -11,7 +12,7 @@ type StudioGame = Game & { studio: Studio };
 
 export default function MyGamesPage() {
   const { user, token } = useAuth();
-  const { data: games, isLoading } = useMyGames(token ?? undefined);
+  const { data: games, isLoading, error } = useMyGames(token ?? undefined);
 
   if (!user) return null;
 
@@ -33,7 +34,9 @@ export default function MyGamesPage() {
             </Link>
           </div>
 
-          {isLoading ? (
+          {error && !isLoading ? (
+            <ErrorState message="Failed to load games." />
+          ) : isLoading ? (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="h-52 animate-pulse border border-border bg-muted/30" />

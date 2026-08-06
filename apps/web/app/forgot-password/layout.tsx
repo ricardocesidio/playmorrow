@@ -1,18 +1,19 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Forgot Password',
+  title: 'Forgot Password — Playmorrow',
   description: 'Reset your Playmorrow account password.',
+  alternates: { canonical: 'https://playmorrow.co/forgot-password' },
   openGraph: {
-    title: 'Forgot Password · Playmorrow',
+    title: 'Forgot Password — Playmorrow',
     description: 'Reset your Playmorrow account password.',
-    images: '/og-image.svg',
+    url: 'https://playmorrow.co/forgot-password',
+    siteName: 'Playmorrow',
   },
   twitter: {
-    images: '/og-image.svg',
-  },
-  alternates: {
-    canonical: '/forgot-password',
+    card: 'summary',
+    title: 'Forgot Password — Playmorrow',
+    description: 'Reset your Playmorrow account password.',
   },
 };
 

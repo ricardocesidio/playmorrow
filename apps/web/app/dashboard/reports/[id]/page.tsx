@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check, X } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
+import { ErrorState } from '@/components/error-state';
 import { useAdminReport, useUpdateReport } from '@/lib/api/hooks';
 
 const STATUS_STYLES: Record<string, string> = {
@@ -18,7 +19,7 @@ const STATUS_STYLES: Record<string, string> = {
 export default function ReportDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { data: report, isLoading } = useAdminReport(id);
+  const { data: report, isLoading, error } = useAdminReport(id);
   const updateReport = useUpdateReport();
   const [resolutionNote, setResolutionNote] = useState('');
 
@@ -31,6 +32,21 @@ export default function ReportDetailPage() {
     await updateReport.mutateAsync({ id, body: { status: 'DISMISSED', resolutionNote: resolutionNote || undefined } });
     router.refresh();
   };
+
+  if (error) {
+    return (
+      <>
+        <SiteHeader />
+        <main className="relative min-h-screen bg-[#020609] px-5 py-6 sm:px-8 lg:px-10">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+          <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+          <div className="relative mx-auto max-w-3xl">
+            <ErrorState message="Failed to load report." />
+          </div>
+        </main>
+      </>
+    );
+  }
 
   if (isLoading) {
     return (

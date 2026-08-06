@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Award, TrendingUp, Heart, Star, MessageSquare, Zap, Trophy } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
+import { ErrorState } from '@/components/error-state';
 import { useAuth } from '@/lib/api/auth-context';
 import { usePlayerWeeklyXp, usePlayerMonthlyXp } from '@/lib/api/hooks';
 
@@ -44,8 +45,9 @@ const TITLE_RANGES = [
 
 export default function PlayerLevelPage() {
   const { user } = useAuth();
-  const { data: weeklyXp } = usePlayerWeeklyXp();
-  const { data: monthlyXp } = usePlayerMonthlyXp();
+  const { data: weeklyXp, error: weeklyError } = usePlayerWeeklyXp();
+  const { data: monthlyXp, error: monthlyError } = usePlayerMonthlyXp();
+  const error = weeklyError || monthlyError;
   const level = user?.level ?? 1;
   const xp = user?.xp ?? 0;
   const xpForNext = level < 5 ? 100 : level < 10 ? 500 : level < 15 ? 1000 : level < 20 ? 1500 : level < 30 ? 2500 : 5000;
@@ -60,6 +62,8 @@ export default function PlayerLevelPage() {
           <Link href="/dashboard" className="mb-6 inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-widest text-muted-foreground transition hover:text-cyan">
             <ArrowLeft className="size-3" /> Back to dashboard
           </Link>
+
+          {error && <div className="mb-6"><ErrorState message="Failed to load XP data." /></div>}
 
           <div className="clip-corner border border-border/70 panel p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] mb-10">
             <div className="flex items-center gap-6">

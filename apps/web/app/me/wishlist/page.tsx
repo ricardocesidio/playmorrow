@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Heart, Bookmark, Gamepad2, Star } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
+import { ErrorState } from '@/components/error-state';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyWishlist, useRemoveGameFromWishlist } from '@/lib/api/hooks';
 import { useRouter } from 'next/navigation';
@@ -10,7 +11,7 @@ import { useRouter } from 'next/navigation';
 export default function WishlistPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
-  const { data: wishlist, isLoading } = useMyWishlist();
+  const { data: wishlist, isLoading, error } = useMyWishlist();
   const removeWishlist = useRemoveGameFromWishlist();
 
   if (authLoading) {
@@ -52,7 +53,9 @@ export default function WishlistPage() {
             </div>
           </div>
 
-          {isLoading ? (
+          {error && !isLoading ? (
+            <ErrorState message="Failed to load wishlist." />
+          ) : isLoading ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="clip-corner border border-border/40 panel p-3 animate-pulse">

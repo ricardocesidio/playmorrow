@@ -116,7 +116,7 @@ export function NotificationDropdown() {
               <div className="flex flex-col items-center gap-3 px-4 py-10 text-center">
                 <Bell className="size-8 text-border" />
                 <p className="pm-micro text-muted-foreground">No notifications yet</p>
-                <p className="text-xs text-muted-foreground/50">Follow studios and games to get updates.</p>
+                <p className="text-xs text-muted-foreground/60">Follow studios and games to get updates.</p>
               </div>
             ) : (
               notifications.map((n) => <NotificationRow key={n.id} item={n} />)

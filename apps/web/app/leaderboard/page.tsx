@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Trophy, ArrowLeft } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
+import { ErrorState } from '@/components/error-state';
 import { api } from '@/lib/api/client';
 
 interface LeaderboardEntry {
@@ -15,11 +16,13 @@ export default function LeaderboardPage() {
   const [tab, setTab] = useState<'all' | 'weekly'>('all');
   const [data, setData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     setLoading(true);
+    setError(false);
     api.get<LeaderboardEntry[]>(`/leaderboard${tab === 'weekly' ? '/weekly' : ''}`)
-      .then(setData).catch(() => {}).finally(() => setLoading(false));
+      .then(setData).catch(() => setError(true)).finally(() => setLoading(false));
   }, [tab]);
 
   const rankColor = (rank: number) => {
@@ -77,6 +80,8 @@ export default function LeaderboardPage() {
                 </div>
               ))}
             </div>
+          ) : error ? (
+            <ErrorState message="Failed to load leaderboard." />
           ) : (
             <div className="space-y-1" role="list" aria-label="Leaderboard entries">
               {data.map((entry) => (

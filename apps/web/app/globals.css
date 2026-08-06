@@ -64,6 +64,11 @@
   --motion-boot: 5000ms;
   --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --motion-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Transition duration tokens (Tailwind) */
+  --duration-fast: 150ms;
+  --duration-medium: 300ms;
+  --duration-slow: 600ms;
 }
 
 /* ── Tailwind Theme Mapping ───────────────────────────────────────────── */
@@ -98,6 +103,11 @@
   --font-display: var(--font-family-display);
   --font-body: var(--font-family-body);
   --font-mono: var(--font-family-mono);
+
+  /* Motion tokens */
+  --duration-fast: var(--motion-fast);
+  --duration-medium: var(--motion-medium);
+  --duration-slow: var(--motion-slow);
 }
 
 @custom-variant dark (&:is(.dark *));

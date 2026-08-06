@@ -25,14 +25,14 @@ export function PlayMorrowSplash({ onDone }: { onDone: () => void }) {
             <span>{Math.round(progress)}%</span>
           </div>
           <div className="relative h-[3px] bg-border/40">
-            <div className="absolute inset-y-0 left-0 bg-cyan transition-all duration-[100ms] ease-linear shadow-[0_0_12px_rgb(62_231_255_/_0.7)]" style={{ width: `${progress}%` }} />
+            <div className="absolute inset-y-0 left-0 bg-cyan transition-all duration-fast ease-linear shadow-[0_0_12px_rgb(62_231_255_/_0.7)]" style={{ width: `${progress}%` }} />
           </div>
         </div>
       </div>
       <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-6 font-mono text-[8px] uppercase tracking-[0.25em] text-muted-foreground/50">
         <span>34.0522° N, 118.2437° W</span>
         <span className="flex items-center gap-1.5">
-          <span className={`size-1.5 rounded-none transition-colors duration-500 ${statusText === 'SIGNAL LOCKED' ? 'bg-success shadow-[0_0_8px_rgb(112_255_155_/_0.6)]' : 'bg-cyan/30'}`} />
+          <span className={`size-1.5 rounded-none transition-colors duration-medium ${statusText === 'SIGNAL LOCKED' ? 'bg-success shadow-[0_0_8px_rgb(112_255_155_/_0.6)]' : 'bg-cyan/30'}`} />
           {statusText === 'SIGNAL LOCKED' ? 'CONNECTED' : 'SCANNING'}
         </span>
       </div>

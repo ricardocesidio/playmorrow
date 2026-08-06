@@ -97,7 +97,7 @@ export function CookieConsent() {
                   Customize
                 </button>
                 <button onClick={rejectAll}
-                  className="clip-corner cursor-pointer border border-border/40 px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground/50 transition hover:text-coral">
+                  className="clip-corner cursor-pointer border border-border/40 px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground/60 transition hover:text-coral">
                   Reject
                 </button>
               </div>
@@ -119,7 +119,7 @@ export function CookieConsent() {
                       <Icon className="mt-0.5 size-4 shrink-0 text-cyan" />
                       <div className="flex-1">
                         <p className="font-mono text-[0.6rem] font-semibold text-foreground">
-                          {ct.label} {ct.required && <span className="text-muted-foreground/50">(required)</span>}
+                          {ct.label} {ct.required && <span className="text-muted-foreground/60">(required)</span>}
                         </p>
                         <p className="mt-0.5 font-mono text-[0.55rem] text-muted-foreground">{ct.desc}</p>
                       </div>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ShieldAlert, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
+import { ErrorState } from '@/components/error-state';
 import { useAdminReports } from '@/lib/api/hooks';
 
 const TABS = [
@@ -18,7 +19,7 @@ const TABS = [
 export default function AdminReportsPage() {
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState('all');
-  const { data, isLoading } = useAdminReports(page, 20, status);
+  const { data, isLoading, error } = useAdminReports(page, 20, status);
 
   const totalPages = data ? Math.ceil(data.total / data.pageSize) : 0;
 
@@ -52,7 +53,9 @@ export default function AdminReportsPage() {
             ))}
           </div>
 
-          {isLoading ? (
+          {error && !isLoading ? (
+            <ErrorState message="Failed to load moderation reports." />
+          ) : isLoading ? (
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="clip-corner h-16 animate-pulse border border-border/40 panel" />

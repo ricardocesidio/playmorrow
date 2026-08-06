@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Users, Building2, Gamepad2, Loader2, Heart } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
+import { ErrorState } from '@/components/error-state';
 import { useAuth } from '@/lib/api/auth-context';
 import { useMyFollows } from '@/lib/api/hooks';
 import { useRouter } from 'next/navigation';
@@ -11,7 +12,7 @@ import { useRouter } from 'next/navigation';
 export default function FollowingPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
-  const { data: follows, isLoading } = useMyFollows();
+  const { data: follows, isLoading, error } = useMyFollows();
   const [tab, setTab] = useState<'studios' | 'games'>('studios');
 
   if (authLoading) {
@@ -58,7 +59,9 @@ export default function FollowingPage() {
             </button>
           </div>
 
-          {isLoading ? (
+          {error && !isLoading ? (
+            <ErrorState message="Failed to load follows." />
+          ) : isLoading ? (
             <div className="flex justify-center py-20"><Loader2 className="size-8 animate-spin text-cyan" /></div>
           ) : tab === 'studios' && studios.length === 0 ? (
             <div className="clip-corner border border-border/60 panel px-6 py-16 text-center">

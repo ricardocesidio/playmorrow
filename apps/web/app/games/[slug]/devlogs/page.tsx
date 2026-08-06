@@ -7,18 +7,20 @@ import { ArrowLeft, FileText, Flame, MessageCircle } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { HudPanel, CircuitFrame, HudStatusRail } from '@/components/playmorrow/hud';
+import { ErrorState } from '@/components/error-state';
 import { useGame, useGameDevlogs } from '@/lib/api/hooks';
 
 const PAGE_SIZE = 5;
 
 export default function GameDevlogsPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { data: game } = useGame(slug);
+  const { data: game, error: gameError } = useGame(slug);
   const [page, setPage] = useState(1);
-  const { data: devlogsData, isLoading } = useGameDevlogs(slug, page, PAGE_SIZE);
+  const { data: devlogsData, isLoading, error: devlogsError } = useGameDevlogs(slug, page, PAGE_SIZE);
   const devlogs = devlogsData?.items ?? [];
   const hasMore = devlogsData?.hasMore ?? false;
   const total = devlogsData?.total ?? 0;
+  const error = gameError || devlogsError;
 
   return (
     <>
@@ -43,7 +45,9 @@ export default function GameDevlogsPage() {
             </h1>
           </div>
 
-          {isLoading ? (
+          {error && !isLoading ? (
+            <ErrorState message="Failed to load devlogs." />
+          ) : isLoading ? (
             <div className="space-y-6">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="animate-pulse clip-corner border border-border/70 panel p-5">

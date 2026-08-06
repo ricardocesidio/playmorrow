@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 export function BrandLoaderShell({ children, fadeOut }: { children: ReactNode; fadeOut: boolean }) {
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center transition-opacity duration-600 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center transition-opacity duration-slow ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
       style={{
         background: 'radial-gradient(circle at 50% 35%, rgba(62, 231, 255, 0.10), transparent 40%), radial-gradient(circle at 80% 20%, rgba(255, 87, 77, 0.12), transparent 30%), #02070b',
       }}

@@ -1,10 +1,22 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Devlogs · Playmorrow',
-  description: 'Read development updates from indie game studios.',
+  title: 'Game Devlogs — Playmorrow',
+  description: 'Development updates and progress logs.',
+  alternates: { canonical: 'https://playmorrow.co/games' },
+  openGraph: {
+    title: 'Game Devlogs — Playmorrow',
+    description: 'Development updates and progress logs.',
+    url: 'https://playmorrow.co/games',
+    siteName: 'Playmorrow',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Game Devlogs — Playmorrow',
+    description: 'Development updates and progress logs.',
+  },
 };
 
-export default function DevlogsLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+export default function GameDevlogsLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }
