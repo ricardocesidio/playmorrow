@@ -19,16 +19,15 @@ What works:
 - AI Module: 35 files, M23 shipped (embedding-based recs via OpenAI)
 - 2FA: TOTP implemented and deployed
 - GDPR: Export endpoint + UI deployed
-- Redis: Upstash provisioned, config-ready
-- 11 Phase 5 integration tests
+- Redis: wired into the rate limiter (atomic Lua INCR, fail-open fallback)
+- 65 Phase 5 tests (unit + integration), 0 failures
 - Vitest coverage thresholds (40% lines)
 
 What needs work:
 - No Phase 5 E2E tests (Playwright)
 - No staging environment deployed
-- Rate limiting still in-memory (Redis config exists, needs wiring)
 - SSE/RxJS single-instance (needs Redis pub/sub for scaling)
-- 137 legacy any types
+- 149 legacy `any` warnings outside Phase 5 (Phase 5 now enforces `any`-free via ESLint error)
 
 Current state: v0.85-beta — functional, not production-hardened.
 
@@ -53,12 +52,12 @@ Current state: v0.85-beta — functional, not production-hardened.
 | **M13** | Production Hardening | Complete | Integration | Dashboard restructure, OAuth cookie domain fix, CSP fixes, branch protection, Dependabot |
 | **M14** | Professionalization | Complete | Integration | Full project audit, enterprise readiness, repo files (CONTRIBUTING, SECURITY, CODE_OF_CONDUCT) |
 | **M15** | Final Polish & UI | Complete | Integration | Devlog blog redesign, push notifications, email verification, avatar upload, SSE notifications |
-| **M16** | Marketplace | Complete | Unit only (mocked) | Stripe Connect Express, PaymentIntent, listings, purchases, licenses (5 DB models) |
-| **M17** | Publisher | Complete | Unit only (mocked) | Per-studio revenue dashboard with earnings and payout history |
+| **M16** | Marketplace | Complete | Unit + integration | Stripe Connect Express, PaymentIntent, listings, purchases, licenses (5 DB models) |
+| **M17** | Publisher | Complete | Unit | Per-studio revenue dashboard with earnings and payout history |
 | **M18** | Funding | Scope Defined | Not started | Reward-based crowdfunding (Kickstarter model); equity/investment blocked — implementation deferred |
-| **M19** | Creator | Complete | Unit only (mocked) | Referral codes + commission tracking via affiliate system |
-| **M20** | Partner | Complete | Unit only (mocked) | B2B CRM with 6 partner types (University, Publisher, Accelerator, Incubator, Studio, Event Organizer) |
-| **M21** | Events | Complete | Unit only (mocked) | Event listings, detail pages, publish workflow, ticketing, upcoming filter |
+| **M19** | Creator | Complete | Unit | Referral codes + commission tracking via affiliate system |
+| **M20** | Partner | Complete | Unit + integration | B2B CRM with 6 partner types (University, Publisher, Accelerator, Incubator, Studio, Event Organizer) |
+| **M21** | Events | Complete | Unit + integration | Event listings, detail pages, publish workflow, ticketing, upcoming filter |
 
 ---
 
@@ -78,8 +77,8 @@ Current state: v0.85-beta — functional, not production-hardened.
 | CSP (nonce-based) | Complete | Next.js middleware with security headers |
 | XSS sanitization | Complete | DOMPurify on all Markdown + sanitize-html on content fields |
 | Input validation | Complete | class-validator whitelist + forbidNonWhitelisted |
-| Upload validation | Complete | MIME whitelist + magic bytes + 4096px max + 20MB limit |
-| Rate limiting | Complete | ThrottlerModule: 60/min global + per-route overrides |
+| Upload validation | Complete | MIME whitelist + magic bytes + 4096px max + 5MB limit |
+| Rate limiting | Complete | ThrottlerModule: 60/min global + per-route overrides; Redis-backed (atomic Lua) with fail-open fallback |
 
 ### Player Features
 
@@ -148,15 +147,21 @@ Current state: v0.85-beta — functional, not production-hardened.
 | ✅ | 9 any types in Phase 5 | Fixed |
 | ✅ | 6 missing TypeScript interfaces | Fixed |
 | ✅ | No game association in listing form | Fixed |
+| ✅ | Redis throttler wired (was config-only) | Atomic Lua INCR/PEXPIRE/PTTL storage, fail-open on Redis error, in-memory fallback |
+| ✅ | Upload limit too lax (20MB) | 5MB cap via MaxFileSizeValidator (matches express.json 5mb) |
+| ✅ | Purchase failure cancelled PaymentIntent | Transaction PENDING→FAILED; intent never cancelled (races confirmation webhook) |
+| ✅ | No PATCH routes / PartialType DTOs | PATCH /marketplace/:id, /events/:slug, /partners/:slug with explicit @IsOptional() DTOs |
+| ✅ | Phase 5 missing enum types (prod 500) | EventStatus/PartnerStatus/PartnerType/MarketplaceListingStatus added via migration (TEXT columns drifted) |
+| ✅ | `any` in Phase 5 | 0 remaining; ESLint error override on Phase 5 modules |
 
 ### Remaining
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 1 | No Phase 5 E2E tests (Playwright) | Medium | Specs exist, CI pending |
 | 2 | Integration tests share Neon dev DB | Medium | Planned |
-| 3 | Redis not wired into rate limiter (provisioned but config-only) | Low | Planned |
-| 4 | SSE/RxJS single-instance (needs Redis pub/sub for scaling) | Low | Planned |
-| 5 | 137 legacy any types | Low | Ongoing |
+| 3 | SSE/RxJS single-instance (needs Redis pub/sub for scaling) | Low | Planned |
+| 4 | AI module spec rot: 25 tests fail (mocks stale vs ProviderFactory API) | Medium | Rebase AI specs on current provider interfaces |
+| 5 | Dev DB migration history drifted (13 migrations unapplied, 1 failed) | Medium | Re-provision dev DB or reconcile via prisma migrate resolve |
 | 6 | No staging environment deployed | Medium | render.yaml configured, not deployed |
 | 7 | No delete/edit for marketplace listings | Low | Planned |
 | 8 | fileUrl shown in UI for non-owners | Low | Backend strips it; UI block is dead code |

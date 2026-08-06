@@ -49,6 +49,7 @@
   - Reports, invitations: Rate-limited (added during professionalization audit)
   - Upload: 20 uploads/min (increased from 5)
 - **Health endpoint**: `@SkipThrottle` — always responsive.
+- **Redis-backed (fail-open)**: `ThrottlerStorage` uses Upstash Redis with atomic Lua `INCR`/`PEXPIRE`/`PTTL`. If Redis is unreachable the limiter degrades to in-memory (never blocks traffic), and misconfiguration is logged. Configure via `REDIS_URL` (or `REDIS_TOKEN`/`UPSTASH_REDIS_REST_TOKEN`).
 
 ### Input Validation
 - **class-validator**: Global `ValidationPipe` with `whitelist: true` and `forbidNonWhitelisted: true` — strips unknown props, rejects malicious payloads.
@@ -111,9 +112,7 @@ Set by `middleware.ts` (Next.js frontend):
 - Document uploads and reviewer notes supported.
 
 ## Known Security Gaps
-- **No 2FA**: Multi-factor authentication not yet implemented.
-- **No Redis-backed rate limiting**: Current throttler is in-memory — resets on server restart.
-- **GDPR export UI**: Full data export interface pending.
+- **Redis limiter is fail-open**: if Redis is unreachable the rate limiter degrades to in-memory rather than blocking traffic — acceptable for availability, revisit if abuse becomes an issue.
 - **Rate limiting per-endpoint**: Per-route limits exist for auth endpoints but not for all mutation endpoints.
 
 ## How to Report a Vulnerability
@@ -148,6 +147,7 @@ Instead, report them via email to the project maintainers. If the issue is criti
 | `CSRF_SECRET` | HMAC CSRF token signing |
 | `RESEND_API_KEY` | Email service |
 | `WEB_ORIGIN` | Frontend origin for CORS |
+| `REDIS_URL` | Upstash Redis for the throttler storage (fail-open) |
 
 **Recommended** (not required but strongly advised):
 `COOKIE_DOMAIN`, `SENTRY_DSN`, `NODE_ENV`

@@ -40,6 +40,7 @@
     "@playmorrow/types": "workspace:*",
     "@sentry/core": "^10.69.0",
     "@sentry/node": "^10.69.0",
+    "@upstash/redis": "^1.38.2",
     "argon2": "^0.44.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",

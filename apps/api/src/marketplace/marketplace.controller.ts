@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Param, Body, Query, UseGuards, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 import { MarketplaceService } from './marketplace.service';
 import { CreateListingDto } from './dto/create-listing.dto';
+import { UpdateListingDto } from './dto/update-listing.dto';
 
 @Controller('marketplace')
 export class MarketplaceController {
@@ -48,6 +49,21 @@ export class MarketplaceController {
   @UseGuards(SessionAuthGuard)
   async purchase(@Param('id') id: string, @CurrentUser() user: { id: string }) {
     return this.marketplace.purchase(user.id, id);
+  }
+
+  @Patch(':id')
+  @UseGuards(SessionAuthGuard)
+  async update(@Param('id') id: string, @Body() body: UpdateListingDto, @CurrentUser() user: { id: string }) {
+    const listing = await this.prisma.marketplaceListing.findUnique({
+      where: { id },
+      select: { studioId: true },
+    });
+    if (!listing) throw new BadRequestException('Listing not found');
+    const member = await this.prisma.studioMember.findFirst({
+      where: { studioId: listing.studioId, userId: user.id, role: { in: ['OWNER', 'ADMIN'] } },
+    });
+    if (!member) throw new ForbiddenException('You must be an admin of this studio to update listings');
+    return this.marketplace.updateListing(id, body);
   }
 
   @Get('me/licenses')

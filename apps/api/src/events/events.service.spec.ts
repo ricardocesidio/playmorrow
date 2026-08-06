@@ -59,7 +59,7 @@ describe('EventsService', () => {
 
       expect(mockPrisma.event.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { status: 'published' },
+          where: { status: 'PUBLISHED' },
         }),
       );
     });
@@ -73,7 +73,7 @@ describe('EventsService', () => {
       expect(mockPrisma.event.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
-            status: 'published',
+            status: 'PUBLISHED',
             startDate: { gte: expect.any(Date) },
           },
         }),
@@ -153,18 +153,18 @@ describe('EventsService', () => {
     });
   });
 
-  describe('publish', () => {
+  describe('update', () => {
     it('should transition status from draft to published', async () => {
       const draftEvent = { id: '1', title: 'Draft Event', slug: 'draft-event', status: 'draft' };
       mockPrisma.event.findUnique.mockResolvedValue(draftEvent);
-      mockPrisma.event.update.mockResolvedValue({ ...draftEvent, status: 'published' });
+      mockPrisma.event.update.mockResolvedValue({ ...draftEvent, status: 'PUBLISHED' });
 
-      const result = await service.publish('draft-event');
+      const result = await service.update('draft-event', { status: 'PUBLISHED' });
 
-      expect(result.status).toBe('published');
+      expect(result.status).toBe('PUBLISHED');
       expect(mockPrisma.event.update).toHaveBeenCalledWith({
         where: { slug: 'draft-event' },
-        data: { status: 'published' },
+        data: { status: 'PUBLISHED' },
       });
     });
 
@@ -172,22 +172,22 @@ describe('EventsService', () => {
       mockPrisma.event.findUnique.mockResolvedValue({
         id: '2', title: 'Cancelled', slug: 'cancelled-event', status: 'draft',
       });
-      mockPrisma.event.update.mockResolvedValue({ id: '2', title: 'Cancelled', slug: 'cancelled-event', status: 'cancelled' });
+      mockPrisma.event.update.mockResolvedValue({ id: '2', title: 'Cancelled', slug: 'cancelled-event', status: 'CANCELLED' });
 
-      const result = await service.publish('cancelled-event', 'cancelled');
+      const result = await service.update('cancelled-event', { status: 'CANCELLED' });
 
-      expect(result.status).toBe('cancelled');
+      expect(result.status).toBe('CANCELLED');
       expect(mockPrisma.event.update).toHaveBeenCalledWith({
         where: { slug: 'cancelled-event' },
-        data: { status: 'cancelled' },
+        data: { status: 'CANCELLED' },
       });
     });
 
     it('should throw NotFoundException if event does not exist', async () => {
       mockPrisma.event.findUnique.mockResolvedValue(null);
 
-      await expect(service.publish('ghost-event')).rejects.toThrow(NotFoundException);
-      await expect(service.publish('ghost-event')).rejects.toThrow('Event not found');
+      await expect(service.update('ghost-event', { title: 'x' })).rejects.toThrow(NotFoundException);
+      await expect(service.update('ghost-event', { title: 'x' })).rejects.toThrow('Event not found');
     });
   });
 });

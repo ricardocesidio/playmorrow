@@ -79,6 +79,23 @@ export class PaymentsService {
     return this.prisma.transaction.create({ data: { ...data, status: 'PENDING' } });
   }
 
+  // State machine: a purchase that fails after the PaymentIntent is created is
+  // marked FAILED. Never "cancel" the intent — a created-but-unconfirmed intent
+  // cannot charge the buyer, and cancelling it can race the webhook.
+  async markTransactionFailed(id: string) {
+    return this.prisma.transaction.update({
+      where: { id },
+      data: { status: 'FAILED' },
+    });
+  }
+
+  async attachPaymentIntent(id: string, stripePaymentIntentId: string) {
+    return this.prisma.transaction.update({
+      where: { id },
+      data: { stripePaymentIntentId },
+    });
+  }
+
   async isWebhookProcessed(stripeEventId: string): Promise<boolean> {
     const existing = await this.prisma.processedWebhookEvent.findUnique({
       where: { stripeEventId },
@@ -123,15 +140,5 @@ export class PaymentsService {
 
       return txn;
     });
-  }
-
-  async cancelPaymentIntent(paymentIntentId: string) {
-    if (!this.stripe) return;
-    try {
-      await this.stripe.paymentIntents.cancel(paymentIntentId);
-      this.logger.log(`Cancelled orphaned PaymentIntent ${paymentIntentId}`);
-    } catch (err) {
-      this.logger.warn(`Failed to cancel PaymentIntent ${paymentIntentId}: ${(err as Error).message}`);
-    }
   }
 }

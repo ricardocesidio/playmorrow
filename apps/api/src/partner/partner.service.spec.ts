@@ -57,7 +57,7 @@ describe('PartnerService', () => {
       await service.list('publisher', 1, 20);
 
       expect(mockPrisma.partner.findMany).toHaveBeenCalledWith({
-        where: { status: 'active', type: 'publisher' },
+        where: { status: 'ACTIVE', type: 'publisher' },
         orderBy: { name: 'asc' },
         skip: 0,
         take: 20,
@@ -72,7 +72,7 @@ describe('PartnerService', () => {
 
       expect(mockPrisma.partner.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { status: 'active' },
+          where: { status: 'ACTIVE' },
         }),
       );
     });

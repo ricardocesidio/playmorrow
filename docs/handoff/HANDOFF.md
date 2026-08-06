@@ -808,8 +808,6 @@ The strategic documents (`AI_ROADMAP_V2.md`, `AI_BUSINESS_VALUE_MATRIX.md`) reco
 | **AI North Star** | `docs/strategy/AI_NORTH_STAR.md` | Single-page strategic AI identity |
 | **AI Constitution** | `docs/strategy/AI_CONSTITUTION.md` | 20 immutable articles governing all AI |
 | **AI Guiding Principles** | `docs/strategy/AI_GUIDING_PRINCIPLES.md` | 15 actionable principles with compliance tests |
-| **AI Decision Framework** | `docs/strategy/AI_DECISION_FRAMEWORK.md` | 24-gate mandatory checklist for AI features |
-| **AI Capability Map** | `docs/strategy/AI_CAPABILITY_MAP.md` | 69 capabilities across 7 domains |
 | **AI Architecture** | `docs/strategy/AI_ARCHITECTURE.md` | Technical design for M22-M26 |
 | **Phase 6 Roadmap** | `docs/strategy/PHASE6_ROADMAP.md` | 5-milestone AI roadmap with cost estimates |
 | **v1.0.0 Release** | `docs/releases/V1_PLATINUM_RELEASE.md` | Platinum freeze release notes |

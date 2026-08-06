@@ -27,7 +27,7 @@ Playmorrow is a social discovery platform connecting indie game studios with pla
 | Storage | Cloudflare R2 (S3-compatible) |
 | Email | Resend API + Cloudflare Email Routing |
 | Real-time | SSE via RxJS Subject |
-| Redis | Upstash (provisioned, config-ready) |
+| Redis | Upstash — rate-limiter storage (atomic Lua, fail-open) |
 | Deploy | Vercel (frontend) + Fly.io (backend) |
 | CI/CD | GitHub Actions (6 workflows) |
 | Monorepo | pnpm workspaces + Turborepo |
@@ -84,7 +84,8 @@ AI_PROVIDER="openai"
 OPENAI_API_KEY="sk-..."
 
 # Infrastructure (optional)
-REDIS_URL=""                           # Upstash Redis
+REDIS_URL=""                           # Upstash Redis (throttler storage; fail-open if absent)
+REDIS_TOKEN=""                         # Upstash token, fallback to URL embedded token
 SENTRY_DSN=""                          # Error tracking
 STORAGE_PROVIDER="local"               # local (dev) or r2 (prod)
 ```

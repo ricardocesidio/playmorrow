@@ -1,7 +1,10 @@
 import { Controller, Post, Req, Headers, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PaymentsService } from './payments.service';
+import type { Request } from 'express';
 import Stripe from 'stripe';
+
+type StripeWebhookRequest = Request & { rawBody?: Buffer | string };
 
 @Controller('webhooks/stripe')
 export class WebhookController {
@@ -20,7 +23,7 @@ export class WebhookController {
 
   @Post()
   async handleWebhook(
-    @Req() req: any,
+    @Req() req: StripeWebhookRequest,
     @Headers('stripe-signature') signature: string,
   ) {
     const secret = this.config.get<string>('STRIPE_WEBHOOK_SECRET');
@@ -29,7 +32,7 @@ export class WebhookController {
       return { received: true };
     }
 
-    let event: any;
+    let event: Stripe.Event;
     try {
       const rawBody = req.rawBody;
       if (!rawBody) {

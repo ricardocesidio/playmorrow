@@ -338,7 +338,7 @@ components/
 ### Global Guards (registered in AppModule)
 
 1. **OptionalSessionGuard** (first in chain): Attaches user to request if valid session cookie present; does not block unauthenticated requests.
-2. **CustomThrottlerGuard**: Per-user or per-IP rate limiting (60 req/min base).
+2. **CustomThrottlerGuard**: Per-user or per-IP rate limiting (60 req/min base). Storage is Redis-backed (`apps/api/src/common/redis-throttler.storage.ts` — atomic Lua `INCR`/`PEXPIRE`/`PTTL` against Upstash) with a fail-open in-memory fallback if Redis is unreachable.
 3. **CsrfGuard**: Blocks authenticated mutations without valid `X-CSRF-Token`.
 
 ### Security Decorators

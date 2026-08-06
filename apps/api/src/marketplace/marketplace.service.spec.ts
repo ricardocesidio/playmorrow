@@ -1,16 +1,45 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigModule } from '@nestjs/config';
-import { PrismaModule } from '../prisma/prisma.module';
+import { PrismaService } from '../prisma/prisma.service';
+import { PaymentsService } from '../payments/payments.service';
+import { EventBus } from '../common/event-bus';
 import { MarketplaceService } from './marketplace.service';
-import { PaymentsModule } from '../payments/payments.module';
 
 describe('MarketplaceService', () => {
   let service: MarketplaceService;
+  const mockPrisma = {
+    marketplaceListing: {
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      count: vi.fn(),
+    },
+    purchasedLicense: { findUnique: vi.fn(), findMany: vi.fn() },
+    stripeConnectAccount: { findUnique: vi.fn() },
+    studioMember: { findFirst: vi.fn() },
+  };
+  const mockPayments = {
+    recordTransaction: vi.fn(),
+    createPaymentIntent: vi.fn(),
+    attachPaymentIntent: vi.fn(),
+    markTransactionFailed: vi.fn(),
+  };
+  const mockEventBus = { emit: vi.fn() };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockPrisma.marketplaceListing.findMany.mockResolvedValue([]);
+    mockPrisma.marketplaceListing.count.mockResolvedValue(0);
+  });
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, PaymentsModule],
-      providers: [MarketplaceService],
+      providers: [
+        MarketplaceService,
+        { provide: PrismaService, useValue: mockPrisma },
+        { provide: PaymentsService, useValue: mockPayments },
+        { provide: EventBus, useValue: mockEventBus },
+      ],
     }).compile();
     service = module.get(MarketplaceService);
   });
@@ -20,15 +49,43 @@ describe('MarketplaceService', () => {
   });
 
   it('should list only active listings', async () => {
+    mockPrisma.marketplaceListing.findMany.mockResolvedValue([
+      { id: '1', status: 'ACTIVE', priceCents: 500 },
+    ]);
     const result = await service.listListings(undefined, 1, 20);
-    expect(result.items.every((l: { status: string }) => l.status === 'active')).toBe(true);
+    expect(result.items.every((l: { status: string }) => l.status === 'ACTIVE')).toBe(true);
+    expect(mockPrisma.marketplaceListing.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ status: 'ACTIVE' }) }),
+    );
   });
 
   it('should reject purchase if listing not active', async () => {
-    await expect(service.purchase('nonexistent', 'nonexistent')).rejects.toThrow();
+    mockPrisma.marketplaceListing.findUnique.mockResolvedValue({
+      id: '1', title: 'X', status: 'DRAFT', priceCents: 500, studioId: 's1',
+    });
+    await expect(service.purchase('user', '1')).rejects.toThrow();
+    expect(mockPayments.recordTransaction).not.toHaveBeenCalled();
   });
 
   it('should reject download without license', async () => {
+    mockPrisma.purchasedLicense.findUnique.mockResolvedValue(null);
     await expect(service.getDownloadUrl('nonexistent', 'nonexistent')).rejects.toThrow();
+  });
+
+  it('should update a listing and coerce enum fields', async () => {
+    mockPrisma.marketplaceListing.findUnique.mockResolvedValue({ id: '1', status: 'DRAFT' });
+    mockPrisma.marketplaceListing.update.mockResolvedValue({ id: '1', status: 'ACTIVE', title: 'New' });
+
+    await service.updateListing('1', { status: 'ACTIVE', title: 'New' });
+
+    expect(mockPrisma.marketplaceListing.update).toHaveBeenCalledWith({
+      where: { id: '1' },
+      data: { title: 'New', status: 'ACTIVE' },
+    });
+  });
+
+  it('should throw NotFoundException when updating a missing listing', async () => {
+    mockPrisma.marketplaceListing.findUnique.mockResolvedValue(null);
+    await expect(service.updateListing('ghost', { title: 'x' })).rejects.toThrow('Listing not found');
   });
 });

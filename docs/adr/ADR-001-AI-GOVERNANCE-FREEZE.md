@@ -69,21 +69,25 @@ Any modification to these documents requires a new ADR. For document 1 (North St
 
 ## References
 
+Live governance core (retained in `docs/strategy/`):
 - `docs/strategy/AI_NORTH_STAR.md`
-- `docs/strategy/AI_GOVERNANCE.md`
 - `docs/strategy/AI_CONSTITUTION.md`
-- `docs/strategy/AI_PHILOSOPHY.md`
 - `docs/strategy/AI_GUIDING_PRINCIPLES.md`
-- `docs/strategy/AI_PRODUCT_PRINCIPLES.md`
-- `docs/strategy/AI_DECISION_FRAMEWORK.md`
-- `docs/strategy/AI_FEATURE_EVALUATION_MATRIX.md`
-- `docs/strategy/AI_PERSONALITY.md`
-- `docs/strategy/AI_SUCCESS_METRICS.md`
-- `docs/strategy/AI_ROADMAP_ALIGNMENT.md`
-- `docs/strategy/VISION_PHASE6.md`
-- `docs/strategy/PHASE6_ROADMAP.md`
 - `docs/strategy/AI_ARCHITECTURE.md`
-- `docs/strategy/COMPETITIVE_ANALYSIS.md`
+- `docs/strategy/AI_ROADMAP_V2.md`
+- `docs/strategy/PHASE6_ROADMAP.md`
+
+Archived (2026-08-06, v0.9 hardening consolidation) — content remains frozen and binding, now under `docs/archive/obsolete-docs/strategy/`:
+- `docs/archive/obsolete-docs/strategy/AI_GOVERNANCE.md`
+- `docs/archive/obsolete-docs/strategy/AI_PHILOSOPHY.md`
+- `docs/archive/obsolete-docs/strategy/AI_PRODUCT_PRINCIPLES.md`
+- `docs/archive/obsolete-docs/strategy/AI_DECISION_FRAMEWORK_V2.md`
+- `docs/archive/obsolete-docs/strategy/AI_FEATURE_EVALUATION_MATRIX.md`
+- `docs/archive/obsolete-docs/strategy/AI_PERSONALITY.md`
+- `docs/archive/obsolete-docs/strategy/AI_SUCCESS_METRICS.md`
+- `docs/archive/obsolete-docs/strategy/AI_ROADMAP_ALIGNMENT.md`
+- `docs/archive/obsolete-docs/strategy/VISION_PHASE6.md`
+- `docs/archive/obsolete-docs/strategy/COMPETITIVE_ANALYSIS.md`
 
 ---
 

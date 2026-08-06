@@ -5,6 +5,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @Controller('events')
 export class EventsController {
@@ -31,8 +32,8 @@ export class EventsController {
   @Patch(':slug')
   @UseGuards(SessionAuthGuard, RolesGuard)
   @Roles('ADMIN', 'MODERATOR')
-  async update(@Param('slug') slug: string, @Body() body: { status?: string }) {
-    return this.events.publish(slug, body.status);
+  async update(@Param('slug') slug: string, @Body() body: UpdateEventDto) {
+    return this.events.update(slug, body);
   }
 
   @Post(':slug/register')

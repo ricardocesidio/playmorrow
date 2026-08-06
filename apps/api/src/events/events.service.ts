@@ -1,21 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateEventDto } from './dto/create-event.dto';
+import type { Prisma, EventStatus } from '@playmorrow/database';
 
 @Injectable()
 export class EventsService {
   constructor(private prisma: PrismaService) {}
 
-  async publish(slug: string, status?: string) {
-    const event = await this.prisma.event.findUnique({ where: { slug } });
-    if (!event) throw new NotFoundException('Event not found');
-    return this.prisma.event.update({
-      where: { slug },
-      data: { status: (status as any) || 'PUBLISHED' },
-    });
-  }
-
   async list(page = 1, pageSize = 20, upcomingOnly = false) {
-    const where: any = { status: 'PUBLISHED' };
+    const where: Prisma.EventWhereInput = { status: 'PUBLISHED' };
     if (upcomingOnly) where.startDate = { gte: new Date() };
 
     const [items, total] = await Promise.all([
@@ -34,8 +27,18 @@ export class EventsService {
     return event;
   }
 
-  async create(data: any) {
+  async create(data: CreateEventDto) {
     return this.prisma.event.create({ data });
+  }
+
+  async update(slug: string, data: Partial<CreateEventDto> & { status?: string }) {
+    const event = await this.prisma.event.findUnique({ where: { slug } });
+    if (!event) throw new NotFoundException('Event not found');
+    const { status, ...rest } = data;
+    return this.prisma.event.update({
+      where: { slug },
+      data: { ...rest, ...(status ? { status: status as EventStatus } : {}) },
+    });
   }
 
   async register(slug: string, userId: string) {

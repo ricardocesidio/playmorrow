@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PaymentsService } from '../payments/payments.service';
 import { EventBus } from '../common/event-bus';
+import { CreateListingDto } from './dto/create-listing.dto';
+import { UpdateListingDto } from './dto/update-listing.dto';
+import type { ListingType, MarketplaceListingStatus, Prisma } from '@playmorrow/database';
 
 @Injectable()
 export class MarketplaceService {
+  private readonly logger = new Logger(MarketplaceService.name);
+
   constructor(
     private prisma: PrismaService,
     private payments: PaymentsService,
@@ -12,8 +17,8 @@ export class MarketplaceService {
   ) {}
 
   async listListings(type?: string, page = 1, pageSize = 20) {
-    const where: any = { status: 'ACTIVE' };
-    if (type) where.type = type;
+    const where: Prisma.MarketplaceListingWhereInput = { status: 'ACTIVE' as MarketplaceListingStatus };
+    if (type) where.type = type as ListingType;
 
     const [items, total] = await Promise.all([
       this.prisma.marketplaceListing.findMany({
@@ -43,24 +48,24 @@ export class MarketplaceService {
     return safe;
   }
 
-  async createListing(data: {
-    type: string;
-    title: string;
-    description?: string;
-    priceCents: number;
-    fileUrl?: string;
-    thumbnailUrl?: string;
-    tags?: string[];
-    studioId: string;
-    gameId?: string;
-  }) {
-    return this.prisma.marketplaceListing.create({ data: data as any });
+  async createListing(data: CreateListingDto) {
+    return this.prisma.marketplaceListing.create({
+      data: { ...data, type: data.type as ListingType },
+    });
   }
 
-  async updateListing(id: string, data: any) {
+  async updateListing(id: string, data: UpdateListingDto) {
     const listing = await this.prisma.marketplaceListing.findUnique({ where: { id } });
     if (!listing) throw new NotFoundException('Listing not found');
-    return this.prisma.marketplaceListing.update({ where: { id }, data });
+    const { status, type, ...rest } = data;
+    return this.prisma.marketplaceListing.update({
+      where: { id },
+      data: {
+        ...rest,
+        ...(type ? { type: type as ListingType } : {}),
+        ...(status ? { status: status as MarketplaceListingStatus } : {}),
+      },
+    });
   }
 
   async purchase(userId: string, listingId: string) {
@@ -85,27 +90,40 @@ export class MarketplaceService {
     });
     const sellerId = owner?.userId;
 
-    const pi = await this.payments.createPaymentIntent(
-      listing.priceCents,
+    // 1. PENDING — record intent to purchase BEFORE touching Stripe.
+    const transaction = await this.payments.recordTransaction({
+      type: 'PURCHASE',
+      amountCents: listing.priceCents,
       platformFeeCents,
-      stripeAccount.stripeAccountId,
-      { buyerId: userId, listingId, listingType: listing.type },
-    );
+      buyerId: userId,
+      sellerId,
+      listingId,
+      description: `Purchase of ${listing.title}`,
+    });
 
+    // 2. Create the PaymentIntent and link it to the transaction.
+    let pi: { id: string; client_secret: string | null };
     try {
-      await this.payments.recordTransaction({
-        type: 'PURCHASE',
-        amountCents: listing.priceCents,
+      pi = await this.payments.createPaymentIntent(
+        listing.priceCents,
         platformFeeCents,
-        buyerId: userId,
-        sellerId,
-        listingId,
-        stripePaymentIntentId: pi.id,
-        description: `Purchase of ${listing.title}`,
-      });
+        stripeAccount.stripeAccountId,
+        { buyerId: userId, listingId, listingType: listing.type },
+      );
+      await this.payments.attachPaymentIntent(transaction.id, pi.id);
     } catch (err) {
-      await this.payments.cancelPaymentIntent(pi.id);
-      throw new BadRequestException('Purchase failed — payment has been cancelled and not charged');
+      // 3. FAILED — never cancel the intent. A created-but-unconfirmed intent
+      // cannot charge the buyer, and cancelling can race the confirmation webhook.
+      try {
+        await this.payments.markTransactionFailed(transaction.id);
+      } catch {
+        // DB unavailable — the transaction stays PENDING; the audit/webhook layer
+        // can reconcile it later.
+      }
+      this.logger.warn(
+        `Purchase ${transaction.id} failed after PaymentIntent creation: ${(err as Error).message}`,
+      );
+      throw new BadRequestException('Purchase could not be completed — no charge was made');
     }
 
     this.eventBus.emit({

@@ -130,8 +130,42 @@ describe('PaymentsService', () => {
     });
   });
 
-  describe('isWebhookProcessed', () => {
-    it('should return false for unprocessed events', async () => {
+  describe('markTransactionFailed', () => {
+    it('should transition the transaction to FAILED', async () => {
+      mockPrisma.transaction.update.mockResolvedValue({
+        id: 'txn-1',
+        status: 'FAILED',
+      });
+
+      const result = await service.markTransactionFailed('txn-1');
+
+      expect(mockPrisma.transaction.update).toHaveBeenCalledWith({
+        where: { id: 'txn-1' },
+        data: { status: 'FAILED' },
+      });
+      expect(result).toEqual({ id: 'txn-1', status: 'FAILED' });
+    });
+  });
+
+  describe('attachPaymentIntent', () => {
+    it('should attach the stripe PaymentIntent id to a PENDING transaction', async () => {
+      mockPrisma.transaction.update.mockResolvedValue({
+        id: 'txn-1',
+        status: 'PENDING',
+        stripePaymentIntentId: 'pi_123',
+      });
+
+      const result = await service.attachPaymentIntent('txn-1', 'pi_123');
+
+      expect(mockPrisma.transaction.update).toHaveBeenCalledWith({
+        where: { id: 'txn-1' },
+        data: { stripePaymentIntentId: 'pi_123' },
+      });
+      expect(result.stripePaymentIntentId).toBe('pi_123');
+    });
+  });
+
+  describe('isWebhookProcessed', () => {    it('should return false for unprocessed events', async () => {
       mockPrisma.processedWebhookEvent.findUnique.mockResolvedValue(null);
 
       const result = await service.isWebhookProcessed('evt_unknown');

@@ -762,3 +762,33 @@ Documentation consolidation before external architectural review. No features �
 
 **Updated:** README.md, AGENTS.md
 **Created:** docs/handoff/HANDOFF.md, docs/releases/PRE_AUDIT_CHECKLIST.md, docs/releases/CLAUDE_REVIEW_PACKAGE.md
+
+### Session 24 — v0.9 Hardening Sprint: Production Safety & Consolidation (2026-08-06)
+
+Phase 5 hardening and architecture consolidation. No new features, no schema expansion.
+
+**Backend hardening:**
+- **Redis throttler wired**: New `apps/api/src/common/redis-throttler.storage.ts` — atomic Lua `INCR`/`PEXPIRE`/`PTTL` against Upstash Redis via `@upstash/redis`. Fail-open: if Redis is unreachable the limiter degrades to in-memory (never blocks traffic). `ThrottlerModule.forRootAsync` in app.module.ts with `createRedisFromUrl()` + in-memory fallback. Deleted dead `common/redis.service.ts` + `common/redis.config.ts`.
+- **Upload limit 5MB**: `MaxFileSizeValidator` 20MB → 5MB (images only; matches `express.json({ limit: '5mb' })`).
+- **Purchase state machine hardened**: `marketplace.purchase()` → recordTransaction PENDING → create+attach PaymentIntent → on failure markTransactionFailed (never cancels — cancelling races the confirmation webhook). Removed dead `cancelPaymentIntent()`.
+- **`any` eliminated in all Phase 5 modules** (payments/marketplace/creator/events/partner/publisher): typed DTOs + `Prisma.*WhereInput` + enum casts; ESLint error override on Phase 5 dirs. Remaining 149 `any` warnings are pre-existing, outside Phase 5.
+
+**API surface (4.3):**
+- Replaced `PartialType` Update DTOs with explicit `@IsOptional()` fields: `UpdateListingDto`, `UpdateEventDto`, `UpdatePartnerDto`.
+- Added `PATCH /marketplace/:id` (studio OWNER/ADMIN RBAC), `PATCH /events/:slug` + `PATCH /partners/:slug` (ADMIN/MODERATOR). Removed dead `EventsService.publish` (folded into `update`).
+
+**Production bug fixed (migration drift):**
+- Phase 5 enums (`EventStatus`, `PartnerStatus`, `PartnerType`, `MarketplaceListingStatus`) existed only in schema.prisma; the CREATE TABLE migrations used TEXT columns, so production (which runs `prisma db deploy`) would 500 on `/events`, `/partners`, `/marketplace` with `type "public.EventStatus" does not exist`. Created `20260806000000_add_missing_enum_types` (backfill lowercase → uppercase, CREATE TYPE, ALTER columns, fix defaults) and applied it to the dev DB.
+
+**Tests:**
+- Phase 5 suite green: 67/67 (unit + integration). Rewrote `marketplace.service.spec.ts` to mocked providers (was DB-backed + missing EventBus), updated stale lowercase-status assertions in events/partner specs to enum values, added `updateListing` coverage.
+- Pre-existing (untouched, documented in STATUS.md): 25 AI-module spec failures — specs mock an outdated `ProviderFactory` (missing `getChatProvider` etc.) after Session 22's API evolution.
+
+**Docs consolidation (2.4):**
+- Archived 20 AI strategy/analysis docs from `docs/strategy/` + `docs/ai/` to `docs/archive/obsolete-docs/{strategy,ai}/`. Kept governance core live: `AI_NORTH_STAR`, `AI_CONSTITUTION`, `AI_GUIDING_PRINCIPLES`, `AI_ARCHITECTURE`, `AI_ROADMAP_V2`, `PHASE6_ROADMAP`. Added `docs/strategy/README.md` index; updated ADR-001 + HANDOFF references.
+- Updated STATUS.md (known issues, resolved table), SECURITY.md (Redis throttler + env vars, removed stale 2FA/GDPR gaps), ARCHITECTURE.md (Redis throttler guard), README.md (Redis row + env vars).
+
+**Gates:** Typecheck ✅ · Lint 0 errors (149 pre-existing warnings) ✅ · `nest build` ✅ · Phase 5 tests 67/67 ✅
+
+**Created:** apps/api/src/common/redis-throttler.storage.ts(+spec), migration `20260806000000_add_missing_enum_types`, docs/strategy/README.md
+**Updated:** STATUS.md, SECURITY.md, ARCHITECTURE.md, README.md, AGENTS.md
