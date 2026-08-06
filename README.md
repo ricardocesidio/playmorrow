@@ -3,116 +3,14 @@
 **Discover tomorrow's indie games today.**
 
 [![CI](https://github.com/ricardocesidio/playmorrow/actions/workflows/ci.yml/badge.svg)](https://github.com/ricardocesidio/playmorrow/actions)
-![License](https://img.shields.io/badge/license-proprietary-red)
-![Status](https://img.shields.io/badge/status-v0.8--beta-orange)
-![Tests](https://img.shields.io/badge/tests-368%20total%20|%2082%20AI%20passing-green)
-![Score](https://img.shields.io/badge/engineering-in--progress-yellow)
-![AI](https://img.shields.io/badge/AI-infra%20built%20(0%20features)-lightgrey)
-
-**Playmorrow is an active development project.** Phase 5 (ecosystem) backend is complete. Phase 6 (AI) infrastructure is built. Production hardening in progress. No external certification has been awarded.
 
 ---
 
-Playmorrow is a social discovery platform connecting indie game studios with players before launch. Studios share their development journey through devlogs, roadmaps, trailers, and press kits — players discover upcoming games, follow development, build wishlists, and join the conversation.
+## What Is Playmorrow?
 
-**Live:** [https://playmorrow.co](https://playmorrow.co)
+Playmorrow is a social discovery platform connecting indie game studios with players. Studios share their development journey through devlogs, roadmaps, trailers, and press kits. Players discover upcoming games, follow development, build wishlists, and join the conversation. The platform includes a marketplace (Stripe Connect), events, a B2B partner CRM, and an AI intelligence layer.
 
----
-
-## Features
-
-### For Players
-- **Discover** — Curated indie games with search, tags, genres, and recommendation engine
-- **Follow** — Track studios and games to follow their development progress
-- **Personalized Feed** — Real-time feed of devlogs, roadmap updates, and community activity
-- **Wishlist** — Save upcoming releases and get notified of updates
-- **Community** — Threaded comments with reactions (LIKE/LOVE/HYPE/INSIGHTFUL)
-- **Notifications** — Real-time SSE + push notifications for followed studio activity
-- **Leaderboard** — XP-based rankings with achievements and level progression
-
-### For Studios
-- **Game Pages** — Rich profiles with screenshots, trailers, tags, platforms, and pricing
-- **Devlogs** — Full markdown editor with scheduling, categories, tags, and screenshots
-- **Roadmap** — Visual milestone timeline with planned/in-progress/completed states
-- **Analytics** — Real event tracking with daily aggregates per game and studio
-- **Press Kits** — Auto-generated markdown for media and publishers
-- **Brand Kits** — Studio brand guidelines and asset management
-- **Verification** — Tiered system (Unverified → Email → Basic → Official → Partner → Featured)
-- **Team Management** — Role-based access with invitation system and seat limits
-- **Goals & Achievements** — Studio milestone tracking
-
-### Discovery & Recommendations (M5)
-- **Recommendation Engine** — 9 scorers: tag similarity, follow-based, trending, wishlist similarity, interaction history, hidden gems, similar studios, recently updated, latest releases
-- **Search 2.0** — Full-text search with 6 filters (genre, status, tag, engine, isFree, demo) and 4 sort modes
-- **Dynamic Collections** — 5 curated collections (Top Wishlisted, In Development, Free to Play, Verified Studios, Recently Released)
-- **Discover Page** — Server-side rendered with Featured, Trending, Popular, and Newest sections
-- **SEO Landing Pages** — `/discover/[tag]` with generateMetadata + JSON-LD
-
-### Moderation & Trust (M8)
-- **Reports System** — User-driven reporting with SPAM/HARASSMENT/COPYRIGHT reasons
-- **Suspension & Shadow Ban** — Manual + automatic (3 strikes → auto-suspend 24h)
-- **Appeals** — Users can file appeals against moderation actions
-- **Strike System** — Progressive enforcement: warn → suspend → ban
-- **Spam Detection** — Keyword matching, short URL detection, ALL CAPS heuristics, rate-limit
-- **Escalation Workflow** — Unresolved reports auto-escalated after 48h
-- **DMCA Workflow** — Takedown notices with 14-day counter-notification timer
-- **Audit Trail** — All moderation actions logged via EventBus
-- **Moderation Dashboard** — Real-time metrics: open reports, escalation rate, avg resolution time
-
-### Email Automation (M9)
-- **Email Templates** — CRUD + render engine with 7 default templates
-- **Transactional Emails** — Welcome, email verification, password reset
-- **Weekly Digest** — Automated weekly summary of followed studio activity
-- **Email Preferences** — Granular notification toggles + token-based unsubscribe
-- **Bounce Handling** — Automatic detection and suppression of bounced addresses
-- **Delivery Analytics** — Open, click, and bounce rate tracking
-
-### Public API & SDK (M11/M12)
-- **API Keys** — Programmatic access with scoped keys
-- **JavaScript SDK** — `@playmorrow/sdk` with full API client
-- **CLI** — `playmorrow` command-line tool (search, games, trending, collections)
-
-### Marketplace & Ecosystem (M16-M21) — Coming Soon
-- **Marketplace** — Game asset listings with Stripe Connect Express payouts, PaymentIntent purchases, license management *(live for testing, launching soon)*
-- **Publisher** — Per-studio revenue dashboard with earnings, transactions, and payout history
-- **Funding** — Reward-based crowdfunding scope (Kickstarter model; equity/investment blocked)
-- **Creator** — Referral codes with commission tracking for affiliate earnings
-- **Partner** — B2B CRM with 6 partner types (University, Publisher, Accelerator, Incubator, Studio, Event Organizer)
-- **Events** — Event listings with detail pages, publish workflow, ticketing, and upcoming filter
-
-### Security
-- **Session-based Auth** — httpOnly `playmorrow_session` cookie
-- **OAuth** — Google and GitHub authentication
-- **CSRF** — Stateless HMAC-SHA256 applied globally
-- **CSP** — Content Security Policy with nonce (production)
-- **XSS Prevention** — DOMPurify + sanitize-html on all rendered content
-- **Password Hashing** — Argon2id with timing-safe comparison
-- **Rate Limiting** — Global 60/min + per-route overrides
-- **Upload Validation** — MIME whitelist, magic bytes, dimension limits, 20MB max
-
----
-
-## Architecture
-
-```
-Browser (Next.js 15 + React 19)
-    │ /api/* (rewritten via next.config.ts)
-    ▼
-Vercel (Frontend)
-    │ HTTPS
-    ▼
-Fly.io (Backend — NestJS)
-    │ Prisma ORM
-    ▼
-Neon (PostgreSQL)
-```
-
-**Key Components:**
-- **Frontend:** Next.js 15 App Router, React 19, Tailwind CSS v4, TanStack Query
-- **Backend:** NestJS with 55 modules, 47 controllers, 318 integration tests
-- **Database:** PostgreSQL on Neon — 63 models, 29 migrations, connection pooler
-- **CI/CD:** GitHub Actions — lint, typecheck, 318 tests, security scans
-- **Monitoring:** Sentry error tracking, UptimeRobot health checks (5min)
+**Live:** [https://playmorrow.co](https://playmorrow.co) | **API:** Fly.io | **DB:** Neon PostgreSQL
 
 ---
 
@@ -120,86 +18,175 @@ Neon (PostgreSQL)
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Next.js 15 (App Router) + React 19 + TypeScript |
-| Styling | Tailwind CSS v4 |
-| Backend | NestJS + TypeScript |
-| Database | PostgreSQL (Neon with connection pooler) |
-| ORM | Prisma (63 models) |
-| Auth | Session-based + OAuth (Google, GitHub) |
-| Security | CSRF HMAC, CSP, DOMPurify, Helmet, rate limiting |
-| Email | Resend (transactional + digests) |
+| Frontend | Next.js 15 (App Router) + React 19 + Tailwind CSS v4 |
+| Backend | NestJS 10 + TypeScript |
+| Database | PostgreSQL 16 (Neon serverless) + Prisma 6 ORM |
+| Auth | Session-based (httpOnly cookies) + OAuth (Google, GitHub) + TOTP 2FA |
+| AI | Provider-agnostic (OpenAI + Anthropic), embedding-based recommendations |
+| Payments | Stripe Connect Express + PaymentIntent (PCI SAQ A) |
+| Storage | Cloudflare R2 (S3-compatible) |
+| Email | Resend API + Cloudflare Email Routing |
 | Real-time | SSE via RxJS Subject |
-| Package Manager | pnpm 11+ (workspaces) |
-| Build System | Turborepo |
-| Testing | Vitest (318 tests), Playwright (E2E) |
-| CI/CD | GitHub Actions |
-| Error Tracking | Sentry |
-| Deployment | Vercel (frontend) + Fly.io (backend) |
-| Containerization | Docker (multi-stage) |
-| Domain | playmorrow.co |
+| Redis | Upstash (provisioned, config-ready) |
+| Deploy | Vercel (frontend) + Fly.io (backend) |
+| CI/CD | GitHub Actions (6 workflows) |
+| Monorepo | pnpm workspaces + Turborepo |
+
+---
+
+## Project Status (v0.85-beta)
+
+| Phase | Status | Milestones |
+|-------|--------|-----------|
+| Phase 1 — Core | ✅ Complete | M1-M5: Game pages, devlogs, feed, search, auth |
+| Phase 2 — Quality | ✅ Complete | M6-M7: Performance, SEO, CI/CD |
+| Phase 3 — Trust | ✅ Complete | M8-M9: Moderation, email automation |
+| Phase 4 — Platform | ✅ Complete | M10-M15: Security, public API, SDK, hardening |
+| Phase 5 — Ecosystem | ✅ Complete | M16-M21: Marketplace, Events, Partners, Creator, Publisher |
+| Phase 6 — AI | 🚧 In Progress | M23 shipped (embedding-based recs), M22/M24/M25/M26 pending |
+
+**Scale:** 63 database models · 55 NestJS modules · 82+ frontend routes · 35 AI module files · 368+ tests
 
 ---
 
 ## Quick Start
 
 ```bash
-git clone git@github.com:ricardocesidio/playmorrow.git
+git clone https://github.com/ricardocesidio/playmorrow.git
 cd playmorrow
 pnpm install
 pnpm dev
 ```
 
-- Frontend: http://localhost:3000
-- API: http://localhost:4000
-
-See [Architecture docs](ARCHITECTURE.md) for detailed setup and deployment instructions.
+Frontend: [http://localhost:3000](http://localhost:3000) | API: [http://localhost:4000](http://localhost:4000) | Swagger: [http://localhost:4000/docs](http://localhost:4000/docs)
 
 ---
 
-## Project Structure
+## Environment Variables
+
+### Backend (`apps/api/.env`)
+
+```bash
+# Required
+DATABASE_URL="postgresql://..."        # Neon connection string
+JWT_SECRET="generate: openssl rand -base64 32"
+SESSION_SECRET="generate: openssl rand -base64 32"
+CSRF_SECRET="generate: openssl rand -base64 32"
+RESEND_API_KEY="re_..."                # Email delivery
+WEB_ORIGIN="http://localhost:3000"
+
+# Marketplace (Phase 5)
+STRIPE_SECRET_KEY="sk_test_..."        # Use test keys for development
+STRIPE_WEBHOOK_SECRET="whsec_..."
+
+# AI (Phase 6 — optional)
+AI_PROVIDER="openai"
+OPENAI_API_KEY="sk-..."
+
+# Infrastructure (optional)
+REDIS_URL=""                           # Upstash Redis
+SENTRY_DSN=""                          # Error tracking
+STORAGE_PROVIDER="local"               # local (dev) or r2 (prod)
+```
+
+### Frontend (`apps/web/.env.local`)
+
+```bash
+NEXT_PUBLIC_API_URL="http://localhost:4000/api"
+NEXT_PUBLIC_SITE_URL="http://localhost:3000"
+```
+
+⚠️ Never commit `.env` files.
+
+---
+
+## Architecture
 
 ```
-playmorrow/
-├── apps/
-│   ├── web/          # Next.js frontend (82 routes)
-│   └── api/          # NestJS backend (55 modules)
-├── packages/
-│   ├── database/     # Prisma schema + client
-│   ├── sdk/          # JavaScript SDK (@playmorrow/sdk)
-│   └── cli/          # CLI tool (@playmorrow/cli)
-├── docs/
-│   ├── releases/     # Certification reports
-│   ├── security/     # Runbooks and policies
-│   └── archive/      # Superseded documents
-└── .github/          # CI/CD workflows
+Browser → Vercel (playmorrow.co)
+              │ /api/* rewrites
+              ▼
+         Fly.io (playmorrow-api)
+              │ Prisma
+              ▼
+         Neon (PostgreSQL + pgvector)
+              │ S3 API
+              ▼
+         Cloudflare R2 (uploads)
 ```
+
+---
+
+## Testing
+
+```bash
+pnpm test              # All tests
+pnpm verify            # Pre-push: lint + typecheck + build
+```
+
+**Coverage:** 40% lines, 30% branches (CI-enforced)
+
+---
+
+## Security
+
+- **Auth:** Session-based (httpOnly, SameSite), argon2id, TOTP 2FA, OAuth (Google/GitHub)
+- **CSRF:** HMAC-SHA256 stateless, global guard on all mutation endpoints
+- **CSP:** Nonce-based per-request, no unsafe-inline in production
+- **XSS:** DOMPurify on all Markdown rendering
+- **Rate limiting:** 60 req/min global, stricter on AI/auth/upload endpoints
+- **Upload validation:** MIME + magic bytes + dimension caps + size limits
+- **PCI:** SAQ A — Stripe.js tokenizes on frontend
+- **Secrets scanning:** Gitleaks in CI
+- **SAST:** CodeQL + Semgrep + Trivy + SBOM
+
+---
+
+## AI Features
+
+### M23 — Embedding-Based Recommendations (SHIPPED)
+
+- Text embeddings via OpenAI `text-embedding-3-small`
+- Cosine similarity scoring for semantic game recommendations
+- Tag-based fallback when AI provider unavailable
+- First feature exercising the 35-file AI pipeline
+
+**Planned:** M26 Semantic Search, M25 Studio Intelligence, M22 AI Assistant, M24 AI Moderation
+
+**Governance:** 20 constitutional articles · 8-gate decision framework · provider-agnostic architecture
 
 ---
 
 ## Documentation
 
-| Resource | Location |
-|----------|----------|
-| Architecture | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
-| Security | [`SECURITY.md`](SECURITY.md) |
-| Security runbooks | [`docs/security/`](docs/security/) |
-| Release certifications | [`docs/releases/`](docs/releases/) |
+| Document | Purpose |
+|----------|---------|
+| `docs/handoff/HANDOFF.md` | Complete project overview, architecture, security |
+| `docs/releases/CLAUDE_REVIEW_PACKAGE.md` | Auditor briefing |
+| `STATUS.md` | Feature inventory |
+| `ARCHITECTURE.md` | Technical architecture |
+| `CHANGELOG.md` | Release notes |
+| `SECURITY.md` | Security policy |
+| `docs/archive/` | Retired certifications and obsolete docs |
 
 ---
 
-## Contact
+## Contributing
 
-- **Email:** playmorrow@hotmail.com
-- **Discord:** [discord.gg/playmorrow](https://discord.gg/playmorrow)
-- **X:** [@playmorrow](https://x.com/playmorrow)
-- **GitHub:** [github.com/ricardocesidio/playmorrow](https://github.com/ricardocesidio/playmorrow)
+1. Fork and clone
+2. `pnpm install`
+3. Copy `.env.example` files and configure
+4. `pnpm dev` to start
+5. `pnpm verify` before pushing (enforced by pre-push hook)
+
+**PR requirements:** tests pass · lint clean · typecheck clean · no new `any` types · coverage thresholds met
 
 ---
 
 ## License
 
-All Rights Reserved — Copyright (c) 2026 Playmorrow
+Proprietary — All Rights Reserved | Contact: playmorrow@hotmail.com
 
 ---
 
-*Last updated: 2026-07-30. Tests verified: 318 passing (27 files).*
+*Self-certifications retired 2026-08-05 following independent architectural audit. See `docs/archive/` for historical documents.*
