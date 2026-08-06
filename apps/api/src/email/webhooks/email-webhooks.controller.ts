@@ -4,6 +4,13 @@ import { SkipCsrf } from '../../common/skip-csrf.decorator';
 import { EmailSenderService } from '../email-sender.service';
 import { logger } from '../../common/logger';
 
+interface ResendWebhookPayload {
+  type?: string;
+  event?: string;
+  data?: { email?: string };
+  email?: string;
+}
+
 @ApiTags('email/webhooks')
 @Controller('email/webhooks')
 @SkipCsrf()
@@ -12,7 +19,7 @@ export class EmailWebhooksController {
 
   @Post('resend')
   @ApiOperation({ summary: 'Receive Resend webhook events (bounces, complaints)' })
-  async resendWebhook(@Body() body: any) {
+  async resendWebhook(@Body() body: ResendWebhookPayload) {
     const eventType = body?.type || body?.event;
     const email = body?.data?.email || body?.email;
 

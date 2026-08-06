@@ -1,6 +1,16 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
+export interface ChatFeedItem {
+  type: 'chat' | 'system';
+  id: string;
+  createdAt: Date;
+  author?: { id: string; displayName: string; username: string; avatarUrl: string | null } | null;
+  action?: string;
+  metadata?: unknown;
+  [key: string]: unknown;
+}
+
 @Injectable()
 export class StudioChatService {
   constructor(private prisma: PrismaService) {}
@@ -42,9 +52,9 @@ export class StudioChatService {
       }),
     ]);
 
-    const items: any[] = [
-      ...chatMessages.map(m => ({ type: 'chat', ...m, author: m.author })),
-      ...auditLogs.map(l => ({ type: 'system', id: l.id, action: l.action, actor: l.actor, metadata: l.metadata, createdAt: l.createdAt })),
+    const items: ChatFeedItem[] = [
+      ...chatMessages.map(m => ({ type: 'chat' as const, ...m, author: m.author })),
+      ...auditLogs.map(l => ({ type: 'system' as const, id: l.id, action: l.action, actor: l.actor, metadata: l.metadata, createdAt: l.createdAt })),
     ];
 
     items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

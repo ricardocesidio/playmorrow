@@ -153,6 +153,10 @@ Current state: v0.85-beta — functional, not production-hardened.
 | ✅ | No PATCH routes / PartialType DTOs | PATCH /marketplace/:id, /events/:slug, /partners/:slug with explicit @IsOptional() DTOs |
 | ✅ | Phase 5 missing enum types (prod 500) | EventStatus/PartnerStatus/PartnerType/MarketplaceListingStatus added via migration (TEXT columns drifted) |
 | ✅ | `any` in Phase 5 | 0 remaining; ESLint error override on Phase 5 modules |
+| ✅ | AI module spec rot (25 tests failing) | All 25 AI/recommendations specs rebased on current ProviderFactory/EmbeddingProvider API; suite now 478/478 |
+| ✅ | 122 `any` warnings across 44 modules | 0 remaining (full repo); type-only cleanup, no behavior change |
+| ✅ | Dead code (knip) | Removed 8 dead AI barrel/prompt files + stray postcss.config.js; removed unused deps (@anthropic-ai/sdk, @sentry/core, @nestjs/mapped-types, @types/dompurify); added missing devDeps (@vitest/coverage-v8, tsx, tsconfig-paths); deleted unused assertPermission, SearchRequestDto, StudioResponse, AI_PROVIDER |
+| ✅ | prisma/seed.ts drift | emailVerified → emailVerifiedAt + missing displayName (blocked `pnpm verify`) |
 
 ### Remaining
 | # | Issue | Severity | Status |
@@ -160,11 +164,10 @@ Current state: v0.85-beta — functional, not production-hardened.
 | 1 | No Phase 5 E2E tests (Playwright) | Medium | Specs exist, CI pending |
 | 2 | Integration tests share Neon dev DB | Medium | Planned |
 | 3 | SSE/RxJS single-instance (needs Redis pub/sub for scaling) | Low | Planned |
-| 4 | AI module spec rot: 25 tests fail (mocks stale vs ProviderFactory API) | Medium | Rebase AI specs on current provider interfaces |
-| 5 | Dev DB migration history drifted (13 migrations unapplied, 1 failed) | Medium | Re-provision dev DB or reconcile via prisma migrate resolve |
-| 6 | No staging environment deployed | Medium | render.yaml configured, not deployed |
-| 7 | No delete/edit for marketplace listings | Low | Planned |
-| 8 | fileUrl shown in UI for non-owners | Low | Backend strips it; UI block is dead code |
+| 4 | Dev DB migration history drifted (13 migrations unapplied, 1 failed) | Medium | Re-provision dev DB or reconcile via prisma migrate resolve |
+| 5 | No staging environment deployed | Medium | render.yaml configured, not deployed |
+| 6 | No delete/edit for marketplace listings | Low | Planned |
+| 7 | fileUrl shown in UI for non-owners | Low | Backend strips it; UI block is dead code |
 
 ---
 
@@ -257,7 +260,7 @@ Full schema: `packages/database/prisma/schema.prisma`
 
 | Suite | Framework | Count | Status |
 |-------|-----------|-------|--------|
-| API unit/integration | Vitest | 318 tests, 27 spec files | 100% passing |
+| API unit/integration | Vitest | 478 tests, 46 spec files | 100% passing |
 | E2E (Playwright) | Playwright | Configured | Requires running dev servers |
 
 ---

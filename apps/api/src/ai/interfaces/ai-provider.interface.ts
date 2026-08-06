@@ -2,7 +2,6 @@ import type { EmbeddingResult } from './embedding-provider.interface';
 import type { ModerationResult } from './moderation-provider.interface';
 
 export { EmbeddingResult };
-export { ModerationResult };
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
@@ -12,15 +11,10 @@ export interface ChatMessage {
   toolCalls?: ToolCall[];
 }
 
-export interface ToolCall {
+interface ToolCall {
   id: string;
   type: 'function';
   function: { name: string; arguments: string };
-}
-
-export interface ToolResult {
-  toolCallId: string;
-  content: string;
 }
 
 export interface ChatOptions {
@@ -32,7 +26,7 @@ export interface ChatOptions {
   metadata?: Record<string, string>;
 }
 
-export interface ToolDefinition {
+interface ToolDefinition {
   name: string;
   description: string;
   parameters: Record<string, unknown>;
@@ -61,8 +55,6 @@ export interface ChatStreamChunk {
   toolCalls?: Partial<ToolCall>[];
   usage?: TokenUsage;
 }
-
-export const AI_PROVIDER = 'AI_PROVIDER';
 
 export interface AIProvider {
   readonly name: string;

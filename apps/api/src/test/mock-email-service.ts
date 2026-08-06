@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { EmailService } from '../email/email.service';
 
-export const mockEmailService = {
+const mockEmailService = {
   sendVerificationCode: () => Promise.resolve(),
   sendInvitationEmail: () => Promise.resolve(),
 };

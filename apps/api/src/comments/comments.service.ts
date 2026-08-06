@@ -9,6 +9,29 @@ import { StudioXpService } from '../studios/studio-xp.service';
 import type { CreateCommentDto } from './dto/create-comment.dto';
 import type { UpdateCommentDto } from './dto/update-comment.dto';
 
+export interface CommentTreeNode {
+  id: string;
+  body: string;
+  parentId: string | null;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  author: { id: string; username: string; displayName: string; avatarUrl: string | null };
+  replies?: CommentTreeNode[];
+}
+
+export interface CommentResponse {
+  id: string;
+  body: string | null;
+  parentId: string | null;
+  deletedAt: string | null;
+  isDeleted?: boolean;
+  createdAt: string;
+  updatedAt?: string;
+  author?: { id: string; username: string; displayName: string; avatarUrl: string | null };
+  replies: CommentResponse[];
+}
+
 @Injectable()
 export class CommentsService {
   constructor(
@@ -395,16 +418,7 @@ export class CommentsService {
     return { success: true };
   }
 
-  private toResponse(comment: {
-    id: string;
-    body: string;
-    parentId: string | null;
-    deletedAt: Date | null;
-    createdAt: Date;
-    updatedAt: Date;
-    author: { id: string; username: string; displayName: string; avatarUrl: string | null };
-    replies?: any[];
-  }): any {
+  private toResponse(comment: CommentTreeNode): CommentResponse {
     if (comment.deletedAt) {
       return {
         id: comment.id,

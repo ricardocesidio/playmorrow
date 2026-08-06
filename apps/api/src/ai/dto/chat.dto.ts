@@ -88,18 +88,3 @@ export class ModerationRequestDto {
   @MaxLength(10000)
   text!: string;
 }
-
-export class SearchRequestDto {
-  @ApiProperty({ example: 'indie roguelike games' })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(500)
-  query!: string;
-
-  @ApiPropertyOptional({ example: 10 })
-  @IsOptional()
-  @IsNumber()
-  @Min(1)
-  @Max(100)
-  topK?: number;
-}

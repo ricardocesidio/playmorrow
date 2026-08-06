@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import type { ReportReason } from '@playmorrow/database';
 
-export const VALID_REPORT_REASONS = [
+const VALID_REPORT_REASONS = [
   'SPAM',
   'HARASSMENT',
   'HATE',

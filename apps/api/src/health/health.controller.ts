@@ -2,9 +2,12 @@ import { Controller, Get, Req } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import type { HealthStatus } from '@playmorrow/types';
+import type { Request } from 'express';
 
 import { logger } from '../common/logger';
 import { PrismaService } from '../prisma/prisma.service';
+
+type HealthCheckRequest = Request & { log?: typeof logger };
 
 @ApiTags('health')
 @Controller('health')
@@ -14,7 +17,7 @@ export class HealthController {
 
   @Get()
   @ApiOkResponse({ description: 'Liveness + database connectivity probe.' })
-  async check(@Req() req: any): Promise<HealthStatus> {
+  async check(@Req() req: HealthCheckRequest): Promise<HealthStatus> {
     let dbOk = true;
     try {
       await this.prisma.$queryRaw`SELECT 1`;
@@ -26,7 +29,7 @@ export class HealthController {
     const emailConfigured = !!process.env.RESEND_API_KEY;
 
     const status = dbOk ? 'ok' : 'degraded';
-    const log = req?.log || logger;
+    const log = req.log || logger;
     log.info({ msg: 'health check', status, database: dbOk, emailProvider: emailConfigured });
 
     return {

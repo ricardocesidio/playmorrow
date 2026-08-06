@@ -100,7 +100,7 @@ export class AchievementService {
     }));
   }
 
-  async checkAndAward(userId: string, xpService: { awardCustom: (userId: string, reason: string, amount: number) => Promise<any> }) {
+  async checkAndAward(userId: string, xpService: { awardCustom: (userId: string, reason: string, amount: number) => Promise<{ levelUp: boolean; newLevel: number; xp: number }> }) {
     for (const def of ACHIEVEMENTS) {
       const already = await this.prisma.achievement.findUnique({
         where: { userId_achievementId: { userId, achievementId: def.id } },

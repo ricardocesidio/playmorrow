@@ -7,6 +7,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import type { VerificationRequestStatus } from '@playmorrow/database';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -20,7 +21,9 @@ export class AdminVerificationController {
   constructor(private readonly verificationService: VerificationService) {}
 
   @Get()
-  async listRequests(@Query('status') status?: string): Promise<any[]> {
+  async listRequests(@Query('status') status?: VerificationRequestStatus): Promise<
+    Awaited<ReturnType<VerificationService['getRequests']>>
+  > {
     return this.verificationService.getRequests(status);
   }
 
@@ -28,8 +31,8 @@ export class AdminVerificationController {
   async reviewRequest(
     @Param('id') id: string,
     @CurrentUser() user: { id: string },
-    @Body() body: { status: string; notes?: string },
-  ): Promise<any> {
+    @Body() body: { status: VerificationRequestStatus; notes?: string },
+  ): Promise<{ success: boolean }> {
     await this.verificationService.reviewRequest(id, user.id, body.status, body.notes);
     return { success: true };
   }

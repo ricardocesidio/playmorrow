@@ -1,4 +1,5 @@
 import { PrismaClient } from '@playmorrow/database';
+import type { GameStatus, PlatformKind, RoadmapStatus } from '@playmorrow/database';
 import * as fs from 'node:fs';
 import { resolve } from 'path';
 
@@ -277,7 +278,7 @@ async function seed() {
           title: bp.game.title,
           tagline: bp.game.tagline,
           description: bp.game.description,
-          status: bp.game.status as any,
+          status: bp.game.status as GameStatus,
           genres: bp.game.genres,
           isFree: bp.game.isFree,
           currency: bp.game.currency,
@@ -313,7 +314,7 @@ async function seed() {
       await prisma.platformLink.create({
         data: {
           gameId: game.id,
-          kind: pl.kind as any,
+          kind: pl.kind as PlatformKind,
           url: pl.url,
           label: pl.label,
           position: bp.platforms.indexOf(pl),
@@ -386,7 +387,7 @@ async function seed() {
           gameId: game.id,
           title: r.title,
           description: r.description,
-          status: r.status as any,
+          status: r.status as RoadmapStatus,
           targetDate: new Date(r.targetDate),
           position: bp.roadmap.indexOf(r),
         },

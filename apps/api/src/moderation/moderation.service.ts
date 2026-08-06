@@ -1,4 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import type { Prisma } from '@playmorrow/database';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventBus } from '../common/event-bus';
 import { logger } from '../common/logger';
@@ -23,7 +24,7 @@ export class ModerationService {
     if (!user) throw new NotFoundException('User not found');
 
     const newCount = (user.strikeCount || 0) + 1;
-    const updateData: any = { strikeCount: newCount, lastStrikeAt: new Date() };
+    const updateData: Prisma.UserUpdateInput = { strikeCount: newCount, lastStrikeAt: new Date() };
 
     // Auto-suspend on 3rd strike (24h)
     if (newCount >= 3) {

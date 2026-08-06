@@ -248,7 +248,16 @@ export class FeedService {
     const limit = cappedSize + 1;
 
     // Build where clause: se cursor existe, busca items ANTES dele
-    const buildWhere = (prefix: string) => {
+    const buildWhere = (
+      prefix: string,
+    ): {
+      gameId: { in: string[] };
+      isPublished?: boolean;
+      OR?: Array<
+        | { createdAt: { lt: Date } }
+        | { createdAt: Date; id: { lt: string } }
+      >;
+    } => {
       const base = prefix === 'devlogs'
         ? { gameId: { in: gameIdArray }, isPublished: true }
         : { gameId: { in: gameIdArray } };
@@ -259,7 +268,7 @@ export class FeedService {
           { createdAt: { lt: new Date(cursor.createdAt) } },
           { createdAt: new Date(cursor.createdAt), id: { lt: cursor.id } },
         ],
-      } as any;
+      };
     };
 
     const [devlogs, roadmapItems] = await Promise.all([

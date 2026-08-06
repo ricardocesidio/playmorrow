@@ -1,8 +1,8 @@
 import { JSDOM } from 'jsdom';
-import DOMPurify from 'dompurify';
+import DOMPurify, { type WindowLike } from 'dompurify';
 
 const window = new JSDOM('').window;
-const purify = DOMPurify(window as any);
+const purify = DOMPurify(window as unknown as WindowLike);
 
 /**
  * Server-side HTML sanitization (defense in depth).

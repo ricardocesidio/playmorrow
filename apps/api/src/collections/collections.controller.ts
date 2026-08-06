@@ -1,5 +1,6 @@
 import { Controller, Get, NotFoundException, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import type { Prisma } from '@playmorrow/database';
 import { PrismaService } from '../prisma/prisma.service';
 import { COLLECTIONS, getCollection } from './collections.config';
 
@@ -31,8 +32,8 @@ export class CollectionsController {
 
     const [items, total] = await Promise.all([
       this.prisma.game.findMany({
-        where: config.filter as any,
-        orderBy: orderBy as any,
+        where: config.filter as Prisma.GameWhereInput,
+        orderBy: orderBy as Prisma.GameOrderByWithRelationInput,
         skip,
         take: pageSize,
         select: {
@@ -42,7 +43,7 @@ export class CollectionsController {
           studio: { select: { name: true, slug: true } },
         },
       }),
-      this.prisma.game.count({ where: config.filter as any }),
+      this.prisma.game.count({ where: config.filter as Prisma.GameWhereInput }),
     ]);
 
     return { items, total, page, pageSize, hasMore: skip + pageSize < total };

@@ -78,7 +78,7 @@ export class AuthController {
   async sessionLogin(@Body() dto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const user = await this.authService.validateUser(dto.emailOrUsername, dto.password);
 
-    if ((user as any).totpEnabled) {
+    if (user.totpEnabled) {
       const totpToken = this.authService.generateTotpLoginToken(user.id);
       return { requires2fa: true, token: totpToken };
     }

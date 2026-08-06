@@ -68,9 +68,10 @@ export class EmailSenderService {
 
       await this.log(email, template.id, 'sent', userId);
       return true;
-    } catch (err: any) {
-      logger.error(`Failed to send email to ${email} template ${templateSlug}: ${err.message}`);
-      await this.log(email, undefined, 'failed', userId, err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error(`Failed to send email to ${email} template ${templateSlug}: ${message}`);
+      await this.log(email, undefined, 'failed', userId, message);
       return false;
     }
   }
@@ -94,9 +95,10 @@ export class EmailSenderService {
       }
       await this.log(email, undefined, 'sent', userId);
       return true;
-    } catch (err: any) {
-      logger.error(`Failed to send email to ${email}: ${err.message}`);
-      await this.log(email, undefined, 'failed', userId, err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error(`Failed to send email to ${email}: ${message}`);
+      await this.log(email, undefined, 'failed', userId, message);
       return false;
     }
   }

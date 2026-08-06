@@ -64,7 +64,7 @@ export class UploadController {
       if (dimensions.height && dimensions.height > 4096) {
         throw new BadRequestException('Image height exceeds 4096px limit');
       }
-    } catch (e: any) {
+    } catch (e) {
       if (e instanceof BadRequestException) throw e;
       throw new BadRequestException('Failed to read image dimensions');
     }

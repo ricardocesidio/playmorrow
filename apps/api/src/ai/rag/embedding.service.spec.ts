@@ -19,14 +19,11 @@ describe('EmbeddingService', () => {
       models: ['text-embedding-3-small'],
       chat: vi.fn(),
       chatStream: vi.fn(),
-      embed: vi.fn(),
+      embedTexts: vi.fn(),
       moderate: vi.fn(),
     };
 
     const mockFactory = {
-      getProvider: vi.fn().mockReturnValue(mockProvider),
-      getDefaultProvider: vi.fn().mockReturnValue(mockProvider),
-      getAvailableProviders: vi.fn(),
       getEmbeddingProvider: vi.fn().mockReturnValue(mockProvider),
     };
 
@@ -46,20 +43,19 @@ describe('EmbeddingService', () => {
 
   it('should embed single text', async () => {
     const result = createMockEmbedding(1);
-    mockProvider.embed = vi.fn().mockResolvedValue([result]);
+    mockProvider.embedTexts = vi.fn().mockResolvedValue([result]);
 
     const embedding = await service.embedText('This is a game description');
     expect(embedding).toBeDefined();
     expect(embedding.tokens).toBe(12);
     expect(embedding.embedding).toHaveLength(1536);
-    expect(mockProvider.embed).toHaveBeenCalledWith(
+    expect(mockProvider.embedTexts).toHaveBeenCalledWith(
       ['This is a game description'],
-      {},
     );
   });
 
   it('should embed multiple texts', async () => {
-    mockProvider.embed = vi.fn().mockResolvedValue([
+    mockProvider.embedTexts = vi.fn().mockResolvedValue([
       createMockEmbedding(1),
       createMockEmbedding(2),
       createMockEmbedding(3),
@@ -67,9 +63,8 @@ describe('EmbeddingService', () => {
 
     const results = await service.embedTexts(['Text A', 'Text B', 'Text C']);
     expect(results).toHaveLength(3);
-    expect(mockProvider.embed).toHaveBeenCalledWith(
+    expect(mockProvider.embedTexts).toHaveBeenCalledWith(
       ['Text A', 'Text B', 'Text C'],
-      {},
     );
   });
 
@@ -83,7 +78,7 @@ describe('EmbeddingService', () => {
   });
 
   it('should embed and return vector documents for a document', async () => {
-    mockProvider.embed = vi
+    mockProvider.embedTexts = vi
       .fn()
       .mockImplementation((texts: string[]) =>
         Promise.resolve(texts.map((_, i) => createMockEmbedding(i))),
@@ -107,7 +102,7 @@ describe('EmbeddingService', () => {
   });
 
   it('should handle embedding errors', async () => {
-    mockProvider.embed = vi
+    mockProvider.embedTexts = vi
       .fn()
       .mockRejectedValue(new Error('Embedding API unavailable'));
 

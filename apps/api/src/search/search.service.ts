@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import type { Prisma } from '@playmorrow/database';
+import type { Prisma, GameStatus } from '@playmorrow/database';
 
 export interface SearchFilters {
   genre?: string;
@@ -137,7 +137,7 @@ export class SearchService {
       and.push({ genres: { contains: filters.genre, mode: 'insensitive' } });
     }
     if (filters.status) {
-      and.push({ status: filters.status as any });
+      and.push({ status: filters.status as GameStatus });
     }
     if (filters.platform) {
       // Platform links are in PlatformLink model — query via game id

@@ -56,7 +56,7 @@ export class RoadmapItemsController {
     @Body() body: { items: { id: string; position: number }[] },
   ) {
     const result = await this.roadmapService.reorder(user.id, gameSlug, body.items);
-    this.eventBus.emit({ type: 'roadmap_updated', actorId: user.id, gameId: (result as any)?.gameId, studioId: (result as any)?.studioId, targetType: 'ROADMAP' });
+    this.eventBus.emit({ type: 'roadmap_updated', actorId: user.id, gameId: result.gameId, studioId: result.studioId, targetType: 'ROADMAP' });
     return result;
   }
 
@@ -89,7 +89,7 @@ export class RoadmapItemsController {
   @ApiOkResponse({ description: 'Roadmap item deleted.' })
   async remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     const result = await this.roadmapService.remove(user.id, id);
-    this.eventBus.emit({ type: 'roadmap_updated', actorId: user.id, gameId: (result as any)?.gameId, studioId: (result as any)?.studioId, targetType: 'ROADMAP_ITEM', targetId: id });
+    this.eventBus.emit({ type: 'roadmap_updated', actorId: user.id, gameId: result.gameId, studioId: result.studioId, targetType: 'ROADMAP_ITEM', targetId: id });
     return result;
   }
 }

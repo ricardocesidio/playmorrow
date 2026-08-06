@@ -47,12 +47,12 @@ describe('RecommendationsService', () => {
   });
 
   it('should respect limit parameter', async () => {
-    const result = await service.getRecommendations(null, 'trending', undefined, 3);
+    const result = await service.getRecommendations(null, 'trending', undefined, undefined, 3);
     expect(result.items.length).toBeLessThanOrEqual(3);
   });
 
   it('should include explainable reasons', async () => {
-    const result = await service.getRecommendations(null, 'trending', undefined, 5);
+    const result = await service.getRecommendations(null, 'trending', undefined, undefined, 5);
     for (const item of result.items) {
       if (item.score > 0) {
         expect(item.reasons.length).toBeGreaterThan(0);
@@ -61,7 +61,7 @@ describe('RecommendationsService', () => {
   });
 
   it('should have cursor pagination', async () => {
-    const result = await service.getRecommendations(null, 'trending', undefined, 2);
+    const result = await service.getRecommendations(null, 'trending', undefined, undefined, 2);
     if (result.hasMore) {
       expect(result.nextCursor).not.toBeNull();
       expect(result.nextCursor).toHaveProperty('score');

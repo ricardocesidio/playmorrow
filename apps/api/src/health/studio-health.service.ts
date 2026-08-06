@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import type { StudioHealthScore } from '@playmorrow/database';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class StudioHealthService {
   constructor(private prisma: PrismaService) {}
 
-  async calculate(studioId: string): Promise<any> {
+  async calculate(studioId: string): Promise<StudioHealthScore | null> {
     const studio = await this.prisma.studio.findUnique({
       where: { id: studioId },
       include: {
@@ -100,7 +101,7 @@ export class StudioHealthService {
     return healthScore;
   }
 
-  async getHealth(studioId: string): Promise<any> {
+  async getHealth(studioId: string): Promise<StudioHealthScore | null> {
     return this.prisma.studioHealthScore.findFirst({
       where: { studioId },
       orderBy: { calculatedAt: 'desc' },

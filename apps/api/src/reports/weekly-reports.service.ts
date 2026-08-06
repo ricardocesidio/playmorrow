@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import type { StudioWeeklyReport } from '@playmorrow/database';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -91,14 +92,14 @@ export class WeeklyReportsService {
     }
   }
 
-  async getReport(studioId: string): Promise<any> {
+  async getReport(studioId: string): Promise<StudioWeeklyReport | null> {
     return this.prisma.studioWeeklyReport.findFirst({
       where: { studioId },
       orderBy: { weekStart: 'desc' },
     });
   }
 
-  async getReports(studioId: string): Promise<any[]> {
+  async getReports(studioId: string): Promise<StudioWeeklyReport[]> {
     return this.prisma.studioWeeklyReport.findMany({
       where: { studioId },
       orderBy: { weekStart: 'desc' },

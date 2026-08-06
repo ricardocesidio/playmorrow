@@ -14,6 +14,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import * as crypto from 'node:crypto';
+import type { NextFunction, Request, Response } from 'express';
 
 import * as Sentry from '@sentry/node';
 import { logger, logRequest, createContextLogger } from './common/logger';
@@ -143,13 +144,13 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Structured request logging with pino (Observability item from elite audit)
-  app.use((req: any, res: any, next: any) => {
-    const requestId = req.headers['x-request-id'] || crypto.randomBytes(8).toString('hex');
+  app.use((req: Request & { requestId?: string; user?: { id?: string } | null; log?: ReturnType<typeof createContextLogger> }, res: Response, next: NextFunction) => {
+    const requestId = (req.headers['x-request-id'] || crypto.randomBytes(8).toString('hex')) as string;
     req.requestId = requestId;
     res.setHeader('x-request-id', requestId);
 
     const start = Date.now();
-    const userId = (req as any).user?.id ?? null;
+    const userId = req.user?.id ?? null;
 
     // Attach contextual logger for the request (polish for tracing)
     req.log = createContextLogger({ requestId, userId: userId || undefined });
@@ -185,8 +186,8 @@ async function bootstrap() {
   // Raw Express health endpoints — respond immediately, no NestJS dependency.
   // The deploy health check pings /health (configurable) and needs a 200
   // before NestJS finishes initializing all modules + database connection.
-  app.use('/api/health', (_req: any, res: any) => res.json({ status: 'ok', service: 'playmorrow-api' }));
-  app.use('/health', (_req: any, res: any) => res.json({ status: 'ok', service: 'playmorrow-api' }));
+  app.use('/api/health', (_req: Request, res: Response) => res.json({ status: 'ok', service: 'playmorrow-api' }));
+  app.use('/health', (_req: Request, res: Response) => res.json({ status: 'ok', service: 'playmorrow-api' }));
 
   // Give OS a moment to release the port before NestJS claims it
   await new Promise((r) => setTimeout(r, 500));

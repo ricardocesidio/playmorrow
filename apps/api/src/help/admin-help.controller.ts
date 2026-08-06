@@ -77,7 +77,7 @@ export class AdminHelpController {
   @ApiOkResponse({ description: 'Article publish status toggled.' })
   async togglePublish(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     const article = await this.helpService.togglePublish(id);
-    if ((article as any)?.isPublished) {
+    if (article.isPublished) {
       this.eventBus.emit({ type: 'help_article_published', actorId: user.id, targetType: 'HELP_ARTICLE', targetId: id });
     }
     return article;

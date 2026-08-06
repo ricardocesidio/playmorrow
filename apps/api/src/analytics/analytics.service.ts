@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { Prisma } from '@playmorrow/database';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface AnalyticsEventInput {
@@ -7,7 +8,7 @@ export interface AnalyticsEventInput {
   studioId?: string;
   userId?: string;
   sessionId?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   ip?: string;
   referrer?: string;
   userAgent?: string;
@@ -76,7 +77,7 @@ export class AnalyticsService {
         studioId: event.studioId ?? null,
         userId: event.userId ?? null,
         sessionId: event.sessionId ?? null,
-        metadata: event.metadata ?? undefined,
+        metadata: (event.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
         ip: event.ip ?? null,
         referrer: event.referrer ?? null,
         userAgent: event.userAgent ?? null,

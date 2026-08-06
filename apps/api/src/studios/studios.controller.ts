@@ -167,7 +167,7 @@ export class StudiosController {
 
   @Get(':slug/goals')
   @ApiOkResponse({ description: 'Studio goals with progress.' })
-  async getGoals(@Param('slug') slug: string): Promise<any> {
+  async getGoals(@Param('slug') slug: string): Promise<unknown> {
     const studio = await this.studiosService.findBySlug(slug);
     if (!studio) throw new NotFoundException('Studio not found');
     return this.goalsService.getGoals(studio.id);
@@ -175,7 +175,7 @@ export class StudiosController {
 
   @Get(':slug/achievements')
   @ApiOkResponse({ description: 'Studio achievements.' })
-  async getAchievements(@Param('slug') slug: string): Promise<any> {
+  async getAchievements(@Param('slug') slug: string): Promise<unknown> {
     const studio = await this.studiosService.findBySlug(slug);
     if (!studio) throw new NotFoundException('Studio not found');
     return this.studioAchievementsService.getAchievements(studio.id);
@@ -183,7 +183,7 @@ export class StudiosController {
 
   @Get(':slug/health')
   @ApiOkResponse({ description: 'Studio health score.' })
-  async getHealth(@Param('slug') slug: string): Promise<any> {
+  async getHealth(@Param('slug') slug: string): Promise<unknown> {
     const studio = await this.studiosService.findBySlug(slug);
     if (!studio) throw new NotFoundException('Studio not found');
     const existing = await this.studioHealthService.getHealth(studio.id);
@@ -194,7 +194,7 @@ export class StudiosController {
   @Post(':slug/health/refresh')
   @UseGuards(SessionAuthGuard)
   @ApiOkResponse({ description: 'Studio health score recalculated.' })
-  async refreshHealth(@Param('slug') slug: string): Promise<any> {
+  async refreshHealth(@Param('slug') slug: string): Promise<unknown> {
     const studio = await this.studiosService.findBySlug(slug);
     if (!studio) throw new NotFoundException('Studio not found');
     return this.studioHealthService.calculate(studio.id);
@@ -202,7 +202,7 @@ export class StudiosController {
 
   @Get(':slug/reports/weekly')
   @ApiOkResponse({ description: 'Weekly reports for a studio.' })
-  async getWeeklyReports(@Param('slug') slug: string): Promise<any> {
+  async getWeeklyReports(@Param('slug') slug: string): Promise<unknown> {
     const studio = await this.studiosService.findBySlug(slug);
     if (!studio) throw new NotFoundException('Studio not found');
     return this.weeklyReportsService.getReports(studio.id);

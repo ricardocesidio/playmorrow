@@ -8,12 +8,15 @@ import { ThrottlerGuard } from '@nestjs/throttler';
  */
 @Injectable()
 export class CustomThrottlerGuard extends ThrottlerGuard {
-  protected override async getTracker(req: Record<string, any>): Promise<string> {
-    const userId = req.user?.id;
-    if (userId) {
-      return `user:${userId}`;
+  protected override async getTracker(req: Record<string, unknown>): Promise<string> {
+    const user = req.user;
+    if (user && typeof user === 'object') {
+      const userId = (user as { id?: string }).id;
+      if (userId) {
+        return `user:${userId}`;
+      }
     }
     // Fallback to IP for unauthenticated or public routes
-    return req.ip;
+    return req.ip as string;
   }
 }

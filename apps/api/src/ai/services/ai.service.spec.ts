@@ -53,7 +53,10 @@ describe('AIService', () => {
       chat: vi.fn().mockResolvedValue(mockChatResponse),
       chatStream: vi.fn().mockReturnValue(mockStream()),
       embed: vi.fn().mockResolvedValue([mockEmbeddingResult]),
+      embedText: vi.fn().mockResolvedValue(mockEmbeddingResult),
+      embedTexts: vi.fn().mockResolvedValue([mockEmbeddingResult]),
       moderate: vi.fn().mockResolvedValue(mockModerationResult),
+      isConfigured: vi.fn().mockReturnValue(true),
       ...overrides,
     };
   }
@@ -61,13 +64,14 @@ describe('AIService', () => {
   beforeEach(async () => {
     const mockProvider = createMockProvider();
     const mockFactory = {
-      getProvider: vi.fn().mockReturnValue(mockProvider),
+      getChatProvider: vi.fn().mockReturnValue(mockProvider),
       getDefaultProvider: vi.fn().mockReturnValue(mockProvider),
+      getModerationProvider: vi.fn().mockReturnValue(mockProvider),
+      getEmbeddingProvider: vi.fn().mockReturnValue(mockProvider),
       getAvailableProviders: vi.fn().mockReturnValue([
         { name: 'openai', models: ['gpt-4o-mini', 'gpt-4o'], configured: true },
         { name: 'anthropic', models: ['claude-3-5-sonnet-20241022'], configured: false },
       ]),
-      getEmbeddingProvider: vi.fn().mockReturnValue(mockProvider),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -126,7 +130,7 @@ describe('AIService', () => {
 
   it('should handle provider errors gracefully', async () => {
     const errorMockFactory = {
-      getProvider: vi.fn().mockReturnValue({
+      getChatProvider: vi.fn().mockReturnValue({
         ...createMockProvider(),
         chat: vi.fn().mockRejectedValue(new Error('API rate limit exceeded')),
       }),
@@ -148,7 +152,7 @@ describe('AIService', () => {
 
   it('should respect rate limits when provider fails', async () => {
     const errorMockFactory = {
-      getProvider: vi.fn().mockReturnValue({
+      getChatProvider: vi.fn().mockReturnValue({
         ...createMockProvider(),
         chat: vi.fn().mockRejectedValue(new Error('Rate limit exceeded')),
       }),

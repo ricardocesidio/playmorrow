@@ -95,14 +95,14 @@ export class GamesController {
     this.analyticsService.track({
       eventType: 'game_view',
       gameId: game.id,
-      studioId: (game as any).studio?.id,
-      sessionId: (req as any).sessionId,
+      studioId: game.studio?.id,
+      sessionId: (req as Request & { sessionId?: string }).sessionId,
       ip: req.ip,
       userAgent: req.headers['user-agent'],
       referrer: req.headers['referer'],
     }).catch(() => {});
 
-    this.eventBus.emit({ type: 'game_view', gameId: game.id, studioId: (game as any).studio?.id, targetType: 'GAME', targetId: game.id });
+    this.eventBus.emit({ type: 'game_view', gameId: game.id, studioId: game.studio?.id, targetType: 'GAME', targetId: game.id });
 
     return game;
   }

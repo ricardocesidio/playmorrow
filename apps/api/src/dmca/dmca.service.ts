@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import type { ReportTargetType } from '@playmorrow/database';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventBus } from '../common/event-bus';
 import { logger } from '../common/logger';
@@ -31,7 +32,7 @@ export class DmcaService {
     const notice = await this.prisma.moderationReport.create({
       data: {
         reporterId: dmcaUserId,
-        targetType: data.targetType as any,
+        targetType: data.targetType as ReportTargetType,
         targetId: data.targetId,
         reason: 'COPYRIGHT',
         details: JSON.stringify({
@@ -107,7 +108,7 @@ export class DmcaService {
     return { items: items.map(r => ({ ...r, details: this.safeParse(r.details) })), total, page, pageSize, hasMore: page * pageSize < total };
   }
 
-  private safeParse(json: string | null): any {
+  private safeParse(json: string | null): unknown {
     try { return json ? JSON.parse(json) : null; } catch { return json; }
   }
 }

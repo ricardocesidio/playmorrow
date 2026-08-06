@@ -12,7 +12,7 @@ import { LatestReleasesScorer } from './scorers/latest-releases.scorer';
 import { InMemoryCacheProvider } from './in-memory-cache';
 import type { RecommendationScorer } from './scorers/recommendation-scorer.interface';
 
-export interface RecommendationItem {
+interface RecommendationItem {
   gameId: string;
   score: number;
   reasons: string[];

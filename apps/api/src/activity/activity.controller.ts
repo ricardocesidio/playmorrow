@@ -20,7 +20,7 @@ export class ActivityController {
     @Query('actorId') actorId?: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('pageSize', new DefaultValuePipe(20), ParseIntPipe) pageSize?: number,
-  ): Promise<any> {
+  ): Promise<Awaited<ReturnType<ActivityService['list']>>> {
     return this.activityService.list({ studioId, gameId, actorId, page, pageSize });
   }
 }

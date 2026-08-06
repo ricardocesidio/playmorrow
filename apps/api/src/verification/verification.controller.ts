@@ -1,4 +1,5 @@
 import { Body, Controller, Get, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
+import type { Prisma, StudioVerificationRequest, StudioVerificationStatus } from '@playmorrow/database';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
@@ -16,8 +17,8 @@ export class VerificationController {
   async requestVerification(
     @Param('slug') slug: string,
     @CurrentUser() user: { id: string },
-    @Body() body: { requestedLevel: string; documents?: any },
-  ): Promise<any> {
+    @Body() body: { requestedLevel: StudioVerificationStatus; documents?: Prisma.InputJsonValue },
+  ): Promise<StudioVerificationRequest> {
     const studio = await this.prisma.studio.findUnique({ where: { slug } });
     if (!studio) throw new NotFoundException('Studio not found');
     return this.verificationService.requestVerification(studio.id, body.requestedLevel, body.documents);
@@ -25,7 +26,14 @@ export class VerificationController {
 
   @Get()
   @UseGuards(SessionAuthGuard)
-  async getStatus(@Param('slug') slug: string): Promise<any> {
+  async getStatus(@Param('slug') slug: string): Promise<{
+    studioId: string;
+    studioName: string;
+    studioSlug: string;
+    verificationStatus: StudioVerificationStatus;
+    trustScore: number;
+    currentRequest: Awaited<ReturnType<VerificationService['getStudioRequest']>>;
+  }> {
     const studio = await this.prisma.studio.findUnique({ where: { slug } });
     if (!studio) throw new NotFoundException('Studio not found');
     const request = await this.verificationService.getStudioRequest(studio.id);

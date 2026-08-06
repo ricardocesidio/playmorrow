@@ -507,9 +507,9 @@ export class AuthService {
 
         return completedUser;
       });
-    } catch (err: any) {
-      if (err?.code === 'P2002') {
-        const target = err?.meta?.target as string[] | undefined;
+    } catch (err: unknown) {
+      if ((err as { code?: string })?.code === 'P2002') {
+        const target = (err as { meta?: { target?: string[] } })?.meta?.target as string[] | undefined;
         if (target?.includes('slug')) {
           throw new ConflictException('Studio slug already taken');
         }
@@ -573,7 +573,7 @@ export class AuthService {
   async generateTotpSecret(userId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-    if ((user as any).totpEnabled) throw new BadRequestException('2FA is already enabled');
+    if (user.totpEnabled) throw new BadRequestException('2FA is already enabled');
 
     const secret = this.totpService.generateSecret();
     const encrypted = this.totpService.encryptSecret(secret);
@@ -581,7 +581,7 @@ export class AuthService {
 
     await this.prisma.user.update({
       where: { id: userId },
-      data: { totpSecret: encrypted } as any,
+      data: { totpSecret: encrypted },
     });
 
     return { secret, qrCodeUri };
@@ -590,10 +590,10 @@ export class AuthService {
   async enableTotp(userId: string, token: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-    if ((user as any).totpEnabled) throw new BadRequestException('2FA is already enabled');
-    if (!(user as any).totpSecret) throw new BadRequestException('Generate a secret first via /auth/2fa/enable');
+    if (user.totpEnabled) throw new BadRequestException('2FA is already enabled');
+    if (!user.totpSecret) throw new BadRequestException('Generate a secret first via /auth/2fa/enable');
 
-    const secret = this.totpService.decryptSecret((user as any).totpSecret);
+    const secret = this.totpService.decryptSecret(user.totpSecret);
     if (!this.totpService.verifyToken(token, secret)) {
       throw new BadRequestException('Invalid verification code');
     }
@@ -603,7 +603,7 @@ export class AuthService {
 
     await this.prisma.user.update({
       where: { id: userId },
-      data: { totpEnabled: true, recoveryCodes: hashedCodes } as any,
+      data: { totpEnabled: true, recoveryCodes: hashedCodes },
     });
 
     return recoveryCodes;
@@ -612,27 +612,27 @@ export class AuthService {
   async disableTotp(userId: string, token: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-    if (!(user as any).totpEnabled) throw new BadRequestException('2FA is not enabled');
-    if (!(user as any).totpSecret) throw new BadRequestException('TOTP not configured');
+    if (!user.totpEnabled) throw new BadRequestException('2FA is not enabled');
+    if (!user.totpSecret) throw new BadRequestException('TOTP not configured');
 
-    const secret = this.totpService.decryptSecret((user as any).totpSecret);
+    const secret = this.totpService.decryptSecret(user.totpSecret);
     if (!this.totpService.verifyToken(token, secret)) {
       throw new BadRequestException('Invalid verification code');
     }
 
     await this.prisma.user.update({
       where: { id: userId },
-      data: { totpEnabled: false, totpSecret: null, recoveryCodes: [] } as any,
+      data: { totpEnabled: false, totpSecret: null, recoveryCodes: [] },
     });
   }
 
   async getRecoveryCodes(userId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-    if (!(user as any).totpEnabled || !(user as any).recoveryCodes?.length) {
+    if (!user.totpEnabled || !user.recoveryCodes?.length) {
       throw new BadRequestException('2FA is not enabled');
     }
-    return (user as any).recoveryCodes;
+    return user.recoveryCodes;
   }
 
   generateTotpLoginToken(userId: string): string {
@@ -650,18 +650,18 @@ export class AuthService {
     }
 
     const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
-    if (!user || !(user as any).totpEnabled || !(user as any).totpSecret) {
+    if (!user || !user.totpEnabled || !user.totpSecret) {
       throw new UnauthorizedException('2FA not enabled');
     }
 
-    const secret = this.totpService.decryptSecret((user as any).totpSecret);
+    const secret = this.totpService.decryptSecret(user.totpSecret);
     if (!this.totpService.verifyToken(code, secret)) {
       throw new UnauthorizedException('Invalid 2FA code');
     }
 
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { lastLoginAt: new Date() } as any,
+      data: { lastLoginAt: new Date() },
     });
 
     return user.id;
@@ -677,11 +677,11 @@ export class AuthService {
     }
 
     const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
-    if (!user || !(user as any).totpEnabled || !(user as any).recoveryCodes?.length) {
+    if (!user || !user.totpEnabled || !user.recoveryCodes?.length) {
       throw new UnauthorizedException('No recovery codes available');
     }
 
-    const recoveryCodes: string[] = (user as any).recoveryCodes;
+    const recoveryCodes: string[] = user.recoveryCodes;
     const codeHash = createHash('sha256').update(code).digest('hex');
     const found = recoveryCodes.some((hashed) =>
       timingSafeEqual(Buffer.from(hashed, 'hex'), Buffer.from(codeHash, 'hex')),
@@ -694,7 +694,7 @@ export class AuthService {
 
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { recoveryCodes: updatedCodes, lastLoginAt: new Date() } as any,
+      data: { recoveryCodes: updatedCodes, lastLoginAt: new Date() },
     });
 
     return user.id;

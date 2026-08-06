@@ -24,8 +24,6 @@ const STUDIO_INCLUDE = {
   _count: { select: { members: true, games: true, followers: true } },
 } satisfies Prisma.StudioInclude;
 
-export type StudioResponse = Awaited<ReturnType<StudiosService['findBySlug']>>;
-
 @Injectable()
 export class StudiosService {
   constructor(
@@ -82,7 +80,19 @@ export class StudiosService {
   }
 
   // Simple in-memory cache stub for studios list (Redis cache stub per audit item 4)
-  private studiosCache = new Map<string, { data: any; expires: number }>();
+  private studiosCache = new Map<
+    string,
+    {
+      data: {
+        items: ReturnType<StudiosService['toResponse']>[];
+        total: number;
+        page: number;
+        pageSize: number;
+        hasMore: boolean;
+      };
+      expires: number;
+    }
+  >();
 
   async findAll(page = 1, pageSize = 20, search?: string) {
     const cacheKey = `studios:${page}:${pageSize}:${search || ''}`;
@@ -482,7 +492,7 @@ export class StudiosService {
       }
     }
 
-    const publishedGames = games.filter(g => g.slug && (g as any).isPublished !== false).length;
+    const publishedGames = games.filter(g => g.slug && (g as { isPublished?: boolean }).isPublished !== false).length;
     const inDevelopmentGames = games.length - publishedGames;
 
     return {

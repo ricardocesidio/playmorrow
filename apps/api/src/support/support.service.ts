@@ -144,7 +144,7 @@ export class SupportService {
     });
 
     if (files && files.length > 0) {
-      const attachmentRecords = [];
+      const attachmentRecords: typeof reply.attachments = [];
       for (const file of files) {
         const stored = await this.uploadService.storeFile(file);
         const attachment = await this.prisma.supportAttachment.create({
@@ -160,7 +160,7 @@ export class SupportService {
         attachmentRecords.push(attachment);
       }
 
-      reply.attachments = attachmentRecords as any;
+      reply.attachments = attachmentRecords;
     }
 
     if (isStaff && ticket.status === 'WAITING_CUSTOMER') {
@@ -341,7 +341,7 @@ export class SupportService {
     action: string,
     fromValue?: string,
     toValue?: string,
-    metadata?: Record<string, unknown>,
+    metadata?: Prisma.InputJsonValue,
   ) {
     await this.prisma.supportTicketHistory.create({
       data: {
@@ -350,7 +350,7 @@ export class SupportService {
         action,
         fromValue: fromValue ?? null,
         toValue: toValue ?? null,
-        metadata: (metadata ?? undefined) as any,
+        metadata: metadata ?? undefined,
       },
     });
   }
@@ -367,10 +367,10 @@ export class SupportService {
       const notification = {
         recipientId: ticket.authorId,
         actorId: null,
-        type: 'SUPPORT_TICKET' as any,
+        type: 'SUPPORT_TICKET',
         title: `Support ticket #${ticket.id.slice(0, 8)}: ${action.replace('_', ' ')}`,
         body: action === 'created' ? `Your ticket "${ticket.title}" has been created.` : `Your ticket "${ticket.title}" has been updated.`,
-        targetType: 'SUPPORT_TICKET' as any,
+        targetType: 'SUPPORT_TICKET',
         targetId: ticket.id,
       };
 

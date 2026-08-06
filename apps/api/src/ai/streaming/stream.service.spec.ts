@@ -35,7 +35,7 @@ describe('StreamService', () => {
     };
 
     const mockFactory = {
-      getProvider: vi.fn().mockReturnValue(mockProvider),
+      getChatProvider: vi.fn().mockReturnValue(mockProvider),
       getDefaultProvider: vi.fn().mockReturnValue(mockProvider),
       getAvailableProviders: vi.fn(),
       getEmbeddingProvider: vi.fn(),
@@ -108,7 +108,7 @@ describe('StreamService', () => {
     };
 
     const errorFactory = {
-      getProvider: vi.fn().mockReturnValue(errorProvider),
+      getChatProvider: vi.fn().mockReturnValue(errorProvider),
       getDefaultProvider: vi.fn(),
       getAvailableProviders: vi.fn(),
       getEmbeddingProvider: vi.fn(),
@@ -152,7 +152,7 @@ describe('StreamService', () => {
     };
 
     const emptyFactory = {
-      getProvider: vi.fn().mockReturnValue(emptyProvider),
+      getChatProvider: vi.fn().mockReturnValue(emptyProvider),
       getDefaultProvider: vi.fn(),
       getAvailableProviders: vi.fn(),
       getEmbeddingProvider: vi.fn(),

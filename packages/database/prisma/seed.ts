@@ -8,10 +8,11 @@ async function main() {
     create: {
       email: 'test@playmorrow.co',
       username: 'testuser',
+      displayName: 'Test User',
       passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$testhash',
       accountType: 'PLAYER',
       isOnboardingCompleted: true,
-      emailVerified: true,
+      emailVerifiedAt: new Date(),
     },
   });
   console.log('Seed user:', user.id);

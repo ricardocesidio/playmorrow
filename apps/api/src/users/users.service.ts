@@ -112,7 +112,7 @@ export class UsersService {
    * GDPR data export stub: gathers user's personal data.
    * Returns a JSON blob with profile, activity, etc. (expand as needed).
    */
-  async exportUserData(userId: string): Promise<Record<string, any> | null> {
+  async exportUserData(userId: string): Promise<Record<string, unknown> | null> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {

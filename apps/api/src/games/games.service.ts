@@ -33,6 +33,8 @@ const GAME_LIST_INCLUDE = {
   _count: { select: { followers: true, wishlistItems: true } },
 } as const;
 
+type GameWithInclude = Prisma.GameGetPayload<{ include: typeof GAME_INCLUDE }>;
+
 @Injectable()
 export class GamesService {
   constructor(
@@ -417,8 +419,8 @@ export class GamesService {
     publishedAt: Date | null;
     createdAt: Date; updatedAt: Date;
     studio?: { id: string; name: string; slug: string; };
-    media?: any[]; tags?: any[]; platformLinks?: any[];
-    devlogs?: any[]; roadmapItems?: any[];
+    media?: GameWithInclude['media']; tags?: GameWithInclude['tags']; platformLinks?: GameWithInclude['platformLinks'];
+    devlogs?: GameWithInclude['devlogs']; roadmapItems?: GameWithInclude['roadmapItems'];
     _count?: { comments?: number; followers?: number; wishlistItems?: number; views?: number; };
   }) {
     return {

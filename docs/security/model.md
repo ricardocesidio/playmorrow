@@ -11,7 +11,7 @@
 ## Authorization & RBAC
 - Global roles: PLAYER, PUBLISHER, MODERATOR, ADMIN.
 - Studio roles: OWNER (max 2), ADMIN (max 3), MODERATOR (max 10), MEMBER (unlimited).
-- Enforcement: `assertPermission` + `StudioRolesGuard`.
+- Enforcement: `assertStudioAccess`/`assertSeatLimit` + `StudioRolesGuard`.
 - Global ADMIN bypass for emergencies.
 
 ## CSRF

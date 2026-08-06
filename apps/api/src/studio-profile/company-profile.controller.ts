@@ -26,7 +26,7 @@ export class CompanyProfileController {
   @StudioRoles(StudioRole.OWNER, StudioRole.ADMIN)
   async update(
     @Param('slug') slug: string,
-    @Body() body: Record<string, any>,
+    @Body() body: Record<string, unknown>,
   ) {
     const studio = await this.studiosService.findBySlug(slug);
     if (!studio) throw new NotFoundException('Studio not found');

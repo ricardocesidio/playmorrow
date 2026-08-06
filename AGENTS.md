@@ -792,3 +792,30 @@ Phase 5 hardening and architecture consolidation. No new features, no schema exp
 
 **Created:** apps/api/src/common/redis-throttler.storage.ts(+spec), migration `20260806000000_add_missing_enum_types`, docs/strategy/README.md
 **Updated:** STATUS.md, SECURITY.md, ARCHITECTURE.md, README.md, AGENTS.md
+
+### Session 24 (continued) — AI Spec Rebase, Dead-Code Sweep & `any` Zero (2026-08-06)
+
+Follow-up execution after the v0.9 hardening commit. No features, no schema changes.
+
+**AI test suite rebased (25 failures → 0):**
+- All 25 pre-existing AI/recommendations spec failures fixed by rebuilding stale mocks against the current `ProviderFactory` API (`getChatProvider`/`getModerationProvider`/`getEmbeddingProvider`, `provider.embedTexts`) — `ai.service.spec`, `stream.service.spec`, `embedding.service.spec`.
+- `ai/services/recommendation.service.spec.ts` rewritten: service now injects `EmbeddingService` (not `ProviderFactory`), no longer returns `basedOnTags`; assertions aligned with `semantic-embedding`/`popularity-fallback` methods + `Similar tags to X` reasons.
+- `recommendations/recommendations.service.spec.ts`: fixed a wrong-arg bug — `getRecommendations` limit is the 5th positional arg, tests passed it as `studioId` (4th).
+- Full API suite now **478/478 across 46 files** (was 451).
+
+**knip dead-code sweep (12 files / 4 deps removed):**
+- Deleted 8 unused AI barrel/prompt files (`src/ai/index.ts` + `config|controllers|dto|interfaces|providers|services/index.ts`, `prompts/built-in.prompts.ts`), stray `apps/api/postcss.config.js`.
+- Removed unused deps: `@anthropic-ai/sdk` (provider uses raw fetch), `@sentry/core` (only `@sentry/node` used), `@nestjs/mapped-types` (PartialType now imported from `@nestjs/swagger`), `@types/dompurify` (dompurify v3 bundles types).
+- Added missing devDeps that scripts actually use: `@vitest/coverage-v8` (vitest.config coverage), `tsx`, `tsconfig-paths`.
+- Removed dead symbols: `assertPermission` (real guard is `StudioRolesGuard`; doc `docs/security/model.md` updated), `SearchRequestDto`, `StudioResponse`, `AI_PROVIDER`, unused `ToolResult`; un-exported `RecommendationItem`, `VALID_REPORT_REASONS`, `mockEmailService`.
+- Remaining knip findings are intentional/false-positive: dev seed scripts (`email-templates.seed.ts`, `help-seed.ts`), `scripts/load-test.js` (k6), `pino-pretty` (string transport target), `k6` binary.
+
+**`any` warnings → 0 across the entire API repo:**
+- All 122 `no-explicit-any` warnings outside Phase 5 eliminated (44 files) via parallel agents — type-only cleanup, zero behavior change. Notable: dropped stale TOTP `as any` casts in auth.service (schema has `totpSecret`/`totpEnabled`/`recoveryCodes`), `Awaited<ReturnType<...>>` for controller `Promise<any>` returns, Prisma payload types via `Prisma.XxxGetPayload`, `unknown` for webhook/error paths.
+- ESLint now: **0 errors, 27 warnings** (only pre-existing unused-var warnings, e.g. `token`).
+- `pnpm verify` gate (root): lint + typecheck + build green across web/api/database. Fixed a pre-existing `prisma/seed.ts` drift it exposed (`emailVerified` → `emailVerifiedAt`, added required `displayName`).
+
+**Gates:** `pnpm verify` ✅ (turbo lint/typecheck/build all workspaces) · Vitest 478/478 ✅ · ESLint 0 errors ✅
+
+**Updated:** STATUS.md (test counts, resolved issues, renumbered remaining), AGENTS.md
+**Commit:** follows `e0e19a4` (v0.9 hardening)

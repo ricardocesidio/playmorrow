@@ -2,7 +2,7 @@ export interface CollectionDef {
   slug: string;
   label: string;
   description: string;
-  filter: Record<string, any>;
+  filter: Record<string, unknown>;
   sort?: string;
 }
 

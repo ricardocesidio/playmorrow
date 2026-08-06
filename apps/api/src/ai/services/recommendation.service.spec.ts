@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RecommendationService } from './recommendation.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { ProviderFactory } from '../../ai/providers/provider.factory';
+import { EmbeddingService } from '../rag/embedding.service';
 
 describe('RecommendationService', () => {
   let service: RecommendationService;
@@ -58,12 +58,18 @@ describe('RecommendationService', () => {
     };
   }
 
+  function createMockEmbeddingService() {
+    return {
+      embedTexts: vi.fn().mockRejectedValue(new Error('embeddings unavailable')),
+    };
+  }
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RecommendationService,
         { provide: PrismaService, useValue: createMockPrisma() },
-        { provide: ProviderFactory, useValue: { getProvider: vi.fn() } },
+        { provide: EmbeddingService, useValue: createMockEmbeddingService() },
       ],
     }).compile();
 
@@ -79,10 +85,9 @@ describe('RecommendationService', () => {
     expect(result.method).toBe('popularity-fallback');
     expect(result.total).toBe(3);
     expect(result.recommendations[0].explanation).toBe('Popular on Playmorrow');
-    expect(result.basedOnTags).toEqual([]);
   });
 
-  it('should return content-based recommendations when user has wishlist history', async () => {
+  it('should recommend games with similar tags when user has wishlist history', async () => {
     const mockPrisma = createMockPrisma({
       wishlistItem: {
         findMany: vi.fn().mockResolvedValue([
@@ -97,29 +102,29 @@ describe('RecommendationService', () => {
       providers: [
         RecommendationService,
         { provide: PrismaService, useValue: mockPrisma },
-        { provide: ProviderFactory, useValue: { getProvider: vi.fn() } },
+        { provide: EmbeddingService, useValue: createMockEmbeddingService() },
       ],
     }).compile();
 
     const svc = module.get(RecommendationService);
     const result = await svc.getRecommendations('history-user', 5);
 
-    expect(result.method).toBe('content-based');
-    expect(result.basedOnTags).toContain('action');
-    expect(result.basedOnTags).toContain('rpg');
+    expect(result.method).toBe('semantic-embedding');
 
     const actionGame = result.recommendations.find((r) => r.id === 'game-1');
     expect(actionGame).toBeDefined();
-    expect(actionGame!.explanation).toContain('similar tags');
+    expect(actionGame!.explanation).toMatch(/similar tags to user game/i);
   });
 
   it('should boost games from followed studios', async () => {
     const mockPrisma = createMockPrisma({
+      wishlistItem: {
+        findMany: vi.fn().mockResolvedValue([
+          { game: makeGame({ id: 'wish-1', title: 'Wish Game', tags: [mockGameTag('action')] }) },
+        ]),
+      },
       follow: {
         findMany: vi.fn().mockResolvedValue([{ studioId: 'studio-2' }]),
-      },
-      wishedlistItem: {
-        findMany: vi.fn().mockResolvedValue([]),
       },
     });
 
@@ -127,7 +132,7 @@ describe('RecommendationService', () => {
       providers: [
         RecommendationService,
         { provide: PrismaService, useValue: mockPrisma },
-        { provide: ProviderFactory, useValue: { getProvider: vi.fn() } },
+        { provide: EmbeddingService, useValue: createMockEmbeddingService() },
       ],
     }).compile();
 
@@ -136,7 +141,7 @@ describe('RecommendationService', () => {
 
     const boosted = result.recommendations.find((r) => r.id === 'game-2');
     expect(boosted).toBeDefined();
-    expect(boosted!.explanation).toContain('you follow this studio');
+    expect(boosted!.explanation).toMatch(/from other studio/i);
   });
 
   it('should respect the limit parameter', async () => {
@@ -150,7 +155,7 @@ describe('RecommendationService', () => {
       providers: [
         RecommendationService,
         { provide: PrismaService, useValue: mockPrisma },
-        { provide: ProviderFactory, useValue: { getProvider: vi.fn() } },
+        { provide: EmbeddingService, useValue: createMockEmbeddingService() },
       ],
     }).compile();
 
@@ -174,7 +179,7 @@ describe('RecommendationService', () => {
       providers: [
         RecommendationService,
         { provide: PrismaService, useValue: mockPrisma },
-        { provide: ProviderFactory, useValue: { getProvider: vi.fn() } },
+        { provide: EmbeddingService, useValue: createMockEmbeddingService() },
       ],
     }).compile();
 
@@ -183,7 +188,7 @@ describe('RecommendationService', () => {
 
     const topRec = result.recommendations[0];
     expect(topRec.id).toBe('game-1');
-    expect(topRec.explanation).toMatch(/you follow this studio|similar tags/);
+    expect(topRec.explanation).toMatch(/similar tags to wish game/i);
   });
 
   it('should not include user-owned games in recommendations', async () => {
@@ -221,7 +226,7 @@ describe('RecommendationService', () => {
       providers: [
         RecommendationService,
         { provide: PrismaService, useValue: mockPrisma },
-        { provide: ProviderFactory, useValue: { getProvider: vi.fn() } },
+        { provide: EmbeddingService, useValue: createMockEmbeddingService() },
       ],
     }).compile();
 

@@ -36,7 +36,7 @@ export class SupportController {
   async createTicket(
     @CurrentUser() user: { id: string },
     @Body() dto: CreateTicketDto,
-  ): Promise<any> {
+  ): Promise<Awaited<ReturnType<SupportService['createTicket']>>> {
     const ticket = await this.supportService.createTicket(user.id, dto);
     this.eventBus.emit({ type: 'support_ticket_created', actorId: user.id, targetType: 'SUPPORT_TICKET', targetId: ticket.id });
     return ticket;
@@ -53,7 +53,7 @@ export class SupportController {
   async listMyTickets(
     @CurrentUser() user: { id: string },
     @Query() query: QueryTicketsDto,
-  ): Promise<any> {
+  ): Promise<Awaited<ReturnType<SupportService['listMyTickets']>>> {
     return this.supportService.listMyTickets(user.id, query);
   }
 
@@ -63,7 +63,7 @@ export class SupportController {
   async getTicket(
     @CurrentUser() user: { id: string },
     @Param('id') id: string,
-  ): Promise<any> {
+  ): Promise<Awaited<ReturnType<SupportService['getTicket']>>> {
     return this.supportService.getTicket(id, user.id);
   }
 
@@ -77,7 +77,7 @@ export class SupportController {
     @Param('id') id: string,
     @Body() dto: CreateReplyDto,
     @UploadedFiles() files?: Express.Multer.File[],
-  ): Promise<any> {
+  ): Promise<Awaited<ReturnType<SupportService['addReply']>>> {
     return this.supportService.addReply(id, user.id, dto, files);
   }
 
@@ -87,13 +87,13 @@ export class SupportController {
   async listReplies(
     @CurrentUser() user: { id: string },
     @Param('id') id: string,
-  ): Promise<any> {
+  ): Promise<Awaited<ReturnType<SupportService['listReplies']>>> {
     return this.supportService.listReplies(id, user.id);
   }
 
   @Get('categories')
   @ApiOkResponse({ description: 'List of support categories.' })
-  async listCategories(): Promise<any> {
+  async listCategories(): Promise<Awaited<ReturnType<SupportService['getCategories']>>> {
     return this.supportService.getCategories();
   }
 }

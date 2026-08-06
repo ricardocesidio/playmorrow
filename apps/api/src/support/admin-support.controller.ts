@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import type { SupportTicketStatus } from '@playmorrow/database';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
@@ -34,7 +35,7 @@ export class AdminSupportController {
   @ApiQuery({ name: 'priority', required: false })
   @ApiQuery({ name: 'department', required: false })
   @ApiQuery({ name: 'search', required: false })
-  async listAllTickets(@Query() query: QueryTicketsDto): Promise<any> {
+  async listAllTickets(@Query() query: QueryTicketsDto): Promise<Awaited<ReturnType<SupportService['listAllTickets']>>> {
     return this.supportService.listAllTickets(query);
   }
 
@@ -43,7 +44,7 @@ export class AdminSupportController {
   async getTicket(
     @CurrentUser() user: { id: string },
     @Param('id') id: string,
-  ): Promise<any> {
+  ): Promise<Awaited<ReturnType<SupportService['getTicket']>>> {
     return this.supportService.getTicket(id, user.id);
   }
 
@@ -54,7 +55,7 @@ export class AdminSupportController {
     @CurrentUser() user: { id: string },
     @Param('id') id: string,
     @Body() dto: UpdateTicketDto,
-  ): Promise<any> {
+  ): Promise<Awaited<ReturnType<SupportService['updateTicket']>>> {
     return this.supportService.updateTicket(id, user.id, dto, true);
   }
 
@@ -65,7 +66,7 @@ export class AdminSupportController {
     @CurrentUser() user: { id: string },
     @Param('id') id: string,
     @Body('assigneeId') assigneeId: string,
-  ): Promise<any> {
+  ): Promise<Awaited<ReturnType<SupportService['assignTicket']>>> {
     return this.supportService.assignTicket(id, assigneeId, user.id);
   }
 
@@ -76,7 +77,7 @@ export class AdminSupportController {
     @CurrentUser() user: { id: string },
     @Param('id') id: string,
     @Body('status') status: string,
-  ): Promise<any> {
-    return this.supportService.updateTicket(id, user.id, { status: status as any }, true);
+  ): Promise<Awaited<ReturnType<SupportService['updateTicket']>>> {
+    return this.supportService.updateTicket(id, user.id, { status: status as SupportTicketStatus }, true);
   }
 }
