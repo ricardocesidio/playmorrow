@@ -157,17 +157,19 @@ Current state: v0.85-beta — functional, not production-hardened.
 | ✅ | 122 `any` warnings across 44 modules | 0 remaining (full repo); type-only cleanup, no behavior change |
 | ✅ | Dead code (knip) | Removed 8 dead AI barrel/prompt files + stray postcss.config.js; removed unused deps (@anthropic-ai/sdk, @sentry/core, @nestjs/mapped-types, @types/dompurify); added missing devDeps (@vitest/coverage-v8, tsx, tsconfig-paths); deleted unused assertPermission, SearchRequestDto, StudioResponse, AI_PROVIDER |
 | ✅ | prisma/seed.ts drift | emailVerified → emailVerifiedAt + missing displayName (blocked `pnpm verify`) |
+| ✅ | SSE/RxJS single-instance | Redis pub/sub bridge (`RedisPubSubService` + `NotificationPubSubService`); multi-instance relay via `playmorrow:notifications` channel, per-instance UUID dedupe, fail-open when `REDIS_URL` absent |
+| ✅ | No delete/edit for marketplace listings | `DELETE /marketplace/:id` soft-archives (OWNER/ADMIN RBAC); edit page `/dashboard/marketplace/[id]`; dashboard shows all statuses + Archive/Edit |
+| ✅ | fileUrl shown for non-owners | Verified already resolved — backend strips `fileUrl` in `getListing`; UI block was dead code |
+| ✅ | No Phase 5 E2E tests | 9 mock-based Playwright specs (marketplace browse/filter/edit/archive, events, partners, revenue, creator) — 18/18 green (desktop + mobile) |
+| ✅ | Dev DB migration history drifted | Dev DB reset + reconciliation migration `20260806010000_reconcile_schema_to_prisma`; 39/39 migrations applied, zero drift vs `schema.prisma`, seeded, API 200. Migration also fixes fresh/prod deploys (was missing `ReferralUsage` table + `VerificationRequestStatus` enum; had orphan `devlogs.coverUrl`, wrong FK/onDelete + index parity) |
+| ✅ | Integration tests share Neon dev DB | Dedicated local test DB provisioned (Colima + Docker + `docker-compose.yml` `postgres-test` on :5433). Schema replayed via all 39 migrations, full suite green: 48 files / 490 tests against `TEST_DATABASE_URL` |
 
 ### Remaining
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 1 | No Phase 5 E2E tests (Playwright) | Medium | Specs exist, CI pending |
-| 2 | Integration tests share Neon dev DB | Medium | Planned |
-| 3 | SSE/RxJS single-instance (needs Redis pub/sub for scaling) | Low | Planned |
-| 4 | Dev DB migration history drifted (13 migrations unapplied, 1 failed) | Medium | Re-provision dev DB or reconcile via prisma migrate resolve |
-| 5 | No staging environment deployed | Medium | render.yaml configured, not deployed |
-| 6 | No delete/edit for marketplace listings | Low | Planned |
-| 7 | fileUrl shown in UI for non-owners | Low | Backend strips it; UI block is dead code |
+| 5 | No staging environment deployed | Medium | Skipped by decision (dedicated test DB chosen over staging) |
+
+> **Migration ops note:** `prisma migrate deploy`/`resolve` time out with P1002 against the Neon endpoint (both pooled `-pooler` and direct hosts block session advisory locks). Dev migration workflow = run the SQL via `prisma db execute` (single transaction), then record in `_prisma_migrations` with the correct SHA-256 checksum (or use a Neon branch that exposes a real direct endpoint). `prisma migrate status` and `prisma migrate diff` work fine.
 
 ---
 

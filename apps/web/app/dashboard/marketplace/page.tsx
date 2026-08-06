@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Pencil, Archive } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
 import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { Button } from '@/components/ui/button';
-import { useMyStudios, useStudioListings } from '@/lib/api/hooks';
+import { useMyStudios, useStudioListings, useDeleteListing } from '@/lib/api/hooks';
 import { formatPrice, formatRelativeTime } from '@/lib/format';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -21,6 +21,7 @@ export default function DashboardMarketplacePage() {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const studio = studios?.[selectedIdx] ?? studios?.[0];
   const { data: myListings = [], isLoading, error } = useStudioListings(studio?.id ?? '');
+  const archive = useDeleteListing();
 
   return (
     <>
@@ -74,22 +75,34 @@ export default function DashboardMarketplacePage() {
             <div className="space-y-3">
               {myListings.map((listing) => (
                 <div key={listing.id} className="clip-corner border border-border/40 panel p-4 transition hover:border-cyan/40">
-                  <div className="flex items-center justify-between">
-                    <div>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
                       <Link href={`/marketplace/${listing.id}`} className="font-display text-sm font-black uppercase text-foreground hover:text-cyan">
                         {listing.title}
                       </Link>
                       <p className="mt-0.5 flex items-center gap-2 font-mono text-[0.55rem] text-muted-foreground">
-                        <span className={`${listing.status === 'active' ? 'text-cyan' : 'text-coral'}`}>
+                        <span className={`${listing.status === 'ACTIVE' ? 'text-cyan' : listing.status === 'ARCHIVED' ? 'text-coral' : 'text-muted-foreground'}`}>
                           {listing.status}
                         </span>
                         &middot; {formatPrice(listing.priceCents)}
                         &middot; {TYPE_LABELS[listing.type] || listing.type}
                       </p>
                     </div>
-                    <span className="font-mono text-[0.5rem] text-muted-foreground">
-                      {formatRelativeTime(listing.createdAt)}
-                    </span>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className="hidden font-mono text-[0.5rem] text-muted-foreground sm:inline">
+                        {formatRelativeTime(listing.createdAt)}
+                      </span>
+                      <Button variant="outline" size="sm" asChild aria-label={`Edit ${listing.title}`}>
+                        <Link href={`/dashboard/marketplace/${listing.id}`}>
+                          <Pencil className="size-3" aria-hidden="true" /> Edit
+                        </Link>
+                      </Button>
+                      {listing.status !== 'ARCHIVED' && (
+                        <Button variant="outline" size="sm" onClick={() => { if (window.confirm(`Archive "${listing.title}"?`)) archive.mutate(listing.id); }} disabled={archive.isPending} aria-label={`Archive ${listing.title}`}>
+                          <Archive className="size-3" aria-hidden="true" /> Archive
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

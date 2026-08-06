@@ -1530,11 +1530,12 @@ export function useDeleteListing() {
     mutationFn: (id: string) => api.delete(`/marketplace/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['marketplace'] });
-      toast.success('Listing deleted');
+      qc.invalidateQueries({ queryKey: ['studio-listings'] });
+      toast.success('Listing archived');
     },
     onError: (err: unknown) => {
       const e = err as { body?: { message?: string }; message?: string };
-      toast.error(e?.body?.message || e?.message || 'Failed to delete listing');
+      toast.error(e?.body?.message || e?.message || 'Failed to archive listing');
     },
   });
 }
@@ -1542,10 +1543,11 @@ export function useDeleteListing() {
 export function useUpdateListing() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: { id: string; status?: string; title?: string; description?: string; priceCents?: number; fileUrl?: string; thumbnailUrl?: string; tags?: string[] }) =>
+    mutationFn: ({ id, ...data }: { id: string; type?: string; status?: string; title?: string; description?: string; priceCents?: number; fileUrl?: string; thumbnailUrl?: string; tags?: string[] }) =>
       api.patch<MarketplaceListing>(`/marketplace/${id}`, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['marketplace'] });
+      qc.invalidateQueries({ queryKey: ['studio-listings'] });
       toast.success('Listing updated');
     },
     onError: (err: unknown) => {

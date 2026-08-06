@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -64,6 +64,21 @@ export class MarketplaceController {
     });
     if (!member) throw new ForbiddenException('You must be an admin of this studio to update listings');
     return this.marketplace.updateListing(id, body);
+  }
+
+  @Delete(':id')
+  @UseGuards(SessionAuthGuard)
+  async remove(@Param('id') id: string, @CurrentUser() user: { id: string }) {
+    const listing = await this.prisma.marketplaceListing.findUnique({
+      where: { id },
+      select: { studioId: true },
+    });
+    if (!listing) throw new BadRequestException('Listing not found');
+    const member = await this.prisma.studioMember.findFirst({
+      where: { studioId: listing.studioId, userId: user.id, role: { in: ['OWNER', 'ADMIN'] } },
+    });
+    if (!member) throw new ForbiddenException('You must be an admin of this studio to delete listings');
+    return this.marketplace.deleteListing(id);
   }
 
   @Get('me/licenses')

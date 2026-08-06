@@ -51,6 +51,60 @@ export async function setupAuth(page: Page) {
   await page.evaluate((token) => localStorage.setItem('playmorrow_token', token), MOCK_TOKEN);
 }
 
+export const MOCK_LISTING = {
+  id: 'listing-1', type: 'ASSET', title: 'Neon Audio Pack',
+  description: 'Synthwave sound pack for game jams.',
+  priceCents: 1999, currency: 'USD', fileUrl: null, thumbnailUrl: null,
+  tags: ['music', 'synthwave'], status: 'ACTIVE', studioId: 'studio-1', gameId: null,
+  createdAt: '2025-02-01T00:00:00.000Z', updatedAt: '2025-02-01T00:00:00.000Z',
+  studio: { id: 'studio-1', name: 'Test Studio', slug: 'test-studio', logoUrl: null },
+  game: null,
+};
+
+export const MOCK_DRAFT_LISTING = {
+  ...MOCK_LISTING, id: 'listing-2', title: 'WIP Shader Pack', type: 'PLUGIN', status: 'DRAFT',
+};
+
+export const MOCK_ARCHIVED_LISTING = {
+  ...MOCK_LISTING, id: 'listing-3', title: 'Old Sound Kit', status: 'ARCHIVED',
+};
+
+export const MOCK_LISTINGS = [MOCK_LISTING, MOCK_DRAFT_LISTING, MOCK_ARCHIVED_LISTING];
+
+export const MOCK_EVENT = {
+  id: 'event-1', title: 'Indie Game Jam 2026', slug: 'indie-game-jam-2026',
+  description: 'Build a game in 48 hours.', startDate: '2026-09-12T09:00:00.000Z',
+  endDate: '2026-09-14T09:00:00.000Z', location: 'Online', virtual: true,
+  ticketPriceCents: 0, maxAttendees: 500, bannerUrl: null, organizerId: null,
+  status: 'PUBLISHED', createdAt: '2025-06-01T00:00:00.000Z', updatedAt: '2025-06-01T00:00:00.000Z',
+};
+
+export const MOCK_PARTNER = {
+  id: 'partner-1', type: 'UNIVERSITY', name: 'Northwind University', slug: 'northwind-university',
+  description: 'Game design program partner.', websiteUrl: 'https://example.com', logoUrl: null,
+  contactName: null, contactEmail: null, status: 'ACTIVE',
+  createdAt: '2025-01-01T00:00:00.000Z', updatedAt: '2025-01-01T00:00:00.000Z',
+};
+
+export const MOCK_PARTNERS = [
+  MOCK_PARTNER,
+  { ...MOCK_PARTNER, id: 'partner-2', type: 'PUBLISHER', name: 'Orbit Interactive', slug: 'orbit-interactive', websiteUrl: null },
+];
+
+export const MOCK_REVENUE = [
+  { studio: { id: 'studio-1', name: 'Test Studio', slug: 'test-studio' }, totalRevenue: 5999, totalFees: 599, netRevenue: 5400, totalSales: 3 },
+];
+
+export const MOCK_REFERRAL_CODE = { id: 'ref-1', userId: 'user-1', code: 'PLAYTEST' };
+export const MOCK_COMMISSIONS = {
+  code: 'PLAYTEST',
+  commissions: [
+    { id: 'comm-1', createdAt: '2026-07-01T00:00:00.000Z', amountCents: 199 },
+    { id: 'comm-2', createdAt: '2026-07-05T00:00:00.000Z', amountCents: 99 },
+  ],
+  totalEarned: 298,
+};
+
 /**
  * Register a centralized API router that dispatches by HTTP method and pathname.
  * Returns a cleanup function to unroute all handlers.
@@ -149,6 +203,55 @@ export async function mockApi(page: Page) {
         if (method === 'POST') return await json({ targetType: 'STUDIO', targetId: 'studio-1', isFollowing: true, followerCount: 6 });
         return await json({ targetType: 'STUDIO', targetId: 'studio-1', isFollowing: false, followerCount: 5 });
       }
+
+      // ── Marketplace ─────────────────────────────────────────────────
+      if (path === '/api/marketplace') {
+        const type = params.get('type');
+        const items = type ? MOCK_LISTINGS.filter((l) => l.type === type) : MOCK_LISTINGS;
+        return await json({ items, total: items.length, page: 1, pageSize: 20, hasMore: false });
+      }
+
+      // Studio listings (must precede the generic /marketplace/:id matcher)
+      const studioListingsMatch = path.match(/^\/api\/marketplace\/studio\/([^/]+)$/);
+      if (studioListingsMatch) return await json(MOCK_LISTINGS);
+
+      const listingMatch = path.match(/^\/api\/marketplace\/([^/]+)$/);
+      if (listingMatch) {
+        const id = listingMatch[1]!;
+        const listing = MOCK_LISTINGS.find((l) => l.id === id);
+        if (!listing) return await json({}, 404);
+        if (method === 'PATCH') {
+          const body = route.request().postDataJSON() as Record<string, unknown>;
+          return await json({ ...listing, ...body, tags: (body.tags as string[]) ?? listing.tags });
+        }
+        if (method === 'DELETE') return await json({ message: 'Listing archived' });
+        return await json(listing);
+      }
+
+      // ── Events ──────────────────────────────────────────────────────
+      if (path === '/api/events') {
+        return await json({ items: [MOCK_EVENT], total: 1, page: 1, pageSize: 20, hasMore: false });
+      }
+      const eventRegisterMatch = path.match(/^\/api\/events\/([^/]+)\/register$/);
+      if (eventRegisterMatch && method === 'POST') return await json({ message: 'Registered' });
+      const eventMatch = path.match(/^\/api\/events\/([^/]+)$/);
+      if (eventMatch) {
+        const slug = eventMatch[1]!;
+        if (slug === MOCK_EVENT.slug) return await json(MOCK_EVENT);
+        return await json({}, 404);
+      }
+
+      // ── Partners ────────────────────────────────────────────────────
+      if (path === '/api/partners') {
+        const type = params.get('type');
+        const items = type ? MOCK_PARTNERS.filter((p) => p.type === type) : MOCK_PARTNERS;
+        return await json({ items, total: items.length, page: 1, pageSize: 20, hasMore: false });
+      }
+
+      // ── Publisher + Creator ─────────────────────────────────────────
+      if (path === '/api/publisher/revenue') return await json(MOCK_REVENUE);
+      if (path === '/api/creator/code') return await json(MOCK_REFERRAL_CODE);
+      if (path === '/api/creator/commissions') return await json(MOCK_COMMISSIONS);
 
       // ── Other ───────────────────────────────────────────────────────
       if (path === '/api/me/notifications/unread-count') return await json({ unreadCount: 0 });

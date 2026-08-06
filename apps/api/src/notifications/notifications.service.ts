@@ -3,6 +3,7 @@ import type { Prisma } from '@playmorrow/database';
 import { Subject } from 'rxjs';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationPubSubService } from './notification-pubsub.service';
 
 export interface CreateNotificationInput {
   recipientId: string;
@@ -29,7 +30,13 @@ export class NotificationsService {
   /** RxJS Subject that emits events for the SSE stream. */
   readonly events$ = new Subject<NotificationEvent>();
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationPubSub: NotificationPubSubService,
+  ) {
+    // Relay Redis events from other API instances into the local SSE Subject.
+    this.notificationPubSub.wire(this.events$);
+  }
 
   async create(input: CreateNotificationInput) {
     return this.prisma.notification.create({
@@ -83,7 +90,9 @@ export class NotificationsService {
       const count = await this.prisma.notification.count({
         where: { recipientId, readAt: null },
       });
-      this.events$.next({ recipientId, unreadCount: count });
+      const event = { recipientId, unreadCount: count };
+      this.events$.next(event);
+      this.notificationPubSub.publish(event);
     }
   }
 

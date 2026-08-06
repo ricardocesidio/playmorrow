@@ -144,9 +144,19 @@ export class MarketplaceService {
 
   async getStudioListings(studioId: string) {
     return this.prisma.marketplaceListing.findMany({
-      where: { studioId, status: 'ACTIVE' },
+      where: { studioId },
       orderBy: { createdAt: 'desc' },
       include: { studio: { select: { id: true, name: true, slug: true, logoUrl: true } } },
+    });
+  }
+
+  async deleteListing(id: string) {
+    const listing = await this.prisma.marketplaceListing.findUnique({ where: { id } });
+    if (!listing) throw new NotFoundException('Listing not found');
+    // Soft-delete: ARCHIVED keeps the row for transaction/license FK integrity.
+    return this.prisma.marketplaceListing.update({
+      where: { id },
+      data: { status: 'ARCHIVED' as MarketplaceListingStatus },
     });
   }
 

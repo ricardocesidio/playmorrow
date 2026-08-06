@@ -88,4 +88,37 @@ describe('MarketplaceService', () => {
     mockPrisma.marketplaceListing.findUnique.mockResolvedValue(null);
     await expect(service.updateListing('ghost', { title: 'x' })).rejects.toThrow('Listing not found');
   });
+
+  it('should archive (soft-delete) a listing', async () => {
+    mockPrisma.marketplaceListing.findUnique.mockResolvedValue({ id: '1', status: 'ACTIVE' });
+    mockPrisma.marketplaceListing.update.mockResolvedValue({ id: '1', status: 'ARCHIVED' });
+
+    await service.deleteListing('1');
+
+    expect(mockPrisma.marketplaceListing.update).toHaveBeenCalledWith({
+      where: { id: '1' },
+      data: { status: 'ARCHIVED' },
+    });
+  });
+
+  it('should throw NotFoundException when archiving a missing listing', async () => {
+    mockPrisma.marketplaceListing.findUnique.mockResolvedValue(null);
+    await expect(service.deleteListing('ghost')).rejects.toThrow('Listing not found');
+  });
+
+  it('should list all statuses for the studio dashboard', async () => {
+    mockPrisma.marketplaceListing.findMany.mockResolvedValue([
+      { id: '1', status: 'DRAFT' },
+      { id: '2', status: 'ACTIVE' },
+      { id: '3', status: 'ARCHIVED' },
+    ]);
+
+    await service.getStudioListings('studio-1');
+
+    expect(mockPrisma.marketplaceListing.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { studioId: 'studio-1' },
+      }),
+    );
+  });
 });
