@@ -49,7 +49,7 @@ export function middleware(request: NextRequest) {
   // TODO: Migrate to Next.js 16 native CSP support via instrumentation.
   const scriptSrc = isDev
     ? ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://plausible.io'].join(' ')
-    : ["'self'", `'nonce-${nonce}'`, 'https://plausible.io'].join(' ');
+    : ["'self'", "'unsafe-inline'", 'https://plausible.io'].join(' ');
   response.headers.set(
     'Content-Security-Policy',
     [
