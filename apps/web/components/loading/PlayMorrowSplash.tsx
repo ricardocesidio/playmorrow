@@ -16,7 +16,7 @@ export function PlayMorrowSplash({ onDone }: { onDone: () => void }) {
           <div style={{ animation: 'logoColorShift 3s ease-in-out forwards', color: 'rgb(255 87 77)', filter: 'drop-shadow(0 0 20px rgb(255 87 77 / 0.45))' }}>
             <PlaymorrowLogo cutout size={56} />
           </div>
-          <span className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.5em] text-[#eef2f2] drop-shadow-[0_0_10px_rgb(255_255_255_/_0.12)]">PLAYMORROW</span>
+          <span className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.5em] text-foreground drop-shadow-[0_0_10px_rgb(255_255_255_/_0.12)]">PLAYMORROW</span>
         </div>
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cyan/70 animate-pulse">{statusText}</p>
         <div className="w-64 space-y-2">

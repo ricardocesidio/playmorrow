@@ -23,9 +23,9 @@ export interface TeamMemberCardProps {
 }
 
 const ROLE_STYLES: Record<StudioRole, { bg: string; text: string; label: string }> = {
-  OWNER: { bg: 'bg-orange/10', text: 'text-orange', label: 'Owner' },
-  ADMIN: { bg: 'bg-red/10', text: 'text-red', label: 'Admin' },
-  MODERATOR: { bg: 'bg-blue/10', text: 'text-blue', label: 'Mod' },
+  OWNER: { bg: 'bg-amber/10', text: 'text-amber', label: 'Owner' },
+  ADMIN: { bg: 'bg-coral/10', text: 'text-coral', label: 'Admin' },
+  MODERATOR: { bg: 'bg-cyan/10', text: 'text-cyan', label: 'Mod' },
   MEMBER: { bg: 'bg-cyan/10', text: 'text-cyan', label: 'Member' },
 };
 
@@ -50,8 +50,8 @@ export function TeamMemberCard({ member, currentUserId, currentUserRole, onRemov
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p className="truncate font-display text-sm font-semibold text-foreground">{member.user.displayName}</p>
-          {member.role === 'OWNER' && <Crown className="size-3.5 text-orange" />}
-          {member.role === 'ADMIN' && <Shield className="size-3.5 text-red" />}
+          {member.role === 'OWNER' && <Crown className="size-3.5 text-amber" />}
+          {member.role === 'ADMIN' && <Shield className="size-3.5 text-coral" />}
         </div>
         <p className="truncate font-mono text-[0.58rem] text-muted-foreground">@{member.user.username}</p>
         {member.title && <p className="font-mono text-[0.55rem] text-muted-foreground/60">{member.title}</p>}

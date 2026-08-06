@@ -18,7 +18,7 @@ export function PlaymorrowLogo({ className = '', style, cutout = false, showText
         </svg>
       </span>
       {showText && (
-        <span className="font-mono text-[0.95rem] font-semibold uppercase tracking-[0.3em] text-[#eef2f2] [text-shadow:0_0_12px_rgb(255_255_255_/_0.14)] sm:text-[1.05rem] sm:tracking-[0.42em]">
+        <span className="font-mono text-[0.95rem] font-semibold uppercase tracking-[0.3em] text-foreground [text-shadow:0_0_12px_rgb(255_255_255_/_0.14)] sm:text-[1.05rem] sm:tracking-[0.42em]">
           PLAYMORROW
         </span>
       )}
