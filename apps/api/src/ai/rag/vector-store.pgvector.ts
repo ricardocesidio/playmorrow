@@ -11,6 +11,7 @@ import type { EmbeddingResult } from '../interfaces/embedding-provider.interface
 @Injectable()
 export class PgVectorStore implements VectorStore {
   readonly name = 'pgvector';
+  private embedFn?: (text: string) => Promise<EmbeddingResult>;
 
   constructor(
     private prisma: PrismaService,
