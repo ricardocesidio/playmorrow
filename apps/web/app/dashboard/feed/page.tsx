@@ -91,7 +91,7 @@ export default function PersonalFeedPage() {
         {isLoading && (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="clip-corner h-24 animate-pulse border border-border/40 bg-[#050b0f]/30" />
+              <div key={i} className="clip-corner h-24 animate-pulse border border-border/40 panel" />
             ))}
           </div>
         )}
@@ -114,7 +114,7 @@ export default function PersonalFeedPage() {
 
         {/* Empty: no follows */}
         {!isLoading && !error && items.length === 0 && type === 'all' && (
-          <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+          <div className="clip-corner border border-border/40 panel py-16 text-center">
             <Rss className="mx-auto mb-3 size-10 text-muted-foreground/30" />
             <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
               Follow games and studios to see their latest updates here.
@@ -127,7 +127,7 @@ export default function PersonalFeedPage() {
 
         {/* Empty: filter has no results */}
         {!isLoading && !error && items.length === 0 && type !== 'all' && (
-          <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+          <div className="clip-corner border border-border/40 panel py-16 text-center">
             <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
               No {type} updates found.
             </p>

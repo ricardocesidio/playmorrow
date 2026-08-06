@@ -192,7 +192,7 @@ export default function HelpArticlePage() {
             </div>
 
             {/* Was this helpful? */}
-            <div className="clip-corner border border-border/60 bg-[#050b0f]/60 p-6 mb-8">
+            <div className="clip-corner border border-border/60 panel p-6 mb-8">
               <h3 className="mb-4 text-center font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">
                 Was this helpful?
               </h3>

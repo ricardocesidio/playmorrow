@@ -71,7 +71,7 @@ export function CookieConsent() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-[100] p-4">
       <div className="mx-auto max-w-5xl">
-        <div className="clip-corner border border-border/70 bg-[#050b0f]/98 p-5 shadow-[0_0_60px_rgb(0_0_0_/_0.6)] backdrop-blur-xl sm:p-6">
+        <div className="clip-corner border border-border/70 panel p-5 shadow-[0_0_60px_rgb(0_0_0_/_0.6)] backdrop-blur-xl sm:p-6">
           {!customizing ? (
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <div className="flex size-12 shrink-0 items-center justify-center border border-cyan/30 bg-cyan/5">

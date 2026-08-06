@@ -81,7 +81,7 @@ export default function CookiePolicyPage() {
 
 function Section({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
   return (
-    <div className="clip-corner border-2 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)]" style={{ borderColor: 'rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}>
+    <div className="clip-corner border-2 panel p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)]" style={{ borderColor: 'rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}>
       <div className="mb-3 flex items-center gap-3 border-b border-border/50 pb-3">
         {icon}
         <h2 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">{title}</h2>

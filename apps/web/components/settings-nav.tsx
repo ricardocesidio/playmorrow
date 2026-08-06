@@ -14,7 +14,7 @@ export function SettingsNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="mb-8 flex gap-1 rounded border border-border/50 bg-[#050b0f]/60 p-1 shadow-[0_0_20px_rgb(0_0_0_/_0.2)]">
+    <nav className="mb-8 flex gap-1 rounded border border-border/50 panel p-1 shadow-[0_0_20px_rgb(0_0_0_/_0.2)]">
       {links.map((link) => {
         const isActive = pathname === link.href;
         const Icon = link.icon;

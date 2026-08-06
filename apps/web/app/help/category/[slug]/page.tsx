@@ -95,7 +95,7 @@ export default function HelpCategoryPage() {
             <div className="h-4 w-64 bg-border/20 rounded mb-8 animate-pulse" />
             <div className="grid gap-4 sm:grid-cols-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-5 animate-pulse">
+                <div key={i} className="clip-corner border border-border/40 panel p-5 animate-pulse">
                   <div className="h-4 w-3/4 bg-border/30 rounded mb-3" />
                   <div className="h-3 w-full bg-border/20 rounded mb-1" />
                   <div className="h-3 w-2/3 bg-border/20 rounded" />
@@ -122,7 +122,7 @@ export default function HelpCategoryPage() {
             </div>
 
             {articles.length === 0 && (
-              <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+              <div className="clip-corner border border-border/40 panel py-16 text-center">
                 <FileText className="mx-auto mb-3 size-10 text-muted-foreground/30" />
                 <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
                   No articles in this category yet.
@@ -135,7 +135,7 @@ export default function HelpCategoryPage() {
                 <Link
                   key={article.id}
                   href={`/help/article/${article.slug}`}
-                  className="clip-corner group border border-border/60 bg-[#050b0f]/50 p-5 transition hover:border-cyan/30 hover:bg-[#050b0f]/80 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]"
+                  className="clip-corner group border border-border/60 panel p-5 transition hover:border-cyan/30 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]"
                 >
                   <h3 className="mb-2 font-mono text-[0.6rem] font-semibold uppercase tracking-wider text-foreground group-hover:text-cyan transition">
                     {article.title}

@@ -75,7 +75,7 @@ export default function StudioLevelPage() {
             <h2 className="mb-5 font-mono text-[0.68rem] uppercase tracking-[0.22em] text-cyan">Title Tiers</h2>
             <div className="grid gap-3 sm:grid-cols-5">
               {TITLE_RANGES.map(tier => (
-                <div key={tier.title} className="clip-corner border border-border/70 bg-[#050b0f]/80 p-4 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+                <div key={tier.title} className="clip-corner border border-border/70 panel p-4 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
                   <div className={`mx-auto mb-2 ${tier.color}`}>{tier.icon}</div>
                   <p className={`font-display text-sm font-bold ${tier.color}`}>{tier.title}</p>
                   <p className="mt-0.5 font-mono text-[0.55rem] text-muted-foreground">Lv.{tier.min}–{tier.max}</p>
@@ -90,7 +90,7 @@ export default function StudioLevelPage() {
             <h2 className="mb-5 font-mono text-[0.68rem] uppercase tracking-[0.22em] text-cyan">How XP Is Earned</h2>
             <div className="space-y-4">
               {XP_TABLE.map(group => (
-                <div key={group.category} className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+                <div key={group.category} className="clip-corner border border-border/70 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
                   <div className="mb-3 flex items-center gap-2 border-b border-border/60 pb-2">
                     <span className="text-cyan">{group.icon}</span>
                     <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">{group.category}</h3>
@@ -111,7 +111,7 @@ export default function StudioLevelPage() {
           {/* Anti-Abuse */}
           <section className="mb-12">
             <h2 className="mb-5 font-mono text-[0.68rem] uppercase tracking-[0.22em] text-cyan">Fair Play Rules</h2>
-            <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <div className="clip-corner border border-border/70 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
                   <Timer className="mt-0.5 size-4 shrink-0 text-coral" />
@@ -144,7 +144,7 @@ export default function StudioLevelPage() {
             <div className="clip-corner overflow-hidden border border-border/70 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
               <table className="w-full font-mono text-[0.6rem]">
                 <thead>
-                  <tr className="border-b border-border/60 bg-[#050b0f]">
+                  <tr className="border-b border-border/60 panel">
                     <th className="px-4 py-3 text-left text-cyan uppercase tracking-wider">Level</th>
                     <th className="px-4 py-3 text-left text-cyan uppercase tracking-wider">Total XP</th>
                     <th className="px-4 py-3 text-left text-cyan uppercase tracking-wider">XP to Next</th>
@@ -153,7 +153,7 @@ export default function StudioLevelPage() {
                 </thead>
                 <tbody>
                   {LEVEL_TABLE.map(row => (
-                    <tr key={row.level} className="border-b border-border/40 bg-[#050b0f]/50">
+                    <tr key={row.level} className="border-b border-border/40 panel">
                       <td className="px-4 py-2.5 font-semibold text-cyan">{row.level}</td>
                       <td className="px-4 py-2.5 text-foreground">{row.totalXp.toLocaleString()}</td>
                       <td className="px-4 py-2.5 text-muted-foreground">{row.nextXp.toLocaleString()}</td>
@@ -168,7 +168,7 @@ export default function StudioLevelPage() {
           {/* Level Up Benefits */}
           <section className="mb-12">
             <h2 className="mb-5 font-mono text-[0.68rem] uppercase tracking-[0.22em] text-cyan">What Levels Unlock</h2>
-            <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <div className="clip-corner border border-border/70 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="border border-border/50 bg-background/30 p-4">
                   <p className="font-mono text-[0.65rem] font-semibold text-cyan">Level 5+</p>
@@ -193,7 +193,7 @@ export default function StudioLevelPage() {
           {/* Clean State Note */}
           <section className="mb-12">
             <h2 className="mb-5 font-mono text-[0.68rem] uppercase tracking-[0.22em] text-cyan">Starting Fresh</h2>
-            <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <div className="clip-corner border border-border/70 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
               <p className="font-mono text-[0.6rem] leading-relaxed text-muted-foreground">
                 Every new studio starts at <span className="text-cyan">Level 1</span> with <span className="text-cyan">0 XP</span>.
                 No followers, no games, no devlogs — a completely clean slate.

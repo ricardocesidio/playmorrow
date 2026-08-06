@@ -243,7 +243,7 @@ export default function TeamPage() {
           </div>
 
           {Object.keys(grouped).length === 0 && !membersLoading && (
-            <div className="clip-corner border border-border/60 bg-[#050b0f]/50 px-6 py-12 text-center">
+            <div className="clip-corner border border-border/60 panel px-6 py-12 text-center">
               <Users className="mx-auto mb-3 size-8 text-muted-foreground" />
               <p className="font-mono text-[0.65rem] text-muted-foreground">No members yet</p>
             </div>
@@ -260,7 +260,7 @@ export default function TeamPage() {
               </h2>
               <div className="space-y-2">
                 {pendingInvites.map((inv: Invitation) => (
-                  <div key={inv.id} className="clip-corner flex items-center gap-3 border border-border/60 bg-[#050b0f]/50 px-4 py-3">
+                  <div key={inv.id} className="clip-corner flex items-center gap-3 border border-border/60 panel px-4 py-3">
                     <Mail className="size-4 text-muted-foreground" />
                     <div className="flex-1 min-w-0">
                       <p className="truncate font-mono text-[0.6rem] text-foreground">{inv.email || inv.userId}</p>
@@ -287,7 +287,7 @@ export default function TeamPage() {
               </h2>
               <div className="space-y-2">
                 {pendingRequests.map((req) => (
-                  <div key={req.id} className="clip-corner flex items-center gap-3 border border-border/60 bg-[#050b0f]/50 px-4 py-3">
+                  <div key={req.id} className="clip-corner flex items-center gap-3 border border-border/60 panel px-4 py-3">
                     <div className="grid size-8 shrink-0 place-items-center rounded-full border border-border bg-background/60 text-xs font-bold overflow-hidden">
                       {req.user?.avatarUrl ? <img src={req.user.avatarUrl} alt="" className="size-full object-cover" /> : (req.user?.displayName?.slice(0, 1) ?? '?')}
                     </div>
@@ -354,7 +354,7 @@ export default function TeamPage() {
             <p className="mb-4 font-mono text-[0.55rem] leading-relaxed text-muted-foreground/60">
               Team members can post updates here. Changes to the studio (logo, games, trailers, etc.) appear automatically with a 🤖 icon.
             </p>
-            <div className="clip-corner max-h-[400px] overflow-y-auto border border-border/60 bg-[#050b0f]/50">
+            <div className="clip-corner max-h-[400px] overflow-y-auto border border-border/60 panel">
               {feed.length === 0 ? (
                 <div className="px-4 py-12 text-center">
                   <div className="mx-auto mb-3 grid size-12 place-items-center rounded-full bg-cyan/10 text-xl">🎮</div>

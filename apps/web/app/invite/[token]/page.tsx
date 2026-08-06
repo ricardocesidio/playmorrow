@@ -91,7 +91,7 @@ export default function InvitePage() {
             </Link>
           </div>
         ) : invitation ? (
-          <div className="clip-corner w-full max-w-md border border-border/70 bg-[#050b0f]/80 p-8 shadow-[0_0_60px_rgb(0_0_0_/_0.4)] text-center">
+          <div className="clip-corner w-full max-w-md border border-border/70 panel p-8 shadow-[0_0_60px_rgb(0_0_0_/_0.4)] text-center">
             <div className="mx-auto grid size-16 place-items-center rounded-full border border-border bg-background/60 overflow-hidden">
               {invitation.studio?.logoUrl ? <img src={invitation.studio.logoUrl} alt="" className="size-full object-cover" /> : <Building2 className="size-8 text-cyan" />}
             </div>

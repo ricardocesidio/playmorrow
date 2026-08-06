@@ -69,7 +69,7 @@ export default function AdminVerificationPage() {
             <Shield className="size-8 text-cyan/30" />
           </div>
 
-          <div className="clip-corner border border-border/90 bg-[#050b0f]/86 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
+          <div className="clip-corner border border-border/90 panel shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
             <div className="flex items-center gap-1 border-b border-border/70 px-4 pt-3">
               {STATUS_TABS.map((tab) => (
                 <button

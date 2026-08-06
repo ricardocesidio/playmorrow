@@ -246,7 +246,7 @@ export default function EditGamePage() {
           )}
 
           {/* Standard Edition (Pricing + Release) */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Standard Edition</h3>
             <div className="flex items-center gap-3 mb-4">
               <input type="checkbox" id="isFree" checked={isFree} onChange={(e) => setIsFree(e.target.checked)} className="rounded border-input" />
@@ -295,7 +295,7 @@ export default function EditGamePage() {
           </div>
 
           {/* About */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">About</h3>
             <div>
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Description</label>
@@ -305,7 +305,7 @@ export default function EditGamePage() {
           </div>
 
           {/* Quick Info */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Quick Info</h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
@@ -348,13 +348,13 @@ export default function EditGamePage() {
           </div>
 
           {/* README */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Full README</h3>
             <MarkdownEditor value={readme} onChange={setReadme} minHeight={400} />
           </div>
 
           {/* Trailer */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Trailer</h3>
             <div>
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">YouTube trailer URL</label>
@@ -366,7 +366,7 @@ export default function EditGamePage() {
           </div>
 
           {/* Screenshots */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Screenshots ({media.length}/{MAX_SCREENSHOTS})</h3>
               <Button type="button" onClick={addMedia} disabled={uploadingShot || media.length >= MAX_SCREENSHOTS} size="sm">

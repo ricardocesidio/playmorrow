@@ -127,7 +127,7 @@ export default function VerificationPage() {
 
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2 space-y-6">
-              <div className="clip-corner border border-border/90 bg-[#050b0f]/86 p-6 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
+              <div className="clip-corner border border-border/90 panel p-6 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
                 <h2 className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">Current Status</h2>
                 <div className="flex items-center gap-4">
                   <div className={`flex size-16 items-center justify-center border-2 ${VERIFICATION_LEVEL_COLORS[currentLevel]}`}>
@@ -159,7 +159,7 @@ export default function VerificationPage() {
                 )}
               </div>
 
-              <div className="clip-corner border border-border/90 bg-[#050b0f]/86 p-6 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
+              <div className="clip-corner border border-border/90 panel p-6 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
                 <h2 className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">Verification Tiers</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {TIERS.map((tier) => {
@@ -175,7 +175,7 @@ export default function VerificationPage() {
                             ? 'border-cyan/60 bg-cyan/10 shadow-[0_0_20px_rgb(62_231_255_/_0.12)]'
                             : isSelected && !isCurrent
                             ? 'border-cyan/40 bg-cyan/5'
-                            : 'border-border/70 bg-[#050b0f]/60 hover:border-cyan/40'
+                            : 'border-border/70 panel hover:border-cyan/40'
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -207,7 +207,7 @@ export default function VerificationPage() {
             </div>
 
             <div className="space-y-6">
-              <div className="clip-corner border border-border/90 bg-[#050b0f]/86 p-6 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
+              <div className="clip-corner border border-border/90 panel p-6 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
                 <h2 className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">Trust Score</h2>
                 <div className="flex flex-col items-center">
                   <div className="relative flex size-24 items-center justify-center">
@@ -257,7 +257,7 @@ export default function VerificationPage() {
               </div>
 
               {verification?.documents && verification.documents.length > 0 && (
-                <div className="clip-corner border border-border/90 bg-[#050b0f]/86 p-6 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
+                <div className="clip-corner border border-border/90 panel p-6 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
                   <h2 className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">Documents</h2>
                   <div className="space-y-2">
                     {verification.documents.map((doc, i) => (

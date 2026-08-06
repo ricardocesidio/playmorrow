@@ -135,7 +135,7 @@ export default function ProfileSettingsPage() {
         <SettingsNav />
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <div className="space-y-5">
               <div>
                 <label htmlFor="username" className="mb-1.5 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Username</label>
@@ -258,7 +258,7 @@ export default function ProfileSettingsPage() {
 
         {/* Push Notifications */}
         <div className="mt-8">
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <div className="mb-3 flex items-center gap-3 border-b border-border/50 pb-3">
               <Bell className="size-5 text-cyan" />
               <h2 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Push Notifications</h2>
@@ -307,7 +307,7 @@ function ChangePasswordSection() {
   };
 
   return (
-    <form onSubmit={handleChange} className="mt-6 clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-6">
+    <form onSubmit={handleChange} className="mt-6 clip-corner border border-border/70 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-6">
       <h2 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-4">Change Password</h2>
       <div className="grid gap-4 sm:grid-cols-3">
         <Input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} aria-label="Current password" placeholder="Current password" className="h-11" />

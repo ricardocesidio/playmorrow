@@ -87,7 +87,7 @@ export default function HelpSearchPage() {
         </h1>
 
         <form onSubmit={handleSearch} className="mb-8">
-          <div className="clip-corner flex h-14 items-center gap-3 border border-cyan/30 bg-[#050b0f]/80 px-5 shadow-[0_0_30px_rgb(62_231_255_/_0.08)]">
+          <div className="clip-corner flex h-14 items-center gap-3 border border-cyan/30 panel px-5 shadow-[0_0_30px_rgb(62_231_255_/_0.08)]">
             <Search className="size-5 shrink-0 text-muted-foreground" />
             <input
               ref={inputRef}
@@ -109,7 +109,7 @@ export default function HelpSearchPage() {
         {loading && (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-4 animate-pulse">
+              <div key={i} className="clip-corner border border-border/40 panel p-4 animate-pulse">
                 <div className="h-4 w-3/4 bg-border/30 rounded mb-2" />
                 <div className="h-3 w-full bg-border/20 rounded mb-1" />
                 <div className="h-3 w-1/2 bg-border/20 rounded" />
@@ -121,7 +121,7 @@ export default function HelpSearchPage() {
         {error && !loading && <ErrorState message={error} onRetry={() => fetchResults(query)} />}
 
         {!loading && !error && results.length === 0 && initialQuery && (
-          <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+          <div className="clip-corner border border-border/40 panel py-16 text-center">
             <Search className="mx-auto mb-3 size-10 text-muted-foreground/30" />
             <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-2">
               No results found
@@ -133,7 +133,7 @@ export default function HelpSearchPage() {
         )}
 
         {!loading && !error && results.length === 0 && !initialQuery && (
-          <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+          <div className="clip-corner border border-border/40 panel py-16 text-center">
             <Search className="mx-auto mb-3 size-10 text-muted-foreground/30" />
             <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
               Enter a search term to find articles
@@ -152,7 +152,7 @@ export default function HelpSearchPage() {
                 className={`flex items-start gap-4 clip-corner border p-4 transition ${
                   selectedIdx === idx
                     ? 'border-cyan/40 bg-cyan/[0.03] shadow-[0_0_16px_rgb(62_231_255_/_0.08)]'
-                    : 'border-border/40 bg-[#050b0f]/30 hover:bg-[#050b0f]/50 hover:border-border/60'
+                    : 'border-border/40 panel hover:border-border/60'
                 }`}
               >
                 <FileText className="size-5 shrink-0 mt-0.5 text-cyan/60" />

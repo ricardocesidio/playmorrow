@@ -175,7 +175,7 @@ function RoadmapContent() {
 
         {/* Game selector */}
         {!gameSlug && (
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] space-y-3">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] space-y-3">
             <div>
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Studio</label>
               <select value={selectedStudio} onChange={(e) => setSelectedStudio(e.target.value)}
@@ -198,7 +198,7 @@ function RoadmapContent() {
         )}
 
         {!gameSlug && !selectedStudio && (
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 py-16 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel py-16 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <Milestone className="mx-auto mb-3 size-10 text-muted-foreground/40" />
             <p className="font-mono text-[0.68rem] uppercase tracking-widest text-muted-foreground">Select a game to manage its roadmap.</p>
           </div>
@@ -213,7 +213,7 @@ function RoadmapContent() {
             )}
 
             {/* Create form */}
-            <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] mb-8">
+            <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] mb-8">
               <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-4 flex items-center gap-2"><Plus className="size-3.5" /> Add roadmap item</h3>
               <form onSubmit={handleCreate} className="space-y-3">
                 <Input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
@@ -240,13 +240,13 @@ function RoadmapContent() {
             {roadmapLoading ? (
               <div className="space-y-2">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="clip-corner h-16 animate-pulse border border-border/50 bg-[#050b0f]/40 shadow-[0_0_20px_rgb(0_0_0_/_0.2)]" />
+                  <div key={i} className="clip-corner h-16 animate-pulse border border-border/50 panel shadow-[0_0_20px_rgb(0_0_0_/_0.2)]" />
                 ))}
               </div>
             ) : roadmap && roadmap.length > 0 ? (
               <div className="space-y-2">
                 {roadmap.slice(0, 5).map((item, index) => (
-                  <div key={item.id} className="clip-corner border border-border/70 bg-[#050b0f]/80 p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition hover:border-cyan/40">
+                  <div key={item.id} className="clip-corner border border-border/70 panel p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition hover:border-cyan/40">
                     {editingId === item.id ? (
                       <div className="space-y-3">
                         <Input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)}
@@ -308,7 +308,7 @@ function RoadmapContent() {
                 ))}
               </div>
             ) : (
-              <div className="clip-corner border border-border/70 bg-[#050b0f]/80 py-12 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+              <div className="clip-corner border border-border/70 panel py-12 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
                 <Milestone className="mx-auto mb-3 size-8 text-muted-foreground/40" />
                 <p className="font-mono text-[0.68rem] uppercase tracking-widest text-muted-foreground">No roadmap items yet.</p>
               </div>

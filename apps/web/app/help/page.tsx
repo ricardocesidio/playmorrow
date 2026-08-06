@@ -71,7 +71,7 @@ export default function HelpPage() {
             Search our knowledge base for guides and documentation
           </p>
           <form onSubmit={handleSearch} className="mx-auto max-w-lg">
-            <div className="clip-corner flex h-14 items-center gap-3 border border-cyan/30 bg-[#050b0f]/80 px-5 shadow-[0_0_30px_rgb(62_231_255_/_0.08)]">
+            <div className="clip-corner flex h-14 items-center gap-3 border border-cyan/30 panel px-5 shadow-[0_0_30px_rgb(62_231_255_/_0.08)]">
               <Search className="size-5 shrink-0 text-muted-foreground" />
               <input
                 type="text"
@@ -94,7 +94,7 @@ export default function HelpPage() {
               <div className="h-3 w-32 bg-border/30 rounded mb-4" />
               <div className="grid gap-4 sm:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-5 animate-pulse">
+                  <div key={i} className="clip-corner border border-border/40 panel p-5 animate-pulse">
                     <div className="h-4 w-3/4 bg-border/30 rounded mb-3" />
                     <div className="h-3 w-full bg-border/20 rounded mb-1" />
                     <div className="h-3 w-2/3 bg-border/20 rounded" />
@@ -106,7 +106,7 @@ export default function HelpPage() {
               <div className="h-3 w-28 bg-border/30 rounded mb-4" />
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-5 animate-pulse">
+                  <div key={i} className="clip-corner border border-border/40 panel p-5 animate-pulse">
                     <div className="h-8 w-8 bg-border/20 rounded mb-3" />
                     <div className="h-4 w-1/2 bg-border/30 rounded mb-2" />
                     <div className="h-3 w-full bg-border/20 rounded" />
@@ -132,7 +132,7 @@ export default function HelpPage() {
                     <Link
                       key={article.id}
                       href={`/help/article/${article.slug}`}
-                      className="clip-corner group border border-border/60 bg-[#050b0f]/50 p-5 transition hover:border-cyan/30 hover:bg-[#050b0f]/80 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]"
+                      className="clip-corner group border border-border/60 panel p-5 transition hover:border-cyan/30 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]"
                     >
                       <h3 className="mb-2 font-mono text-[0.6rem] font-semibold uppercase tracking-wider text-foreground group-hover:text-cyan transition">
                         {article.title}
@@ -167,7 +167,7 @@ export default function HelpPage() {
                     <Link
                       key={cat.id}
                       href={`/help/category/${cat.slug}`}
-                      className="clip-corner group border border-border/60 bg-[#050b0f]/50 p-5 transition hover:border-cyan/30 hover:bg-[#050b0f]/80 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]"
+                      className="clip-corner group border border-border/60 panel p-5 transition hover:border-cyan/30 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]"
                     >
                       <CATEGORY_ICON className="mb-3 size-6 text-cyan/60 group-hover:text-cyan transition" />
                       <h3 className="mb-1 font-mono text-[0.6rem] font-semibold uppercase tracking-wider text-foreground">
@@ -193,12 +193,12 @@ export default function HelpPage() {
                 <h2 className="mb-6 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">
                   Popular Articles
                 </h2>
-                <div className="clip-corner border border-border/60 bg-[#050b0f]/50">
+                <div className="clip-corner border border-border/60 panel">
                   {popular.map((article, idx) => (
                     <Link
                       key={article.id}
                       href={`/help/article/${article.slug}`}
-                      className={`flex items-center gap-4 px-5 py-4 transition hover:bg-[#050b0f]/80 hover:border-cyan/30 ${
+                      className={`flex items-center gap-4 px-5 py-4 transition hover:border-cyan/30 ${
                         idx < popular.length - 1 ? 'border-b border-border/40' : ''
                       }`}
                     >
@@ -220,7 +220,7 @@ export default function HelpPage() {
             )}
 
             {/* Support CTA */}
-            <section className="clip-corner border border-border/60 bg-[#050b0f]/60 p-6 text-center">
+            <section className="clip-corner border border-border/60 panel p-6 text-center">
               <LifeBuoy className="mx-auto mb-3 size-8 text-cyan/60" />
               <h2 className="mb-2 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">
                 Still need help?

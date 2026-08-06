@@ -217,7 +217,11 @@ model User {
    purchasedLicenses       PurchasedLicense[]
    referralCodes           ReferralCode[]
    referralUsages          ReferralUsage[]
-   organizedEvents         Event[]
+    organizedEvents         Event[]
+    feedEvents              FeedEvent[]
+    analyticsEvents         AnalyticsEvent[]
+    activityEvents          ActivityEvent[]
+    emailLogs               EmailLog[]
 
    @@index([role])
    @@map("users")
@@ -293,7 +297,13 @@ model Studio {
   pressKit          StudioPressKit?
   stripeConnectAccount StripeConnectAccount?
   marketplaceListings  MarketplaceListing[]
+  feedEvents           FeedEvent[]
+  analyticsEvents      AnalyticsEvent[]
+  activityEvents       ActivityEvent[]
 
+  @@index([name])
+  @@index([createdAt])
+  @@index([followersCount])
   @@map("studios")
 }
 
@@ -540,6 +550,9 @@ model Game {
   wishlistItems WishlistItem[]
   views         GameView[]
   marketplaceListings MarketplaceListing[]
+  feedEvents          FeedEvent[]
+  analyticsEvents     AnalyticsEvent[]
+  activityEvents      ActivityEvent[]
 
   @@index([studioId])
   @@index([status])
@@ -686,6 +699,10 @@ model FeedEvent {
   payload   Json
   createdAt DateTime      @default(now())
 
+  studio Studio  @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  game   Game?   @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  actor  User?   @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
   @@index([createdAt])
   @@index([studioId])
   @@index([gameId])
@@ -743,7 +760,7 @@ model Comment {
   gameId    String?
   authorId  String
   body      String
-  type      String    @default("REPLY")
+  type      String    @default("POST")
   /// Self-relation for threaded replies.
   parentId  String?
   createdAt DateTime  @default(now())
@@ -993,6 +1010,10 @@ model ActivityEvent {
   metadata  Json?
   createdAt DateTime @default(now())
 
+  actor  User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  studio Studio?  @relation(fields: [studioId], references: [id], onDelete: SetNull)
+  game   Game?    @relation(fields: [gameId], references: [id], onDelete: SetNull)
+
   @@index([actorId, createdAt])
   @@index([studioId, createdAt])
   @@index([gameId, createdAt])
@@ -1104,6 +1125,10 @@ model AnalyticsEvent {
   userAgent   String?
   locale      String?
   timestamp   DateTime @default(now())
+
+  game   Game?   @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  studio Studio? @relation(fields: [studioId], references: [id], onDelete: SetNull)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([eventType])
   @@index([gameId, eventType, timestamp])
@@ -1392,6 +1417,8 @@ model EmailLog {
   clickedAt  DateTime?
   createdAt  DateTime @default(now())
 
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   @@index([userId])
   @@index([createdAt])
   @@index([status])
@@ -1497,9 +1524,9 @@ model Transaction {
   description     String?
   createdAt       DateTime          @default(now())
 
-  buyer  User?         @relation("BuyerTransactions", fields: [buyerId], references: [id])
-  seller User?         @relation("SellerTransactions", fields: [sellerId], references: [id])
-  listing MarketplaceListing? @relation(fields: [listingId], references: [id])
+  buyer  User?         @relation("BuyerTransactions", fields: [buyerId], references: [id], onDelete: SetNull)
+  seller User?         @relation("SellerTransactions", fields: [sellerId], references: [id], onDelete: SetNull)
+  listing MarketplaceListing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
 
   @@index([buyerId])
   @@index([sellerId])
@@ -1617,7 +1644,7 @@ model Event {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  organizer User? @relation(fields: [organizerId], references: [id])
+  organizer User? @relation(fields: [organizerId], references: [id], onDelete: SetNull)
 
   @@index([status])
   @@index([startDate])
@@ -1629,7 +1656,7 @@ model ReferralUsage {
   referralCodeId  String
   userId          String
   createdAt       DateTime     @default(now())
-  referralCode    ReferralCode @relation(fields: [referralCodeId], references: [id])
-  user            User         @relation(fields: [userId], references: [id])
+  referralCode    ReferralCode @relation(fields: [referralCodeId], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([referralCodeId, userId])
 }

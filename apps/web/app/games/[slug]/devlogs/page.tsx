@@ -46,7 +46,7 @@ export default function GameDevlogsPage() {
           {isLoading ? (
             <div className="space-y-6">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="animate-pulse clip-corner border border-border/70 bg-[#050b0f]/80 p-5">
+                <div key={i} className="animate-pulse clip-corner border border-border/70 panel p-5">
                   <div className="h-4 w-1/3 rounded bg-border/20 mb-3" />
                   <div className="h-3 w-2/3 rounded bg-border/20 mb-2" />
                   <div className="h-3 w-1/2 rounded bg-border/20" />
@@ -64,14 +64,14 @@ export default function GameDevlogsPage() {
                   <Link
                     key={dl.id}
                     href={`/devlogs/${dl.id}`}
-                    className="clip-corner group block overflow-hidden border border-border/70 bg-[#050b0f]/80 transition hover:border-cyan/50"
+                    className="clip-corner group block overflow-hidden border border-border/70 panel transition hover:border-cyan/50"
                   >
                     {dl.screenshots && dl.screenshots.length > 0 ? (
                       <div className="aspect-[2/1] overflow-hidden">
                         <img src={dl.screenshots[0]!.url} alt="" className="size-full object-cover transition duration-300 group-hover:scale-[1.03]" />
                       </div>
                     ) : (
-                      <div className="aspect-[2/1] flex items-center justify-center bg-[#050b0f]">
+                      <div className="aspect-[2/1] flex items-center justify-center panel">
                         <FileText className="size-10 text-muted-foreground/20" />
                       </div>
                     )}

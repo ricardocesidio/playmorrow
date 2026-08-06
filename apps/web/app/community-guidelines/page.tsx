@@ -15,7 +15,7 @@ export default function CommunityGuidelinesPage() {
       <div className="relative px-5 sm:px-8 lg:px-10">
 
         <main className="relative z-10 mx-auto mt-8 max-w-3xl pb-16">
-          <div className="clip-corner border-2 bg-[#050b0f]/80 p-6 sm:p-8 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]" style={{ borderColor: 'rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}>
+          <div className="clip-corner border-2 panel p-6 sm:p-8 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]" style={{ borderColor: 'rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}>
             <h1 className="font-display font-black uppercase tracking-tight text-white text-2xl sm:text-3xl">Community Guidelines</h1>
             <p className="mt-2 text-sm text-muted-foreground">Last updated: June 2026</p>
 

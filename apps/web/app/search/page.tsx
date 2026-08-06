@@ -82,7 +82,7 @@ export default function SearchPage() {
 
           {/* No results */}
           {noResults && (
-            <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+            <div className="clip-corner border border-border/40 panel py-16 text-center">
               <Search className="mx-auto mb-3 size-10 text-muted-foreground/30" />
               <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">No results for &ldquo;{debounced}&rdquo;</p>
             </div>
@@ -102,12 +102,12 @@ export default function SearchPage() {
                       <Link
                         key={g.id}
                         href={`/games/${g.slug}`}
-                        className="clip-corner flex items-center gap-3 border border-border/70 bg-[#050b0f]/80 p-3 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-colors hover:border-cyan/30"
+                        className="clip-corner flex items-center gap-3 border border-border/70 panel p-3 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-colors hover:border-cyan/30"
                       >
                         {g.coverUrl ? (
                           <img src={g.coverUrl} alt="" className="size-12 border border-border/60 object-cover" />
                         ) : (
-                          <div className="flex size-12 items-center justify-center border border-border/60 bg-[#050b0f]/50 font-mono text-[0.55rem] uppercase text-muted-foreground">No cover</div>
+                          <div className="flex size-12 items-center justify-center border border-border/60 panel font-mono text-[0.55rem] uppercase text-muted-foreground">No cover</div>
                         )}
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-display font-semibold text-white">{g.title}</p>
@@ -131,12 +131,12 @@ export default function SearchPage() {
                       <Link
                         key={s.id}
                         href={`/studios/${s.slug}`}
-                        className="clip-corner flex items-center gap-3 border border-border/70 bg-[#050b0f]/80 p-3 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-colors hover:border-cyan/30"
+                        className="clip-corner flex items-center gap-3 border border-border/70 panel p-3 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-colors hover:border-cyan/30"
                       >
                         {s.logoUrl ? (
                           <img src={s.logoUrl} alt="" className="size-12 border border-border/60 object-cover" />
                         ) : (
-                          <div className="flex size-12 items-center justify-center border border-border/60 bg-[#050b0f]/50 font-mono text-[0.55rem] uppercase text-muted-foreground">No logo</div>
+                          <div className="flex size-12 items-center justify-center border border-border/60 panel font-mono text-[0.55rem] uppercase text-muted-foreground">No logo</div>
                         )}
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-display font-semibold text-white">{s.name}</p>
@@ -159,9 +159,9 @@ export default function SearchPage() {
                       <Link
                         key={d.id}
                         href={`/devlogs/${d.id}`}
-                        className="clip-corner flex items-center gap-3 border border-border/70 bg-[#050b0f]/80 p-3 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-colors hover:border-cyan/30"
+                        className="clip-corner flex items-center gap-3 border border-border/70 panel p-3 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-colors hover:border-cyan/30"
                       >
-                        <div className="flex size-12 items-center justify-center border border-border/60 bg-[#050b0f]/50 font-mono text-[0.55rem] uppercase text-muted-foreground">Devlog</div>
+                        <div className="flex size-12 items-center justify-center border border-border/60 panel font-mono text-[0.55rem] uppercase text-muted-foreground">Devlog</div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-display font-semibold text-white">{d.title}</p>
                           <p className="font-mono text-[0.55rem] text-muted-foreground/60">{d.game.title}</p>

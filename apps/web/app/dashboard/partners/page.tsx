@@ -45,7 +45,7 @@ export default function PartnersPage() {
           {isLoading ? (
             <div role="status" aria-busy="true" aria-live="polite" className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="clip-corner h-20 animate-pulse border border-border/40 bg-[#050b0f]/30" />
+                <div key={i} className="clip-corner h-20 animate-pulse border border-border/40 panel" />
               ))}
             </div>
           ) : error ? (
@@ -53,7 +53,7 @@ export default function PartnersPage() {
           ) : (
             <div className="space-y-3">
               {data?.items.map((p) => (
-                <div key={p.id} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-4 transition hover:border-cyan/40">
+                <div key={p.id} className="clip-corner border border-border/40 panel p-4 transition hover:border-cyan/40">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="grid size-10 place-items-center border border-border bg-background/60">

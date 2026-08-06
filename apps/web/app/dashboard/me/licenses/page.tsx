@@ -33,7 +33,7 @@ export default function MyLicensesPage() {
           {isLoading && (
             <div role="status" aria-busy="true" aria-live="polite" className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="clip-corner h-20 animate-pulse border border-border/40 bg-[#050b0f]/30" />
+                <div key={i} className="clip-corner h-20 animate-pulse border border-border/40 panel" />
               ))}
             </div>
           )}
@@ -48,7 +48,7 @@ export default function MyLicensesPage() {
           {!isLoading && licenses && licenses.length > 0 && (
             <div className="space-y-3">
               {licenses.map((license) => (
-                <div key={license.id} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-4 transition hover:border-cyan/40">
+                <div key={license.id} className="clip-corner border border-border/40 panel p-4 transition hover:border-cyan/40">
                   <div className="flex items-center justify-between">
                     <div>
                       <Link href={`/marketplace/${license.listing.id}`} className="font-display text-sm font-black uppercase text-foreground hover:text-cyan focus-visible:ring-2 focus-visible:ring-cyan">

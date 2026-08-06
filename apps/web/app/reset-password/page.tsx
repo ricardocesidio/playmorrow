@@ -43,7 +43,7 @@ function ResetPasswordInner() {
         <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
         <SiteHeader />
         <div className="relative flex min-h-screen flex-col items-center justify-center px-4">
-          <div className="clip-corner w-full max-w-sm border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner w-full max-w-sm border border-border/70 panel p-5 sm:p-6 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h1 className="font-display font-black uppercase tracking-tight text-white">Password reset</h1>
             <p className="mb-6 mt-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Your password has been changed. All sessions have been revoked.</p>
             <Link href="/login" className="clip-corner inline-flex items-center justify-center border border-cyan bg-cyan/10 px-6 py-2.5 font-mono text-xs uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">Sign in</Link>
@@ -59,7 +59,7 @@ function ResetPasswordInner() {
       <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
       <SiteHeader />
       <div className="relative flex min-h-screen flex-col items-center justify-center px-4">
-        <div className="clip-corner w-full max-w-sm border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+        <div className="clip-corner w-full max-w-sm border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
           <h1 className="font-display font-black uppercase tracking-tight text-white">Set new password</h1>
           <p className="mb-6 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Enter your new password</p>
           <form onSubmit={handleSubmit} className="space-y-4">

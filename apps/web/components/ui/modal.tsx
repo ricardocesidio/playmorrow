@@ -76,7 +76,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="clip-corner w-full max-w-md border border-border/70 bg-[#050b0f] p-6 shadow-[0_0_60px_rgb(0_0_0_/_0.5)] outline-none"
+        className="clip-corner w-full max-w-md border border-border/70 panel p-6 shadow-[0_0_60px_rgb(0_0_0_/_0.5)] outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-center justify-between">

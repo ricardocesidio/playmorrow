@@ -110,7 +110,7 @@ export default function TwoFactorPage() {
             <ArrowLeft className="size-3" /> Back to dashboard
           </Link>
 
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <div className="mb-6 flex items-center gap-4">
               <div className={`grid size-14 place-items-center border ${totpEnabled ? 'border-emerald/50 bg-emerald/5 text-emerald' : 'border-border/50 bg-background/20 text-muted-foreground'}`}>
                 {totpEnabled ? <ShieldCheck className="size-7" /> : <Shield className="size-7" />}

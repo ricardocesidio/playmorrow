@@ -141,7 +141,7 @@ export default function EditStudioPage() {
       <div className="relative mx-auto grid max-w-[1540px] lg:grid-cols-[220px_minmax(0,1fr)_320px]">
         {/* Sidebar */}
         <aside className="hidden border-r border-border/50 lg:block">
-          <div className="clip-corner sticky top-0 min-h-screen border-border/90 bg-[#050b0f]/88 p-3 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
+          <div className="clip-corner sticky top-0 min-h-screen border-border/90 panel p-3 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
             <div className="border-b border-border/70 px-2 pb-3">
               <p className="flex items-center gap-2 font-mono text-[0.68rem] uppercase tracking-[0.18em] text-cyan"><Gauge className="size-3.5" /> Studio Dashboard</p>
             </div>
@@ -251,7 +251,7 @@ export default function EditStudioPage() {
             </Section>
 
             {/* Save Bar */}
-            <div className="sticky bottom-0 z-10 -mx-4 border-t border-border/70 bg-[#050b0f]/95 px-4 py-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+            <div className="sticky bottom-0 z-10 -mx-4 border-t border-border/70 panel px-4 py-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <Button type="submit" disabled={updateStudio.isPending || !hasChanges}>
@@ -273,7 +273,7 @@ export default function EditStudioPage() {
         <aside className="hidden border-l border-border/50 lg:block">
           <div className="sticky top-0 space-y-4 p-4">
             {/* Live Preview */}
-            <div className="clip-corner border border-border/90 bg-[#050b0f]/88 p-4 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
+            <div className="clip-corner border border-border/90 panel p-4 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
               <p className="mb-3 font-mono text-[0.58rem] uppercase tracking-[0.22em] text-cyan">Live Preview</p>
               <div className="aspect-[3/1] overflow-hidden border border-border/60 bg-background/60">
                 {bannerUrl ? <img src={bannerUrl} alt="" className="size-full object-cover" /> : <div className="flex h-full items-center justify-center font-mono text-[0.58rem] text-muted-foreground">No banner</div>}
@@ -296,7 +296,7 @@ export default function EditStudioPage() {
             </div>
 
             {/* Profile Strength */}
-            <div className="clip-corner border border-border/90 bg-[#050b0f]/88 p-4 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
+            <div className="clip-corner border border-border/90 panel p-4 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
               <p className="mb-2 font-mono text-[0.58rem] uppercase tracking-[0.22em] text-muted-foreground">Profile Strength</p>
               <div className="relative grid size-20 place-items-center mx-auto">
                 <svg className="size-20 -rotate-90" viewBox="0 0 72 72">
@@ -344,7 +344,7 @@ export default function EditStudioPage() {
 
 function Section({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) {
   return (
-    <section className="clip-corner border border-border/90 bg-[#050b0f]/88 p-5 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)] sm:p-6">
+    <section className="clip-corner border border-border/90 panel p-5 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)] sm:p-6">
       <div className="mb-5 border-b border-border/60 pb-3">
         <h2 className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">{title}</h2>
         <p className="mt-1 font-mono text-[0.58rem] text-muted-foreground">{desc}</p>

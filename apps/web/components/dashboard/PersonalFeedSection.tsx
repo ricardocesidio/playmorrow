@@ -14,7 +14,7 @@ export function PersonalFeedSection() {
 
   if (!isAuthenticated) {
     return (
-      <div className="clip-corner border border-border/40 bg-[#050b0f]/40 p-6 text-center">
+      <div className="clip-corner border border-border/40 panel p-6 text-center">
         <Newspaper className="mx-auto mb-3 size-8 text-muted-foreground/40" />
         <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
           <Link href="/login" className="text-cyan underline">Sign in</Link> to see your personal feed.
@@ -47,7 +47,7 @@ export function PersonalFeedSection() {
 
   if (displayItems.length === 0 && !isLoading) {
     return (
-      <div className="clip-corner border border-border/40 bg-[#050b0f]/40 p-6 text-center">
+      <div className="clip-corner border border-border/40 panel p-6 text-center">
         <Newspaper className="mx-auto mb-3 size-8 text-muted-foreground/40" />
         <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">No activity yet.</p>
         <Link href="/studios" className="mt-3 inline-flex items-center gap-1 font-mono text-[0.55rem] text-cyan underline">
@@ -58,7 +58,7 @@ export function PersonalFeedSection() {
   }
 
   return (
-    <div className="clip-corner border border-border/40 bg-[#050b0f]/40">
+    <div className="clip-corner border border-border/40 panel">
       <div className="border-b border-border/40 px-4 py-3">
         <h2 className="flex items-center gap-2 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">
           <Newspaper className="size-3.5" /> Studio Activity
@@ -69,7 +69,7 @@ export function PersonalFeedSection() {
           <Link
             key={item.id}
             href={`/devlogs/${item.id}`}
-            className="flex items-center gap-3 px-4 py-3 transition hover:bg-[#050b0f]/60"
+            className="flex items-center gap-3 px-4 py-3 transition "
           >
             <div className="min-w-0 flex-1">
               <p className="truncate font-mono text-[0.6rem] font-semibold uppercase tracking-wider text-foreground">

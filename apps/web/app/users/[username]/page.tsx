@@ -68,10 +68,10 @@ export default function UserProfilePage() {
               </div>
               <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-20 rounded border border-border/30 bg-[#050b0f]/40" />
+                  <div key={i} className="h-20 rounded border border-border/30 panel" />
                 ))}
               </div>
-              <div className="mt-8 h-48 rounded border border-border/30 bg-[#050b0f]/40" />
+              <div className="mt-8 h-48 rounded border border-border/30 panel" />
             </div>
           </div>
         </main>
@@ -113,10 +113,10 @@ export default function UserProfilePage() {
 
         <div className="relative mx-auto w-full max-w-3xl">
           {/* ── Hero Section ── */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-shadow duration-300 hover:shadow-[0_0_30px_rgb(62_231_255_/_0.08)] sm:p-8">
+          <div className="clip-corner border border-border/70 panel p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-shadow duration-300 hover:shadow-[0_0_30px_rgb(62_231_255_/_0.08)] sm:p-8">
             <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
               <div className="relative" aria-label={`${data.displayName}'s profile avatar`}>
-                <div className="flex size-20 shrink-0 items-center justify-center border border-border/60 bg-[#050b0f]/50 font-display text-3xl font-bold text-muted-foreground transition-transform duration-300 hover:scale-105 sm:size-24">
+                <div className="flex size-20 shrink-0 items-center justify-center border border-border/60 panel font-display text-3xl font-bold text-muted-foreground transition-transform duration-300 hover:scale-105 sm:size-24">
                   {data.avatarUrl ? (
                     <img src={data.avatarUrl} alt={`${data.displayName}'s avatar`} className="size-full object-cover" />
                   ) : (
@@ -158,7 +158,7 @@ export default function UserProfilePage() {
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="clip-corner border border-border/70 bg-[#050b0f]/80 p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan/30 hover:shadow-[0_0_25px_rgb(62_231_255_/_0.06)]"
+                className="clip-corner border border-border/70 panel p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan/30 hover:shadow-[0_0_25px_rgb(62_231_255_/_0.06)]"
                 role="listitem"
                 aria-label={`${stat.value} ${stat.label}`}
               >
@@ -177,7 +177,7 @@ export default function UserProfilePage() {
           {(() => {
             const { level, nextXp, progress } = xpProgress(data.xp);
             return (
-              <div className="mt-6 clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-all duration-300 hover:border-cyan/30 hover:shadow-[0_0_25px_rgb(62_231_255_/_0.06)]">
+              <div className="mt-6 clip-corner border border-border/70 panel p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-all duration-300 hover:border-cyan/30 hover:shadow-[0_0_25px_rgb(62_231_255_/_0.06)]">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div className="flex size-12 items-center justify-center border border-cyan/30 bg-cyan/5 font-display text-xl font-black text-cyan">
@@ -215,12 +215,12 @@ export default function UserProfilePage() {
                   <Link
                     key={s.id}
                     href={`/studios/${s.slug}`}
-                    className="clip-corner flex items-center gap-4 border border-border/70 bg-[#050b0f]/80 p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan/30 hover:shadow-[0_0_25px_rgb(62_231_255_/_0.06)]"
+                    className="clip-corner flex items-center gap-4 border border-border/70 panel p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan/30 hover:shadow-[0_0_25px_rgb(62_231_255_/_0.06)]"
                   >
                     {s.logoUrl ? (
                       <img src={s.logoUrl} alt="" className="size-12 border border-border/60 object-cover" />
                     ) : (
-                      <div className="flex size-12 items-center justify-center border border-border/60 bg-[#050b0f]/50 font-display text-lg font-bold text-muted-foreground">
+                      <div className="flex size-12 items-center justify-center border border-border/60 panel font-display text-lg font-bold text-muted-foreground">
                         {s.name.charAt(0)}
                       </div>
                     )}
@@ -252,7 +252,7 @@ export default function UserProfilePage() {
                 Recent activity
                 <span className="font-mono text-[0.55rem] font-normal tracking-widest text-muted-foreground">({data.recentActivity.length})</span>
               </h2>
-              <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-1 shadow-[0_0_20px_rgb(0_0_0_/_0.25)]">
+              <div className="clip-corner border border-border/70 panel p-1 shadow-[0_0_20px_rgb(0_0_0_/_0.25)]">
                 {data.recentActivity.map((item, idx) => (
                   <div
                     key={item.id}
@@ -261,7 +261,7 @@ export default function UserProfilePage() {
                       idx < data.recentActivity.length - 1 && 'border-b border-border/40',
                     )}
                   >
-                    <div className="flex size-8 shrink-0 items-center justify-center border border-border/60 bg-[#050b0f]/50 transition-colors group-hover:border-cyan/40">
+                    <div className="flex size-8 shrink-0 items-center justify-center border border-border/60 panel transition-colors group-hover:border-cyan/40">
                       <ActivityIcon type={item.type} />
                     </div>
                     <div className="min-w-0 flex-1">

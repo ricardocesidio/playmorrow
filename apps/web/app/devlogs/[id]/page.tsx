@@ -206,7 +206,7 @@ function CommentItem({
   };
 
   return (
-    <div className={`clip-corner border border-border/70 bg-[#050b0f]/80 p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] ${depth > 0 ? 'ml-6' : ''}`}>
+    <div className={`clip-corner border border-border/70 panel p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] ${depth > 0 ? 'ml-6' : ''}`}>
       {comment.isDeleted || comment.deletedAt ? (
         <p className="text-sm italic text-muted-foreground/60">[deleted]</p>
       ) : editing ? (
@@ -338,9 +338,9 @@ export default function DevlogDetailPage() {
           <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
           <div className="relative mx-auto w-full max-w-3xl">
             <div className="animate-pulse space-y-4">
-              <div className="clip-corner h-8 w-64 bg-[#050b0f]/30" />
-              <div className="clip-corner h-4 w-96 bg-[#050b0f]/30" />
-              <div className="clip-corner h-48 bg-[#050b0f]/30" />
+              <div className="clip-corner h-8 w-64 panel" />
+              <div className="clip-corner h-4 w-96 panel" />
+              <div className="clip-corner h-48 panel" />
             </div>
           </div>
         </main>
@@ -527,7 +527,7 @@ export default function DevlogDetailPage() {
                 </Button>
               </div>
             ) : (
-              <div className="clip-corner mb-6 border border-border/70 bg-[#050b0f]/80 p-4 text-center shadow-[0_0_20px_rgb(0_0_0_/_0.25)]">
+              <div className="clip-corner mb-6 border border-border/70 panel p-4 text-center shadow-[0_0_20px_rgb(0_0_0_/_0.25)]">
                 <p className="font-mono text-[0.6rem] text-muted-foreground">
                   <Link href="/login" className="text-cyan underline-offset-2 hover:underline">Sign in</Link> to leave a comment.
                 </p>

@@ -167,7 +167,7 @@ function CreateDevlogForm() {
           )}
 
           {!gameSlug && (
-            <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+            <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
               <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Game</h3>
               <div className="space-y-4">
                 <div>
@@ -192,7 +192,7 @@ function CreateDevlogForm() {
             </div>
           )}
 
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Content</h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
@@ -283,7 +283,7 @@ function CreateDevlogForm() {
             </div>
           </div>
 
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Status</h3>
             <div className="flex items-center gap-4">
               {(['DRAFT', 'PUBLISHED', 'SCHEDULED'] as const).map((s) => (

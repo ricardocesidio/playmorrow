@@ -128,7 +128,7 @@ export default function MyTicketsPage() {
         {loading && (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-4 animate-pulse">
+              <div key={i} className="clip-corner border border-border/40 panel p-4 animate-pulse">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="h-3 w-16 bg-border/30 rounded" />
                   <div className="h-3 w-12 bg-border/20 rounded" />
@@ -152,7 +152,7 @@ export default function MyTicketsPage() {
 
         {/* Empty */}
         {!loading && !error && tickets.length === 0 && (
-          <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+          <div className="clip-corner border border-border/40 panel py-16 text-center">
             <Ticket className="mx-auto mb-3 size-10 text-muted-foreground/30" />
             <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-4">
               {statusFilter === 'all' ? 'No tickets yet.' : 'No tickets with this status.'}

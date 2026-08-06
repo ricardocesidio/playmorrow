@@ -118,7 +118,7 @@ export default function AdminHelpPage() {
         {loading && (
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-4 animate-pulse">
+              <div key={i} className="clip-corner border border-border/40 panel p-4 animate-pulse">
                 <div className="flex items-center gap-3">
                   <div className="h-3 w-12 bg-border/20 rounded" />
                   <div className="h-4 w-1/3 bg-border/30 rounded" />
@@ -132,7 +132,7 @@ export default function AdminHelpPage() {
         {error && !loading && <ErrorState message={error} onRetry={fetchArticles} />}
 
         {!loading && !error && articles.length === 0 && (
-          <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+          <div className="clip-corner border border-border/40 panel py-16 text-center">
             <FileText className="mx-auto mb-3 size-10 text-muted-foreground/30" />
             <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-4">
               No articles yet.
@@ -150,7 +150,7 @@ export default function AdminHelpPage() {
             {articles.map((article) => (
               <div
                 key={article.id}
-                className="clip-corner border border-border/40 bg-[#050b0f]/30 p-4 transition hover:bg-[#050b0f]/50"
+                className="clip-corner border border-border/40 panel p-4 transition "
               >
                 <div className="flex items-center gap-4">
                   <div className="flex-1 min-w-0">

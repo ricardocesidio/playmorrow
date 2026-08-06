@@ -26,7 +26,7 @@ export default function MediaPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Link
               href="/dashboard/games"
-              className="clip-corner flex flex-col items-center gap-4 border border-border/90 bg-[#050b0f]/86 p-12 text-center transition hover:-translate-y-0.5 hover:border-cyan/70"
+              className="clip-corner flex flex-col items-center gap-4 border border-border/90 panel p-12 text-center transition hover:-translate-y-0.5 hover:border-cyan/70"
             >
               <Image className="size-10 text-muted-foreground" />
               <div>
@@ -38,7 +38,7 @@ export default function MediaPage() {
               </span>
             </Link>
 
-            <div className="clip-corner flex flex-col items-center gap-4 border border-border/60 bg-[#050b0f]/50 p-12 text-center opacity-60">
+            <div className="clip-corner flex flex-col items-center gap-4 border border-border/60 panel p-12 text-center opacity-60">
               <Upload className="size-10 text-muted-foreground" />
               <div>
                 <h2 className="font-display text-lg font-bold text-foreground">Press Kit Assets</h2>
@@ -47,7 +47,7 @@ export default function MediaPage() {
               <span className="text-[0.55rem] font-mono uppercase tracking-wider text-muted-foreground">Coming Soon</span>
             </div>
 
-            <div className="clip-corner flex flex-col items-center gap-4 border border-border/60 bg-[#050b0f]/50 p-12 text-center opacity-60">
+            <div className="clip-corner flex flex-col items-center gap-4 border border-border/60 panel p-12 text-center opacity-60">
               <Upload className="size-10 text-muted-foreground" />
               <div>
                 <h2 className="font-display text-lg font-bold text-foreground">Video Trailers</h2>

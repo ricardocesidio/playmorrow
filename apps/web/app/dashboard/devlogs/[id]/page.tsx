@@ -169,7 +169,7 @@ export default function EditDevlogPage() {
             </div>
           )}
 
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Content</h3>
             <div className="mb-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Title</label>
@@ -223,7 +223,7 @@ export default function EditDevlogPage() {
             </div>
           </div>
 
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Details</h3>
             <div className="mb-4">
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Subtitle</label>
@@ -262,7 +262,7 @@ export default function EditDevlogPage() {
             </div>
           </div>
 
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Status</h3>
             <div className="flex items-center gap-4">
               {(['DRAFT', 'PUBLISHED', 'SCHEDULED'] as const).map((s) => (

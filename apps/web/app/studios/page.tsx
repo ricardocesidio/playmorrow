@@ -120,7 +120,7 @@ export default function StudiosPage() {
                   onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                   placeholder="Search studios..."
                   aria-label="Search studios"
-                  className="clip-corner h-12 w-full border border-cyan/30 bg-[#050b0f]/80 pl-12 pr-4 font-mono text-sm text-white outline-none placeholder:text-muted-foreground/40 shadow-[0_0_12px_rgb(62_231_255_/_0.06)] transition-all duration-500 focus:border-cyan focus:shadow-[0_0_30px_rgb(62_231_255_/_0.2)]"
+                  className="clip-corner h-12 w-full border border-cyan/30 panel pl-12 pr-4 font-mono text-sm text-white outline-none placeholder:text-muted-foreground/40 shadow-[0_0_12px_rgb(62_231_255_/_0.06)] transition-all duration-500 focus:border-cyan focus:shadow-[0_0_30px_rgb(62_231_255_/_0.2)]"
                 />
               </div>
             </form>
@@ -134,7 +134,7 @@ export default function StudiosPage() {
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className="clip-corner animate-pulse border border-border/40 bg-[#050b0f]/30"
+                  className="clip-corner animate-pulse border border-border/40 panel"
                   style={{ animationDelay: `${i * 0.1}s`, animationDuration: '1.5s' }}
                 >
                   {/* Banner placeholder */}
@@ -168,7 +168,7 @@ export default function StudiosPage() {
           )}
 
           {!isLoading && !error && data?.items.length === 0 && (
-            <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-20 text-center">
+            <div className="clip-corner border border-border/40 panel py-20 text-center">
               <Building2 className="mx-auto mb-4 size-12 text-muted-foreground/30" />
               <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
                 {search ? `No studios matching "${search}"` : 'No studios yet'}
@@ -194,7 +194,7 @@ export default function StudiosPage() {
                     style={{ animationDelay: `${index * 0.1}s` }}
                     className={cn(
                       'group clip-corner relative flex flex-col overflow-hidden',
-                      'border border-border/70 bg-[#050b0f]/80',
+                      'border border-border/70 panel',
                       'shadow-[0_0_30px_rgb(0_0_0_/_0.3)]',
                       'transition-all duration-500',
                       'hover:scale-[1.02] hover:border-cyan/70 hover:shadow-[0_0_30px_rgb(62_231_255_/_0.15)]',
@@ -225,7 +225,7 @@ export default function StudiosPage() {
                             className="relative size-16 border-2 border-border/60 object-cover shadow-lg"
                           />
                         ) : (
-                          <div className="relative flex size-16 items-center justify-center border-2 border-border/60 bg-[#050b0f] font-display text-xl font-black uppercase text-muted-foreground shadow-lg">
+                          <div className="relative flex size-16 items-center justify-center border-2 border-border/60 panel font-display text-xl font-black uppercase text-muted-foreground shadow-lg">
                             {studio.name.charAt(0)}
                           </div>
                         )}

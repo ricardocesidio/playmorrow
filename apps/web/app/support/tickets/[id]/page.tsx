@@ -140,7 +140,7 @@ export default function TicketDetailPage() {
         </Link>
 
         {/* Ticket Header */}
-        <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+        <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <span className="font-mono text-[0.5rem] text-muted-foreground/50">
               #{ticket.ticketNumber}
@@ -194,7 +194,7 @@ export default function TicketDetailPage() {
           </h2>
 
           {replies.length === 0 && (
-            <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-8 text-center">
+            <div className="clip-corner border border-border/40 panel py-8 text-center">
               <p className="font-mono text-[0.6rem] text-muted-foreground">
                 No replies yet. A support agent will respond shortly.
               </p>
@@ -210,7 +210,7 @@ export default function TicketDetailPage() {
                 className={`clip-corner border p-4 ${
                   isStaff
                     ? 'border-cyan/20 bg-cyan/[0.02]'
-                    : 'border-border/50 bg-[#050b0f]/40'
+                    : 'border-border/50 panel'
                 }`}
               >
                 <div className="mb-2 flex items-center gap-2">
@@ -248,7 +248,7 @@ export default function TicketDetailPage() {
 
         {/* Reply Form */}
         <form onSubmit={handleReply} className="mt-6">
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <label htmlFor="reply" className="mb-2 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
               Add a reply
             </label>

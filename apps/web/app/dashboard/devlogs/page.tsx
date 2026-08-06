@@ -33,7 +33,7 @@ export default function MyDevlogsPage() {
               <Loader2 className="size-8 animate-spin text-cyan" />
             </div>
           ) : !devlogs || devlogs.length === 0 ? (
-            <div className="clip-corner flex flex-col items-center gap-4 border border-border/90 bg-[#050b0f]/86 p-12 text-center">
+            <div className="clip-corner flex flex-col items-center gap-4 border border-border/90 panel p-12 text-center">
               <FileText className="size-12 text-muted-foreground" />
               <h2 className="font-display text-xl font-bold text-foreground">No devlogs yet</h2>
               <p className="text-sm text-muted-foreground">Create your first devlog to share development updates with your community.</p>

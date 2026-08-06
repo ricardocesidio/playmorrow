@@ -28,7 +28,7 @@ export default function RevenueDashboardPage() {
           {isLoading && (
             <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading revenue">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="clip-corner h-24 animate-pulse border border-border/40 bg-[#050b0f]/30" />
+                <div key={i} className="clip-corner h-24 animate-pulse border border-border/40 panel" />
               ))}
             </div>
           )}
@@ -40,7 +40,7 @@ export default function RevenueDashboardPage() {
           {!isLoading && studios && studios.length > 0 && (
             <div className="space-y-6">
               {studios.map((s) => (
-                <div key={s.studio.id} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-4">
+                <div key={s.studio.id} className="clip-corner border border-border/40 panel p-4">
                   <h2 className="font-display text-sm font-black uppercase text-cyan">{s.studio.name}</h2>
 
                   <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">

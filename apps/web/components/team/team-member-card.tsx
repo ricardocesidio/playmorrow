@@ -39,7 +39,7 @@ export function TeamMemberCard({ member, currentUserId, currentUserRole, onRemov
   const canManage = currentUserRole === 'OWNER' || (currentUserRole === 'ADMIN' && (member.role === 'MODERATOR' || member.role === 'MEMBER'));
 
   return (
-    <div className="clip-corner flex items-center gap-4 border border-border/70 bg-[#050b0f]/80 p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)]">
+    <div className="clip-corner flex items-center gap-4 border border-border/70 panel p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)]">
       <div className="grid size-10 shrink-0 place-items-center rounded-full border border-border bg-background/60 text-sm font-bold text-foreground overflow-hidden">
         {member.user.avatarUrl ? (
           <img src={member.user.avatarUrl} alt="" className="size-full object-cover" />
@@ -68,7 +68,7 @@ export function TeamMemberCard({ member, currentUserId, currentUserRole, onRemov
           {menuOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-              <div className="absolute right-0 top-full z-50 mt-1 w-44 border border-border bg-[#050b0f] shadow-lg">
+              <div className="absolute right-0 top-full z-50 mt-1 w-44 border border-border panel shadow-lg">
                 {isSelf && member.role !== 'OWNER' && (
                   <button onClick={() => { onRemove(member.userId); setMenuOpen(false); }}
                     className="flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 font-mono text-[0.6rem] text-coral hover:bg-coral/10">

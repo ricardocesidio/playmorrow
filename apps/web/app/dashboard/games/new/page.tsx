@@ -243,7 +243,7 @@ function CreateGameForm() {
           )}
 
           {/* Studio selector */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Studio</h3>
             <div>
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">Studio *</label>
@@ -256,7 +256,7 @@ function CreateGameForm() {
           </div>
 
           {/* Basic Info */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Basic Information</h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
@@ -305,7 +305,7 @@ function CreateGameForm() {
           </div>
 
           {/* Demo & Release */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Demo &amp; Release</h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
@@ -402,7 +402,7 @@ function CreateGameForm() {
           </div>
 
           {/* Pricing */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Pricing</h3>
             <div className="flex items-center gap-3 mb-3">
               <Input type="checkbox" id="isFree" checked={isFree} onChange={(e) => setIsFree(e.target.checked)}
@@ -440,7 +440,7 @@ function CreateGameForm() {
           </div>
 
           {/* Trailer */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Trailer</h3>
             <div>
               <label className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground mb-1.5 block">YouTube trailer URL</label>
@@ -452,7 +452,7 @@ function CreateGameForm() {
           </div>
 
           {/* Media URLs */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan mb-3">Cover & Banner</h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
@@ -481,7 +481,7 @@ function CreateGameForm() {
           </div>
 
           {/* Screenshots */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Screenshots ({media.length}/{MAX_SCREENSHOTS})</h3>
               <Button type="button" onClick={addMedia} disabled={uploadingShot || media.length >= MAX_SCREENSHOTS} size="sm">
@@ -513,7 +513,7 @@ function CreateGameForm() {
           </div>
 
           {/* Platform links rows */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Platform Links ({platformLinks.length}/{MAX_PLATFORM_LINKS})</h3>
               <Button type="button" onClick={addPlatform} size="sm">

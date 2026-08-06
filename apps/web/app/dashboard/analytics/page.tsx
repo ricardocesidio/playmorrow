@@ -309,13 +309,13 @@ function AnalyticsSkeleton() {
     <div className="space-y-3 p-3 animate-pulse">
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/40 p-4">
+          <div key={i} className="clip-corner border border-border/40 panel p-4">
             <div className="h-3 w-16 bg-border/30 mb-3" />
             <div className="h-6 w-12 bg-border/40" />
           </div>
         ))}
       </div>
-      <div className="clip-corner border border-border/40 bg-[#050b0f]/40 p-4 h-72" />
+      <div className="clip-corner border border-border/40 panel p-4 h-72" />
     </div>
   );
 }

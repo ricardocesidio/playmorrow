@@ -46,7 +46,7 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {games.map((game: GameItem) => (
             <Link key={game.id} href={`/games/${game.slug}`}
-              className="group clip-corner border border-border/40 bg-[#050b0f]/50 overflow-hidden transition hover:border-cyan/30">
+              className="group clip-corner border border-border/40 panel overflow-hidden transition hover:border-cyan/30">
               <div className="aspect-[3/4] bg-border/10 flex items-center justify-center">
                 {game.coverUrl
                   ? <img src={game.coverUrl} alt={game.title} className="size-full object-cover" />

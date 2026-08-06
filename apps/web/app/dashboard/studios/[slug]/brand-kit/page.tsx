@@ -92,7 +92,7 @@ export default function BrandKitPage() {
   }
 
   const Section = ({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) => (
-    <fieldset className="clip-corner border border-border/90 bg-[#050b0f]/86 p-6 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
+    <fieldset className="clip-corner border border-border/90 panel p-6 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)]">
       <legend className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">{title}</legend>
       {desc && <p className="mb-5 mt-1 text-xs text-muted-foreground">{desc}</p>}
       <div className="space-y-4">{children}</div>
@@ -215,7 +215,7 @@ export default function BrandKitPage() {
               />
             </Section>
 
-            <div className="sticky bottom-0 z-10 -mx-4 border-t border-border/70 bg-[#050b0f]/95 px-4 py-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+            <div className="sticky bottom-0 z-10 -mx-4 border-t border-border/70 panel px-4 py-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
               <div className="flex items-center justify-between gap-4">
                 <Button type="submit" disabled={saveBrandKit.isPending}>
                   {saveBrandKit.isPending ? <Loader2 className="size-3 animate-spin" /> : <Save className="size-3" />}

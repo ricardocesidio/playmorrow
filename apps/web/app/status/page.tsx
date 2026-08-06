@@ -86,7 +86,7 @@ export default function StatusPage() {
 
           <div className="space-y-2">
             {services.map((svc) => (
-              <div key={svc.name} className="clip-corner flex items-center gap-4 border border-border/70 bg-[#050b0f]/80 px-5 py-4">
+              <div key={svc.name} className="clip-corner flex items-center gap-4 border border-border/70 panel px-5 py-4">
                 <span className="text-cyan">{svc.icon}</span>
                 <span className="flex-1 font-mono text-[0.6rem] text-foreground">{svc.name}</span>
                 {svc.status === 'loading' ? (
@@ -103,7 +103,7 @@ export default function StatusPage() {
             ))}
           </div>
 
-          <div className="mt-6 clip-corner border border-border/60 bg-[#050b0f]/50 px-5 py-4 text-center">
+          <div className="mt-6 clip-corner border border-border/60 panel px-5 py-4 text-center">
             <p className="font-mono text-[0.55rem] text-muted-foreground">
               Uptime (30 days): <span className="text-cyan">{uptime}</span>
             </p>

@@ -42,7 +42,7 @@ export default function ReportDetailPage() {
           <div className="relative mx-auto max-w-3xl">
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="clip-corner h-16 animate-pulse border border-border/40 bg-[#050b0f]/30" />
+                <div key={i} className="clip-corner h-16 animate-pulse border border-border/40 panel" />
               ))}
             </div>
           </div>
@@ -59,7 +59,7 @@ export default function ReportDetailPage() {
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(62_231_255_/_0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(62_231_255_/_0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
           <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
           <div className="relative mx-auto max-w-3xl">
-            <div className="clip-corner border border-border/40 bg-[#050b0f]/30 py-16 text-center">
+            <div className="clip-corner border border-border/40 panel py-16 text-center">
               <p className="font-mono text-[0.6rem] text-muted-foreground">Report not found.</p>
             </div>
           </div>
@@ -95,7 +95,7 @@ export default function ReportDetailPage() {
           </div>
 
           {report.details && (
-            <div className="clip-corner mt-6 border border-border/60 bg-[#050b0f]/50 p-4">
+            <div className="clip-corner mt-6 border border-border/60 panel p-4">
               <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Details</p>
               <p className="mt-2 font-mono text-[0.55rem] text-foreground whitespace-pre-wrap">{report.details}</p>
             </div>
@@ -107,14 +107,14 @@ export default function ReportDetailPage() {
           </div>
 
           {report.status === 'OPEN' && (
-            <div className="clip-corner mt-8 border border-border/60 bg-[#050b0f]/50 p-4">
+            <div className="clip-corner mt-8 border border-border/60 panel p-4">
               <p className="mb-3 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Resolution note</p>
               <textarea
                 value={resolutionNote}
                 onChange={(e) => setResolutionNote(e.target.value)}
                 placeholder="Add a note about this resolution (optional)"
                 rows={3}
-                className="clip-corner w-full border border-border/60 bg-[#050b0f]/50 px-3 py-2 font-mono text-[0.55rem] text-foreground placeholder:text-muted-foreground/40 focus:border-cyan focus:outline-none"
+                className="clip-corner w-full border border-border/60 panel px-3 py-2 font-mono text-[0.55rem] text-foreground placeholder:text-muted-foreground/40 focus:border-cyan focus:outline-none"
               />
               <div className="mt-4 flex gap-3">
                 <Button onClick={handleResolve} disabled={updateReport.isPending}>
@@ -128,7 +128,7 @@ export default function ReportDetailPage() {
           )}
 
           {report.resolutionNote && (
-            <div className="clip-corner mt-4 border border-border/60 bg-[#050b0f]/50 p-4">
+            <div className="clip-corner mt-4 border border-border/60 panel p-4">
               <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
                 {report.status === 'RESOLVED' ? 'Resolution' : 'Dismissal'} note
               </p>

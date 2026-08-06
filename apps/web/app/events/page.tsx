@@ -29,7 +29,7 @@ export default function EventsPage() {
           {isLoading && (
             <div role="status" aria-busy="true" aria-live="polite" className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="clip-corner h-24 animate-pulse border border-border/40 bg-[#050b0f]/30" />
+                <div key={i} className="clip-corner h-24 animate-pulse border border-border/40 panel" />
               ))}
             </div>
           )}
@@ -42,7 +42,7 @@ export default function EventsPage() {
             <div className="space-y-3">
               {data.items.map((event: { id: string; title: string; slug: string; startDate: string; location: string | null; virtual: boolean; ticketPriceCents: number | null }) => (
                 <Link key={event.id} href={`/events/${event.slug}`}
-                  className="group clip-corner flex border border-border/40 bg-[#050b0f]/30 p-4 transition hover:border-cyan/40 focus-visible:ring-2 focus-visible:ring-cyan">
+                  className="group clip-corner flex border border-border/40 panel p-4 transition hover:border-cyan/40 focus-visible:ring-2 focus-visible:ring-cyan">
                   <div className="mr-4 flex w-16 flex-col items-center justify-center border border-border bg-background/60 p-2">
                     <span className="font-mono text-lg font-bold text-cyan">
                       {new Date(event.startDate).getDate()}

@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export function DashboardPanel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`clip-corner border border-border/90 bg-[#050b0f]/86 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)] ${className}`}>
+    <div className={`clip-corner border border-border/90 panel shadow-[0_18px_70px_rgb(0_0_0_/_0.36)] ${className}`}>
       {children}
     </div>
   );

@@ -156,7 +156,7 @@ export default function NotificationsSettingsPage() {
         <h1 className="mb-2 mt-6 font-display text-3xl font-black uppercase tracking-tight text-white">Notification Settings</h1>
         <SettingsNav />
 
-        <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+        <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
           <div className="mb-4 flex items-center gap-3 border-b border-border/50 pb-3">
             <Bell className="size-5 text-cyan" />
             <h2 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Notification Preferences</h2>

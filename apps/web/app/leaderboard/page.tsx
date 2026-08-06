@@ -66,7 +66,7 @@ export default function LeaderboardPage() {
           {loading ? (
             <div className="space-y-1">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="clip-corner flex items-center gap-4 border border-border/40 bg-[#050b0f]/50 px-4 py-3 animate-pulse">
+                <div key={i} className="clip-corner flex items-center gap-4 border border-border/40 panel px-4 py-3 animate-pulse">
                   <div className="w-8 h-4 bg-border/30" />
                   <div className="size-9 rounded-full bg-border/30" />
                   <div className="flex-1 space-y-1">
@@ -81,7 +81,7 @@ export default function LeaderboardPage() {
             <div className="space-y-1" role="list" aria-label="Leaderboard entries">
               {data.map((entry) => (
                 <Link key={entry.id} href={`/users/${entry.username}`}
-                  className="clip-corner flex items-center gap-4 border border-border/60 bg-[#050b0f]/70 px-4 py-3 transition hover:border-cyan/50 focus:outline-none focus:ring-2 focus:ring-cyan/50"
+                  className="clip-corner flex items-center gap-4 border border-border/60 panel px-4 py-3 transition hover:border-cyan/50 focus:outline-none focus:ring-2 focus:ring-cyan/50"
                   aria-label={`${entry.displayName} (@${entry.username}), level ${entry.level}, ${entry.xp} XP`}>
                   <span className={`w-8 text-center font-mono text-[0.65rem] font-bold ${rankColor(entry.rank)}`}>{rankIcon(entry.rank)}</span>
                   <div className="grid size-9 shrink-0 place-items-center rounded-full border border-border bg-background/60 text-xs font-bold overflow-hidden">

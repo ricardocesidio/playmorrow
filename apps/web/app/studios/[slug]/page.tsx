@@ -166,22 +166,22 @@ export default function StudioDetailPage() {
         {/* ── STATS CARDS ─────────────────────────────────────────────── */}
         <section className="relative z-10 mx-auto mt-6 max-w-6xl px-5 sm:px-8 lg:px-10">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-5">
-            <div className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)] transition hover:border-coral/50 hover:shadow-[0_0_30px_rgb(255_87_77_/_0.15)] sm:p-6">
+            <div className="clip-corner border border-border/80 panel p-5 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)] transition hover:border-coral/50 hover:shadow-[0_0_30px_rgb(255_87_77_/_0.15)] sm:p-6">
               <Heart className="mx-auto size-6 text-coral drop-shadow-[0_0_12px_rgb(255_87_77_/_0.5)] sm:size-7" />
               <p className="mt-2 font-display text-2xl font-semibold text-white sm:text-3xl">{formatFollowers(studio.followersCount)}</p>
               <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Followers</p>
             </div>
-            <div className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)] transition hover:border-cyan/50 hover:shadow-[0_0_30px_rgb(62_231_255_/_0.15)] sm:p-6">
+            <div className="clip-corner border border-border/80 panel p-5 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)] transition hover:border-cyan/50 hover:shadow-[0_0_30px_rgb(62_231_255_/_0.15)] sm:p-6">
               <Gamepad2 className="mx-auto size-6 text-cyan drop-shadow-[0_0_12px_rgb(62_231_255_/_0.5)] sm:size-7" />
               <p className="mt-2 font-display text-2xl font-semibold text-white sm:text-3xl">{studio.gamesCount}</p>
               <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Games</p>
             </div>
-            <div className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)] transition hover:border-amber/50 hover:shadow-[0_0_30px_rgb(234_179_8_/_0.15)] sm:p-6">
+            <div className="clip-corner border border-border/80 panel p-5 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)] transition hover:border-amber/50 hover:shadow-[0_0_30px_rgb(234_179_8_/_0.15)] sm:p-6">
               <Users className="mx-auto size-6 text-amber drop-shadow-[0_0_12px_rgb(234_179_8_/_0.5)] sm:size-7" />
               <p className="mt-2 font-display text-2xl font-semibold text-white sm:text-3xl">{studio.membersCount}</p>
               <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Members</p>
             </div>
-            <div className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)] transition sm:p-6" style={{ borderColor: `${trustColor}40` }}>
+            <div className="clip-corner border border-border/80 panel p-5 text-center shadow-[0_0_30px_rgb(0_0_0_/_0.3)] transition sm:p-6" style={{ borderColor: `${trustColor}40` }}>
               <div className="relative mx-auto flex size-12 items-center justify-center sm:size-14">
                 <svg className="absolute inset-0 size-full -rotate-90" viewBox="0 0 36 36">
                   <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgb(255 255 255 / 0.08)" strokeWidth="3" />
@@ -197,7 +197,7 @@ export default function StudioDetailPage() {
 
         {/* ── ACTION BAR ──────────────────────────────────────────────── */}
         <section className="relative z-10 mx-auto mt-6 max-w-6xl px-5 sm:px-8 lg:px-10">
-          <div className="clip-corner border border-border/80 bg-[#050b0f]/80 p-4 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-5">
+          <div className="clip-corner border border-border/80 panel p-4 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-5">
             <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               <FollowButton targetType="studio" slug={slug} />
 
@@ -245,7 +245,7 @@ export default function StudioDetailPage() {
 
               {/* About */}
               {studio.description && (
-                <section className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+                <section className="clip-corner border border-border/80 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
                   <h2 className="mb-3 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">About</h2>
                   <div className="whitespace-pre-wrap text-sm leading-relaxed text-[#c8d0d4]">{studio.description}</div>
                 </section>
@@ -253,7 +253,7 @@ export default function StudioDetailPage() {
 
               {/* Company Info */}
               {cp && (cp.legalName || cp.engine || cp.platforms || cp.mission) && (
-                <section className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+                <section className="clip-corner border border-border/80 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
                   <h2 className="mb-4 flex items-center gap-2 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">
                     <Info className="size-4" /> Company Info
                   </h2>
@@ -280,7 +280,7 @@ export default function StudioDetailPage() {
 
               {/* Social Links */}
               {SOCIAL_PLATFORMS.some(p => p.href) && (
-                <section className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+                <section className="clip-corner border border-border/80 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
                   <h2 className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">Social</h2>
                   <div className="flex flex-wrap gap-3">
                     {SOCIAL_PLATFORMS.filter(p => p.href).map((platform) => (
@@ -311,13 +311,13 @@ export default function StudioDetailPage() {
 
               {/* Team */}
               {members.length > 0 && (
-                <section className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+                <section className="clip-corner border border-border/80 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
                   <h2 className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">Team ({members.length})</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
                     {members.map((m: { id: string; role: string; title: string | null; user: { id: string; username: string; displayName: string; avatarUrl: string | null } }) => (
                       <div
                         key={m.id}
-                        className="clip-corner flex items-center gap-4 border border-border/70 bg-[#050b0f]/60 p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition hover:border-cyan/50 hover:shadow-[0_0_24px_rgb(62_231_255_/_0.08)]"
+                        className="clip-corner flex items-center gap-4 border border-border/70 panel p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition hover:border-cyan/50 hover:shadow-[0_0_24px_rgb(62_231_255_/_0.08)]"
                       >
                         {m.user.avatarUrl ? (
                           <img src={m.user.avatarUrl} alt="" className="size-12 shrink-0 border border-border/60 object-cover" />
@@ -343,7 +343,7 @@ export default function StudioDetailPage() {
 
               {/* Press Kit */}
               {hasPressKit && (
-                <section className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+                <section className="clip-corner border border-border/80 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
                   <h2 className="mb-4 flex items-center gap-2 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">
                     <Download className="size-4" /> Press Kit
                   </h2>
@@ -382,7 +382,7 @@ export default function StudioDetailPage() {
 
               {/* Brand Kit */}
               {hasBrandKit && (
-                <section className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+                <section className="clip-corner border border-border/80 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
                   <h2 className="mb-4 flex items-center gap-2 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">
                     <Palette className="size-4" /> Brand Kit
                   </h2>
@@ -414,7 +414,7 @@ export default function StudioDetailPage() {
               )}
 
               {/* Games */}
-              <section className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+              <section className="clip-corner border border-border/80 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
                 <div className="mb-5 flex items-center justify-between">
                   <h2 className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">Games ({studio.gamesCount})</h2>
                   {authUser && (
@@ -440,7 +440,7 @@ export default function StudioDetailPage() {
 
               {/* Trust Score Breakdown */}
               {trustScore && trustScore.breakdown && trustScore.breakdown.length > 0 && (
-                <section className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+                <section className="clip-corner border border-border/80 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
                   <h2 className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">Health Score</h2>
                   <div className="space-y-3">
                     {trustScore.breakdown.map((b) => (
@@ -466,7 +466,7 @@ export default function StudioDetailPage() {
 
               {/* Studio Identity */}
               {(studio.location || studio.foundedYear || cp?.legalName) && (
-                <section className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+                <section className="clip-corner border border-border/80 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
                   <h2 className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">Identity</h2>
                   <div className="space-y-4">
                     {cp?.legalName && (
@@ -519,7 +519,7 @@ export default function StudioDetailPage() {
 
               {/* Key Art / Media */}
               {pressKit?.keyArt && (
-                <section className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+                <section className="clip-corner border border-border/80 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
                   <h2 className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">Key Art</h2>
                   <div className="aspect-video overflow-hidden border border-border/60">
                     <img src={pressKit.keyArt} alt="Key art" className="size-full object-cover" />
@@ -528,7 +528,7 @@ export default function StudioDetailPage() {
               )}
 
               {pressKit?.trailerUrl && (
-                <section className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+                <section className="clip-corner border border-border/80 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
                   <h2 className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">Trailer</h2>
                   <a
                     href={pressKit.trailerUrl}
@@ -560,7 +560,7 @@ export default function StudioDetailPage() {
 
               {/* Activity */}
               {auditLogs.length > 0 && (
-                <section className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+                <section className="clip-corner border border-border/80 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
                   <h2 className="mb-4 flex items-center gap-2 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">
                     <Clock className="size-4" /> Recent Activity
                   </h2>
@@ -654,11 +654,11 @@ function SimilarStudios({ currentSlug }: { currentSlug: string }) {
   if (!others.length) return null;
   return (
     <section className="relative z-10 mx-auto mt-6 max-w-6xl px-5 sm:px-8 lg:px-10">
-      <div className="clip-corner border border-border/80 bg-[#050b0f]/80 p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
+      <div className="clip-corner border border-border/80 panel p-5 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] sm:p-7">
         <h2 className="mb-4 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-cyan">More Studios</h2>
         <div className="grid gap-3 sm:grid-cols-3">
           {others.map((s) => (
-            <Link key={s.id} href={`/studios/${s.slug}`} className="clip-corner flex items-center gap-4 border border-border/60 bg-[#050b0f]/40 p-4 transition hover:border-cyan/50 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]">
+            <Link key={s.id} href={`/studios/${s.slug}`} className="clip-corner flex items-center gap-4 border border-border/60 panel p-4 transition hover:border-cyan/50 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]">
               <div className="grid size-12 shrink-0 place-items-center border border-cyan/30 bg-cyan/5 text-cyan font-display text-lg font-black">{s.name.charAt(0)}</div>
               <div className="min-w-0">
                 <p className="truncate font-display text-sm font-bold text-white">{s.name}</p>

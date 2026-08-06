@@ -713,7 +713,7 @@ function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
           <Link
             key={dl.id}
             href={`/devlogs/${dl.id}`}
-            className="group block clip-corner overflow-hidden border border-border/60 bg-[#050b0f]/60 transition hover:border-cyan/60"
+            className="group block clip-corner overflow-hidden border border-border/60 panel transition hover:border-cyan/60"
           >
             {/* Image with title overlay */}
             <div className="relative">
@@ -722,7 +722,7 @@ function DevlogsPanel({ devlogs, slug }: { devlogs: Devlog[]; slug: string }) {
                   <img src={dl.screenshots[0]!.url} alt="" className="size-full object-cover transition duration-300 group-hover:scale-[1.03]" />
                 </div>
               ) : (
-                <div className="aspect-[2/1] flex items-center justify-center bg-[#050b0f]">
+                <div className="aspect-[2/1] flex items-center justify-center panel">
                   <FileText className="size-10 text-muted-foreground/20" />
                 </div>
               )}
@@ -1078,7 +1078,7 @@ function SimilarGamesSection({ gameId, slug }: { gameId: string | undefined; slu
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         {games.map(game => (
           <Link key={game.id} href={`/games/${game.slug}`}
-            className="group clip-corner border border-border/40 bg-[#050b0f]/50 overflow-hidden transition hover:border-cyan/30">
+            className="group clip-corner border border-border/40 panel overflow-hidden transition hover:border-cyan/30">
             <div className="aspect-[3/4] bg-border/10 flex items-center justify-center">
               {game.coverUrl ? <img src={game.coverUrl} alt={game.title} className="size-full object-cover" />
                 : <Gamepad2 className="size-8 text-muted-foreground/30" />}

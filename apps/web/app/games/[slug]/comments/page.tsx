@@ -40,7 +40,7 @@ export default function GameCommentsPage() {
           {isLoading ? (
             <div className="space-y-4" aria-label="Loading comments">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="animate-pulse clip-corner border border-border/70 bg-[#050b0f]/80 p-5">
+                <div key={i} className="animate-pulse clip-corner border border-border/70 panel p-5">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="size-8 rounded-full bg-border/30" />
                     <div className="flex-1">
@@ -60,7 +60,7 @@ export default function GameCommentsPage() {
           ) : (
             <div className="space-y-4" role="list" aria-label="Community comments">
               {comments.map((c, index) => (
-                <div key={c.id} className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6" role="listitem" aria-labelledby={`comment-author-${index}`}>
+                <div key={c.id} className="clip-corner border border-border/70 panel p-5 sm:p-6" role="listitem" aria-labelledby={`comment-author-${index}`}>
                   <div className="flex items-center gap-3 mb-3">
                     {c.author?.avatarUrl ? (
                       <img src={c.author.avatarUrl} alt={`${c.author.displayName || 'Anonymous'} avatar`} className="size-8 rounded-full border border-border/40" />

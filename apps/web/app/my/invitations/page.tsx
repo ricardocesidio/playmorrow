@@ -72,14 +72,14 @@ export default function MyInvitationsPage() {
           {isLoading ? (
             <div className="flex justify-center py-12"><Loader2 className="size-6 animate-spin text-cyan" /></div>
           ) : !invitations?.length ? (
-            <div className="clip-corner border border-border/60 bg-[#050b0f]/50 px-6 py-12 text-center">
+            <div className="clip-corner border border-border/60 panel px-6 py-12 text-center">
               <Building2 className="mx-auto mb-3 size-8 text-muted-foreground" />
               <p className="font-mono text-[0.65rem] text-muted-foreground">No pending invitations</p>
             </div>
           ) : (
             <div className="space-y-3">
               {invitations.map((inv) => (
-                <div key={inv.id} className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)]">
+                <div key={inv.id} className="clip-corner border border-border/70 panel p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)]">
                   <div className="flex items-start gap-4">
                     <div className="grid size-12 shrink-0 place-items-center rounded-full border border-border bg-background/60 overflow-hidden">
                       {inv.studio?.logoUrl ? <img src={inv.studio.logoUrl} alt="" className="size-full object-cover" /> : <Building2 className="size-5 text-muted-foreground" />}

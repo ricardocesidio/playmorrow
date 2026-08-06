@@ -22,7 +22,7 @@ export function TicketCard({ ticket, href }: TicketCardProps) {
   return (
     <Link
       href={href}
-      className="clip-corner block border border-border/60 bg-[#050b0f]/50 p-4 transition hover:border-cyan/30 hover:bg-[#050b0f]/80 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]"
+      className="clip-corner block border border-border/60 panel p-4 transition hover:border-cyan/30 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">

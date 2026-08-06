@@ -47,7 +47,7 @@ export default function AchievementsPage() {
               <Loader2 className="size-8 animate-spin text-cyan" />
             </div>
           ) : !achievements || achievements.length === 0 ? (
-            <div className="clip-corner flex flex-col items-center gap-4 border border-border/90 bg-[#050b0f]/86 p-12 text-center">
+            <div className="clip-corner flex flex-col items-center gap-4 border border-border/90 panel p-12 text-center">
               <Trophy className="size-12 text-muted-foreground" />
               <h2 className="font-display text-xl font-bold text-foreground">No achievements yet</h2>
               <p className="text-sm text-muted-foreground">Start engaging with the community to earn achievements and XP.</p>
@@ -90,7 +90,7 @@ export default function AchievementsPage() {
                     {locked.map((a) => {
                       const Icon = ICON_MAP[a.icon] ?? Trophy;
                       return (
-                        <div key={a.id} className="clip-corner border border-border/60 bg-[#050b0f]/40 p-4 opacity-60">
+                        <div key={a.id} className="clip-corner border border-border/60 panel p-4 opacity-60">
                           <div className="flex items-center gap-3">
                             <Lock className="size-5 text-muted-foreground shrink-0" />
                             <Icon className="size-5 text-muted-foreground shrink-0" />

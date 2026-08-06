@@ -85,7 +85,7 @@ export function StudioDashboard() {
             {/* Stats skeleton */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/40 p-4">
+                <div key={i} className="clip-corner border border-border/40 panel p-4">
                   <div className="h-3 w-20 bg-border/30 mb-3" />
                   <div className="h-6 w-12 bg-border/40" />
                 </div>
@@ -94,7 +94,7 @@ export function StudioDashboard() {
             {/* Games / Devlogs skeleton */}
             <div className="grid md:grid-cols-2 gap-6">
               {Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/40 p-4">
+                <div key={i} className="clip-corner border border-border/40 panel p-4">
                   <div className="h-4 w-32 bg-border/30 mb-4" />
                   <div className="space-y-2">
                     {Array.from({ length: 3 }).map((_, j) => (
@@ -304,7 +304,7 @@ function StudioSidebar({ unreadCount, studioSlug }: { unreadCount: number; studi
 
 function StudioHero({ studio, studioName, studioTagline }: { studio: Studio; studioName: string; studioTagline: string }) {
   return (
-    <div className="clip-corner border-b border-border/90 bg-[#050b0f]/88 shadow-[0_18px_70px_rgb(0_0_0_/_0.36)] overflow-hidden">
+    <div className="clip-corner border-b border-border/90 panel shadow-[0_18px_70px_rgb(0_0_0_/_0.36)] overflow-hidden">
       <div className="relative min-h-[160px]">
         <img src={studio.bannerUrl || '/demo/games/neon-warden/hero.svg'} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_86%_24%,rgb(255_87_77_/_0.06),transparent_18rem),linear-gradient(90deg,#020609_0%,rgb(2_6_9_/_0.35)_34%,rgb(2_6_9_/_0.08)_100%)]" />

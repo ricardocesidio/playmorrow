@@ -173,7 +173,7 @@ export default function EditHelpArticlePage() {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <div className="space-y-5">
               {/* Title */}
               <div>
@@ -276,7 +276,7 @@ export default function EditHelpArticlePage() {
           </div>
 
           {/* Body */}
-          <div className="clip-corner border border-border/70 bg-[#050b0f]/80 p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
+          <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <label className="mb-3 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
               Body (Markdown)
             </label>

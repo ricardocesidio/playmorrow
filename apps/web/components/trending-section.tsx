@@ -42,7 +42,7 @@ export default async function TrendingSection() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {games.map((game) => (
             <Link key={game.id} href={`/games/${game.slug}`}
-              className="group clip-corner border border-border/40 bg-[#050b0f]/50 overflow-hidden transition hover:border-cyan/30 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]">
+              className="group clip-corner border border-border/40 panel overflow-hidden transition hover:border-cyan/30 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]">
               <div className="aspect-[3/4] bg-border/10 flex items-center justify-center">
                 {game.coverUrl ? (
                   <img src={game.coverUrl} alt={game.title} className="size-full object-cover" />

@@ -55,7 +55,7 @@ export default function WishlistPage() {
           {isLoading ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="clip-corner border border-border/40 bg-[#050b0f]/30 p-3 animate-pulse">
+                <div key={i} className="clip-corner border border-border/40 panel p-3 animate-pulse">
                   <div className="h-32 bg-border/20 mb-3" />
                   <div className="h-4 w-3/4 bg-border/30 mb-1" />
                   <div className="h-3 w-1/2 bg-border/20" />
@@ -63,7 +63,7 @@ export default function WishlistPage() {
               ))}
             </div>
           ) : items.length === 0 ? (
-            <div className="clip-corner border border-border/60 bg-[#050b0f]/50 px-6 py-16 text-center">
+            <div className="clip-corner border border-border/60 panel px-6 py-16 text-center">
               <Bookmark className="mx-auto mb-4 size-10 text-muted-foreground" />
               <p className="font-display text-xl font-bold text-white">Your wishlist is empty</p>
               <p className="mt-2 font-mono text-[0.6rem] text-muted-foreground">Save games you're interested in to track their progress.</p>
@@ -74,7 +74,7 @@ export default function WishlistPage() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {items.map((item) => (
-                <div key={item.id} className="group overflow-hidden border border-border/80 bg-[#050b0f]/70 transition hover:border-cyan/70">
+                <div key={item.id} className="group overflow-hidden border border-border/80 panel transition hover:border-cyan/70">
                   <Link href={`/games/${item.game.slug}`} className="block">
                     <div className="relative aspect-[1.15/1] overflow-hidden">
                       <img src={item.game.coverUrl || '/demo/games/neon-warden/hero.svg'} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />

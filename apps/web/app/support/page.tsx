@@ -69,7 +69,7 @@ export default function SupportPage() {
             Search our knowledge base or create a support ticket
           </p>
           <form onSubmit={handleSearch} className="mx-auto max-w-lg">
-            <div className="clip-corner flex h-14 items-center gap-3 border border-cyan/30 bg-[#050b0f]/80 px-5 shadow-[0_0_30px_rgb(62_231_255_/_0.08)]">
+            <div className="clip-corner flex h-14 items-center gap-3 border border-cyan/30 panel px-5 shadow-[0_0_30px_rgb(62_231_255_/_0.08)]">
               <Search className="size-5 shrink-0 text-muted-foreground" />
               <input
                 type="text"
@@ -98,7 +98,7 @@ export default function SupportPage() {
                 <Link
                   key={cat.label}
                   href={cat.href}
-                  className="clip-corner group border border-border/60 bg-[#050b0f]/50 p-5 transition hover:border-cyan/30 hover:bg-[#050b0f]/80 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]"
+                  className="clip-corner group border border-border/60 panel p-5 transition hover:border-cyan/30 hover:shadow-[0_0_20px_rgb(62_231_255_/_0.06)]"
                 >
                   <Icon className="mb-3 size-6 text-cyan/60 group-hover:text-cyan transition" />
                   <h3 className="mb-1 font-mono text-[0.6rem] font-semibold uppercase tracking-wider text-foreground">
@@ -125,7 +125,7 @@ export default function SupportPage() {
                 <Link
                   key={action.label}
                   href={action.href}
-                  className="clip-corner group border border-border/50 bg-[#050b0f]/40 p-5 text-center transition hover:border-coral/30 hover:bg-[#050b0f]/70"
+                  className="clip-corner group border border-border/50 panel p-5 text-center transition hover:border-coral/30 "
                 >
                   <Icon className="mx-auto mb-2 size-6 text-coral/60 group-hover:text-coral transition" />
                   <h3 className="mb-0.5 font-mono text-[0.6rem] font-semibold uppercase tracking-wider text-foreground">
@@ -141,7 +141,7 @@ export default function SupportPage() {
         </section>
 
         {/* Contact */}
-        <section className="clip-corner border border-border/60 bg-[#050b0f]/60 p-6 text-center">
+        <section className="clip-corner border border-border/60 panel p-6 text-center">
           <h2 className="mb-4 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">
             Still need help?
           </h2>

@@ -48,9 +48,9 @@ export default function WelcomePage() {
             <Link
               key={step.href}
               href={step.href}
-              className="clip-corner group flex items-center gap-5 border border-border/70 bg-[#050b0f]/80 p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-colors hover:border-cyan/30"
+              className="clip-corner group flex items-center gap-5 border border-border/70 panel p-5 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition-colors hover:border-cyan/30"
             >
-              <span className="clip-corner flex size-12 shrink-0 items-center justify-center border border-cyan/60 bg-[#050b0f]/50 font-mono text-lg font-bold text-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.12)]">
+              <span className="clip-corner flex size-12 shrink-0 items-center justify-center border border-cyan/60 panel font-mono text-lg font-bold text-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.12)]">
                 {i + 1}
               </span>
               <div className="min-w-0 flex-1">

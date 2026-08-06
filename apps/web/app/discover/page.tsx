@@ -99,7 +99,7 @@ function SectionGrid({ title, icon, games }: { title: string; icon: React.ReactN
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         {games.map((game: GameItem) => (
           <Link key={game.id} href={`/games/${game.slug}`}
-            className="group clip-corner border border-border/40 bg-[#050b0f]/50 overflow-hidden transition hover:border-cyan/30">
+            className="group clip-corner border border-border/40 panel overflow-hidden transition hover:border-cyan/30">
             <div className="aspect-[3/4] bg-border/10 flex items-center justify-center">
               {game.coverUrl
                 ? <img src={game.coverUrl} alt={game.title} className="size-full object-cover" />

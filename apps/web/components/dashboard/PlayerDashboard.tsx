@@ -52,7 +52,7 @@ export function PlayerDashboard() {
   useEffect(() => {
     if (user?.level && user.level > prevLevel && prevLevel > 0) {
       const toast = document.createElement('div');
-      toast.className = 'fixed top-20 right-4 z-50 clip-corner border border-cyan bg-[#050b0f] p-4 shadow-[0_0_30px_rgb(62_231_255_/_0.3)] animate-fadeIn';
+      toast.className = 'fixed top-20 right-4 z-50 clip-corner border border-cyan panel p-4 shadow-[0_0_30px_rgb(62_231_255_/_0.3)] animate-fadeIn';
       toast.innerHTML = `<p class="font-mono text-[0.55rem] text-cyan">LEVEL UP!</p><p class="font-display text-lg font-bold text-white">Level ${user.level}</p>`;
       document.body.appendChild(toast);
       setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.5s'; setTimeout(() => toast.remove(), 500); }, 4000);

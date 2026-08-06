@@ -61,7 +61,7 @@ export default function FollowingPage() {
           {isLoading ? (
             <div className="flex justify-center py-20"><Loader2 className="size-8 animate-spin text-cyan" /></div>
           ) : tab === 'studios' && studios.length === 0 ? (
-            <div className="clip-corner border border-border/60 bg-[#050b0f]/50 px-6 py-16 text-center">
+            <div className="clip-corner border border-border/60 panel px-6 py-16 text-center">
               <Building2 className="mx-auto mb-4 size-10 text-muted-foreground" />
               <p className="font-display text-xl font-bold text-white">Not following any studios</p>
               <p className="mt-2 font-mono text-[0.6rem] text-muted-foreground">Follow studios to get updates on their games.</p>
@@ -70,7 +70,7 @@ export default function FollowingPage() {
               </Link>
             </div>
           ) : tab === 'games' && games.length === 0 ? (
-            <div className="clip-corner border border-border/60 bg-[#050b0f]/50 px-6 py-16 text-center">
+            <div className="clip-corner border border-border/60 panel px-6 py-16 text-center">
               <Gamepad2 className="mx-auto mb-4 size-10 text-muted-foreground" />
               <p className="font-display text-xl font-bold text-white">Not following any games</p>
               <p className="mt-2 font-mono text-[0.6rem] text-muted-foreground">Follow games to get notified of updates.</p>
@@ -82,7 +82,7 @@ export default function FollowingPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               {studios.map((s) => (
                 <Link key={s.id} href={`/studios/${s.slug}`}
-                  className="clip-corner flex items-center gap-4 border border-border/70 bg-[#050b0f]/80 p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition hover:border-cyan/70">
+                  className="clip-corner flex items-center gap-4 border border-border/70 panel p-4 shadow-[0_0_20px_rgb(0_0_0_/_0.25)] transition hover:border-cyan/70">
                   <div className="grid size-12 shrink-0 place-items-center rounded-full border border-border bg-background/60 overflow-hidden">
                     {s.logoUrl ? <img src={s.logoUrl} alt="" className="size-full object-cover" /> : <Building2 className="size-5 text-muted-foreground" />}
                   </div>
@@ -98,7 +98,7 @@ export default function FollowingPage() {
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {games.map((g) => (
                 <Link key={g.id} href={`/games/${g.slug}`}
-                  className="group overflow-hidden border border-border/80 bg-[#050b0f]/70 transition hover:border-cyan/70">
+                  className="group overflow-hidden border border-border/80 panel transition hover:border-cyan/70">
                   <div className="relative aspect-[1.15/1] overflow-hidden">
                     <img src={g.coverUrl || '/demo/games/neon-warden/hero.svg'} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/15 to-transparent" />
