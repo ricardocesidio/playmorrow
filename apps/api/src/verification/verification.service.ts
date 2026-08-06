@@ -48,7 +48,7 @@ export class VerificationService {
     await this.prisma.studioVerificationRequest.update({
       where: { id: requestId },
       data: {
-        status,
+        status: status as any,
         notes,
         reviewedById: adminId,
         reviewedAt: new Date(),
@@ -87,7 +87,7 @@ export class VerificationService {
   }
 
   async getRequests(status?: string): Promise<any[]> {
-    const where = status ? { status } : {};
+    const where: any = status ? { status } : {};
     return this.prisma.studioVerificationRequest.findMany({
       where,
       include: {

@@ -12,7 +12,7 @@ export class MarketplaceService {
   ) {}
 
   async listListings(type?: string, page = 1, pageSize = 20) {
-    const where: any = { status: 'active' };
+    const where: any = { status: 'ACTIVE' };
     if (type) where.type = type;
 
     const [items, total] = await Promise.all([
@@ -65,7 +65,7 @@ export class MarketplaceService {
 
   async purchase(userId: string, listingId: string) {
     const listing = await this.getListing(listingId);
-    if (listing.status !== 'active') throw new BadRequestException('Listing is not active');
+    if (listing.status !== 'ACTIVE') throw new BadRequestException('Listing is not active');
 
     const existingLicense = await this.prisma.purchasedLicense.findUnique({
       where: { userId_listingId: { userId, listingId } },
@@ -126,7 +126,7 @@ export class MarketplaceService {
 
   async getStudioListings(studioId: string) {
     return this.prisma.marketplaceListing.findMany({
-      where: { studioId, status: 'active' },
+      where: { studioId, status: 'ACTIVE' },
       orderBy: { createdAt: 'desc' },
       include: { studio: { select: { id: true, name: true, slug: true, logoUrl: true } } },
     });

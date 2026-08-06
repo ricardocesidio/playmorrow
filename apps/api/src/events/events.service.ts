@@ -10,12 +10,12 @@ export class EventsService {
     if (!event) throw new NotFoundException('Event not found');
     return this.prisma.event.update({
       where: { slug },
-      data: { status: status || 'published' },
+      data: { status: (status as any) || 'PUBLISHED' },
     });
   }
 
   async list(page = 1, pageSize = 20, upcomingOnly = false) {
-    const where: any = { status: 'published' };
+    const where: any = { status: 'PUBLISHED' };
     if (upcomingOnly) where.startDate = { gte: new Date() };
 
     const [items, total] = await Promise.all([
