@@ -132,6 +132,29 @@ enum PlatformKind {
   OTHER
 }
 
+enum MarketplaceListingStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+}
+
+enum VerificationRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PartnerStatus {
+  ACTIVE
+  INACTIVE
+}
+
 // ──────────────────────────────────────────────────────────────────────────
 // Identity
 // ──────────────────────────────────────────────────────────────────────────
@@ -311,7 +334,7 @@ model StudioVerificationRequest {
   id              String                    @id @default(cuid())
   studioId        String
   requestedLevel  StudioVerificationStatus
-  status          String                    @default("PENDING") // PENDING | APPROVED | REJECTED | MORE_INFO
+  status          VerificationRequestStatus @default(PENDING)
   documents       Json?
   notes           String?
   reviewedById    String?
@@ -1553,7 +1576,7 @@ model MarketplaceListing {
   fileUrl     String?
   thumbnailUrl String?
   tags        String[]
-  status      String     @default("draft") // draft, active, archived
+  status      MarketplaceListingStatus @default(DRAFT)
   studioId    String
   gameId      String?
   createdAt   DateTime   @default(now())
@@ -1618,7 +1641,7 @@ model Partner {
   logoUrl     String?
   contactName String?
   contactEmail String?
-  status      String      @default("active")
+  status      PartnerStatus @default(ACTIVE)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
@@ -1640,7 +1663,7 @@ model Event {
   maxAttendees    Int?
   bannerUrl       String?
   organizerId     String?
-  status          String    @default("draft")
+  status          EventStatus @default(DRAFT)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

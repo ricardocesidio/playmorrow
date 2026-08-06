@@ -30,13 +30,13 @@ function DefaultCard({ game }: { game: Game }) {
   return (
     <Link
       href={`/games/${game.slug}`}
-      className="group panel relative flex min-h-[228px] flex-col overflow-hidden border-border/90 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.06),rgb(166_92_255_/_0.04),rgb(255_87_77_/_0.03))] shadow-[0_20px_80px_rgb(0_0_0_/_0.6),0_0_30px_rgb(62_231_255_/_0.05),inset_0_1px_0_rgb(255_255_255_/_0.02)] transition duration-fast hover:border-cyan/70 hover:shadow-[0_0_32px_rgb(62_231_255_/_0.14),0_20px_80px_rgb(0_0_0_/_0.7)]"
+      className="group panel relative flex min-h-[228px] flex-col overflow-hidden border-border/90 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.06),rgb(166_92_255_/_0.04),rgb(255_87_77_/_0.03))] shadow-[0_20px_80px_rgb(0_0_0_/_0.6),0_0_30px_rgb(62_231_255_/_0.05),inset_0_1px_0_rgb(255_255_255_/_0.02)] transition-colors duration-fast hover:border-cyan/70 hover:shadow-[0_0_32px_rgb(62_231_255_/_0.14),0_20px_80px_rgb(0_0_0_/_0.7)]"
     >
       <div className="relative aspect-[1.82] overflow-hidden bg-muted">
         <img
           src={cover}
           alt={game.title}
-          className="img-glitch-hover size-full object-cover transition duration-medium group-hover:scale-[1.035]"
+          className="img-glitch-hover size-full object-cover transition-colors duration-medium group-hover:scale-[1.035]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/28 to-transparent" />
         <div className="absolute left-3 top-3">
@@ -46,7 +46,7 @@ function DefaultCard({ game }: { game: Game }) {
         <button
           type="button"
           aria-label={`Save ${game.title}`}
-          className="absolute bottom-3 right-3 grid size-8 place-items-center border border-border-bright/70 bg-background/70 text-muted-foreground backdrop-blur-sm transition group-hover:border-cyan group-hover:text-cyan"
+          className="absolute bottom-3 right-3 grid size-8 place-items-center border border-border-bright/70 bg-background/70 text-muted-foreground backdrop-blur-sm transition-colors group-hover:border-cyan group-hover:text-cyan"
           onClick={(event) => event.preventDefault()}
         >
           <Bookmark className="size-4" />
@@ -110,7 +110,7 @@ function FeaturedCard({ game }: { game: Game }) {
   const cover = game.coverUrl || '/demo/games/neon-warden/hero.svg';
   return (
     <Link href={`/games/${game.slug}`} className="block cursor-pointer">
-      <HudPanel className="relative min-h-[438px] overflow-hidden p-6 sm:p-7 transition hover:border-cyan/70" accent="muted">
+      <HudPanel className="relative min-h-[438px] overflow-hidden p-6 sm:p-7 transition-colors hover:border-cyan/70" accent="muted">
         <img src={cover} alt={game.title} className="absolute inset-0 size-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/56 to-background/6" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/92 via-transparent to-background/20" />
@@ -178,9 +178,9 @@ function FeaturedCard({ game }: { game: Game }) {
 function CompactCard({ game }: { game: Game }) {
   const cover = game.coverUrl || '/demo/games/neon-warden/hero.svg';
   return (
-    <Link href={`/games/${game.slug}`} className="group grid min-h-[260px] overflow-hidden border border-border bg-card transition hover:border-cyan/70">
+    <Link href={`/games/${game.slug}`} className="group grid min-h-[260px] overflow-hidden border border-border bg-card transition-colors hover:border-cyan/70">
       <div className="relative min-h-[180px] p-4">
-        <img src={cover} alt={game.title} className="img-glitch-hover absolute inset-0 size-full object-cover transition duration-medium group-hover:scale-[1.035]" />
+        <img src={cover} alt={game.title} className="img-glitch-hover absolute inset-0 size-full object-cover transition-colors duration-medium group-hover:scale-[1.035]" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/86 via-background/42 to-transparent" />
         <div className="relative z-10">
           <StatusBadge status={game.status} />
@@ -209,9 +209,9 @@ function StudioDashboardCard({ game }: { game: Game }) {
   const cover = game.coverUrl || game.bannerUrl || '/demo/games/neon-warden/hero.svg';
   const progress = game.progressPercent ?? statusBasedProgress(game.status);
   return (
-    <Link href={`/games/${game.slug}`} className="group overflow-hidden border border-border/90 bg-background/70 transition hover:-translate-y-0.5 hover:border-cyan/70">
+    <Link href={`/games/${game.slug}`} className="group overflow-hidden border border-border/90 bg-background/70 transition-colors hover:-translate-y-0.5 hover:border-cyan/70">
       <div className="relative aspect-[1.2/1] overflow-hidden">
-        <img src={cover} alt="" className="h-full w-full object-cover transition duration-medium group-hover:scale-105" />
+        <img src={cover} alt="" className="h-full w-full object-cover transition-colors duration-medium group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" />
         <span className="absolute right-2 top-2 border border-coral/60 bg-coral/15 px-2 py-1 font-mono text-[0.55rem] uppercase text-coral">{formatStatusLabel(game.status)}</span>
         <div className="absolute inset-x-3 bottom-3">

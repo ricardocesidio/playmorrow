@@ -1,6 +1,8 @@
 import { Body, Controller, Get, NotFoundException, Param, Patch, UseGuards } from '@nestjs/common';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { StudioRole } from '@playmorrow/database';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { StudioRolesGuard } from '../studios/guards/studio-roles.guard';
+import { StudioRoles } from '../studios/guards/studio-roles.decorator';
 import { StudiosService } from '../studios/studios.service';
 import { CompanyProfileService } from './company-profile.service';
 
@@ -20,7 +22,8 @@ export class CompanyProfileController {
   }
 
   @Patch()
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, StudioRolesGuard)
+  @StudioRoles(StudioRole.OWNER, StudioRole.ADMIN)
   async update(
     @Param('slug') slug: string,
     @Body() body: Record<string, any>,

@@ -11,7 +11,7 @@ async function getGame(slug: string) {
 export default async function EmbedPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const game = await getGame(slug);
-  if (!game) return <div style={{ color: '#8c969b', padding: 20, fontFamily: 'monospace', background: '#02070b' }}>Game not found</div>;
+  if (!game) return <div className="p-5 font-mono text-[#8c969b] bg-[#02070b]">Game not found</div>;
 
   return (
     <html>

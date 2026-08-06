@@ -444,6 +444,11 @@
   transition: all 0.25s ease;
 }
 
+@utility neon-border {
+  border: 2px solid transparent;
+  animation: neonBorder 3s linear infinite;
+}
+
 /* ── Signal & HUD utilities ───────────────────────────────────────────── */
 
 @utility signal-dot {

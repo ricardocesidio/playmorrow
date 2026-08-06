@@ -111,7 +111,7 @@ export function SiteHeader() {
                       <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Games ({searchResults.games.total})</p>
                       {searchResults.games.items.map((g) => (
                         <Link key={g.id} href={`/games/${g.slug}`} onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
-                          className="flex items-center gap-3 rounded px-2 py-2 transition hover:bg-muted"
+                          className="flex items-center gap-3 rounded px-2 py-2 transition-colors hover:bg-muted"
                         >
                           {g.coverUrl ? (
                             <img src={g.coverUrl} alt="" className="size-9 shrink-0 rounded object-cover" />
@@ -132,7 +132,7 @@ export function SiteHeader() {
                       <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Studios ({searchResults.studios.total})</p>
                       {searchResults.studios.items.map((s) => (
                         <Link key={s.id} href={`/studios/${s.slug}`} onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
-                          className="flex items-center gap-3 rounded px-2 py-2 transition hover:bg-muted"
+                          className="flex items-center gap-3 rounded px-2 py-2 transition-colors hover:bg-muted"
                         >
                           {s.logoUrl ? (
                             <img src={s.logoUrl} alt="" className="size-9 shrink-0 rounded object-cover" />
@@ -153,7 +153,7 @@ export function SiteHeader() {
                   )}
 
                   <Link href={`/search?q=${encodeURIComponent(searchQuery)}`} onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
-                    className="mt-1 flex items-center justify-center rounded px-2 py-2 text-xs font-medium text-cyan transition hover:bg-muted"
+                    className="mt-1 flex items-center justify-center rounded px-2 py-2 text-xs font-medium text-cyan transition-colors hover:bg-muted"
                   >
                     View all results <ArrowUpRight className="ml-1 size-3" />
                   </Link>
@@ -185,9 +185,9 @@ export function SiteHeader() {
                   <svg className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
                 <div className="absolute right-0 top-full z-50 mt-1 w-40 border border-border bg-background shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-150">
-                  <Link href="/dashboard" className="block px-4 py-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan transition">Dashboard</Link>
-                  <Link href="/me/licenses" className="block px-4 py-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan transition">My Licenses</Link>
-                  <Link href="/settings/profile" className="block px-4 py-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan transition">Settings</Link>
+                  <Link href="/dashboard" className="block px-4 py-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan transition-colors">Dashboard</Link>
+                  <Link href="/me/licenses" className="block px-4 py-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan transition-colors">My Licenses</Link>
+                  <Link href="/settings/profile" className="block px-4 py-2 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:bg-cyan/10 hover:text-cyan transition-colors">Settings</Link>
                   <button onClick={async () => { await logout(); window.location.href = '/'; }} className="block w-full cursor-pointer px-4 py-2 text-left text-xs font-mono uppercase tracking-widest text-muted-foreground hover:bg-coral/10 hover:text-coral transition">Sign out</button>
                 </div>
               </div>
@@ -205,7 +205,7 @@ export function SiteHeader() {
 
           <Link
             href={isAuthenticated ? (user?.accountType === 'STUDIO' ? '/dashboard' : '/dashboard/games/new') : '/register'}
-            className="clip-corner hidden border border-coral bg-coral px-5 py-3 pm-display text-[0.68rem] text-coral-foreground shadow-[0_0_24px_rgb(255_87_77_/_0.22)] transition hover:bg-[#ff6a61] sm:inline-flex"
+            className="clip-corner hidden border border-coral bg-coral px-5 py-3 pm-display text-[0.68rem] text-coral-foreground shadow-[0_0_24px_rgb(255_87_77_/_0.22)] transition-colors hover:bg-[#ff6a61] sm:inline-flex"
           >
             {user?.accountType === 'STUDIO' ? 'Studio Dashboard' : 'Share your game'} <ArrowUpRight className="size-4" />
           </Link>

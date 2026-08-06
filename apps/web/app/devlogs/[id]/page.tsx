@@ -388,8 +388,7 @@ export default function DevlogDetailPage() {
              <aside className="space-y-6">
               {/* Hero image */}
               {devlog.screenshots?.[0] && (
-                <div className="clip-corner-sm overflow-hidden cursor-pointer"
-                  style={{ border: '2px solid rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}
+                <div className="clip-corner-sm overflow-hidden cursor-pointer neon-border"
                   onClick={() => { setLightboxOpen(true); setLightboxIndex(0); }}>
                   <img src={devlog.screenshots[0].url} alt="" className="w-full object-cover" />
                 </div>
@@ -405,7 +404,7 @@ export default function DevlogDetailPage() {
                     <h3 className="font-mono text-[0.55rem] uppercase tracking-widest text-muted-foreground">Screenshots</h3>
                     <div className="grid grid-cols-2 gap-2">
                       {remaining.slice(0, 2).map((s, i) => (
-                        <div key={s.id} className="aspect-square clip-corner-sm overflow-hidden cursor-pointer" style={{ border: '2px solid rgb(62 231 255)', animation: 'neonBorder 3s ease-in-out infinite' }}
+                        <div key={s.id} className="aspect-square clip-corner-sm overflow-hidden cursor-pointer neon-border"
                           onClick={() => { setLightboxOpen(true); setLightboxIndex(i + 1); }}>
                           <img src={s.url} alt={s.caption ?? ''} className="size-full object-cover" />
                         </div>
