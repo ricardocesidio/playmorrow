@@ -72,8 +72,8 @@ Playmorrow is a social discovery platform connecting indie game studios with pla
 - **JavaScript SDK** — `@playmorrow/sdk` with full API client
 - **CLI** — `playmorrow` command-line tool (search, games, trending, collections)
 
-### Marketplace & Ecosystem (M16-M21)
-- **Marketplace** — Game asset listings with Stripe Connect Express payouts, PaymentIntent purchases, license management
+### Marketplace & Ecosystem (M16-M21) — Coming Soon
+- **Marketplace** — Game asset listings with Stripe Connect Express payouts, PaymentIntent purchases, license management *(live for testing, launching soon)*
 - **Publisher** — Per-studio revenue dashboard with earnings, transactions, and payout history
 - **Funding** — Reward-based crowdfunding scope (Kickstarter model; equity/investment blocked)
 - **Creator** — Referral codes with commission tracking for affiliate earnings

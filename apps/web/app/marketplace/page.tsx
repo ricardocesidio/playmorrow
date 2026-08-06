@@ -46,6 +46,9 @@ export default function MarketplacePage() {
                 <h1 className="font-display text-[2.55rem] font-black uppercase leading-[0.9] text-foreground sm:text-5xl lg:text-[3.28rem]">
                   Marketplace
                 </h1>
+                <span className="ml-3 inline-block border border-coral/60 px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-widest text-coral">
+                  Coming Soon
+                </span>
                 <p className="mt-2 text-sm leading-none text-muted-foreground sm:text-base">
                   Assets, tools, and services for game development.
                 </p>
