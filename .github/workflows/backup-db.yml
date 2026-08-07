@@ -48,6 +48,7 @@ jobs:
 
       - name: pg_dump (Postgres 18, matches Neon server version)
         run: |
+          mkdir -p backup
           docker run --rm \
             -e BACKUP_DATABASE_URL="$BACKUP_DATABASE_URL" \
             -v "$PWD/backup:/backup" \
