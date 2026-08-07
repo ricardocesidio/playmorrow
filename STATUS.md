@@ -163,13 +163,18 @@ Current state: v0.85-beta — functional, not production-hardened.
 | ✅ | No Phase 5 E2E tests | 9 mock-based Playwright specs (marketplace browse/filter/edit/archive, events, partners, revenue, creator) — 18/18 green (desktop + mobile) |
 | ✅ | Dev DB migration history drifted | Dev DB reset + reconciliation migration `20260806010000_reconcile_schema_to_prisma`; 39/39 migrations applied, zero drift vs `schema.prisma`, seeded, API 200. Migration also fixes fresh/prod deploys (was missing `ReferralUsage` table + `VerificationRequestStatus` enum; had orphan `devlogs.coverUrl`, wrong FK/onDelete + index parity) |
 | ✅ | Integration tests share Neon dev DB | Dedicated local test DB provisioned (Colima + Docker + `docker-compose.yml` `postgres-test` on :5433). Schema replayed via all 39 migrations, full suite green: 48 files / 490 tests against `TEST_DATABASE_URL` |
+| ✅ | Reconcile migration to prod | Already live — prod and dev share the same Neon DB (`neondb` on `ep-orange-bird-abpuzipk-pooler`). Verified against prod `DATABASE_URL`: 39/39 migrations applied, zero drift vs `schema.prisma`. Smoke: `/api/health`, `/api/games`, `/api/marketplace`, `/api/events` 200; `/api/creator/*` 401 (guard works, no 500) |
+| ✅ | **P0: prod/dev DB isolation** | Neon project `green-leaf-42103134` (Playmorrow) now has TWO branches: `production` (br-patient-bonus-abbxfc07) and `dev` (br-sparkling-sea-abobomp9, endpoint ep-raspy-sunset-abo6apgc). Dev `DATABASE_URL` (apps/api/.env) rewired to the dev branch. Verified: dev reset + 39 migrations + seed OK; prod untouched (39/39, zero drift, smoke 200/401); guard blocks prod destructive ops and allows dev/test. Full details: `docs/releases/PRODUCTION_DB_ISOLATION_CERTIFICATION.md` |
 
 ### Remaining
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 5 | No staging environment deployed | Medium | Skipped by decision (dedicated test DB chosen over staging) |
+| 6 | Nightly `pg_dump` backup not yet implemented | High | Neon PITR is only 6 hours (`history_retention_seconds: 21600`, verified via API) and zero snapshots exist — **pre-incident data is NOT recoverable**. Nightly dumps + off-machine storage are the highest-priority hardening gap. See `DATABASE_RECOVERY_RUNBOOK.md` |
 
 > **Migration ops note:** `prisma migrate deploy`/`resolve` time out with P1002 against the Neon endpoint (both pooled `-pooler` and direct hosts block session advisory locks). Dev migration workflow = run the SQL via `prisma db execute` (single transaction), then record in `_prisma_migrations` with the correct SHA-256 checksum (or use a Neon branch that exposes a real direct endpoint). `prisma migrate status` and `prisma migrate diff` work fine.
+>
+> **Prod/dev isolation (RESOLVED):** prod (`ep-orange-bird-abpuzipk…`) and dev (`ep-raspy-sunset-abo6apgc…`) now use **separate Neon branches**. The 2026-08-06 incident cleared the production dataset; the pre-incident data is **not recoverable** (Neon PITR = 6h, zero snapshots). A DB safety guard (`packages/database/scripts/db-guard.mjs`) blocks `reset`/`push`/`seed`/`migrate dev` against the prod host unless `ALLOW_PROD_DB_OPERATIONS=1`. See `docs/infrastructure/PRODUCTION_DATABASE_SAFETY.md`.
 
 ---
 
@@ -182,7 +187,7 @@ Current state: v0.85-beta — functional, not production-hardened.
 | Frontend | https://playmorrow.co (Vercel) | 200 |
 | API | https://playmorrow-api-aged-mountain-9542.fly.dev (Fly.io) | 200 |
 | Health | https://playmorrow-api-aged-mountain-9542.fly.dev/api/health | 200 |
-| Database | Neon PostgreSQL (connection pooler) | Active |
+| Database | Neon PostgreSQL — **separate branches: prod (`ep-orange-bird-abpuzipk…`) / dev (`ep-raspy-sunset-abo6apgc…`)** | Active |
 
 ### Monitoring
 

@@ -13,11 +13,13 @@
   "scripts": {
     "build": "prisma generate && tsc -p tsconfig.build.json",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy",
-    "db:push": "prisma db push",
-    "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:migrate": "node scripts/db-guard.mjs migrate-dev && prisma migrate dev",
+    "db:deploy": "node scripts/db-guard.mjs deploy && prisma migrate deploy",
+    "db:push": "node scripts/db-guard.mjs push && prisma db push",
+    "db:reset": "node scripts/db-guard.mjs reset && prisma migrate reset",
+    "db:studio": "node scripts/db-guard.mjs studio && prisma studio",
+    "db:status": "node scripts/db-guard.mjs status && prisma migrate status",
+    "db:seed": "node scripts/db-guard.mjs seed && tsx prisma/seed.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "clean": "rm -rf dist .turbo"
   },

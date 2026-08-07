@@ -138,6 +138,33 @@ Instead, report them via email to the project maintainers. If the issue is criti
 - Minimum Node.js 20, pnpm 11.
 - No untrusted build steps or postinstall scripts from external sources.
 
+## Database Safety & Production Data Protection
+
+- **Environment isolation (2026-08-07):** production and development use
+  **separate Neon branches** of project `green-leaf-42103134` (prod
+  `ep-orange-bird-abpuzipk…` vs dev `ep-raspy-sunset-abo6apgc…`). They share
+  **no** connection string or endpoint.
+- **Safety guard:** `packages/database/scripts/db-guard.mjs` runs before every
+  DB command in `packages/database/package.json` and `apps/api/package.json`.
+  It **blocks** `migrate reset`, `db push`, `migrate dev`, and `seed` whenever
+  `DATABASE_URL` targets the prod host, unless the explicit
+  `ALLOW_PROD_DB_OPERATIONS=1` override is set (never to be left set).
+  `migrate deploy`/`status`/`generate`/`diff` are always allowed.
+- **CI isolation:** GitHub Actions runs against an ephemeral Postgres 16
+  container only; a CI safety check fails if `DATABASE_URL` resembles the prod
+  host (`ep-orange-bird-abpuzipk` or `neon.tech`). No prod credentials exist in
+  any workflow.
+- **Frontend:** `apps/web` contains zero `DATABASE_URL` references — Vercel has
+  no database access.
+- **Credentials discipline:** prod `DATABASE_URL` (contains an embedded
+  password) exists only as a Fly.io secret and is extracted read-only when
+  needed; it is never committed, printed, or stored in local `.env` files.
+- **Backup reality (VERIFIED):** Neon PITR retention is **6 hours**
+  (`history_retention_seconds: 21600`) with **zero snapshots**. A `migrate
+  reset` incident on 2026-08-06 cleared the production dataset; the
+  pre-incident data is **not recoverable**. Nightly `pg_dump` backups are the
+  highest-priority outstanding gap (`docs/infrastructure/DATABASE_RECOVERY_RUNBOOK.md`).
+
 ## Production Environment Variables (Required in Production)
 | Variable | Purpose |
 |---|---|

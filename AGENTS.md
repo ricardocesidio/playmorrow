@@ -57,6 +57,8 @@ This file is a **chronological history log** of development sessions. It records
 | CSRF guard (global) | `apps/api/src/common/csrf.guard.ts` |
 | CSRF service (HMAC) | `apps/api/src/common/csrf.service.ts` |
 | CSRF frontend bridge | `apps/web/app/api/auth/form-login/route.ts` |
+| DB safety guard | `packages/database/scripts/db-guard.mjs` |
+| Environment isolation docs | `docs/infrastructure/` |
 | ROADMAP.md | `ROADMAP.md` |
 | Session 10 handoff | `docs/handoff/session-10.md` |
 
@@ -819,3 +821,33 @@ Follow-up execution after the v0.9 hardening commit. No features, no schema chan
 
 **Updated:** STATUS.md (test counts, resolved issues, renumbered remaining), AGENTS.md
 **Commit:** follows `e0e19a4` (v0.9 hardening)
+
+### Session 25 — P0 Production Database Isolation Incident (2026-08-07)
+
+Critical incident response. No features — production safety and recovery certification.
+
+**Incident:** The item-4 dev-database reconciliation ran `prisma migrate reset`, but prod and dev shared the SAME Neon database (`neondb` on `ep-orange-bird-abpuzipk-pooler.eu-west-2.aws.neon.tech`). The production dataset was cleared; only the seed user remained.
+
+**Isolation (implemented + verified via Neon API):**
+- Neon project `green-leaf-42103134` (Playmorrow). Created dev branch `br-sparkling-sea-abobomp9` (endpoint `ep-raspy-sunset-abo6apgc.eu-west-2.aws.neon.tech`). Prod branch `br-patient-bonus-abbxfc07` (endpoint `ep-orange-bird-abpuzipk…`) untouched.
+- Rewired `apps/api/.env` DATABASE_URL → dev branch. Prod Fly.io secret unchanged.
+- Dev branch: `migrate reset` + 39 migrations + seed OK. Zero drift.
+- Prod re-verified: 39/39 migrations, zero drift, smoke `/health` `/games` `/marketplace` `/events` 200, `/creator/*` 401, POST wrong-verb 404.
+
+**DB safety guard** `packages/database/scripts/db-guard.mjs`:
+- Wired into ALL DB scripts (database + api packages): `db:reset` `db:push` `db:migrate` `db:seed` `seed:model-games` `admin:ensure` `db:studio` `db:deploy` `db:status`.
+- Blocks `reset`/`push`/`migrate-dev`/`seed` against the prod host unless `ALLOW_PROD_DB_OPERATIONS=1`. Safe ops (`deploy`/`status`/`generate`/`diff`) always allowed.
+- Tested 5/5 matrix: prod destructive BLOCKED; prod safe ALLOWED; dev branch ALLOWED; local test ALLOWED; role-based block works.
+- Fixed a bug: `studio` command was rejected by the valid-command check (now allowed, warns on prod).
+
+**Backup/PITR (VERIFIED — correction of earlier docs):**
+- `history_retention_seconds: 21600` = **6 hours** PITR (NOT "7 days" as previously documented). Zero snapshots. Pre-incident data is **NOT recoverable**.
+- Nightly `pg_dump` to off-machine storage is the highest-priority outstanding hardening gap.
+
+**CI:** added a database-safety step to `ci.yml` — CI fails if `DATABASE_URL` resembles the prod host or any `neon.tech` host. CI continues to use an ephemeral Postgres 16 container only.
+
+**Docs:** created `docs/infrastructure/` (ENVIRONMENT_ISOLATION, DATABASE_MIGRATION_POLICY, DATABASE_RECOVERY_RUNBOOK, PRODUCTION_DATABASE_SAFETY) + `docs/releases/PRODUCTION_DB_ISOLATION_CERTIFICATION.md`. Updated STATUS.md, SECURITY.md, ARCHITECTURE.md, README.md, CHANGELOG.md, HANDOFF.md, BACKUP_RESTORE.md.
+
+**Gates:** test suite 490/490 (48 files) against disposable :5433 DB ✅ · prod + dev migrate status + zero drift ✅ · guards 5/5 ✅
+
+**Phase 6 AI remains BLOCKED until P0 isolation is certified.**

@@ -58,6 +58,11 @@ Self-certifications (Platinum, Gold, RC3.x) have been retired. Current honest as
 | Phase 1-4 | Complete | Foundation, discovery, ops, automation |
 | Phase 5 (Ecosystem) | Backend complete, hardening in progress | 22 endpoints, 11 integration tests, needs E2E tests |
 | Phase 6 (AI) | Started — M23 MVP shipped | Content-based recommendations live; M22/M24/M25/M26 pending |
+
+> **⚠️ BLOCKED — P0 production-database isolation.** Phase 6 AI development
+> remains **blocked** until P0 production-database isolation is certified
+> (certified 2026-08-07 — see `docs/releases/PRODUCTION_DB_ISOLATION_CERTIFICATION.md`).
+> Do NOT start Phase 6 features, AI migrations, or AI infrastructure changes.
 | Infrastructure | Render free tier + Vercel + Neon | Zero cost; cold start latency |
 | Security | Strong fundamentals | CSRF HMAC, CSP nonce, 2FA pending |
 | Tests | 368+ total, 90 AI tests | Phase 5 needs E2E coverage |
@@ -207,9 +212,9 @@ Browser → Vercel (playmorrow.co)
 
 | Environment | Frontend | Backend | Database |
 |---|---|---|---|
-| Local | `localhost:3000` | `localhost:4000` | Neon dev (shared) |
-| Production | Vercel (playmorrow.co) | Render (playmorrow-api.onrender.com) | Neon prod |
-| Staging | Vercel preview | Render (playmorrow-api-staging.onrender.com) | Neon staging |
+| Local | `localhost:3000` | `localhost:4000` | Neon dev **branch** (`ep-raspy-sunset-abo6apgc…`) |
+| Production | Vercel (playmorrow.co) | Fly.io (playmorrow-api-aged-mountain-9542.fly.dev) | Neon prod branch (`ep-orange-bird-abpuzipk…`) |
+| Staging | Vercel preview | (not deployed) | needs Neon staging branch |
 
 ### CI/CD — GitHub Actions (6 workflows)
 
@@ -234,8 +239,10 @@ Browser → Vercel (playmorrow.co)
 
 ### Backup
 
-- **Neon**: Daily automated backups + point-in-time recovery (PITR)
-- **No separate backup infrastructure**: Relies fully on Neon managed backups
+- **Neon PITR: 6 hours** (`history_retention_seconds: 21600`, verified 2026-08-07). Zero snapshots exist.
+- **Correction:** the earlier "daily backups + 7-day PITR" claim was inaccurate.
+- **Highest-priority gap:** nightly `pg_dump` to off-machine storage is NOT yet implemented.
+- **2026-08-06 incident:** a `prisma migrate reset` (when prod/dev shared one DB) cleared the production dataset. Pre-incident data is **not recoverable** (PITR window elapsed). See `docs/infrastructure/DATABASE_RECOVERY_RUNBOOK.md`.
 
 ### Docker
 
@@ -650,9 +657,10 @@ Build → Measure → Learn → Improve → Review → Repeat
 | 2 | **M18 Funding implementation** | Legal, Product, CTO | ⚠️ Reward-based crowdfunding model defined, no schema, needs legal |
 | 3 | **Render Starter upgrade** | CTO, Ops | ⚠️ $7/mo eliminates auto-sleep cold starts. Budget trivial. |
 | 4 | **Screen reader testing** | QA, Accessibility | ⚠️ NVDA/VoiceOver not yet performed |
-| 5 | **Staging environment** | Ops | ⚠️ Configured in render.yaml, not yet deployed — needs Neon branch + Stripe keys |
-| 6 | **Test database strategy** | Engineering | ⚠️ Integration tests share Neon dev DB |
+| 5 | **Staging environment** | Ops | ⚠️ Scaffold in render.yaml; needs Neon staging branch + secrets. Low priority (dedicated test DB in place) |
+| 6 | **Test database strategy** | Engineering | ✅ RESOLVED — dedicated local test DB (:5433) + CI ephemeral Postgres; integration tests no longer touch Neon |
 | 7 | **Redis adoption** | Engineering | ⚠️ Config + service wrapper created; Upstash not yet provisioned |
+| 8 | **Nightly pg_dump backup** | Ops, Engineering | ⚠️ **HIGH** — Neon PITR is only 6h; pre-incident prod data was lost 2026-08-06 and is unrecoverable. Nightly dumps + off-machine storage required. |
 
 ---
 

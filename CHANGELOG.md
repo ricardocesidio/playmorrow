@@ -2,6 +2,38 @@
 
 ## [Unreleased]
 
+### P0 Production Database Isolation (2026-08-07)
+
+**Incident:** A `prisma migrate reset` (run during a dev-database reconciliation
+on 2026-08-06) executed against the shared Neon database and cleared the
+production dataset. Pre-incident data is **not recoverable** — Neon PITR
+retention is only 6 hours (`history_retention_seconds: 21600`, verified via
+API) and zero snapshots exist.
+
+**Root cause:** prod and dev pointed at the SAME Neon database.
+
+**Remediation (VERIFIED):**
+- Created a dedicated **dev Neon branch** (`br-sparkling-sea-abobomp9`,
+  endpoint `ep-raspy-sunset-abo6apgc`) of project `green-leaf-42103134`; prod
+  branch (`br-patient-bonus-abbxfc07`, `ep-orange-bird-abpuzipk…`) untouched.
+- Rewired `apps/api/.env` `DATABASE_URL` → dev branch. Prod Fly.io secret
+  unchanged.
+- **DB safety guard** `packages/database/scripts/db-guard.mjs` wired into all
+  DB scripts (database + api packages): blocks `reset`/`push`/`migrate-dev`/
+  `seed` against the prod host unless `ALLOW_PROD_DB_OPERATIONS=1`; `deploy`/
+  `status`/`generate`/`diff` always allowed. Tested 5/5 matrix.
+- CI safety check added to `ci.yml` — fails if `DATABASE_URL` resembles prod.
+- Verified: prod 39/39 migrations, zero drift, smoke 200/401/404; dev branch
+  reset + migrate + seed OK; test suite 490/490 green against disposable DB.
+- Docs: `docs/infrastructure/` (ENVIRONMENT_ISOLATION, DATABASE_MIGRATION_POLICY,
+  DATABASE_RECOVERY_RUNBOOK, PRODUCTION_DATABASE_SAFETY) +
+  `docs/releases/PRODUCTION_DB_ISOLATION_CERTIFICATION.md`.
+- Corrected inaccurate "7-day PITR" claim in `docs/security/BACKUP_RESTORE.md`
+  (actual: 6h).
+
+**Outstanding:** nightly `pg_dump` backups (HIGH), Neon plan upgrade for longer
+PITR, staging branch.
+
 ### Audit Remediation (2026-08-05)
 - CR-04: Added transactional rollback (cancelPaymentIntent) to marketplace purchase
 - CR-05: Fixed /me/licenses auth redirect (now redirects to /login)

@@ -481,7 +481,7 @@ flowchart LR
     subgraph Dev [Local Development]
         LocalWeb["Next.js :3000"]
         LocalAPI["NestJS :4000"]
-        LocalDB["Neon (shared dev)"]
+        LocalDB["Neon dev branch (ep-raspy-sunset-abo6apgc…)"]
         LocalWeb -->|/api/* proxy| LocalAPI
         LocalAPI --> LocalDB
     end
@@ -491,8 +491,15 @@ flowchart LR
 
 | Environment | Frontend | Backend | Database | Purpose |
 |---|---|---|---|---|
-| Local | `:3000` | `:4000` | Neon dev | Development |
-| Production | Vercel | Railway | Neon prod | Live |
+| Local | `:3000` | `:4000` | Neon dev branch (`ep-raspy-sunset-abo6apgc…`) | Development |
+| Test | n/a | n/a | local Postgres :5433 / CI ephemeral | Tests |
+| Production | Vercel | Fly.io (playmorrow-api-aged-mountain-9542) | Neon prod branch (`ep-orange-bird-abpuzipk…`) | Live |
+
+> **Environment isolation (2026-08-07):** prod and dev run on **separate Neon
+> branches** of project `green-leaf-42103134`. A DB safety guard blocks
+> destructive Prisma commands against the prod host. See
+> `docs/infrastructure/ENVIRONMENT_ISOLATION.md` and
+> `docs/infrastructure/PRODUCTION_DATABASE_SAFETY.md`.
 
 ### Environment Variables
 

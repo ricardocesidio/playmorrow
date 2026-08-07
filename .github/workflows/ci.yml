@@ -78,6 +78,13 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Database safety check (never target production from CI)
+        run: |
+          if echo "$DATABASE_URL" | grep -qE 'ep-orange-bird-abpuzipk|neon\.tech'; then
+            echo "ERROR: DATABASE_URL appears to point at production Neon. CI must use disposable Postgres only."
+            exit 1
+          fi
+          echo "PASS: DATABASE_URL targets non-production database"
       - name: Build api + workspace deps (generates Prisma client)
         run: pnpm exec turbo run build --filter=@playmorrow/api...
       - name: Apply migrations

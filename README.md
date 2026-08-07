@@ -10,7 +10,7 @@
 
 Playmorrow is a social discovery platform connecting indie game studios with players. Studios share their development journey through devlogs, roadmaps, trailers, and press kits. Players discover upcoming games, follow development, build wishlists, and join the conversation. The platform includes a marketplace (Stripe Connect), events, a B2B partner CRM, and an AI intelligence layer.
 
-**Live:** [https://playmorrow.co](https://playmorrow.co) | **API:** Fly.io | **DB:** Neon PostgreSQL
+**Live:** [https://playmorrow.co](https://playmorrow.co) | **API:** Fly.io | **DB:** Neon PostgreSQL (prod/dev on separate branches)
 
 ---
 
