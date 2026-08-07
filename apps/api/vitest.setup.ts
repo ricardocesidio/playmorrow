@@ -17,7 +17,7 @@ if (process.env.TEST_DATABASE_URL) {
 // This was the root cause of 70+ test games + 1600 test users polluting prod.
 // Use docker postgres-test (or a dedicated Neon *branch* + TEST_DATABASE_URL).
 const dbUrl = process.env.DATABASE_URL || "";
-const isLikelyProd = /neon\.tech|playmorrow-prod|ep-aged-darkness/i.test(dbUrl) && !/test|5433|localhost:543/i.test(dbUrl);
+const isLikelyProd = /neon\.tech|playmorrow-prod|ep-aged-darkness|ep-orange-bird-abpuzipk|ep-raspy-sunset/i.test(dbUrl) && !/test|5433|localhost:543/i.test(dbUrl);
 if (isLikelyProd && !process.env.ALLOW_PROD_DB_FOR_TESTS) {
   throw new Error(
     "🛑 TEST SAFETY: Refusing to run tests against a production-like DATABASE_URL.\n" +

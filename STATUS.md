@@ -1,10 +1,12 @@
 # Playmorrow — Project Status
 
-> **Last verified:** 2026-08-06
+> **Last verified:** 2026-08-07
 > **Version:** v0.85-beta
 > **Repository:** [github.com/ricardocesidio/playmorrow](https://github.com/ricardocesidio/playmorrow)
-> **Tests:** 368+ total (33 files, 90 AI). **Typecheck:** 7/7. **Lint:** 0 errors.
+> **Tests:** 490 total (48 files). **Typecheck:** 7/7. **Lint:** 0 errors. **Build:** 6/6.
 > **Live:** https://playmorrow.co
+> **Production DB isolation:** 🟢 CERTIFIED (separate prod/dev Neon branches)
+> **Production hardening (P0.1.1):** 🟡 CONDITIONALLY CERTIFIED — credentials rotated; real backup verified in R2; `gh` secret registration is the final user action. See `docs/releases/P0_1_FINAL_CERTIFICATION.md`. **Phase 6 AI BLOCKED.**
 
 ---
 
@@ -165,12 +167,14 @@ Current state: v0.85-beta — functional, not production-hardened.
 | ✅ | Integration tests share Neon dev DB | Dedicated local test DB provisioned (Colima + Docker + `docker-compose.yml` `postgres-test` on :5433). Schema replayed via all 39 migrations, full suite green: 48 files / 490 tests against `TEST_DATABASE_URL` |
 | ✅ | Reconcile migration to prod | Already live — prod and dev share the same Neon DB (`neondb` on `ep-orange-bird-abpuzipk-pooler`). Verified against prod `DATABASE_URL`: 39/39 migrations applied, zero drift vs `schema.prisma`. Smoke: `/api/health`, `/api/games`, `/api/marketplace`, `/api/events` 200; `/api/creator/*` 401 (guard works, no 500) |
 | ✅ | **P0: prod/dev DB isolation** | Neon project `green-leaf-42103134` (Playmorrow) now has TWO branches: `production` (br-patient-bonus-abbxfc07) and `dev` (br-sparkling-sea-abobomp9, endpoint ep-raspy-sunset-abo6apgc). Dev `DATABASE_URL` (apps/api/.env) rewired to the dev branch. Verified: dev reset + 39 migrations + seed OK; prod untouched (39/39, zero drift, smoke 200/401); guard blocks prod destructive ops and allows dev/test. Full details: `docs/releases/PRODUCTION_DB_ISOLATION_CERTIFICATION.md` |
+| ✅ | **P0.1: production hardening & recovery readiness** | Fail-closed DB guard (destructive ops vs unknown hosts blocked unless override); dead `admin:ensure` bypass removed; stale `vitest.setup.ts` prod-host regex fixed (blocks suite on both Neon hosts); `smoke-test.yml` robust to empty-but-healthy prod (`total=0` passes); nightly backup workflow (→R2) + read-only backup role + full restore drill. See `docs/releases/P0_1_PRODUCTION_HARDENING_CERTIFICATION.md` |
 
 ### Remaining
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 5 | No staging environment deployed | Medium | Skipped by decision (dedicated test DB chosen over staging) |
-| 6 | Nightly `pg_dump` backup not yet implemented | High | Neon PITR is only 6 hours (`history_retention_seconds: 21600`, verified via API) and zero snapshots exist — **pre-incident data is NOT recoverable**. Nightly dumps + off-machine storage are the highest-priority hardening gap. See `DATABASE_RECOVERY_RUNBOOK.md` |
+| 6 | ~~Nightly `pg_dump` backup not yet implemented~~ | ~~High~~ | **RESOLVED 2026-08-07** — `.github/workflows/backup-db.yml` (02:00 UTC cron) dumps prod via read-only role `playmorrow_backup` (postgres:18, `--exclude-schema=neon_auth`) → R2 `db-backups/` (14-day retention, SHA-256 + MANIFEST). ✅ **Real production backup VERIFIED in R2** this session: `db-backups/20260807T132952Z.dump` (197,092 bytes) + checksum + manifest created with the workflow's own flags, downloaded back (checksum matched), and **restored to disposable Postgres 18 → 65/65 tables, row counts match live prod**. Remaining: register 5 GitHub secrets (`gh` not installed here) to activate nightly cron. See `docs/releases/P0_1_FINAL_CERTIFICATION.md` |
+| 7 | ~~Exposed Neon credentials still live~~ | ~~High~~ | **RESOLVED 2026-08-07 (P0.1.1)** — DB password rotated via Neon API (old `npg_…` confirmed dead via failed auth; new password live in Fly `DATABASE_URL`, prod smoke 200). Exposed org `NEON_API_KEY` revoked (`playmorrow-key`, id 3244621), replaced by `playmorrow-key-v2` (gitignored `.env.neon-apikey`). New prod URL in gitignored `.env.prod-dburl`. Full evidence: `docs/releases/P0_1_FINAL_CERTIFICATION.md` |
 
 > **Migration ops note:** `prisma migrate deploy`/`resolve` time out with P1002 against the Neon endpoint (both pooled `-pooler` and direct hosts block session advisory locks). Dev migration workflow = run the SQL via `prisma db execute` (single transaction), then record in `_prisma_migrations` with the correct SHA-256 checksum (or use a Neon branch that exposes a real direct endpoint). `prisma migrate status` and `prisma migrate diff` work fine.
 >

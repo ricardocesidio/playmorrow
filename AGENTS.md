@@ -835,14 +835,16 @@ Critical incident response. No features — production safety and recovery certi
 - Prod re-verified: 39/39 migrations, zero drift, smoke `/health` `/games` `/marketplace` `/events` 200, `/creator/*` 401, POST wrong-verb 404.
 
 **DB safety guard** `packages/database/scripts/db-guard.mjs`:
-- Wired into ALL DB scripts (database + api packages): `db:reset` `db:push` `db:migrate` `db:seed` `seed:model-games` `admin:ensure` `db:studio` `db:deploy` `db:status`.
+- Wired into ALL DB scripts (database + api packages): `db:reset` `db:push` `db:migrate` `db:seed` `seed:model-games` `db:studio` `db:deploy` `db:status`.
 - Blocks `reset`/`push`/`migrate-dev`/`seed` against the prod host unless `ALLOW_PROD_DB_OPERATIONS=1`. Safe ops (`deploy`/`status`/`generate`/`diff`) always allowed.
-- Tested 5/5 matrix: prod destructive BLOCKED; prod safe ALLOWED; dev branch ALLOWED; local test ALLOWED; role-based block works.
+- **Fail-closed (P0.1):** destructive commands against *unknown* hosts (any host that is not prod, not localhost, and not `DEV_DB_HOST`) are now BLOCKED too. Accidentally repointing `DATABASE_URL` at another Neon/RDS/cloud endpoint can no longer proceed without an explicit override.
+- Tested 7/7 matrix: prod destructive BLOCKED; prod safe ALLOWED; dev branch ALLOWED; local test ALLOWED; unknown host BLOCKED; unknown host + `PLAYMORROW_DB_ROLE=dev` ALLOWED; role-based block works.
 - Fixed a bug: `studio` command was rejected by the valid-command check (now allowed, warns on prod).
+- Removed dead `admin:ensure` scripts (both package.json) + `admin-script.ts` tsconfig exclude (file was deleted as dead code in `a6eaaa5` but scripts remained — root one was an unguarded latent bypass).
 
 **Backup/PITR (VERIFIED — correction of earlier docs):**
 - `history_retention_seconds: 21600` = **6 hours** PITR (NOT "7 days" as previously documented). Zero snapshots. Pre-incident data is **NOT recoverable**.
-- Nightly `pg_dump` to off-machine storage is the highest-priority outstanding hardening gap.
+- Nightly `pg_dump` to off-machine storage — **implemented in P0.1** (see Session 25 continued below).
 
 **CI:** added a database-safety step to `ci.yml` — CI fails if `DATABASE_URL` resembles the prod host or any `neon.tech` host. CI continues to use an ephemeral Postgres 16 container only.
 
@@ -851,3 +853,160 @@ Critical incident response. No features — production safety and recovery certi
 **Gates:** test suite 490/490 (48 files) against disposable :5433 DB ✅ · prod + dev migrate status + zero drift ✅ · guards 5/5 ✅
 
 **Phase 6 AI remains BLOCKED until P0 isolation is certified.**
+
+### Session 25 (continued) — P0.1 Production Hardening & Recovery Readiness (2026-08-07)
+
+P0.1 sprint closing the remaining recovery-readiness gaps. No features, no schema changes.
+
+**Nightly off-machine backup (implemented + component-verified):**
+- `.github/workflows/backup-db.yml` — 02:00 UTC cron + `workflow_dispatch`: host safety check (must be `ep-orange-bird-abpuzipk…`, non-pooler), `pg_dump --no-owner --no-privileges -Fc --exclude-schema=neon_auth` via `postgres:18` container (matches Neon PG 18.4; PG16 client fails with server-version mismatch), `pg_restore --list` integrity check, SHA-256 + MANIFEST.txt, upload `db-backups/<STAMP>.dump` → R2, 14-day retention prune, existence verification.
+- Read-only role `playmorrow_backup` created on prod Neon (LOGIN, SELECT-only on `public`, default privileges; write denied verified — `permission denied for schema public`). Deliberate single exception to "CI has no prod credentials"; pg_dump is read-only.
+- R2 write path verified from Fly runtime (existing app token; KeyCount=5). Backup-only R2 token scoped to `db-backups/` recommended, deferred to user.
+- **Full restore drill PASSED:** prod dump → disposable Postgres 18 (`pm-restore-test` :5434) → 65/65 tables, row counts match live prod (users=1, games=0). 2 expected errors only for Neon-only `pg_session_jwt`.
+- `packages/database/scripts/db-backup.sh` — ad-hoc local dump/upload script (needs `pg_dump` + `aws` on PATH; workflow is the production path).
+- `scripts/setup-backup-secrets.sh` — extracts read-only URL + R2 creds from Fly, writes gitignored `.env.backup-secrets`, prints the 5 `gh secret set` commands (`BACKUP_DATABASE_URL`, `R2_ENDPOINT`, `R2_BUCKET`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`).
+- **User action required:** `gh secret set` (gh CLI not installed here) + `gh workflow run backup-db.yml`; also secret rotation (DB password + NEON_API_KEY exposed during incident forensics).
+
+**Test/CI safety fixes:**
+- `apps/api/vitest.setup.ts` prod-host regex updated — now matches current prod (`ep-orange-bird-abpuzipk`) + dev branch (`ep-raspy-sunset`) hosts (stale regex only matched pre-incident `ep-aged-darkness`). Verified 6/6 (prod/dev BLOCKED; localhost/CI ALLOWED).
+- `.github/workflows/smoke-test.yml` games step no longer fails on `total=0` (prod legitimately empty post-incident) — asserts HTTP 200 + well-formed JSON only. Live-verified.
+- CI database-safety step already blocks `neon.tech` + prod host (P0).
+
+**Gates:** lint 0 errors (67 pre-existing warnings) ✅ · typecheck 7/7 ✅ · build 6/6 ✅ · API suite 490/490 (48 files) ✅ · guard matrix 7/7 re-verified ✅ · YAML 4/4 ✅
+
+**Docs:** created `docs/releases/P0_1_PRODUCTION_HARDENING_CERTIFICATION.md` (🟡 conditional — pending user secrets + rotation); updated `docs/security/BACKUP_RESTORE.md`, `docs/infrastructure/DATABASE_RECOVERY_RUNBOOK.md`, `docs/releases/PRODUCTION_DB_ISOLATION_CERTIFICATION.md`, STATUS.md, AGENTS.md.
+
+**Verdict:** 🟡 CONDITIONALLY CERTIFIED. Full CERTIFIED once (1) GitHub secrets set + first successful R2 backup, and (2) exposed secrets rotated.
+
+**Phase 6 AI remains BLOCKED until P0.1 reaches full CERTIFIED status.**
+
+### Session 25 (continued) — P0.1.1 Final Production Hardening Closure (2026-08-07)
+
+Closure sprint executing the P0.1.1 checklist: independently re-verify all P0.1
+hardening, run the first real backup, rotate the exposed Neon credentials, and
+produce a final evidence-based certification.
+
+**Step 6 — Rotate Neon DB password (DONE):**
+- `neon` CLI was authenticated via browser OAuth (ricardinrocha12@gmail.com).
+- Before rotating, tested the `reset_password` API path end-to-end against a
+  throwaway role on the **dev** branch: old password rejected, new password
+  accepted, role deleted. No prod impact.
+- Rotated `neondb_owner` on the **production** branch
+  (`br-patient-bonus-abbxfc07`) via Neon API
+  `POST /projects/green-leaf-42103134/branches/br-patient-bonus-abbxfc07/roles/neondb_owner/reset_password`.
+- Confirmed the old exposed password (`npg_d0nw9exVhtBk`) SHA-256 equals the live
+  prod password hash (`578ca22e…bd985`) — i.e. it was **still valid** before reset.
+- Set the new `DATABASE_URL` on the Fly app secret via the Fly Machines API
+  (`POST /v1/apps/playmorrow-api-aged-mountain-9542/secrets`) with a JSON body
+  (avoids process-args leak; `flyctl secrets set` has no stdin mode). Digest
+  changed `f2820f3e18578bc5 → 1a14e99a9403694f`; updated `2026-08-07T12:25:23Z`.
+- Post-deploy smoke: health/games/marketplace/events → 200; creator/* → 401;
+  games `total` = 0 (expected). Verified the OLD password now
+  **rejected** (`password authentication failed`) and the NEW URL connects.
+- Read-only backup role `playmorrow_backup` keeps its own password (separate),
+  verified still working (SELECT-only, writes denied).
+- New prod URL persisted to gitignored `.env.prod-dburl` (chmod 600); not printed.
+
+**Step 7 — Rotate NEON_API_KEY (DONE):**
+- The CLI uses OAuth (`~/.config/neon/credentials.json`), not an API key.
+- Revoked the exposed **org** key `playmorrow-key` (id `3244621`, created
+  2026-08-05, predating the 2026-08-06 incident → the exposed `napi_…` key).
+- Created replacement org key `playmorrow-key-v2` (id `3250211`), stored ONLY in
+  gitignored `.env.neon-apikey` (chmod 600, never printed). Verified the new key
+  authenticates (HTTP 200) and the revoked key is gone (org key list empty).
+- No tracked code, Fly secrets, or local env files referenced NEON_API_KEY.
+
+**Step 8 — Secret exposure audit (CLEAN):**
+- No `npg_d0nw9exVhtBk` / `napi_` / `postgresql://user:pass@` creds in tracked
+  files; only 4 `.env.example` files (placeholders); full 1,369-commit git
+  history has **0** occurrences; `.env*` fully gitignored; no `sk_`/`ghp_`/`AKIA`
+  patterns.
+
+**Step 9 — Production smoke:** all public endpoints 200; protected routes 401;
+marketplace/me 404 (route absent); games `total` numeric = 0.
+
+**Step 10 — DB safety guard + isolation (re-verified 10/10):**
+prod destructive BLOCKED, prod deploy/status ALLOWED, dev reset ALLOWED, unknown
+host reset BLOCKED (fail-closed), unknown+role=dev ALLOWED, local :5433 ALLOWED,
+studio command allowed, dry-run honored, no-override default BLOCK, override ALLOW.
+Prod host ≠ dev host (pooler vs dev branch). Test DB still :5433 (now stopped).
+
+**Step 11 — CI/CD audit:** 7 workflows parse; only backup-db.yml has R2/AWS
+secrets (read-only role, intentional). `secrets.R…` grep hit was a regex artifact.
+
+**Step 12 — Quality gates:** `pnpm verify` (lint/typecheck/build all green);
+lint 0 errors / 67 pre-existing warnings; API tests **490/490** across 48 files
+against disposable :5433 Postgres 18; guard matrix 10/10; YAML all valid. Corrected
+stale CI `any`-count baseline (was 137; actual 0).
+
+**Step 12b — ci.yml ratchet:** baseline `any`-count was stale (137); actual
+`: any` literal count in `apps/api/src` = 0 (Session 24 zero-any work). Rewritten
+to baseline 0 with explanatory message.
+
+**Step 13 — Docs:** updated P0.1 cert, STATUS.md, SECRET_ROTATION.md,
+DATABASE_RECOVERY_RUNBOOK.md, CHANGELOG.md, BACKUP_RESTORE.md, HANDOFF.md,
+SECURITY.md, README.md.
+
+**Outstanding:** Steps 2–3 (GitHub secrets + first real backup) — `gh` CLI not
+installed on this workstation (not on `/usr/local/bin`, `/opt/homebrew/bin`, or
+`~/.local/bin`). Without `gh` it is impossible to set the 5 GitHub secrets or
+trigger `backup-db.yml`; R2 currently has **0** backup objects. This is a hard
+environment block documented as USER ACTION in `docs/releases/P0_1_FINAL_CERTIFICATION.md`.
+
+**Verdict:** 🟡 CONDITIONALLY CERTIFIED. Credentials rotated & verified; only the
+first GitHub-secrets + backup run remains (environment-blocked). Phase 6 AI stays
+BLOCKED until 🟢 certification.
+
+**Commits:** uncommitted (all changes since `5eb775b` staged for a single
+`chore: close P0.1 production hardening` commit; deferred until the backup block
+clears to keep the branch honest about its true state).
+
+### Session 25 (continued) — P0.1.1 — Key File Additions/Updates
+- **New (gitignored, chmod 600):** `.env.prod-dburl` (rotated prod URL),
+  `.env.neon-apikey` (replacement org key).
+- **New untracked:** `.github/workflows/backup-db.yml`,
+  `packages/database/scripts/db-backup.sh`, `scripts/setup-backup-secrets.sh`,
+  `docs/releases/P0_1_FINAL_CERTIFICATION.md`.
+- **Updated:** `docs/releases/P0_1_PRODUCTION_HARDENING_CERTIFICATION.md`,
+  `docs/infrastructure/DATABASE_RECOVERY_RUNBOOK.md`, `docs/security/BACKUP_RESTORE.md`,
+  `docs/security/SECRET_ROTATION.md`, `STATUS.md`, `SECURITY.md`, `AGENTS.md`,
+  `CHANGELOG.md`, `README.md`, `.github/workflows/ci.yml`, `docs/handoff/HANDOFF.md`.
+
+### Session 25 (continued) — P0.1.1 Final Backup Verification (2026-08-07)
+
+Final closure sprint. Goal: prove the backup pipeline works with real evidence.
+
+- **`gh` CLI NOT installed** on this workstation (not in `/usr/local/bin`,
+  `/opt/homebrew/bin`, `~/.local/bin`); no `GH_TOKEN`/`GITHUB_TOKEN` in env and
+  no `~/.config/gh/` credentials — cannot set repo secrets or trigger the
+  GitHub Actions workflow. Reported as a user action.
+- **Real production backup CREATED & VERIFIED in R2** using the workflow's own
+  pg_dump flags + the verified read-only role (`playmorrow_backup`, prod direct
+  host) + real R2 credentials:
+  - pg_dump → 197,092 bytes; `pg_restore --list` valid (exit 0); 65 tables w/ data.
+  - SHA-256 `27f1f8f4943307dbc5ab2ada5fda8228a0f15b2f2fc2604839ef3e58375d1eaa`;
+    MANIFEST.txt generated.
+  - Uploaded to R2 `db-backups/20260807T132952Z.dump` (+ `.sha256` + `.MANIFEST.txt`).
+  - Independent verification: downloaded `verify.dump` from R2 → SHA-256 matches.
+  - **Restore to disposable Postgres 18 (:5434):** 65/65 tables, indexes=230,
+    constraints=569; row counts match live prod (users=1, games=0, studios=0,
+    devlogs=0). Only 2 Neon-only `pg_session_jwt` errors (ignored).
+  - Container destroyed; `:5434` released. No prod touched.
+- **Failure handling reviewed:** safety-check rejects dev/pooler hosts;
+  pg_restore --list fails (exit 1) on empty + corrupt dumps; retention regex
+  `^db-backups/[0-9]{8}T[0-9]{6}Z\.dump$` cannot delete unrelated R2 objects.
+- **Guard matrix re-verified 10/10** (prod destructive BLOCKED/override
+  ALLOWED, dev/localhost ALLOWED, unknown host fail-closed BLOCKED).
+- **Quality gates:** `pnpm verify` (lint 0 errors / 67 pre-existing warnings,
+  typecheck 7/7, build 6/6); API tests **490/490** across 48 files; 7/7 workflow
+  YAMLs valid (yq).
+- **No secrets in commit** (leak scan: 0 real credentials; only the public-
+  compromised password name `npg_d0nw9exVhtBk` referenced).
+- **Verdict:** 🟡 CONDITIONALLY CERTIFIED. Every backup-verifiability criterion
+  is satisfied with real R2 evidence; the only unmet item is the operational
+  GitHub Actions secret registration (needs `gh` auth). Backup system is
+  **proven working**, not merely implemented. Phase 6 AI **BLOCKED** pending the
+  gh-secret-registration user action.
+- **Commit:** `920de09 chore: close P0.1 production hardening (🟡 conditional)`
+  (local; push deferred; no production impact from pushing docs+ci, but deferred
+  to honor the conditional state).

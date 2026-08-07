@@ -42,7 +42,7 @@ ADMIN is a **global role**, not an account type. It's set on the `User.role` fie
 **There is no way to register as ADMIN.**
 - Registration ignores any submitted `role` field
 - Only the configured owner email (`PLAYMORROW_OWNER_EMAIL`) can be promoted to ADMIN
-- Admin promotion is done via `pnpm admin:ensure`
+- Admin promotion is done via the owner bootstrap (see `docs/product/admin-role.md`)
 
 ## Backend enforcement
 

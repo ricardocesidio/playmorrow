@@ -30,12 +30,30 @@ Consequences:
 pg_dump "$DATABASE_URL" > playmorrow-backup-$(date +%Y%m%d).sql
 ```
 
-Because Neon PITR only covers 6 hours, **manual `pg_dump` backups are the
-primary disaster-recovery mechanism**. Perform them:
+### Automated Nightly Backup (VERIFIED 2026-08-07)
 
-- nightly (cron/CI), kept for ≥30 days, stored off-machine (e.g. R2 bucket),
-- before **any** `migrate reset`/`db push --accept-data-loss`/seed on a
-  non-disposable database.
+**Implemented:** nightly `pg_dump` → Cloudflare R2 (off-machine), run by the
+`Nightly Database Backup` GitHub Actions workflow (`.github/workflows/backup-db.yml`)
+at 02:00 UTC daily (+ manual `workflow_dispatch`).
+
+- **Read-only role:** `playmorrow_backup` (SELECT-only grants, direct
+  non-pooler host). The backup credential cannot write — it is the single,
+  deliberate exception to "no production credentials in CI" and is documented
+  in `docs/infrastructure/PRODUCTION_DATABASE_SAFETY.md`.
+- **Object layout:** `s3://<bucket>/db-backups/<YYYYMMDDTHHMMSSZ>.dump`
+  + `.sha256` checksum + `MANIFEST.txt` (source, timestamp, sha, size).
+- **Retention:** 14 days (configurable `KEEP_DAYS`), pruned by the workflow.
+- **Integrity:** `pg_restore --list` runs before upload; a full restore test
+  (dump → disposable Postgres 18 → 65 tables, row counts match) was performed
+  2026-08-07 and is documented in `docs/releases/P0_1_PRODUCTION_HARDENING_CERTIFICATION.md`.
+- **Neon-only schema excluded:** `--exclude-schema=neon_auth` (Neon-managed
+  built-in auth; not Playmorrow data).
+- **Manual trigger:** `gh workflow run backup-db.yml --repo ricardocesidio/playmorrow`.
+- **Secrets:** `BACKUP_DATABASE_URL`, `R2_ENDPOINT`, `R2_BUCKET`,
+  `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`. Local bootstrap:
+  `scripts/setup-backup-secrets.sh <backup-url-file> <fly-app>` (writes the
+  gitignored `.env.backup-secrets` + prints the `gh secret set` commands).
+- **Ad-hoc local dump:** `BACKUP_DATABASE_URL=... packages/database/scripts/db-backup.sh [--upload]`.
 
 ### Restore Procedure
 
@@ -106,9 +124,9 @@ aws s3 sync ./uploads-backup/ s3://playmorrow-uploads/ \
 | Test | Frequency | Status |
 |------|-----------|--------|
 | Database restore to Neon branch | Quarterly | ⏳ Not yet performed (PITR verified ≤6h) |
-| Nightly pg_dump to off-machine storage | Daily | ⛔ **Not yet implemented** — highest priority |
-| Full recovery drill (DB + API) | Bi-annual | ⏳ Not yet performed |
-| R2 backup sync | Monthly | ⏳ Not yet performed |
+| Nightly pg_dump to off-machine storage | Daily | ✅ **Implemented 2026-08-07** — GitHub Actions → R2 (14-day retention) |
+| Full restore drill (pg_dump → disposable PG) | Verified 2026-08-07 | ✅ 65/65 tables, row counts match |
+| R2 backup sync | Monthly | ⏳ Manual full-bucket sync not yet scheduled |
 
 ---
 

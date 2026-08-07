@@ -40,7 +40,7 @@ git push origin main
 
 | Secret | Type | Rotation Method | Last Rotated | Notes |
 |--------|------|----------------|--------------|-------|
-| DATABASE_URL | Connection string | Neon dashboard → Settings → Reset password | 2026-07-29 | Must update Fly.io + Vercel simultaneously |
+| DATABASE_URL | Connection string | Neon dashboard → Settings → Reset password | 2026-08-07 (P0.1.1) | Must update Fly.io + Vercel simultaneously |
 | JWT_SECRET | Cryptographic (32 bytes hex) | `openssl rand -hex 32` | 2026-07-28 | Invalidates existing JWTs |
 | SESSION_SECRET | Cryptographic (32 bytes hex) | `openssl rand -hex 32` | 2026-07-28 | Invalidates existing sessions |
 | CSRF_SECRET | Cryptographic (32 bytes hex) | `openssl rand -hex 32` | 2026-07-28 | Invalidates existing CSRF tokens |
@@ -54,6 +54,7 @@ git push origin main
 | VAPID_PUBLIC_KEY | Cryptographic | Generate new VAPID key pair | — | Must update frontend push service |
 | VAPID_PRIVATE_KEY | Cryptographic | Generate new VAPID key pair | — | Rotate with PUBLIC_KEY |
 | SENTRY_DSN | Service key | Sentry dashboard → Settings → Client Keys | — | Can use same DSN for both client/server |
+| NEON_API_KEY | Service key (org) | Neon console → Settings → API keys | 2026-08-07 (P0.1.1) | Old `playmorrow-key` revoked (exposed); replacement `playmorrow-key-v2` stored in gitignored `.env.neon-apikey` |
 | WEB_ORIGIN | URL | Static (does not rotate) | — | Changes only with domain migration |
 | COOKIE_DOMAIN | Domain | Static (does not rotate) | — | Changes only with domain migration |
 | NODE_ENV | Config value | Static (does not rotate) | — | 'production' |

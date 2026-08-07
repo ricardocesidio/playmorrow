@@ -32,12 +32,12 @@ jobs:
         run: |
           ANY_COUNT=$(grep -r ": any" apps/api/src --include="*.ts" | wc -l | tr -d ' ')
           echo "Current 'any' type count: $ANY_COUNT"
-          echo "Baseline: 137 (pre-existing legacy code)"
-          if [ "$ANY_COUNT" -gt 137 ]; then
-            echo "ERROR: 'any' type count increased from 137 to $ANY_COUNT"
+          echo "Baseline: 0 (Session 24 eliminated all legacy any types)"
+          if [ "$ANY_COUNT" -gt 0 ]; then
+            echo "ERROR: 'any' type count increased from 0 to $ANY_COUNT"
             exit 1
           fi
-          echo "PASS: 'any' type count has not increased"
+          echo "PASS: 'any' type count is zero"
       - run: pnpm typecheck
       - name: npm audit (production deps)
         run: pnpm audit --prod --audit-level=critical || echo "::warning::Critical production dependency vulnerabilities found. Run pnpm update and pnpm audit --prod to verify."

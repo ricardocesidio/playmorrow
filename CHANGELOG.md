@@ -31,8 +31,69 @@ API) and zero snapshots exist.
 - Corrected inaccurate "7-day PITR" claim in `docs/security/BACKUP_RESTORE.md`
   (actual: 6h).
 
-**Outstanding:** nightly `pg_dump` backups (HIGH), Neon plan upgrade for longer
-PITR, staging branch.
+**Outstanding (P0 → P0.1):** nightly `pg_dump` backups (now implemented — see
+below), Neon plan upgrade for longer PITR, staging branch.
+
+### P0.1 Production Hardening & Recovery Readiness (2026-08-07)
+
+- **Nightly off-machine backups implemented:** `.github/workflows/backup-db.yml`
+  (02:00 UTC cron + `workflow_dispatch`) dumps production via read-only role
+  `playmorrow_backup` (`postgres:18`, `--exclude-schema=neon_auth`) → Cloudflare
+  R2 `db-backups/` (SHA-256 + MANIFEST, 14-day retention). Full restore drill
+  passed: 65/65 tables, row counts match live prod.
+- **Fail-closed DB guard:** destructive commands against *unknown* hosts (any
+  host that is not prod, localhost, or `DEV_DB_HOST`) are now BLOCKED unless
+  `ALLOW_PROD_DB_OPERATIONS=1`. Matrix re-verified 7/7.
+- **Dead latent bypass removed:** `admin:ensure` scripts (root + api package.json)
+  pointing at the deleted `admin-script.ts` were removed.
+- **Test-suite safety:** `vitest.setup.ts` prod-host regex now matches current
+  prod + dev-branch Neon hosts (was stale `ep-aged-darkness`). Verified 6/6.
+- **Smoke-test robustness:** games step accepts `total=0` (prod legitimately
+  empty post-incident) — asserts HTTP 200 + well-formed JSON. Live-verified.
+- **Docs:** `docs/releases/P0_1_PRODUCTION_HARDENING_CERTIFICATION.md`
+  (🟡 conditional — pending user secrets + rotation); updated
+  `docs/security/BACKUP_RESTORE.md`, `DATABASE_RECOVERY_RUNBOOK.md`,
+  `PRODUCTION_DB_ISOLATION_CERTIFICATION.md`, STATUS.md, SECURITY.md, AGENTS.md.
+- **USER ACTION REQUIRED:** set 5 GitHub secrets (`gh secret set` via
+  `scripts/setup-backup-secrets.sh`), run `backup-db.yml` once, and rotate the
+  exposed Neon DB password + NEON_API_KEY.
+
+### P0.1.1 Production Hardening Closure (2026-08-07)
+
+- **DB password rotation (DONE):** rotated `neondb_owner` password on the
+  production branch via Neon API (browser-authenticated `neon` CLI); confirmed
+  old exposed password (`npg_d0nw9exVhtBk`) now **rejected** and new password
+  live in Fly `DATABASE_URL` secret (digest changed `f2820f3e…→1a14e99a…`);
+  production smoke: all endpoints 200, protected routes 401. New prod URL stored
+  in gitignored `.env.prod-dburl`. Backup read-only role `playmorrow_backup`
+  unaffected (separate password).
+- **NEON_API_KEY rotation (DONE):** exposed org key `playmorrow-key` (id 3244621)
+  revoked; replacement `playmorrow-key-v2` created, stored in gitignored
+  `.env.neon-apikey`. CLI auth is OAuth (unaffected); no tracked code / Fly
+  secrets referenced the key.
+- **Quality gates:** `pnpm verify` green (lint 0 errors, 67 pre-existing warning,
+  typecheck 7/7, build 6/6); API test suite 490/490 across 48 files against
+  disposable :5433.
+- **CI ratchet:** corrected stale `any`-count baseline in `ci.yml` (was 137; actual
+  0) → baseline 0 with explanatory message.
+- **Docs:** `docs/releases/P0_1_FINAL_CERTIFICATION.md`; updated P0.1 cert, STATUS,
+  SECRET_ROTATION, DATABASE_RECOVERY_RUNBOOK, CHANGELOG, AGENTS.
+ - **Status:** 🟡 CONDITIONALLY CERTIFIED — `gh` not installed on this workstation →
+  GitHub secret registration is a USER ACTION. Phase 6 AI remains BLOCKED.
+
+- **Real production backup VERIFIED in R2 (P0.1.1 closure sprint):** created a real
+  backup using the workflow's own `pg_dump` flags + the verified read-only role
+  `playmorrow_backup` (prod direct host) + real R2 creds; uploaded to
+  `db-backups/20260807T132952Z.dump` (+ `.sha256` + `.MANIFEST.txt`, 197,092 bytes);
+  downloaded it back, **checksum matched**; **restored to disposable Postgres 18
+  (:5434) → 65/65 tables, row counts match live prod**. Independent restore drill:
+  `tables=65, indexes=230, constraints=569, users=1, games=0`. `gh` CLI unavailable
+  → cannot trigger the GitHub Actions workflow itself; pipeline correctness proven
+  via direct execution identical to `backup-db.yml`. See
+  `docs/releases/P0_1_FINAL_CERTIFICATION.md`.
+- **Guard matrix re-verified 10/10**; **7/7 workflow YAMLs valid** (yq); quality
+  gates hold (490/490, lint 0 errors, typecheck 7/7, build 6/6).
+- **Commit:** `920de09` (local; no secrets in commit; push deferred pending gh action).
 
 ### Audit Remediation (2026-08-05)
 - CR-04: Added transactional rollback (cancelPaymentIntent) to marketplace purchase

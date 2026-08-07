@@ -21,8 +21,7 @@
     "devlogs:publish-scheduled": "echo 'Now automatic via DevlogsSchedulerService (@nestjs/schedule cron every 5 min)'",
     "loadtest": "k6 run ../tests/load/scenarios.js",
     "seed:model-games": "node ../../packages/database/scripts/db-guard.mjs seed && npx ts-node -r tsconfig-paths/register src/scripts/seed-model-games.ts",
-    "db:seed": "node ../../packages/database/scripts/db-guard.mjs seed && tsx ../../packages/database/prisma/seed.ts",
-    "admin:ensure": "node ../../packages/database/scripts/db-guard.mjs seed && tsx apps/api/src/admin-script.ts"
+    "db:seed": "node ../../packages/database/scripts/db-guard.mjs seed && tsx ../../packages/database/prisma/seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1090.0",

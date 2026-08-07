@@ -69,19 +69,24 @@ untouched; only `apps/api/.env` was rewired.
 
 | Command | Guarded as | vs prod |
 |---|---|---|
-| `db:reset` / `db:migrate` / `db:push` / `db:seed` / `seed:model-games` / `admin:ensure` | destructive | **BLOCKED** (exit 1) unless `ALLOW_PROD_DB_OPERATIONS=1` |
+| `db:reset` / `db:migrate` / `db:push` / `db:seed` / `seed:model-games` | destructive | **BLOCKED** (exit 1) unless `ALLOW_PROD_DB_OPERATIONS=1` |
 | `db:studio` | interactive | warns |
 | `db:deploy` / `db:status` / `db:generate` / `migrate diff` | safe | **ALLOWED** |
 
-Guard test matrix (all 5/5):
+Guard test matrix (7/7, P0.1 — includes fail-closed unknown hosts):
 
 | Target | reset | push | seed | deploy | status |
 |---|---|---|---|---|---|
 | prod host (`ep-orange-bird-abpuzipk…`) | BLOCKED | BLOCKED | BLOCKED | ALLOWED | ALLOWED |
 | dev branch (`ep-raspy-sunset-abo6apgc…`) | ALLOWED | ALLOWED | ALLOWED | ALLOWED | ALLOWED |
 | local :5433 `playmorrow_test` | ALLOWED | — | — | ALLOWED | ALLOWED |
+| **unknown Neon/RDS/cloud host (any non-prod, non-dev, non-local)** | **BLOCKED** (fail-closed) | — | — | ALLOWED | ALLOWED |
+| unknown host + `PLAYMORROW_DB_ROLE=dev` | ALLOWED | — | — | — | — |
 | `PLAYMORROW_DB_ROLE=production` (any host) | BLOCKED | — | — | — | — |
 | `ALLOW_PROD_DB_OPERATIONS=1` (prod) | ALLOWED (warn) | — | — | — | — |
+
+Dead `admin:ensure` scripts (both package.json, referencing the `admin-script.ts`
+deleted in `a6eaaa5`) were removed — the root one was an unguarded latent bypass.
 
 ## 7. Migration Policy
 
@@ -149,8 +154,9 @@ Production migration status: **up to date, zero drift** vs `schema.prisma`.
 
 ## 13. Remaining Risks
 
-1. **No automated nightly backup** (HIGH) — required before considering this
-   fully hardened.
+1. ~~**No automated nightly backup** (HIGH)~~ — **RESOLVED 2026-08-07** by the
+   P0.1 hardening sprint (`.github/workflows/backup-db.yml` → R2). See
+   `docs/releases/P0_1_PRODUCTION_HARDENING_CERTIFICATION.md`.
 2. Dev branch is created from prod but not protected in Neon (branch protection
    is a paid feature) — the hostname guard is the control.
 3. Bare `npx prisma migrate reset` bypasses the guard — mitigated by policy +
@@ -163,7 +169,7 @@ Production migration status: **up to date, zero drift** vs `schema.prisma`.
 
 - Staging Neon branch + deployed staging environment (render.yaml scaffold exists).
 - Neon plan upgrade for extended PITR.
-- Nightly `pg_dump` + off-machine storage (treated as HIGH, not deferred).
+- Nightly `pg_dump` + off-machine storage — **implemented 2026-08-07** (P0.1), no longer deferred.
 - Quarterly recovery-drill runbook execution.
 
 ## 15. Final Verdict
@@ -190,4 +196,5 @@ All certification criteria are satisfied:
 - ✅ No secrets exposed (hostnames/db names only; guard masks full URLs).
 - ✅ Phase 6 AI remains blocked until this certification is complete.
 
-**Nightly `pg_dump` backup remains the #1 outstanding hardening item.**
+**Nightly `pg_dump` backup — implemented 2026-08-07 in the P0.1 sprint.** See
+`docs/releases/P0_1_PRODUCTION_HARDENING_CERTIFICATION.md`.

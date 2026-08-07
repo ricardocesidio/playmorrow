@@ -42,7 +42,8 @@ data exists — it does not.**
 ## 4. Restore procedure (once a recoverable point is confirmed)
 
 ```bash
-# 0) Prereqs: NEON_API_KEY authenticated, recovery target confirmed to be a BRANCH.
+# 0) Prereqs: NEON_API_KEY authenticated (current org key in gitignored .env.neon-apikey),
+#    recovery target confirmed to be a BRANCH.
 # 1) Create a restore branch from prod at the pre-incident timestamp.
 neonctl branches create --name recovery-$TS --parent <prod-branch> \
   --timestamp <YYYY-MM-DDTHH:MM:SS> --api-key $NEON_API_KEY
@@ -81,8 +82,9 @@ Official statement:
 
 Remediation (implemented / to do):
 
-- ✅ Nightly `pg_dump` job is the **highest-priority gap** — without it, any
-  future incident is permanently unrecoverable.
+- ✅ Nightly `pg_dump` job **implemented 2026-08-07** — GitHub Actions → R2
+  (`.github/workflows/backup-db.yml`), 14-day retention, restore drill passed
+  (see `docs/releases/P0_1_PRODUCTION_HARDENING_CERTIFICATION.md`).
 - ✅ DB guard prevents a repeat of `migrate reset` against production.
 - ✅ Prod/dev now use separate Neon branches (see `ENVIRONMENT_ISOLATION.md`).
 

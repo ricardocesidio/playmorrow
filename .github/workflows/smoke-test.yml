@@ -21,13 +21,18 @@ jobs:
 
       - name: Games endpoint
         run: |
-          RESP=$(curl -s "https://playmorrow-api-aged-mountain-9542.fly.dev/api/games?pageSize=1")
-          TOTAL=$(echo "$RESP" | python3 -c "import sys,json; print(json.load(sys.stdin).get('total', 0))" 2>/dev/null)
-          if [ -z "$TOTAL" ] || [ "$TOTAL" = "0" ]; then
-            echo "❌ Games endpoint returned no items"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://playmorrow-api-aged-mountain-9542.fly.dev/api/games?pageSize=1")
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Games endpoint failed: $STATUS"
             exit 1
           fi
-          echo "✅ Games endpoint: $TOTAL total items"
+          RESP=$(curl -s "https://playmorrow-api-aged-mountain-9542.fly.dev/api/games?pageSize=1")
+          TOTAL=$(echo "$RESP" | python3 -c "import sys,json; print(json.load(sys.stdin).get('total', 'MISSING'))" 2>/dev/null)
+          if [ -z "$TOTAL" ] || [ "$TOTAL" = "MISSING" ]; then
+            echo "❌ Games endpoint returned malformed response"
+            exit 1
+          fi
+          echo "✅ Games endpoint: HTTP $STATUS (total=$TOTAL — 0 is valid, post-incident DB is empty)"
 
       - name: Search endpoint
         run: |

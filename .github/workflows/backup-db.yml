@@ -1,0 +1,131 @@
+name: Nightly Database Backup
+
+# Nightly pg_dump of the production Neon database → Cloudflare R2 (off-machine).
+#
+# Security model (deliberate, documented):
+#   - BACKUP_DATABASE_URL is a READ-ONLY role (playmorrow_backup) — SELECT-only
+#     grants, direct (non-pooler) host, pg_dump is inherently read-only.
+#     This is the single exception to "CI has no production credentials"; it
+#     cannot write, so the destructive-op isolation in ci.yml is unaffected.
+#   - R2 creds are write-scoped to the backup prefix only (documented in
+#     docs/infrastructure/PRODUCTION_DATABASE_SAFETY.md).
+#   - Neon-only schema (neon_auth, managed by Neon) is excluded from the dump.
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # 02:00 UTC nightly
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-backup
+  cancel-in-progress: false
+
+env:
+  BACKUP_PREFIX: db-backups
+  KEEP_DAYS: '14'
+
+jobs:
+  backup:
+    name: pg_dump → R2
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Safety check — backup URL must target the production host
+        run: |
+          HOST=$(echo "$BACKUP_DATABASE_URL" | sed -E 's|^postgresql://[^@]*@||; s|/.*||')
+          echo "Backup host: $HOST"
+          if ! echo "$HOST" | grep -qE '^ep-orange-bird-abpuzipk'; then
+            echo "ERROR: BACKUP_DATABASE_URL does not target the known production host." >&2
+            exit 1
+          fi
+          if echo "$BACKUP_DATABASE_URL" | grep -q -- '-pooler'; then
+            echo "ERROR: pg_dump requires a direct (non-pooler) host." >&2
+            exit 1
+          fi
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+
+      - name: pg_dump (Postgres 18, matches Neon server version)
+        run: |
+          docker run --rm \
+            -e BACKUP_DATABASE_URL="$BACKUP_DATABASE_URL" \
+            -v "$PWD/backup:/backup" \
+            postgres:18 \
+            sh -c 'pg_dump --no-owner --no-privileges -Fc --exclude-schema=neon_auth \
+              "$BACKUP_DATABASE_URL" -f /backup/prod.dump'
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+        working-directory: ${{ github.workspace }}
+
+      - name: Verify archive integrity (pg_restore --list)
+        run: |
+          docker run --rm -v "$PWD/backup:/backup" postgres:18 \
+            pg_restore --list /backup/prod.dump > /dev/null
+          echo "✅ Archive is a valid pg_dump (pg_restore --list passed)"
+          docker run --rm -v "$PWD/backup:/backup" postgres:18 \
+            pg_restore --list /backup/prod.dump | grep -c "TABLE DATA" | xargs echo "Tables with data:"
+        working-directory: ${{ github.workspace }}
+
+      - name: Checksum + metadata
+        run: |
+          STAMP=$(date -u +%Y%m%dT%H%M%SZ)
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+          shasum -a 256 backup/prod.dump | awk '{print $1}' > backup/prod.dump.sha256
+          SIZE=$(stat -c%s backup/prod.dump)
+          printf 'source=prod-neon\ncreated_utc=%s\nsha256=%s\nsize_bytes=%s\npg_dump=postgres:18\nexclude_schema=neon_auth\n' \
+            "$STAMP" "$(cat backup/prod.dump.sha256)" "$SIZE" > backup/MANIFEST.txt
+          cat backup/MANIFEST.txt
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload to R2
+        run: |
+          aws --endpoint-url "$R2_ENDPOINT" s3 cp "backup/prod.dump" \
+            "s3://$R2_BUCKET/$BACKUP_PREFIX/$STAMP.dump" >/dev/null
+          aws --endpoint-url "$R2_ENDPOINT" s3 cp "backup/prod.dump.sha256" \
+            "s3://$R2_BUCKET/$BACKUP_PREFIX/$STAMP.dump.sha256" >/dev/null
+          aws --endpoint-url "$R2_ENDPOINT" s3 cp "backup/MANIFEST.txt" \
+            "s3://$R2_BUCKET/$BACKUP_PREFIX/$STAMP.MANIFEST.txt" >/dev/null
+          echo "✅ Uploaded db-backups/$STAMP.dump (+ checksum + manifest)"
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          STAMP: ${{ env.STAMP }}
+        working-directory: ${{ github.workspace }}
+
+      - name: Retention (prune backups older than $KEEP_DAYS days)
+        run: |
+          CUTOFF=$(date -u -d "${KEEP_DAYS} days ago" +%Y%m%dT%H%M%SZ)
+          echo "Pruning keys older than $CUTOFF"
+          aws --endpoint-url "$R2_ENDPOINT" s3 ls "s3://$R2_BUCKET/$BACKUP_PREFIX/" --recursive \
+            | awk '{print $4}' \
+            | grep -E '^db-backups/[0-9]{8}T[0-9]{6}Z\.dump$' \
+            | while read -r KEY; do
+                STAMP_K=$(basename "$KEY" .dump)
+                if [[ "$STAMP_K" < "$CUTOFF" ]]; then
+                  aws --endpoint-url "$R2_ENDPOINT" s3 rm "s3://$R2_BUCKET/$KEY" >/dev/null \
+                    && echo "pruned: $KEY"
+                fi
+              done
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          KEEP_DAYS: ${{ env.KEEP_DAYS }}
+        working-directory: ${{ github.workspace }}
+
+      - name: Verify backup exists in R2
+        run: |
+          KEY="db-backups/$STAMP.dump"
+          aws --endpoint-url "$R2_ENDPOINT" s3 ls "s3://$R2_BUCKET/$KEY" | awk '{print $4, $3}'
+          echo "✅ Confirmed latest backup object present"
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          STAMP: ${{ env.STAMP }}
+        working-directory: ${{ github.workspace }}

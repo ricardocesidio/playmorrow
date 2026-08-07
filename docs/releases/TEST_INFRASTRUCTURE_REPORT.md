@@ -306,7 +306,7 @@ Located at `apps/api/src/test/` (excluded from production build via `tsconfig.bu
 
 These helpers are used by all 27 integration test files. They are excluded from the production build in `apps/api/tsconfig.json`:
 ```json
-"exclude": ["node_modules", "dist", "**/*.spec.ts", "src/admin-script.ts", "src/scripts", "src/test"]
+"exclude": ["node_modules", "dist", "**/*.spec.ts", "src/scripts", "src/test"]
 ```
 
 ---

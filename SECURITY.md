@@ -162,8 +162,10 @@ Instead, report them via email to the project maintainers. If the issue is criti
 - **Backup reality (VERIFIED):** Neon PITR retention is **6 hours**
   (`history_retention_seconds: 21600`) with **zero snapshots**. A `migrate
   reset` incident on 2026-08-06 cleared the production dataset; the
-  pre-incident data is **not recoverable**. Nightly `pg_dump` backups are the
-  highest-priority outstanding gap (`docs/infrastructure/DATABASE_RECOVERY_RUNBOOK.md`).
+  pre-incident data is **not recoverable**. Nightly `pg_dump` backups to R2 are
+  **implemented 2026-08-07** (`.github/workflows/backup-db.yml`, read-only role,
+  14-day retention, restore drill passed) — see
+  `docs/releases/P0_1_PRODUCTION_HARDENING_CERTIFICATION.md`.
 
 ## Production Environment Variables (Required in Production)
 | Variable | Purpose |

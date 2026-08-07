@@ -13,17 +13,16 @@ There is NO public way to register as ADMIN:
 - Any submitted `role` in the body is ignored (class-validator strips unknown properties)
 - No frontend UI for ADMIN selection
 
-The only way to become ADMIN is via the owner bootstrap script:
+The only way to become ADMIN is via the owner bootstrap:
 
-```bash
-pnpm admin:ensure
-```
-
-This script:
 1. Reads `PLAYMORROW_OWNER_EMAIL` from environment
 2. Finds the user with that email
 3. Promotes them to `role: ADMIN`
 4. If the user doesn't exist, shows an error message
+
+> **Note:** the historical `pnpm admin:ensure` script was removed (it referenced
+> `apps/api/src/admin-script.ts`, deleted as dead code). Admin promotion is now
+> done directly via Prisma against the dev database:
 
 ## Configuration
 
@@ -42,6 +41,6 @@ PLAYMORROW_OWNER_USERNAME=your-username (optional)
 ## Security
 
 - Only ONE admin should exist (the project owner)
-- The admin script never runs from an HTTP request
+- The admin bootstrap never runs from an HTTP request
 - Registration cannot create ADMIN accounts
 - There is no "make me admin" endpoint

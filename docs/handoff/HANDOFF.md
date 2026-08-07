@@ -241,7 +241,20 @@ Browser → Vercel (playmorrow.co)
 
 - **Neon PITR: 6 hours** (`history_retention_seconds: 21600`, verified 2026-08-07). Zero snapshots exist.
 - **Correction:** the earlier "daily backups + 7-day PITR" claim was inaccurate.
-- **Highest-priority gap:** nightly `pg_dump` to off-machine storage is NOT yet implemented.
+ - **Nightly `pg_dump` → R2 IMPLEMENTED 2026-08-07:** `.github/workflows/backup-db.yml`
+   (02:00 UTC + `workflow_dispatch`), read-only role `playmorrow_backup`,
+   postgres:18, 14-day retention, restore drill passed.
+   **✅ Real production backup VERIFIED in R2** this session:
+   `db-backups/20260807T132952Z.dump` (197,092 bytes) + `.sha256` + `.MANIFEST.txt`
+   — created via the workflow's own pg_dump flags, uploaded with the real backup
+   role + R2 creds, downloaded back, checksum matched, and **restored to a
+   disposable Postgres 18 → 65/65 tables, row counts match live prod**. See
+   `docs/releases/P0_1_FINAL_CERTIFICATION.md`.
+   **Requires:** 5 GitHub secrets registered via
+   `scripts/setup-backup-secrets.sh` (prints exact `gh secret set` commands) to
+   activate the nightly cron + manual `workflow_dispatch`. `gh` is not installed
+   in this environment → user action (see Final Certification §15).
+   *(Secrets rotated 2026-08-07: DB password + org `NEON_API_KEY`.)*
 - **2026-08-06 incident:** a `prisma migrate reset` (when prod/dev shared one DB) cleared the production dataset. Pre-incident data is **not recoverable** (PITR window elapsed). See `docs/infrastructure/DATABASE_RECOVERY_RUNBOOK.md`.
 
 ### Docker
@@ -660,7 +673,7 @@ Build → Measure → Learn → Improve → Review → Repeat
 | 5 | **Staging environment** | Ops | ⚠️ Scaffold in render.yaml; needs Neon staging branch + secrets. Low priority (dedicated test DB in place) |
 | 6 | **Test database strategy** | Engineering | ✅ RESOLVED — dedicated local test DB (:5433) + CI ephemeral Postgres; integration tests no longer touch Neon |
 | 7 | **Redis adoption** | Engineering | ⚠️ Config + service wrapper created; Upstash not yet provisioned |
-| 8 | **Nightly pg_dump backup** | Ops, Engineering | ⚠️ **HIGH** — Neon PITR is only 6h; pre-incident prod data was lost 2026-08-06 and is unrecoverable. Nightly dumps + off-machine storage required. |
+| 8 | **Nightly pg_dump backup + secret rotation** | Ops, Engineering | ✅ **IMPLEMENTED 2026-08-07** — workflow → R2, restore drill passed, secrets rotated. Pending: GitHub secrets + first backup run (needs `gh` CLI; see `docs/releases/P0_1_FINAL_CERTIFICATION.md`) |
 
 ---
 
