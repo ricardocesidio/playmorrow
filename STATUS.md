@@ -1,12 +1,13 @@
 # Playmorrow — Project Status
 
-> **Last verified:** 2026-08-07
+> **Last verified:** 2026-08-09
 > **Version:** v0.85-beta
 > **Repository:** [github.com/ricardocesidio/playmorrow](https://github.com/ricardocesidio/playmorrow)
-> **Tests:** 490 total (48 files). **Typecheck:** 7/7. **Lint:** 0 errors. **Build:** 6/6.
+> **Tests:** 505 total (50 files). **Typecheck:** 7/7. **Lint:** 0 errors. **Build:** 6/6.
 > **Live:** https://playmorrow.co
 > **Production DB isolation:** 🟢 CERTIFIED (separate prod/dev Neon branches)
-> **Production hardening (P0.1.1):** 🟡 CONDITIONALLY CERTIFIED — credentials rotated; real backup verified in R2; `gh` secret registration is the final user action. See `docs/releases/P0_1_FINAL_CERTIFICATION.md`. **Phase 6 AI BLOCKED.**
+> **Production hardening (P0.1.1):** 🟡 CONDITIONALLY CERTIFIED — credentials rotated; real backup verified in R2; `gh` secret registration is the final user action. See `docs/releases/P0_1_FINAL_CERTIFICATION.md`.
+> **Phase 6 AI:** M23 (Recommendation Engine) 🟢 CERTIFIED for governed 5% rollout — see `docs/releases/M23_CERTIFICATION.md`. M22/M24/M25/M26 not started.
 
 ---
 
@@ -18,7 +19,7 @@ What works:
 - Backend: 55 modules, ~165 API endpoints
 - Frontend: 82+ routes, all pages functional
 - Marketplace: Stripe Connect Express integrated (test mode)
-- AI Module: 35 files, M23 shipped (embedding-based recs via OpenAI)
+- AI Module: 47 files, M23 shipped (hybrid recs: pgvector semantic + legacy floor)
 - 2FA: TOTP implemented and deployed
 - GDPR: Export endpoint + UI deployed
 - Redis: wired into the rate limiter (atomic Lua INCR, fail-open fallback)
@@ -60,6 +61,8 @@ Current state: v0.85-beta — functional, not production-hardened.
 | **M19** | Creator | Complete | Unit | Referral codes + commission tracking via affiliate system |
 | **M20** | Partner | Complete | Unit + integration | B2B CRM with 6 partner types (University, Publisher, Accelerator, Incubator, Studio, Event Organizer) |
 | **M21** | Events | Complete | Unit + integration | Event listings, detail pages, publish workflow, ticketing, upcoming filter |
+| **M22** | AI Assistant | Foundation only | Unit | Provider-agnostic AI module (35 files, 82 tests); feature endpoints gated off |
+| **M23** | Recommendation Engine | Complete | Unit + live | Hybrid For You feed (semantic + legacy floor), pgvector embeddings, feedback events, semantic search — certified for 5% rollout |
 
 ---
 
@@ -125,6 +128,17 @@ Current state: v0.85-beta — functional, not production-hardened.
 | Referral codes | Complete | Affiliate codes with commission tracking (REFERRAL_COMMISSION) |
 | Partner CRM | Complete | B2B directory with 6 partner types |
 | Events | Complete | Listings, detail, publish workflow, ticketing, upcoming filter |
+
+### AI & Platform Intelligence (Phase 6)
+
+| Feature | Status | Details |
+|---------|--------|---------|
+| For You feed (hybrid recs) | Complete | Semantic (pgvector, taste signals, MMR) over legacy floor; 5% governed rollout; kill switch |
+| Semantic search | Complete | KNN vector search (game titles), 5-candidate cap, fallback chain; wired into search page + game detail |
+| Recommendation feedback | Complete | CLICKED / DISMISSED / WISHLISTED events, dismissal window, validated gameId |
+| Embedding refresh | Complete | Nightly 03:00 UTC cron for published games + orphan cleanup |
+| Assistant chat (per-request) | Gated (M22 flags) | Chat on game detail page; preferences stored to `UserPreferences`; feature flags default off |
+| Admin AI debug | Complete | `/dashboard/admin/ai` — embeddings count, provider status |
 
 ---
 

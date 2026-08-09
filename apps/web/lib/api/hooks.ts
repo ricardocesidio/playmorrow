@@ -1524,6 +1524,52 @@ export function useRecommendations() {
   });
 }
 
+// ── M23 hybrid "For You" feed ───────────────────────────────────────────
+
+export interface ForYouItem {
+  gameId: string;
+  score: number;
+  reason: string;
+  reasonType: 'semantic' | 'tag-affinity' | 'studio-follow' | 'popular' | 'trending' | 'hidden-gem' | 'fresh' | 'legacy';
+  sourceGameId?: string;
+  title?: string;
+  slug?: string;
+  coverUrl?: string | null;
+  studioName?: string;
+}
+
+export interface ForYouResult {
+  items: ForYouItem[];
+  nextCursor: { score: number; gameId: string } | null;
+  hasMore: boolean;
+  method: 'hybrid' | 'content' | 'trending' | 'legacy';
+}
+
+export function useForYouFeed(pageSize = 12) {
+  return useInfiniteQuery({
+    queryKey: ['forYouFeed', pageSize],
+    queryFn: ({ pageParam }) => {
+      const params = new URLSearchParams({ limit: String(pageSize) });
+      if (pageParam) params.set('cursor', JSON.stringify(pageParam));
+      return api.get<ForYouResult>(`/recommendations/for-you?${params}`);
+    },
+    getNextPageParam: (last) => (last.hasMore ? last.nextCursor : undefined),
+    initialPageParam: null as { score: number; gameId: string } | null,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useRecommendationFeedback() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ gameId, action }: { gameId: string; action: 'CLICKED' | 'DISMISSED' | 'WISHLISTED' }) =>
+      api.post('/recommendations/feedback', { gameId, action }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['forYouFeed'] });
+    },
+  });
+}
+
 export function useDeleteListing() {
   const qc = useQueryClient();
   return useMutation({

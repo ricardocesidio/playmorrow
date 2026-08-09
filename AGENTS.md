@@ -1010,3 +1010,63 @@ Final closure sprint. Goal: prove the backup pipeline works with real evidence.
 - **Commit:** `920de09 chore: close P0.1 production hardening (🟡 conditional)`
   (local; push deferred; no production impact from pushing docs+ci, but deferred
   to honor the conditional state).
+
+### Session 26 — M23 Recommendation Engine: Hybrid Implementation & Certification (2026-08-08/09)
+
+Phase 6 milestone M23 (highest business value, 48/70) implemented and
+certified. No other Phase 6 milestones started (M22/M24/M25/M26 remain gated).
+
+**Backend (`apps/api/src/ai/recommendations/`, 12 new files):**
+- **Hybrid For You feed** (`for-you.controller.ts` + `hybrid-recommender.service.ts`):
+  semantic (pgvector taste-signal embeddings, MMR λ=0.7) over the legacy
+  scoring floor — cannot be worse than pre-AI. Weights 0.35/0.25/0.25/0.05/0.10
+  (wishlist/views/tag/studio/recency). Rollout: stable `hash(userId) % 100 <
+  ROLLOUT_PCT` (default 5%). Kill switch: `RECOMMENDATIONS_ENABLED=false`.
+- **Graceful degradation (Article 8) live-verified**: provider down + semantic
+  ON → HTTP 200 with `method=content` items, no 500; exclusions proven
+  (wishlisted game excluded from own feed). Unit: `fails gracefully when
+  semantic candidate lookup errors`.
+- **Feedback events**: `POST /ai/recommendations/feedback` (CLICKED/DISMISSED/
+  WISHLISTED), dismissal window, validated gameId. Frontend wires CLICKED +
+  DISMISSED only (WISHLISTED enum unused → condition C-4).
+- **SemanticSearchService**: KNN (`embedding <=> query`), 5-candidate cap,
+  fallback chain; wired into search page + game detail page.
+- **Nightly embedding refresh** (03:00 UTC cron, `game-embedding-refresh.service.ts`)
+  for published games + orphan cleanup (`game_embeddings` + HNSW, `vector(1536)`).
+- **Per-request assistant chat** (M22 flag-gated): chat on game detail page,
+  preferences stored to `UserPreferences`; model + feature caching.
+- **Admin AI debug**: `GET /ai/recommendations` (content-level) +
+  `/dashboard/admin/ai` (embeddings count, provider status).
+
+**Schema** (migration `20260809000000_m23_recommendation_engine`, +24 lines):
+`User.preferredGenres` (Json, unused for cold start — deviation D-4),
+`UserPreferences`, `game_embeddings` (+HNSW), `FeedbackEvent.eventType` +
+`liked`/`disliked`. pgvector extension created. Dev DB: 40/40, zero drift,
+extension + table + index live, 0 rows (no refresh — prod catalog empty).
+
+**Config** (`ai.config.ts`): `RECOMMENDATIONS_ENABLED` (true), `ROLLOUT_PCT`
+(5), `PERSONALIZE` (true), `SEMANTIC` (true), `CACHE_REFRESH` (true),
+`FEED_REFRESH_MS` (180000). Provider `embed()` hardcodes
+`text-embedding-ada-002` (`openai.provider.ts:306`); `AI_EMBEDDING_MODEL`
+governs chat-context embeddings only — both 1536-dim (tech debt T-1).
+
+**Frontend**: `components/discovery/ForYouFeed.tsx` (cards, cursor pagination,
+dismiss ×, explainer line "Because you…", 3-min auto-refresh); homepage uses
+it when authenticated; hooks `useForYouFeed`, `useRecordRecommendationFeedback`,
+`useSemanticSearch`, `useAiHealth` in `lib/api/hooks.ts`.
+
+**Gates (evidence):** tests **505/505 (50 files)** (was 490/48; 26 new:
+for-you controller 16 + hybrid recommender 10) ✅ · typecheck 2/2 ✅ · lint 0
+errors (27 api / 67 web pre-existing warnings) ✅ · build 6/6 ✅ · dev DB 40/40
+zero drift ✅ · live verify: anonymous trending 200 @349ms cold; personalized
+degraded content 200; p50 138ms / p95 161ms (budget 3s); feedback CLICKED 201 ✅
+
+**Certification**: `docs/releases/M23_CERTIFICATION.md` — 16-gate audit
+(all PASS), 8 plan deviations (D-1…D-8), 6 findings (F-1…F-6). **Verdict:
+🟢 CERTIFIED for 5% governed rollout.** Mandatory before 25% (C-1: per-user
+personalization opt-out + feedback reset; C-2: impression/CTR baseline;
+C-3/C-4 minor). Docs: `docs/ai/M23_RECOMMENDATION_ENGINE.md`,
+`M23_METRICS.md`, `M23_SECURITY.md`, `M23_ROLLOUT.md`,
+`docs/ai/sprints/M23_SPRINT_REPORT.md`, `M23_POST_IMPLEMENTATION_REVIEW.md`.
+
+**Updated:** STATUS.md, CHANGELOG.md, docs/handoff/HANDOFF.md, AGENTS.md

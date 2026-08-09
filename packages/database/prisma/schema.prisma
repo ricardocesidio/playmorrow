@@ -225,6 +225,7 @@ model User {
   apiKeys                 ApiKey[]
   passwordResetTokens     PasswordResetToken[]
   wishlistItems         WishlistItem[]
+  recommendationFeedback RecommendationFeedback[]
    auditLogs             AuditLog[]
    xpEvents              PlayerXpEvent[]
    achievements          Achievement[]
@@ -576,6 +577,7 @@ model Game {
   feedEvents          FeedEvent[]
   analyticsEvents     AnalyticsEvent[]
   activityEvents      ActivityEvent[]
+  recommendationFeedback RecommendationFeedback[]
 
   @@index([studioId])
   @@index([status])
@@ -1413,6 +1415,28 @@ model WishlistItem {
   @@index([userId, createdAt])
   @@index([gameId])
   @@map("wishlist_items")
+}
+
+enum RecommendationFeedbackAction {
+  CLICKED
+  DISMISSED
+  WISHLISTED
+}
+
+model RecommendationFeedback {
+  id        String                       @id @default(cuid())
+  userId    String
+  gameId    String
+  action    RecommendationFeedbackAction
+  createdAt DateTime                     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([gameId])
+  @@index([action])
+  @@map("recommendation_feedback")
 }
 
 model EmailTemplate {

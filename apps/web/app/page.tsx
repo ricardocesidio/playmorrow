@@ -1,6 +1,7 @@
 import { SiteHeader } from '@/components/site-header';
 import { CircuitFrame } from '@/components/playmorrow/hud';
 import TrendingSection from '@/components/trending-section';
+import ForYouFeed from '@/components/discovery/ForYouFeed';
 import { HeroSection, GamesSection } from '@/components/home-hero-client';
 import { HowItWorks, CtaSection } from '@/components/home-static-sections';
 
@@ -15,6 +16,8 @@ export default async function HomePage() {
         <HeroSection />
 
         <TrendingSection />
+
+        <ForYouFeed />
 
         <GamesSection />
 

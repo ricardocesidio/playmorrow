@@ -1,4 +1,5 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { SessionAuthGuard } from '../../auth/guards/session-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { RecommendationService } from '../services/recommendation.service';
@@ -9,6 +10,7 @@ export class RecommendationController {
 
   @Get()
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { limit: 30, ttl: 60000 } })
   async getRecommendations(
     @CurrentUser() user: { id: string },
     @Query('limit') limit?: string,

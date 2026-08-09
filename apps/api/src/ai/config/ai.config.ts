@@ -52,4 +52,53 @@ export class AIConfig {
   get anthropicApiKey(): string | undefined {
     return this.config.get('ANTHROPIC_API_KEY');
   }
+
+  // ── M23 hybrid recommendation flags ──────────────────────────────────────
+
+  /** Master switch: false routes /recommendations/for-you to the legacy engine. */
+  get recommendationEnabled(): boolean {
+    return this.config.get('RECOMMENDATIONS_ENABLED', 'true') !== 'false';
+  }
+
+  /** Percentage (0-100) of users who see the hybrid engine (5/25/100 rollout). */
+  get recommendationRolloutPct(): number {
+    return this.clampPct(parseInt(this.config.get('RECOMMENDATIONS_ROLLOUT_PCT', '5'), 10));
+  }
+
+  /** When false, "For You" degrades to non-personalized discovery (content/trending). */
+  get personalizationEnabled(): boolean {
+    return this.config.get('RECOMMENDATIONS_PERSONALIZE', 'true') !== 'false';
+  }
+
+  /** When false, the pgvector semantic path is disabled (deterministic only). */
+  get semanticEnabled(): boolean {
+    return this.config.get('RECOMMENDATIONS_SEMANTIC', 'true') !== 'false';
+  }
+
+  /** Daily embedding-refresh cron (nightly) can be disabled without touching code. */
+  get embeddingsEnabled(): boolean {
+    return this.config.get('EMBEDDINGS_REFRESH_ENABLED', 'true') !== 'false';
+  }
+
+  /** Deterministic rollout bucketing — stable per user across requests. */
+  rolloutEnabled(userId: string): boolean {
+    if (!this.recommendationEnabled) return false;
+    if (this.recommendationRolloutPct >= 100) return true;
+    if (this.recommendationRolloutPct <= 0) return false;
+    return (this.hashString(userId) % 100) < this.recommendationRolloutPct;
+  }
+
+  private hashString(input: string): number {
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+      hash = (hash << 5) - hash + input.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  }
+
+  private clampPct(value: number): number {
+    if (Number.isNaN(value)) return 5;
+    return Math.max(0, Math.min(100, value));
+  }
 }

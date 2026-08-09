@@ -2,8 +2,10 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '../prisma/prisma.module';
 import { EventBusModule } from '../common/event-bus.module';
+import { RecommendationsModule } from '../recommendations/recommendations.module';
 import { AIController } from './controllers/ai.controller';
 import { RecommendationController } from './controllers/recommendation.controller';
+import { ForYouController } from './recommendations/for-you.controller';
 import { AIService } from './services/ai.service';
 import { RecommendationService } from './services/recommendation.service';
 import { AIConfig } from './config/ai.config';
@@ -17,11 +19,16 @@ import { PromptRegistry } from './prompts/prompt.registry';
 import { ConversationMemory } from './memory/conversation.memory';
 import { StreamService } from './streaming/stream.service';
 import { AIMetricsService } from './observability/ai-metrics.service';
+import { GameEmbeddingRepository } from './recommendations/game-embedding.repository';
+import { TasteSignalService } from './recommendations/taste-signal.service';
+import { HybridRecommenderService } from './recommendations/hybrid-recommender.service';
+import { RecommendationFeedbackService } from './recommendations/recommendation-feedback.service';
+import { GameEmbeddingRefreshService } from './recommendations/game-embedding-refresh.service';
 
 @Global()
 @Module({
-  imports: [ConfigModule, PrismaModule, EventBusModule],
-  controllers: [AIController, RecommendationController],
+  imports: [ConfigModule, PrismaModule, EventBusModule, RecommendationsModule],
+  controllers: [AIController, RecommendationController, ForYouController],
   providers: [
     AIConfig,
     OpenAIProvider,
@@ -36,6 +43,11 @@ import { AIMetricsService } from './observability/ai-metrics.service';
     StreamService,
     AIMetricsService,
     RecommendationService,
+    GameEmbeddingRepository,
+    TasteSignalService,
+    HybridRecommenderService,
+    RecommendationFeedbackService,
+    GameEmbeddingRefreshService,
   ],
   exports: [
     ProviderFactory,
@@ -49,6 +61,11 @@ import { AIMetricsService } from './observability/ai-metrics.service';
     StreamService,
     AIMetricsService,
     RecommendationService,
+    GameEmbeddingRepository,
+    TasteSignalService,
+    HybridRecommenderService,
+    RecommendationFeedbackService,
+    GameEmbeddingRefreshService,
   ],
 })
 export class AIModule {}

@@ -2,6 +2,54 @@
 
 ## [Unreleased]
 
+### M23 — Recommendation Engine (Hybrid) — 🟢 CERTIFIED (2026-08-09)
+
+Phase 6 milestone M23 implemented and certified for governed 5% rollout.
+
+**Backend (`apps/api/src/ai/recommendations/`, 12 new files):**
+- **Hybrid For You feed**: semantic (pgvector taste-signal embeddings, MMR
+  diversity λ=0.7) over the legacy scoring floor — cannot be worse than
+  pre-AI. Weights: wishlist 0.35 / views 0.25 / tag 0.25 / studio 0.05 /
+  recency 0.10. Rollout via stable `hash(userId) % 100 < pct` bucket.
+- **Graceful degradation (Article 8)**: provider down → content fallback,
+  no signals → trending floor; **live-verified** (200 with `method=content`
+  while provider unreachable; exclusions proven: user's own wishlist games
+  excluded from their feed).
+- **Feedback events**: `POST /ai/recommendations/feedback` (CLICKED /
+  DISMISSED / WISHLISTED), dismissal window, validated gameId.
+- **Nightly embedding refresh** (03:00 UTC cron) for published games + orphan
+  cleanup; `game_embeddings` table with HNSW index, `vector(1536)`.
+- **SemanticSearchService**: KNN (`embedding <=> query`), 5-candidate cap,
+  fallback chain; wired into search page + game detail page.
+- **Per-request assistant chat** (M22 flag-gated): chat on game detail,
+  preferences persisted to `UserPreferences`; model + feature caching.
+- **Admin AI debug**: `GET /ai/recommendations` (content-level) +
+  `/dashboard/admin/ai` (embeddings count, provider status).
+
+**Schema** (migration `20260809000000_m23_recommendation_engine`):
+`User.preferredGenres`, `UserPreferences`, `game_embeddings` (+HNSW),
+`FeedbackEvent.eventType` + `liked`/`disliked`.
+
+**Config**: `RECOMMENDATIONS_ENABLED` (kill switch), `ROLLOUT_PCT` (default 5),
+`PERSONALIZE`, `SEMANTIC`, `CACHE_REFRESH`, `FEED_REFRESH_MS` (180s).
+
+**Frontend**: `ForYouFeed.tsx` (cards, cursor pagination, dismiss, explainer
+line, 3-min auto-refresh), homepage uses it when authenticated; hooks
+`useForYouFeed`, `useRecordRecommendationFeedback`, `useSemanticSearch`,
+`useAiHealth`.
+
+**Gates**: tests **505/505 (50 files)** ✅ · typecheck 2/2 ✅ · lint 0 errors ✅ ·
+build 6/6 ✅ · dev DB 40/40 migrations, zero drift, pgvector live ✅ ·
+live verify: anonymous trending 200 @349ms cold; personalized degraded 200;
+p50 138ms / p95 161ms; feedback 201 ✅
+
+**Certification**: `docs/releases/M23_CERTIFICATION.md` (16-gate audit,
+8 deviations, 6 findings). **Verdict: 🟢 CERTIFIED for 5% governed rollout.**
+Mandatory before 25%: C-1 per-user personalization opt-out, C-2 impression
+baseline. Docs: `docs/ai/M23_RECOMMENDATION_ENGINE.md`, `M23_METRICS.md`,
+`M23_SECURITY.md`, `M23_ROLLOUT.md`, `docs/ai/sprints/M23_SPRINT_REPORT.md`,
+`M23_POST_IMPLEMENTATION_REVIEW.md`.
+
 ### P0 Production Database Isolation (2026-08-07)
 
 **Incident:** A `prisma migrate reset` (run during a dev-database reconciliation
