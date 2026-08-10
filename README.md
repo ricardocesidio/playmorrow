@@ -45,6 +45,8 @@ Playmorrow is a social discovery platform connecting indie game studios with pla
 | Phase 5 — Ecosystem | ✅ Complete | M16-M21: Marketplace, Events, Partners, Creator, Publisher |
 | Phase 6 — AI | 🚧 In Progress | M23 shipped (embedding-based recs), M22/M24/M25/M26 pending |
 
+**Publishing — studios publish games via the dashboard (completeness gate); public catalog/search only show published games. AI does not decide public visibility — publishing is a product/studio decision; AI works on already-eligible content.**
+
 **Scale:** 63 database models · 55 NestJS modules · 82+ frontend routes · 35 AI module files · 368+ tests
 
 ---

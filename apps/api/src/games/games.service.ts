@@ -14,7 +14,7 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 import { EventBus } from '../common/event-bus';
 import { FeedEngineService } from '../feed/feed-events.service';
 
-const GAME_INCLUDE = {
+export const GAME_INCLUDE = {
   studio: { select: { id: true, name: true, slug: true } },
   media: { orderBy: { position: 'asc' as const } },
   platformLinks: { orderBy: { position: 'asc' as const } },
@@ -33,7 +33,7 @@ const GAME_LIST_INCLUDE = {
   _count: { select: { followers: true, wishlistItems: true } },
 } as const;
 
-type GameWithInclude = Prisma.GameGetPayload<{ include: typeof GAME_INCLUDE }>;
+export type GameWithInclude = Prisma.GameGetPayload<{ include: typeof GAME_INCLUDE }>;
 
 @Injectable()
 export class GamesService {
@@ -189,7 +189,7 @@ export class GamesService {
     pageSize = 20,
     options?: { search?: string; status?: string; tag?: string },
   ) {
-    const where: Prisma.GameWhereInput = {};
+    const where: Prisma.GameWhereInput = { isPublished: true };
     if (options?.search) {
       where.OR = [
         { title: { contains: options.search, mode: 'insensitive' as const } },
@@ -285,11 +285,6 @@ export class GamesService {
       if (dto.priceCents !== undefined) data.priceCents = dto.priceCents;
       if (dto.currency !== undefined) data.currency = dto.currency;
       if (dto.isFree !== undefined) data.isFree = dto.isFree;
-      // publishedBy/publishedAt must be set BEFORE the update call
-      if (dto.status === 'RELEASED') {
-        data.publishedBy = userId;
-        data.publishedAt = new Date();
-      }
     }
 
     if (dto.media !== undefined) {
@@ -405,7 +400,7 @@ export class GamesService {
     return { success: true };
   }
 
-  private toResponse(game: {
+  toResponse(game: {
     id: string; slug: string; studioId: string; title: string; tagline: string | null;
     description: string | null; status: string; releaseDate: Date | null;
     expectedReleaseText: string | null; priceCents: number | null; currency: string | null;

@@ -118,7 +118,7 @@ export class SearchService {
   }
 
   private buildGameWhere(term: string, filters: SearchFilters): Prisma.GameWhereInput {
-    const and: Prisma.GameWhereInput[] = [];
+    const and: Prisma.GameWhereInput[] = [{ isPublished: true }];
 
     // Text search on games
     if (term) {

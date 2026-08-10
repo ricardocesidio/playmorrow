@@ -16,6 +16,8 @@ import { UsersModule } from '../users/users.module';
 import { GamesModule } from './games.module';
 import { StudiosModule } from '../studios/studios.module';
 import { EventBusModule } from '../common/event-bus.module';
+import { EventBus } from '../common/event-bus';
+import { SearchModule } from '../search/search.module';
 import { MockEmailModule } from '../test/mock-email-service';
 import { registerTestUser } from '../test/register-test-user';
 import { createTestApp } from '../test/create-test-app';
@@ -28,6 +30,12 @@ const ADMIN_EMAIL = `admin_${SUFFIX}@example.com`;
 const PASSWORD = 'StrongPass123!';
 const STUDIO_SLUG = `studio-${SUFFIX}`;
 const GAME_SLUG = `game-${SUFFIX}`;
+const MODERATOR_EMAIL = `moderator_${SUFFIX}@example.com`;
+const INCOMPLETE_SLUG = `incomplete-${SUFFIX}`;
+const CANCELLED_SLUG = `cancelled-${SUFFIX}`;
+const FORGE_SLUG = `forge-${SUFFIX}`;
+const ADMIN_PUB_SLUG = `adminpub-${SUFFIX}`;
+const MODERATOR_PUB_SLUG = `moderatorpub-${SUFFIX}`;
 
 function cleanEmail(e: string): string {
   return e.toLowerCase();
@@ -41,6 +49,7 @@ describe('GamesController (e2e)', () => {
   let memberToken: string;
   let nonMemberToken: string;
   let adminToken: string;
+  let moderatorToken: string;
 
   beforeAll(async () => {
     const result = await createTestApp(
@@ -56,6 +65,7 @@ describe('GamesController (e2e)', () => {
           ScheduleModule.forRoot(),
           StudiosModule,
           GamesModule,
+          SearchModule,
         ],
       }),
     );
@@ -77,6 +87,9 @@ describe('GamesController (e2e)', () => {
     adminToken = admin.sessionCookie;
     await prisma.user.update({ where: { email: cleanEmail(ADMIN_EMAIL) }, data: { role: 'ADMIN' } });
 
+    const moderator = await registerTestUser(httpServer, prisma, MODERATOR_EMAIL, PASSWORD);
+    moderatorToken = moderator.sessionCookie;
+
     // Create studio as owner
     await request(httpServer)
       .post('/api/studios')
@@ -89,6 +102,14 @@ describe('GamesController (e2e)', () => {
     if (studioRec && memberUser) {
       await prisma.studioMember.create({
         data: { studioId: studioRec.id, userId: memberUser.id, role: 'MEMBER' },
+      });
+    }
+
+    // Add moderator user as MODERATOR
+    const moderatorUser = await prisma.user.findUnique({ where: { email: cleanEmail(MODERATOR_EMAIL) } });
+    if (studioRec && moderatorUser) {
+      await prisma.studioMember.create({
+        data: { studioId: studioRec.id, userId: moderatorUser.id, role: 'MODERATOR' },
       });
     }
   });
@@ -228,18 +249,17 @@ describe('GamesController (e2e)', () => {
 
   // ── LIST all ────────────────────────────────────────────────────────────
 
-  it('GET /api/games lists created game', async () => {
+  it('GET /api/games excludes unpublished drafts', async () => {
     const res = await request(httpServer).get('/api/games');
     expect(res.status).toBe(HttpStatus.OK);
-    expect(res.body.items.length).toBeGreaterThanOrEqual(1);
-    expect(res.body.items.some((g: { slug: string }) => g.slug === GAME_SLUG)).toBe(true);
+    expect(res.body.items.some((g: { slug: string }) => g.slug === GAME_SLUG)).toBe(false);
+    expect(res.body.items.some((g: { slug: string }) => g.slug === `test-game-2-${SUFFIX}`)).toBe(false);
   });
 
-  it('GET /api/games supports search query', async () => {
+  it('GET /api/games search query also excludes unpublished drafts', async () => {
     const res = await request(httpServer).get('/api/games?search=Echoes');
     expect(res.status).toBe(HttpStatus.OK);
-    expect(res.body.items.length).toBeGreaterThanOrEqual(1);
-    expect(res.body.items[0].slug).toBe(GAME_SLUG);
+    expect(res.body.items.some((g: { slug: string }) => g.slug === GAME_SLUG)).toBe(false);
   });
 
   // ── GET by slug ─────────────────────────────────────────────────────────
@@ -331,5 +351,228 @@ describe('GamesController (e2e)', () => {
   it('Returned game responses do not expose user passwordHash', async () => {
     const res = await request(httpServer).get(`/api/games/${GAME_SLUG}`);
     expect(res.body.passwordHash).toBeUndefined();
+  });
+
+  // ── PUBLISH ─────────────────────────────────────────────────────────────
+
+  it('POST /api/games/:slug/publish rejects unauthenticated', async () => {
+    const res = await request(httpServer).post(`/api/games/${GAME_SLUG}/publish`);
+    expect(res.status).toBe(HttpStatus.UNAUTHORIZED);
+  });
+
+  it('POST /api/games/:slug/publish rejects non-member with 403', async () => {
+    const res = await request(httpServer)
+      .post(`/api/games/${GAME_SLUG}/publish`)
+      .set('Cookie', `playmorrow_session=${nonMemberToken}`);
+    expect(res.status).toBe(HttpStatus.FORBIDDEN);
+  });
+
+  it('POST /api/games/:slug/publish rejects MEMBER role with 403', async () => {
+    const res = await request(httpServer)
+      .post(`/api/games/${GAME_SLUG}/publish`)
+      .set('Cookie', `playmorrow_session=${memberToken}`);
+    expect(res.status).toBe(HttpStatus.FORBIDDEN);
+  });
+
+  it('POST /api/games/:slug/publish returns 404 for a missing game', async () => {
+    const res = await request(httpServer)
+      .post(`/api/games/missing-${SUFFIX}/publish`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`);
+    expect(res.status).toBe(HttpStatus.NOT_FOUND);
+  });
+
+  it('POST /api/games/:slug/publish returns 400 with missing list for an incomplete game', async () => {
+    // Create a title-only game (incomplete)
+    await request(httpServer)
+      .post(`/api/studios/${STUDIO_SLUG}/games`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
+      .send({ title: 'Incomplete Game', slug: INCOMPLETE_SLUG })
+      .expect(HttpStatus.CREATED);
+
+    const res = await request(httpServer)
+      .post(`/api/games/${INCOMPLETE_SLUG}/publish`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`);
+
+    expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+    expect(String(res.body.message)).toContain('Game is not ready to publish');
+    expect(String(res.body.message)).toContain('tagline');
+    expect(String(res.body.message)).toContain('description');
+    expect(String(res.body.message)).toContain('screenshot');
+  });
+
+  it('POST /api/games/:slug/publish rejects CANCELLED games with 400', async () => {
+    await request(httpServer)
+      .post(`/api/studios/${STUDIO_SLUG}/games`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
+      .send({ title: 'Cancelled Game', slug: CANCELLED_SLUG, status: 'CANCELLED' })
+      .expect(HttpStatus.CREATED);
+
+    const res = await request(httpServer)
+      .post(`/api/games/${CANCELLED_SLUG}/publish`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`);
+
+    expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+  });
+
+  it('POST /api/games/:slug/publish allows studio OWNER and persists metadata', async () => {
+    const gameBefore = await prisma.game.findUnique({ where: { slug: GAME_SLUG } });
+    expect(gameBefore?.isPublished).toBe(false);
+
+    const res = await request(httpServer)
+      .post(`/api/games/${GAME_SLUG}/publish`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`);
+
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.isPublished).toBe(true);
+
+    const gameAfter = await prisma.game.findUnique({ where: { slug: GAME_SLUG } });
+    expect(gameAfter?.isPublished).toBe(true);
+    expect(gameAfter?.publishedAt).not.toBeNull();
+    expect(gameAfter?.publishedBy).not.toBeNull();
+  });
+
+  it('POST /api/games/:slug/publish is idempotent (no re-stamp on second call)', async () => {
+    const before = await prisma.game.findUnique({ where: { slug: GAME_SLUG } });
+
+    const res = await request(httpServer)
+      .post(`/api/games/${GAME_SLUG}/publish`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`);
+
+    expect(res.status).toBe(HttpStatus.OK);
+    const after = await prisma.game.findUnique({ where: { slug: GAME_SLUG } });
+    expect(after?.isPublished).toBe(true);
+    expect(after?.publishedAt?.toISOString()).toBe(before?.publishedAt?.toISOString());
+  });
+
+  it('POST /api/games/:slug/publish writes a GAME_PUBLISHED audit log entry', async () => {
+    const game = await prisma.game.findUnique({ where: { slug: GAME_SLUG } });
+    const entry = await prisma.auditLog.findFirst({
+      where: { action: 'GAME_PUBLISHED', targetId: game?.id },
+      orderBy: { createdAt: 'desc' },
+    });
+    expect(entry).not.toBeNull();
+    expect(entry?.targetType).toBe('GAME');
+  });
+
+  it('POST /api/games/:slug/publish emits a game_published event on the real transition', async () => {
+    const eventBus = app.get(EventBus);
+    const received: string[] = [];
+    const handler = (e: { type: string; gameId?: string }) => {
+      if (e.type === 'game_published') received.push(e.type);
+    };
+    eventBus.on('game_published', handler);
+
+    // Already published (idempotent) — no new event expected.
+    await request(httpServer)
+      .post(`/api/games/${GAME_SLUG}/publish`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
+      .expect(HttpStatus.OK);
+    expect(received).toHaveLength(0);
+
+    // Publish a fresh game — exactly one event.
+    const freshSlug = `fresh-${SUFFIX}`;
+    await request(httpServer)
+      .post(`/api/studios/${STUDIO_SLUG}/games`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
+      .send({
+        title: 'Fresh Publish Game',
+        slug: freshSlug,
+        tagline: 'Fresh tagline',
+        description: 'Fresh description',
+        coverUrl: 'https://example.com/fresh-cover.jpg',
+        platformLinks: [{ platform: 'STEAM', url: 'https://store.steampowered.com/app/fresh' }],
+        media: [{ type: 'SCREENSHOT', url: 'https://example.com/fresh-screen.jpg' }],
+        tags: ['adventure'],
+      })
+      .expect(HttpStatus.CREATED);
+
+    // NOTE: games.service create() also emits game_published (pre-existing
+    // behavior at games.service.ts:147) — reset the capture so we only count
+    // events caused by the publish call itself.
+    received.length = 0;
+
+    await request(httpServer)
+      .post(`/api/games/${freshSlug}/publish`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
+      .expect(HttpStatus.OK);
+
+    expect(received).toHaveLength(1);
+  });
+
+  it('POST /api/games/:slug/publish allows global ADMIN', async () => {
+    await request(httpServer)
+      .post(`/api/studios/${STUDIO_SLUG}/games`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
+      .send({
+        title: 'Admin Publish Game',
+        slug: ADMIN_PUB_SLUG,
+        tagline: 'Admin tagline',
+        description: 'Admin description',
+        coverUrl: 'https://example.com/admin-cover.jpg',
+        platformLinks: [{ platform: 'STEAM', url: 'https://store.steampowered.com/app/admin' }],
+        media: [{ type: 'SCREENSHOT', url: 'https://example.com/admin-screen.jpg' }],
+        tags: ['adventure'],
+      })
+      .expect(HttpStatus.CREATED);
+
+    const res = await request(httpServer)
+      .post(`/api/games/${ADMIN_PUB_SLUG}/publish`)
+      .set('Cookie', `playmorrow_session=${adminToken}`);
+
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.isPublished).toBe(true);
+  });
+
+  it('POST /api/games/:slug/publish allows studio MODERATOR', async () => {
+    await request(httpServer)
+      .post(`/api/studios/${STUDIO_SLUG}/games`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
+      .send({
+        title: 'Moderator Publish Game',
+        slug: MODERATOR_PUB_SLUG,
+        tagline: 'Moderator tagline',
+        description: 'Moderator description',
+        coverUrl: 'https://example.com/moderator-cover.jpg',
+        platformLinks: [{ platform: 'STEAM', url: 'https://store.steampowered.com/app/moderator' }],
+        media: [{ type: 'SCREENSHOT', url: 'https://example.com/moderator-screen.jpg' }],
+        tags: ['adventure'],
+      })
+      .expect(HttpStatus.CREATED);
+
+    const res = await request(httpServer)
+      .post(`/api/games/${MODERATOR_PUB_SLUG}/publish`)
+      .set('Cookie', `playmorrow_session=${moderatorToken}`);
+
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.isPublished).toBe(true);
+  });
+
+  it('published games appear in the public catalog and search', async () => {
+    const catalogRes = await request(httpServer).get('/api/games');
+    expect(catalogRes.status).toBe(HttpStatus.OK);
+    expect(catalogRes.body.items.some((g: { slug: string }) => g.slug === GAME_SLUG)).toBe(true);
+
+    const searchRes = await request(httpServer).get(`/api/search?q=${encodeURIComponent('Final Title')}`);
+    expect(searchRes.status).toBe(HttpStatus.OK);
+    expect(searchRes.body.games?.items?.some((g: { slug: string }) => g.slug === GAME_SLUG)).toBe(true);
+  });
+
+  it('forged isPublished in PATCH body is rejected and never publishes', async () => {
+    await request(httpServer)
+      .post(`/api/studios/${STUDIO_SLUG}/games`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
+      .send({ title: 'Forge Target', slug: FORGE_SLUG })
+      .expect(HttpStatus.CREATED);
+
+    // forbidNonWhitelisted:true → unknown property is rejected with 400.
+    const res = await request(httpServer)
+      .patch(`/api/games/${FORGE_SLUG}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`)
+      .send({ isPublished: true });
+
+    expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+
+    const game = await prisma.game.findUnique({ where: { slug: FORGE_SLUG } });
+    expect(game?.isPublished).toBe(false);
   });
 });

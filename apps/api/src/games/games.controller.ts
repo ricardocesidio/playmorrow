@@ -26,6 +26,7 @@ import { EventBus } from '../common/event-bus';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GamesService } from './games.service';
+import { GamePublicationService } from './game-publication.service';
 
 @ApiTags('games')
 @Controller()
@@ -34,6 +35,7 @@ export class GamesController {
     private readonly gamesService: GamesService,
     private readonly analyticsService: AnalyticsService,
     private readonly eventBus: EventBus,
+    private readonly gamePublicationService: GamePublicationService,
   ) {}
 
   @Post('studios/:studioSlug/games')
@@ -122,6 +124,15 @@ export class GamesController {
     }
     this.eventBus.emit({ type: 'game_updated', actorId: user.id, gameId: game.id, studioId: game.studio?.id, targetType: 'GAME', targetId: game.id, metadata: { trailerUrl: dto.trailerUrl, screenshotCount: dto.media?.length } });
     return game;
+  }
+
+  @Post('games/:slug/publish')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  @UseGuards(SessionAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: 'Game published.' })
+  async publish(@CurrentUser() user: { id: string }, @Param('slug') slug: string) {
+    return this.gamePublicationService.publishGame(user.id, slug);
   }
 
   @Delete('games/:slug')

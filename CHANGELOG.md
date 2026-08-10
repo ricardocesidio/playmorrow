@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Game Publishing Path — Catalog Readiness (2026-08-10)
+
+Game Publishing Path shipped (STATUS.md issue #8 RESOLVED): studios can now
+publish games through the product.
+
+- `POST /api/games/:slug/publish` (SessionAuthGuard; OWNER/ADMIN/MODERATOR via `assertStudioAccess`; completeness gate → 400 with missing keys; CANCELLED → 400; idempotent → 200 no-op; transactional `isPublished=true` + `publishedBy` + `publishedAt` + `GAME_PUBLISHED` audit; `game_published` EventBus + `GAME_PUBLISHED` feed event on real transition)
+- Public catalog (`GET /api/games`) and search games branch filter `isPublished: true`; drafts stay visible in studio/owner/admin queries
+- RELEASED status no longer auto-stamps `publishedBy`/`publishedAt` (separates dev-stage label from public-visibility state)
+- `isPublished` is not exposed on Create/Update DTOs — forged payloads rejected (`forbidNonWhitelisted`)
+- Frontend: `usePublishGame()` hook + Publication card with readiness checklist on the game editor
+- e2e: games controller spec now 34 tests (auth matrix, completeness, idempotency, audit, events, catalog/search presence, draft isolation, forged-payload rejection)
+- M23 remains under **Observation Freeze** — no frozen M23 component touched (freeze log entry added)
+
 ### M23 — Recommendation Engine (Hybrid) — 🟢 CERTIFIED (2026-08-09)
 
 Phase 6 milestone M23 implemented and certified for governed 5% rollout.

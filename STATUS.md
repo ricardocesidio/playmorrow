@@ -7,7 +7,7 @@
 > **Live:** https://playmorrow.co
 > **Production DB isolation:** 🟢 CERTIFIED (separate prod/dev Neon branches)
 > **Production hardening (P0.1.1):** 🟡 CONDITIONALLY CERTIFIED — credentials rotated; real backup verified in R2; `gh` secret registration is the final user action. See `docs/releases/P0_1_FINAL_CERTIFICATION.md`.
-> **Phase 6 AI:** M23 (Recommendation Engine) 🟢 CERTIFIED for governed 5% rollout — see `docs/releases/M23_CERTIFICATION.md`. M22/M24/M25/M26 not started.
+> **Phase 6 AI:** M23 (Recommendation Engine) 🟢 CERTIFIED for governed 5% rollout — see `docs/releases/M23_CERTIFICATION.md`. M22/M24/M25/M26 not started. 🟢 **Catalog publishing path available** (2026-08-10): `POST /api/games/:slug/publish` lets studios publish games; public catalog/search filter `isPublished: true`.
 
 ---
 
@@ -189,6 +189,9 @@ Current state: v0.85-beta — functional, not production-hardened.
 | 5 | No staging environment deployed | Medium | Skipped by decision (dedicated test DB chosen over staging) |
 | 6 | ~~Nightly `pg_dump` backup not yet implemented~~ | ~~High~~ | **RESOLVED 2026-08-07** — `.github/workflows/backup-db.yml` (02:00 UTC cron) dumps prod via read-only role `playmorrow_backup` (postgres:18, `--exclude-schema=neon_auth`) → R2 `db-backups/` (14-day retention, SHA-256 + MANIFEST). ✅ **Real production backup VERIFIED in R2** this session: `db-backups/20260807T132952Z.dump` (197,092 bytes) + checksum + manifest created with the workflow's own flags, downloaded back (checksum matched), and **restored to disposable Postgres 18 → 65/65 tables, row counts match live prod**. Remaining: register 5 GitHub secrets (`gh` not installed here) to activate nightly cron. See `docs/releases/P0_1_FINAL_CERTIFICATION.md` |
 | 7 | ~~Exposed Neon credentials still live~~ | ~~High~~ | **RESOLVED 2026-08-07 (P0.1.1)** — DB password rotated via Neon API (old `npg_…` confirmed dead via failed auth; new password live in Fly `DATABASE_URL`, prod smoke 200). Exposed org `NEON_API_KEY` revoked (`playmorrow-key`, id 3244621), replaced by `playmorrow-key-v2` (gitignored `.env.neon-apikey`). New prod URL in gitignored `.env.prod-dburl`. Full evidence: `docs/releases/P0_1_FINAL_CERTIFICATION.md` |
+
+| 8 | ~~**No game publishing workflow** — no product path sets `Game.isPublished=true`~~ | ~~High (product)~~ | **RESOLVED 2026-08-10** — Game Publishing Path shipped: `POST /api/games/:slug/publish` (SessionAuthGuard, OWNER/ADMIN/MODERATOR, completeness gate, idempotent, transactional, audit `GAME_PUBLISHED`, `game_published` EventBus + `GAME_PUBLISHED` feed on real transition). Public catalog (`GET /api/games`) + search games branch now filter `isPublished: true`; RELEASED no longer auto-stamps publication metadata. Frontend Publication card + `usePublishGame()` on the editor. e2e: 34 tests in `games.controller.spec.ts`. No M23 frozen component touched (freeze log entry). See `docs/releases/M23_CATALOG_READINESS_CERTIFICATION.md` |
+
 
 > **Migration ops note:** `prisma migrate deploy`/`resolve` time out with P1002 against the Neon endpoint (both pooled `-pooler` and direct hosts block session advisory locks). Dev migration workflow = run the SQL via `prisma db execute` (single transaction), then record in `_prisma_migrations` with the correct SHA-256 checksum (or use a Neon branch that exposes a real direct endpoint). `prisma migrate status` and `prisma migrate diff` work fine.
 >

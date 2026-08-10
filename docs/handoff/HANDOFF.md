@@ -57,7 +57,10 @@ Self-certifications (Platinum, Gold, RC3.x) have been retired. Current honest as
 |---|---|---|
 | Phase 1-4 | Complete | Foundation, discovery, ops, automation |
 | Phase 5 (Ecosystem) | Backend complete, hardening in progress | 22 endpoints, 11 integration tests, needs E2E tests |
-| Phase 6 (AI) | Started — M23 certified | Hybrid For You feed (pgvector semantic + legacy floor) at governed 5% rollout; M22/M24/M25/M26 pending |
+| Phase 6 (AI) | Started — M23 certified | Hybrid For You feed (pgvector semantic + legacy floor) at governed 5% rollout; M22/M24/M25/M26 pending. **Catalog publishing path shipped 2026-08-10** (`POST /api/games/:slug/publish`). |
+
+
+**Game publishing:** `POST /api/games/:slug/publish` (authorized OWNER/ADMIN/MODERATOR via `assertStudioAccess`, completeness gate, idempotent, transactional audit `GAME_PUBLISHED`, `game_published` EventBus + `GAME_PUBLISHED` feed on real transition). Public catalog (`GET /api/games`) + search games branch filter `isPublished: true`. Studio dashboard/owner queries unaffected. `isPublished` is not exposed on Create/Update DTOs (server-authoritative). See `docs/releases/M23_CATALOG_READINESS_CERTIFICATION.md`.
 
 > **✅ Phase 6 partially unblocked (2026-08-09).** P0 production-DB isolation is
 > certified (2026-08-07). M23 is 🟢 CERTIFIED for governed 5% rollout

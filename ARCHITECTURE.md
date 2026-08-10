@@ -296,7 +296,7 @@ components/
 | `AuthModule` | Login, register, OAuth, JWT, session auth |
 | `UsersModule` | User CRUD, profile management |
 | `StudiosModule` | Studio CRUD, membership management |
-| `GamesModule` | Game CRUD, stats |
+| `GamesModule` | Game CRUD, stats, **publication** (`GamePublicationService`) |
 | `DevlogsModule` | Devlog CRUD, scheduled publishing, screenshots |
 | `CommentsModule` | Comments + replies with nested tree support |
 | `ReactionsModule` | Devlog reactions (like/love/hype/insightful) |
@@ -393,6 +393,60 @@ components/
 - **OpenAPI/Swagger**: Available at `/docs` in development only
 
 ---
+
+## Game Publishing Path
+
+`GameStatus` (CONCEPT → RELEASED) describes the **development lifecycle**;
+`isPublished` is the **public discovery eligibility** flag. They are separate
+concepts — there is exactly one publication state machine.
+
+```
+Studio creates/edits game
+        ↓
+Completeness validation (title, tagline, description, coverUrl,
+                        ≥1 screenshot, ≥1 platform link, ≥1 tag)
+        ↓
+POST /api/games/:slug/publish
+        ↓
+Session authentication (SessionAuthGuard)
+        ↓
+Studio authorization (assertStudioAccess — OWNER/ADMIN/MODERATOR;
+                      global ADMIN/MODERATOR bypass preserved)
+        ↓
+Publication transaction
+        ├── isPublished = true
+        ├── publishedBy = actor
+        ├── publishedAt = now
+        └── GAME_PUBLISHED audit log (same transaction)
+        ↓
+game_published event (EventBus) + GAME_PUBLISHED feed event
+        ↓
+        ┌───────┴────────┐
+        ↓                ↓
+     Feed          Embedding refresh (GameEmbeddingRefreshService)
+        ↓                ↓
+Public catalog     Semantic discovery
+        └───────┬────────┘
+                ↓
+         Recommendation
+```
+
+Behavior:
+
+- **Idempotent**: publishing an already-published game returns `200` with no
+  re-stamp, no duplicate audit/event/downstream side effects.
+- **States**: `401` anonymous · `403` non-member or MEMBER · `404` missing ·
+  `400` incomplete or CANCELLED · `200` published (or already published).
+- **Server-authoritative**: `isPublished` is not exposed on Create/Update DTOs;
+  a forged `{ isPublished: true }` in PATCH is rejected by `forbidNonWhitelisted`.
+- **Discovery**: `GET /api/games` and the games branch of `GET /api/search`
+  filter `isPublished: true`. Studio dashboard/owner/admin game queries are
+  unaffected — drafts stay visible there.
+- **`GET /api/games/:slug` is intentionally NOT publication-gated** — the same
+  path serves the studio edit flow. Documented as a known follow-up.
+
+---
+
 
 ## Notification System
 

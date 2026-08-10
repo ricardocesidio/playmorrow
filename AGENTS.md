@@ -1070,3 +1070,18 @@ C-3/C-4 minor). Docs: `docs/ai/M23_RECOMMENDATION_ENGINE.md`,
 `docs/ai/sprints/M23_SPRINT_REPORT.md`, `M23_POST_IMPLEMENTATION_REVIEW.md`.
 
 **Updated:** STATUS.md, CHANGELOG.md, docs/handoff/HANDOFF.md, AGENTS.md
+
+### Session 31 — Game Publishing Path Implemented (2026-08-10)
+
+Executed the approved Game Publishing Path (STATUS.md issue #8), creating the
+server-authoritative publication pipeline that unblocks catalog growth for M23
+discovery data. **No M23 frozen component was touched** (freeze log entry added).
+
+- **Backend:** `GamePublicationService` (`apps/api/src/games/game-publication.service.ts`) — deterministic completeness gate (title/tagline/description/coverUrl/≥1 screenshot/≥1 platform link/≥1 tag), authorization via `assertStudioAccess` (OWNER/ADMIN/MODERATOR; global ADMIN/MODERATOR bypass preserved), CANCELLED → 400, idempotent 200 no-op, transactional `isPublished=true` + `publishedBy` + `publishedAt` + `GAME_PUBLISHED` audit (via `AuditLogService.log` optional `tx` param), post-commit `game_published` EventBus + `GAME_PUBLISHED` feed events only on real false→true.
+- **Endpoint:** `POST /api/games/:slug/publish` (SessionAuthGuard, `@HttpCode(200)`).
+- **Discovery:** `findAll()` + `buildGameWhere` games branch filter `isPublished: true`; studio dashboard/owner/admin queries unaffected; `GET /games/:slug` intentionally not gated (serves the edit flow — documented follow-up).
+- **Architecture:** `GAME_INCLUDE` exported, `GameWithInclude` exported, `toResponse` public; RELEASED no longer auto-stamps publication metadata.
+- **Frontend:** `usePublishGame()` hook + Publication card with readiness checklist on the game editor (`apps/web/app/dashboard/games/[slug]/page.tsx`).
+- **Tests:** games controller spec 20 → 34 tests (auth matrix, completeness, idempotency, audit, events with create-emission reset, catalog/search presence, draft isolation, forged-payload rejection). Search spec still green.
+- **Docs:** ARCHITECTURE.md (publishing path diagram), README.md, STATUS.md (issue #8 RESOLVED), HANDOFF.md, CHANGELOG.md, `docs/ai/M23_CATALOG_READINESS.md`, `docs/ai/M23_FREEZE_CHANGE_LOG.md` (entry), `docs/releases/M23_CATALOG_READINESS_CERTIFICATION.md`.
+- **Verdict:** 🟢 Publishing Path implemented & verified locally. Not deployed (per mission §28 — deploy not required this session). M23 observation freeze intact.

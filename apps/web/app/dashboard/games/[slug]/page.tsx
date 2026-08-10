@@ -10,11 +10,20 @@ import { SiteHeader } from '@/components/site-header';
 import { Input } from '@/components/ui/input';
 import { MarkdownEditor } from '@/components/md-editor';
 import { useAuth } from '@/lib/api/auth-context';
-import { useGame, useUpdateGame, useDeleteGame } from '@/lib/api/hooks';
-import { ApiError } from '@/lib/api/client';
+import { useGame, useUpdateGame, useDeleteGame, usePublishGame } from '@/lib/api/hooks';
+import { ApiError, type Game } from '@/lib/api/client';
 
 const STATUSES = ['CONCEPT', 'IN_DEVELOPMENT', 'ALPHA', 'BETA', 'EARLY_ACCESS', 'RELEASED', 'CANCELLED', 'ON_HOLD'];
 const MAX_SCREENSHOTS = 15;
+const PUBLICATION_REQUIREMENTS: { key: string; label: string; isMet: (game: Game) => boolean }[] = [
+  { key: 'title', label: 'Title', isMet: (g) => Boolean(g.title?.trim()) },
+  { key: 'tagline', label: 'Tagline', isMet: (g) => Boolean(g.tagline?.trim()) },
+  { key: 'description', label: 'Description', isMet: (g) => Boolean(g.description?.trim()) },
+  { key: 'coverUrl', label: 'Cover image', isMet: (g) => Boolean(g.coverUrl?.trim()) },
+  { key: 'screenshot', label: 'At least one screenshot', isMet: (g) => (g.media ?? []).some((m) => m.type === 'SCREENSHOT') },
+  { key: 'platformLink', label: 'At least one platform link', isMet: (g) => (g.platformLinks ?? []).length > 0 },
+  { key: 'tag', label: 'At least one tag', isMet: (g) => (g.tags ?? []).length > 0 },
+];
 const AVAILABLE_TAGS = [
   { slug: 'stealth', name: 'Stealth' },
   { slug: 'cyberpunk', name: 'Cyberpunk' },
@@ -44,6 +53,7 @@ export default function EditGamePage() {
   const { data: game, isLoading: gameLoading } = useGame(slug);
   const updateGame = useUpdateGame();
   const deleteGame = useDeleteGame();
+  const publishGame = usePublishGame();
 
   const [title, setTitle] = useState('');
   const [tagline, setTagline] = useState('');
@@ -231,6 +241,51 @@ export default function EditGamePage() {
           <Link href={`/games/${slug}`} className="clip-corner inline-flex items-center border border-border/60 px-4 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
             <ExternalLink className="size-3 mr-1" /> View public page
           </Link>
+        </div>
+
+        {/* Publication */}
+        <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)] mb-8">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Publication</h3>
+            {game.isPublished ? (
+              <span className="font-mono text-[0.6rem] uppercase tracking-widest text-cyan">Published ✓</span>
+            ) : (
+              <span className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Not published</span>
+            )}
+          </div>
+
+          {!game.isPublished && (
+            <>
+              <ul className="mb-4 space-y-1.5">
+                {PUBLICATION_REQUIREMENTS.map((req) => {
+                  const met = req.isMet(game);
+                  return (
+                    <li key={req.key} className="flex items-center gap-2 font-mono text-[0.6rem]">
+                      <span className={met ? 'text-cyan' : 'text-coral'}>{met ? '✓' : '✗'}</span>
+                      <span className={met ? 'text-muted-foreground' : 'text-coral'}>{req.label}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+              <Button
+                type="button"
+                onClick={async () => {
+                  if (!token) return;
+                  try {
+                    await publishGame.mutateAsync({ slug });
+                  } catch (err) {
+                    if (err instanceof ApiError && err.status === 403) {
+                      setError("You don't have permission to publish this game.");
+                    }
+                  }
+                }}
+                disabled={!PUBLICATION_REQUIREMENTS.every((r) => r.isMet(game)) || publishGame.isPending}
+              >
+                {publishGame.isPending ? <Loader2 className="size-3 animate-spin" /> : null}
+                {publishGame.isPending ? 'Publishing…' : 'Publish Game'}
+              </Button>
+            </>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">

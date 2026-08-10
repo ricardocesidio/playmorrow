@@ -1013,6 +1013,22 @@ export function useDeleteGame() {
   });
 }
 
+export function usePublishGame() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { slug: string }) => api.post<Game>(`/games/${data.slug}/publish`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['myGames'] });
+      qc.invalidateQueries({ queryKey: ['games'] });
+      qc.invalidateQueries({ queryKey: ['game'] });
+      revalidateFeed();
+      revalidateHomepage();
+      toast.success('Game published');
+    },
+    onError: () => toast.error('Failed to publish game'),
+  });
+}
+
 // ── Reports (admin) ──────────────────────────────────────────────────────
 
 export function useCreateReport() {

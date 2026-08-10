@@ -6,15 +6,19 @@ import { PrismaService } from '../prisma/prisma.service';
 export class AuditLogService {
   constructor(private prisma: PrismaService) {}
 
-  async log(params: {
-    studioId: string;
-    actorId: string;
-    action: string;
-    targetType: string;
-    targetId?: string;
-    metadata?: Record<string, unknown>;
-  }): Promise<void> {
-    await this.prisma.auditLog.create({
+  async log(
+    params: {
+      studioId: string;
+      actorId: string;
+      action: string;
+      targetType: string;
+      targetId?: string;
+      metadata?: Record<string, unknown>;
+    },
+    tx?: Prisma.TransactionClient,
+  ): Promise<void> {
+    const client = tx ?? this.prisma;
+    await client.auditLog.create({
       data: {
         studioId: params.studioId,
         actorId: params.actorId,
