@@ -137,6 +137,32 @@ export default function ProfileSettingsPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="clip-corner border border-border/70 panel p-5 sm:p-6 shadow-[0_0_30px_rgb(0_0_0_/_0.3)]">
             <div className="space-y-5">
+              <div className="flex flex-col items-center py-6">
+                <div className="relative mb-4">
+                  {form.avatarUrl ? (
+                    <div className="relative">
+                      <img src={form.avatarUrl} alt="Avatar" className="size-28 rounded-full border-2 border-cyan/50 object-cover shadow-[0_0_30px_rgb(62_231_255_/_0.15)]" />
+                      <button type="button" onClick={() => handleChange('avatarUrl', '')} className="absolute -right-1 -top-1 grid size-6 place-items-center rounded-full bg-coral text-white text-xs cursor-pointer hover:bg-coral/80 transition">✕</button>
+                    </div>
+                  ) : (
+                    <div className="flex size-28 items-center justify-center rounded-full border-2 border-border/50 bg-background/60 text-4xl text-muted-foreground/30">
+                      ?
+                    </div>
+                  )}
+                </div>
+                <label className="clip-corner cursor-pointer border border-cyan/60 bg-cyan/5 px-6 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-cyan hover:bg-cyan/10 transition">
+                  Upload avatar
+                  <Input type="file" accept="image/png,image/jpeg" className="hidden" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) return;
+                    const reader = new FileReader();
+                    reader.onload = () => handleChange('avatarUrl', reader.result as string);
+                    reader.readAsDataURL(file);
+                  }} />
+                </label>
+              </div>
+
               <div>
                 <label htmlFor="username" className="mb-1.5 block font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">Username</label>
                 <Input
@@ -179,32 +205,6 @@ export default function ProfileSettingsPage() {
                 ) : (
                   <p className="mt-1.5 text-xs text-muted-foreground">You can change your email up to 2 times.</p>
                 )}
-              </div>
-
-              <div className="flex flex-col items-center py-6">
-                <div className="relative mb-4">
-                  {form.avatarUrl ? (
-                    <div className="relative">
-                      <img src={form.avatarUrl} alt="Avatar" className="size-28 rounded-full border-2 border-cyan/50 object-cover shadow-[0_0_30px_rgb(62_231_255_/_0.15)]" />
-                      <button type="button" onClick={() => handleChange('avatarUrl', '')} className="absolute -right-1 -top-1 grid size-6 place-items-center rounded-full bg-coral text-white text-xs cursor-pointer hover:bg-coral/80 transition">✕</button>
-                    </div>
-                  ) : (
-                    <div className="flex size-28 items-center justify-center rounded-full border-2 border-border/50 bg-background/60 text-4xl text-muted-foreground/30">
-                      ?
-                    </div>
-                  )}
-                </div>
-                <label className="clip-corner cursor-pointer border border-cyan/60 bg-cyan/5 px-6 py-2.5 font-mono text-[0.6rem] uppercase tracking-widest text-cyan hover:bg-cyan/10 transition">
-                  Upload avatar
-                  <Input type="file" accept="image/png,image/jpeg" className="hidden" onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    if (file.size > 5 * 1024 * 1024) return;
-                    const reader = new FileReader();
-                    reader.onload = () => handleChange('avatarUrl', reader.result as string);
-                    reader.readAsDataURL(file);
-                  }} />
-                </label>
               </div>
 
               <div>
