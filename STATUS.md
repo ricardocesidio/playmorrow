@@ -7,8 +7,8 @@
 > **Live:** https://playmorrow.co
 > **Production DB isolation:** 🟢 CERTIFIED (separate prod/dev Neon branches)
 > **Production hardening (P0.1.1):** 🟡 CONDITIONALLY CERTIFIED — credentials rotated; real backup verified in R2; `gh` secret registration is the final user action. See `docs/releases/P0_1_FINAL_CERTIFICATION.md`.
-> **Security Assessment v2:** 🟡 BASELINE ACCEPTED WITH REMEDIATION — 3 confirmed production vulnerabilities (dompurify x2, multer transitive); M23 freeze intact; 538/539 tests passing. See `docs/security/SECURITY_ASSESSMENT_V2.md`.
-> **Phase 6 AI:** M23 (Recommendation Engine) 🟢 CERTIFIED for governed 5% rollout — see `docs/releases/M23_CERTIFICATION.md`. M22/M24/M25/M26 not started. 🟢 **Catalog publishing path available** (2026-08-10): `POST /api/games/:slug/publish` lets studios publish games; public catalog/search filter `isPublished: true`.
+> **Security Assessment v2:** 🟢 **BASELINE ACCEPTED — NO EXPLOITABLE DEPENDENCY VULN REMAINS** — dompurify/multer/js-yaml remediated; image-size MITIGATED (magic-byte gate); **SEC-012 sharp P1 RESOLVED 2026-08-11** (next 16.3.0 → sharp 0.35.3/vips 8.18.3, audit 23 → 20 findings, all remaining NOT-REACHABLE/deferred); M23 freeze intact; 539/539 tests passing. See `docs/security/SECURITY_ASSESSMENT_V2.md`.
+> **Phase 6 AI:** M23 (Recommendation Engine) 🟢 **DEPLOYED & ACTIVE — OBSERVATION FREEZE** — 5% governed rollout, kill switch tested, baseline window active 2026-08-10 → 2026-08-17, **25% gate LOCKED** until gate evaluation. 🟢 **Catalog publishing path available** (2026-08-10): `POST /api/games/:slug/publish` lets studios publish games; public catalog/search filter `isPublished: true`. Whether real studios publish (and the catalog becomes measurable) is now a production observation question. M22/M24/M25/M26 not started (gated until M23 gate evaluated). See `docs/ai/M23_OBSERVATION_FREEZE.md`.
 
 ---
 
@@ -63,7 +63,7 @@ Current state: v0.85-beta — functional, not production-hardened.
 | **M20** | Partner | Complete | Unit + integration | B2B CRM with 6 partner types (University, Publisher, Accelerator, Incubator, Studio, Event Organizer) |
 | **M21** | Events | Complete | Unit + integration | Event listings, detail pages, publish workflow, ticketing, upcoming filter |
 | **M22** | AI Assistant | Foundation only | Unit | Provider-agnostic AI module (35 files, 82 tests); feature endpoints gated off |
-| **M23** | Recommendation Engine | Complete | Unit + live | Hybrid For You feed (semantic + legacy floor), pgvector embeddings, feedback events, semantic search — certified for 5% rollout |
+| **M23** | Recommendation Engine | Complete | Unit + live | Hybrid For You feed (semantic + legacy floor), pgvector embeddings, feedback events, semantic search — **deployed to production 2026-08-10, migrations applied, 5% governed rollout active, baseline window started** |
 
 ---
 
@@ -134,12 +134,16 @@ Current state: v0.85-beta — functional, not production-hardened.
 
 | Feature | Status | Details |
 |---------|--------|---------|
-| For You feed (hybrid recs) | Complete | Semantic (pgvector, taste signals, MMR) over legacy floor; 5% governed rollout; kill switch |
-| Semantic search | Complete | KNN vector search (game titles), 5-candidate cap, fallback chain; wired into search page + game detail |
-| Recommendation feedback | Complete | CLICKED / DISMISSED / WISHLISTED events, dismissal window, validated gameId |
-| Embedding refresh | Complete | Nightly 03:00 UTC cron for published games + orphan cleanup |
+| For You feed (hybrid recs) | **Deployed** | Semantic (pgvector, taste signals, MMR) over legacy floor; 5% governed rollout; kill switch tested |
+| Personalization consent | **Deployed** | `/settings/personalization` — opt-in default **false** (Art. 5), server-side enforcement, `personalizationEnabledAt` audit stamp |
+| Impression / CTR metrics | **Deployed** | `POST /recommendations/impressions` (60-min dedup) + ADMIN `GET /recommendations/metrics` |
+| Feedback history reset | **Deployed** | `DELETE /recommendations/feedback` — session-scoped (Art. 5), dismissed games return as candidates |
+| Semantic search | **Deployed** | KNN vector search (game titles), 5-candidate cap, fallback chain; wired into search page + game detail |
+| Recommendation feedback | **Deployed** | CLICKED / DISMISSED / WISHLISTED / IMPRESSION events, dismissal window, validated gameId |
+| Embedding refresh | **Deployed** | Nightly 03:00 UTC cron for published games + orphan cleanup; model/dimension config-driven; dimension-abort + empty-catalog guards |
 | Assistant chat (per-request) | Gated (M22 flags) | Chat on game detail page; preferences stored to `UserPreferences`; feature flags default off |
-| Admin AI debug | Complete | `/dashboard/admin/ai` — embeddings count, provider status |
+| Admin AI debug | **Deployed** | `/dashboard/admin/ai` — embeddings count, provider status |
+| **Production Deployment** | **COMPLETE** | **M23 endpoints live, migrations applied, 5% rollout active, kill switch verified, baseline window started 2026-08-10** |
 
 ---
 
@@ -190,14 +194,14 @@ Current state: v0.85-beta — functional, not production-hardened.
 | 5 | No staging environment deployed | Medium | Skipped by decision (dedicated test DB chosen over staging) |
 | 6 | ~~Nightly `pg_dump` backup not yet implemented~~ | ~~High~~ | **RESOLVED 2026-08-07** — `.github/workflows/backup-db.yml` (02:00 UTC cron) dumps prod via read-only role `playmorrow_backup` (postgres:18, `--exclude-schema=neon_auth`) → R2 `db-backups/` (14-day retention, SHA-256 + MANIFEST). ✅ **Real production backup VERIFIED in R2** this session: `db-backups/20260807T132952Z.dump` (197,092 bytes) + checksum + manifest created with the workflow's own flags, downloaded back (checksum matched), and **restored to disposable Postgres 18 → 65/65 tables, row counts match live prod**. Remaining: register 5 GitHub secrets (`gh` not installed here) to activate nightly cron. See `docs/releases/P0_1_FINAL_CERTIFICATION.md` |
 | 7 | ~~Exposed Neon credentials still live~~ | ~~High~~ | **RESOLVED 2026-08-07 (P0.1.1)** — DB password rotated via Neon API (old `npg_…` confirmed dead via failed auth; new password live in Fly `DATABASE_URL`, prod smoke 200). Exposed org `NEON_API_KEY` revoked (`playmorrow-key`, id 3244621), replaced by `playmorrow-key-v2` (gitignored `.env.neon-apikey`). New prod URL in gitignored `.env.prod-dburl`. Full evidence: `docs/releases/P0_1_FINAL_CERTIFICATION.md` |
-
 | 8 | ~~**No game publishing workflow** — no product path sets `Game.isPublished=true`~~ | ~~High (product)~~ | **RESOLVED 2026-08-10** — Game Publishing Path shipped: `POST /api/games/:slug/publish` (SessionAuthGuard, OWNER/ADMIN/MODERATOR, completeness gate, idempotent, transactional, audit `GAME_PUBLISHED`, `game_published` EventBus + `GAME_PUBLISHED` feed on real transition). Public catalog (`GET /api/games`) + search games branch now filter `isPublished: true`; RELEASED no longer auto-stamps publication metadata. Frontend Publication card + `usePublishGame()` on the editor. e2e: 34 tests in `games.controller.spec.ts`. No M23 frozen component touched (freeze log entry). See `docs/releases/M23_CATALOG_READINESS_CERTIFICATION.md` |
-+| 9 | **DOMPurify XSS vulnerabilities (3 CVEs)** — v3.4.11 used in API + Web | High | **P1** — Upgrade to ≥3.4.13 (fixes 3 CVEs: IN_PLACE hook XSS, CUSTOM_ELEMENT_HANDLING bypass x2). See `docs/security/SECURITY_ASSESSMENT_V2.md` |
-+| 10 | **Multer DoS (transitive)** — v2.1.1 via @nestjs/platform-express | High | **P1** — Ensure multer 2.2.0 used via pnpm override. See `docs/security/SECURITY_ASSESSMENT_V2.md` |
-+| 11 | **Draft game exposure via slug enumeration** — `GET /games/:slug` lacks `isPublished` check | Medium | **P3** — Add publication check or `/preview/:slug` endpoint. See `docs/security/SECURITY_ASSESSMENT_V2.md` |
-+| 12 | No CSP violation report endpoint | Low | **P3** — Implement `/api/csp-report` handler. See `docs/security/SECURITY_ASSESSMENT_V2.md` |
-+| 13 | No password minimum length | Low | **P4** — Add `@MinLength(8)` to `RegisterDto` |
-+| 14 | No password history / rotation policy | Low | **P4** — Add history table + rotation check |
+| 9 | **DOMPurify XSS vulnerabilities (3 CVEs)** — v3.4.11 used in API + Web | High | **P1** — Upgrade to ≥3.4.13 (fixes 3 CVEs: IN_PLACE hook XSS, CUSTOM_ELEMENT_HANDLING bypass x2). See `docs/security/SECURITY_ASSESSMENT_V2.md` |
+| 10 | **Multer DoS (transitive)** — v2.1.1 via @nestjs/platform-express | High | **P1** — Ensure multer 2.2.0 used via pnpm override. See `docs/security/SECURITY_ASSESSMENT_V2.md` |
+| 11 | **Draft game exposure via slug enumeration** — `GET /games/:slug` lacks `isPublished` check | Medium | **P3** — Add publication check or `/preview/:slug` endpoint. See `docs/security/SECURITY_ASSESSMENT_V2.md` |
+| 10 | No CSP violation report endpoint | Low | **P3** — Implement `/api/csp-report` handler. See `docs/security/SECURITY_ASSESSMENT_V2.md` |
+| 11 | No password minimum length | Low | **P4** — Add `@MinLength(8)` to `RegisterDto` |
+| 12 | No password history / rotation policy | Low | **P4** — Add history table + rotation check |
+| 13 | ~~**sharp@0.34.5 libvips CVEs (SEC-012 P1)** — transitive via next@16.2.12, reachable via `/_next/image` (GHSA-f88m-g3jw-g9cj: CVE-2026-35591 TIFF / CVE-2026-33327 VIPS / CVE-2026-35590 EXIF)~~ | ~~High~~ | **RESOLVED 2026-08-11** — `next` 16.2.12 → **16.3.0** + `@next/bundle-analyzer` 16.2.12 → 16.3.0 (web workspace) vendors patched **sharp@0.35.3 (libvips 8.18.3)**. Verified: single sharp in tree (`pnpm why` → 0.35.3 via next@16.3.0), next `optimizeImage` functional (TIFF→webp, PNG→jpeg), `pnpm audit --prod` 23 → 20 findings (sharp no longer flagged). M23 freeze intact (dependency-layer only; freeze log entry). See `docs/releases/SEC012_CERTIFICATION.md` |
 
 > **Migration ops note:** `prisma migrate deploy`/`resolve` time out with P1002 against the Neon endpoint (both pooled `-pooler` and direct hosts block session advisory locks). Dev migration workflow = run the SQL via `prisma db execute` (single transaction), then record in `_prisma_migrations` with the correct SHA-256 checksum (or use a Neon branch that exposes a real direct endpoint). `prisma migrate status` and `prisma migrate diff` work fine.
 >

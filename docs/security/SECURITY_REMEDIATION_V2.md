@@ -4,6 +4,17 @@
 **Classification:** Security remediation sprint (P1 dependency vulnerabilities)
 **Related docs:** `SECURITY_ASSESSMENT_V2.md`, `SECURITY_CVE_INVENTORY.md`, `SECURITY_FINDINGS.md`, `SECURITY_THREAT_MODEL.md`
 
+> **Follow-up closure (2026-08-11, SEC-012 sharp):** The one finding this sprint
+> deferred as a pre-existing transitive finding with a plausible attack path —
+> **`sharp@0.34.5`** via `next@16.2.12` (GHSA-f88m-g3jw-g9cj; libvips CVEs
+> CVE-2026-35591/CVE-2026-33327/CVE-2026-35590) — was **REMEDIATED** by upgrading
+> `next` 16.2.12 → **16.3.0** + `@next/bundle-analyzer` 16.2.12 → 16.3.0 (web
+> workspace), which vendors **patched `sharp@0.35.3` (libvips 8.18.3)**.
+> Evidence: `pnpm why sharp` → single 0.35.3; next `optimizeImage` functional on
+> sharp 0.35.3/vips 8.18.3 (TIFF→webp, PNG→jpeg); `pnpm audit --prod` 23 → 20
+> findings. Side effect: postcss findings via `next` dropped 4 → 2 (next@16.3.0
+> bundles postcss 8.5.23). Full evidence: `docs/releases/SEC012_CERTIFICATION.md`.
+
 ---
 
 ## 1. Executive Summary

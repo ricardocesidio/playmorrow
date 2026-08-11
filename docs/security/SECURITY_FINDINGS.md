@@ -33,7 +33,7 @@
 | SEC-009 | **P4** | No password history / rotation | Auth service | Not implemented | Credential reuse after breach | Credential reuse risk | Post-breach | **CONFIRMED** | Yes | Add history table + rotation check | No |
 | SEC-010 | **HIGH*** | image-size infinite-loop DoS (ICNS/JXL/HEIF) | `image-size@2.0.2` (direct, API) | CVE-2025-71329/CVE-2025-71330; **no patched version exists** | Crafted ICNS/JXL/HEIF upload hangs event loop | DoS on upload endpoint | Blocked by magic-byte gate — vulnerable parsers unreachable | **CONFIRMED (pkg) / MITIGATED (usage)** | Yes (pkg) / No (reachable path) | **NONE AVAILABLE** — magic-byte gate is the compensating control | No |
 | SEC-011 | **HIGH*** | js-yaml exponential parsing DoS (transitive) | `js-yaml@4.1.1` (via @nestjs/swagger) | GHSA-52cp-r559-cp3m / GHSA-5p4m-2wfm-xmqj; fixed ≥4.3.1 | Malicious YAML in flow collection hangs parser | DoS | **No untrusted YAML parsed** — only OpenAPI doc generation from trusted decorators | **REMEDIATED** (4.3.1 override) | Yes (pkg) / No (reachable path) | ✅ Override `js-yaml: 4.3.1` in pnpm-workspace.yaml | No |
-| SEC-012 | **HIGH (batch)** | Pre-existing transitive findings in committed baseline | postcss (4), brace-expansion (6), fast-uri (3), sharp (1), nanoid (2) via `@sentry/nextjs→next`; undici (5) via `jsdom` | pnpm audit --prod = 23 findings; in-scope (dompurify/multer/js-yaml/image-size) handled above | Depends on package | Varied | Reachability varies; present in `HEAD` | **DEFERRED** (out of scope) | Yes (transitive) | Upgrade `@sentry/nextjs`+`next`; remove/upgrade `jsdom` prod dep — dependency-drift release | No |
+| SEC-012 | **HIGH (batch)** | Pre-existing transitive findings in committed baseline | postcss (2), brace-expansion (6), fast-uri (3), sharp (1), nanoid (2) via `@sentry/nextjs→next`; undici (5) via `jsdom` | pnpm audit --prod = 20 findings; in-scope (dompurify/multer/js-yaml/image-size) handled above | Depends on package | Varied | **Deep audit (2026-08-11): sharp REMEDIATED (2026-08-11, next 16.3.0); 20 NOT REACHABLE** — see detail | **ANALYZED** — see SEC-012 detail | Yes (transitive) | sharp: **DONE 2026-08-11** — `next` 16.2.12 → 16.3.0 (patched sharp ≥0.35.0); rest: deferred, not reachable | No |
 
 *\*Severity as reported by advisory. Reclassified **MITIGATED** (not exploitable in Playmorrow's usage) after reachability analysis — see Finding Details.*
 
@@ -129,6 +129,23 @@
 - **Reachability:** Playmorrow never parses untrusted YAML at runtime. js-yaml is only exercised by `SwaggerModule.setup()` reading app decorators (trusted developer input). No user-controlled YAML reaches the parser.
 - **Remediation (DONE 2026-08-11):** Override `js-yaml: 4.3.1` in `pnpm-workspace.yaml` (same-major patch bump). Verified: `pnpm why js-yaml` → `Found 1 version of js-yaml` (4.3.1); `pnpm audit --prod` no longer flags js-yaml.
 
+### SEC-012: Pre-existing transitive findings — **DEEP AUDIT COMPLETE (2026-08-11); sharp REMEDIATED**
+- **Report:** `docs/security/SECURITY_TRANSITIVE_DEPENDENCY_AUDIT_V2.md`
+- **Reachability:** `pnpm audit --prod` on the committed baseline (`ac86169`) = 23 findings (6 moderate | 17 high), of which 21 are the pre-existing SEC-012 set (image-size x2 already MITIGATED as SEC-010).
+- **1 finding PARTIALLY REACHABLE (tracked P1) — now REMEDIATED:**
+  - **sharp@0.34.5** (optional dep of `next@16.2.12`), GHSA-f88m-g3jw-g9cj — inherited libvips vulns: **CVE-2026-35591** (TIFF loader, JPEG/JPEG2000 tiles, heap overflow → possible code exec), **CVE-2026-33327** (VIPS loader, heap overflow → possible code exec), **CVE-2026-35590** (EXIF, OOB read / null deref → crash/DoS), CVE-2026-33328 (GIF, 32-bit only — N/A).
+  - **Attack path verified in source:** `/_next/image` endpoint is LIVE (middleware matcher exempts it; image optimization not disabled); `next.config.ts` remotePatterns whitelist `**.r2.dev` + `**.githubusercontent.com` (attacker-controllable); `image-optimizer.js` `detectContentType` recognizes TIFF (`II*\0`) and TIFF ∉ `BYPASS_TYPES`, so crafted TIFF/GIF buffers flow into `optimizeImage` → `getSharp()` → `sharp(buffer).rotate().resize().toBuffer()`.
+  - **Impact:** server-side decode of attacker-hosted crafted TIFF/VIPS → heap corruption, possible RCE or DoS via `/_next/image?url=https://<attacker>.r2.dev/payload.tiff&w=640&q=75`.
+  - **Fix (dependency-drift release, P1 priority):** upgrade `@sentry/nextjs`+`next` (brings sharp ≥ 0.35.0 / libvips 8.18.3) OR add `sharp` override to `pnpm-workspace.yaml`.
+  - **REMEDIATED 2026-08-11:** `next` 16.2.12 → **16.3.0** + `@next/bundle-analyzer` 16.2.12 → 16.3.0 (web workspace). Verified single `sharp@0.35.3` (vips 8.18.3) in tree; next `optimizeImage` functional (TIFF→webp, PNG→jpeg); `pnpm audit --prod` 23 → 20 findings. M23 freeze unaffected (dependency-layer change only).
+- **20 findings NOT REACHABLE in Playmorrow's runtime (deferred):**
+  - **undici@7.28.0 (x5, via jsdom):** jsdom used DOM-only (`sanitize-html.ts` `new JSDOM('')`); no fetch/WebSocket/resource loading → undici network paths never execute.
+  - **postcss@8.4.31 (x2, build-time via @sentry/webpack-plugin→webpack→terser-webpack-plugin):** build-time only (`next/dist/build/**`); no runtime processing of attacker CSS. (postcss via `next` bundle itself resolved to 8.5.23 with next@16.3.0.)
+  - **brace-expansion (x6):** dev/build-time (eslint, @storybook, fork-ts-checker, sentry glob).
+  - **fast-uri@3.1.2 (x3):** build-time webpack via `@sentry/webpack-plugin→schema-utils→ajv`.
+  - **nanoid@3.3.12 (x2):** build-time (postcss/@storybook/nextjs).
+- **Deploy verdict:** 🟢 **DEPLOYABLE.** No exploitable P0/P1 dependency vulnerability remains; sharp resolved, remaining 20 findings are build-time/DOM-only and NOT REACHABLE.
+
 ---
 
 ## Remediation Tracking
@@ -146,7 +163,7 @@
 | SEC-009 | P4 | Backlog | Next Release | - |
 | SEC-010 | HIGH* | **MITIGATED** (magic-byte gate; no patch exists) | Monitor upstream | - |
 | SEC-011 | HIGH* | **REMEDIATED** (4.3.1 override) | 2026-08-11 | - |
-| SEC-012 | HIGH (batch) | **DEFERRED** — 21 pre-existing transitive findings in HEAD (postcss/brace-expansion/fast-uri/sharp/nanoid via @sentry/nextjs→next; undici via jsdom). Not introduced by this commit; dependency-drift release required. | dependency-drift release | - |
+| SEC-012 | HIGH (batch) | **REMEDIATED** — deep audit 2026-08-11: sharp@0.34.5 P1 **RESOLVED** (next 16.3.0 → sharp 0.35.3); 20 findings NOT REACHABLE (deferred). `pnpm audit --prod` 20 findings, all non-exploitable. | 2026-08-11 | - |
 
 ---
 
@@ -206,10 +223,11 @@ multer@2.2.0
 Found 1 version of multer
 
 $ pnpm audit --prod
-23 vulnerabilities found
-Severity: 6 moderate | 17 high
+20 vulnerabilities found
+Severity: 5 moderate | 15 high
 # In scope: dompurify/multer/js-yaml cleared; image-size@2.0.2 x2 MITIGATED (magic-byte gate, SEC-010)
-# Pre-existing in HEAD (DEFERRED, SEC-012): postcss x4, brace-expansion x6, fast-uri x3, sharp, nanoid x2 (via @sentry/nextjs→next); undici x5 (via jsdom)
+# sharp (SEC-012 P1) REMEDIATED via next 16.3.0 upgrade (patched sharp 0.35.3 / libvips 8.18.3)
+# Pre-existing in HEAD (DEFERRED, SEC-012): postcss x2, brace-expansion x6, fast-uri x3, nanoid x2 (via @sentry/nextjs→next); undici x5 (via jsdom)
 # js-yaml (SEC-011) cleared via 4.3.1 override
 
 $ pnpm verify
@@ -220,4 +238,5 @@ $ pnpm --filter @playmorrow/api test
 ```
 
 **All P1 findings REMEDIATED. SEC-004 resolved by same dompurify upgrade.
-SEC-011 resolved via js-yaml 4.3.1 override. SEC-010 documented as MITIGATED with compensating control and upstream monitoring. SEC-012 (21 pre-existing transitive findings in HEAD) tracked as DEFERRED.**
+SEC-011 resolved via js-yaml 4.3.1 override. SEC-010 documented as MITIGATED with compensating control and upstream monitoring.
+SEC-012 sharp P1 RESOLVED via next 16.3.0 upgrade (2026-08-11); remaining 20 findings deep-audited NOT REACHABLE (deferred).**

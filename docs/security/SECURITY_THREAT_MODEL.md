@@ -232,7 +232,7 @@ User Behavioral Signals
 | RR-007 | Dev dependencies with vulns | Dev-only (vitest, vite, esbuild, undici, etc.) | NONE | **ACCEPTED** - Dev environment only |
 | RR-008 | image-size infinite-loop DoS (ICNS/JXL/HEIF) | Magic-byte gate blocks vulnerable parsers; **no patch exists** | LOW (gate-dependent) | **ACCEPTED** - Monitor upstream, upgrade when patch ships |
 | RR-009 | js-yaml exponential parsing DoS (transitive) | **REMEDIATED** — js-yaml 4.3.1 override | NONE | ✅ RESOLVED |
-| RR-010 | 21 pre-existing transitive prod findings (postcss/brace-expansion/fast-uri/sharp/nanoid via @sentry/nextjs→next; undici via jsdom) | Present in committed baseline (`HEAD`), not introduced by remediation | LOW | **ACCEPTED** - dependency-drift release |
+| RR-010 | 21 pre-existing transitive prod findings (postcss/brace-expansion/fast-uri/sharp/nanoid via @sentry/nextjs→next; undici via jsdom) | **sharp RESOLVED 2026-08-11** (next 16.2.12 → 16.3.0, sharp 0.35.3/vips 8.18.3); remaining 20 (build-time/DOM-only) present in committed baseline (`HEAD`), not introduced by remediation | NONE | ✅ **sharp RESOLVED**; remaining 20 ACCEPTED — dependency-drift release |
 
 ---
 

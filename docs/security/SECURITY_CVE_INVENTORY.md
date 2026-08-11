@@ -17,6 +17,8 @@
 | **Moderate** | 12 | 2 production-relevant |
 | **Low** | 2 | 1 production-relevant |
 | **Production-Affecting** | **5** | dompurify (2), multer (transitive), js-yaml (transitive), image-size (2 CVEs) |
+
+> **Update 2026-08-11 (SEC-012 remediation):** `sharp@0.34.5` (via `next@16.2.12`) — the sole **TRACKED P1** partially-reachable finding — has been **REMEDIATED** by upgrading `next` 16.2.12 → 16.3.0 + `@next/bundle-analyzer` 16.2.12 → 16.3.0, replacing vulnerable sharp with **patched `sharp@0.35.3` (libvips 8.18.3)**. Verified: single sharp in tree (0.35.3), next optimizer functional, audit 23 → 20 findings.
 | **Dev-Only** | 34 | vitest, vite, esbuild, launch-editor, uuid, elliptic |
 
 ---
@@ -185,12 +187,32 @@ Found 1 version of multer
 |----------------|-------|---------|
 | **REMEDIATED (Production)** | 4 | dompurify (2 CVEs: GHSA-55q2, GHSA-c2j3), multer (CVE-2026-5079), js-yaml (GHSA-52cp-r559-cp3m / GHSA-5p4m-2wfm-xmqj) |
 | **MITIGATED (Production)** | 2 | image-size (CVE-2025-71329/71330 — no patch exists, magic-byte gate) |
-| **DEFERRED (Production, pre-existing in HEAD)** | 21 | postcss (4), brace-expansion (6), fast-uri (3), sharp (1), nanoid (2) via `@sentry/nextjs→next`; undici (5) via `jsdom` — out of scope for this commit, see §7 |
+| **DEFERRED (Production, pre-existing in HEAD)** | 20 | postcss (2), brace-expansion (6), fast-uri (3), nanoid (2) via `@sentry/nextjs→next`; undici (5) via `jsdom` — **deep-audited 2026-08-11: NOT REACHABLE in Playmorrow runtime** (see §7) |
+| **TRACKED P1 (Production) — now REMEDIATED** | 1 | **sharp (1)** via `next@16.2.12` → **REMEDIATED 2026-08-11** by `next` 16.3.0 upgrade (sharp ≥0.35.0 / libvips 8.18.3) (see §7) |
 | **CONFIRMED VULNERABLE (Dev-Only)** | 10 | vitest, vite, esbuild, brace-expansion, undici, elliptic, launch-editor, uuid |
 | **CONFIRMED VULNERABLE (Production)** | **0** | — |
 | **NOT APPLICABLE** | 0 | - |
 | **UNVERIFIED** | 0 | - |
 | **REVIEW REQUIRED** | 0 | - |
+
+---
+
+## SEC-012 Deep Audit (2026-08-11) — Reachability of Deferred Findings
+
+Full report: `docs/security/SECURITY_TRANSITIVE_DEPENDENCY_AUDIT_V2.md`. Baseline commit `ac86169`.
+
+| Package | Installed | Advisories | Reachability | Evidence | Decision |
+|---------|-----------|-----------|--------------|----------|----------|
+| **sharp** | ~~0.34.5~~ → **0.35.3** (opt dep of next@16.3.0) | GHSA-f88m-g3jw-g9cj (CVE-2026-33327 VIPS, CVE-2026-33328 GIF 32-bit, CVE-2026-35590 EXIF, CVE-2026-35591 TIFF) | **REMEDIATED 2026-08-11** | `next` 16.2.12 → 16.3.0 brings patched sharp ≥0.35.0 (libvips 8.18.3). Verified: `pnpm why sharp` → single 0.35.3; next `optimizeImage` runs sharp 0.35.3/vips 8.18.3 (TIFF→webp, PNG→jpeg functional); `pnpm audit --prod` no longer flags sharp (23 → 20 findings) | **RESOLVED** |
+| undici | 7.28.0 (via jsdom) | GHSA-8xcm-r25x-g524, GHSA-4cwx-7wf7-3272, GHSA-m8rv-5g2x-5cg5, GHSA-jr45-8vmc-qm54, GHSA-v3r7-h72x-cjcm | **NOT REACHABLE** | jsdom used DOM-only (`sanitize-html.ts` `new JSDOM('')`); no fetch/WebSocket/resource loading → undici network paths never execute | DEFERRED |
+| postcss | 8.4.31 (via next) | GHSA-qx2v-qp2m-jg93, GHSA-6g55-p6wh-862q, GHSA-r28c-9q8g-f849, GHSA-fxqj-rqcc-2cmp | **NOT REACHABLE** | Only required in `next/dist/build/**`; zero `require('postcss')` in `next/dist/server/**`; no runtime processing of attacker CSS | DEFERRED |
+| brace-expansion | 1.1.15 / 5.0.6 | GHSA-3jxr-9vmj-r5cp, GHSA-mh99-v99m-4gvg, GHSA-rgw5-rvv9-x895 | **NOT REACHABLE** | Dev/build-time only: eslint, @storybook, fork-ts-checker, sentry glob | DEFERRED |
+| fast-uri | 3.1.2 | GHSA-v2hh-gcrm-f6hx, GHSA-7p8r-x3mc-p8w7, GHSA-4c8g-83qw-93j6 | **NOT REACHABLE** | Build-time webpack via @sentry/webpack-plugin→schema-utils→ajv | DEFERRED |
+| nanoid | 3.3.12 | GHSA-28wg-ghj8-5hjv, GHSA-2v37-7h3g-55p8 | **NOT REACHABLE** | Build-time (postcss, @storybook/nextjs); not in next server runtime | DEFERRED |
+
+**Deploy verdict for `ac86169`: 🟢 DEPLOYABLE.** The single partially-reachable finding (sharp) pre-dates this commit; it elevates the dependency-drift release to P1 priority.
+
+**SEC-012 closure (2026-08-11):** The sharp P1 finding is **RESOLVED** via `next` 16.2.12 → 16.3.0 upgrade (patched sharp 0.35.3 / libvips 8.18.3). No production-relevant vulnerability remains from the SEC-012 set; the 20 remaining findings are all deep-audited NOT-REACHABLE build-time/DOM-only findings (see §7) tracked as DEFERRED.
 
 ---
 
@@ -203,8 +225,9 @@ Found 1 version of multer
 | multer DoS (transitive) | 2.2.0 | 2.2.0 only | **REMEDIATED** | - | 2026-08-11 |
 | image-size DoS (ICNS/JXL/HEIF) | 2.0.2 | no patch (advisory: ≥2.0.3, unpublished) | **MITIGATED** (magic-byte gate) | - | Monitor upstream |
 | js-yaml DoS (transitive) | 4.3.1 | ≥4.3.1 | **REMEDIATED** (4.3.1 override) | - | 2026-08-11 |
-| postcss / brace-expansion / fast-uri / sharp / nanoid (via @sentry/nextjs→next) | HEAD | upgrade @sentry/nextjs+next | **DEFERRED** (pre-existing in HEAD) | - | dependency-drift release |
-| undici (via jsdom) | HEAD | remove/upgrade jsdom prod dep | **DEFERRED** (pre-existing in HEAD) | - | dependency-drift release |
+| postcss / brace-expansion / fast-uri / nanoid (via @sentry/nextjs→next) | HEAD | upgrade @sentry/nextjs+next | **DEFERRED** (deep-audited: NOT REACHABLE, build-time) | - | dependency-drift release |
+| **sharp (via next@16.2.12)** | ~~0.34.5~~ → **0.35.3** | ≥0.35.0 (libvips 8.18.3) | **REMEDIATED 2026-08-11** (next 16.3.0 upgrade) | - | **2026-08-11** |
+| undici (via jsdom) | HEAD | remove/upgrade jsdom prod dep | **DEFERRED** (deep-audited: NOT REACHABLE, DOM-only) | - | dependency-drift release |
 | vitest Critical | 2.1.8 | ≥3.2.6 | Backlog | - | Dev Dependency |
 | vite High | ≤6.4.2 | ≥6.4.3 | Backlog | - | Dev Dependency |
 | esbuild High | ≤0.25.11 | ≥0.25.12 | Backlog | - | Dev Dependency |
@@ -232,13 +255,30 @@ multer@2.2.0
   └── @playmorrow/api@0.1.0 (dependencies)
 Found 1 version of multer
 
-# Run production audit - 23 findings; in-scope cleared, image-size MITIGATED, 21 pre-existing DEFERRED
+# Run production audit - 20 findings; in-scope cleared, image-size MITIGATED, sharp REMEDIATED, 20 pre-existing DEFERRED
 $ pnpm audit --prod
-23 vulnerabilities found
-Severity: 6 moderate | 17 high
+20 vulnerabilities found
+Severity: 5 moderate | 15 high
 # In scope: dompurify/multer/js-yaml cleared; image-size@2.0.2 MITIGATED (magic-byte gate blocks unreachable parsers)
-# Pre-existing in HEAD (DEFERRED): postcss x4, brace-expansion x6, fast-uri x3, sharp, nanoid x2 (via @sentry/nextjs→next); undici x5 (via jsdom)
+# sharp (SEC-012 P1) REMEDIATED via next 16.3.0 upgrade (patched sharp 0.35.3 / libvips 8.18.3)
+# Pre-existing in HEAD (DEFERRED): postcss x2, brace-expansion x6, fast-uri x3, nanoid x2 (via @sentry/nextjs→next); undici x5 (via jsdom); image-size x2 (MITIGATED)
 # (js-yaml cleared via 4.3.1 override)
+
+# Verify sharp resolution (SEC-012 closure)
+$ pnpm why sharp
+sharp@0.35.3
+└─┬ next@16.3.0
+  ├── @playmorrow/web@0.1.0 (dependencies)
+  └─┬ @sentry/nextjs@10.64.0
+    └── @playmorrow/web@0.1.0 (dependencies)
+Found 1 version of sharp
+
+# Verify next optimizer functional with patched sharp
+$ node -e 'const {getSharp}=require("next/dist/server/image-optimizer.js"); ...'
+next@16.3.0 image-optimizer loaded OK
+input.tiff -> sharp: 0.35.3 | vips: 8.18.3 -> webp | dims: 50x30
+input.png -> jpeg | dims: 50x30
+IMAGE OPTIMIZER FUNCTIONAL
 ```
 
 ---
@@ -252,4 +292,5 @@ Severity: 6 moderate | 17 high
 5. **DOMPurify** is used in both server-side (API devlog sanitization) and client-side (SanitizedMarkdown component) — upgraded to 3.4.13 in all workspaces.
 6. **image-size** has NO patched version (npm latest = 2.0.2; advisory lists ≥2.0.3 but it is not published). The magic-byte gate (jpeg/png/gif/webp only) makes the vulnerable ICNS/JXL/HEIF parsers unreachable. Monitor upstream; upgrade immediately when a patch is published.
 7. **js-yaml** (via `@nestjs/swagger`) was remediated by a `js-yaml: 4.3.1` override (same-major patch bump) fixing GHSA-52cp-r559-cp3m and GHSA-5p4m-2wfm-xmqj. Verified single version in tree and cleared from `pnpm audit --prod`.
-8. **21 pre-existing production findings** remain in the committed baseline (`HEAD`) — postcss/brace-expansion/fast-uri/sharp/nanoid via `@sentry/nextjs→next`, and undici via `jsdom`. They were present before this commit and are tracked as **DEFERRED (out of scope)**; remediation requires a dependency-drift release.
+8. **20 pre-existing production findings** remain in the committed baseline (`HEAD`) — postcss/brace-expansion/fast-uri/nanoid via `@sentry/nextjs→next`, and undici via `jsdom`. They were present before this commit and are tracked as **DEFERRED (out of scope)**; remediation requires a dependency-drift release.
+9. **sharp (SEC-012 P1) REMEDIATED (2026-08-11):** `next` 16.2.12 → 16.3.0 (+ `@next/bundle-analyzer` 16.2.12 → 16.3.0) replaced vulnerable `sharp@0.34.5` with patched `sharp@0.35.3` (libvips 8.18.3). Verified single sharp in tree, next optimizer functional (TIFF→webp + PNG→jpeg), and `pnpm audit --prod` dropped 23 → 20 findings. Side effect: postcss findings via `next` dropped 4 → 2 (next@16.3.0 bundles postcss 8.5.23); the 2 remaining are build-time via `@sentry/webpack-plugin→webpack→terser-webpack-plugin`.

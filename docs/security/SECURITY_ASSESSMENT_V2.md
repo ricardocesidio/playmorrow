@@ -368,7 +368,7 @@ No P0/P1 critical vulnerabilities were found in production code. The system is s
 | **Metrics** | Unchanged | CTR, dismissal, impression, opt-in definitions frozen |
 | **Kill Switch** | Functional | `RECOMMENDATIONS_ENABLED=false` tested |
 | **Baseline** | Valid | Day 1 of 7-day window (2026-08-10 → 2026-08-17) |
-| **Freeze Log** | 1 entry | Game Publishing Path — catalog readiness (baseline NOT contaminated) |
+| **Freeze Log** | 2 entries | Game Publishing Path + SEC-012 dependency remediation (baseline NOT contaminated) |
 
 **M23 Status:** ✅ **FREEZE INTACT — NO ALGORITHMIC CHANGES**
 
@@ -562,7 +562,7 @@ No P0/P1 critical vulnerabilities were found in production code. The system is s
 | **Tests** | ✅ PASS | 539/539 pass (51 files) |
 | **pnpm verify** | ✅ PASS | 6/6 tasks |
 | **Any-type ratchet** | ✅ PASS | Baseline 0 maintained |
-| **npm audit (prod)** | 🟡 PARTIAL | 23 findings (6 moderate | 17 high): in-scope cleared; image-size x2 MITIGATED; 21 pre-existing transitive (via @sentry/nextjs→next, jsdom→undici) DEFERRED |
+| **npm audit (prod)** | 🟡 PARTIAL | 20 findings (5 moderate | 15 high): in-scope cleared; image-size x2 MITIGATED; sharp (SEC-012 P1) **REMEDIATED 2026-08-11** (next 16.3.0 → sharp 0.35.3); 20 remaining NOT REACHABLE (deferred) |
 | **DB Safety Check** | ✅ PASS | CI blocks prod Neon URLs |
 
 ---
@@ -579,7 +579,7 @@ No P0/P1 critical vulnerabilities were found in production code. The system is s
 | **Metrics** | Unchanged | CTR, dismissal, impression, opt-in definitions frozen |
 | **Kill Switch** | Functional | `RECOMMENDATIONS_ENABLED=false` tested |
 | **Baseline** | Valid | Day 1 of 7-day window (2026-08-10 → 2026-08-17) |
-| **Freeze Log** | 1 entry | Game Publishing Path — catalog readiness (baseline NOT contaminated) |
+| **Freeze Log** | 2 entries | Game Publishing Path + SEC-012 dependency remediation (baseline NOT contaminated) |
 
 **M23 Status:** ✅ **FREEZE INTACT — NO ALGORITHMIC CHANGES**
 
@@ -603,10 +603,10 @@ No P0/P1 critical vulnerabilities were found in production code. The system is s
 
 ## 🟢 SECURITY BASELINE ACCEPTED — P1 CLEARED, RESIDUAL RISK DOCUMENTED
 
-**Meaning:** All P1/P2 production vulnerabilities remediated (including js-yaml). The in-scope remaining HIGH advisory (image-size) is **MITIGATED** — no exploitable path exists in Playmorrow's code, and no upstream patch is published. 21 further findings are pre-existing transitive dependencies of `HEAD` (out of scope, deferred to a dependency-drift release).
+**Meaning:** All P1/P2 production vulnerabilities remediated (including js-yaml and SEC-012 sharp). The in-scope remaining HIGH advisory (image-size) is **MITIGATED** — no exploitable path exists in Playmorrow's code, and no upstream patch is published. A deep reachability audit (2026-08-11, see `SECURITY_TRANSITIVE_DEPENDENCY_AUDIT_V2.md`) classified the 21 deferred findings: **1 partially reachable (sharp, P1-tracked) — REMEDIATED 2026-08-11 via next 16.3.0 (sharp 0.35.3), 20 NOT REACHABLE** in Playmorrow's runtime.
 
 ### What's Working Well
-- Zero **exploitable** production vulnerabilities (4 REMEDIATED, 1 MITIGATED)
+- Zero **exploitable** production vulnerabilities (4 REMEDIATED + SEC-012 sharp REMEDIATED, 1 MITIGATED, 0 TRACKED P1)
 - Strong authentication (Argon2id, 2FA, lockout, email verification)
 - Comprehensive authorization (RBAC, studio ownership, seat limits)
 - Defense-in-depth XSS protection (DOMPurify + CSP + React)
@@ -623,7 +623,7 @@ No P0/P1 critical vulnerabilities were found in production code. The system is s
 4. ⏳ **SEC-010:** image-size — **MITIGATED**; upgrade immediately when upstream patch ships
 5. **SEC-005:** Fix draft game exposure via slug enumeration (backlog)
 6. **SEC-006:** Implement CSP violation report endpoint (backlog)
-7. **SEC-012:** 21 pre-existing transitive findings (via `@sentry/nextjs→next`, `jsdom→undici`) — dependency-drift release (backlog)
+7. ✅ **SEC-012:** deep audit complete (2026-08-11) — **sharp@0.34.5 PARTIALLY REACHABLE via `/_next/image` → REMEDIATED 2026-08-11** (next 16.2.12 → 16.3.0, sharp 0.35.3/vips 8.18.3); remaining 20 findings **NOT REACHABLE** (deferred)
 
 ### M23 Status
 ✅ Observation freeze active, baseline valid, 5% rollout unchanged, 25% gate locked until 2026-08-17.
@@ -673,10 +673,10 @@ Only documentation files created/updated in `docs/security/`. Assessment complet
 | SEC-007 | P4 | **DEFERRED** | Remaining security backlog |
 | SEC-008 | P4 | **DEFERRED** | Remaining security backlog |
 | SEC-009 | P4 | **DEFERRED** | Remaining security backlog |
-| SEC-012 | HIGH (batch) | **DEFERRED** | 21 pre-existing transitive findings in HEAD (postcss/brace-expansion/fast-uri/sharp/nanoid via @sentry/nextjs→next; undici via jsdom) — dependency-drift release |
+| SEC-012 | HIGH (batch) | **REMEDIATED** | Deep audit 2026-08-11: sharp@0.34.5 PARTIALLY REACHABLE via `/_next/image` → **RESOLVED 2026-08-11** (next 16.2.12 → 16.3.0, sharp 0.35.3/vips 8.18.3); 20 remaining findings NOT REACHABLE (deferred) |
 
 **Remediation Evidence:** See `docs/security/SECURITY_REMEDIATION_V2.md`.
 
 **Updated M23 Status (post-remediation):** ✅ Freeze intact, 5% rollout unchanged, baseline valid. No M23 algorithm/weights/rollout/metrics files modified by remediation.
 
-**Updated Verdict (post-remediation):** 🟢 **SECURITY BASELINE ACCEPTED** — all P1/P2 cleared; residual HIGH advisory (image-size) documented as MITIGATED with compensating control and upstream monitoring; 21 pre-existing transitive findings tracked as DEFERRED (out of scope).
+**Updated Verdict (post-remediation):** 🟢 **SECURITY BASELINE ACCEPTED** — all P1/P2 cleared; residual HIGH advisory (image-size) documented as MITIGATED with compensating control and upstream monitoring; deep audit of the 21 pre-existing transitive findings (2026-08-11) classified sharp as PARTIALLY REACHABLE (P1-tracked) — now **REMEDIATED** via next 16.3.0 upgrade (sharp 0.35.3/vips 8.18.3) — and the remaining 20 as NOT REACHABLE (deferred). No exploitable dependency vulnerability remains.
