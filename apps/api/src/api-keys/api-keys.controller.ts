@@ -3,13 +3,11 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { SkipCsrf } from '../common/skip-csrf.decorator';
 import { ApiKeysService } from './api-keys.service';
 
 @ApiTags('api-keys')
 @Controller('api-keys')
 @UseGuards(SessionAuthGuard)
-@SkipCsrf()
 export class ApiKeysController {
   constructor(private readonly svc: ApiKeysService) {}
 

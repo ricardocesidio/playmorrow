@@ -7,7 +7,6 @@ import { Throttle } from '@nestjs/throttler';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { SkipCsrf } from '../common/skip-csrf.decorator';
 import { EmailTemplatesService } from './email-templates.service';
 import { EmailSenderService } from '../email/email-sender.service';
 
@@ -15,7 +14,6 @@ import { EmailSenderService } from '../email/email-sender.service';
 @Controller('admin/email-templates')
 @UseGuards(SessionAuthGuard, RolesGuard)
 @Roles('ADMIN')
-@SkipCsrf()
 export class EmailTemplatesController {
   constructor(
     private readonly svc: EmailTemplatesService,

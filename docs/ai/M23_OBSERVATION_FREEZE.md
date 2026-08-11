@@ -28,7 +28,7 @@ They MUST NOT be modified, even if metrics look suboptimal:
 | 3 | Semantic-search behavior | `embeddingRepository.search`, 5-candidate cap, fallback chain | Freeze |
 | 4 | Embedding model | `text-embedding-3-small` (via `AI_EMBEDDING_MODEL`) | Freeze |
 | 5 | Embedding dimensions | 1536 (via `AI_EMBEDDING_DIMENSIONS`) | Freeze |
-| 6 | MMR configuration | λ=0.7, candidate set = merged pool | Freeze |
+| 6 | MMR configuration | λ=0.5, candidate set = merged pool | Freeze |
 | 7 | Recommendation ranking logic | `applyMMR` + deterministic sort | Freeze |
 | 8 | Personalization logic | Consent-gated taste signals; `personalizationEnabled` default false | Freeze |
 | 9 | Rollout percentage | 5% (`RECOMMENDATIONS_ROLLOUT_PCT` default) | Freeze |

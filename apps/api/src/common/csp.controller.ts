@@ -6,7 +6,7 @@ import { logger } from './logger';
 @SkipThrottle()
 @Controller()
 export class CspController {
-  @Post('api/csp-report')
+  @Post('csp-report')
   report(@Req() req: Request) {
     const report = req.body?.['csp-report'] || req.body;
     logger.warn({ msg: 'CSP violation', report });
