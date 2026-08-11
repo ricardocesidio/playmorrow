@@ -299,7 +299,7 @@ function ChangePasswordSection() {
     if (newPass.length < 8) { setMsg('Password must be at least 8 characters.'); return; }
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/reset-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ currentPassword: current, newPassword: newPass }), credentials: 'include' });
+      const res = await fetch('/api/auth/change-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ currentPassword: current, newPassword: newPass }), credentials: 'include' });
       if (!res.ok) { const b = await res.json().catch(() => ({})); setMsg(b.message || 'Failed to change password.'); }
       else { setMsg('Password changed successfully.'); setCurrent(''); setNewPass(''); setConfirm(''); }
     } catch { setMsg('Connection error.'); }

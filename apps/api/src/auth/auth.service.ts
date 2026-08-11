@@ -399,6 +399,40 @@ export class AuthService {
     ]);
   }
 
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const valid = await argon2.verify(user.passwordHash!, currentPassword);
+    if (!valid) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
+    if (isCommonPassword(newPassword)) {
+      throw new BadRequestException('New password is too common. Please choose a stronger password.');
+    }
+
+    const passwordHash = await argon2.hash(newPassword, { type: argon2.argon2id, memoryCost: 19456, timeCost: 3, parallelism: 1 });
+    const newAuthVersion = Date.now();
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash, authVersion: newAuthVersion },
+      }),
+      this.prisma.session.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
+  }
+
   // ── Token helpers ────────────────────────────────────────────────────
 
   private async buildResult(user: User): Promise<AuthResult> {

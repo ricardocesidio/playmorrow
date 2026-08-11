@@ -10,6 +10,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { CompleteOnboardingDto } from './dto/complete-onboarding.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { EnableTotpDto, VerifyTotpDto, DisableTotpDto, TotpLoginDto } from './dto/totp.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { SessionAuthGuard } from './guards/session-auth.guard';
@@ -164,6 +165,15 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() dto: ResetPasswordDto) {
     await this.authService.resetPassword(dto.token, dto.password);
+    return { success: true };
+  }
+
+  @Post('change-password')
+  @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @HttpCode(HttpStatus.OK)
+  async changePassword(@CurrentUser() user: { id: string }, @Body() dto: ChangePasswordDto) {
+    await this.authService.changePassword(user.id, dto.currentPassword, dto.newPassword);
     return { success: true };
   }
 
