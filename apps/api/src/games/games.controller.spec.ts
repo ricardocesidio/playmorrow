@@ -240,11 +240,11 @@ describe('GamesController (e2e)', () => {
 
   // ── LIST by studio ──────────────────────────────────────────────────────
 
-  it('GET /api/studios/:studioSlug/games lists studio games', async () => {
+  it('GET /api/studios/:studioSlug/games lists only published games for anonymous', async () => {
     const res = await request(httpServer).get(`/api/studios/${STUDIO_SLUG}/games`);
     expect(res.status).toBe(HttpStatus.OK);
-    expect(res.body.items.length).toBeGreaterThanOrEqual(1);
-    expect(res.body.items.some((g: { slug: string }) => g.slug === GAME_SLUG)).toBe(true);
+    // Draft games are not visible to anonymous viewers
+    expect(res.body.items.filter((g: { slug: string }) => g.slug === GAME_SLUG).length).toBe(0);
   });
 
   // ── LIST all ────────────────────────────────────────────────────────────
@@ -264,15 +264,25 @@ describe('GamesController (e2e)', () => {
 
   // ── GET by slug ─────────────────────────────────────────────────────────
 
-  it('GET /api/games/:slug returns game with studio/media/platformLinks/tags', async () => {
+  it('GET /api/games/:slug returns 404 for unpublished draft (anonymous)', async () => {
     const res = await request(httpServer).get(`/api/games/${GAME_SLUG}`);
+    expect(res.status).toBe(HttpStatus.NOT_FOUND);
+  });
+
+  it('GET /api/games/:slug returns draft to studio OWNER', async () => {
+    const res = await request(httpServer)
+      .get(`/api/games/${GAME_SLUG}`)
+      .set('Cookie', `playmorrow_session=${ownerToken}`);
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body.title).toBe('Echoes of the Deep');
     expect(res.body.studio.slug).toBe(STUDIO_SLUG);
-    expect(res.body.media.length).toBe(1);
-    expect(res.body.platformLinks.length).toBe(1);
-    expect(res.body.tags).toContain('adventure');
-    expect(res.body.tags).toContain('exploration');
+  });
+
+  it('GET /api/games/:slug returns 404 for draft to non-member', async () => {
+    const res = await request(httpServer)
+      .get(`/api/games/${GAME_SLUG}`)
+      .set('Cookie', `playmorrow_session=${nonMemberToken}`);
+    expect(res.status).toBe(HttpStatus.NOT_FOUND);
   });
 
   it('GET /api/games/:missing returns 404', async () => {
@@ -574,5 +584,15 @@ describe('GamesController (e2e)', () => {
 
     const game = await prisma.game.findUnique({ where: { slug: FORGE_SLUG } });
     expect(game?.isPublished).toBe(false);
+  });
+
+  it('GET /api/games/:slug returns published game with studio/media/platformLinks/tags', async () => {
+    const res = await request(httpServer).get(`/api/games/${GAME_SLUG}`);
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.studio.slug).toBe(STUDIO_SLUG);
+    expect(res.body.media.length).toBeGreaterThanOrEqual(1);
+    expect(res.body.platformLinks.length).toBeGreaterThanOrEqual(1);
+    expect(res.body.tags).toContain('adventure');
+    expect(res.body.tags).toContain('exploration');
   });
 });

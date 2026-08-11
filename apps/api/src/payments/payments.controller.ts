@@ -1,4 +1,5 @@
 import { Controller, Post, Body, UseGuards, BadRequestException, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PaymentsService } from './payments.service';
@@ -15,6 +16,7 @@ export class PaymentsController {
 
   @Post('stripe/onboarding')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   async getOnboardingLink(
     @CurrentUser() user: { id: string },
     @Body() body: { studioId: string; refreshUrl: string; returnUrl: string },

@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
@@ -30,6 +31,7 @@ export class RoadmapItemsController {
 
   @Post('games/:gameSlug/roadmap')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 15 } })
   @ApiCreatedResponse({ description: 'Roadmap item created.' })
   async create(
     @CurrentUser() user: { id: string },
@@ -49,6 +51,7 @@ export class RoadmapItemsController {
 
   @Patch('games/:gameSlug/roadmap/reorder')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 15 } })
   @ApiOkResponse({ description: 'Roadmap items reordered.' })
   async reorder(
     @CurrentUser() user: { id: string },
@@ -72,6 +75,7 @@ export class RoadmapItemsController {
 
   @Patch('roadmap-items/:id')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 15 } })
   @ApiOkResponse({ description: 'Roadmap item updated.' })
   async update(
     @CurrentUser() user: { id: string },
@@ -85,6 +89,7 @@ export class RoadmapItemsController {
 
   @Delete('roadmap-items/:id')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 15 } })
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Roadmap item deleted.' })
   async remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {

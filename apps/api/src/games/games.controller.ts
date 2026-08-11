@@ -19,6 +19,7 @@ import { ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/sw
 import type { Request } from 'express';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { Throttle } from '@nestjs/throttler';
 import { AnalyticsService } from '../analytics/analytics.service';
@@ -56,6 +57,7 @@ export class GamesController {
   }
 
   @Get('studios/:studioSlug/games')
+  @UseGuards(OptionalSessionGuard)
   @ApiOkResponse({ description: 'Paginated games for a studio.' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'pageSize', required: false })
@@ -65,8 +67,12 @@ export class GamesController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(20), ParseIntPipe) pageSize: number,
     @Query('status') status?: string,
+    @CurrentUser() viewer?: { id: string; role: string },
   ) {
-    return this.gamesService.findByStudioSlug(studioSlug, page, Math.min(pageSize, 100), status);
+    return this.gamesService.findByStudioSlug(
+      studioSlug, page, Math.min(pageSize, 100), status,
+      viewer ? { userId: viewer.id, role: viewer.role } : undefined,
+    );
   }
 
   @Get('games')
@@ -87,9 +93,14 @@ export class GamesController {
   }
 
   @Get('games/:slug')
+  @UseGuards(OptionalSessionGuard)
   @ApiOkResponse({ description: 'Game profile.' })
-  async findBySlug(@Param('slug') slug: string, @Req() req: Request) {
-    const game = await this.gamesService.findBySlug(slug);
+  async findBySlug(
+    @Param('slug') slug: string,
+    @Req() req: Request,
+    @CurrentUser() viewer?: { id: string; role: string },
+  ) {
+    const game = await this.gamesService.findBySlug(slug, viewer ? { userId: viewer.id, role: viewer.role } : undefined);
     if (!game) {
       throw new NotFoundException('Game not found');
     }

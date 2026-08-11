@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, UseGuards, BadRequestException } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreatorService } from './creator.service';
@@ -9,6 +10,7 @@ export class CreatorController {
 
   @Get('code')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 15 } })
   async getCode(@CurrentUser() user: { id: string }) {
     return this.creator.getOrCreateCode(user.id);
   }

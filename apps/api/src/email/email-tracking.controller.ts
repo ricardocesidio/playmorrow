@@ -1,8 +1,26 @@
-import { Controller, Get, Param, Query, Res } from '@nestjs/common';
+import { Controller, Get, Param, Query, Res, BadRequestException } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { SkipCsrf } from '../common/skip-csrf.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 import type { Response } from 'express';
+
+const ALLOWED_REDIRECT_HOSTS = new Set([
+  'playmorrow.co',
+  'www.playmorrow.co',
+  'playmorrow.vercel.app',
+  'localhost',
+]);
+
+function isValidRedirectUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+    if (parsed.username || parsed.password) return false;
+    return ALLOWED_REDIRECT_HOSTS.has(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
 
 @ApiTags('email/tracking')
 @Controller('email/track')
@@ -24,14 +42,14 @@ export class EmailTrackingController {
 
   @Get('click/:logId')
   async trackClick(@Param('logId') logId: string, @Query('url') url: string, @Res() res: Response) {
-    if (url) {
+    if (url && isValidRedirectUrl(url)) {
       await this.prisma.emailLog.update({
         where: { id: logId },
         data: { clickedAt: new Date() },
       }).catch(() => {});
       res.redirect(302, url);
     } else {
-      res.status(400).json({ error: 'Missing url parameter' });
+      throw new BadRequestException('Invalid or missing url parameter');
     }
   }
 }

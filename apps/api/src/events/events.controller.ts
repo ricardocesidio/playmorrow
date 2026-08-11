@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards, BadRequestException } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -24,6 +25,7 @@ export class EventsController {
   @Post()
   @UseGuards(SessionAuthGuard, RolesGuard)
   @Roles('ADMIN', 'MODERATOR')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   async create(@Body() body: CreateEventDto, @CurrentUser() _user: { id: string }) {
     if (!body.title || !body.slug || !body.startDate) throw new BadRequestException('title, slug, and startDate are required');
     return this.events.create(body);
@@ -32,12 +34,14 @@ export class EventsController {
   @Patch(':slug')
   @UseGuards(SessionAuthGuard, RolesGuard)
   @Roles('ADMIN', 'MODERATOR')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   async update(@Param('slug') slug: string, @Body() body: UpdateEventDto) {
     return this.events.update(slug, body);
   }
 
   @Post(':slug/register')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   async register(@Param('slug') slug: string, @CurrentUser() user: { id: string }) {
     return this.events.register(slug, user.id);
   }

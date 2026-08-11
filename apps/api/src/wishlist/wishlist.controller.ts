@@ -1,5 +1,6 @@
 import { Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -22,6 +23,7 @@ export class WishlistController {
 
   @Post('games/:slug/wishlist')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @ApiOkResponse({ description: 'Game added to wishlist.' })
   async add(@CurrentUser() user: { id: string }, @Param('slug') slug: string, @Req() req: Request) {
     const result = await this.wishlistService.add(user.id, slug);
@@ -42,6 +44,7 @@ export class WishlistController {
 
   @Delete('games/:slug/wishlist')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @ApiOkResponse({ description: 'Game removed from wishlist.' })
   async remove(@CurrentUser() user: { id: string }, @Param('slug') slug: string, @Req() req: Request) {
     const result = await this.wishlistService.remove(user.id, slug);

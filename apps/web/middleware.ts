@@ -37,6 +37,12 @@ export function middleware(request: NextRequest) {
   // Reduce referrer leakage
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
+  // Restrict browser features not used by Playmorrow
+  response.headers.set(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(), payment=(self), usb=(), fullscreen=(self), clipboard-write=(self), accelerometer=(), gyroscope=(), magnetometer=()',
+  );
+
   // Production: strict nonce-based CSP.
   // Development: unsafe-inline + unsafe-eval because Next.js HMR and React
   // DevTools inject inline scripts without nonces. We must NOT include both
@@ -48,8 +54,8 @@ export function middleware(request: NextRequest) {
   // (no nonce) to allow Next.js inline scripts to execute.
   // TODO: Migrate to Next.js 16 native CSP support via instrumentation.
   const scriptSrc = isDev
-    ? ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://plausible.io'].join(' ')
-    : ["'self'", "'unsafe-inline'", 'https://plausible.io'].join(' ');
+    ? ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://plausible.io', 'https://js.stripe.com'].join(' ')
+    : ["'self'", "'unsafe-inline'", 'https://plausible.io', 'https://js.stripe.com'].join(' ');
   response.headers.set(
     'Content-Security-Policy',
     [
@@ -58,8 +64,9 @@ export function middleware(request: NextRequest) {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https: http://localhost:*",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://playmorrow-api-aged-mountain-9542.fly.dev https://plausible.io http://localhost:*",
+      "connect-src 'self' https://playmorrow-api-aged-mountain-9542.fly.dev https://plausible.io https://api.stripe.com http://localhost:*",
       "frame-ancestors 'none'",
+      "frame-src 'self' https://js.stripe.com",
       "form-action 'self'",
       "base-uri 'self'",
       "object-src 'none'",

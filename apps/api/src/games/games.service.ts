@@ -151,15 +151,24 @@ export class GamesService {
     return this.toResponse(game);
   }
 
-  async findByStudioSlug(studioSlug: string, page = 1, pageSize = 20, status?: string) {
+  async findByStudioSlug(studioSlug: string, page = 1, pageSize = 20, status?: string, viewer?: { userId?: string; role?: string }) {
     const studio = await this.prisma.studio.findUnique({
       where: { slug: studioSlug.toLowerCase() },
+      include: { members: { select: { userId: true, role: true } } },
     });
     if (!studio) {
       throw new NotFoundException('Studio not found');
     }
 
-    const where: Prisma.GameWhereInput = { studioId: studio.id };
+    const isStudioViewer = viewer?.userId && (
+      viewer.role === 'ADMIN' || viewer.role === 'MODERATOR' ||
+      studio.members.some((m) => m.userId === viewer.userId)
+    );
+
+    const where: Prisma.GameWhereInput = {
+      studioId: studio.id,
+      ...(isStudioViewer ? {} : { isPublished: true }),
+    };
     if (status) {
       where.status = status as never;
     }
@@ -223,7 +232,7 @@ export class GamesService {
     };
   }
 
-  async findBySlug(slug: string) {
+  async findBySlug(slug: string, viewer?: { userId?: string; role?: string }) {
     const game = await this.prisma.game.findUnique({
       where: { slug: slug.toLowerCase() },
       include: GAME_INCLUDE,
@@ -231,6 +240,21 @@ export class GamesService {
 
     if (!game) {
       return null;
+    }
+
+    // Unpublished games: only visible to studio members or global admin/mod
+    if (!game.isPublished) {
+      if (!viewer?.userId) {
+        return null;
+      }
+      if (viewer.role !== 'ADMIN' && viewer.role !== 'MODERATOR') {
+        const membership = await this.prisma.studioMember.findFirst({
+          where: { studioId: game.studioId, userId: viewer.userId },
+        });
+        if (!membership) {
+          return null;
+        }
+      }
     }
 
     // Track view (increment async, don't block response)

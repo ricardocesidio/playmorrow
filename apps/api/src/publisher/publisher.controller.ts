@@ -1,10 +1,12 @@
 import { Controller, Get, Param, Query, UseGuards, ForbiddenException } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 import { PublisherService } from './publisher.service';
 
 @Controller('publisher')
+@Throttle({ default: { ttl: 60_000, limit: 20 } })
 export class PublisherController {
   constructor(
     private publisher: PublisherService,

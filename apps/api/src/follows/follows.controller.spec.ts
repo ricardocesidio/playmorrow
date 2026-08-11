@@ -307,7 +307,9 @@ describe('FollowsController (e2e)', () => {
   });
 
   it('Existing game response includes followersCount', async () => {
-    const res = await request(httpServer).get(`/api/games/${GAME_SLUG}`);
+    const res = await request(httpServer)
+      .get(`/api/games/${GAME_SLUG}`)
+      .set('Cookie', `playmorrow_session=${userToken}`);
     expect(res.status).toBe(HttpStatus.OK);
     expect(res.body).toHaveProperty('followersCount');
     expect(typeof res.body.followersCount).toBe('number');

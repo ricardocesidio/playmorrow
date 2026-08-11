@@ -16,6 +16,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
@@ -35,6 +36,7 @@ export class DevlogsController {
 
   @Post('games/:gameSlug/devlogs')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 15 } })
   @ApiCreatedResponse({ description: 'Devlog created.' })
   async create(
     @CurrentUser() user: { id: string },
@@ -90,6 +92,7 @@ export class DevlogsController {
 
   @Patch('devlogs/:id')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 15 } })
   @ApiOkResponse({ description: 'Devlog updated.' })
   async update(
     @CurrentUser() user: { id: string },
@@ -101,6 +104,7 @@ export class DevlogsController {
 
   @Delete('devlogs/:id')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 15 } })
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Devlog deleted (cascades to comments, reactions).' })
   async remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
@@ -116,6 +120,7 @@ export class DevlogsController {
 
   @Post('devlogs/:id/like')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 15 } })
   @HttpCode(HttpStatus.OK)
   async toggleLike(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.devlogsService.toggleLike(user.id, id);

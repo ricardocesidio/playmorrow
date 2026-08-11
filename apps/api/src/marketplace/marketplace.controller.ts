@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { OptionalSessionGuard } from '../auth/guards/optional-session.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -36,6 +37,7 @@ export class MarketplaceController {
 
   @Post()
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   async create(@Body() body: CreateListingDto, @CurrentUser() user: { id: string }) {
     if (!body.studioId) throw new BadRequestException('studioId is required');
     const member = await this.prisma.studioMember.findFirst({
@@ -47,12 +49,14 @@ export class MarketplaceController {
 
   @Post(':id/purchase')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   async purchase(@Param('id') id: string, @CurrentUser() user: { id: string }) {
     return this.marketplace.purchase(user.id, id);
   }
 
   @Patch(':id')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   async update(@Param('id') id: string, @Body() body: UpdateListingDto, @CurrentUser() user: { id: string }) {
     const listing = await this.prisma.marketplaceListing.findUnique({
       where: { id },
@@ -68,6 +72,7 @@ export class MarketplaceController {
 
   @Delete(':id')
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   async remove(@Param('id') id: string, @CurrentUser() user: { id: string }) {
     const listing = await this.prisma.marketplaceListing.findUnique({
       where: { id },
