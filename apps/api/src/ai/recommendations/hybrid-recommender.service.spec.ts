@@ -14,6 +14,7 @@ function mockAIConfig(overrides: Partial<AIConfig> = {}): AIConfig {
     embeddingsEnabled: true,
     rolloutEnabled: () => true,
     embeddingModel: 'text-embedding-3-small',
+    embeddingDimensions: 1536,
     defaultProvider: 'openai',
     ...overrides,
   } as unknown as AIConfig;
@@ -44,6 +45,10 @@ function mockPrisma() {
   const byId = new Map(games.map((g) => [g.id, g]));
 
   return {
+    user: {
+      findUnique: vi.fn().mockResolvedValue({ personalizationEnabled: true }),
+      update: vi.fn().mockResolvedValue({}),
+    },
     game: {
       findMany: vi.fn(async ({ where }: { where?: { id?: { in?: string[] } } }) => {
         const ids = where?.id?.in;
@@ -166,6 +171,102 @@ describe('HybridRecommenderService', () => {
     expect(result.items.length).toBeGreaterThan(0);
     expect(result.items[0].reason).toBeTruthy();
   });
+
+  it('does not gather taste signals for opted-out users (consent gate)', async () => {
+    const prisma = mockPrisma();
+    prisma.user.findUnique = vi.fn().mockResolvedValue({ personalizationEnabled: false });
+    const signals = mockSignals();
+
+    const service = new HybridRecommenderService(
+      prisma as never,
+      mockLegacy() as never,
+      signals as never,
+      { search: vi.fn(), count: vi.fn() } as never,
+      { embedTexts: vi.fn() } as never,
+      mockAIConfig() as never,
+    );
+
+    const result = await service.getForYou('user-1', 10, null);
+    expect(signals.gather).not.toHaveBeenCalled();
+    expect(result.personalizationEnabled).toBe(false);
+    expect(result.method).not.toBe('hybrid');
+    expect(result.items.length).toBeGreaterThan(0);
+  });
+
+  it('exposes personalizationEnabled as null for anonymous sessions', async () => {
+    const service = new HybridRecommenderService(
+      mockPrisma() as never,
+      mockLegacy() as never,
+      mockSignals() as never,
+      { search: vi.fn(), count: vi.fn() } as never,
+      { embedTexts: vi.fn() } as never,
+      mockAIConfig() as never,
+    );
+
+    const result = await service.getForYou(null, 10, null);
+    expect(result.personalizationEnabled).toBeNull();
+  });
+
+  it('runs the hybrid path only for consenting users and marks it', async () => {
+    const embeddingRepo = { search: vi.fn().mockResolvedValue([{ gameId: 'g2', score: 0.9 }]), count: vi.fn() };
+
+    const service = new HybridRecommenderService(
+      mockPrisma() as never,
+      mockLegacy() as never,
+      mockSignals() as never,
+      embeddingRepo as never,
+      { embedTexts: vi.fn().mockResolvedValue([{ embedding: Array(1536).fill(0.1) }]) } as never,
+      mockAIConfig() as never,
+    );
+
+    const result = await service.getForYou('user-1', 10, null);
+    expect(result.method).toBe('hybrid');
+    expect(result.personalizationEnabled).toBe(true);
+    expect(result.items.length).toBeGreaterThan(0);
+  });
+
+  it('degrades to content (no error) when embedding dimension mismatches the config', async () => {
+    const signals = mockSignals();
+    const service = new HybridRecommenderService(
+      mockPrisma() as never,
+      mockLegacy() as never,
+      signals as never,
+      { search: vi.fn(), count: vi.fn() } as never,
+      { embedTexts: vi.fn().mockResolvedValue([{ embedding: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8] }]) } as never,
+      mockAIConfig() as never,
+    );
+
+    const result = await service.getForYou('user-1', 10, null);
+    expect(result.method).toBe('content');
+    expect(result.items.length).toBeGreaterThan(0);
+  });
+
+  it('explanation never claims popularity for semantically-sourced candidates', async () => {
+    const prisma = mockPrisma();
+    prisma.user.findUnique = vi.fn().mockResolvedValue({ personalizationEnabled: true });
+
+    const service = new HybridRecommenderService(
+      prisma as never,
+      // Legacy returns an activity-only reason so the fallback path triggers.
+      {
+        getRecommendations: vi.fn().mockResolvedValue({
+          items: [{ gameId: 'g2', score: 60, reasons: ['Recent activity in your games'] }],
+          nextCursor: null,
+          hasMore: false,
+        }),
+      } as never,
+      mockSignals() as never,
+      { search: vi.fn().mockResolvedValue([]), count: vi.fn() } as never,
+      { embedTexts: vi.fn().mockResolvedValue([{ embedding: Array(1536).fill(0.1) }]) } as never,
+      mockAIConfig() as never,
+    );
+
+    const result = await service.getForYou('user-1', 10, null);
+    for (const item of result.items) {
+      expect(item.reason).not.toContain('Popular on Playmorrow');
+      expect(item.reason).toBeTruthy();
+    }
+  });
 });
 
 describe('TasteSignalService', () => {
@@ -257,5 +358,57 @@ describe('RecommendationFeedbackService', () => {
     const service = new RecommendationFeedbackService(prisma as never);
     const ids = await service.getDismissedGameIds('u1');
     expect(ids).toEqual(['g1', 'g2']);
+  });
+
+  it('dedupes impressions within the window and skips unknown games', async () => {
+    const prisma = {
+      game: {
+        findMany: vi.fn().mockResolvedValue([{ id: 'g1' }, { id: 'g2' }]),
+      },
+      recommendationFeedback: {
+        findMany: vi.fn().mockResolvedValue([{ gameId: 'g1' }]),
+        createMany: vi.fn().mockResolvedValue({ count: 1 }),
+      },
+    };
+
+    const service = new RecommendationFeedbackService(prisma as never);
+    const result = await service.recordImpressions('u1', ['g1', 'g1', 'g2', 'unknown']);
+
+    expect(result).toEqual({ recorded: 1, deduplicated: 2, invalid: 1 });
+    expect(prisma.recommendationFeedback.createMany).toHaveBeenCalledWith({
+      data: [{ userId: 'u1', gameId: 'g2', action: 'IMPRESSION' }],
+    });
+  });
+
+  it('resetForUser deletes only that user feedback rows', async () => {
+    const prisma = {
+      recommendationFeedback: {
+        deleteMany: vi.fn().mockResolvedValue({ count: 3 }),
+      },
+    };
+
+    const service = new RecommendationFeedbackService(prisma as never);
+    const deleted = await service.resetForUser('u1');
+    expect(deleted).toBe(3);
+    expect(prisma.recommendationFeedback.deleteMany).toHaveBeenCalledWith({
+      where: { userId: 'u1' },
+    });
+  });
+
+  it('countFeedback computes a capped CTR', async () => {
+    const prisma = {
+      recommendationFeedback: {
+        count: vi
+          .fn()
+          .mockResolvedValueOnce(10)
+          .mockResolvedValueOnce(2)
+          .mockResolvedValueOnce(3)
+          .mockResolvedValueOnce(100),
+      },
+    };
+
+    const service = new RecommendationFeedbackService(prisma as never);
+    const counts = await service.countFeedback(7);
+    expect(counts).toMatchObject({ clicks: 10, dismissals: 2, wishlists: 3, impressions: 100, ctr: 0.1 });
   });
 });

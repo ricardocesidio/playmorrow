@@ -334,6 +334,7 @@ components/
 | `CreatorModule` | Referral codes + commission tracking |
 | `PartnerModule` | B2B CRM (6 partner types: University, Publisher, etc.) |
 | `EventsModule` | Events listing, detail, ticketing, upcoming filter |
+| `AIModule` | Provider-agnostic AI (OpenAI/Anthropic), M23 hybrid recommendations (consent-gated), semantic search, embeddings, moderation, metrics |
 
 ### Global Guards (registered in AppModule)
 
@@ -356,7 +357,7 @@ components/
 
 | Model | Description |
 |---|---|
-| `User` | Account, auth, profile, preferences, XP/level |
+| `User` | Account, auth, profile, preferences, XP/level, `personalizationEnabled` consent (default false) + `personalizationEnabledAt` audit stamp |
 | `Studio` | Studio profile, verification, trust score, XP/level |
 | `StudioMember` | User-studio membership with `StudioRole` |
 | `Game` | Game profile, status, stats |
@@ -371,6 +372,8 @@ components/
 | `AuditLog` | Sensitive operation audit trail |
 | `SupportTicket` | Support requests with replies and history |
 | `HelpArticle` | Help center articles with categories + feedback |
+| `RecommendationFeedback` | M23 feedback events (CLICKED / DISMISSED / WISHLISTED / IMPRESSION) — CTR + dismissal signals, session-scoped reset |
+| `game_embeddings` (raw SQL) | pgvector table (`vector(1536)` + HNSW) — game title/tagline/description embeddings, nightly refresh + event-driven |
 
 ### Schema Design Principles
 
@@ -447,7 +450,6 @@ Behavior:
 
 ---
 
-
 ## Notification System
 
 - **In-app notifications**: Stored in `notifications` table, fetched via API
@@ -503,6 +505,87 @@ Behavior:
 - **Data source**: Direct Prisma queries on production tables (denormalized counters)
 - **Endpoints**: `/api/analytics/game/:id`, `/api/analytics/studio/:id`
 - **No external analytics service**: Plausible for page analytics; custom counters for game/studio data
+
+---
+
+## AI & Recommendation Pipeline (M23)
+
+Full architecture: [`docs/ai/AI_RECOMMENDATION_ARCHITECTURE.md`](docs/ai/AI_RECOMMENDATION_ARCHITECTURE.md).
+
+- **Hybrid "For You" engine**: legacy 9-scorer pool ∪ pgvector semantic candidates →
+  weighted score (0.35 base / 0.25 tag / 0.25 semantic / 0.05 fresh / 0.10
+  behavioral) → MMR diversity re-rank → per-item truthful explanation.
+- **Consent-gated (Constitution Art. 5)**: `User.personalizationEnabled`
+  defaults **false**; enforced server-side per request — opted-out users have
+  zero personal data read (`GET|PATCH /recommendations/preferences`).
+- **Feedback & metrics (C-2)**: `RecommendationFeedback` rows
+  (CLICKED / DISMISSED / WISHLISTED / IMPRESSION — 60-min dedup);
+  session-scoped reset (`DELETE /recommendations/feedback`);
+  ADMIN metrics (`GET /recommendations/metrics`).
+- **Embeddings**: `game_embeddings` (`vector(1536)` + HNSW), nightly 03:00 UTC
+  refresh + `game_published` event refresh; model/dimension config-driven
+  (`AI_EMBEDDING_MODEL`, `AI_EMBEDDING_DIMENSIONS`); dimension mismatch
+  aborts runs / skips vectors (never writes stale data); empty-catalog
+  delete guard.
+- **Kill switch**: `RECOMMENDATIONS_ENABLED=false` → instant legacy feed.
+  Rollout: `ROLLOUT_PCT` stable hash bucket (5% active → 25% → 100% gated).
+- **Semantic search**: KNN over `game_embeddings` (5-candidate cap, fallback
+  chain) wired into the search page and game detail page.
+
+### M23 Production Flow (live)
+
+```text
+User
+  ↓
+Consent / Session Context          (optional session; personalizationEnabled consent gate)
+  ↓
+Taste Signals                      (only for opted-in users: wishlist, views, tags, studio follows)
+  ↓
+Candidate Generation
+  ├── Traditional Recommendation Candidates   (legacy 9-scorer pool)
+  └── Semantic / pgvector Candidates          (KNN, top 5, θ=0.15)
+  ↓
+Hybrid Scoring                      (weights 0.35/0.25/0.25/0.05/0.10)
+  ↓
+MMR Diversity Re-ranking            (λ=0.7, deterministic sort)
+  ↓
+Explainability                      ("Because you're into X" / tag / studio / popular)
+  ↓
+Recommendation                      (ForYouResult: items, nextCursor, method, personalizationEnabled)
+  ↓
+Impression                          (POST /impressions, 60-min dedup)
+  ↓
+Click / Wishlist / Dismiss          (POST /feedback: CLICKED/WISHLISTED/DISMISSED)
+  ↓
+Feedback                            (recommendation_feedback rows)
+  ↓
+Metrics                             (GET /metrics — admin: CTR, dismissals, impressions)
+  ↓
+Evaluation                          (25% gate 2026-08-17)
+  ↓
+Future Improvements                 (selected post-gate, from M23 evidence)
+```
+
+### M23 Graceful Degradation (live)
+
+```text
+AI / Provider Available
+        ↓
+Hybrid Recommendation                (semantic + legacy merge)
+        ↓
+Normal M23 experience
+
+AI / Provider Unavailable
+        ↓
+Graceful degradation                 (try/catch → semantic returns [])
+        ↓
+Traditional recommendation path       (legacy / content / trending floor)
+        ↓
+No catastrophic failure               (always HTTP 200, never 500)
+```
+
+This degradation behavior is enforced at `HybridRecommenderService.getForYou`
+and `getSemanticCandidates` (see `docs/ai/M23_FAILURE_VALIDATION.md`).
 
 ---
 

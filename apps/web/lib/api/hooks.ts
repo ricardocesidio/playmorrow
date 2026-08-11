@@ -1559,6 +1559,7 @@ export interface ForYouResult {
   nextCursor: { score: number; gameId: string } | null;
   hasMore: boolean;
   method: 'hybrid' | 'content' | 'trending' | 'legacy';
+  personalizationEnabled: boolean | null;
 }
 
 export function useForYouFeed(pageSize = 12) {
@@ -1584,6 +1585,39 @@ export function useRecommendationFeedback() {
       qc.invalidateQueries({ queryKey: ['forYouFeed'] });
     },
   });
+}
+
+export function useRecordImpressions() {
+  return useMutation({
+    mutationFn: (gameIds: string[]) => api.post('/recommendations/impressions', { gameIds }),
+  });
+}
+
+export function useRecommendationPreferences() {
+  const qc = useQueryClient();
+  const preferences = useQuery({
+    queryKey: ['recommendationPreferences'],
+    queryFn: () => api.get<{ personalizationEnabled: boolean }>('/recommendations/preferences'),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const setPreferences = useMutation({
+    mutationFn: (personalizationEnabled: boolean) =>
+      api.patch<{ personalizationEnabled: boolean }>('/recommendations/preferences', { personalizationEnabled }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['recommendationPreferences'] });
+      qc.invalidateQueries({ queryKey: ['forYouFeed'] });
+    },
+  });
+
+  const resetHistory = useMutation({
+    mutationFn: () => api.delete<{ deleted: number }>('/recommendations/feedback'),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['forYouFeed'] });
+    },
+  });
+
+  return { preferences, setPreferences, resetHistory };
 }
 
 export function useDeleteListing() {

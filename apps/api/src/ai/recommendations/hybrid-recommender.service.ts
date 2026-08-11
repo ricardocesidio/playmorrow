@@ -35,6 +35,12 @@ export interface ForYouResult {
   nextCursor: { score: number; gameId: string } | null;
   hasMore: boolean;
   method: ForYouMethod;
+  /**
+   * Consent state for the session user: true/false when the M23 engine served
+   * the request (in-bucket, authenticated), null for anonymous or out-of-bucket
+   * sessions. The frontend uses `false` to invite the user to personalize.
+   */
+  personalizationEnabled: boolean | null;
 }
 
 interface CandidateDetail {
@@ -97,16 +103,20 @@ export class HybridRecommenderService {
     cursor?: { score: number; gameId: string } | null,
   ): Promise<ForYouResult> {
     const cappedLimit = Math.max(1, Math.min(limit, 50));
-    const personalizationOn = userId !== null && this.aiConfig.personalizationEnabled;
     const inBucket = this.aiConfig.rolloutEnabled(userId ?? 'anonymous');
 
     if (!inBucket) {
       return this.legacyResult(userId, cappedLimit, cursor);
     }
 
-    const signals = userId !== null && personalizationOn
-      ? await this.tasteSignals.gather(userId)
-      : null;
+    // Per-user consent (AI Constitution Art. 5 / Principle 3): personalization
+    // requires the user to have opted in. Opted-out users get the deterministic
+    // content path — no taste signals are gathered, nothing personal is read.
+    const userPref = userId ? await this.getUserPreference(userId) : null;
+    const personalizationOn =
+      userId !== null && userPref?.personalizationEnabled === true && this.aiConfig.personalizationEnabled;
+
+    const signals = personalizationOn ? await this.tasteSignals.gather(userId) : null;
 
     const [legacyResult, semanticHits, excludedIds] = await Promise.all([
       this.legacy.getRecommendations(userId, 'for-you', undefined, undefined, LEGACY_CANDIDATE_LIMIT),
@@ -125,7 +135,13 @@ export class HybridRecommenderService {
     ].filter((id) => !excludedIds.has(id));
 
     if (candidateIds.length === 0) {
-      return { items: [], nextCursor: null, hasMore: false, method: this.inferMethod(signals, semanticByGame.size) };
+      return {
+        items: [],
+        nextCursor: null,
+        hasMore: false,
+        method: this.inferMethod(signals, semanticByGame.size),
+        personalizationEnabled: userId ? personalizationOn : null,
+      };
     }
 
     const details = await this.fetchCandidateDetails(candidateIds);
@@ -157,12 +173,35 @@ export class HybridRecommenderService {
       nextCursor: paged.nextCursor,
       hasMore: paged.hasMore,
       method: this.inferMethod(signals, semanticByGame.size),
+      personalizationEnabled: userId ? personalizationOn : null,
     };
   }
 
   // ────────────────────────────────────────────────────────────────────────
   // Candidates
   // ────────────────────────────────────────────────────────────────────────
+
+  async getUserPreference(userId: string): Promise<{ personalizationEnabled: boolean } | null> {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { personalizationEnabled: true },
+    });
+  }
+
+  /**
+   * Persists personalization consent (AI Constitution Art. 5). Enabling
+   * stamps `personalizationEnabledAt` (consent audit trail); disabling clears
+   * it. The flag lives on the User row, so enforcement is server-side.
+   */
+  async setUserPreference(userId: string, enabled: boolean): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        personalizationEnabled: enabled,
+        personalizationEnabledAt: enabled ? new Date() : null,
+      },
+    });
+  }
 
   private async getSemanticCandidates(signals: TasteSignals): Promise<Array<{ gameId: string; score: number }>> {
     try {
@@ -176,6 +215,16 @@ export class HybridRecommenderService {
       const embeddings = await this.embeddingService.embedTexts(texts);
       const tasteVector = this.averageVectors(embeddings.map((e) => e.embedding));
       if (!tasteVector) return [];
+
+      // Dimension guard: a model/provider swap that changes the vector size
+      // must fail loudly here (never query the DB with a mismatched vector).
+      if (tasteVector.length !== this.aiConfig.embeddingDimensions) {
+        this.logger.error(
+          `Embedding dimension mismatch: got ${tasteVector.length}, configured ${this.aiConfig.embeddingDimensions}. ` +
+            'Re-embed with AI_EMBEDDING_DIMENSIONS aligned to the DB column.',
+        );
+        return [];
+      }
 
       return this.embeddingRepository.search(tasteVector, SEMANTIC_CANDIDATE_LIMIT, 0.15);
     } catch (err) {
@@ -223,6 +272,7 @@ export class HybridRecommenderService {
   private async fetchCandidateDetails(gameIds: string[]): Promise<CandidateDetail[]> {
     const games = await this.prisma.game.findMany({
       where: { id: { in: gameIds }, isPublished: true },
+      orderBy: { id: 'asc' },
       select: {
         id: true,
         title: true,
@@ -373,10 +423,13 @@ export class HybridRecommenderService {
     limit: number,
     cursor?: { score: number; gameId: string } | null,
   ): { items: CandidateDetail[]; nextCursor: { score: number; gameId: string } | null; hasMore: boolean } {
+    // Deterministic pagination: ranking input is ordered by gameId and MMR
+    // output is stable, so the cursor is a position in the ranked list —
+    // no score comparison, no skipped/duplicated items across pages.
     let startIdx = 0;
     if (cursor) {
-      const idx = ranked.findIndex((g) => g.score <= cursor.score && g.id !== cursor.gameId);
-      if (idx !== -1) startIdx = idx;
+      const idx = ranked.findIndex((g) => g.id === cursor.gameId);
+      if (idx !== -1) startIdx = idx + 1;
     }
 
     const page = ranked.slice(startIdx, startIdx + limit);
@@ -431,7 +484,10 @@ export class HybridRecommenderService {
       return { reason, reasonType: type };
     }
 
-    return { reason: 'Popular on Playmorrow', reasonType: 'popular' };
+    // Truthful last resort — never claims popularity or affinity we cannot
+    // back up (AI Constitution Art. 3 / Principle 2). The game IS in the feed,
+    // so "Recommended for you" is always factually correct.
+    return { reason: 'Recommended for you', reasonType: 'popular' };
   }
 
   private closestSignalGame(entry: CandidateDetail, signals: TasteSignals) {
@@ -495,6 +551,7 @@ export class HybridRecommenderService {
       nextCursor: result.nextCursor,
       hasMore: result.hasMore,
       method: 'legacy',
+      personalizationEnabled: null,
     };
   }
 

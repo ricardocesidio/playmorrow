@@ -29,6 +29,7 @@ describe('ForYouController (e2e) — M23 hybrid feed', () => {
   let httpServer: unknown;
   let prisma: PrismaService;
   let sessionCookie: string;
+  let userId: string;
   let gameId: string;
 
   beforeAll(async () => {
@@ -56,6 +57,7 @@ describe('ForYouController (e2e) — M23 hybrid feed', () => {
 
     const user = await registerTestUser(httpServer, prisma, EMAIL, PASSWORD);
     sessionCookie = user.sessionCookie;
+    userId = user.userId;
 
     const studio = await prisma.studio.create({
       data: {
@@ -137,6 +139,95 @@ describe('ForYouController (e2e) — M23 hybrid feed', () => {
       where: { gameId, action: 'DISMISSED' },
     });
     expect(count).toBeGreaterThan(0);
+  });
+
+  it('personalization preference is opt-in and defaults to false', async () => {
+    const res = await request(httpServer)
+      .get('/api/recommendations/preferences')
+      .set('Cookie', [`playmorrow_session=${sessionCookie}`])
+      .expect(200);
+    expect(res.body).toEqual({ personalizationEnabled: false });
+
+    await request(httpServer)
+      .patch('/api/recommendations/preferences')
+      .set('Cookie', [`playmorrow_session=${sessionCookie}`])
+      .send({ personalizationEnabled: true })
+      .expect(200);
+
+    const after = await request(httpServer)
+      .get('/api/recommendations/preferences')
+      .set('Cookie', [`playmorrow_session=${sessionCookie}`])
+      .expect(200);
+    expect(after.body).toEqual({ personalizationEnabled: true });
+
+    const row = await prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { personalizationEnabled: true, personalizationEnabledAt: true },
+    });
+    expect(row.personalizationEnabled).toBe(true);
+    expect(row.personalizationEnabledAt).not.toBeNull();
+  });
+
+  it('personalization endpoints require a session (anonymous 401)', async () => {
+    await request(httpServer).get('/api/recommendations/preferences').expect(401);
+    await request(httpServer)
+      .patch('/api/recommendations/preferences')
+      .send({ personalizationEnabled: true })
+      .expect(401);
+    await request(httpServer).post('/api/recommendations/impressions').send({ gameIds: [gameId] }).expect(401);
+    await request(httpServer).delete('/api/recommendations/feedback').expect(401);
+  });
+
+  it('POST /recommendations/impressions dedupes within the window and ignores unknown games', async () => {
+    const first = await request(httpServer)
+      .post('/api/recommendations/impressions')
+      .set('Cookie', [`playmorrow_session=${sessionCookie}`])
+      .send({ gameIds: [gameId, gameId, 'no-such-game'] })
+      .expect(201);
+    expect(first.body).toEqual({ recorded: 1, deduplicated: 1, invalid: 1 });
+
+    const second = await request(httpServer)
+      .post('/api/recommendations/impressions')
+      .set('Cookie', [`playmorrow_session=${sessionCookie}`])
+      .send({ gameIds: [gameId] })
+      .expect(201);
+    expect(second.body).toEqual({ recorded: 0, deduplicated: 1, invalid: 0 });
+
+    const count = await prisma.recommendationFeedback.count({
+      where: { action: 'IMPRESSION', gameId },
+    });
+    expect(count).toBe(1);
+  });
+
+  it('DELETE /recommendations/feedback only clears the session users own history', async () => {
+    await request(httpServer)
+      .post('/api/recommendations/impressions')
+      .set('Cookie', [`playmorrow_session=${sessionCookie}`])
+      .send({ gameIds: [gameId] })
+      .expect(201);
+    await request(httpServer)
+      .post('/api/recommendations/feedback')
+      .set('Cookie', [`playmorrow_session=${sessionCookie}`])
+      .send({ gameId, action: 'CLICKED' })
+      .expect(201);
+
+    const res = await request(httpServer)
+      .delete('/api/recommendations/feedback')
+      .set('Cookie', [`playmorrow_session=${sessionCookie}`])
+      .expect(200);
+    expect(res.body.deleted).toBeGreaterThanOrEqual(2);
+
+    const leftover = await prisma.recommendationFeedback.count({
+      where: { userId },
+    });
+    expect(leftover).toBe(0);
+  });
+
+  it('GET /recommendations/metrics is ADMIN-only', async () => {
+    await request(httpServer)
+      .get('/api/recommendations/metrics?days=7')
+      .set('Cookie', [`playmorrow_session=${sessionCookie}`])
+      .expect(403);
   });
 
   it('POST /recommendations/refresh-embeddings requires ADMIN', async () => {

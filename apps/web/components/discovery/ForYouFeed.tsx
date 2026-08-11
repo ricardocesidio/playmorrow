@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, Gamepad2, Loader2, Sparkles, X } from 'lucide-react';
 import { useAuth } from '@/lib/api/auth-context';
-import { useForYouFeed, useRecommendationFeedback, type ForYouItem } from '@/lib/api/hooks';
+import { useForYouFeed, useRecommendationFeedback, useRecordImpressions, type ForYouItem } from '@/lib/api/hooks';
 import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
 
@@ -40,13 +40,26 @@ export default function ForYouFeed() {
 
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const feedback = useRecommendationFeedback();
+  const impressions = useRecordImpressions();
+  const recorded = useRef<Set<string>>(new Set());
 
   const items = useMemo(
     () => (data?.pages ?? []).flatMap((p) => p.items).filter((i) => !dismissed.has(i.gameId)),
     [data, dismissed],
   );
 
+  // Impression capture (CTR denominator). Each game counts once per client
+  // session; the API additionally dedupes within a 60-minute window.
+  useEffect(() => {
+    if (!isAuthenticated || items.length === 0) return;
+    const fresh = items.map((i) => i.gameId).filter((id) => !recorded.current.has(id));
+    if (fresh.length === 0) return;
+    fresh.forEach((id) => recorded.current.add(id));
+    impressions.mutate(fresh);
+  }, [isAuthenticated, items, impressions]);
+
   const method = data?.pages[0]?.method ?? 'legacy';
+  const personalizationEnabled = data?.pages[0]?.personalizationEnabled ?? null;
 
   const onDismiss = (item: ForYouItem) => {
     setDismissed((prev) => new Set(prev).add(item.gameId));
@@ -115,6 +128,22 @@ export default function ForYouFeed() {
             Discover all <ArrowRight className="ml-1 inline size-3" aria-hidden="true" />
           </Link>
         </div>
+
+        {isAuthenticated && personalizationEnabled === false && (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border border-cyan/25 bg-cyan/5 px-4 py-3">
+            <p className="font-mono text-[0.6rem] uppercase tracking-widest text-cyan">
+              <Sparkles className="mr-1.5 inline size-3.5" aria-hidden="true" />
+              Your feed is not personalized yet. Turn it on to get recommendations built around your taste — with an
+              explanation for every pick.
+            </p>
+            <Link
+              href="/settings/personalization"
+              className="clip-corner border border-cyan/40 bg-cyan/10 px-3 py-1.5 font-mono text-[0.55rem] uppercase tracking-widest text-cyan transition hover:bg-cyan/20 focus-visible:ring-2 focus-visible:ring-cyan"
+            >
+              Personalize
+            </Link>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {items.map((item) => (

@@ -1,10 +1,18 @@
 # M23 — Recommendation Engine (Hybrid)
 
 **Milestone:** M23 — Recommendation Engine (AI & Platform Intelligence)
-**Status:** 🟢 IMPLEMENTED — governed 5% rollout (2026-08-09)
+**Status:** 🟢 LIVE — governed 5% rollout, hardened (2026-08-09)
 **Plan:** [`docs/ai/M23_IMPLEMENTATION_PLAN.md`](M23_IMPLEMENTATION_PLAN.md)
-**Certification:** [`docs/releases/M23_CERTIFICATION.md`](../releases/M23_CERTIFICATION.md)
-**Related:** [AI Architecture](AI_ARCHITECTURE.md) · [AI Constitution](../../docs/strategy/AI_CONSTITUTION.md)
+**Certifications:** [`docs/releases/M23_CERTIFICATION.md`](../releases/M23_CERTIFICATION.md) ·
+[`docs/releases/M23_FINAL_HARDENING_CERTIFICATION.md`](../releases/M23_FINAL_HARDENING_CERTIFICATION.md) (🟢 READY FOR 25% GATE)
+**Architecture:** [`AI_RECOMMENDATION_ARCHITECTURE.md`](AI_RECOMMENDATION_ARCHITECTURE.md) (current, authoritative)
+**Related:** [AI Constitution](../../docs/strategy/AI_CONSTITUTION.md) · [Rollout](M23_ROLLOUT.md) · [Metrics](M23_METRICS.md)
+
+> **2026-08-09 (Final Hardening):** personalization is now consent-gated
+> (default off), impressions/CTR are instrumented (C-2), the embedding model
+> is config-driven (C-3/T-1), refresh has dimension-abort + empty-catalog
+> guards, ordering is deterministic, and the explainability fallback never
+> fabricates. See the final hardening certification.
 
 ---
 

@@ -1,9 +1,9 @@
 # Playmorrow — Engineering Handoff
 
 **Prepared for:** Incoming senior engineering team  
-**Date:** 2026-08-05 (final)  
-**Current version:** v0.85-beta
-**Status:** Phase 5 complete. M23 (Recommendation Engine) certified for governed 5% rollout. 2FA + GDPR + provider-agnostic fix + staging config deployed. Documentation consolidation in progress.
+**Date:** 2026-08-10  
+**Current version:** v0.85-beta  
+**Status:** Phase 5 complete. M23 (Recommendation Engine) **deployed to production 2026-08-10 under an explicit OBSERVATION FREEZE** — 5% governed rollout active, kill switch tested, 7-day baseline window active (2026-08-10 → 2026-08-17), **25% gate LOCKED**. Do NOT start M22/M24/M25/M26 and do NOT modify M23 scoring/model/UX/metrics until the gate is evaluated. See `docs/ai/M23_OBSERVATION_FREEZE.md`. Documentation consolidation in progress.
 
 ---
 
@@ -57,19 +57,21 @@ Self-certifications (Platinum, Gold, RC3.x) have been retired. Current honest as
 |---|---|---|
 | Phase 1-4 | Complete | Foundation, discovery, ops, automation |
 | Phase 5 (Ecosystem) | Backend complete, hardening in progress | 22 endpoints, 11 integration tests, needs E2E tests |
-| Phase 6 (AI) | Started — M23 certified | Hybrid For You feed (pgvector semantic + legacy floor) at governed 5% rollout; M22/M24/M25/M26 pending. **Catalog publishing path shipped 2026-08-10** (`POST /api/games/:slug/publish`). |
-
+| Phase 6 (AI) | **M23 DEPLOYED 2026-08-10** | Hybrid For You feed (pgvector semantic + legacy floor) **deployed to production** — endpoints live, migrations applied, 5% governed rollout active, kill switch tested, 7-day baseline window started. M22/M24/M25/M26 pending. **Catalog publishing path shipped 2026-08-10** (`POST /api/games/:slug/publish`). |
 
 **Game publishing:** `POST /api/games/:slug/publish` (authorized OWNER/ADMIN/MODERATOR via `assertStudioAccess`, completeness gate, idempotent, transactional audit `GAME_PUBLISHED`, `game_published` EventBus + `GAME_PUBLISHED` feed on real transition). Public catalog (`GET /api/games`) + search games branch filter `isPublished: true`. Studio dashboard/owner queries unaffected. `isPublished` is not exposed on Create/Update DTOs (server-authoritative). See `docs/releases/M23_CATALOG_READINESS_CERTIFICATION.md`.
 
-> **✅ Phase 6 partially unblocked (2026-08-09).** P0 production-DB isolation is
-> certified (2026-08-07). M23 is 🟢 CERTIFIED for governed 5% rollout
-> (`docs/releases/M23_CERTIFICATION.md`). M22/M24/M25/M26 remain **not started**;
-> production deploy of AI features is still gated by the P0.1.1 conditional
-> certification (GitHub `gh` secret registration for backups).
+> **✅ Phase 6 DEPLOYED (2026-08-10) — OBSERVATION FREEZE.** P0 production-DB
+> isolation is certified (2026-08-07). M23 is 🟢 **DEPLOYED & ACTIVE — OBSERVATION
+> FREEZE** — endpoints live, migrations applied, 5% rollout active, kill switch
+> tested, 7-day baseline window active 2026-08-10 → 2026-08-17, **25% gate
+> LOCKED**. M22/M24/M25/M26 remain **not started** and must not begin until the
+> M23 25% gate is evaluated. Freeze policy: only P0/P1 emergencies may change
+> M23 components; log any such change in `docs/ai/M23_FREEZE_CHANGE_LOG.md`.
+> conditional certification (GitHub `gh` secret registration for backups).
 | Infrastructure | Render free tier + Vercel + Neon | Zero cost; cold start latency |
 | Security | Strong fundamentals | CSRF HMAC, CSP nonce, 2FA pending |
-| Tests | 368+ total, 90 AI tests | Phase 5 needs E2E coverage |
+| Tests | **525 total** (51 files), 122 AI tests | Phase 5 needs E2E coverage; M23 suite complete (35 tests in recommendations module) |
 
 ### Critical Bugs (All Resolved)
 
@@ -91,12 +93,12 @@ Self-certifications (Platinum, Gold, RC3.x) have been retired. Current honest as
 | **Phase 4 — Platform** | M10–M15 | Security hardening (global HMAC CSRF, CSP nonce, DOMPurify, rate limiting), Public API + SDK + CLI, production hardening, professionalization audit, final UI polish (devlog blog redesign, push notifications, SSE, avatar, email verification) |
 | **Phase 5 — Ecosystem** | M16–M21 | Marketplace (Stripe Connect, PaymentIntent, PCI SAQ A), Publisher (revenue dashboard), Funding (scope — crowdfunding model defined), Creator (referral codes + commissions), Partner (B2B CRM), Events (listings, ticketing) |
 
-### Phase 6 — AI & Platform Intelligence (Started — M23 Certified)
+### Phase 6 — AI & Platform Intelligence (M23 Deployed 2026-08-10)
 
 | Milestone | Focus | Status |
 |---|---|---|
 | M22 | AI Assistant (context-aware, devlog drafts, studio insights) | Foundation built (35 files, 82 tests), features pending |
-| **M23** | **Recommendation Engine (hybrid)** | **🟢 CERTIFIED (2026-08-09)** — For You feed: pgvector semantic (taste signals, MMR) over legacy floor; feedback events; nightly embedding refresh; semantic search wired into search + game detail. 505/505 tests, live-verified graceful degradation (Article 8), 5% governed rollout, kill switch tested. Docs: `docs/ai/M23_RECOMMENDATION_ENGINE.md`, `docs/ai/M23_ROLLOUT.md`, `docs/releases/M23_CERTIFICATION.md` |
+| **M23** | **Recommendation Engine (hybrid)** | **🟢 DEPLOYED 2026-08-10 — OBSERVATION FREEZE** — For You feed: pgvector semantic (taste signals, MMR) over legacy floor; feedback events; nightly embedding refresh; semantic search wired into search + game detail. **525/525 tests, migrations applied, 5% rollout active, kill switch tested, 7-day baseline window active, 25% gate LOCKED.** Docs: `docs/ai/AI_RECOMMENDATION_ARCHITECTURE.md`, `docs/ai/M23_ROLLOUT.md`, `docs/ai/M23_OBSERVATION_FREEZE.md`, `docs/ai/M23_25_PERCENT_GATE.md`, `docs/releases/M23_PRODUCTION_DEPLOYMENT_CERTIFICATION.md`, `docs/releases/M23_PRODUCTION_OBSERVATION_CERTIFICATION.md` |
 | M24 | AI Moderation (toxicity detection, auto-flagging, triage) | Planned (deferred to >50K DAU) |
 | M25 | Studio Intelligence (sentiment analysis, store page optimizer, competitive benchmarking) | Planned (6 weeks) |
 | M26 | Semantic Search (embeddings, hybrid keyword+semantic, natural language queries) | Planned (6 weeks) |

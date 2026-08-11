@@ -60,16 +60,18 @@ export class GameEmbeddingRepository {
     return rows.length > 0 ? this.mapRow(rows[0]) : null;
   }
 
-  async findAll(): Promise<Array<{ gameId: string; embedding: number[]; updatedAt: Date; version: number }>> {
+  async findAll(): Promise<Array<{ gameId: string; embedding: number[]; updatedAt: Date; version: number; dimensions: number; model: string }>> {
     const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(
       `SELECT "game_id"::text AS "gameId", "embedding"::text AS "embedding",
-              "version", "updated_at" AS "updatedAt"
+              "version", "dimensions", "model", "updated_at" AS "updatedAt"
        FROM "game_embeddings"`,
     );
     return rows.map((r) => ({
       gameId: String(r.gameId),
       embedding: this.parseVector(String(r.embedding)),
       version: Number(r.version),
+      dimensions: Number(r.dimensions),
+      model: String(r.model),
       updatedAt: new Date(String(r.updatedAt)),
     }));
   }

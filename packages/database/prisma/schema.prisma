@@ -177,6 +177,11 @@ model User {
   isVerified   Boolean  @default(false)
   accountType                 AccountType @default(PLAYER)
   isOnboardingCompleted       Boolean     @default(false)
+  /// M23: explicit consent for personalized recommendations (AI Constitution Art. 5).
+  /// Defaults to false — personalization is opt-in (Principle 3: content-based by default).
+  personalizationEnabled       Boolean     @default(false)
+  /// When the user last enabled personalization (consent audit trail).
+  personalizationEnabledAt     DateTime?
   termsAcceptedAt             DateTime?
   privacyAcceptedAt           DateTime?
   communityGuidelinesAcceptedAt DateTime?
@@ -1421,6 +1426,8 @@ enum RecommendationFeedbackAction {
   CLICKED
   DISMISSED
   WISHLISTED
+  /// Impression — a game card shown in the For You feed (CTR denominator).
+  IMPRESSION
 }
 
 model RecommendationFeedback {

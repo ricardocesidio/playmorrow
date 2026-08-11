@@ -41,6 +41,128 @@ publish games through the product.
 - e2e: games controller spec now 34 tests (auth matrix, completeness, idempotency, audit, events, catalog/search presence, draft isolation, forged-payload rejection)
 - M23 remains under **Observation Freeze** — no frozen M23 component touched (freeze log entry added)
 
+### M23 Observation Freeze — Governed Production Experiment (2026-08-10)
+
+Entered an explicit **M23 OBSERVATION FREEZE** (2026-08-10 → 2026-08-17) to protect the integrity of the 7-day production baseline. The 25% gate is **LOCKED** until evaluated; no next AI milestone (M22/M24/M25/M26) begins until then.
+
+**Governance established:**
+- `docs/ai/M23_OBSERVATION_FREEZE.md` — period (08-10→08-17), 16 frozen components (weights, candidates, semantic search, embedding model/dims, MMR, ranking, personalization, rollout %, UX, explanations, feedback/CTR/impression/dismissal/wishlist semantics), allowed P0/P1 emergency changes, hard no-optimize-for-baseline rule
+- `docs/ai/M23_FREEZE_CHANGE_LOG.md` — empty log (freeze unbroken)
+
+**Gate definition:**
+- `docs/ai/M23_25_PERCENT_GATE.md` — summary metric table (M23 / baseline / target / result; INSUFFICIENT DATA policy), PROMOTE/EXTEND/ROLLBACK decision matrix, updated post-decision actions
+
+**Baseline & causality:**
+- `docs/ai/M23_BASELINE_COMPARISON.md` §5.1 — explicit conclusion: **no valid control group exists; insufficient evidence to establish causal improvement attributable to M23** (Options A/B/C not viable → D)
+- `docs/ai/M23_METRIC_DEFINITIONS_AUDIT.md` — 10 metrics audited (event/storage/calc/population/invalidation/dedup/verifiability)
+- `docs/ai/M23_DATA_QUALITY_AUDIT.md` — read-only audit; production catalog empty (0 games) → discovery metrics expected **INSUFFICIENT DATA** at gate unless games published; no fabrication
+- `docs/ai/M23_FINDINGS_CLASSIFICATION.md` — FV-1 (embedding timeout), FV-2 (circuit breaker), SEC-1 (cursor size) all classified **non-blocking / technical debt**; none implemented during freeze
+- `docs/ai/M23_OBSERVATION_STATUS.md` — kill-switch re-verification (evidence-based, no toggling), North Star preservation (discovery > engagement), 25% decision definition, next-milestone policy
+
+**Architecture & docs sync:** `ARCHITECTURE.md` (live production flow + graceful-degradation diagrams), `README.md`, `STATUS.md`, `docs/handoff/HANDOFF.md`, `CHANGELOG.md`, `docs/ai/M23_ROLLOUT.md`, `docs/ai/M23_METRICS.md`, `docs/releases/M23_PRODUCTION_OBSERVATION_CERTIFICATION.md` all updated to reflect the freeze state.
+
+**Verdict:** 🟢 **OBSERVATION FREEZE ACTIVE** — 25% gate LOCKED, next decision 2026-08-17.
+
+### M23 Production Observation — Governance Validation Complete (2026-08-10)
+
+Completed the full pre-baseline governance validation for the M23 production observation phase. All 12 governance areas verified with documented evidence on day 1 of the 7-day baseline window.
+
+**Validation Reports Created:**
+- `docs/ai/M23_FAILURE_VALIDATION.md` — Failure mode matrix + kill-switch verification (Art. 8)
+- `docs/ai/M23_COST_GOVERNANCE.md` — Cost model & projections (~$0.15/mo at 5%, 0.03% of $500 ceiling)
+- `docs/ai/M23_PERFORMANCE_REVIEW.md` — Production latency measured (p50 41ms, p95 42ms, 0% errors)
+- `docs/ai/M23_SECURITY_REVIEW.md` — All endpoints authN + throttled, admin role-gated, consent default-off
+- `docs/releases/M23_PRODUCTION_OBSERVATION_CERTIFICATION.md` — Final certification of the observation phase
+
+**Key Measurements (2026-08-10):**
+| Metric | Value |
+|---|---|
+| Feed p50 | 41.0 ms (vs 3 s budget) |
+| Feed p95 | 41.7 ms |
+| Error rate | 0% |
+| Kill-switch propagation | < 60 s (zero-deploy) |
+| Monthly AI cost at 5% | ~$0.15 |
+
+**25% Gate Criteria Defined:** CTR +25% vs floor, dismissal <15%, error <2%, opt-in 30–60%, cost <$1/mo, latency p95 <3s. Decision scheduled 2026-08-17.
+
+**Verdict:** 🟢 **GOVERNANCE VALIDATION COMPLETE — 7-DAY BASELINE WINDOW ACTIVE.** Next decision point 2026-08-17.
+
+### M23 Production Deployment & Baseline Activation — 🟢 DEPLOYED & 5% ROLLOUT ACTIVE (2026-08-10)
+
+Successfully deployed M23 Hybrid Recommendation Engine to production and activated the governed 5% rollout.
+
+**Deployment Summary:**
+- **Backend:** Deployed to Fly.io (`playmorrow-api-aged-mountain-9542`) with release_command running `prisma migrate deploy` — both M23 migrations applied successfully
+- **Frontend:** Vercel deployment already contains ForYouFeed component — now successfully calls live API endpoints
+- **Database:** Both M23 migrations applied to production Neon branch
+- **Feature Flags:** Defaults active (RECOMMENDATIONS_ENABLED=true, ROLLOUT_PCT=5, PERSONALIZE=true, SEMANTIC=true) — 5% governed rollout active
+- **Kill Switch:** Tested and verified — RECOMMENDATIONS_ENABLED=false instantly returns legacy feed, re-enabled successfully
+
+**Production API Verification:**
+| Endpoint | Status | Notes |
+|---|---|---|
+| `GET /api/recommendations/for-you` | ✅ 200 | Returns legacy feed (0 games in production) |
+| `GET /api/recommendations/preferences` | ✅ 401 | Requires auth (correct) |
+| `POST /api/recommendations/impressions` | ✅ 401 | Requires auth (correct) |
+| `POST /api/recommendations/feedback` | ✅ 401 | Requires auth (correct) |
+| `GET /api/recommendations/metrics` | ✅ 401 | Requires admin (correct) |
+| `GET /api/ai/recommendations` (legacy) | ✅ 401 | Works as expected |
+
+**Kill Switch Test:** RECOMMENDATIONS_ENABLED=false → instant legacy fallback verified; re-enabled successfully.
+
+**Frontend:** Vercel deployment at `playmorrow.vercel.app` loads ForYouFeed component which now successfully calls the live API (shows empty state since 0 games in production).
+
+**Quality Gates:** All pass — 525/525 tests, TypeScript 7/7, ESLint 0 errors, Build 6/6, `pnpm verify` clean.
+
+**Baseline Window:** Started 2026-08-10 — 7-day observation period for CTR, dismissal rate, opt-in rate, latency, cost metrics before 25% gate evaluation.
+
+**Decision:** 🟢 **M23 DEPLOYED & CERTIFIED FOR GOVERNED 5% OBSERVATION** — 25% gate remains locked until 7-day baseline completes with real production evidence.
+
+**Docs:** `docs/releases/M23_PRODUCTION_DEPLOYMENT_CERTIFICATION.md`
+
+### M23 Production Validation — Deployment Required — 🔴 HISTORICAL (2026-08-09)
+
+### M23 Final Hardening — Consent, Impressions, Config-Driven Embeddings — 🟢 READY FOR 25% GATE (2026-08-09)
+
+Closes all pre-25% conditions (C-1…C-4) and findings (F-1…F-6) from the M23
+certification. Verdict: `docs/releases/M23_FINAL_HARDENING_CERTIFICATION.md`.
+
+**Consent-gated personalization (C-1/F-1, Constitution Art. 5):**
+- `User.personalizationEnabled Boolean @default(false)` +
+  `personalizationEnabledAt DateTime?` (migration `20260809010000_m23_hardening`, additive)
+- `GET|PATCH /recommendations/preferences` — server-side enforcement per
+  request; opted-out users have zero personal data read
+- `/settings/personalization` page (toggle + one-click history reset),
+  settings-nav link, invitation banner on the feed
+- Feed response exposes `personalizationEnabled` (null for anonymous)
+
+**Impression instrumentation (C-2/F-2):**
+- `RecommendationFeedbackAction += IMPRESSION`
+- `POST /recommendations/impressions` — published-game validation, 50-id cap,
+  60-min per-(user,game) dedup, recorded/deduplicated/invalid report
+- `GET /recommendations/metrics` (ADMIN) — clicks/dismissals/wishlists/
+  impressions/CTR over 1–90 days
+- `ForYouFeed` captures impressions once per card per client session
+
+**Config-driven embeddings (C-3/F-3/T-1):**
+- `EmbeddingService` passes configured `AI_EMBEDDING_MODEL` to the provider
+  (kills the hardcoded fallback); `AIConfig.embeddingDimensions`
+  (`AI_EMBEDDING_DIMENSIONS`, default 1536)
+- Refresh re-embeds on model/dimension change; run-start dimension abort +
+  per-vector skip; empty-catalog `deleteOrphans` guard (F-5/T-3)
+
+**Determinism + explainability:**
+- Deterministic candidate ordering + positional cursor pagination (F-4/T-2)
+- Fallback reason "Popular on Playmorrow" → "Recommended for you" (never
+  fabricates popularity — Art. 3 / Principle 2)
+
+**Reset + WISHLISTED (C-4/F-6):**
+- `DELETE /recommendations/feedback` — session-scoped AI-history reset
+- WISHLISTED retained as documented API contract (frontend wiring deferred)
+
+**Tests:** 525/525 (51 files, +20). **Gates:** typecheck ✅, lint 0 errors ✅,
+`pnpm verify` 6/6 ✅. Migration applied to dev DB (40/40, zero drift).
+
 ### M23 — Recommendation Engine (Hybrid) — 🟢 CERTIFIED (2026-08-09)
 
 Phase 6 milestone M23 implemented and certified for governed 5% rollout.

@@ -4,6 +4,9 @@ primary_region = 'ams'
 [build]
   dockerfile = 'apps/api/Dockerfile'
 
+[deploy]
+  release_command = "sh -c 'cd packages/database && npx prisma migrate deploy --schema=prisma/schema.prisma'"
+
 [http_service]
   internal_port = 4000
   force_https = true

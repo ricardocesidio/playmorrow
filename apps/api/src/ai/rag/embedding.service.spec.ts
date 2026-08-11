@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmbeddingService } from './embedding.service';
 import { ProviderFactory } from '../providers/provider.factory';
+import { AIConfig } from '../config/ai.config';
 import type { AIProvider } from '../interfaces/ai-provider.interface';
 
 describe('EmbeddingService', () => {
@@ -12,6 +13,11 @@ describe('EmbeddingService', () => {
     tokens: 12,
     model: 'text-embedding-3-small',
   });
+
+  const mockConfig = {
+    embeddingModel: 'text-embedding-3-small',
+    embeddingDimensions: 1536,
+  } as unknown as AIConfig;
 
   beforeEach(async () => {
     mockProvider = {
@@ -31,6 +37,7 @@ describe('EmbeddingService', () => {
       providers: [
         EmbeddingService,
         { provide: ProviderFactory, useValue: mockFactory },
+        { provide: AIConfig, useValue: mockConfig },
       ],
     }).compile();
 
@@ -51,6 +58,7 @@ describe('EmbeddingService', () => {
     expect(embedding.embedding).toHaveLength(1536);
     expect(mockProvider.embedTexts).toHaveBeenCalledWith(
       ['This is a game description'],
+      { model: 'text-embedding-3-small' },
     );
   });
 
@@ -65,6 +73,7 @@ describe('EmbeddingService', () => {
     expect(results).toHaveLength(3);
     expect(mockProvider.embedTexts).toHaveBeenCalledWith(
       ['Text A', 'Text B', 'Text C'],
+      { model: 'text-embedding-3-small' },
     );
   });
 

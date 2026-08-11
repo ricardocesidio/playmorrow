@@ -17,6 +17,16 @@ export class AIConfig {
     return this.config.get('AI_EMBEDDING_MODEL', 'text-embedding-3-small');
   }
 
+  /**
+   * Expected embedding vector dimension. The DB column is `vector(1536)`;
+   * changing this requires a column migration + full re-embed (see
+   * docs/ai/AI_RECOMMENDATION_ARCHITECTURE.md). All callers validate against
+   * this value — mismatched vectors fail loudly, never silently truncated.
+   */
+  get embeddingDimensions(): number {
+    return parseInt(this.config.get('AI_EMBEDDING_DIMENSIONS', '1536'), 10);
+  }
+
   get maxTokens(): number {
     return parseInt(this.config.get('AI_MAX_TOKENS', '4096'));
   }

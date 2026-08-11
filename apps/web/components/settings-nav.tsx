@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { User, Settings, Bell } from 'lucide-react';
+import { User, Settings, Bell, Sparkles } from 'lucide-react';
 
 const links = [
   { href: '/settings/profile', label: 'Profile', icon: User },
   { href: '/settings/account', label: 'Account', icon: Settings },
   { href: '/settings/notifications', label: 'Notifications', icon: Bell },
+  { href: '/settings/personalization', label: 'Personalization', icon: Sparkles },
 ];
 
 export function SettingsNav() {

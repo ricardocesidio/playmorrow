@@ -1071,6 +1071,227 @@ C-3/C-4 minor). Docs: `docs/ai/M23_RECOMMENDATION_ENGINE.md`,
 
 **Updated:** STATUS.md, CHANGELOG.md, docs/handoff/HANDOFF.md, AGENTS.md
 
+### Session 27 — M23 Final Hardening: Consent, Impressions, Config-Driven Embeddings (2026-08-09)
+
+Closes all pre-25% conditions (C-1…C-4) and findings (F-1…F-6) from the M23
+certification. **Verdict: 🟢 READY FOR 25% GATE.**
+
+**Consent-gated personalization (C-1 / F-1):**
+- Schema: `User.personalizationEnabled Boolean @default(false)` +
+  `personalizationEnabledAt DateTime?` (migration `20260809010000_m23_hardening`,
+  additive)
+- Enforcement in `HybridRecommenderService.getForYou`: opted-out users get
+  `signals = null` — **zero personal data read** (Art. 5 / Principle 3)
+- Endpoints: `GET|PATCH /recommendations/preferences` (session-scoped)
+- UI: `/settings/personalization` (toggle + one-click history reset), settings-nav
+  link, invitation banner on the feed for opted-out users
+- `ForYouResult.personalizationEnabled` (null for anonymous/out-of-bucket)
+
+**Impression instrumentation (C-2 / F-2):**
+- `RecommendationFeedbackAction += IMPRESSION` (enum extension)
+- `POST /recommendations/impressions` — published validation, 50-id cap,
+  60-min dedup, recorded/deduplicated/invalid counts
+- `GET /recommendations/metrics` (ADMIN) — clicks/dismissals/wishlists/
+  impressions/CTR over 1–90 days
+- Frontend `ForYouFeed` captures impressions once per card per session
+
+**Config-driven embeddings (C-3 / F-3 / T-1):**
+- `EmbeddingService` passes configured `AI_EMBEDDING_MODEL` to provider
+  (kills hardcoded fallback); `AIConfig.embeddingDimensions`
+  (`AI_EMBEDDING_DIMENSIONS`, default 1536) — single source of truth
+- Refresh re-embeds on model/dimension change; run-start dimension abort +
+  per-vector skip; empty-catalog `deleteOrphans` guard (F-5 / T-3)
+
+**Determinism + explainability (F-4 / T-2):**
+- Deterministic ordering + positional cursor pagination
+- Fallback "Popular on Playmorrow" → "Recommended for you" (never fabricates)
+
+**Feedback reset + WISHLISTED (C-4 / F-6):**
+- `DELETE /recommendations/feedback` — session-scoped AI-history reset
+- WISHLISTED retained as documented API contract (frontend wiring deferred)
+
+**Tests:** 525/525 (51 files, +20 vs 505 baseline): consent gate, anonymity,
+hybrid path, dim degradation, truthful explanations, refresh abort/empty-catalog/
+model-change/per-vector-skip, impression dedup, reset scoping, CTR counts,
+e2e prefs/impressions/reset/metrics/anonymous.
+
+**Gates:** typecheck ✅, lint 0 errors ✅, `pnpm verify` 6/6 ✅. Migration
+applied to dev DB (40/40, zero drift).
+
+**Docs:** `docs/ai/AI_RECOMMENDATION_ARCHITECTURE.md` (new), `M23_ROLLOUT.md`,
+`M23_METRICS.md`, `M23_SECURITY.md`, `M23_RECOMMENDATION_ENGINE.md`,
+`docs/releases/M23_FINAL_HARDENING_CERTIFICATION.md`, ARCHITECTURE.md,
+README.md, STATUS.md, CHANGELOG.md, HANDOFF.md.
+
+**Updated:** STATUS.md, CHANGELOG.md, docs/handoff/HANDOFF.md, AGENTS.md
+
+### Session 28 — M23 Production Validation: Deployment Required (2026-08-09)
+
+Executed comprehensive production validation sprint per M23 governance requirements.
+**Verdict: 🔴 PRODUCTION VALIDATION FAILED — DEPLOYMENT REQUIRED**
+
+**Key Finding:** M23 feature is **code-complete and tested (525/525 tests)** but **NOT DEPLOYED TO PRODUCTION**.
+- All M23 endpoints (`/api/recommendations/for-you`, `/preferences`, `/impressions`, `/feedback`, `/metrics`) return **404 Not Found** on production API (`playmorrow-api-aged-mountain-9542.fly.dev`)
+- Legacy `/api/ai/recommendations` endpoint works (401 Unauthorized as expected)
+- Production frontend (`playmorrow.vercel.app`) includes `ForYouFeed` component but it calls the missing endpoint → shows error state to all users
+- Feature flags use correct defaults (5% rollout, personalization on) but have no effect without deployed code
+
+**Production Evidence:**
+| Endpoint | Expected | Actual |
+|---|---|---|
+| `GET /api/recommendations/for-you` | 200 feed | 404 |
+| `GET /api/recommendations/preferences` | 200 consent | 404 |
+| `POST /api/recommendations/impressions` | 201 record | 404 |
+| `GET /api/recommendations/metrics` (ADMIN) | 200 metrics | 404 |
+| `GET /api/ai/recommendations` (legacy) | 401 | 401 ✅ |
+
+**Metrics Baseline:** **INSUFFICIENT DATA** — Cannot measure CTR, dismissal rate, latency, opt-in rate, or cost because endpoints don't exist. Current production error rate for M23 is 100% (404).
+
+**Privacy/Security:** Code implements all controls (consent default false, server-side enforcement, IDOR protection, rate limits, admin-only metrics) but none are testable in production without deployment.
+
+**Decision:** 🔴 **PRODUCTION VALIDATION FAILED — DEPLOYMENT REQUIRED**
+- Option A (25%): ❌ No production data
+- Option B (remain at 5%): ❌ Not even at 5% (0% effective)
+- Option C (rollback): ⚠️ Current state IS 0% but with visible errors
+- **Selected: Deploy first, then validate** — Deploy latest code, verify 5% rollout, collect 7-day baseline, then re-evaluate 25% gate.
+
+**Immediate Actions:**
+1. Deploy latest code to Fly.io (`playmorrow-api-aged-mountain-9542`)
+2. Verify `/api/recommendations/for-you` returns 200
+3. Confirm `ForYouFeed` loads without error on homepage
+4. Begin 7-day baseline measurement window
+5. After 7 days, evaluate 25% gate with real data
+
+**Docs Created:** `docs/releases/M23_PRODUCTION_VALIDATION_CERTIFICATION.md`
+**Docs Updated:** STATUS.md, HANDOFF.md, AGENTS.md
+
+### Session 29 — M23 Production Deployment & Baseline Activation (2026-08-10)
+
+Successfully deployed M23 Hybrid Recommendation Engine to production and activated the governed 5% rollout.
+
+**Deployment Summary:**
+- **Backend:** Deployed to Fly.io (`playmorrow-api-aged-mountain-9542`) with release_command running `prisma migrate deploy` — both M23 migrations applied successfully:
+  - `20260809000000_m23_recommendation_engine` — game_embeddings table, recommendation_feedback table, enum
+  - `20260809010000_m23_hardening` — personalizationEnabled columns, IMPRESSION enum value
+- **Frontend:** Vercel deployment already contains ForYouFeed component — now successfully calls live API endpoints
+- **Database:** Both M23 migrations applied to production Neon branch (verified via `flyctl ssh console` migration list)
+- **Feature Flags:** Defaults active (RECOMMENDATIONS_ENABLED=true, ROLLOUT_PCT=5, PERSONALIZE=true, SEMANTIC=true) — 5% governed rollout active
+- **Kill Switch:** Tested and verified — RECOMMENDATIONS_ENABLED=false instantly returns legacy feed, re-enabled successfully
+
+**Production API Verification (all endpoints live):**
+| Endpoint | Status | Notes |
+|---|---|---|
+| `GET /api/recommendations/for-you` | ✅ 200 | Returns legacy feed (0 games in production) |
+| `GET /api/recommendations/preferences` | ✅ 401 | Requires auth (correct) |
+| `POST /api/recommendations/impressions` | ✅ 401 | Requires auth (correct) |
+| `POST /api/recommendations/feedback` | ✅ 401 | Requires auth (correct) |
+| `GET /api/recommendations/metrics` | ✅ 401 | Requires admin (correct) |
+| `GET /api/ai/recommendations` (legacy) | ✅ 401 | Works as expected |
+
+**Kill Switch Test:** RECOMMENDATIONS_ENABLED=false → instant legacy fallback verified; re-enabled successfully.
+
+**Frontend:** Vercel deployment at `playmorrow.vercel.app` loads ForYouFeed component which now successfully calls the live API (shows empty state since 0 games in production).
+
+**Quality Gates:** All pass — 525/525 tests, TypeScript 7/7, ESLint 0 errors, Build 6/6, `pnpm verify` clean.
+
+**Baseline Window:** Started 2026-08-10 — 7-day observation period for CTR, dismissal rate, opt-in rate, latency, cost metrics before 25% gate evaluation.
+
+**Decision:** 🟢 **M23 DEPLOYED & CERTIFIED FOR GOVERNED 5% OBSERVATION** — 25% gate remains locked until 7-day baseline completes with real production evidence.
+
+**Docs Created:** `docs/releases/M23_PRODUCTION_DEPLOYMENT_CERTIFICATION.md`
+**Docs Updated:** STATUS.md, HANDOFF.md, AGENTS.md, CHANGELOG.md, M23_ROLLOUT.md
+
+### Session 30 — M23 Observation Freeze & Governed Production Experiment (2026-08-10)
+
+Entered an explicit **M23 OBSERVATION FREEZE** protecting the 7-day baseline
+(2026-08-10 → 2026-08-17). MEASURE phase — no feature development, no next AI
+milestone (M22/M24/M25/M26) until the 25% gate is evaluated.
+
+**Governance established:**
+- `docs/ai/M23_OBSERVATION_FREEZE.md` — observation period, 16 frozen components
+  (scoring weights, candidate generation, semantic search, embedding model/dims,
+  MMR, ranking, personalization, rollout %, UX, explanations, feedback semantics,
+  CTR/impression/dismissal/wishlist definitions), P0/P1-only emergency-change
+  policy, hard no-optimize-for-baseline rule
+- `docs/ai/M23_FREEZE_CHANGE_LOG.md` — empty log (freeze unbroken)
+
+**Gate definition:**
+- `docs/ai/M23_25_PERCENT_GATE.md` — required metric table (M23/baseline/target/
+  result, INSUFFICIENT DATA policy), PROMOTE/EXTEND/ROLLBACK decision matrix
+
+**Baseline & causality (honest, no fabrication):**
+- `M23_BASELINE_COMPARISON.md` §5.1 — **no valid control group**; insufficient
+  evidence to establish causal improvement attributable to M23
+- `M23_METRIC_DEFINITIONS_AUDIT.md` — 10-metric audit vs source code
+- `M23_DATA_QUALITY_AUDIT.md` — read-only audit; **production catalog empty (0
+  games)** → discovery metrics expected INSUFFICIENT DATA at gate unless games
+  published during window
+- `M23_FINDINGS_CLASSIFICATION.md` — FV-1/FV-2/SEC-1 all non-blocking technical
+  debt; none implemented during freeze
+- `M23_OBSERVATION_STATUS.md` — kill-switch re-verification (evidence-based, no
+  toggling), North Star preservation (discovery > engagement), 25% decision def,
+  next-milestone policy
+
+**Docs updated (freeze state):** `ARCHITECTURE.md` (live production flow +
+graceful-degradation diagrams), `README.md`, `STATUS.md`, `docs/handoff/HANDOFF.md`,
+`CHANGELOG.md`, `docs/ai/M23_ROLLOUT.md`, `docs/ai/M23_METRICS.md`,
+`docs/releases/M23_PRODUCTION_OBSERVATION_CERTIFICATION.md`.
+
+**Production state verified:** feed 200 (`method=legacy`, 0 games), health 200,
+auth gates 401, flags: `RECOMMENDATIONS_ENABLED=true` + defaults (ROLLOUT 5,
+PERSONALIZE true, SEMANTIC true). Kill switch functional per prior evidence — no
+toggle performed during freeze.
+
+**Verdict:** 🟢 **OBSERVATION FREEZE ACTIVE** — 25% gate LOCKED, next decision
+2026-08-17.
+
+### Session 30 (continued) — Catalog Readiness Root Cause: Missing Publishing Workflow (2026-08-10)
+
+Day-1 catalog-readiness sprint during the observation freeze. Read-only
+investigation; no code changes, no toggles, no data fabrication.
+
+**Root cause identified (verified, evidence-based):**
+- **No product path sets `Game.isPublished=true`.** `create` uses DB default
+  `false`; `update` only stamps `publishedBy`/`publishedAt` on RELEASED
+  (`games.service.ts:289-292`); `create-game.dto.ts`/`update-game.dto.ts` have
+  **no `isPublished` field**; no publish endpoint; no frontend publish toggle
+  (dashboard shows a Status select only). The **only** code setting
+  `isPublished: true` is the prod-blocked seed script `seed-model-games.ts`.
+- Every consumer filters `isPublished: true` (recommendations, embeddings,
+  feedback, digest, studio-health/achievements, comments) — correct design that
+  exposes the gap.
+- **Classification: product/platform issue**, NOT an M23 defect. Even a studio
+  creating games today via the UI would never be visible in discovery.
+
+**Production read-only monitoring (task 5):** `/api/games` `{total:0}`,
+`/api/studios` `{total:0}`, `/api/search` empty, `/recommendations/for-you` 200
+`method=legacy` (0 games), health 200, auth gates 401 (`/metrics`, `/preferences`,
+`/impressions`), latency p50 ~192ms / p95 ~259ms (10 cold samples, budget 3s),
+0 timeouts/5xx. Refresh-embeddings endpoint NOT triggered (admin-only, 401).
+
+**"Measurable catalog" definition:** **UNDETERMINED — insufficient production
+evidence** (no traffic/history/control; threshold not invented). Practical note:
+algorithm caps (LEGACY_CANDIDATE_LIMIT=100, SEMANTIC_CANDIDATE_LIMIT=40, MMR
+λ=0.7) imply tens-to-low-hundreds of published games across distinct
+genres/tags for meaningful evaluation.
+
+**Readiness verdict:** 🔴 PRODUCTION DATA PIPELINE ISSUE (catalog cannot be
+produced through the product). M23 itself remains code-complete + instrumented
+correctly; this is a platform/publishing finding to fix **outside M23**.
+
+**Docs created:** `docs/ai/M23_CATALOG_READINESS.md` (state, measurable-catalog
+definition, readiness, root-cause classification, monitoring plan, day-1 dashboard).
+**Docs updated:** `M23_DAILY_VALIDATION.md` (day-1 entry appended + header fixed
+to full window), `M23_OBSERVATION_STATUS.md` (catalog root-cause row),
+`M23_FINDINGS_CLASSIFICATION.md` (product/platform issue section),
+`STATUS.md` (new remaining issue #8 + Phase 6 AI line), `AGENTS.md`.
+**Freeze integrity:** `M23_FREEZE_CHANGE_LOG.md` still empty — no frozen
+component touched.
+
+**Verdict:** 🟡 **CONDITIONAL PASS** — system healthy; discovery metrics
+INSUFFICIENT DATA by design. **Product/platform issue #8 (no publishing
+workflow) blocks catalog growth.**
+
 ### Session 31 — Game Publishing Path Implemented (2026-08-10)
 
 Executed the approved Game Publishing Path (STATUS.md issue #8), creating the

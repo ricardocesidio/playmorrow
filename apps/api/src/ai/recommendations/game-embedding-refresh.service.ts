@@ -71,9 +71,25 @@ export class GameEmbeddingRefreshService implements OnModuleInit {
         this.embeddingRepository.findAll(),
       ]);
 
+      // Fail clearly, never silently: if the configured embedding dimension no
+      // longer matches what's stored, abort the run (a dimension change
+      // requires a column migration + full re-embed — see AI_RECOMMENDATION_ARCHITECTURE.md).
+      if (existing.length > 0 && existing[0].dimensions !== this.aiConfig.embeddingDimensions) {
+        this.logger.error(
+          `Embedding refresh aborted: stored dimension ${existing[0].dimensions} != configured ` +
+            `${this.aiConfig.embeddingDimensions}. Align AI_EMBEDDING_DIMENSIONS (and migrate the ` +
+            `vector(n) column) before refreshing.`,
+        );
+        return { embedded: 0, skipped: existing.length, deleted: 0, disabled: false };
+      }
+
       const existingByGame = new Map(existing.map((e) => [e.gameId, e]));
       const publishedIds = games.map((g) => g.id);
-      const deleted = await this.embeddingRepository.deleteOrphans(publishedIds);
+
+      // F-5 guard: with an empty catalog the `<> ALL($1)` predicate would match
+      // every row and wipe all embeddings — only clean up when there is at
+      // least one published game.
+      const deleted = publishedIds.length > 0 ? await this.embeddingRepository.deleteOrphans(publishedIds) : 0;
 
       let embedded = 0;
       let skipped = 0;
@@ -81,6 +97,9 @@ export class GameEmbeddingRefreshService implements OnModuleInit {
       const toEmbed = games.filter((g) => {
         const current = existingByGame.get(g.id);
         if (!current) return true;
+        // Model change or dimension change forces a full re-embed.
+        if (current.model !== this.aiConfig.embeddingModel) return true;
+        if (current.dimensions !== this.aiConfig.embeddingDimensions) return true;
         return current.version < EMBEDDING_VERSION || current.updatedAt < g.updatedAt;
       });
 
@@ -94,6 +113,14 @@ export class GameEmbeddingRefreshService implements OnModuleInit {
           for (let j = 0; j < batch.length; j++) {
             const embedding = results[j]?.embedding;
             if (!embedding) continue;
+            // Per-vector dimension guard: skip (never store) mismatched vectors.
+            if (embedding.length !== this.aiConfig.embeddingDimensions) {
+              this.logger.error(
+                `Embedding dimension mismatch for ${batch[j].id}: got ${embedding.length}, ` +
+                  `expected ${this.aiConfig.embeddingDimensions}. Skipped.`,
+              );
+              continue;
+            }
             await this.embeddingRepository.upsert(batch[j].id, embedding, this.aiConfig.embeddingModel, EMBEDDING_VERSION);
             embedded += 1;
           }
@@ -133,6 +160,13 @@ export class GameEmbeddingRefreshService implements OnModuleInit {
 
     const result = await this.embeddingService.embedText(this.buildContentText(game));
     if (!result?.embedding) return false;
+    if (result.embedding.length !== this.aiConfig.embeddingDimensions) {
+      this.logger.error(
+        `Embedding dimension mismatch for ${gameId}: got ${result.embedding.length}, ` +
+          `expected ${this.aiConfig.embeddingDimensions}. Skipped.`,
+      );
+      return false;
+    }
     await this.embeddingRepository.upsert(game.id, result.embedding, this.aiConfig.embeddingModel, EMBEDDING_VERSION);
     return true;
   }
