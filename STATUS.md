@@ -1,12 +1,13 @@
 # Playmorrow — Project Status
 
-> **Last verified:** 2026-08-09
+> **Last verified:** 2026-08-11
 > **Version:** v0.85-beta
 > **Repository:** [github.com/ricardocesidio/playmorrow](https://github.com/ricardocesidio/playmorrow)
-> **Tests:** 505 total (50 files). **Typecheck:** 7/7. **Lint:** 0 errors. **Build:** 6/6.
+> **Tests:** 538/539 passing (51 files). **Typecheck:** 7/7. **Lint:** 0 errors. **Build:** 6/6.
 > **Live:** https://playmorrow.co
 > **Production DB isolation:** 🟢 CERTIFIED (separate prod/dev Neon branches)
 > **Production hardening (P0.1.1):** 🟡 CONDITIONALLY CERTIFIED — credentials rotated; real backup verified in R2; `gh` secret registration is the final user action. See `docs/releases/P0_1_FINAL_CERTIFICATION.md`.
+> **Security Assessment v2:** 🟡 BASELINE ACCEPTED WITH REMEDIATION — 3 confirmed production vulnerabilities (dompurify x2, multer transitive); M23 freeze intact; 538/539 tests passing. See `docs/security/SECURITY_ASSESSMENT_V2.md`.
 > **Phase 6 AI:** M23 (Recommendation Engine) 🟢 CERTIFIED for governed 5% rollout — see `docs/releases/M23_CERTIFICATION.md`. M22/M24/M25/M26 not started. 🟢 **Catalog publishing path available** (2026-08-10): `POST /api/games/:slug/publish` lets studios publish games; public catalog/search filter `isPublished: true`.
 
 ---
@@ -191,7 +192,12 @@ Current state: v0.85-beta — functional, not production-hardened.
 | 7 | ~~Exposed Neon credentials still live~~ | ~~High~~ | **RESOLVED 2026-08-07 (P0.1.1)** — DB password rotated via Neon API (old `npg_…` confirmed dead via failed auth; new password live in Fly `DATABASE_URL`, prod smoke 200). Exposed org `NEON_API_KEY` revoked (`playmorrow-key`, id 3244621), replaced by `playmorrow-key-v2` (gitignored `.env.neon-apikey`). New prod URL in gitignored `.env.prod-dburl`. Full evidence: `docs/releases/P0_1_FINAL_CERTIFICATION.md` |
 
 | 8 | ~~**No game publishing workflow** — no product path sets `Game.isPublished=true`~~ | ~~High (product)~~ | **RESOLVED 2026-08-10** — Game Publishing Path shipped: `POST /api/games/:slug/publish` (SessionAuthGuard, OWNER/ADMIN/MODERATOR, completeness gate, idempotent, transactional, audit `GAME_PUBLISHED`, `game_published` EventBus + `GAME_PUBLISHED` feed on real transition). Public catalog (`GET /api/games`) + search games branch now filter `isPublished: true`; RELEASED no longer auto-stamps publication metadata. Frontend Publication card + `usePublishGame()` on the editor. e2e: 34 tests in `games.controller.spec.ts`. No M23 frozen component touched (freeze log entry). See `docs/releases/M23_CATALOG_READINESS_CERTIFICATION.md` |
-
++| 9 | **DOMPurify XSS vulnerabilities (3 CVEs)** — v3.4.11 used in API + Web | High | **P1** — Upgrade to ≥3.4.13 (fixes 3 CVEs: IN_PLACE hook XSS, CUSTOM_ELEMENT_HANDLING bypass x2). See `docs/security/SECURITY_ASSESSMENT_V2.md` |
++| 10 | **Multer DoS (transitive)** — v2.1.1 via @nestjs/platform-express | High | **P1** — Ensure multer 2.2.0 used via pnpm override. See `docs/security/SECURITY_ASSESSMENT_V2.md` |
++| 11 | **Draft game exposure via slug enumeration** — `GET /games/:slug` lacks `isPublished` check | Medium | **P3** — Add publication check or `/preview/:slug` endpoint. See `docs/security/SECURITY_ASSESSMENT_V2.md` |
++| 12 | No CSP violation report endpoint | Low | **P3** — Implement `/api/csp-report` handler. See `docs/security/SECURITY_ASSESSMENT_V2.md` |
++| 13 | No password minimum length | Low | **P4** — Add `@MinLength(8)` to `RegisterDto` |
++| 14 | No password history / rotation policy | Low | **P4** — Add history table + rotation check |
 
 > **Migration ops note:** `prisma migrate deploy`/`resolve` time out with P1002 against the Neon endpoint (both pooled `-pooler` and direct hosts block session advisory locks). Dev migration workflow = run the SQL via `prisma db execute` (single transaction), then record in `_prisma_migrations` with the correct SHA-256 checksum (or use a Neon branch that exposes a real direct endpoint). `prisma migrate status` and `prisma migrate diff` work fine.
 >

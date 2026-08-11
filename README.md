@@ -170,6 +170,10 @@ pnpm verify            # Pre-push: lint + typecheck + build
 | `ARCHITECTURE.md` | Technical architecture |
 | `CHANGELOG.md` | Release notes |
 | `SECURITY.md` | Security policy |
+| `docs/security/SECURITY_ASSESSMENT_V2.md` | **Security Assessment v2 — full audit report** |
+| `docs/security/SECURITY_THREAT_MODEL.md` | **Threat model & attack surface** |
+| `docs/security/SECURITY_CVE_INVENTORY.md` | **CVE inventory & correlation** |
+| `docs/security/SECURITY_FINDINGS.md` | **Findings register & remediation** |
 | `docs/archive/` | Retired certifications and obsolete docs |
 
 ---

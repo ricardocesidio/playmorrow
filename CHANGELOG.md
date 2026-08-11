@@ -2,6 +2,32 @@
 
 ## [Unreleased]
 
+### Security Assessment v2 — Read-Only Audit Complete (2026-08-11)
+
+Completed comprehensive read-only security discovery and audit sprint across the entire platform.
+
+**Key Results:**
+- **3 confirmed production vulnerabilities** (dompurify x2, multer transitive) — all P1, require remediation before next release
+- **0 P0/P1 vulnerabilities in application code** — strong authentication, authorization, input validation, CSP, CSRF
+- **M23 Observation Freeze intact** — no algorithmic changes, 5% rollout unchanged, baseline valid
+- **Quality gates:** 538/539 tests passing, lint 0 errors, typecheck clean, build 6/6, pnpm verify 6/6
+
+**Security Documentation Created:**
+- `docs/security/SECURITY_ASSESSMENT_V2.md` — Full audit report with executive summary, scorecard, verdict
+- `docs/security/SECURITY_THREAT_MODEL.md` — Threat model with attack surface, trust boundaries, 16 attack scenarios
+- `docs/security/SECURITY_CVE_INVENTORY.md` — CVE inventory with 3 confirmed production vulns, 10 dev-only
+- `docs/security/SECURITY_FINDINGS.md` — 9 findings register with remediation priority
+
+**Production Vulnerabilities (Require Remediation):**
+1. **SEC-001/SEC-002/SEC-004** — DOMPurify 3.4.11: 3 XSS vulnerabilities (High/Moderate/Low) — upgrade to ≥3.4.13
+2. **SEC-003** — Multer 2.1.1 (transitive): DoS via nested field names — ensure multer 2.2.0 via pnpm override
+3. **SEC-005** — Draft games accessible via slug enumeration — add publication check to `GET /games/:slug`
+4. **SEC-006** — No CSP violation report endpoint — implement `/api/csp-report` handler
+
+**Remediation Priority:** P1 findings before next release; P2-P4 before next major milestone.
+
+**M23 Status:** Freeze intact (5% rollout, 25% gate locked until 2026-08-17), no algorithmic changes.
+
 ### Game Publishing Path — Catalog Readiness (2026-08-10)
 
 Game Publishing Path shipped (STATUS.md issue #8 RESOLVED): studios can now

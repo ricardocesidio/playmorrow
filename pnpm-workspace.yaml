@@ -25,3 +25,6 @@ allowBuilds:
   sharp: true
   "@sentry/cli": true
   simple-git-hooks: true
+overrides:
+  multer: 2.2.0
+  js-yaml: 4.3.1

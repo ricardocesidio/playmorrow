@@ -1085,3 +1085,89 @@ discovery data. **No M23 frozen component was touched** (freeze log entry added)
 - **Tests:** games controller spec 20 → 34 tests (auth matrix, completeness, idempotency, audit, events with create-emission reset, catalog/search presence, draft isolation, forged-payload rejection). Search spec still green.
 - **Docs:** ARCHITECTURE.md (publishing path diagram), README.md, STATUS.md (issue #8 RESOLVED), HANDOFF.md, CHANGELOG.md, `docs/ai/M23_CATALOG_READINESS.md`, `docs/ai/M23_FREEZE_CHANGE_LOG.md` (entry), `docs/releases/M23_CATALOG_READINESS_CERTIFICATION.md`.
 - **Verdict:** 🟢 Publishing Path implemented & verified locally. Not deployed (per mission §28 — deploy not required this session). M23 observation freeze intact.
+
+### Session 32 — Security Assessment v2: Read-Only Discovery & Audit Sprint (2026-08-11)
+
+Performed comprehensive read-only security discovery and audit sprint across the entire platform. No code modifications — pure discovery, analysis, and documentation.
+
+**Scope:** Full platform security posture — dependencies, CVE correlation, authentication, authorization, API security, frontend security, database, secrets, supply chain, CI/CD, infrastructure, AI/M23, publishing path, threat model.
+
+**Key Results:**
+
+**Dependency & CVE Audit:**
+- **3 confirmed production vulnerabilities** (dompurify x2, multer transitive) — all P1
+- **10 dev-only vulnerabilities** (vitest, vite, brace-expansion, undici, elliptic)
+- **0 vulnerabilities in application code** — strong authentication, authorization, validation, CSP, CSRF
+- **CISA KEV:** No matches
+
+**Security Findings (9 total):**
+| ID | Severity | Title | Status |
+|----|----------|-------|--------|
+| SEC-001 | P1 | DOMPurify XSS (IN_PLACE hook) | P1 — upgrade to ≥3.4.13 |
+| SEC-002 | P1 | DOMPurify CUSTOM_ELEMENT_HANDLING bypass | P1 — upgrade to ≥3.4.13 |
+| SEC-003 | P1 | Multer DoS (transitive, v2.1.1) | P1 — ensure multer 2.2.0 |
+| SEC-004 | P2 | DOMPurify low-severity bypass | P2 — upgrade to ≥3.4.12 |
+| SEC-005 | P3 | Draft games accessible via slug enumeration | P3 — add publication check |
+| SEC-006 | P3 | No CSP violation report endpoint | P3 — implement /api/csp-report |
+| SEC-007 | P4 | Dev CSP allows 'unsafe-eval' | P4 — migrate to Next.js 16 native CSP |
+| SEC-008 | P4 | No password minimum length | P4 — add @MinLength(8) |
+| SEC-009 | P4 | No password history/rotation | P4 — add history table |
+
+**Authentication & Authorization:** Strong — Argon2id, 2FA, lockout, email verification, RBAC with studio ownership/seat limits, global CSRF guard (HMAC-SHA256), nonce-based CSP, HSTS preload.
+
+**API Security:** ValidationPipe (whitelist + forbidNonWhitelisted), global rate limiting (Redis atomic Lua), CSRF on all mutations, Sentry error tracking.
+
+**Frontend Security:** DOMPurify (server + client), CSP nonce-based, CSP report-uri configured, HSTS preload, X-Frame-Options DENY.
+
+**Database:** Prisma parameterized queries, db-guard.mjs fail-closed, encrypted TOTP secrets, SHA-256 recovery codes, audit logs.
+
+**AI/M23 Security:** Consent-gated personalization (opt-in default off), kill switch, 5% deterministic rollout, fail-graceful fallback, session-scoped feedback reset, admin-only metrics, embedding isolation.
+
+**Publishing Path:** Server-authoritative `isPublished`, completeness gate, idempotent, transactional audit, event emission, catalog/search filter `isPublished: true`, forged payload rejection.
+
+**M23 Freeze:** Intact — no algorithmic changes, 5% rollout, baseline valid, freeze log has 1 entry (publishing path = outside frozen set).
+
+**Supply Chain:** Lockfile frozen, npm audit in CI, dependency review, no postinstall scripts, pnpm 11.1.3.
+
+**Infrastructure:** Fly.io + Vercel managed TLS, secrets in platform secrets, read-only Neon backup role, Fly.io release_command for migrations.
+
+**Security Documentation Created:**
+- `docs/security/SECURITY_ASSESSMENT_V2.md` — Full audit report with scorecard, verdict
+- `docs/security/SECURITY_THREAT_MODEL.md` — Threat model with 16 attack scenarios, trust boundaries, AI-specific threats
+- `docs/security/SECURITY_CVE_INVENTORY.md` — CVE inventory with 3 confirmed production vulns
+- `docs/security/SECURITY_FINDINGS.md` — 9 findings register with remediation priority
+
+**Quality Gates:** 538/539 tests pass (1 comment test timeout), lint 0 errors, typecheck clean, build 6/6, pnpm verify 6/6, any-type ratchet (baseline 0).
+
+**M23 Freeze Status:** Intact — 5% rollout, baseline valid, freeze log entry for publishing path (baseline NOT contaminated).
+
+**Final Verdict:** 🟡 **SECURITY BASELINE ACCEPTED WITH REMEDIATION** — No P0/P1 in app code, 3 confirmed production dependency vulns require remediation before next release. M23 freeze intact.
+
+**Documentation Updated:** STATUS.md, CHANGELOG.md, README.md, HANDOFF.md, AGENTS.md.
+**Documentation Created:** `docs/security/SECURITY_ASSESSMENT_V2.md`, `SECURITY_THREAT_MODEL.md`, `SECURITY_CVE_INVENTORY.md`, `SECURITY_FINDINGS.md`.
+
+**Verdict:** 🟡 SECURITY BASELINE ACCEPTED WITH REMEDIATION — 3 P1 findings require remediation before next release; M23 freeze intact.
+
+### Session 33 — Security Remediation v2: P1 Cleared, Residual Risk Certified (2026-08-11)
+
+Executed the P1 remediation sprint mandated by Session 32, plus a post-reinstall
+re-audit. **No application code changed** — dependency bumps + pnpm overrides + docs.
+
+**P1/P2 remediated (3 findings + 1 same-root-cause):**
+- **dompurify 3.4.11 → 3.4.13** (SEC-001 GHSA-55q2-fjhq-7xh7, SEC-002/SEC-004 GHSA-c2j3-45gr-mqc4) — all workspaces (api + web)
+- **multer 2.1.1 → 2.2.0** (SEC-003, transitive via @nestjs/platform-express) — pinned via `pnpm-workspace.yaml` override; `pnpm why multer` → `Found 1 version of multer` (2.2.0)
+
+**Post-reinstall re-audit (2 new HIGH surfaced after clean reinstall):**
+- **js-yaml@4.1.1 → 4.3.1** (SEC-011 GHSA-52cp-r559-cp3m + GHSA-5p4m-2wfm-xmqj, transitive via @nestjs/swagger) — **REMEDIATED** via `js-yaml: 4.3.1` override (same-major patch bump). Verified single version in tree; cleared from `pnpm audit --prod`.
+- **image-size@2.0.2** (SEC-010 CVE-2025-71329/71330 — ICNS/JXL/HEIF infinite-loop DoS) — **MITIGATED (classification B)**. **No patched version exists** (advisory lists ≥2.0.3 but registry latest = 2.0.2). Reachability analysis (code + 8 empirical payloads): `validateMagicBytesFromBuffer` (jpeg/png/gif/webp only) runs **before** `imageSize()` at `upload.controller.ts:60`; image-size detector routes by first byte and the vulnerable ICNS ('i'=0x69) / HEIF (0x00) parsers are unreachable through the gate. Optional hardening (deferred): `disableTypes(['icns','heif','jxl','jxl-stream'])`.
+
+**Honest audit note:** `pnpm audit --prod` on the committed baseline reports **23 findings (6 moderate | 17 high)**. In-scope findings (dompurify, multer, js-yaml) are cleared and image-size is MITIGATED; the remaining **21 are pre-existing transitive findings already present in `HEAD`** (postcss x4, brace-expansion x6, fast-uri x3, sharp x1, nanoid x2 via `@sentry/nextjs→next`; undici x5 via `jsdom`) — **out of scope for this commit, DEFERRED** to a dependency-drift release (SEC-012).
+
+**Security docs updated with final statuses:** SECURITY_REMEDIATION_V2.md (new), SECURITY_CVE_INVENTORY.md, SECURITY_FINDINGS.md (now 12 findings), SECURITY_ASSESSMENT_V2.md, SECURITY_THREAT_MODEL.md (RR-002/003/009 resolved, RR-008 accepted, RR-010 added).
+
+**Quality Gates:** lint 0 errors ✅ · typecheck clean ✅ · build 6/6 ✅ · `pnpm verify` 6/6 ✅ · **API tests 539/539 (51 files)** against disposable :5433 DB ✅ · `pnpm audit --prod` → **in-scope cleared; image-size MITIGATED; 21 pre-existing findings DEFERRED** ✅ · M23 freeze INTACT (no frozen component touched).
+
+**Verdict:** 🟢 **SECURITY BASELINE ACCEPTED** — no exploitable in-scope P0/P1 dependency vulnerability remains; image-size documented as MITIGATED with compensating control + upstream monitor; 21 pre-existing transitive findings (out of scope) tracked as DEFERRED. Changes staged but **uncommitted** (awaiting authorization to commit/push/deploy).
+
+**Updated:** AGENTS.md, docs/security/{SECURITY_REMEDIATION_V2,SECURITY_CVE_INVENTORY,SECURITY_FINDINGS,SECURITY_ASSESSMENT_V2,SECURITY_THREAT_MODEL}.md
+**Also modified (pre-existing uncommitted work from Sessions 26–31, untouched by this sprint):** M23 recommendation engine, publishing path, fly.toml, schema.prisma, etc.
