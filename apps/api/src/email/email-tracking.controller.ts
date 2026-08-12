@@ -8,7 +8,6 @@ const ALLOWED_REDIRECT_HOSTS = new Set([
   'playmorrow.co',
   'www.playmorrow.co',
   'playmorrow.vercel.app',
-  'localhost',
 ]);
 
 function isValidRedirectUrl(url: string): boolean {
