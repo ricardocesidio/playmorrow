@@ -239,6 +239,10 @@ export class StudiosService {
     if (!targetMember) throw new NotFoundException('Member not found');
     if (targetMember.role === 'OWNER') throw new ForbiddenException('Cannot modify the Owner');
 
+    if (dto.role === 'OWNER') {
+      throw new ForbiddenException('Use the transfer ownership endpoint to change studio ownership');
+    }
+
     if (dto.role === 'ADMIN' && actorMembership.role !== 'OWNER') {
       throw new ForbiddenException('Only the Owner can promote to Admin');
     }
