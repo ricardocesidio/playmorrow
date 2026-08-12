@@ -285,6 +285,7 @@ export default function ProfileSettingsPage() {
 }
 
 function ChangePasswordSection() {
+  const router = useRouter();
   const [current, setCurrent] = useState('');
   const [newPass, setNewPass] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -299,10 +300,13 @@ function ChangePasswordSection() {
     if (newPass.length < 8) { setMsg('Password must be at least 8 characters.'); return; }
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/change-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ currentPassword: current, newPassword: newPass }), credentials: 'include' });
-      if (!res.ok) { const b = await res.json().catch(() => ({})); setMsg(b.message || 'Failed to change password.'); }
-      else { setMsg('Password changed successfully.'); setCurrent(''); setNewPass(''); setConfirm(''); }
-    } catch { setMsg('Connection error.'); }
+      await api.post('/auth/change-password', { currentPassword: current, newPassword: newPass });
+      setMsg('Password changed. Redirecting to login...');
+      setTimeout(() => router.push('/login'), 1500);
+    } catch (err) {
+      if (err instanceof ApiError) { setMsg(err.message || 'Failed to change password.'); }
+      else { setMsg('Connection error.'); }
+    }
     setLoading(false);
   };
 
