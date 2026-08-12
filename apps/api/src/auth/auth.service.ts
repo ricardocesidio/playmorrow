@@ -414,23 +414,23 @@ export class AuthService {
       throw new BadRequestException('New password is too common. Please choose a stronger password.');
     }
 
-    const passwordHash = await argon2.hash(newPassword, { type: argon2.argon2id, memoryCost: 19456, timeCost: 3, parallelism: 1 });
-    const newAuthVersion = Date.now();
+    try {
+      const passwordHash = await argon2.hash(newPassword, { type: argon2.argon2id, memoryCost: 19456, timeCost: 3, parallelism: 1 });
 
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { passwordHash, authVersion: newAuthVersion },
-    });
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash, authVersion: Date.now() },
+      });
 
-    this.prisma.session.updateMany({
-      where: { userId, revokedAt: null },
-      data: { revokedAt: new Date() },
-    }).catch(() => {});
-
-    this.prisma.refreshToken.updateMany({
-      where: { userId, revokedAt: null },
-      data: { revokedAt: new Date() },
-    }).catch(() => {});
+      this.prisma.session.updateMany({
+        where: { userId },
+        data: { revokedAt: new Date() },
+      }).catch(() => {});
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error({ msg: 'changePassword failed', err: message });
+      throw new BadRequestException('Failed to update password. Please try again.');
+    }
   }
 
   // ── Token helpers ────────────────────────────────────────────────────
