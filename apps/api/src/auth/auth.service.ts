@@ -417,20 +417,20 @@ export class AuthService {
     const passwordHash = await argon2.hash(newPassword, { type: argon2.argon2id, memoryCost: 19456, timeCost: 3, parallelism: 1 });
     const newAuthVersion = Date.now();
 
-    await this.prisma.$transaction([
-      this.prisma.user.update({
-        where: { id: userId },
-        data: { passwordHash, authVersion: newAuthVersion },
-      }),
-      this.prisma.session.updateMany({
-        where: { userId, revokedAt: null },
-        data: { revokedAt: new Date() },
-      }),
-      this.prisma.refreshToken.updateMany({
-        where: { userId, revokedAt: null },
-        data: { revokedAt: new Date() },
-      }),
-    ]);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash, authVersion: newAuthVersion },
+    });
+
+    this.prisma.session.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    }).catch(() => {});
+
+    this.prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    }).catch(() => {});
   }
 
   // ── Token helpers ────────────────────────────────────────────────────
