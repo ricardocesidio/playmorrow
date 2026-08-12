@@ -40,10 +40,5 @@
   },
   "simple-git-hooks": {
     "pre-push": "pnpm verify"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "simple-git-hooks"
-    ]
   }
 }
