@@ -378,13 +378,12 @@ export class AuthService {
     }
 
     const passwordHash = await argon2.hash(newPassword, { type: argon2.argon2id, memoryCost: 19456, timeCost: 3, parallelism: 1 });
-    const newAuthVersion = Date.now();
 
     await this.prisma.$transaction([
       this.prisma.passwordResetToken.update({ where: { id: stored.id }, data: { consumedAt: new Date() } }),
       this.prisma.user.update({
         where: { id: stored.userId },
-        data: { passwordHash, authVersion: newAuthVersion },
+        data: { passwordHash, authVersion: { increment: 1 } },
       }),
       // Revoke all sessions
       this.prisma.session.updateMany({
@@ -419,7 +418,7 @@ export class AuthService {
 
       await this.prisma.user.update({
         where: { id: userId },
-        data: { passwordHash, authVersion: Date.now() },
+        data: { passwordHash, authVersion: { increment: 1 } },
       });
 
       this.prisma.session.updateMany({
