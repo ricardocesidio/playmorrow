@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
+import { useEffect, useState } from 'react';
+import { loadStripe, type Stripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 const stripePromise = typeof window !== 'undefined'
@@ -50,9 +50,32 @@ function CheckoutForm({ clientSecret, onSuccess }: { clientSecret: string; onSuc
 }
 
 export function StripePayment({ clientSecret, onSuccess }: { clientSecret: string; onSuccess: () => void }) {
+  const [stripe, setStripe] = useState<Stripe | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!stripePromise) {
+      setFailed(true);
+      return;
+    }
+    stripePromise
+      .then((resolved) => { if (!cancelled) setStripe(resolved); })
+      .catch(() => { if (!cancelled) setFailed(true); });
+    return () => { cancelled = true; };
+  }, []);
+
   if (!stripePromise) return <p className="text-xs text-coral">Stripe not configured — set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</p>;
+  if (failed) return <p className="text-xs text-coral">Stripe could not be loaded — please try again.</p>;
+  if (!stripe) {
+    return (
+      <div role="status" aria-busy="true" aria-live="polite" className="flex items-center justify-center py-6">
+        <div className="size-6 animate-spin rounded-full border-2 border-cyan border-t-transparent" />
+      </div>
+    );
+  }
   return (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
+    <Elements stripe={stripe} options={{ clientSecret }}>
       <CheckoutForm clientSecret={clientSecret} onSuccess={onSuccess} />
     </Elements>
   );

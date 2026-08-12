@@ -108,8 +108,11 @@ export const MOCK_COMMISSIONS = {
 /**
  * Register a centralized API router that dispatches by HTTP method and pathname.
  * Returns a cleanup function to unroute all handlers.
+ *
+ * `unauthenticated` (default false) makes `/api/auth/session/me` return 401 so
+ * tests can exercise logged-out flows against a fully mocked API.
  */
-export async function mockApi(page: Page) {
+export async function mockApi(page: Page, opts: { unauthenticated?: boolean } = {}) {
   const apiOrigin = API_ORIGIN;
 
   // Single catch-all route for the API origin
@@ -133,7 +136,12 @@ export async function mockApi(page: Page) {
     try {
       // ── Auth ───────────────────────────────────────────────────────
       if (path === '/api/auth/session/me') {
+        if (opts.unauthenticated) return await json({ message: 'Unauthorized' }, 401);
         return await json(MOCK_USER);
+      }
+
+      if (path === '/api/auth/session/login' && method === 'POST') {
+        return await json({ ...MOCK_USER, csrfToken: 'mock-csrf-token' });
       }
 
       // ── Feed ───────────────────────────────────────────────────────
@@ -214,6 +222,19 @@ export async function mockApi(page: Page) {
       // Studio listings (must precede the generic /marketplace/:id matcher)
       const studioListingsMatch = path.match(/^\/api\/marketplace\/studio\/([^/]+)$/);
       if (studioListingsMatch) return await json(MOCK_LISTINGS);
+
+      // Purchase intent + licenses (must precede the generic /marketplace/:id matcher)
+      const purchaseMatch = path.match(/^\/api\/marketplace\/([^/]+)\/purchase$/);
+      if (purchaseMatch && method === 'POST') {
+        return await json({ clientSecret: 'cs_mock_secret' });
+      }
+      if (path === '/api/marketplace/me/licenses') {
+        return await json([{
+          id: 'license-1', userId: 'user-1', listingId: 'listing-1',
+          purchasedAt: '2025-03-01T00:00:00.000Z', active: true,
+          listing: { ...MOCK_LISTING, fileUrl: 'https://example.com/neon-audio-pack.zip' },
+        }]);
+      }
 
       const listingMatch = path.match(/^\/api\/marketplace\/([^/]+)$/);
       if (listingMatch) {
