@@ -211,7 +211,7 @@ export class RoadmapItemsService {
     await this.prisma.$transaction(
       items.map((item) =>
         this.prisma.roadmapItem.update({
-          where: { id: item.id },
+          where: { id: item.id, gameId: game.id },
           data: { position: item.position },
         }),
       ),
