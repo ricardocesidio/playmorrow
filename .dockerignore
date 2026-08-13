@@ -6,3 +6,34 @@ uploads/
 dist/
 *.md
 deploy-fly.sh
+
+# Never bake secrets into the image
+.env
+.env.*
+!.env.example
+apps/api/.env
+apps/api/.env.*
+!apps/api/.env.example
+apps/web/.env
+apps/web/.env.*
+!apps/web/.env.example
+packages/database/.env
+packages/database/.env.*
+!packages/database/.env.example
+
+# Local key/cert/credential files
+*.pem
+*.key
+*.p12
+*.pfx
+*.cred
+*.creds
+*secret*
+!**/SECURITY.md
+!**/docs/security/*
+
+# Local infra state
+*.local
+.vscode/
+.idea/
+.DS_Store
