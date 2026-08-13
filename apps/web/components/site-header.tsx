@@ -196,7 +196,7 @@ export function SiteHeader() {
             <>
               <Link
                 href="/login"
-                className="text-sm text-foreground hover:text-cyan"
+                className="hidden text-sm text-foreground hover:text-cyan md:inline"
               >
                 Sign in
               </Link>
