@@ -1,0 +1,11 @@
+node_modules
+.turbo
+.next
+out
+dist
+.vercel/output
+apps/*/node_modules
+apps/*/.next
+apps/*/dist
+packages/*/node_modules
+packages/*/dist
