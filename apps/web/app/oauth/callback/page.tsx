@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Suspense } from 'react';
 import { SiteHeader } from '@/components/site-header';
@@ -9,6 +9,7 @@ import { PostLoginTransition } from '@/components/loading/PostLoginTransition';
 function OAuthCallbackInner() {
   const router = useRouter();
   const [showTransition, setShowTransition] = useState(false);
+  const handleDone = useCallback(() => router.replace('/dashboard'), [router]);
 
   useEffect(() => {
     // Capture CSRF token from URL hash fragment and set it as a frontend-domain cookie.
@@ -26,7 +27,7 @@ function OAuthCallbackInner() {
   return (
     <>
       {showTransition ? (
-        <PostLoginTransition onDone={() => router.replace('/dashboard')} />
+        <PostLoginTransition onDone={handleDone} />
       ) : (
         <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="size-6 animate-spin border border-cyan border-t-transparent" />
