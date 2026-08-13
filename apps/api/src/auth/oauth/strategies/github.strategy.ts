@@ -31,8 +31,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     accessToken: string,
     _refreshToken: string,
     profile: { id: string; emails?: { value: string }[]; username?: string; displayName?: string; photos?: { value: string }[] },
-    done: (err: Error | null, user?: unknown) => void,
-  ): Promise<void> {
+  ): Promise<OAuthProfile> {
     let email = profile.emails?.[0]?.value;
     // If GitHub didn't provide an email (user has it private), fetch it via API
     if (!email && accessToken) {
@@ -48,8 +47,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
       }
     }
     if (!email) {
-      done(new Error('GitHub did not provide an email. Please ensure your GitHub email is public or grant email access.'));
-      return;
+      throw new Error('GitHub did not provide an email. Please ensure your GitHub email is public or grant email access.');
     }
     const profileData: OAuthProfile = {
       provider: 'github',
@@ -58,6 +56,6 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
       displayName: profile.displayName ?? profile.username ?? 'GitHub User',
       avatarUrl: profile.photos?.[0]?.value ?? null,
     };
-    done(null, profileData);
+    return profileData;
   }
 }
