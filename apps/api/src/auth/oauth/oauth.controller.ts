@@ -2,7 +2,7 @@ import { Controller, Get, Req, Res, Logger } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import * as passport from 'passport';
+import passport from 'passport';
 import { randomBytes } from 'node:crypto';
 
 import { CsrfService } from '../../common/csrf.service';
