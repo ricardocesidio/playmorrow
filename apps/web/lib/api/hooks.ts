@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile, type Report, type CreateReportDto, type MarketplaceListing, type PurchasedLicense, type PurchaseIntent, type StudioRevenue, type Event, type Partner, type ReferralCodeInfo } from './client';
+import { API, api, type Paginated, type FeedItem, type Game, type Studio, type Devlog, type RoadmapItem, type PressKit, type Comment, type ReactionStatus, type DevlogCommentReactions, type StudioWithMembers, type UserProfile, type Report, type CreateReportDto, type MarketplaceListing, type PurchasedLicense, type PurchaseIntent, type StudioRevenue, type Event, type Partner, type ReferralCodeInfo } from './client';
 import type { StudioAnalytics, GameAnalytics } from './analytics-types';
 import type { StudioVerificationRequest, TrustScore, CompanyProfile, StudioPressKit, BrandKit, AdminVerificationItem } from './verification-types';
 import { revalidateFeed, revalidateHomepage, revalidateGame } from '@/actions/revalidate';
@@ -437,8 +437,7 @@ export function useUnreadNotificationCount() {
   const queryKey = ['unreadNotificationCount'];
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-    const eventSource = new EventSource(`${apiUrl}/me/notifications/stream`, { withCredentials: true });
+    const eventSource = new EventSource(`${API}/me/notifications/stream`, { withCredentials: true });
 
     eventSource.onmessage = (event) => {
       try {
