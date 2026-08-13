@@ -34,6 +34,7 @@ export interface ForYouResult {
   items: ForYouItem[];
   nextCursor: { score: number; gameId: string } | null;
   hasMore: boolean;
+  total: number;
   method: ForYouMethod;
   /**
    * Consent state for the session user: true/false when the M23 engine served
@@ -139,6 +140,7 @@ export class HybridRecommenderService {
         items: [],
         nextCursor: null,
         hasMore: false,
+        total: 0,
         method: this.inferMethod(signals, semanticByGame.size),
         personalizationEnabled: userId ? personalizationOn : null,
       };
@@ -172,6 +174,7 @@ export class HybridRecommenderService {
       items,
       nextCursor: paged.nextCursor,
       hasMore: paged.hasMore,
+      total: ranked.length,
       method: this.inferMethod(signals, semanticByGame.size),
       personalizationEnabled: userId ? personalizationOn : null,
     };
@@ -550,6 +553,7 @@ export class HybridRecommenderService {
       }),
       nextCursor: result.nextCursor,
       hasMore: result.hasMore,
+      total: result.total,
       method: 'legacy',
       personalizationEnabled: null,
     };

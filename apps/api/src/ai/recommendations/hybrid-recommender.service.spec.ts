@@ -29,6 +29,7 @@ function mockLegacy() {
       ],
       nextCursor: null,
       hasMore: false,
+      total: 2,
     }),
   };
 }
@@ -253,6 +254,7 @@ describe('HybridRecommenderService', () => {
           items: [{ gameId: 'g2', score: 60, reasons: ['Recent activity in your games'] }],
           nextCursor: null,
           hasMore: false,
+          total: 1,
         }),
       } as never,
       mockSignals() as never,

@@ -109,12 +109,12 @@ function statusAccent(status: string) {
 function FeaturedCard({ game }: { game: Game }) {
   const cover = game.coverUrl || '/demo/games/neon-warden/hero.svg';
   return (
-    <Link href={`/games/${game.slug}`} className="block cursor-pointer">
-      <HudPanel className="relative min-h-[438px] overflow-hidden p-6 sm:p-7 transition-colors hover:border-cyan/70" accent="muted">
+    <Link href={`/games/${game.slug}`} className="relative block cursor-pointer">
+      <HudPanel className="relative min-h-[470px] overflow-hidden p-0" accent="muted">
         <img src={cover} alt={game.title} className="absolute inset-0 size-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/56 to-background/6" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/92 via-transparent to-background/20" />
-        <div className="relative z-10 grid min-h-[386px] content-between">
+        <div className="absolute inset-0 bg-gradient-to-r from-background/98 via-background/70 to-background/12" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-transparent to-background/20" />
+        <div className="relative z-10 grid min-h-[470px] scale-[1.04] origin-center content-between p-6 sm:p-7">
           <div>
             <StatusBadge status={game.status} />
             <h2 className="mt-5 font-display text-5xl font-black uppercase leading-none text-foreground sm:text-[3.55rem]">{game.title}</h2>

@@ -4,17 +4,28 @@
 
 [![CI](https://github.com/ricardocesidio/playmorrow/actions/workflows/ci.yml/badge.svg)](https://github.com/ricardocesidio/playmorrow/actions)
 
----
-
-## What Is Playmorrow?
-
 Playmorrow is a social discovery platform connecting indie game studios with
 players. Studios share development journeys through devlogs, roadmaps, and press
 kits. Players discover upcoming games, follow development, build wishlists, and
 join the conversation. The platform includes a marketplace (Stripe Connect),
 events, a B2B partner CRM, and an AI recommendation layer.
 
-**Live:** [playmorrow.co](https://playmorrow.co)
+**Live:** [playmorrow.co](https://playmorrow.co) — currently in **beta**.
+
+---
+
+## Production Status & History
+
+Playmorrow is a **beta product** in active development. The production dataset
+is small and changes frequently.
+
+**2026-08-06 incident (disclosed):** a development database operation
+(`prisma migrate reset`) executed against the production database and cleared
+the production dataset. Neon's point-in-time recovery (6-hour retention, no
+snapshots) could not restore it. Remediated 2026-08-07 with separate production
+and development Neon branches, a fail-closed DB safety guard
+(`packages/database/scripts/db-guard.mjs`), and nightly `pg_dump` backups to R2
+with a verified restore drill. See [SECURITY.md](SECURITY.md) for details.
 
 ---
 
@@ -24,7 +35,7 @@ events, a B2B partner CRM, and an AI recommendation layer.
 |-------|-----------|
 | Frontend | Next.js 16 (App Router) + React 19 + Tailwind CSS v4 |
 | Backend | NestJS 11 + TypeScript |
-| Database | PostgreSQL 16 (Neon) + Prisma ORM |
+| Database | PostgreSQL 16 (Neon) + Prisma ORM + pgvector |
 | Auth | Session-based (httpOnly cookies) + OAuth (Google, GitHub) + TOTP 2FA |
 | AI | Provider-agnostic (OpenAI + Anthropic), hybrid recommendation engine |
 | Payments | Stripe Connect + PaymentIntent |
@@ -42,13 +53,13 @@ Frontend (Next.js / Vercel)
     ↕  API requests (Next.js rewrites)
 Backend (NestJS / Fly.io)
     ↕  Prisma ORM
-PostgreSQL (Neon)
+PostgreSQL (Neon, with pgvector)
 ```
 
 - **Frontend:** Next.js 16 App Router, server components, Turbopack, Tailwind CSS
-- **Backend:** NestJS 11 REST API with ~55 modules, validation pipes, global
-  CSRF guard, Redis-backed rate limiting
-- **Database:** 63 Prisma models, 41 migrations, pgvector for AI embeddings
+- **Backend:** NestJS 11 REST API — 58 modules, ~250 endpoints, validation
+  pipes, global CSRF guard, Redis-backed rate limiting
+- **Database:** 65 Prisma models, 41 migrations, pgvector for AI embeddings
 
 ---
 
@@ -77,8 +88,10 @@ pnpm db:migrate # Run migrations
 
 ```bash
 pnpm verify     # Lint + typecheck + build (all workspaces)
-pnpm test       # API test suite (requires disposable Postgres on :5433)
+pnpm test       # API test suite (542 tests; requires isolated test DB)
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the isolated test database workflow.
 
 ---
 
@@ -86,8 +99,8 @@ pnpm test       # API test suite (requires disposable Postgres on :5433)
 
 ```
 apps/
-  api/          NestJS backend (~55 modules, 170+ endpoints)
-  web/          Next.js frontend (80+ routes, App Router)
+  api/          NestJS backend (58 modules)
+  web/          Next.js frontend (100+ routes, App Router)
 packages/
   database/     Prisma schema, migrations, seed
   types/        Shared TypeScript types
@@ -100,11 +113,10 @@ packages/
 
 ## AI & Recommendations
 
-Playmorrow runs a hybrid recommendation engine (M23) combining semantic
-embeddings (pgvector) with collaborative signals. Personalization is
-consent-gated and the system is currently under governed observation at a
-controlled rollout percentage. Provider-agnostic architecture supports OpenAI
-and Anthropic.
+Playmorrow runs a hybrid recommendation engine combining semantic embeddings
+(pgvector) with collaborative signals. Personalization is consent-gated and the
+system is currently under governed observation at a controlled rollout
+percentage. Provider-agnostic architecture supports OpenAI and Anthropic.
 
 ---
 
@@ -113,20 +125,20 @@ and Anthropic.
 Security controls include:
 
 - Session-based authentication with httpOnly/Secure/SameSite cookies
-- Argon2id password hashing with configurable memory cost
-- TOTP-based two-factor authentication
+- Argon2id password hashing
+- TOTP-based two-factor authentication with SHA-256-hashed backup codes
 - RBAC with studio-level roles (Owner, Admin, Moderator, Member)
 - Stateless HMAC-SHA256 CSRF protection on all authenticated mutations
-- Content Security Policy with nonce-based script execution
+- Content Security Policy (Stripe and analytics origins allow-listed)
 - Rate limiting with Redis atomic Lua scripting (fail-open)
 - Input validation with global whitelist + forbid-non-whitelisted pipes
 - Upload validation (MIME type + magic bytes + dimensions)
 - Parameterized database queries via Prisma ORM
 - Secret scanning (Gitleaks), dependency review, SAST (CodeQL/Semgrep) in CI
-- Pre-commit and pre-push hooks for quality gating
+- Pre-push quality gate (`pnpm verify`)
 
-See [SECURITY.md](SECURITY.md) for our security policy and responsible
-disclosure process.
+See [SECURITY.md](SECURITY.md) for the security policy, known gaps, and
+responsible disclosure process.
 
 ---
 

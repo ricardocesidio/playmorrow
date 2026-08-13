@@ -22,6 +22,7 @@ export interface RecommendationResult {
   items: RecommendationItem[];
   nextCursor: { score: number; gameId: string } | null;
   hasMore: boolean;
+  total: number;
 }
 
 const WEIGHTS: Record<string, number> = {
@@ -98,7 +99,7 @@ export class RecommendationsService {
     }
 
     if (candidateIds.length === 0) {
-      return { items: [], nextCursor: null, hasMore: false };
+      return { items: [], nextCursor: null, hasMore: false, total: 0 };
     }
 
     const usedScorers = type === 'hidden-gems'
@@ -163,7 +164,7 @@ export class RecommendationsService {
       reasons: data.reasons,
     }));
 
-    return { items, nextCursor, hasMore };
+    return { items, nextCursor, hasMore, total: sorted.length };
   }
 
   private async getPersonalizedCandidates(userId: string, limit: number): Promise<string[]> {

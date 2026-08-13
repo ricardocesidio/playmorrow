@@ -79,7 +79,7 @@ export default function GamesPage() {
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search games by name, studio, or tag..."
                   aria-label="Search games"
-                  className="h-10 max-w-xl border-border-bright/50 bg-background/70 pl-12 placeholder:text-muted-foreground/45"
+                  className="h-10 w-full border-border-bright/50 bg-background/70 pl-12 placeholder:text-muted-foreground/45"
                 />
                 <button type="submit" className="cursor-pointer sr-only">Search</button>
               </div>

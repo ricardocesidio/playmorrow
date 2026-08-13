@@ -250,7 +250,7 @@ function GameHero({ game, title, heroImage, slug, pendingCover, onSaveCover, onC
   }, [pendingCover, offsetY]);
 
   return (
-    <HudPanel className="relative min-h-[420px] overflow-hidden p-0 xl:h-[420px] xl:min-h-0" accent="muted">
+    <HudPanel className="relative min-h-[420px] overflow-hidden p-0 xl:h-[420px] xl:min-h-0 xl:[&>div]:h-full" accent="muted">
       <div
         className="absolute inset-0"
         onMouseDown={handleMouseDown}
@@ -277,19 +277,21 @@ function GameHero({ game, title, heroImage, slug, pendingCover, onSaveCover, onC
         </div>
       )}
 
-      <div className="relative z-10 grid min-h-[420px] content-between p-6 pb-0 sm:p-8 sm:pb-0 xl:h-full xl:min-h-0 xl:px-12 xl:pb-0 xl:pt-8">
+      <div className="relative z-10 flex min-h-[420px] flex-col p-6 pb-0 sm:p-8 sm:pb-0 xl:h-full xl:min-h-0 xl:px-12 xl:pb-0 xl:pt-8">
         <div>
           {game.featured && <span className="clip-corner-sm border border-cyan/70 bg-background/70 px-3.5 py-1.5 pm-micro text-cyan shadow-[0_0_14px_rgb(62_231_255_/_0.18)]">Featured</span>}
           <ManageDropdown slug={slug} onCoverUploaded={onCoverUploaded} />
-          <h1 className="mt-5 font-display text-[4rem] font-black uppercase leading-[0.86] text-foreground drop-shadow-[0_6px_18px_rgb(0_0_0_/_0.85)] sm:text-[5.05rem] xl:text-[5.25rem]">
-            {title.split(' ').map((word) => (
-              <span key={word} className="block">{word}</span>
+          <h1 className="mt-5 max-w-full font-display text-[2.8rem] font-black uppercase leading-[0.92] text-foreground drop-shadow-[0_6px_18px_rgb(0_0_0_/_0.85)] sm:text-[3rem] xl:text-[3.1rem]">
+            {title.split(' ').map((word, index, words) => (
+              <span key={`${word}-${index}`} className="inline">
+                {word}{index < words.length - 1 ? ' ' : ''}
+              </span>
             ))}
           </h1>
           {game.tagline && <p className="pm-micro mb-[10px] mt-5 text-[0.78rem] text-muted-foreground">{game.tagline}</p>}
         </div>
 
-        <div>
+        <div className="mt-auto w-full">
           <div className="mb-4 mt-[5px] flex flex-wrap items-center gap-4">
             <div className="grid size-14 place-items-center rounded-[3px] border border-border-bright bg-background/78 shadow-[inset_0_0_0_1px_rgb(255_255_255_/_0.04)]">
               <Shield className="size-7 text-foreground" />
@@ -302,13 +304,13 @@ function GameHero({ game, title, heroImage, slug, pendingCover, onSaveCover, onC
             </div>
             <DetailFollowButton slug={slug} />
           </div>
-          <div className="-mx-6 grid border-y border-border/55 bg-background/38 shadow-[inset_0_18px_34px_rgb(0_0_0_/_0.28)] sm:-mx-8 sm:grid-cols-[205px_205px_205px_205px_1fr] xl:-mx-12">
-            <HeroStat icon={<Heart className="size-[28px] stroke-[2]" />} value={formatFollowers(game.followersCount || 0)} label="Followers" />
-            <HeroStat icon={<Flame className="size-[26px] fill-coral text-coral" />} value={String(game.wishlistsCount ?? 0)} label="Wishlists" />
-            <HeroStat icon={<MessageCircle className="size-[29px] stroke-[1.9]" />} value={String(game.commentsCount ?? 0)} label="Comments" />
-            <HeroStat icon={<ActivityIcon />} value={String(game.viewsCount ?? 0)} label="Views" />
-          </div>
         </div>
+          <div className="-mx-6 flex flex-wrap justify-evenly border-y border-border/55 bg-background/38 shadow-[inset_0_18px_34px_rgb(0_0_0_/_0.28)] sm:-mx-8 xl:-mx-12">
+          <HeroStat icon={<Heart className="size-[28px] stroke-[2]" />} value={formatFollowers(game.followersCount || 0)} label="Followers" />
+          <HeroStat icon={<Flame className="size-[26px] fill-coral text-coral" />} value={String(game.wishlistsCount ?? 0)} label="Wishlists" />
+          <HeroStat icon={<MessageCircle className="size-[29px] stroke-[1.9]" />} value={String(game.commentsCount ?? 0)} label="Comments" />
+          <HeroStat icon={<ActivityIcon />} value={String(game.viewsCount ?? 0)} label="Views" />
+          </div>
       </div>
     </HudPanel>
   );
@@ -325,7 +327,7 @@ function PurchasePanel({ game, slug, title }: { game: Game; slug: string; title:
 
   return (
     <HudPanel className="p-4" accent="muted">
-      <p className="text-sm mb-3 text-foreground">Standard Edition</p>
+      <p className="mb-3 text-base text-foreground">Standard Edition</p>
       <div className="mt-3 flex items-start justify-between gap-4">
         <p className="font-display text-2xl font-black text-foreground">{price}</p>
         <span className="clip-corner inline-flex items-center gap-1 border border-border px-2 py-1 font-mono text-[10px] uppercase text-muted-foreground">
@@ -990,7 +992,7 @@ function InfoField({ label, value }: { label: string; value: string }) {
 
 function HeroStat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
-    <div className="flex min-h-[66px] items-center gap-[14px] border-r border-border/60 px-7 last:border-r-0 sm:px-8">
+    <div className="flex min-h-[66px] min-w-0 flex-1 basis-1/2 items-center justify-center gap-[14px] border-r border-border/60 px-4 last:border-r-0 sm:basis-0 sm:px-6 xl:px-8">
       <span className="grid size-8 shrink-0 place-items-center text-foreground">{icon}</span>
       <span className="pt-[2px]">
         <span className="block font-mono text-[1.25rem] font-bold leading-none tracking-[0.03em] text-foreground">{value}</span>
@@ -1073,9 +1075,10 @@ function SimilarGamesSection({ gameId, slug }: { gameId: string | undefined; slu
   if (loading || games.length === 0) return null;
 
   return (
-    <section className="mx-auto mt-12 max-w-6xl px-5 sm:px-8 lg:px-10">
-      <h2 className="mb-6 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Similar Games</h2>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+    <section className="relative isolate mx-auto mt-12 max-w-6xl overflow-hidden border border-border/50 bg-[linear-gradient(135deg,rgb(62_231_255_/_0.05),rgb(2_6_9_/_0.72)_48%,rgb(255_87_77_/_0.04))] px-5 py-8 shadow-[inset_0_1px_0_rgb(255_255_255_/_0.05),0_20px_60px_rgb(0_0_0_/_0.25)] sm:px-8 lg:px-10">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgb(62_231_255_/_0.1),transparent_35%),radial-gradient(circle_at_90%_100%,rgb(255_87_77_/_0.08),transparent_38%)]" aria-hidden="true" />
+      <h2 className="relative z-10 mb-6 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cyan">Similar Games</h2>
+      <div className="relative z-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         {games.map(game => (
           <Link key={game.id} href={`/games/${game.slug}`}
             className="group clip-corner border border-border/40 panel overflow-hidden transition hover:border-cyan/30">

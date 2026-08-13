@@ -36,8 +36,8 @@ export function HudPanel({
     <div
       className={cn(
         'panel relative border-border/90 overflow-hidden',
-        'before:pointer-events-none before:absolute before:left-3 before:top-3 before:size-8 before:border-l before:border-t before:z-10',
-        'after:pointer-events-none after:absolute after:bottom-3 after:right-3 after:size-8 after:border-b after:border-r after:z-10',
+        'before:pointer-events-none before:absolute before:left-0 before:top-0 before:size-8 before:border-l before:border-t before:z-10',
+        'after:pointer-events-none after:absolute after:bottom-0 after:right-0 after:size-8 after:border-b after:border-r after:z-10',
         accentClass,
         className,
       )}

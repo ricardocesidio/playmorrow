@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Activity, ArrowRight, Gamepad2, Radio, SquarePlay, UserPlus } from 'lucide-react';
 import { GameCard } from '@/components/game-card';
 import { formatRelativeTime } from '@/lib/format';
@@ -45,11 +46,10 @@ export function HeroSection({ children }: { children?: ReactNode }) {
               </div>
               <h1 className="mt-6 font-display text-[clamp(2.5rem,6vw,5rem)] font-black uppercase leading-[0.9] text-white">
                 Discover tomorrow's<br />
-                <span className="text-cyan">indie games</span> today.
+                <span className="bg-gradient-to-r from-cyan to-[#8e1f1a] bg-clip-text text-transparent">indie games</span> today.
               </h1>
               <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground">
-                Playmorrow is where indie studios build their public presence and grow their audience.
-                Follow development in real-time, play demos, and be part of the journey before the game ships.
+                Playmorrow is the discovery layer for tomorrow&apos;s games, where indie studios broadcast their journey in real-time. Follow development from first prototype to release, play demos, and join the community shaping what ships next.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Link href={user ? '/dashboard' : '/games'}
@@ -125,9 +125,8 @@ function LiveTicker({ items }: { items: { type: string; title?: string; game?: {
 }
 
 export function GamesSection() {
-  const [gamePage, setGamePage] = useState(1);
-  const { data: gamesData, isLoading: gamesLoading } = useGames(gamePage, 9);
-
+  const router = useRouter();
+  const { data: gamesData, isLoading: gamesLoading } = useGames(1, 9);
   const games = gamesData?.items?.slice(0, 9) ?? [];
   const gamesHasMore = gamesData?.hasMore ?? false;
 
@@ -166,9 +165,9 @@ export function GamesSection() {
           <div className="mt-8 flex justify-center">
             <button
               type="button"
-              onClick={() => setGamePage((p) => p + 1)}
+              onClick={() => router.push('/games')}
               disabled={gamesLoading}
-              className="clip-corner inline-flex h-10 items-center gap-2 border border-cyan/50 bg-cyan/5 px-6 font-mono text-xs text-cyan hover:bg-cyan/10 transition disabled:opacity-50"
+              className="clip-corner inline-flex h-10 cursor-pointer items-center gap-2 border border-cyan/50 bg-cyan/5 px-6 font-mono text-xs text-cyan transition hover:bg-cyan/10 disabled:cursor-default disabled:opacity-50"
             >
               {gamesLoading ? 'Loading...' : 'Load more games'} <ArrowRight className="size-4" />
             </button>

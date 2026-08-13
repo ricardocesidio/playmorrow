@@ -6,7 +6,6 @@ import { useSearchParams } from 'next/navigation';
 import { Store, ArrowRight } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { Button } from '@/components/ui/button';
@@ -46,11 +45,8 @@ export default function MarketplacePage() {
                 <h1 className="font-display text-[2.55rem] font-black uppercase leading-[0.9] text-foreground sm:text-5xl lg:text-[3.28rem]">
                   Marketplace
                 </h1>
-                <span className="ml-3 inline-block border border-coral/60 px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-widest text-coral">
-                  Coming Soon
-                </span>
                 <p className="mt-2 text-sm leading-none text-muted-foreground sm:text-base">
-                  Assets, tools, and services for game development.
+                  Discover the assets, tools, and services trusted by independent game developers.
                 </p>
               </div>
             </div>
@@ -90,10 +86,34 @@ export default function MarketplacePage() {
             )}
 
             {!isLoading && !error && items.length === 0 && (
-              <EmptyState
-                title="No listings yet"
-                action={{ label: 'Browse games', href: '/games' }}
-              />
+              <div className="relative flex flex-col items-center gap-4 overflow-hidden border border-border/60 bg-muted/10 py-16 grayscale shadow-[inset_0_0_90px_rgb(0_0_0_/_0.45),0_0_30px_rgb(0_0_0_/_0.25)] panel">
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,transparent_0%,rgb(255_255_255_/_0.025)_48%,transparent_50%)]" aria-hidden="true" />
+                <div className="relative flex size-16 items-center justify-center border border-border/70 bg-background/60 text-muted-foreground/45 shadow-[0_0_24px_rgb(0_0_0_/_0.35)]" aria-hidden="true">
+                  <Store className="size-7" />
+                  <span className="absolute -right-2 -top-2 border border-border/80 bg-background px-2 py-1 font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground/70">
+                    Locked
+                  </span>
+                </div>
+                <span className="relative border border-border/70 bg-background/70 px-3 py-1 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-muted-foreground">
+                  Coming Soon
+                </span>
+                <p className="relative font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground/60">
+                  <span className="animate-blink mr-2 inline-block h-3 w-2 bg-muted-foreground/50 align-middle" aria-hidden="true" />
+                  NO DATA DETECTED
+                </p>
+                <p className="relative font-display text-lg font-semibold text-muted-foreground">
+                  No listings yet
+                </p>
+                <p className="relative max-w-md text-center text-sm text-muted-foreground/60">
+                  Marketplace inventory is being prepared.
+                </p>
+                <Link
+                  href="/games"
+                  className="relative mt-2 clip-corner border border-border/70 bg-background/40 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-muted-foreground transition hover:border-cyan/60 hover:text-cyan"
+                >
+                  Browse games
+                </Link>
+              </div>
             )}
 
             {!isLoading && items.length > 0 && (

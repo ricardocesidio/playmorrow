@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, Gamepad2, Loader2, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Gamepad2, Loader2, Sparkles, X } from 'lucide-react';
 import { useAuth } from '@/lib/api/auth-context';
 import { useForYouFeed, useRecommendationFeedback, useRecordImpressions, type ForYouItem } from '@/lib/api/hooks';
 import { EmptyState } from '@/components/empty-state';
@@ -39,14 +39,37 @@ export default function ForYouFeed() {
   } = useForYouFeed(12);
 
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [pageIndex, setPageIndex] = useState(0);
   const feedback = useRecommendationFeedback();
   const impressions = useRecordImpressions();
   const recorded = useRef<Set<string>>(new Set());
 
+  const pages = data?.pages ?? [];
   const items = useMemo(
-    () => (data?.pages ?? []).flatMap((p) => p.items).filter((i) => !dismissed.has(i.gameId)),
-    [data, dismissed],
+    () => (pages[pageIndex]?.items ?? []).filter((i) => !dismissed.has(i.gameId)),
+    [pages, pageIndex, dismissed],
   );
+
+  const total = data?.pages[0]?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / 12));
+
+  const goToPage = async (index: number) => {
+    if (index < 0) return;
+    while (index >= pages.length && hasNextPage) {
+      await fetchNextPage();
+    }
+    setPageIndex(Math.min(index, pages.length - 1));
+  };
+  const goNext = () => {
+    if (pageIndex < pages.length - 1) {
+      setPageIndex((p) => p + 1);
+      return;
+    }
+    if (hasNextPage) {
+      fetchNextPage().then(() => setPageIndex((p) => p + 1));
+    }
+  };
+  const goPrev = () => setPageIndex((p) => Math.max(0, p - 1));
 
   // Impression capture (CTR denominator). Each game counts once per client
   // session; the API additionally dedupes within a 60-minute window.
@@ -192,20 +215,49 @@ export default function ForYouFeed() {
           ))}
         </div>
 
-        {hasNextPage && (
-          <div className="mt-8 flex justify-center">
+        {totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-center gap-1.5">
             <button
               type="button"
-              onClick={() => fetchNextPage()}
-              disabled={isFetchingNextPage}
-              className="clip-corner border border-cyan/30 bg-cyan/5 px-6 py-2 font-mono text-xs uppercase tracking-widest text-cyan transition hover:bg-cyan/15 focus-visible:ring-2 focus-visible:ring-cyan disabled:opacity-50"
+              onClick={goPrev}
+              disabled={pageIndex === 0}
+              className="clip-corner flex cursor-pointer items-center gap-1.5 border border-border/40 px-3 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan/30 hover:text-cyan focus-visible:ring-2 focus-visible:ring-cyan disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="Previous page"
             >
-              {isFetchingNextPage ? (
+              <ArrowLeft className="size-3" aria-hidden="true" /> Prev
+            </button>
+
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goToPage(i)}
+                disabled={isFetchingNextPage && i >= pages.length}
+                aria-current={i === pageIndex ? 'page' : undefined}
+                className={`clip-corner min-w-9 cursor-pointer border px-3 py-2 font-mono text-[0.6rem] tracking-widest transition focus-visible:ring-2 focus-visible:ring-cyan ${
+                  i === pageIndex
+                    ? 'border-cyan bg-cyan/15 text-cyan'
+                    : 'border-border/40 text-muted-foreground hover:border-cyan/30 hover:text-cyan'
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={!hasNextPage && pageIndex >= pages.length - 1}
+              className="clip-corner flex cursor-pointer items-center gap-1.5 border border-border/40 px-3 py-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground transition hover:border-cyan/30 hover:text-cyan focus-visible:ring-2 focus-visible:ring-cyan disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {isFetchingNextPage && pageIndex >= pages.length - 1 ? (
                 <>
-                  <Loader2 className="mr-2 inline size-3 animate-spin" aria-hidden="true" /> Loading
+                  <Loader2 className="size-3 animate-spin" aria-hidden="true" /> Loading
                 </>
               ) : (
-                'Load more'
+                <>
+                  Next <ArrowRight className="size-3" aria-hidden="true" />
+                </>
               )}
             </button>
           </div>

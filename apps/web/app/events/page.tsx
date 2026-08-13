@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { MapPin, Calendar } from 'lucide-react';
 
 import { SiteHeader } from '@/components/site-header';
-import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/error-state';
 import { CircuitFrame, HudPanel, HudStatusRail } from '@/components/playmorrow/hud';
 import { useEvents } from '@/lib/api/hooks';
@@ -18,10 +17,23 @@ export default function EventsPage() {
       <SiteHeader />
       <main className="relative min-h-screen bg-[#020609] px-5 pb-28 pt-4 sm:px-8 lg:px-10">
         <CircuitFrame className="opacity-70" />
-        <div className="relative z-10 mx-auto max-w-5xl">
+        <div className="relative z-10 mx-auto max-w-[1448px]">
           <HudPanel className="mb-3 px-4 py-3 sm:px-8 sm:py-4" accent="muted">
-            <h1 className="font-display text-2xl font-black uppercase text-foreground">Events</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Game jams, showcases, and community events.</p>
+            <div className="flex flex-wrap items-end justify-between gap-5 border-b border-border/55 pb-2">
+              <div>
+                <h1 className="font-display text-[2.55rem] font-black uppercase leading-[0.9] text-foreground sm:text-5xl lg:text-[3.28rem]">
+                  Events
+                </h1>
+                <p className="mt-2 text-sm leading-none text-muted-foreground sm:text-base">
+                  Discover the game jams, showcases, and community gatherings shaping the indie scene.
+                </p>
+              </div>
+              {data && (
+                <div className="pm-micro text-muted-foreground">
+                  <span className="text-cyan">{data.total.toLocaleString()}</span> events indexed
+                </div>
+              )}
+            </div>
           </HudPanel>
 
           {error && !isLoading && <ErrorState message="Failed to load events." />}
@@ -35,7 +47,34 @@ export default function EventsPage() {
           )}
 
           {!isLoading && data && data.items.length === 0 && (
-            <EmptyState title="No upcoming events" action={{ label: 'Browse games', href: '/games' }} />
+            <div className="relative flex flex-col items-center gap-4 overflow-hidden border border-border/60 bg-muted/10 py-16 grayscale shadow-[inset_0_0_90px_rgb(0_0_0_/_0.45),0_0_30px_rgb(0_0_0_/_0.25)] panel">
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,transparent_0%,rgb(255_255_255_/_0.025)_48%,transparent_50%)]" aria-hidden="true" />
+              <div className="relative flex size-16 items-center justify-center border border-border/70 bg-background/60 text-muted-foreground/45 shadow-[0_0_24px_rgb(0_0_0_/_0.35)]" aria-hidden="true">
+                <Calendar className="size-7" />
+                <span className="absolute -right-2 -top-2 border border-border/80 bg-background px-2 py-1 font-mono text-[0.5rem] uppercase tracking-widest text-muted-foreground/70">
+                  Locked
+                </span>
+              </div>
+              <span className="relative border border-border/70 bg-background/70 px-3 py-1 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-muted-foreground">
+                Coming Soon
+              </span>
+              <p className="relative font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground/60">
+                <span className="animate-blink mr-2 inline-block h-3 w-2 bg-muted-foreground/50 align-middle" aria-hidden="true" />
+                NO DATA DETECTED
+              </p>
+              <p className="relative font-display text-lg font-semibold text-muted-foreground">
+                No upcoming events
+              </p>
+              <p className="relative max-w-md text-center text-sm text-muted-foreground/60">
+                Event listings are being prepared.
+              </p>
+              <Link
+                href="/games"
+                className="relative mt-2 clip-corner border border-border/70 bg-background/40 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-muted-foreground transition hover:border-cyan/60 hover:text-cyan"
+              >
+                Browse games
+              </Link>
+            </div>
           )}
 
           {!isLoading && data && data.items.length > 0 && (

@@ -25,7 +25,7 @@ export class ForYouController {
 
   @Get('for-you')
   @UseGuards(OptionalSessionGuard)
-  @Throttle({ default: { limit: 30, ttl: 60000 } })
+  @Throttle({ default: { limit: 120, ttl: 60000 } })
   @ApiOperation({ summary: 'M23 hybrid "For You" feed' })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'cursor', required: false, description: 'URL-encoded JSON {score, gameId}' })

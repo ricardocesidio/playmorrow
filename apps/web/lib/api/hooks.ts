@@ -1558,6 +1558,7 @@ export interface ForYouResult {
   items: ForYouItem[];
   nextCursor: { score: number; gameId: string } | null;
   hasMore: boolean;
+  total: number;
   method: 'hybrid' | 'content' | 'trending' | 'legacy';
   personalizationEnabled: boolean | null;
 }
@@ -1577,13 +1578,9 @@ export function useForYouFeed(pageSize = 12) {
 }
 
 export function useRecommendationFeedback() {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ gameId, action }: { gameId: string; action: 'CLICKED' | 'DISMISSED' | 'WISHLISTED' }) =>
       api.post('/recommendations/feedback', { gameId, action }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['forYouFeed'] });
-    },
   });
 }
 
