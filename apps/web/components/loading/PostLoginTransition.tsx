@@ -8,7 +8,10 @@ export function PostLoginTransition({ onDone }: { onDone: () => void }) {
   const [progress, setProgress] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
   const startRef = useRef(Date.now());
+  const onDoneRef = useRef(onDone);
   const duration = 1200;
+
+  onDoneRef.current = onDone;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -17,17 +20,24 @@ export function PostLoginTransition({ onDone }: { onDone: () => void }) {
       setProgress(pct);
     }, 50);
 
+    let fadeTimer: ReturnType<typeof setTimeout> | undefined;
+    let doneTimer: ReturnType<typeof setTimeout> | undefined;
     const timer = setTimeout(() => {
       setProgress(100);
       clearInterval(interval);
-      setTimeout(() => {
+      fadeTimer = setTimeout(() => {
         setFadeOut(true);
-        setTimeout(() => onDone(), 400);
+        doneTimer = setTimeout(() => onDoneRef.current(), 400);
       }, 200);
     }, duration);
 
-    return () => { clearInterval(interval); clearTimeout(timer); };
-  }, [onDone]);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timer);
+      if (fadeTimer) clearTimeout(fadeTimer);
+      if (doneTimer) clearTimeout(doneTimer);
+    };
+  }, []);
 
   return (
     <BrandLoaderShell fadeOut={fadeOut}>
