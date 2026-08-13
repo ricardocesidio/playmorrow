@@ -44,7 +44,6 @@ const COUNTRIES = [
 export default function OnboardingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const provider = searchParams.get('provider');
   const email = searchParams.get('email') || '';
   const { user } = useAuth();
 
@@ -139,29 +138,32 @@ export default function OnboardingPage() {
       return;
     }
 
-    // Resize to 256x256 before creating data URL to avoid body size issues
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = 256;
-        canvas.height = 256;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) throw new Error('Canvas unavailable');
-        ctx.drawImage(img, 0, 0, 256, 256);
-        setAvatarDataUrl(canvas.toDataURL('image/jpeg', 0.8));
-      } catch {
-        setError('Could not process this image. Use a PNG, JPG, GIF, or WebP file.');
-      } finally {
-        URL.revokeObjectURL(url);
+    // Use a data URL instead of blob URLs, which are blocked by the production CSP.
+    const reader = new FileReader();
+    reader.onerror = () => setError('Could not read this image. Use a PNG, JPG, GIF, or WebP file.');
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') {
+        setError('Could not read this image. Use a PNG, JPG, GIF, or WebP file.');
+        return;
       }
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = 256;
+          canvas.height = 256;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) throw new Error('Canvas unavailable');
+          ctx.drawImage(img, 0, 0, 256, 256);
+          setAvatarDataUrl(canvas.toDataURL('image/jpeg', 0.8));
+        } catch {
+          setError('Could not process this image. Use a PNG, JPG, GIF, or WebP file.');
+        }
+      };
+      img.onerror = () => setError('Could not read this image. Use a PNG, JPG, GIF, or WebP file.');
+      img.src = reader.result;
     };
-    img.onerror = () => {
-      setError('Could not read this image. Use a PNG, JPG, GIF, or WebP file.');
-      URL.revokeObjectURL(url);
-    };
-    img.src = url;
+    reader.readAsDataURL(file);
     e.currentTarget.value = '';
   };
 
@@ -176,7 +178,6 @@ export default function OnboardingPage() {
         bio,
         country,
         avatarUrl: avatarDataUrl || undefined,
-        provider: provider || undefined,
         email: email || undefined,
       };
       if (accountType === 'STUDIO') {
