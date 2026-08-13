@@ -132,21 +132,37 @@ export default function OnboardingPage() {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { setError('Image too large. Max 5MB.'); return; }
+    setError('');
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image too large. Max 5MB.');
+      e.currentTarget.value = '';
+      return;
+    }
 
     // Resize to 256x256 before creating data URL to avoid body size issues
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 256;
-      canvas.height = 256;
-      const ctx = canvas.getContext('2d')!;
-      ctx.drawImage(img, 0, 0, 256, 256);
-      setAvatarDataUrl(canvas.toDataURL('image/jpeg', 0.8));
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas unavailable');
+        ctx.drawImage(img, 0, 0, 256, 256);
+        setAvatarDataUrl(canvas.toDataURL('image/jpeg', 0.8));
+      } catch {
+        setError('Could not process this image. Use a PNG, JPG, GIF, or WebP file.');
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    };
+    img.onerror = () => {
+      setError('Could not read this image. Use a PNG, JPG, GIF, or WebP file.');
       URL.revokeObjectURL(url);
     };
     img.src = url;
+    e.currentTarget.value = '';
   };
 
   const handleFinish = async () => {
@@ -285,7 +301,7 @@ export default function OnboardingPage() {
                     className="cursor-pointer border border-border px-5 py-2 font-mono text-xs uppercase tracking-widest text-muted-foreground transition hover:border-cyan hover:text-cyan">
                     <Upload className="mr-1 inline size-3" /> Upload photo
                   </button>
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
+                   <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp" onChange={handleAvatarChange} className="hidden" />
                 </div>
               </div>
 
@@ -351,7 +367,6 @@ export default function OnboardingPage() {
                 {bio && <div className="flex justify-between border-b border-border/60 pb-2"><span className="text-muted-foreground">Bio</span><span className="font-medium text-foreground">{bio.slice(0, 80)}{bio.length > 80 ? '...' : ''}</span></div>}
                 {avatarDataUrl && <div className="flex justify-between border-b border-border/60 pb-2"><span className="text-muted-foreground">Avatar</span><span className="text-cyan">Uploaded ✓</span></div>}
               </div>
-              {error && <p className="pm-micro text-coral">{error}</p>}
             </div>
           )}
 
@@ -479,12 +494,13 @@ export default function OnboardingPage() {
                 className="cursor-pointer border border-cyan bg-cyan/10 px-6 py-2 font-mono text-xs uppercase tracking-widest text-cyan transition hover:bg-cyan hover:text-background">
                 Continue <ArrowRight className="ml-1 inline size-3" />
               </button>
-            ) : (
+           ) : (
               <Button onClick={handleFinish} disabled={loading} variant="destructive" size="lg">
                 {loading ? 'Completing setup...' : accountType === 'PLAYER' ? 'Complete Setup' : 'Finish Setup'}
               </Button>
             )}
           </div>
+          {error && <p role="alert" aria-live="assertive" className="mt-4 pm-micro text-coral">{error}</p>}
         </HudPanel>
       </div>
       {success ? (
