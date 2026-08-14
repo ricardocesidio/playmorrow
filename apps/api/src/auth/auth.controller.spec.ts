@@ -1,4 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { createHash } from 'node:crypto';
 import { ConfigModule } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -14,6 +16,8 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { AuthModule } from './auth.module';
 import { MockEmailModule } from '../test/mock-email-service';
 import { registerTestUser } from '../test/register-test-user';
+import { CsrfGuard } from '../common/csrf.guard';
+import { OptionalSessionGuard } from './guards/optional-session.guard';
 
 const TEST_SUFFIX = `test-${Date.now()}`;
 const TEST_EMAIL = `${TEST_SUFFIX}@example.com`;
@@ -41,6 +45,10 @@ describe('AuthController (e2e)', () => {
         AuthModule,
         NotificationsModule,
         MockEmailModule,
+      ],
+      providers: [
+        { provide: APP_GUARD, useClass: OptionalSessionGuard },
+        { provide: APP_GUARD, useClass: CsrfGuard },
       ],
     }).compile();
 
@@ -94,6 +102,41 @@ describe('AuthController (e2e)', () => {
       });
 
     expect(res.status).toBe(HttpStatus.CONFLICT);
+  });
+
+  it('POST /api/auth/verify-email issues a CSRF token for the new session', async () => {
+    const email = `${TEST_SUFFIX}_csrf@example.com`;
+    const reg = await request(httpServer)
+      .post('/api/auth/register')
+      .send({ email, password: TEST_PASSWORD, acceptedTerms: true, acceptedPrivacy: true });
+    expect(reg.status).toBe(HttpStatus.CREATED);
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new Error('User not created');
+
+    // verifyEmail uses the latest unconsumed code — override with a known raw value
+    const rawCode = '654321';
+    const codeHash = createHash('sha256').update(rawCode).digest('hex');
+    await prisma.emailVerificationCode.create({
+      data: { codeHash, userId: user.id, expiresAt: new Date(Date.now() + 5 * 60 * 1000) },
+    });
+
+    const res = await request(httpServer)
+      .post('/api/auth/verify-email')
+      .send({ email, code: rawCode });
+
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.csrfToken).toBeDefined();
+    expect(typeof res.body.csrfToken).toBe('string');
+    expect(res.headers['x-csrf-token']).toBe(res.body.csrfToken);
+
+    // The issued token must be accepted by an authenticated mutation (complete-onboarding)
+    const username = `csrfuser${Date.now()}`;
+    const onboard = await request(httpServer)
+      .post('/api/auth/complete-onboarding')
+      .set('X-CSRF-Token', res.body.csrfToken)
+      .send({ accountType: 'PLAYER', username, email, displayName: 'CSRF Player' });
+    expect(onboard.status).toBe(HttpStatus.CREATED);
   });
 
   it('POST /api/auth/login works with valid credentials (by email)', async () => {

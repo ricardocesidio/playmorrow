@@ -138,7 +138,9 @@ export class AuthController {
     const ip = req.ip ?? req.socket?.remoteAddress;
     const { raw, expiresAt } = await this.sessionService.create(result.user.id, ip, ua);
     setSessionCookie(res, raw, expiresAt);
-    return result;
+    const csrfToken = this.csrfService.generateToken(result.user.id);
+    res.setHeader('X-CSRF-Token', csrfToken);
+    return { ...result, csrfToken };
   }
 
   @Post('resend-verification')

@@ -127,7 +127,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const verifyEmail = useCallback(async (email: string, code: string) => {
-    const result = await api.post<{ user: AuthUser; accessToken: string }>('/auth/verify-email', { email, code });
+    const result = await api.post<{ user: AuthUser; accessToken?: string; csrfToken?: string }>('/auth/verify-email', { email, code });
+    if (result.csrfToken) {
+      document.cookie = `playmorrow_csrf=${result.csrfToken}; path=/; sameSite=lax; maxAge=${60 * 60 * 24}`;
+    }
     setUser(result.user);
     return result.user;
   }, []);

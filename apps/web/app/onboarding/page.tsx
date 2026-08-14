@@ -191,9 +191,14 @@ export default function OnboardingPage() {
         body.wishlistGameSlugs = wishlistedGameSlugs;
       }
       // Use direct fetch instead of api client to ensure cookies are captured
+      const csrfMatch = document.cookie.match(/(?:^|;\s*)playmorrow_csrf=([^;]*)/);
+      const csrfToken = csrfMatch ? csrfMatch[1] : undefined;
       const res = await fetch(`${API}/auth/complete-onboarding`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+        },
         credentials: 'include',
         body: JSON.stringify(body),
       });
