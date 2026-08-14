@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/api/auth-context';
 import { usePersonalFeedCursor } from '@/lib/api/hooks';
@@ -11,6 +11,14 @@ export function PersonalFeedSection() {
   const [cursor, setCursor] = useState<{ createdAt: string; id: string } | null>(null);
   const [items, setItems] = useState<{ id: string; title: string; type: string; createdAt: string; summary: string; game: { slug: string; title: string }; studio: { name: string } }[]>([]);
   const [allLoaded, setAllLoaded] = useState(false);
+
+  const { data, isLoading } = usePersonalFeedCursor('all', 10, cursor, isAuthenticated);
+
+  useEffect(() => {
+    if (!cursor && data?.items && items.length === 0) {
+      setItems(data.items);
+    }
+  }, [cursor, data, items.length]);
 
   if (!isAuthenticated) {
     return (
@@ -23,8 +31,6 @@ export function PersonalFeedSection() {
     );
   }
 
-  const { data, isLoading } = usePersonalFeedCursor('all', 10, cursor);
-
   const handleLoadMore = () => {
     if (data?.nextCursor) {
       setCursor(data.nextCursor);
@@ -35,11 +41,6 @@ export function PersonalFeedSection() {
       setAllLoaded(true);
     }
   };
-
-  // Initial load
-  if (!cursor && data && data.items && items.length === 0) {
-    setItems(data.items);
-  }
 
   // Load more if we have a cursor update
   const displayItems = cursor ? items : (data?.items || []);

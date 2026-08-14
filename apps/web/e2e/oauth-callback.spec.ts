@@ -13,6 +13,13 @@ test('OAuth callback finishes the post-login transition and redirects once', asy
   await page.route('**/api/health', async (route) => {
     await route.fulfill({ status: 200, contentType: 'application/json', body: '{"status":"ok"}' });
   });
+  await page.route('**/api/me/feed/cursor**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [], hasMore: false, nextCursor: null }),
+    });
+  });
 
   await page.goto('/oauth/callback#csrf=test-csrf-token');
   await page.waitForURL('**/dashboard', { timeout: 10_000 });
