@@ -73,6 +73,12 @@ export function middleware(request: NextRequest) {
     ].join('; '),
   );
 
+  // Authenticated flows must always load the current client bundle after a deploy.
+  const pathname = request.nextUrl.pathname;
+  if (pathname === '/login' || pathname.startsWith('/oauth') || pathname.startsWith('/onboarding') || pathname.startsWith('/dashboard')) {
+    response.headers.set('Cache-Control', 'no-store');
+  }
+
   return response;
 }
 
