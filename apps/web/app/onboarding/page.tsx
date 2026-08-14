@@ -191,8 +191,22 @@ export default function OnboardingPage() {
         body.wishlistGameSlugs = wishlistedGameSlugs;
       }
       // Use direct fetch instead of api client to ensure cookies are captured
+      // Self-heal: sessions created before CSRF tokens were issued have no cookie —
+      // fetch a fresh token from session/me first so the mutation is not rejected.
       const csrfMatch = document.cookie.match(/(?:^|;\s*)playmorrow_csrf=([^;]*)/);
-      const csrfToken = csrfMatch ? csrfMatch[1] : undefined;
+      let csrfToken = csrfMatch ? csrfMatch[1] : undefined;
+      if (!csrfToken) {
+        try {
+          const meRes = await fetch(`${API}/auth/session/me`, { credentials: 'include' });
+          if (meRes.ok) {
+            const me = await meRes.json();
+            if (me.csrfToken) {
+              csrfToken = me.csrfToken;
+              document.cookie = `playmorrow_csrf=${me.csrfToken}; path=/; sameSite=lax; maxAge=86400`;
+            }
+          }
+        } catch { /* fall through — send request without a token */ }
+      }
       const res = await fetch(`${API}/auth/complete-onboarding`, {
         method: 'POST',
         headers: {

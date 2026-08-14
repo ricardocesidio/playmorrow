@@ -117,8 +117,11 @@ export class AuthController {
 
   @Get('session/me')
   @UseGuards(SessionAuthGuard)
-  async sessionMe(@CurrentUser() user: { id: string }) {
-    return this.authService.getProfile(user.id);
+  async sessionMe(@CurrentUser() user: { id: string }, @Res({ passthrough: true }) res: Response) {
+    const profile = await this.authService.getProfile(user.id);
+    const csrfToken = this.csrfService.generateToken(user.id);
+    res.setHeader('X-CSRF-Token', csrfToken);
+    return { ...profile, csrfToken };
   }
 
   @Get('session/list')

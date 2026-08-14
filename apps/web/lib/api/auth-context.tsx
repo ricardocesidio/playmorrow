@@ -68,8 +68,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchMe = useCallback(async () => {
     try {
-      const u = await api.get<AuthUser>('/auth/session/me');
-      setUser(u);
+      const u = await api.get<AuthUser & { csrfToken?: string }>('/auth/session/me');
+      if (u.csrfToken) {
+        document.cookie = `playmorrow_csrf=${u.csrfToken}; path=/; sameSite=lax; maxAge=${60 * 60 * 24}`;
+      }
+      const { csrfToken: _unused, ...clean } = u;
+      setUser(clean);
     } catch {
       setUser(null);
     } finally {

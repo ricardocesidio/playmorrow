@@ -18,6 +18,7 @@ import { MockEmailModule } from '../test/mock-email-service';
 import { registerTestUser } from '../test/register-test-user';
 import { CsrfGuard } from '../common/csrf.guard';
 import { OptionalSessionGuard } from './guards/optional-session.guard';
+import cookieParser from 'cookie-parser';
 
 const TEST_SUFFIX = `test-${Date.now()}`;
 const TEST_EMAIL = `${TEST_SUFFIX}@example.com`;
@@ -53,6 +54,7 @@ describe('AuthController (e2e)', () => {
     }).compile();
 
     const nestApp = app.createNestApplication();
+    nestApp.use(cookieParser());
     nestApp.setGlobalPrefix('api', { exclude: ['health'] });
     await nestApp.init();
     httpServer = nestApp.getHttpServer();
@@ -68,6 +70,29 @@ describe('AuthController (e2e)', () => {
 
       await prisma.$disconnect();
     }
+  });
+
+  it('GET /api/auth/session/me issues a CSRF token usable by authenticated mutations', async () => {
+    const email = `${TEST_SUFFIX}_csrfme@example.com`;
+    const { sessionCookie } = await registerTestUser(httpServer, prisma, email, TEST_PASSWORD);
+    const cookieHeader = `playmorrow_session=${sessionCookie}`;
+
+    const res = await request(httpServer)
+      .get('/api/auth/session/me')
+      .set('Cookie', cookieHeader);
+
+    expect(res.status).toBe(HttpStatus.OK);
+    expect(res.body.csrfToken).toBeDefined();
+    expect(typeof res.body.csrfToken).toBe('string');
+    expect(res.headers['x-csrf-token']).toBe(res.body.csrfToken);
+
+    // The issued token must be accepted by an authenticated mutation
+    const onboard = await request(httpServer)
+      .post('/api/auth/complete-onboarding')
+      .set('Cookie', cookieHeader)
+      .set('X-CSRF-Token', res.body.csrfToken)
+      .send({ accountType: 'PLAYER', username: `csrfmeuser${Date.now()}`, email, displayName: 'CSRF Me' });
+    expect(onboard.status).toBe(HttpStatus.CREATED);
   });
 
   it('POST /api/auth/register creates a user and requires email verification', async () => {
@@ -130,10 +155,26 @@ describe('AuthController (e2e)', () => {
     expect(typeof res.body.csrfToken).toBe('string');
     expect(res.headers['x-csrf-token']).toBe(res.body.csrfToken);
 
-    // The issued token must be accepted by an authenticated mutation (complete-onboarding)
+    // verify-email establishes the session cookie
+    const setCookies = res.headers['set-cookie'];
+    const cookieStr = Array.isArray(setCookies) ? setCookies[0] : setCookies;
+    const sessionMatch = cookieStr?.match(/playmorrow_session=[^;]+/);
+    const sessionCookie = sessionMatch ? sessionMatch[0] : null;
+    expect(sessionCookie).toBeTruthy();
+    if (!sessionCookie) throw new Error('No session cookie from verify-email');
+
+    // Sanity: without a CSRF token the authenticated mutation is rejected (the reported bug)
     const username = `csrfuser${Date.now()}`;
+    const blocked = await request(httpServer)
+      .post('/api/auth/complete-onboarding')
+      .set('Cookie', sessionCookie)
+      .send({ accountType: 'PLAYER', username, email, displayName: 'CSRF Player' });
+    expect(blocked.status).toBe(HttpStatus.FORBIDDEN);
+
+    // The issued token must be accepted by the same authenticated mutation
     const onboard = await request(httpServer)
       .post('/api/auth/complete-onboarding')
+      .set('Cookie', sessionCookie)
       .set('X-CSRF-Token', res.body.csrfToken)
       .send({ accountType: 'PLAYER', username, email, displayName: 'CSRF Player' });
     expect(onboard.status).toBe(HttpStatus.CREATED);
