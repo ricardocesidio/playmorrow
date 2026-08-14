@@ -18,7 +18,8 @@ export function reportWebVitals() {
     };
 
     if (navigator.sendBeacon) {
-      navigator.sendBeacon('/api/analytics/track', JSON.stringify(body));
+      const blob = new Blob([JSON.stringify(body)], { type: 'application/json' });
+      navigator.sendBeacon('/api/analytics/track', blob);
     }
   };
 

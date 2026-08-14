@@ -47,11 +47,9 @@ interface AuthContextValue {
   login: (emailOrUsername: string, password: string) => Promise<AuthUser>;
   register: (data: {
     email: string;
-    username: string;
-    displayName: string;
     password: string;
-    accountType?: 'PLAYER' | 'STUDIO';
     acceptedTerms: boolean;
+    acceptedPrivacy: boolean;
     marketingOptIn?: boolean;
     partnerMarketingOptIn?: boolean;
   }) => Promise<RegisterResult>;
@@ -109,11 +107,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(async (data: {
     email: string;
-    username: string;
-    displayName: string;
     password: string;
-    accountType?: 'PLAYER' | 'STUDIO';
     acceptedTerms: boolean;
+    acceptedPrivacy: boolean;
     marketingOptIn?: boolean;
     partnerMarketingOptIn?: boolean;
   }) => {

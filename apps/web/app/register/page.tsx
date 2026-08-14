@@ -3,7 +3,7 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowUpRight, Eye, EyeOff, Lock, Mail, User, Gamepad2, Building2 } from 'lucide-react';
+import { ArrowUpRight, Eye, EyeOff, Lock, Mail, Gamepad2, Building2 } from 'lucide-react';
 
 import { useAuth } from '@/lib/api/auth-context';
 import { Input } from '@/components/ui/input';
@@ -21,8 +21,6 @@ export default function RegisterPage() {
   const { register, isAuthenticated, isLoading: authLoading } = useAuth();
   const [accountType, setAccountType] = useState<'PLAYER' | 'STUDIO'>('PLAYER');
   const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [marketingOptIn, setMarketingOptIn] = useState(false);
@@ -48,16 +46,8 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !username.trim() || !displayName.trim() || !password) {
+    if (!email.trim() || !password) {
       setError('All fields required');
-      return;
-    }
-    if (!/^[a-zA-Z0-9\s]+$/.test(displayName.trim()) || displayName.trim().length > 30) {
-      setError('Name can only contain letters, numbers, and spaces (max 30 characters).');
-      return;
-    }
-    if (!/^[a-zA-Z0-9]+$/.test(username.trim()) || username.trim().length > 12) {
-      setError('Username can only contain letters and numbers (max 12 characters).');
       return;
     }
     if (password.length < 8 || !/[^a-zA-Z0-9]/.test(password)) {
@@ -73,11 +63,9 @@ export default function RegisterPage() {
     try {
       const result = await register({
         email: email.trim(),
-        username: username.trim(),
-        displayName: displayName.trim(),
         password,
-        accountType,
         acceptedTerms,
+        acceptedPrivacy: acceptedTerms,
         marketingOptIn,
         partnerMarketingOptIn,
       });
@@ -163,24 +151,6 @@ export default function RegisterPage() {
               </div>
 
               <form onSubmit={handleSubmit} className="mt-10 space-y-5">
-                <HudTextField
-                  id="displayName"
-                  label="Name"
-                  value={displayName}
-                  onChange={setDisplayName}
-                  placeholder="Your name"
-                  icon={<User className="size-5" />}
-                />
-                <HudTextField
-                  id="username"
-                  label="Username"
-                  value={username}
-                  onChange={setUsername}
-                  placeholder="Choose a username"
-                  autoComplete="username"
-                  icon={<User className="size-5" />}
-                  hint="Letters and numbers only. Max 12 characters."
-                />
                 <HudTextField
                   id="email"
                   label="Email"

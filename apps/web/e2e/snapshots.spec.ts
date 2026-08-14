@@ -48,6 +48,9 @@ test.describe('Visual snapshots', () => {
     test(`register at ${viewport}`, async ({ page }) => {
       test.slow();
       await page.setViewportSize({ width, height });
+      await page.route('**/api/auth/session/me', async (route) => {
+        await route.fulfill({ status: 401, contentType: 'application/json', body: '{}' });
+      });
       await page.goto('/register', { waitUntil: 'networkidle' });
       await expect(page.getByRole('heading', { name: 'Create your signal' })).toBeVisible();
       await expect(page).toHaveScreenshot(`register-${viewport}.png`);
