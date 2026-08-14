@@ -1,13 +1,13 @@
 # Playmorrow — Project Status
 
-> **Last verified:** 2026-08-11
+> **Last verified:** 2026-08-14
 > **Version:** v0.85-beta
 > **Repository:** [github.com/ricardocesidio/playmorrow](https://github.com/ricardocesidio/playmorrow)
-> **Tests:** 538/539 passing (51 files). **Typecheck:** 7/7. **Lint:** 0 errors. **Build:** 6/6.
+> **Tests:** 546/546 passing (54 files). **Typecheck:** 7/7. **Lint:** 0 errors. **Build:** 6/6.
 > **Live:** https://playmorrow.co
 > **Production DB isolation:** 🟢 CERTIFIED (separate prod/dev Neon branches)
 > **Production hardening (P0.1.1):** 🟡 CONDITIONALLY CERTIFIED — credentials rotated; real backup verified in R2; `gh` secret registration is the final user action. See `docs/releases/P0_1_FINAL_CERTIFICATION.md`.
-> **Security Assessment v2:** 🟢 **BASELINE ACCEPTED — NO EXPLOITABLE DEPENDENCY VULN REMAINS** — dompurify/multer/js-yaml remediated; image-size MITIGATED (magic-byte gate); **SEC-012 sharp P1 RESOLVED 2026-08-11** (next 16.3.0 → sharp 0.35.3/vips 8.18.3, audit 23 → 20 findings, all remaining NOT-REACHABLE/deferred); M23 freeze intact; 539/539 tests passing. See `docs/security/SECURITY_ASSESSMENT_V2.md`.
+> **Security Assessment v2:** 🟢 **BASELINE ACCEPTED — NO EXPLOITABLE DEPENDENCY VULN REMAINS** — dompurify/multer/js-yaml remediated; image-size MITIGATED (magic-byte gate); **SEC-012 sharp P1 RESOLVED 2026-08-11** (next 16.3.0 → sharp 0.35.3/vips 8.18.3, audit 23 → 20 findings, all remaining NOT-REACHABLE/deferred); M23 freeze intact; 546/546 tests passing. See `docs/security/SECURITY_ASSESSMENT_V2.md`.
 > **Phase 6 AI:** M23 (Recommendation Engine) 🟢 **DEPLOYED & ACTIVE — OBSERVATION FREEZE** — 5% governed rollout, kill switch tested, baseline window active 2026-08-10 → 2026-08-17, **25% gate LOCKED** until gate evaluation. 🟢 **Catalog publishing path available** (2026-08-10): `POST /api/games/:slug/publish` lets studios publish games; public catalog/search filter `isPublished: true`. Whether real studios publish (and the catalog becomes measurable) is now a production observation question. M22/M24/M25/M26 not started (gated until M23 gate evaluated). See `docs/ai/M23_OBSERVATION_FREEZE.md`.
 
 ---
@@ -187,6 +187,7 @@ Current state: v0.85-beta — functional, not production-hardened.
 | ✅ | Reconcile migration to prod | Already live — prod and dev share the same Neon DB (`neondb` on `ep-orange-bird-abpuzipk-pooler`). Verified against prod `DATABASE_URL`: 39/39 migrations applied, zero drift vs `schema.prisma`. Smoke: `/api/health`, `/api/games`, `/api/marketplace`, `/api/events` 200; `/api/creator/*` 401 (guard works, no 500) |
 | ✅ | **P0: prod/dev DB isolation** | Neon project `green-leaf-42103134` (Playmorrow) now has TWO branches: `production` (br-patient-bonus-abbxfc07) and `dev` (br-sparkling-sea-abobomp9, endpoint ep-raspy-sunset-abo6apgc). Dev `DATABASE_URL` (apps/api/.env) rewired to the dev branch. Verified: dev reset + 39 migrations + seed OK; prod untouched (39/39, zero drift, smoke 200/401); guard blocks prod destructive ops and allows dev/test. Full details: `docs/releases/PRODUCTION_DB_ISOLATION_CERTIFICATION.md` |
 | ✅ | **P0.1: production hardening & recovery readiness** | Fail-closed DB guard (destructive ops vs unknown hosts blocked unless override); dead `admin:ensure` bypass removed; stale `vitest.setup.ts` prod-host regex fixed (blocks suite on both Neon hosts); `smoke-test.yml` robust to empty-but-healthy prod (`total=0` passes); nightly backup workflow (→R2) + read-only backup role + full restore drill. See `docs/releases/P0_1_PRODUCTION_HARDENING_CERTIFICATION.md` |
+| ✅ | **Email verification emails never delivered (P0)** | Root cause: Resend account had **zero verified domains** + code sent from `playmorrow@hotmail.com` → every send rejected `403 "The hotmail.com domain is not verified"`, error swallowed in `register()` → verification blocked for all accounts. Fixed 2026-08-14: `playmorrow.co` domain created + **verified** in Resend (DKIM/SPF/MX live); `EMAIL_FROM` secret set on Fly (`PlayMorrow <noreply@playmorrow.co>`) + code defaults updated (was hotmail); all 7 email templates seeded into prod DB (were missing → "Template not found"); duplicate verification send removed (register sent code via `sendVerificationCode` **and** `sendRaw` — now exactly once, regression test `auth.service.register.spec.ts`). Verified live: direct Resend send 200; fresh registration 201 + `emailLog` rows `sent`; exactly 1 email per registration |
 
 ### Remaining
 | # | Issue | Severity | Status |
@@ -241,6 +242,7 @@ Current state: v0.85-beta — functional, not production-hardened.
 | `SESSION_SECRET` | Yes | Session cookie signing |
 | `CSRF_SECRET` | Yes | HMAC CSRF token signing (getOrThrow in production) |
 | `RESEND_API_KEY` | Yes | Email delivery (required for registration) |
+| `EMAIL_FROM` | Yes | Sender address — `PlayMorrow <noreply@playmorrow.co>` (verified domain; hotmail fallback removed) |
 | `WEB_ORIGIN` | Yes | Frontend origin for CORS (https://playmorrow.co) |
 | `NODE_ENV` | Yes | Set to `production` |
 | `COOKIE_DOMAIN` | Recommended | `.playmorrow.co` for cross-subdomain cookies |

@@ -2,7 +2,7 @@ import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  css: false,
+  css: { postcss: { plugins: [] } },
   test: {
     globals: true,
     environment: 'node',

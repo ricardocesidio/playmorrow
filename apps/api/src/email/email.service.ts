@@ -10,7 +10,7 @@ export class EmailService {
   private readonly isProduction: boolean;
 
   constructor(private configService: ConfigService) {
-    this.from = this.configService.get<string>('EMAIL_FROM', 'PlayMorrow <playmorrow@hotmail.com>');
+    this.from = this.configService.get<string>('EMAIL_FROM', 'PlayMorrow <noreply@playmorrow.co>');
     this.isProduction = this.configService.get<string>('NODE_ENV') === 'production';
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
     if (apiKey) {

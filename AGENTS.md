@@ -1392,3 +1392,25 @@ re-audit. **No application code changed** — dependency bumps + pnpm overrides 
 
 **Updated:** AGENTS.md, docs/security/{SECURITY_REMEDIATION_V2,SECURITY_CVE_INVENTORY,SECURITY_FINDINGS,SECURITY_ASSESSMENT_V2,SECURITY_THREAT_MODEL}.md
 **Also modified (pre-existing uncommitted work from Sessions 26–31, untouched by this sprint):** M23 recommendation engine, publishing path, fly.toml, schema.prisma, etc.
+
+### Session 34 — Production Email Verification Fix (P0) & Duplicate Send Cleanup (2026-08-14)
+
+Production incident: verification emails never delivered → all account verifications blocked. Root-caused, fixed, deployed, and proven live with evidence.
+
+**Root cause (verified):** Resend account had **zero verified domains**, and code sent from `PlayMorrow <playmorrow@hotmail.com>` (default `EMAIL_FROM`). Every send was rejected `403 {"message":"The hotmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"}`. The error was swallowed in `auth.service.register()` (`logger.error` only) → signup returned 201 but no email ever left. `onboarding@resend.dev` fallback also rejected (only sends to account owner `ricardocesidio@hotmail.com`).
+
+**Fix (all verified live):**
+- **Resend domain** `playmorrow.co` created (`id 62ff06de-ebac-446f-acdf-5c9cd722d8bb`) and **verified** — DNS added in Cloudflare by user: TXT `resend._domainkey` (DKIM), MX `send` → `feedback-smtp.us-east-1.amazonses.com`, TXT `send` → `v=spf1 include:amazonses.com ~all`. Status `verified` (DKIM/SPF/SPF).
+- **Fly secret:** `EMAIL_FROM=PlayMorrow <noreply@playmorrow.co>` set (`playmorrow-api-aged-mountain-9542`) + code defaults in `email.service.ts:13` and `email-sender.service.ts:19` changed from hotmail → `noreply@playmorrow.co` (recursion hardening).
+- **Templates seeded into prod DB:** all 7 `DEFAULT_TEMPLATES` (`email-templates.seed.ts`) via `pnpm exec tsx` with `PROD_DATABASE_URL` from `.env.prod-dburl` — `email_templates` table was empty → welcome send failed with "Template not found" (emailLog rows now `sent`).
+- **Duplicate verification send removed:** `register()` sent the code **twice** — `emailService.sendVerificationCode` AND `this.emailSender?.sendRaw(...)`. Removed the `sendRaw` block (single send; `sendRaw` kept for legit callers `digest.service.ts:73`, `invitations.service.ts:96`). Welcome notification block preserved.
+- **Regression test:** new `apps/api/src/auth/auth.service.register.spec.ts` (2 tests: register → `requiresEmailVerification`; verification sent **exactly once**, no `EmailSenderService.sendRaw`) — RED before fix, GREEN after.
+- **vitest.config.ts:** `css: false` → `css: { postcss: { plugins: [] } }` — inline config so Vite's PostCSS search no longer walks up to `~/Desktop` (macOS `EPERM: operation not permitted` aborted the whole suite).
+
+**Verification (live, evidence-based):** direct Resend send from `noreply@playmorrow.co` → HTTP 200 (`id fbcbdd6a-3f8b-41bc-ab4e-a9c32503b55c`); fresh registrations → 201, no email errors in logs; prod `emailLog` shows verification + welcome rows `sent` (previously `failed`/`Template not found`); post-fix registration → **exactly 1** emailLog row. Deployed to Fly (`flyctl deploy`), migrations unaffected.
+
+**Gates:** full API suite **546/546 (54 files)** against :5433 test DB ✅ (1 flaky run: register/throttler concurrency collision on shared test DB — passed on rerun; matches pre-existing flakiness) · auth+email subset 28/28 ✅ · typecheck ✅ · lint 0 errors (27 pre-existing warnings) ✅ · build ✅.
+
+**Docs:** STATUS.md (resolved P0 row, `EMAIL_FROM` env var, test count 546/546, last-verified date), AGENTS.md.
+
+**Outstanding (deferred, not requested):** delete the 3 throwaway verification users (`emailtest[1-3]+verify@pmtest.dev`) in prod DB — user declined at wrap-up; `.env.prod-dburl` rotatation note unchanged.

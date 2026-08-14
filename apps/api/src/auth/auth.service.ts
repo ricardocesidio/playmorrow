@@ -131,11 +131,6 @@ export class AuthService {
         // Log but swallow — registration succeeded. Code is in DB.
         logger.error({ msg: 'Failed to send verification email during register (code stored for resend)', err });
       }
-      this.emailSender?.sendRaw(user.email, 'Your Playmorrow verification code',
-        `<p>Your verification code is: <strong style="font-size:24px;color:#3ee7ff">${raw}</strong></p><p>This code expires in 15 minutes.</p>`,
-        user.id,
-      ).catch(() => {});
-
       // Send welcome notification
       this.notificationsService.create({
         recipientId: user.id,

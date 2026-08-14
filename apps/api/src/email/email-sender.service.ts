@@ -16,7 +16,7 @@ export class EmailSenderService {
     private prisma: PrismaService,
     private templates: EmailTemplatesService,
   ) {
-    this.from = this.configService.get<string>('EMAIL_FROM', 'PlayMorrow <playmorrow@hotmail.com>');
+    this.from = this.configService.get<string>('EMAIL_FROM', 'PlayMorrow <noreply@playmorrow.co>');
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
     if (apiKey) {
       this.resend = new Resend(apiKey);
