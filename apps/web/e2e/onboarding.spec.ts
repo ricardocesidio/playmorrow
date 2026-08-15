@@ -97,4 +97,62 @@ test.describe('Onboarding', () => {
     await expect.poll(() => submittedBody).toBeDefined();
     expect(submittedBody).not.toHaveProperty('provider');
   });
+
+  test('lands on /dashboard after completing setup and does not bounce back to /onboarding', async ({ page }) => {
+    // Authenticated session that becomes onboarded only after the mutation succeeds
+    let onboarded = false;
+    await page.route('**/api/auth/session/me', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'user-1',
+          email: 'player@example.com',
+          username: 'player123',
+          displayName: 'Player',
+          role: 'PLAYER',
+          accountType: 'PLAYER',
+          isOnboardingCompleted: onboarded,
+          csrfToken: 'csrf-1',
+        }),
+      });
+    });
+    await page.route('**/api/auth/complete-onboarding', async (route) => {
+      onboarded = true;
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          user: { id: 'user-1', username: 'player123', displayName: 'Player', role: 'PLAYER', accountType: 'PLAYER' },
+          csrfToken: 'csrf-2',
+        }),
+      });
+    });
+    await page.route('**/api/studios**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) });
+    });
+    await page.route('**/api/games**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) });
+    });
+    await page.route('**/api/users/*', async (route) => {
+      await route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ message: 'Not found' }) });
+    });
+
+    await page.goto('/onboarding');
+    await page.getByRole('button', { name: /Player/ }).click();
+    await page.getByRole('button', { name: /Continue/ }).click();
+    await page.getByPlaceholder('Choose a username').fill('player123');
+    await expect(page.getByText('Available')).toBeVisible();
+    await page.getByRole('button', { name: /Continue/ }).click();
+    await page.getByLabel('Country *').selectOption({ label: 'Brazil' });
+    await page.getByLabel('Bio *').fill('I enjoy discovering independent games.');
+    await page.getByRole('button', { name: /Continue/ }).click();
+    await page.getByRole('button', { name: /Continue/ }).click();
+    await page.getByRole('button', { name: /Continue/ }).click();
+    await page.getByRole('button', { name: 'Complete Setup' }).click();
+
+    await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 });
+    await page.waitForTimeout(2000);
+    await expect(page).not.toHaveURL(/\/onboarding/);
+  });
 });

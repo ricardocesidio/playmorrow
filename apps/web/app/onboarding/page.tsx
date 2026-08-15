@@ -45,7 +45,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
 
   useEffect(() => {
     if (user?.isOnboardingCompleted) router.replace('/dashboard');
@@ -228,6 +228,12 @@ export default function OnboardingPage() {
         document.cookie = `playmorrow_csrf=${data.csrfToken}; path=/; max-age=86400; SameSite=Lax`;
       }
       setSuccess(true);
+      // Reflect the completed onboarding in the auth context immediately, so the
+      // dashboard guard sees isOnboardingCompleted=true and doesn't bounce back
+      // to the account-type step with the stale pre-onboarding user.
+      if (data.user && user) {
+        setUser({ ...user, ...data.user, isOnboardingCompleted: true });
+      }
       router.replace('/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to complete setup');
