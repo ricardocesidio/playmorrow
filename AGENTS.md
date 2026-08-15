@@ -1447,3 +1447,28 @@ DTOs like prod — this surfaced a latent bug (usernames `csrfmeuser${Date.now()
 (API+web) ✅ · pre-push `pnpm verify` + secret scan ✅. Commit `0541c63` pushed → Vercel redeploy
 in progress (playmorrow.co). User-facing: the `/api/users/*` 404s during onboarding are the
 benign username-availability check (404 = name available), not a bug.
+
+### Session 34 (continued) — Onboarding Bounce Fix: Stale Auth Context (2026-08-15)
+
+Production UX bug: after "Finish Setup" succeeded (201), the app redirected back to the
+"choose your account type" step instead of the dashboard.
+
+**Root cause:** the dashboard layout guard (`dashboard/layout.tsx`) redirects to `/onboarding`
+when `user.isOnboardingCompleted` is falsy, but `handleFinish` never updated the AuthContext —
+it only called `router.replace('/dashboard')`. The context held the pre-onboarding
+`isOnboardingCompleted: false` (hydrated once on mount), so the guard bounced the user back.
+DB + `/auth/session/me` were always correct (`auth.service.ts:482` sets the flag; session/me
+returns it).
+
+**Fix:** `onboarding/page.tsx` `handleFinish` now merges the 201 response user into the context
+and sets `isOnboardingCompleted: true` before navigating — same `setUser` pattern as
+`login`/`verifyEmail`. No extra fetch; no null-user-on-network-failure risk.
+
+**Regression test:** new Playwright e2e in `onboarding.spec.ts` — authenticated session whose
+`session/me` flips to `isOnboardingCompleted: true` only after the mutation mock; asserts the
+flow lands on `/dashboard` and does not return to `/onboarding`. **Reproduced the bounce before
+the fix** (failed at the `toHaveURL(/\/dashboard/)` assertion, desktop + mobile), passes after.
+
+**Gates:** e2e onboarding spec 10/10 (desktop + mobile) ✅ · web typecheck clean ✅ · web lint
+clean ✅ · `next build` ✅ · pre-push `pnpm verify` + secret scan ✅. Commit `027ac6f` pushed →
+Vercel redeploy in progress.
