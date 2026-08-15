@@ -501,6 +501,7 @@ export class AuthService {
               description: dto.studioBio || null,
               logoUrl: dto.studioLogoUrl || dto.avatarUrl || null,
               websiteUrl: dto.websiteUrl || null,
+              discord: dto.studioDiscord || null,
               location: dto.location || null,
               isVerified: false,
               members: { create: { userId: completedUser.id, role: 'OWNER' } },

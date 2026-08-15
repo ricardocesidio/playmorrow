@@ -75,6 +75,12 @@ export class CompleteOnboardingDto {
   @IsString()
   websiteUrl?: string;
 
+  @ApiPropertyOptional({ example: 'discord.gg/mystudio' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  studioDiscord?: string;
+
   @ApiPropertyOptional({ example: 'San Francisco, CA' })
   @IsOptional()
   @IsString()

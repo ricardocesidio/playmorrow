@@ -171,31 +171,12 @@ export default function OnboardingPage() {
     setError('');
     setLoading(true);
     try {
-      const body: Record<string, unknown> = {
-        accountType,
-        username,
-        displayName: displayName || username,
-        bio,
-        country,
-        avatarUrl: avatarDataUrl || undefined,
-        email: email || undefined,
-      };
-      if (accountType === 'STUDIO') {
-        body.studioName = studioName;
-        body.studioSlug = studioSlug;
-        body.studioWebsite = studioWebsite || undefined;
-        body.studioDiscord = studioDiscord || undefined;
-      }
-      if (accountType === 'PLAYER') {
-        body.followStudioSlugs = selectedStudioSlugs;
-        body.wishlistGameSlugs = wishlistedGameSlugs;
-      }
-      // Use direct fetch instead of api client to ensure cookies are captured
-      // Self-heal: sessions created before CSRF tokens were issued have no cookie —
-      // fetch a fresh token from session/me first so the mutation is not rejected.
+      // email is required by the API — prefer the authenticated session's address,
+      // fall back to the URL query param (?email=...) used by the verify flow.
+      let authedEmail: string | undefined;
       const csrfMatch = document.cookie.match(/(?:^|;\s*)playmorrow_csrf=([^;]*)/);
       let csrfToken = csrfMatch ? csrfMatch[1] : undefined;
-      if (!csrfToken) {
+      if (!csrfToken || !user?.email) {
         try {
           const meRes = await fetch(`${API}/auth/session/me`, { credentials: 'include' });
           if (meRes.ok) {
@@ -204,9 +185,31 @@ export default function OnboardingPage() {
               csrfToken = me.csrfToken;
               document.cookie = `playmorrow_csrf=${me.csrfToken}; path=/; sameSite=lax; maxAge=86400`;
             }
+            if (typeof me.email === 'string' && me.email) authedEmail = me.email;
           }
-        } catch { /* fall through — send request without a token */ }
+        } catch { /* fall through — send request with whatever we have */ }
       }
+
+      const body: Record<string, unknown> = {
+        accountType,
+        username,
+        displayName: displayName || username,
+        bio,
+        country,
+        avatarUrl: avatarDataUrl || undefined,
+        email: user?.email || authedEmail || email || undefined,
+      };
+      if (accountType === 'STUDIO') {
+        body.studioName = studioName;
+        body.studioSlug = studioSlug;
+        body.websiteUrl = studioWebsite || undefined;
+        body.studioDiscord = studioDiscord || undefined;
+      }
+      if (accountType === 'PLAYER') {
+        body.followStudioSlugs = selectedStudioSlugs;
+        body.wishlistGameSlugs = wishlistedGameSlugs;
+      }
+      // Use direct fetch instead of api client to ensure cookies are captured
       const res = await fetch(`${API}/auth/complete-onboarding`, {
         method: 'POST',
         headers: {

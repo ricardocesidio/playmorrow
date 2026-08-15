@@ -1,4 +1,4 @@
-import { HttpStatus } from '@nestjs/common';
+import { HttpStatus, ValidationPipe } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { createHash } from 'node:crypto';
 import { ConfigModule } from '@nestjs/config';
@@ -55,6 +55,14 @@ describe('AuthController (e2e)', () => {
 
     const nestApp = app.createNestApplication();
     nestApp.use(cookieParser());
+    nestApp.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+        transformOptions: { enableImplicitConversion: true },
+      }),
+    );
     nestApp.setGlobalPrefix('api', { exclude: ['health'] });
     await nestApp.init();
     httpServer = nestApp.getHttpServer();
@@ -91,7 +99,7 @@ describe('AuthController (e2e)', () => {
       .post('/api/auth/complete-onboarding')
       .set('Cookie', cookieHeader)
       .set('X-CSRF-Token', res.body.csrfToken)
-      .send({ accountType: 'PLAYER', username: `csrfmeuser${Date.now()}`, email, displayName: 'CSRF Me' });
+      .send({ accountType: 'PLAYER', username: `csrfmeu${Date.now() % 100000}`, email, displayName: 'CSRF Me' });
     expect(onboard.status).toBe(HttpStatus.CREATED);
   });
 
@@ -114,6 +122,52 @@ describe('AuthController (e2e)', () => {
     expect(typeof res.body.user.displayName).toBe('string');
     expect(res.body.user.emailVerifiedAt).toBeNull();
     expect(res.body.user.passwordHash).toBeUndefined();
+  });
+
+  it('POST /api/auth/complete-onboarding accepts studio fields and rejects unknown ones', async () => {
+    const email = `${TEST_SUFFIX}_studioc@example.com`;
+    const { sessionCookie } = await registerTestUser(httpServer, prisma, email, TEST_PASSWORD);
+    const cookieHeader = `playmorrow_session=${sessionCookie}`;
+
+    const me = await request(httpServer).get('/api/auth/session/me').set('Cookie', cookieHeader);
+    expect(me.status).toBe(HttpStatus.OK);
+    const csrfToken = me.body.csrfToken as string;
+
+    const slug = `studio${Date.now() % 100000000}`;
+    const res = await request(httpServer)
+      .post('/api/auth/complete-onboarding')
+      .set('Cookie', cookieHeader)
+      .set('X-CSRF-Token', csrfToken)
+      .send({
+        accountType: 'STUDIO',
+        username: `studiouser${Date.now() % 100000}`,
+        email,
+        displayName: 'Studio Owner',
+        studioName: 'Studio X',
+        studioSlug: slug,
+        websiteUrl: 'https://example.com',
+        studioDiscord: 'discord.gg/xyz',
+      });
+    expect(res.status).toBe(HttpStatus.CREATED);
+
+    const studio = await prisma.studio.findUnique({ where: { slug } });
+    expect(studio).toBeTruthy();
+    expect(studio?.websiteUrl).toBe('https://example.com');
+    expect(studio?.discord).toBe('discord.gg/xyz');
+
+    // Regression: the old "studioWebsite" field name must be rejected (forbidNonWhitelisted)
+    const reg = await request(httpServer)
+      .post('/api/auth/complete-onboarding')
+      .set('Cookie', cookieHeader)
+      .set('X-CSRF-Token', csrfToken)
+      .send({
+        accountType: 'PLAYER',
+        username: `baduser${Date.now() % 100000}`,
+        email: `${TEST_SUFFIX}_bad@example.com`,
+        studioWebsite: 'https://example.com',
+      });
+    expect(reg.status).toBe(HttpStatus.BAD_REQUEST);
+    expect(reg.body.message).toContain('property studioWebsite should not exist');
   });
 
   it('POST /api/auth/register rejects duplicate email', async () => {
@@ -164,7 +218,7 @@ describe('AuthController (e2e)', () => {
     if (!sessionCookie) throw new Error('No session cookie from verify-email');
 
     // Sanity: without a CSRF token the authenticated mutation is rejected (the reported bug)
-    const username = `csrfuser${Date.now()}`;
+    const username = `csrfuser${Date.now() % 100000}`;
     const blocked = await request(httpServer)
       .post('/api/auth/complete-onboarding')
       .set('Cookie', sessionCookie)
