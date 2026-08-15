@@ -1414,3 +1414,36 @@ Production incident: verification emails never delivered → all account verific
 **Docs:** STATUS.md (resolved P0 row, `EMAIL_FROM` env var, test count 546/546, last-verified date), AGENTS.md.
 
 **Outstanding (deferred, not requested):** delete the 3 throwaway verification users (`emailtest[1-3]+verify@pmtest.dev`) in prod DB — user declined at wrap-up; `.env.prod-dburl` rotatation note unchanged.
+
+### Session 34 (continued) — Complete-Onboarding 400 Fix: Payload Alignment (2026-08-15)
+
+Production incident follow-up: after the CSRF 403 was resolved (Session 34/`6367674`),
+the onboarding mutation surfaced validation 400s — `"studioWebsite should not exist,
+email must be a string"` (forbidNonWhitelisted in prod).
+
+**Root causes:** (1) `onboarding/page.tsx` sent `body.studioWebsite` but the DTO field is
+`websiteUrl`; (2) `email` came from `?email=` query param only — absent → dropped from JSON
+→ `email must be a string`; (3) `studioDiscord` had no DTO support even though
+`Studio.discord String?` existed in schema (`20260730000004_catchup_all_missing_tables`).
+
+**Fixes:** DTO `complete-onboarding.dto.ts` adds optional `studioDiscord` (MaxLength 300);
+`auth.service.ts` studio create maps `discord: dto.studioDiscord || null`; `onboarding/page.tsx`
+`handleFinish` sends `websiteUrl`, keeps `studioDiscord`, and resolves email from
+`user?.email || authedEmail || ?email` where `authedEmail` is captured by the existing
+session/me self-heal fetch (extended to run when `!user?.email` too).
+
+**Spec hardening:** `auth.controller.spec.ts` now registers the global `ValidationPipe`
+(`whitelist` + `forbidNonWhitelisted` + `transform`, mirroring `main.ts`) so e2e validates
+DTOs like prod — this surfaced a latent bug (usernames `csrfmeuser${Date.now()}` exceeded the
+20-char `@MaxLength(20)`; shortened to `% 100000`). New test: studio onboarding accepts
+`websiteUrl` + `studioDiscord` (row persisted) and rejects legacy `studioWebsite` (400,
+`property studioWebsite should not exist`).
+
+**Deployed + live-verified through `https://playmorrow.co/api`:** register 201 → session/login
+200+cookie → session/me 200+csrfToken → STUDIO complete-onboarding 201 (`websiteUrl` +
+`studioDiscord` persisted) → bad `studioWebsite` payload 400. Throwaway users/studios cleaned up.
+
+**Gates:** API suite **549/549 (54 files)** ✅ · typecheck clean (API+web) ✅ · lint 0 errors
+(API+web) ✅ · pre-push `pnpm verify` + secret scan ✅. Commit `0541c63` pushed → Vercel redeploy
+in progress (playmorrow.co). User-facing: the `/api/users/*` 404s during onboarding are the
+benign username-availability check (404 = name available), not a bug.
