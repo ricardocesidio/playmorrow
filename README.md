@@ -58,10 +58,14 @@ snapshots) could not restore it. Remediated 2026-08-07:
 
 See [SECURITY.md](SECURITY.md) and `docs/infrastructure/` for details.
 
-**Current milestone (2026-08):** the M23 hybrid recommendation engine is
+**Current milestone (2026-08-15):** the M23 hybrid recommendation engine is
 **deployed to production** and under a governed **5% rollout observation**
 window (baseline 2026-08-10 → 2026-08-17). See
 [`docs/ai/M23_ROLLOUT.md`](docs/ai/M23_ROLLOUT.md).
+
+Production onboarding flow was hardened in August 2026: CSRF self-heal, the
+onboarding bounce (stale AuthContext) fix, and the `studioWebsite` →
+`websiteUrl` payload alignment were all fixed, tested, and verified live.
 
 ---
 
@@ -113,7 +117,7 @@ window (baseline 2026-08-10 → 2026-08-17). See
 | Layer | Technology |
 |-------|-----------|
 | Frontend | Next.js 16 (App Router) + React 19 + Tailwind CSS v4 + TanStack Query |
-| Backend | NestJS 11 + TypeScript — 59 modules, ~254 endpoints |
+| Backend | NestJS 11 + TypeScript — 57 modules, ~254 endpoints |
 | Database | PostgreSQL 16 (Neon, two branches) + Prisma ORM + pgvector |
 | Auth | Session-based (httpOnly cookies) + OAuth (Google, GitHub) + TOTP 2FA + Argon2id |
 | AI | Provider-agnostic (OpenAI + Anthropic), hybrid recommendation engine |
@@ -143,7 +147,7 @@ PostgreSQL (Neon: production + dev branches, pgvector)
 - **Backend:** NestJS with feature modules, global `ValidationPipe`
   (whitelist + forbid-non-whitelisted), global stateless HMAC-SHA256 CSRF guard,
   Redis-backed rate limiting, and an event bus powering the feed.
-- **Database:** 65 Prisma models, 41 migrations, pgvector for AI embeddings.
+- **Database:** 65 Prisma models, 42 migrations, pgvector for AI embeddings.
   All schema changes ship as migrations (never `db push` in production).
 
 A detailed architecture reference (including diagrams) lives in
@@ -155,7 +159,7 @@ A detailed architecture reference (including diagrams) lives in
 
 ```
 apps/
-  api/          NestJS backend (59 modules, ~254 endpoints)
+  api/          NestJS backend (57 modules, ~254 endpoints)
   web/          Next.js frontend (99+ routes, App Router)
 packages/
   database/     Prisma schema, migrations, seed, DB safety guard
@@ -253,7 +257,7 @@ pnpm db:studio    # Prisma Studio
 - **65 models** across the schema (users, studios, games, devlogs, roadmaps,
   feed events, comments, marketplace, payments, events, partners, AI/feedback,
   and more).
-- **41 migrations**; production and development run on **separate Neon
+- **42 migrations**; production and development run on **separate Neon
   branches**. Migrations are applied in production via `prisma migrate deploy`
   as a Fly.io release command.
 - **pgvector** powers semantic embeddings for the recommendation engine
@@ -272,7 +276,7 @@ pnpm test              # API suite (Vitest)
 pnpm test:all          # API suite + web E2E (Playwright)
 ```
 
-- **API:** 51 spec files / 542 tests against an isolated test database
+- **API:** 54 spec files / 549 tests against an isolated test database
   (ephemeral Postgres in CI; local via `docker-compose.yml` `postgres-test`
   service). Integration tests create unique data and clean up in `afterAll`.
   One pre-existing test is flaky (comment-test timeout) and tracked in
