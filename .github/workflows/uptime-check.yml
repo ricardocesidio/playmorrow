@@ -1,7 +1,7 @@
 name: Uptime Check
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '0 */6 * * *'  # every 6 hours (was */5 min — caused email flood during Neon quota outage)
   workflow_dispatch:
 
 jobs:
@@ -26,13 +26,11 @@ jobs:
           fi
           echo "OK: API Health (HTTP $status)"
 
-      - name: Check API Games Endpoint
+      - name: Check API Games Endpoint (soft — data endpoints may fail during DB maintenance)
         run: |
-          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://playmorrow-api-aged-mountain-9542.fly.dev/api/games")
-          body=$(curl -s --max-time 15 "https://playmorrow-api-aged-mountain-9542.fly.dev/api/games")
-          count=$(echo "$body" | grep -o '"id"' | wc -l)
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://playmorrow-api-aged-mountain-9542.fly.dev/api/games?pageSize=1")
           if [ "$status" != "200" ]; then
-            echo "FAIL: API Games (HTTP $status)"
-            exit 1
+            echo "WARN: API Games (HTTP $status) — data endpoint, non-blocking"
+          else
+            echo "OK: API Games (HTTP $status)"
           fi
-          echo "OK: API Games (HTTP $status, $count games)"
