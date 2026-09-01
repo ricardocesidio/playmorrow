@@ -66,7 +66,7 @@
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
     "@playmorrow/config": "workspace:*",
-    "@swc/core": "^1.10.7",
+    "@swc/core": "^1.16.1",
     "@types/cookie-parser": "^1.4.7",
     "@types/express": "^5.0.0",
     "@types/jsdom": "^28.0.3",
@@ -83,9 +83,9 @@
     "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "tsx": "^4.19.2",
+    "tsx": "^4.23.12",
     "typescript": "^5.6.3",
-    "unplugin-swc": "^1.5.1",
+    "unplugin-swc": "^1.5.11",
     "vitest": "^2.1.8"
   }
 }
